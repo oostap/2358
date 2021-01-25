@@ -1,0 +1,138 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/token_header">
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_sandbox"
+            app:title="@string/is_sandbox_token_title"
+            app:defaultValue="true" />
+
+        <EditTextPreference
+            app:key="@string/setting_key_token_sandbox"
+            app:title="@string/sandbox_token_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="@string/setting_key_token_market"
+            app:title="@string/market_token_title"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/stocks_header">
+        <EditTextPreference
+            app:key="@string/setting_key_stocks_usd_price_min"
+            app:title="@string/stocks_usd_min"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_stocks_usd_price_max"
+            app:title="@string/stocks_usd_max"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="100000"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/stocks_header_2358">
+        <EditTextPreference
+            app:key="@string/setting_key_2358_price_change_percent"
+            app:title="@string/stocks_2358_price_change_percent"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="-1"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_2358_volume_min_day"
+            app:title="@string/stocks_2358_volume_min_day"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="10000"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_2358_volume_min_cash"
+            app:title="@string/stocks_2358_volume_min_cash"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0.1"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_2358_purchase_time"
+            app:title="@string/stocks_2358_purchase_time"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="23:58:00"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_2358_purchase_volume"
+            app:title="@string/stocks_2358_purchase_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1000"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_2358_take_profit"
+            app:title="@string/stocks_2358_take_profit"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1.0"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/stocks_header_1830">
+        <EditTextPreference
+            app:key="@string/setting_key_1830_price_change_percent"
+            app:title="@string/stocks_1830_price_change_percent"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="-1"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1830_volume_min_day"
+            app:title="@string/stocks_1830_volume_min_day"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="5000"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1830_purchase_volume"
+            app:title="@string/stocks_1830_purchase_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1000"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1830_take_profit"
+            app:title="@string/stocks_1830_take_profit"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/stocks_header_1728">
+        <EditTextPreference
+            app:key="@string/setting_key_1728_track_start"
+            app:title="@string/stocks_1728_track_start"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="17:28"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1728_volume_before_start"
+            app:title="@string/stocks_1728_volume_before_start"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1000"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1728_volume_after_start"
+            app:title="@string/stocks_1728_volume_after_start"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="10000"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1728_price_change"
+            app:title="@string/stocks_1728_price_change"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1728_purchase_volume"
+            app:title="@string/stocks_1728_purchase_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1000"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1728_take_profit"
+            app:title="@string/stocks_1728_take_profit"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1"/>
+    </PreferenceCategory>
+</PreferenceScreen>

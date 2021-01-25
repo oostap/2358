@@ -1,0 +1,103 @@
+<resources>
+    <string name="app_name">2358</string>
+    <string name="title_activity_main">2358</string>
+    <string name="nav_header_subtitle">котлета</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="service_2358_prepare">Продолжить</string>
+    <string name="service_2358_start">Старт</string>
+    <string name="service_2358_stop">Стоп</string>
+    <string name="update">Обновить</string>
+    <string name="sort">Сортировка</string>
+
+    <string name="prepare_start_2358_text">Запуск таймера на покупку: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
+    <string name="prepare_start_1000_text">Запуск таймера на продажу: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
+
+    <string name="ticker">тикер</string>
+    <string name="volume">объём</string>
+    <string name="change">изменение</string>
+
+    <string name="menu_settings">Настройки</string>
+    <string name="menu_portfolio">Депо</string>
+    <string name="menu_stocks">Скринер</string>
+    <string name="menu_1000">1000</string>
+    <string name="menu_2358">2358</string>
+    <string name="menu_1728">1728</string>
+    <string name="menu_1830">1830</string>
+    <string name="menu_rocket">Ракета</string>
+
+    <!-- Preference Titles -->
+
+    <string name="stocks_header_2358">Стратегия 2358</string>
+    <string name="stocks_header_1728">Стратегия 1728</string>
+    <string name="stocks_header_1830">Стратегия 1830</string>
+
+    <!-- tinkoff settings -->
+    <string name="token_header">Tinkoff OpenApi Токен</string>
+    <string name="is_sandbox_token_title">Sandbox</string>
+    <string name="sandbox_token_title">Sandbox token</string>
+    <string name="market_token_title">Market token</string>
+
+    <!-- common settings -->
+    <string name="stocks_header">Общие настройки</string>
+    <string name="stocks_usd_min">Цена min $</string>
+    <string name="stocks_usd_max">Цена max $</string>
+
+    <!-- 2358 settings -->
+    <string name="stocks_2358_price_change_percent">Падение от %</string>
+    <string name="stocks_2358_volume_min_day">Объём в день от шт.</string>
+    <string name="stocks_2358_volume_min_cash">Объём в день от млрд. $</string>
+    <string name="stocks_2358_purchase_volume">На сколько тарим в равных долях? в $</string>
+    <string name="stocks_2358_purchase_time">Во сколько тарим? МСК</string>
+    <string name="stocks_2358_take_profit">Заявка на тейкпрофит в % (0 = не создавать)</string>
+
+    <!-- 1830 settings -->
+    <string name="stocks_1830_price_change_percent">Падение от %</string>
+    <string name="stocks_1830_volume_min_day">Объём за день до шт.</string>
+    <string name="stocks_1830_purchase_volume">На сколько тарим в равных долях? в $</string>
+    <string name="stocks_1830_take_profit">Заявка на тейкпрофит в % (0 = не создавать)</string>
+
+    <!-- 1728 settings -->
+    <string name="stocks_1728_track_start">Время старта МСК</string>
+    <string name="stocks_1728_volume_before_start">Объём до старта шт.</string>
+    <string name="stocks_1728_volume_after_start">Объём от старта шт.</string>
+    <string name="stocks_1728_price_change">Изменение цены со старта в %</string>
+    <string name="stocks_1728_purchase_volume">На сколько тарим в равных долях? в $</string>
+    <string name="stocks_1728_take_profit">Заявка на тейкпрофит в % (0 = не создавать)</string>
+
+    <!-- setting keys-->
+
+    <!-- tinkoff -->
+    <string name="setting_key_sandbox">sandbox</string>
+    <string name="setting_key_token_sandbox">token_sandbox</string>
+    <string name="setting_key_token_market">token_market</string>
+
+    <!-- common settings -->
+    <string name="setting_key_stocks_usd_price_min">stocks_usd_price_min</string>
+    <string name="setting_key_stocks_usd_price_max">stocks_usd_price_max</string>
+
+    <!-- 2358 settings -->
+    <string name="setting_key_2358_price_change_percent">2358_price_change_percent</string>
+    <string name="setting_key_2358_volume_min_day">2358_volume_min_day</string>
+    <string name="setting_key_2358_volume_min_cash">2358_volume_min_cash</string>
+    <string name="setting_key_2358_purchase_volume">2358_purchase_volume</string>
+    <string name="setting_key_2358_purchase_time">2358_purchase_time</string>
+    <string name="setting_key_2358_take_profit">2358_take_profit</string>
+
+    <!-- 1830 settings -->
+    <string name="setting_key_1830_price_change_percent">1830_price_change_percent</string>
+    <string name="setting_key_1830_volume_min_day">1830_volume_min_day</string>
+    <string name="setting_key_1830_purchase_volume">1830_purchase_volume</string>
+    <string name="setting_key_1830_take_profit">1830_take_profit</string>
+
+    <!-- 1728 settings -->
+    <string name="setting_key_1728_track_start">1728_start</string>
+    <string name="setting_key_1728_volume_before_start">1728_volume_before_start</string>
+    <string name="setting_key_1728_volume_after_start">1728_volume_after_start</string>
+    <string name="setting_key_1728_price_change">1728_price_change</string>
+    <string name="setting_key_1728_purchase_volume">1728_purchase_volume</string>
+    <string name="setting_key_1728_take_profit">1728_take_profit</string>
+
+    <!-- rocket settings -->
+    
+</resources>

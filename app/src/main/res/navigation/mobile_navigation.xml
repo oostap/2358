@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_portfolio">
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.project.ti2358.ui.settings.SettingsFragment"
+        android:label="@string/menu_settings"
+        tools:layout="@xml/fragment_settings" />
+    <fragment
+        android:id="@+id/nav_portfolio"
+        android:name="com.project.ti2358.ui.portfolio.PortfolioFragment"
+        android:label="@string/menu_portfolio"
+        tools:layout="@layout/fragment_portfolio_item_list" />
+    <fragment
+        android:id="@+id/nav_stocks"
+        android:name="com.project.ti2358.ui.stocks.ScreenerFragment"
+        android:label="@string/menu_stocks"
+        tools:layout="@layout/fragment_screener_item_list" />
+
+    <fragment
+        android:id="@+id/nav_2358_start"
+        android:name="com.project.ti2358.ui.strategy2358.Strategy2358StartFragment"
+        android:label="@string/menu_2358"
+        tools:layout="@layout/fragment_2358_start" >
+        <action
+            android:id="@+id/action_nav_2358_start_to_nav_2358_finish"
+            app:destination="@id/nav_2358_finish"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left"
+             />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_2358_finish"
+        android:name="com.project.ti2358.ui.strategy2358.Strategy2358FinishFragment"
+        android:label="@string/menu_2358"
+        tools:layout="@layout/fragment_2358_start" />
+
+    <fragment
+        android:id="@+id/nav_1728_start"
+        android:name="com.project.ti2358.ui.strategy1728.Strategy1728StartFragment"
+        android:label="@string/menu_1728"
+        tools:layout="@layout/fragment_1728_start" >
+        <action
+            android:id="@+id/action_nav_1728_start_to_nav_1728_finish"
+            app:destination="@id/nav_1728_finish"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left"
+            />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_1728_finish"
+        android:name="com.project.ti2358.ui.strategy1728.Strategy1728FinishFragment"
+        android:label="@string/menu_1728"
+        tools:layout="@layout/fragment_1728_start" />
+
+
+    <fragment
+        android:id="@+id/nav_1830_start"
+        android:name="com.project.ti2358.ui.strategy1830.Strategy1830StartFragment"
+        android:label="@string/menu_1830"
+        tools:layout="@layout/fragment_1830_start" >
+        <action
+            android:id="@+id/action_nav_1830_start_to_nav_1830_finish"
+            app:destination="@id/nav_1830_finish"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left"
+            />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_1830_finish"
+        android:name="com.project.ti2358.ui.strategy1830.Strategy1830FinishFragment"
+        android:label="@string/menu_1830"
+        tools:layout="@layout/fragment_1830_start" />
+
+
+    <fragment
+        android:id="@+id/nav_rocket_start"
+        android:name="com.project.ti2358.ui.strategyRocket.StrategyRocketStartFragment"
+        android:label="@string/menu_rocket"
+        tools:layout="@layout/fragment_rocket_start" >
+        <action
+            android:id="@+id/action_nav_rocket_start_to_nav_rocket_finish"
+            app:destination="@id/nav_rocket_finish"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left"
+            />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_rocket_finish"
+        android:name="com.project.ti2358.ui.strategyRocket.StrategyRocketFinishFragment"
+        android:label="@string/menu_rocket"
+        tools:layout="@layout/fragment_rocket_finish" />
+
+
+    <fragment
+        android:id="@+id/nav_1000_start"
+        android:name="com.project.ti2358.ui.strategy1000.Strategy1000StartFragment"
+        android:label="@string/menu_1000"
+        tools:layout="@layout/fragment_1000_start" >
+        <action
+            android:id="@+id/action_nav_1000_start_to_nav_1000_finish"
+            app:destination="@id/nav_1000_finish"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left"
+            />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_1000_finish"
+        android:name="com.project.ti2358.ui.strategy1000.Strategy1000FinishFragment"
+        android:label="@string/menu_1000"
+        tools:layout="@layout/fragment_1000_start" />
+</navigation>
