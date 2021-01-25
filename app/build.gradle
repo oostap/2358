@@ -16,12 +16,39 @@ android {
         versionName "1.0"
     }
 
-    buildTypes {
+    signingConfigs {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            storeFile file('../2358.keystore')
+            storePassword '23582358'
+            keyAlias '2358'
+            keyPassword '23582358'
         }
     }
+
+    buildTypes {
+        release {
+//            minifyEnabled true
+            zipAlignEnabled true
+//            shrinkResources true
+//            useProguard false
+//            debuggable false
+//            jniDebuggable false
+//            renderscriptDebuggable false
+//            pseudoLocalesEnabled false
+
+            signingConfig signingConfigs.release
+        }
+
+        debug {
+            minifyEnabled true
+            shrinkResources false
+            useProguard true
+            debuggable true
+            jniDebuggable true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
