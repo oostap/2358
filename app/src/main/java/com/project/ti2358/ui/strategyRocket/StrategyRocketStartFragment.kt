@@ -60,13 +60,13 @@ class StrategyRocketStartFragment : Fragment() {
         }
 
         val buttonStart = view.findViewById<Button>(R.id.buttonStart)
-        buttonStart.setOnClickListener { view ->
+        buttonStart.setOnClickListener { _ ->
             if (strategyRocket.stocksSelected.isNotEmpty())
                 view.findNavController().navigate(R.id.action_nav_rocket_start_to_nav_rocket_finish)
         }
 
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
-        buttonUpdate.setOnClickListener { view ->
+        buttonUpdate.setOnClickListener { _ ->
             adapterList.setData(strategyRocket.process())
         }
 

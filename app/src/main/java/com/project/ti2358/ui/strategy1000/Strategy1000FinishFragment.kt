@@ -122,10 +122,11 @@ class Strategy1000FinishFragment : Fragment() {
             val item = values[position]
             holder.position = item
 
+            val avg = item.position.getAveragePrice()
             holder.tickerView.text = "${item.position.ticker} ${item.position.lots} шт."
-            holder.currentPriceView.text = "${item.position.averagePositionPrice.value} $"
+            holder.currentPriceView.text = "${avg} $"
 
-            var totalCash = item.position.balance * item.position.averagePositionPrice.value
+            var totalCash = item.position.balance * avg
             var percent = (100 * item.position.expectedYield.value) / totalCash
             holder.currentProfitView.text = "%.2f".format(percent) + "%"
 
@@ -166,7 +167,8 @@ class Strategy1000FinishFragment : Fragment() {
             var futurePercent = item.profit
             holder.futureProfitView.text = "%.2f ".format(futurePercent) + "%"
 
-            var futureProfitPrice = item.getProfitPrice() - item.position.averagePositionPrice.value
+            val avg = item.position.getAveragePrice()
+            var futureProfitPrice = item.getProfitPrice() - avg
             holder.futureProfitPriceView.text = "%.2f $".format(futureProfitPrice)
             holder.totalFutureProfitPriceView.text = "%.2f $".format(futureProfitPrice * item.position.balance)
 

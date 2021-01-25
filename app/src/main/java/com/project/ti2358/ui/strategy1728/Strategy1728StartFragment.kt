@@ -60,13 +60,13 @@ class Strategy1728StartFragment : Fragment() {
         }
 
         val buttonStart = view.findViewById<Button>(R.id.buttonStart)
-        buttonStart.setOnClickListener { view ->
+        buttonStart.setOnClickListener { _ ->
             if (strategy1728.stocksSelected.isNotEmpty())
                 view.findNavController().navigate(R.id.action_nav_1728_start_to_nav_1728_finish)
         }
 
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
-        buttonUpdate.setOnClickListener { view ->
+        buttonUpdate.setOnClickListener { _ ->
             adapterList.setData(strategy1728.process())
         }
 

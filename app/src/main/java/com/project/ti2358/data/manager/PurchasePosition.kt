@@ -33,7 +33,7 @@ data class PurchasePosition (
         if (futureProfit == 0.0) futureProfit = 1.0
 
         // если текущий профит уже больше, то за базовый взять его
-        var totalCash = position.balance * position.averagePositionPrice.value
+        var totalCash = position.balance * position.getAveragePrice()
         var currentProfit = (100 * position.expectedYield.value) / totalCash
 
         profit = if (currentProfit > futureProfit) {
@@ -56,7 +56,8 @@ data class PurchasePosition (
     public fun getProfitPrice() : Double {
         if (profit == 0.0) return 0.0
 
-        var priceProfit = position.averagePositionPrice.value + position.averagePositionPrice.value / 100.0 * profit
+        val avg = position.getAveragePrice()
+        var priceProfit = avg + avg / 100.0 * profit
         priceProfit = Math.round(priceProfit * 100.0) / 100.0
 
         return priceProfit
@@ -92,8 +93,8 @@ data class PurchasePosition (
                 while (true) {
                     delay(1000)
 
-                    var pos = depoManager.getPositionForFigi(position.figi)
-                    if (pos == null) { // продано!
+                    var p = depoManager.getPositionForFigi(position.figi)
+                    if (p == null) { // продано!
                         status = PurchaseStatus.SELLED
                         break
                     }

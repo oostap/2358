@@ -157,7 +157,7 @@ class Strategy1000Service : Service() {
         val now = Calendar.getInstance(TimeZone.getDefault())
         var scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
 
-        var title = ""
+        var title: String
 
         val allSeconds = scheduleDelay / 1000
         val hours = allSeconds / 3600

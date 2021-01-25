@@ -83,12 +83,13 @@ class PortfolioFragment : Fragment() {
             val item = values[position]
             holder.tickerView.text = "${position}. ${item.ticker}"
 
+            val avg = item.getAveragePrice()
             holder.volumePiecesView.text = "${item.lots} шт."
-            holder.priceView.text = "${item.averagePositionPrice.value}"
+            holder.priceView.text = "${avg}"
 
             holder.changePriceAbsoluteView.text = item.getProfitAmount()
 
-            var totalCash = item.balance * item.averagePositionPrice.value
+            var totalCash = item.balance * avg
             val percent = (100 * item.expectedYield.value) / totalCash
             holder.changePricePercentView.text = "%.2f".format(percent) + "%"
 

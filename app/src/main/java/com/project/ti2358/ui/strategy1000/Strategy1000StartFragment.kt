@@ -100,13 +100,14 @@ class Strategy1000StartFragment : Fragment() {
             holder.checkBoxView.setOnCheckedChangeListener(null)
             holder.checkBoxView.isChecked = strategy1000.isSelected(item)
 
+            var avg = item.getAveragePrice()
             holder.volumePiecesView.text = "${item.lots} шт."
-            holder.priceView.text = "${item.averagePositionPrice.value}"
+            holder.priceView.text = "${avg}"
 
             var change = item.expectedYield.value
             holder.changePriceAbsoluteView.text = "${change} $"
 
-            var totalCash = item.balance * item.averagePositionPrice.value
+            var totalCash = item.balance * avg
             var percent = (100 * item.expectedYield.value) / totalCash
             holder.changePricePercentView.text = "%.2f".format(percent) + "%"
 

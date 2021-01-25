@@ -89,8 +89,9 @@ data class PurchaseStock (
 
                     // вычисляем и округляем до 2 после запятой
 
-                    val price: Double = if (it.averagePositionPrice.value != 0.0) {
-                        it.averagePositionPrice.value
+                    val avg = it.getAveragePrice()
+                    val price: Double = if (avg != 0.0) {
+                        avg
                     } else {
                         stock.todayDayCandle.closingPrice
                     }

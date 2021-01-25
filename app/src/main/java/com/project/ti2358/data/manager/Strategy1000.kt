@@ -23,7 +23,7 @@ class Strategy1000() : KoinComponent {
         positions.clear()
         positions.addAll(all)
 
-        positions.sortByDescending { it.lots * it.averagePositionPrice.value }
+        positions.sortByDescending { it.lots * it.getAveragePrice() }
         return positions
     }
 
@@ -35,7 +35,7 @@ class Strategy1000() : KoinComponent {
             if (filter.isEmpty())
                 positionsSelected.add(position)
         }
-        positionsSelected.sortByDescending { it.lots * it.averagePositionPrice.value }
+        positionsSelected.sortByDescending { it.lots * it.getAveragePrice() }
     }
 
     public fun isSelected(position: PortfolioPosition) : Boolean {

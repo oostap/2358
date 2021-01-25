@@ -67,7 +67,7 @@ class DepoManager : KoinComponent {
     }
 
     private fun baseSortPortfolio() {
-        portfolioPositions.sortByDescending { it.lots * it.averagePositionPrice.value }
+        portfolioPositions.sortByDescending { it.lots * it.getAveragePrice() }
 
         // удалить позицию $
         portfolioPositions.removeAll { it.ticker.contains("USD000") }
