@@ -87,17 +87,17 @@ class PortfolioFragment : Fragment() {
             holder.volumePiecesView.text = "${item.lots} шт."
             holder.priceView.text = "${avg}"
 
-            holder.changePriceAbsoluteView.text = item.getProfitAmount()
+            val profit = item.getProfitAmount()
+            holder.changePriceAbsoluteView.text = "%.2f $".format(profit)
 
             var totalCash = item.balance * avg
-            val percent = (100 * item.expectedYield.value) / totalCash
+            val percent = item.getProfitPercent()
             holder.changePricePercentView.text = "%.2f".format(percent) + "%"
 
-            val change = item.expectedYield.value
-            totalCash += change
+            totalCash += profit
             holder.volumeCashView.text = "%.2f $".format(totalCash)
 
-            if (change < 0) {
+            if (percent < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)
                 holder.changePricePercentView.setTextColor(Utils.RED)
             } else {

@@ -15,17 +15,23 @@ data class PortfolioPosition(
     val instrumentType: InstrumentType,
     val balance: Double,
     val blocked: Double,
-    val expectedYield: MoneyAmount,
+    val expectedYield: MoneyAmount?,
     val averagePositionPrice: MoneyAmount?,
-    val averagePositionPriceNoNkd: MoneyAmount,
+    val averagePositionPriceNoNkd: MoneyAmount?,
 
     var stock: Stock?
 ) {
-    fun getProfitAmount(): String {
-        return "${expectedYield.value} $"
+    fun getProfitAmount(): Double {
+        return expectedYield?.value ?: 0.0
     }
 
     fun getAveragePrice(): Double {
         return averagePositionPrice?.value ?: 0.0
+    }
+
+    fun getProfitPercent(): Double {
+        val profit = getProfitAmount()
+        val totalCash = balance * getAveragePrice()
+        return if (totalCash == 0.0) 0.0 else (100 * profit) / totalCash
     }
 }

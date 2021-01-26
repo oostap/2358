@@ -126,16 +126,16 @@ class Strategy1000FinishFragment : Fragment() {
             holder.tickerView.text = "${item.position.ticker} ${item.position.lots} шт."
             holder.currentPriceView.text = "${avg} $"
 
+            val profit = item.position.getProfitAmount()
             var totalCash = item.position.balance * avg
-            var percent = (100 * item.position.expectedYield.value) / totalCash
+            val percent = item.position.getProfitPercent()
             holder.currentProfitView.text = "%.2f".format(percent) + "%"
 
-            var change = item.position.expectedYield?.value
-            totalCash += change
+            totalCash += profit
             holder.totalPriceView.text = "%.2f $".format(totalCash)
 
-            holder.totalPriceProfitView.text = "${change} $"
-            holder.priceProfitView.text = "${change / item.position.lots} $"
+            holder.totalPriceProfitView.text = "%.2f $".format(profit)
+            holder.priceProfitView.text = "${profit / item.position.lots} $"
 
             if (percent < 0) {
                 holder.currentProfitView.setTextColor(Utils.RED)

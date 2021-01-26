@@ -104,17 +104,17 @@ class Strategy1000StartFragment : Fragment() {
             holder.volumePiecesView.text = "${item.lots} шт."
             holder.priceView.text = "${avg}"
 
-            var change = item.expectedYield.value
-            holder.changePriceAbsoluteView.text = "${change} $"
+            var profit = item.getProfitAmount()
+            holder.changePriceAbsoluteView.text = "${profit} $"
 
             var totalCash = item.balance * avg
-            var percent = (100 * item.expectedYield.value) / totalCash
+            val percent = item.getProfitPercent()
             holder.changePricePercentView.text = "%.2f".format(percent) + "%"
 
-            totalCash += change
+            totalCash += profit
             holder.volumeCashView.text = "%.2f $".format(totalCash)
 
-            if (change < 0) {
+            if (profit < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)
                 holder.changePricePercentView.setTextColor(Utils.RED)
             } else {

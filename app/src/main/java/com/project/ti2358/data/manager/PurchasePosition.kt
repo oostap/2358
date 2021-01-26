@@ -33,8 +33,9 @@ data class PurchasePosition (
         if (futureProfit == 0.0) futureProfit = 1.0
 
         // если текущий профит уже больше, то за базовый взять его
+        val change = position.getProfitAmount()
         var totalCash = position.balance * position.getAveragePrice()
-        var currentProfit = (100 * position.expectedYield.value) / totalCash
+        var currentProfit = (100 * change) / totalCash
 
         profit = if (currentProfit > futureProfit) {
             currentProfit

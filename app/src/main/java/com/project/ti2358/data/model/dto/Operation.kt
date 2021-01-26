@@ -6,7 +6,7 @@ data class Operation (
     val id: String,
     val status: OperationStatus,
     val trades: List<OperationTrade>,
-    val commission: MoneyAmount,
+    val commission: MoneyAmount?,
     val currency: Currency,
     val payment: Double,
     val price: Double,

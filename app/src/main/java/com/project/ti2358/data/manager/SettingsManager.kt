@@ -54,13 +54,23 @@ class SettingsManager {
         fun getCommonPriceMin() : Int {
             val key: String = context.getString(R.string.setting_key_stocks_usd_price_min)
             val value: String? = preferences.getString(key, "0")
-            return parseInt(value ?: "0")
+            try {
+                val v = parseInt(value ?: "0")
+                return v
+            } finally {
+                return 0
+            }
         }
 
         fun getCommonPriceMax() : Int {
             val key: String = context.getString(R.string.setting_key_stocks_usd_price_max)
             val value: String? = preferences.getString(key, "10000")
-            return parseInt(value ?: "10000")
+            try {
+                val v = parseInt(value ?: "10000")
+                return v
+            } finally {
+                return 10000
+            }
         }
 
         /******************** 2358 *************************/
@@ -68,7 +78,12 @@ class SettingsManager {
         fun get2358ChangePercent() : Double {
             val key: String = context.getString(R.string.setting_key_2358_price_change_percent)
             val value: String? = preferences.getString(key, "-1")
-            return (value ?: "-1").toDouble()
+            try {
+                val v = (value ?: "-1").toDouble()
+                return v
+            } finally {
+                return -1.0
+            }
         }
 
         fun get2358PurchaseTime() : String {
@@ -80,25 +95,45 @@ class SettingsManager {
         fun get2358PurchaseVolume() : Int {
             val key: String = context.getString(R.string.setting_key_2358_purchase_volume)
             val value: String? = preferences.getString(key, "1000")
-            return parseInt(value ?: "1000")
+            try {
+                val v = parseInt(value ?: "1000")
+                return v
+            } finally {
+                return 1000
+            }
         }
 
         fun get2358TakeProfit() : Double {
             val key: String = context.getString(R.string.setting_key_2358_take_profit)
             val value: String? = preferences.getString(key, "1")
-            return (value ?: "1").toDouble()
+            try {
+                val v = (value ?: "1").toDouble()
+                return v
+            } finally {
+                return 1.0
+            }
         }
 
         fun get2358VolumeDayPieces() : Int {
             val key: String = context.getString(R.string.setting_key_2358_volume_min_day)
             val value: String? = preferences.getString(key, "10000")
-            return parseInt(value ?: "10000")
+            try {
+                val v = parseInt(value ?: "10000")
+                return v
+            } finally {
+                return 10000
+            }
         }
 
         fun get2358VolumeDayCash() : Double {
             val key: String = context.getString(R.string.setting_key_2358_volume_min_cash)
             val value: String? = preferences.getString(key, "0.1")
-            return (value ?: "1").toDouble()
+            try {
+                val v = (value ?: "0.1").toDouble()
+                return v
+            } finally {
+                return 0.1
+            }
         }
     }
 }

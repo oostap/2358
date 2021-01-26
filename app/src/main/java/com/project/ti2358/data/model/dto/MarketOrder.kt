@@ -8,7 +8,7 @@ data class MarketOrder(
     val message: String,
     val requestedLots: Int,
     val executedLots: Int,
-    val commission: MoneyAmount,
+    val commission: MoneyAmount?,
 
     var figi: String
 )
