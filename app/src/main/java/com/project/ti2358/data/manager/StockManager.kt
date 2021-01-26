@@ -1,7 +1,7 @@
 package com.project.ti2358.data.service
 
-import android.telephony.euicc.DownloadableSubscription
 import com.project.ti2358.data.model.dto.Candle
+import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.MarketInstrument
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.coroutines.Dispatchers
@@ -65,11 +65,15 @@ class StockManager() : KoinComponent {
 
     private fun resetSubscription() {
         stocksStream.let { stocks ->
+
             streamingService
-                .getCandleEventsStream(stocks.map { it.marketInstrument.figi })
+                .getCandleEventStream(
+                    stocks.map { it.marketInstrument.figi },
+                    Interval.DAY
+                )
                 .subscribeBy(
                     onNext = {
-                        addCandle(it.payload)
+                        addCandle(it)
                     },
                     onError = {
                         it.printStackTrace()
