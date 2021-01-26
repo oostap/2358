@@ -25,10 +25,11 @@
             android:icon="@drawable/ic_2358"
             android:title="@string/menu_2358" />
 
-<!--        <item-->
-<!--            android:id="@+id/nav_1728_start"-->
-<!--            android:icon="@drawable/ic_1728"-->
-<!--            android:title="@string/menu_1728" />-->
+        <item
+            android:id="@+id/nav_1728_start"
+            android:icon="@drawable/ic_1728"
+            android:title="@string/menu_1728" />
+
 <!--        <item-->
 <!--            android:id="@+id/nav_1830_start"-->
 <!--            android:icon="@drawable/ic_1830"-->
