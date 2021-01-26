@@ -3,7 +3,7 @@ Helper for 2358 strategy via Tinkoff Invest OpenAPI
 
 **Проект находится на этапе тестирования**
 
-Приложение для Android.
+<a href="https://github.com/oostap/2358/releases">Приложение для Android.</a>
 
 Для работы приложения в настройках необходимо ввести торговый токен Tinkoff Invest OpenApi.
 Токен используется только для авторизации в Tinkoff, никто, кроме вас, его не увидит.
