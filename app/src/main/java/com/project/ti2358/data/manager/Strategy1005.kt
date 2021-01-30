@@ -17,7 +17,7 @@ import org.koin.core.component.inject
 import kotlin.random.Random
 
 @KoinApiExtension
-class StrategyScreener : KoinComponent {
+class Strategy1005 : KoinComponent {
     private val stockManager: StockManager by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
@@ -40,9 +40,9 @@ class StrategyScreener : KoinComponent {
 
     public fun resort(sort : Sorting = Sorting.ASCENDING) : MutableList<Stock> {
         if (sort == Sorting.ASCENDING)
-            stocks.sortBy { it.changePriceDayPercent }
+            stocks.sortBy { it.changePriceFromClosingDayPercent }
         else
-            stocks.sortByDescending { it.changePriceDayPercent }
+            stocks.sortByDescending { it.changePriceFromClosingDayPercent }
 
         return stocks
     }

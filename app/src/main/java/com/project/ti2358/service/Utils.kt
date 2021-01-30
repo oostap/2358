@@ -15,6 +15,11 @@ fun log(msg: String) {
     Log.d("ti2358-service", msg)
 }
 
+enum class Sorting {
+    ASCENDING,
+    DESCENDING
+}
+
 class Utils {
     companion object {
         val GREEN: Int = Color.parseColor("#58D68D")

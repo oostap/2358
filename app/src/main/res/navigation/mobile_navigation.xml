@@ -118,4 +118,24 @@
         android:name="com.project.ti2358.ui.strategy1000.Strategy1000FinishFragment"
         android:label="@string/menu_1000"
         tools:layout="@layout/fragment_1000_start" />
+
+
+    <fragment
+        android:id="@+id/nav_1005_start"
+        android:name="com.project.ti2358.ui.strategy1005.Strategy1005StartFragment"
+        android:label="@string/menu_1005"
+        tools:layout="@layout/fragment_1005_start" >
+        <action
+            android:id="@+id/action_nav_1005_start_to_nav_1005_finish"
+            app:destination="@id/nav_1005_finish"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left"
+            />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_1005_finish"
+        android:name="com.project.ti2358.ui.strategy1005.Strategy1005FinishFragment"
+        android:label="@string/menu_1005"
+        tools:layout="@layout/fragment_1005_start" />
 </navigation>

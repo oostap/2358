@@ -75,6 +75,10 @@ class WorkflowManager() : KoinComponent {
                 return Strategy1000()
             }
 
+            fun provideStrategy1005(): Strategy1005 {
+                return Strategy1005()
+            }
+
             fun provideStrategy2358(): Strategy2358 {
                 return Strategy2358()
             }
@@ -97,6 +101,7 @@ class WorkflowManager() : KoinComponent {
 
             single { provideStrategyScreener() }
             single { provideStrategy1000() }
+            single { provideStrategy1005() }
             single { provideStrategy2358() }
             single { provideStrategy1728() }
             single { provideStrategy1830() }
@@ -141,7 +146,7 @@ class WorkflowManager() : KoinComponent {
             fun provideRetrofit(): Retrofit {
                 val httpClient = OkHttpClient.Builder()
                     .addInterceptor(AuthInterceptor())
-//                    .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                    .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                     .build()
 
                 return Retrofit.Builder()

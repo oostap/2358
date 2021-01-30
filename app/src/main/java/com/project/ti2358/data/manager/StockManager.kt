@@ -21,6 +21,7 @@ class StockManager() : KoinComponent {
 
     // все акции, которые участвуют в расчётах с учётом базовой сортировки из настроек
     var stocksStream: MutableList<Stock> = mutableListOf()
+    var loadClosingPriceDelay: Long = 0
 
     public fun loadStocks() {
         if (instrumentsAll.isNotEmpty()) return
@@ -54,11 +55,9 @@ class StockManager() : KoinComponent {
     private fun baseSortStocks() {
         stocksStream.clear()
 
-        var delay: Long = 0
         for (stock in stocksAll) {
             if (SettingsManager.isAllowCurrency(stock.marketInstrument.currency)) {
                 stocksStream.add(stock)
-                delay = stock.loadLastWeekDayCandles(delay)
             }
         }
     }
@@ -79,7 +78,28 @@ class StockManager() : KoinComponent {
                         it.printStackTrace()
                     }
                 )
+
+            streamingService
+                .getCandleEventStream(
+                    stocks.map { it.marketInstrument.figi },
+                    Interval.MINUTE
+                )
+                .subscribeBy(
+                    onNext = {
+                        addCandle(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
         }
+    }
+
+    public fun unsubscribeStock(stock: Stock, interval: Interval) {
+        streamingService.getCandleEventStream(listOf(stock.marketInstrument.figi), interval)
+
+        // получить цену закрытия US
+        loadClosingPriceDelay = stock.loadClosingPriceCandle(loadClosingPriceDelay)
     }
 
     private fun addCandle(candle: Candle) {
