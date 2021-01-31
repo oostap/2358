@@ -239,6 +239,8 @@ data class Stock(
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
+
+                delay(2000)
             }
         }
         return delay
@@ -250,23 +252,22 @@ data class Stock(
         var hours = 23
         var minutes = 59
         var seconds = 0
-        var deltaDay = -1
 
         if (!before) {
             hours = 0
             minutes = 0
             seconds = 0
-            deltaDay = 0
         }
 
         var time = Calendar.getInstance(TimeZone.getDefault())
-        time.add(Calendar.HOUR_OF_DAY, -differenceHours)
         time.set(Calendar.HOUR_OF_DAY, hours)
         time.set(Calendar.MINUTE, minutes)
         time.set(Calendar.SECOND, seconds)
         time.set(Calendar.MILLISECOND, 0)
+
+        val oldDay = time.get(Calendar.DAY_OF_MONTH)
         time.add(Calendar.HOUR_OF_DAY, differenceHours)
-        time.add(Calendar.DAY_OF_MONTH, deltaDay)
+        val dayChanged = oldDay == time.get(Calendar.DAY_OF_MONTH)
 
         // если воскресенье, то откатиться к субботе
         if (time.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
@@ -276,6 +277,10 @@ data class Stock(
         // если понедельник, то откатиться к субботе
         if (time.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
             time.add(Calendar.DAY_OF_MONTH, -2)
+        }
+
+        if (before && dayChanged) {
+            time.add(Calendar.DAY_OF_MONTH, -1)
         }
 
         return time.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
