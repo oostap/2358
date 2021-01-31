@@ -59,7 +59,7 @@ class Strategy1728() : KoinComponent {
         var onePiece : Double = totalMoney / stocksToPurchase.size
 
         for (stock in stocksToPurchase) {
-            stock.lots = (onePiece / stock.stock.todayDayCandle.closingPrice).roundToInt()
+            stock.lots = (onePiece / stock.stock.getPriceDouble()).roundToInt()
         }
 
         return stocksToPurchase

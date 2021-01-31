@@ -37,7 +37,8 @@ data class Stock(
 
     var changeOnStartTimer: Double = 0.0
 
-    var todayDayCandle: Candle = Candle()
+    var lastWeekCandle: Candle? = null
+    var todayDayCandle: Candle? = null
     var yesterdayClosingCandle: Candle? = null
     var changePriceFromClosingDayAbsolute: Double = 0.0
     var changePriceFromClosingDayPercent: Double = 0.0
@@ -51,6 +52,8 @@ data class Stock(
             processDayCandle(candle)
         } else if (candle.interval == Interval.MINUTE) {
             processMinuteCandle(candle)
+        } else if (candle.interval == Interval.WEEK) {
+            processWeekCandle(candle)
         }
     }
 
@@ -61,17 +64,26 @@ data class Stock(
 
         todayDayCandle = candle
 
-        changePriceDayAbsolute = todayDayCandle.closingPrice - todayDayCandle.openingPrice
-        changePriceDayPercent = (100 * todayDayCandle.closingPrice) / todayDayCandle.openingPrice - 100
+        todayDayCandle?.let {
+            changePriceDayAbsolute = it.closingPrice - it.openingPrice
+            changePriceDayPercent = (100 * it.closingPrice) / it.openingPrice - 100
 
-        middlePrice = (todayDayCandle.highestPrice + todayDayCandle.lowestPrice ) / 2.0
-        dayVolumeCash = middlePrice * todayDayCandle.volume
+            middlePrice = (it.highestPrice + it.lowestPrice ) / 2.0
+            dayVolumeCash = middlePrice * it.volume
 
-        priceNow = todayDayCandle.closingPrice
+            priceNow = it.closingPrice
+        }
 
-//        stockManager.unsubscribeStock(this, Interval.DAY)
         loadClosingPriceDelay = loadClosingPriceCandle(loadClosingPriceDelay)
+        updateChangeFromClosing()
+    }
 
+    public fun processWeekCandle(candle: Candle) {
+        lastWeekCandle = candle
+        priceNow = lastWeekCandle?.closingPrice ?: 0.0
+
+        stockManager.unsubscribeStock(this, Interval.WEEK)
+        loadClosingPriceDelay = loadClosingPriceCandle(loadClosingPriceDelay)
         updateChangeFromClosing()
     }
 
@@ -90,8 +102,32 @@ data class Stock(
 //        log("minuteCandles.size = ${minuteCandles.size}")
     }
 
+    public fun getTodayVolume(): Int {
+        return todayDayCandle?.volume ?: 0
+    }
+
+    public fun getPriceDouble(): Double {
+        if (todayDayCandle != null) {
+            return todayDayCandle?.closingPrice ?: 0.0
+        }
+
+        if (lastWeekCandle != null) {
+            return lastWeekCandle?.closingPrice ?: 0.0
+        }
+
+        return 0.0
+    }
+
     public fun getPriceString(): String {
-        return "${todayDayCandle.closingPrice}$"
+        if (todayDayCandle != null) {
+            return "${todayDayCandle?.closingPrice ?: 0.0}$"
+        }
+
+        if (lastWeekCandle != null) {
+            return "${lastWeekCandle?.closingPrice ?: 0.0}$"
+        }
+
+        return "0.0$"
     }
 
     public fun getClosingPriceString(): String {
@@ -141,8 +177,15 @@ data class Stock(
 
     private fun updateChangeFromClosing() {
         yesterdayClosingCandle?.let {
-            changePriceFromClosingDayAbsolute = todayDayCandle.closingPrice - it.openingPrice
-            changePriceFromClosingDayPercent = (100 * todayDayCandle.closingPrice) / it.openingPrice - 100
+            lastWeekCandle?.let { week ->
+                changePriceFromClosingDayAbsolute = week.closingPrice - it.openingPrice
+                changePriceFromClosingDayPercent = (100 * week.closingPrice) / it.openingPrice - 100
+            }
+
+            todayDayCandle?.let { today ->
+                changePriceFromClosingDayAbsolute = today.closingPrice - it.openingPrice
+                changePriceFromClosingDayPercent = (100 * today.closingPrice) / it.openingPrice - 100
+            }
         }
     }
 

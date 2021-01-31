@@ -30,7 +30,7 @@ class Strategy1005 : KoinComponent {
 
         stocks.clear()
         for (stock in all) {
-            if (stock.todayDayCandle.openingPrice > min && stock.todayDayCandle.openingPrice < max) {
+            if (stock.getPriceDouble() > min && stock.getPriceDouble() < max) {
                 stocks.add(stock)
             }
         }

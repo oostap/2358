@@ -112,7 +112,7 @@ class Strategy1728StartFragment : Fragment() {
             holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
             holder.priceView.text = item.getPriceString()
 
-            val volume = item.todayDayCandle.volume / 1000f
+            val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1f".format(volume) + "k"
 
             holder.changePriceAbsoluteView.text = "%.2f".format(item.changePriceDayAbsolute) + " $"

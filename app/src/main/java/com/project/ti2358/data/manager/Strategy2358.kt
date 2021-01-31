@@ -32,17 +32,17 @@ class Strategy2358() : KoinComponent {
 
         val change = SettingsManager.get2358ChangePercent()
         val volumeDayPieces = SettingsManager.get2358VolumeDayPieces()
-        val volumeDayCash = SettingsManager.get2358VolumeDayCash()
+        val volumeDayCash = SettingsManager.get2358VolumeDayCash() * 1000 * 1000
 
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
         for (stock in all) {
             if (stock.changePriceDayPercent <= change &&            // изменение
-                stock.todayDayCandle.volume >= volumeDayPieces &&   // объём в шт
+                stock.getTodayVolume() >= volumeDayPieces &&   // объём в шт
                 stock.dayVolumeCash >= volumeDayCash &&             // объём в $
-                stock.todayDayCandle.openingPrice > min &&          // мин цена
-                stock.todayDayCandle.openingPrice < max) {          // макс цена
+                stock.getPriceDouble() > min &&          // мин цена
+                stock.getPriceDouble() < max) {          // макс цена
                 stocks.add(stock)
             }
         }
@@ -95,7 +95,7 @@ class Strategy2358() : KoinComponent {
         var onePiece : Double = totalMoney / stocksToPurchase.size
 
         for (purchase in stocksToPurchase) {
-            purchase.lots = (onePiece / purchase.stock.todayDayCandle.closingPrice).roundToInt()
+            purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
             purchase.status = PurchaseStatus.BEFORE_BUY
 
             if (prepare) { // запоминаем % подготовки, чтобы после проверить изменение
@@ -109,7 +109,7 @@ class Strategy2358() : KoinComponent {
     public fun getTotalPurchaseString() : String {
         var value = 0.0
         for (stock in stocksToPurchase) {
-            value += stock.lots * stock.stock.todayDayCandle.closingPrice
+            value += stock.lots * stock.stock.getPriceDouble()
         }
         return "%.1f".format(value) + "$"
     }
@@ -135,7 +135,7 @@ class Strategy2358() : KoinComponent {
     public fun getNotificationTextLong(): String {
         var tickers = ""
         for (stock in stocksToPurchase) {
-            val p = "%.1f".format(stock.lots * stock.stock.todayDayCandle.closingPrice) + "$"
+            val p = "%.1f".format(stock.lots * stock.stock.getPriceDouble()) + "$"
             tickers += "${stock.stock.marketInstrument.ticker} * ${stock.lots} шт. = ${p} ${stock.getStatusString()}\n"
         }
 

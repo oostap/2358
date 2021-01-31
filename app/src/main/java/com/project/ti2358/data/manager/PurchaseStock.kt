@@ -43,7 +43,7 @@ data class PurchaseStock (
     public var sellOrder: LimitOrder? = null
 
     public fun getPriceString(): String {
-        return "%.1f".format(stock.todayDayCandle.closingPrice * lots) + "$"
+        return "%.1f".format(stock.getPriceDouble() * lots) + "$"
     }
 
     public fun getStatusString(): String =
@@ -93,7 +93,7 @@ data class PurchaseStock (
                     val price: Double = if (avg != 0.0) {
                         avg
                     } else {
-                        stock.todayDayCandle.closingPrice
+                        stock.getPriceDouble()
                     }
 
                     var profitPrice = price + price / 100.0 * profit

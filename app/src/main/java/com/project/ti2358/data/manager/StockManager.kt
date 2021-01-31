@@ -1,11 +1,17 @@
 package com.project.ti2358.data.service
 
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.MarketInstrument
+import com.project.ti2358.service.log
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -24,23 +30,48 @@ class StockManager() : KoinComponent {
     var loadClosingPriceDelay: Long = 0
 
     public fun loadStocks() {
-        if (instrumentsAll.isNotEmpty()) return
+        val key = "all_instruments"
+
+        val gson = GsonBuilder().create()
+        val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
+        val jsonInstuments = preferences.getString(key, null)
+        if (jsonInstuments != null) {
+            val itemType = object : TypeToken<List<MarketInstrument>>() {}.type
+            instrumentsAll = gson.fromJson<List<MarketInstrument>>(jsonInstuments, itemType)
+        }
+
+        if (instrumentsAll.isNotEmpty()) {
+            afterLoadInstruments()
+            return
+        }
 
         GlobalScope.launch(Dispatchers.Main) {
-            try {
-                instrumentsAll = marketService.stocks().instruments
+            while (instrumentsAll.isEmpty()) {
+                try {
+                    instrumentsAll = marketService.stocks().instruments
 
-                stocksAll.clear()
-                for (instrument in instrumentsAll) {
-                    stocksAll.add(Stock(instrument))
+                    val jsonInstuments = gson.toJson(instrumentsAll)
+                    val editor: SharedPreferences.Editor = preferences.edit()
+                    editor.putString(key, jsonInstuments)
+                    editor.apply()
+
+                    afterLoadInstruments()
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
-                baseSortStocks()
-
-                resetSubscription()
-            } catch (e: Exception) {
-                e.printStackTrace()
+                delay(1500) // 1 sec
             }
         }
+    }
+
+    fun afterLoadInstruments() {
+        stocksAll.clear()
+        for (instrument in instrumentsAll) {
+            stocksAll.add(Stock(instrument))
+        }
+        baseSortStocks()
+
+        resetSubscription()
     }
 
     public fun getStockByFigi(figi: String) : Stock? {
@@ -92,14 +123,25 @@ class StockManager() : KoinComponent {
                         it.printStackTrace()
                     }
                 )
+
+            streamingService
+                .getCandleEventStream(
+                    stocks.map { it.marketInstrument.figi },
+                    Interval.WEEK
+                )
+                .subscribeBy(
+                    onNext = {
+                        addCandle(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
         }
     }
 
     public fun unsubscribeStock(stock: Stock, interval: Interval) {
         streamingService.getCandleEventStream(listOf(stock.marketInstrument.figi), interval)
-
-        // получить цену закрытия US
-        loadClosingPriceDelay = stock.loadClosingPriceCandle(loadClosingPriceDelay)
     }
 
     private fun addCandle(candle: Candle) {
