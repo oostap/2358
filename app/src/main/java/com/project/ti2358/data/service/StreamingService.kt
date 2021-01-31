@@ -13,6 +13,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import okhttp3.*
 import okio.ByteString
 import org.json.JSONObject
+import java.util.Collections.synchronizedList
+import java.util.Collections.synchronizedMap
 
 class StreamingService {
 
@@ -23,8 +25,8 @@ class StreamingService {
     private val webSocket: WebSocket
     private val publishProcessor: PublishProcessor<Any> = PublishProcessor.create()
     private val gson = Gson()
-    private val activeCandleSubscriptions: MutableMap<String, MutableList<Interval>> = mutableMapOf()
-    private val activeOrderSubscriptions: MutableMap<String, MutableList<Int>> = mutableMapOf()
+    private val activeCandleSubscriptions: MutableMap<String, MutableList<Interval>> = synchronizedMap(mutableMapOf())
+    private val activeOrderSubscriptions: MutableMap<String, MutableList<Int>> = synchronizedMap(mutableMapOf())
 
     init {
         val client = OkHttpClient()
@@ -148,7 +150,7 @@ class StreamingService {
         webSocket.send(Gson().toJson(OrderEventBody("orderbook:subscribe", figi, depth)))
         if (activeOrderSubscriptions[figi] == null) {
             activeOrderSubscriptions[figi] = mutableListOf(depth)
-        }  else {
+        } else {
             activeOrderSubscriptions[figi]?.add(depth)
         }
     }
@@ -164,7 +166,7 @@ class StreamingService {
         webSocket.send(Gson().toJson(CandleEventBody("candle:subscribe", figi, interval)))
         if (activeCandleSubscriptions[figi] == null) {
             activeCandleSubscriptions[figi] = mutableListOf(interval)
-        }  else {
+        } else {
             activeCandleSubscriptions[figi]?.add(interval)
         }
     }

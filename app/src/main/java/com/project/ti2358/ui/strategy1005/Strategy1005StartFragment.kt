@@ -1,8 +1,5 @@
 package com.project.ti2358.ui.strategy1005
 
-import android.content.Intent
-import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,14 +15,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.service.Stock
 import com.project.ti2358.data.service.Strategy1005
-import com.project.ti2358.data.service.StrategyScreener
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 
 @KoinApiExtension
 class Strategy1005StartFragment : Fragment() {
@@ -60,19 +52,19 @@ class Strategy1005StartFragment : Fragment() {
 
         val buttonStart = view.findViewById<Button>(R.id.buttonStart)
         buttonStart.setOnClickListener {
-//            if (strategy2358.stocksSelected.isNotEmpty()) {
-//                view.findNavController().navigate(R.id.action_nav_2358_start_to_nav_2358_finish)
-//            } else {
-//                Utils.showErrorAlert(requireContext())
-//            }
+            if (strategy1005.stocksSelected.isNotEmpty()) {
+//                view.findNavController().navigate(R.id.action_nav_1000_start_to_nav_1000_finish)
+            } else {
+                Utils.showErrorAlert(requireContext())
+            }
         }
 
         val checkBox = view.findViewById<CheckBox>(R.id.check_box)
         checkBox.setOnCheckedChangeListener { _, isChecked ->
-//            for (stock in strategy2358.process()) {
-//                strategy2358.setSelected(stock, !isChecked)
-//            }
-//            adapterList.notifyDataSetChanged()
+            for (stock in strategy1005.process()) {
+                strategy1005.setSelected(stock, !isChecked)
+            }
+            adapterList.notifyDataSetChanged()
         }
 
         var sort = Sorting.DESCENDING
@@ -117,10 +109,10 @@ class Strategy1005StartFragment : Fragment() {
             holder.stock = item
 
             holder.checkBoxView.setOnCheckedChangeListener(null)
-            holder.checkBoxView.isChecked = false//strategy2358.isSelected(item)
+            holder.checkBoxView.isChecked = strategy1005.isSelected(item)
 
             holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
-            holder.priceView.text = "${item.getClosingPriceString()} -> ${item.getPriceString()}"
+            holder.priceView.text = "${item.getPrice2359String()} -> ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
@@ -128,10 +120,10 @@ class Strategy1005StartFragment : Fragment() {
             val volumeCash = item.dayVolumeCash / 1000f / 1000f
             holder.volumeTodayCashView.text = "%.2f B$".format(volumeCash)
 
-            holder.changePriceAbsoluteView.text = "%.2f $".format(item.changePriceFromClosingDayAbsolute)
-            holder.changePricePercentView.text = "%.2f".format(item.changePriceFromClosingDayPercent) + "%"
+            holder.changePriceAbsoluteView.text = "%.2f $".format(item.changePrice2359DayAbsolute)
+            holder.changePricePercentView.text = "%.2f".format(item.changePrice2359DayPercent) + "%"
 
-            if (item.changePriceFromClosingDayAbsolute < 0) {
+            if (item.changePrice2359DayAbsolute < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)
                 holder.changePricePercentView.setTextColor(Utils.RED)
             } else {
@@ -140,7 +132,7 @@ class Strategy1005StartFragment : Fragment() {
             }
 
             holder.checkBoxView.setOnCheckedChangeListener { _, isChecked ->
-//                strategy2358.setSelected(holder.stock, !isChecked)
+                strategy1005.setSelected(holder.stock, !isChecked)
             }
 
             holder.itemView.setOnClickListener {

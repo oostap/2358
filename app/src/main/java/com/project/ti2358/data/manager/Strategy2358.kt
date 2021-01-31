@@ -19,14 +19,12 @@ import kotlin.random.Random
 @KoinApiExtension
 class Strategy2358() : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val depoManager: DepoManager by inject()
-    private val ordersService: OrdersService by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
 
-    public fun process() : MutableList<Stock> {
+    fun process() : MutableList<Stock> {
         val all = stockManager.stocksStream
         stocks.clear()
 
@@ -50,7 +48,7 @@ class Strategy2358() : KoinComponent {
         return stocks
     }
 
-    public fun setSelected(stock: Stock, value : Boolean) {
+    fun setSelected(stock: Stock, value : Boolean) {
         if (value) {
             stocksSelected.remove(stock)
         } else {
@@ -60,11 +58,11 @@ class Strategy2358() : KoinComponent {
         stocksSelected.sortBy { it.changePriceDayPercent }
     }
 
-    public fun isSelected(stock: Stock) : Boolean {
+    fun isSelected(stock: Stock) : Boolean {
         return stocksSelected.contains(stock)
     }
 
-    public fun getPurchaseStock(prepare: Boolean) : MutableList<PurchaseStock> {
+    fun getPurchaseStock(prepare: Boolean) : MutableList<PurchaseStock> {
         // проверить и удалить бумаги, которые перестали удовлетворять условию 2358
         process()
         stocksSelected.removeAll { !stocks.contains(it) }
@@ -78,7 +76,7 @@ class Strategy2358() : KoinComponent {
                 var delta = stock.changeOnStartTimer / stock.changePriceDayPercent
 
                 // если бумага отросла больше, чем на половину, то отменить покупку
-                if (delta > 1.5) {
+                if (delta >= 1.4) {
                     stocksToDelete.add(stock)
                 }
             }
@@ -92,11 +90,11 @@ class Strategy2358() : KoinComponent {
         }
 
         val totalMoney : Double = SettingsManager.get2358PurchaseVolume().toDouble()
-        var onePiece : Double = totalMoney / stocksToPurchase.size
+        val onePiece : Double = totalMoney / stocksToPurchase.size
 
         for (purchase in stocksToPurchase) {
             purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
-            purchase.status = PurchaseStatus.BEFORE_BUY
+            purchase.status = PurchaseStatus.WAITING
 
             if (prepare) { // запоминаем % подготовки, чтобы после проверить изменение
                 purchase.stock.changeOnStartTimer = purchase.stock.changePriceDayPercent
@@ -106,7 +104,7 @@ class Strategy2358() : KoinComponent {
         return stocksToPurchase
     }
 
-    public fun getTotalPurchaseString() : String {
+    fun getTotalPurchaseString() : String {
         var value = 0.0
         for (stock in stocksToPurchase) {
             value += stock.lots * stock.stock.getPriceDouble()
@@ -114,7 +112,7 @@ class Strategy2358() : KoinComponent {
         return "%.1f".format(value) + "$"
     }
 
-    public fun getTotalPurchasePieces() : Int {
+    fun getTotalPurchasePieces() : Int {
         var value = 0
         for (stock in stocksToPurchase) {
             value += stock.lots
@@ -122,8 +120,8 @@ class Strategy2358() : KoinComponent {
         return value
     }
 
-    public fun getNotificationTextShort(): String {
-        var price = getTotalPurchaseString()
+    fun getNotificationTextShort(): String {
+        val price = getTotalPurchaseString()
         var tickers = ""
         for (stock in stocksToPurchase) {
             tickers += "${stock.lots}*${stock.stock.marketInstrument.ticker} "
@@ -132,7 +130,7 @@ class Strategy2358() : KoinComponent {
         return "$price:\n$tickers"
     }
 
-    public fun getNotificationTextLong(): String {
+    fun getNotificationTextLong(): String {
         var tickers = ""
         for (stock in stocksToPurchase) {
             val p = "%.1f".format(stock.lots * stock.stock.getPriceDouble()) + "$"

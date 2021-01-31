@@ -61,13 +61,11 @@ class Strategy1728StartFragment : Fragment() {
 
         val buttonStart = view.findViewById<Button>(R.id.buttonStart)
         buttonStart.setOnClickListener { _ ->
-            if (strategy1728.stocksSelected.isNotEmpty())
-                view.findNavController().navigate(R.id.action_nav_1728_start_to_nav_1728_finish)
-        }
-
-        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
-        buttonUpdate.setOnClickListener { _ ->
-            adapterList.setData(strategy1728.process())
+            if (strategy1728.stocksSelected.isNotEmpty()) {
+//                view.findNavController().navigate(R.id.action_nav_1728_start_to_nav_1728_finish)
+            } else {
+                Utils.showErrorAlert(requireContext())
+            }
         }
 
         val checkBox = view.findViewById<CheckBox>(R.id.check_box)
@@ -78,7 +76,20 @@ class Strategy1728StartFragment : Fragment() {
             adapterList.notifyDataSetChanged()
         }
 
-        adapterList.setData(strategy1728.process())
+        var sort = Sorting.DESCENDING
+        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
+        buttonUpdate.setOnClickListener {
+            strategy1728.process()
+            adapterList.setData(strategy1728.resort(sort))
+            sort = if (sort == Sorting.DESCENDING) {
+                Sorting.ASCENDING
+            } else {
+                Sorting.DESCENDING
+            }
+        }
+
+        strategy1728.process()
+        adapterList.setData(strategy1728.resort(sort))
 
         return view
     }
@@ -110,15 +121,15 @@ class Strategy1728StartFragment : Fragment() {
             holder.checkBoxView.isChecked = strategy1728.isSelected(item)
 
             holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
-            holder.priceView.text = item.getPriceString()
+            holder.priceView.text = item.getPrice1728String()
 
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1f".format(volume) + "k"
 
-            holder.changePriceAbsoluteView.text = "%.2f".format(item.changePriceDayAbsolute) + " $"
-            holder.changePricePercentView.text = "%.2f".format(item.changePriceDayPercent) + "%"
+            holder.changePriceAbsoluteView.text = "%.2f".format(item.changePrice1728DayAbsolute) + " $"
+            holder.changePricePercentView.text = "%.2f".format(item.changePrice1728DayPercent) + "%"
 
-            if (item.changePriceDayAbsolute < 0) {
+            if (item.changePrice1728DayAbsolute < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)
                 holder.changePricePercentView.setTextColor(Utils.RED)
             } else {
@@ -131,8 +142,7 @@ class Strategy1728StartFragment : Fragment() {
             }
 
             holder.itemView.setOnClickListener {
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tinkoff.ru/invest/stocks/${holder.stock.marketInstrument.ticker}/"))
-                startActivity(browserIntent)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.marketInstrument.ticker)
             }
         }
 

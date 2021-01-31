@@ -1,6 +1,7 @@
 package com.project.ti2358.data.service
 
 import com.project.ti2358.data.manager.PurchaseStock
+import com.project.ti2358.service.Sorting
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -16,12 +17,24 @@ class Strategy1728() : KoinComponent {
     public fun process() : MutableList<Stock> {
         stocks.clear()
 
+        val min = SettingsManager.getCommonPriceMin()
+        val max = SettingsManager.getCommonPriceMax()
+
         val all = stockManager.stocksStream
         for (stock in all) {
-//            if (SettingsManager.isAllowCurrency(stock.marketInstrument.currency)) {
-            stocks.add(stock)
-//            }
+            if (stock.getPriceDouble() > min && stock.getPriceDouble() < max) {
+                stocks.add(stock)
+            }
         }
+
+        return stocks
+    }
+
+    public fun resort(sort : Sorting = Sorting.ASCENDING) : MutableList<Stock> {
+        if (sort == Sorting.ASCENDING)
+            stocks.sortBy { it.changePrice1728DayPercent }
+        else
+            stocks.sortByDescending { it.changePrice1728DayPercent }
 
         return stocks
     }
@@ -33,7 +46,7 @@ class Strategy1728() : KoinComponent {
             if (!stocksSelected.contains(stock))
                 stocksSelected.add(stock)
         }
-        stocksSelected.sortBy { it.changePriceDayPercent }
+        stocksSelected.sortBy { it.changePrice1728DayPercent }
     }
 
     public fun isSelected(stock: Stock) : Boolean {

@@ -1,26 +1,16 @@
 package com.project.ti2358.data.service
 
-import android.util.Log
-import androidx.lifecycle.MutableLiveData
-import com.project.ti2358.data.model.dto.Candle
-import com.project.ti2358.data.model.dto.Interval
-import com.project.ti2358.data.model.dto.MarketInstrument
 import com.project.ti2358.service.Sorting
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.kotlin.subscribeBy
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.random.Random
 
 @KoinApiExtension
 class Strategy1005 : KoinComponent {
     private val stockManager: StockManager by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
+    var stocksSelected: MutableList<Stock> = mutableListOf()
 
     public fun process() : MutableList<Stock> {
         val all = stockManager.stocksStream
@@ -40,10 +30,25 @@ class Strategy1005 : KoinComponent {
 
     public fun resort(sort : Sorting = Sorting.ASCENDING) : MutableList<Stock> {
         if (sort == Sorting.ASCENDING)
-            stocks.sortBy { it.changePriceFromClosingDayPercent }
+            stocks.sortBy { it.changePrice2359DayPercent }
         else
-            stocks.sortByDescending { it.changePriceFromClosingDayPercent }
+            stocks.sortByDescending { it.changePrice2359DayPercent }
 
         return stocks
+    }
+
+
+    fun setSelected(stock: Stock, value : Boolean) {
+        if (value) {
+            stocksSelected.remove(stock)
+        } else {
+            if (!stocksSelected.contains(stock))
+                stocksSelected.add(stock)
+        }
+        stocksSelected.sortBy { it.changePriceDayPercent }
+    }
+
+    fun isSelected(stock: Stock) : Boolean {
+        return stocksSelected.contains(stock)
     }
 }

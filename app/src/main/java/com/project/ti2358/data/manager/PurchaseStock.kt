@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit
 
 enum class PurchaseStatus {
     NONE,
-    BEFORE_BUY,
     ORDER_BUY,
     BUYED,
     ORDER_SELL,
@@ -49,11 +48,10 @@ data class PurchaseStock (
     public fun getStatusString(): String =
         when (status) {
             PurchaseStatus.NONE -> ""
-            PurchaseStatus.BEFORE_BUY -> "ждём покупку"
-            PurchaseStatus.ORDER_BUY -> "ордер на покупку"
+            PurchaseStatus.ORDER_BUY -> "ордер: покупка"
             PurchaseStatus.BUYED -> "куплено!"
-            PurchaseStatus.ORDER_SELL -> "ордер на продажу"
-            PurchaseStatus.WAITING -> "ждём продажу"
+            PurchaseStatus.ORDER_SELL -> "ордер: продажа"
+            PurchaseStatus.WAITING -> "ждём"
             PurchaseStatus.SELLED -> "продано!"
             PurchaseStatus.CANCELED -> "отменена!"
         }
@@ -73,7 +71,7 @@ data class PurchaseStock (
                 // проверяем появился ли в портфеле тикер
                 var position: PortfolioPosition?
                 while (true) {
-                    delay(1000)
+                    delay(500)
 
                     position = depoManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
@@ -88,13 +86,8 @@ data class PurchaseStock (
                     if (profit == 0.0) return@launch
 
                     // вычисляем и округляем до 2 после запятой
-
-                    val avg = it.getAveragePrice()
-                    val price: Double = if (avg != 0.0) {
-                        avg
-                    } else {
-                        stock.getPriceDouble()
-                    }
+                    val price = stock.getPriceDouble()
+                    if (price == 0.0) return@launch
 
                     var profitPrice = price + price / 100.0 * profit
                     profitPrice = Math.round(profitPrice * 100.0) / 100.0
@@ -112,7 +105,7 @@ data class PurchaseStock (
                 }
 
                 while (true) {
-                    delay(1000)
+                    delay(2000)
 
                     position = depoManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position == null) { // продано!

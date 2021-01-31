@@ -128,5 +128,11 @@ class SettingsManager {
                 0.1
             }
         }
+
+        fun get728StartTime() : String {
+            val key: String = context.getString(R.string.setting_key_1728_track_start)
+            val value : String? = preferences.getString(key, "")
+            return value ?: "17:28:00"
+        }
     }
 }
