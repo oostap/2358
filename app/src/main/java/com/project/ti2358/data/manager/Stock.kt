@@ -259,15 +259,13 @@ data class Stock(
             seconds = 0
         }
 
-        var time = Calendar.getInstance(TimeZone.getDefault())
+        var time = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow"))
+        time.add(Calendar.HOUR_OF_DAY, -differenceHours)
+
         time.set(Calendar.HOUR_OF_DAY, hours)
         time.set(Calendar.MINUTE, minutes)
         time.set(Calendar.SECOND, seconds)
         time.set(Calendar.MILLISECOND, 0)
-
-        val oldDay = time.get(Calendar.DAY_OF_MONTH)
-        time.add(Calendar.HOUR_OF_DAY, differenceHours)
-        val dayChanged = oldDay == time.get(Calendar.DAY_OF_MONTH)
 
         // если воскресенье, то откатиться к субботе
         if (time.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
@@ -279,7 +277,7 @@ data class Stock(
             time.add(Calendar.DAY_OF_MONTH, -2)
         }
 
-        if (before && dayChanged) {
+        if (before) {
             time.add(Calendar.DAY_OF_MONTH, -1)
         }
 
@@ -299,6 +297,19 @@ data class Stock(
         var calendar = Calendar.getInstance()
         calendar.add(Calendar.DAY_OF_YEAR, -5)
         return calendar.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+    }
+
+    fun getMskTimezone(): String? {
+        val tz = TimeZone.getTimeZone("Europe/Moscow")
+        val cal = GregorianCalendar.getInstance(tz)
+        val offsetInMillis = tz.getOffset(cal.timeInMillis)
+        var offset = String.format(
+            "%02d:%02d", Math.abs(offsetInMillis / 3600000), Math.abs(
+                offsetInMillis / 60000 % 60
+            )
+        )
+        offset = (if (offsetInMillis >= 0) "+" else "-") + offset
+        return offset
     }
 
     fun getCurrentTimezone(): String? {
