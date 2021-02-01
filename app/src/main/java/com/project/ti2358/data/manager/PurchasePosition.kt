@@ -27,7 +27,7 @@ data class PurchasePosition (
 
     fun processInitialProfit() {
         // по умолчанию взять профит из 2358
-        var futureProfit = SettingsManager.get2358TakeProfit()
+        var futureProfit = SettingsManager.get1000TakeProfit()
 
         // если не задан в настройках, то 1% по умолчанию
         if (futureProfit == 0.0) futureProfit = 1.0

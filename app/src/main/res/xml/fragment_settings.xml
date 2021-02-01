@@ -72,12 +72,34 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/stocks_header_1000">
+        <EditTextPreference
+            app:key="@string/setting_key_1000_take_profit"
+            app:title="@string/stocks_1000_take_profit"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1.0"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/stocks_header_1005">
+        <EditTextPreference
+            app:key="@string/setting_key_1005_price_change_percent"
+            app:title="@string/stocks_1005_price_change_percent"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="-2"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1005_volume_min_day"
+            app:title="@string/stocks_1005_volume_min_day"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="5000"/>
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/stocks_header_1728">
         <EditTextPreference
             app:key="@string/setting_key_1728_track_start"
             app:title="@string/stocks_1728_track_start"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="17:28"/>
+            app:defaultValue="17:28:00"/>
 
         <EditTextPreference
             app:key="@string/setting_key_1728_volume_before_start"
@@ -110,29 +132,4 @@
             app:defaultValue="1"/>
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/stocks_header_1830">
-        <EditTextPreference
-            app:key="@string/setting_key_1830_price_change_percent"
-            app:title="@string/stocks_1830_price_change_percent"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="-1"/>
-
-        <EditTextPreference
-            app:key="@string/setting_key_1830_volume_min_day"
-            app:title="@string/stocks_1830_volume_min_day"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="5000"/>
-
-        <EditTextPreference
-            app:key="@string/setting_key_1830_purchase_volume"
-            app:title="@string/stocks_1830_purchase_volume"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="1000"/>
-
-        <EditTextPreference
-            app:key="@string/setting_key_1830_take_profit"
-            app:title="@string/stocks_1830_take_profit"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="1"/>
-    </PreferenceCategory>
 </PreferenceScreen>

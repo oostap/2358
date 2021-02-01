@@ -129,10 +129,96 @@ class SettingsManager {
             }
         }
 
-        fun get728StartTime() : String {
+        /******************** 1005 *************************/
+
+        fun get1005ChangePercent() : Double {
+            val key: String = context.getString(R.string.setting_key_1005_price_change_percent)
+            val value: String? = preferences.getString(key, "2")
+            return try {
+                (value ?: "2").toDouble()
+            } catch (e: Exception) {
+                2.0
+            }
+        }
+
+        fun get1005VolumeDayPieces() : Int {
+            val key: String = context.getString(R.string.setting_key_1005_volume_min_day)
+            val value: String? = preferences.getString(key, "5000")
+            return try {
+                parseInt(value ?: "5000")
+            } catch (e: Exception) {
+                10000
+            }
+        }
+
+        /******************** 1000 *************************/
+
+        fun get1000TakeProfit() : Double {
+            val key: String = context.getString(R.string.setting_key_1000_take_profit)
+            val value: String? = preferences.getString(key, "1")
+            return try {
+                (value ?: "1").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        /******************** 1728 *************************/
+
+        fun get1728ChangePercent() : Double {
+            val key: String = context.getString(R.string.setting_key_1728_price_change)
+            val value: String? = preferences.getString(key, "-1")
+            return try {
+                (value ?: "-1").toDouble()
+            } catch (e: Exception) {
+                -1.0
+            }
+        }
+
+        fun get1728TrackStart() : String {
             val key: String = context.getString(R.string.setting_key_1728_track_start)
-            val value : String? = preferences.getString(key, "")
+            val value : String? = preferences.getString(key, "17:28:00")
             return value ?: "17:28:00"
+        }
+
+        fun get1728PurchaseVolume() : Int {
+            val key: String = context.getString(R.string.setting_key_1728_purchase_volume)
+            val value: String? = preferences.getString(key, "1000")
+            return try {
+                parseInt(value ?: "1000")
+            } catch (e: Exception) {
+                1000
+            }
+        }
+
+        fun get1728TakeProfit() : Double {
+            val key: String = context.getString(R.string.setting_key_1728_take_profit)
+            val value: String? = preferences.getString(key, "1")
+            return try {
+                (value ?: "1").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun get1728VolumeBeforeStart() : Int {
+            val key: String = context.getString(R.string.setting_key_1728_volume_before_start)
+            val value: String? = preferences.getString(key, "10000")
+            return try {
+                parseInt(value ?: "10000")
+            } catch (e: Exception) {
+                10000
+            }
+        }
+
+        fun get1728VolumeAfterStart() : Int {
+            val key: String = context.getString(R.string.setting_key_1728_volume_after_start)
+            val value: String? = preferences.getString(key, "10000")
+            return try {
+                parseInt(value ?: "10000")
+            } catch (e: Exception) {
+                10000
+            }
         }
     }
 }

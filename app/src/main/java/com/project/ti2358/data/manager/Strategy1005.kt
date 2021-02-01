@@ -4,6 +4,7 @@ import com.project.ti2358.service.Sorting
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.math.abs
 
 @KoinApiExtension
 class Strategy1005 : KoinComponent {
@@ -18,9 +19,15 @@ class Strategy1005 : KoinComponent {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
+        val change = SettingsManager.get1005ChangePercent()
+        val volumeDayPieces = SettingsManager.get1005VolumeDayPieces()
+
         stocks.clear()
         for (stock in all) {
-            if (stock.getPriceDouble() > min && stock.getPriceDouble() < max) {
+            if (stock.getPriceDouble() > min &&
+                stock.getPriceDouble() < max &&
+                abs(stock.changePrice2359DayPercent) >= abs(change) &&    // изменение
+                stock.getTodayVolume() >= volumeDayPieces) {              // объём в шт
                 stocks.add(stock)
             }
         }
@@ -36,7 +43,6 @@ class Strategy1005 : KoinComponent {
 
         return stocks
     }
-
 
     fun setSelected(stock: Stock, value : Boolean) {
         if (value) {

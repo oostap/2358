@@ -6,6 +6,7 @@ import com.project.ti2358.data.model.body.OrderEventBody
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.OrderEvent
+import com.project.ti2358.service.log
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.processors.PublishProcessor
@@ -62,12 +63,15 @@ class StreamingService {
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                    log("SOCKET onClosed ${code} ${reason}")
                 }
 
                 override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                    log("SOCKET onClosing ${code} ${reason}")
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                    log("SOCKET onFailure ${response}")
                 }
             }
         )

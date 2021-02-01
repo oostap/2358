@@ -37,7 +37,7 @@ class Strategy2358() : KoinComponent {
 
         for (stock in all) {
             if (stock.changePriceDayPercent <= change &&            // изменение
-                stock.getTodayVolume() >= volumeDayPieces &&   // объём в шт
+                stock.getTodayVolume() >= volumeDayPieces &&        // объём в шт
                 stock.dayVolumeCash >= volumeDayCash &&             // объём в $
                 stock.getPriceDouble() > min &&          // мин цена
                 stock.getPriceDouble() < max) {          // макс цена

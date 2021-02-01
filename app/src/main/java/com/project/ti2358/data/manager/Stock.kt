@@ -40,7 +40,7 @@ data class Stock(
     var candle1000: Candle? = null  // реалтайм, дневная свеча
 
     var candle2359: Candle? = null // цена закрытия 2359, минутная свеча
-    var candle1728: Candle? = null // цена закрытия 1728, минутная свеча
+    var minute1728Candles: MutableList<Candle> = mutableListOf() // все свечи после 1728
 
     var changePrice2359DayAbsolute: Double = 0.0
     var changePrice2359DayPercent: Double = 0.0
@@ -104,30 +104,61 @@ data class Stock(
 
         // проверка на стратегию 1728
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
-        val time = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow"))
-        time.add(Calendar.HOUR_OF_DAY, -differenceHours)
+        val timeCandle = Calendar.getInstance()
+        timeCandle.time = candle.time
+        timeCandle.add(Calendar.HOUR_OF_DAY, -differenceHours)
 
-        val currentHour = time.get(Calendar.HOUR_OF_DAY)
-        val currentMinute = time.get(Calendar.MINUTE)
-        val currentSecond = time.get(Calendar.SECOND)
+//        val currentHour = time.get(Calendar.HOUR_OF_DAY)
+//        val currentMinute = time.get(Calendar.MINUTE)
+//        val currentSecond = time.get(Calendar.SECOND)
 
-        val time1728 = SettingsManager.get728StartTime()
+        val time1728 = SettingsManager.get1728TrackStart()
         var dayTime = time1728.split(":").toTypedArray()
         if (dayTime.size < 3) {
             dayTime = arrayOf("17", "28", "00")
         }
 
+        val timeTrackStart = Calendar.getInstance()
+        timeTrackStart.add(Calendar.HOUR_OF_DAY, -differenceHours)
+
         val strategyHours = Integer.parseInt(dayTime[0])
         val strategyMinutes = Integer.parseInt(dayTime[1])
         val strategySeconds = Integer.parseInt(dayTime[2])
 
-        if (currentHour == strategyHours &&
-            currentMinute == strategyMinutes &&
-            currentSecond == strategySeconds) {
-            candle1728 = candle
+        timeTrackStart.set(Calendar.HOUR_OF_DAY, strategyHours)
+        timeTrackStart.set(Calendar.MINUTE, strategyMinutes)
+        timeTrackStart.set(Calendar.SECOND, strategySeconds)
+
+//        log("timeTrackStart")
+//        log(timeCandle.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"))
+//        log(timeTrackStart.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"))
+
+        if (timeCandle.time > timeTrackStart.time) {
+            exists = false
+            for ((index, c) in minute1728Candles.withIndex()) {
+                if (c.time == candle.time) {
+                    minute1728Candles[index] = candle
+                    exists = true
+                }
+            }
+            if (!exists) {
+                minute1728Candles.add(candle)
+            }
         }
 
         updateChange1728()
+    }
+
+    fun getVolume1728BeforeStart(): Int {
+        return getTodayVolume() - getVolume1728AfterStart()
+    }
+
+    fun getVolume1728AfterStart(): Int {
+        var volume = 0
+        for (candle in minute1728Candles) {
+            volume += candle.volume
+        }
+        return volume
     }
 
     fun getTodayVolume(): Int {
@@ -166,8 +197,8 @@ data class Stock(
     }
 
     public fun getPrice1728String(): String {
-        if (candle1728 != null) {
-            return "${candle1728?.closingPrice}$"
+        if (minute1728Candles.isNotEmpty()) {
+            return "${minute1728Candles[0].closingPrice}$"
         }
         return "0$"
     }
@@ -225,10 +256,10 @@ data class Stock(
     }
 
     private fun updateChange1728() {
-        candle1728?.let {
-            candle1728?.let { week ->
-                changePrice1728DayAbsolute = week.closingPrice - it.openingPrice
-                changePrice1728DayPercent = (100 * week.closingPrice) / it.openingPrice - 100
+        if (minute1728Candles.isNotEmpty()) {
+            candleWeek?.let { week ->
+                changePrice1728DayAbsolute = week.closingPrice - minute1728Candles[0].openingPrice
+                changePrice1728DayPercent = (100 * week.closingPrice) / minute1728Candles[0].openingPrice - 100
             }
         }
     }

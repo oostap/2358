@@ -5,6 +5,7 @@ import com.project.ti2358.service.Sorting
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @KoinApiExtension
@@ -20,9 +21,18 @@ class Strategy1728() : KoinComponent {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
+        val change = SettingsManager.get1728ChangePercent()
+        val volumeBeforeStart = SettingsManager.get1728VolumeBeforeStart()
+        val volumeAfterStart = SettingsManager.get1728VolumeAfterStart()
+
         val all = stockManager.stocksStream
         for (stock in all) {
-            if (stock.getPriceDouble() > min && stock.getPriceDouble() < max) {
+            if (stock.getPriceDouble() > min &&
+                stock.getPriceDouble() < max &&
+                abs(stock.changePrice1728DayPercent) >= abs(change) &&   // изменение
+                stock.getVolume1728AfterStart() >= volumeAfterStart &&
+                stock.getVolume1728BeforeStart() >= volumeBeforeStart
+            ) {
                 stocks.add(stock)
             }
         }
