@@ -1,6 +1,7 @@
 package com.project.ti2358.data.service
 
 import androidx.lifecycle.MutableLiveData
+import com.project.ti2358.BuildConfig
 import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.MarketInstrument
@@ -144,10 +145,16 @@ class WorkflowManager() : KoinComponent {
 
         val retrofitModule = module {
             fun provideRetrofit(): Retrofit {
+                var level = HttpLoggingInterceptor.Level.NONE
+                if (BuildConfig.DEBUG) {
+                    level = HttpLoggingInterceptor.Level.BODY
+                }
+
                 val httpClient = OkHttpClient.Builder()
                     .addInterceptor(AuthInterceptor())
-                    .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                    .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(level))
                     .build()
+
 
                 return Retrofit.Builder()
                     .client(httpClient)

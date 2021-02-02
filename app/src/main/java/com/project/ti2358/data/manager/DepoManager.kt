@@ -42,7 +42,7 @@ class DepoManager : KoinComponent {
 
                     orders = ordersService.orders() as MutableList<Order>
 
-                    log(orders.toString())
+//                    log(orders.toString())
 
                 } catch (e: Exception) {
                     e.printStackTrace()
