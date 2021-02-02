@@ -14,6 +14,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import okhttp3.*
 import okio.ByteString
 import org.json.JSONObject
+import java.util.concurrent.Executors
 
 class StreamingService {
 
@@ -30,6 +31,7 @@ class StreamingService {
     private val publishProcessor: PublishProcessor<Any> = PublishProcessor.create()
     private val activeCandleSubscriptions: MutableMap<String, MutableList<Interval>> = mutableMapOf()
     private val activeOrderSubscriptions: MutableMap<String, MutableList<Int>> = mutableMapOf()
+    private val threadPoolExecutor = Executors.newSingleThreadExecutor()
 
     init {
         connect()
@@ -57,7 +59,7 @@ class StreamingService {
     inner class MyWebSocketListener: WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             Log.d("StreamingService", "onOpen")
-            resubscribe()
+            resubscribe().subscribe()
             currentAttemptCount = 0
         }
 
@@ -91,17 +93,23 @@ class StreamingService {
         }
     }
 
-    fun resubscribe(){
-        activeOrderSubscriptions.forEach { orderEntry ->
-            orderEntry.value.forEach{
-                subscribeOrderEventsStream(orderEntry.key, it)
+    fun resubscribe(): Single<Boolean> {
+        return Single
+            .create<Boolean> { emitter ->
+                activeOrderSubscriptions.forEach { orderEntry ->
+                    orderEntry.value.forEach{
+                        subscribeOrderEventsStream(orderEntry.key, it, addSubscription = false)
+                    }
+                }
+                activeCandleSubscriptions.forEach { candleEntry ->
+                    candleEntry.value.forEach{
+                        subscribeCandleEventsStream(candleEntry.key, it, addSubscription = false)
+                    }
+                }
+
+                emitter.onSuccess(true)
             }
-        }
-        activeCandleSubscriptions.forEach { candleEntry ->
-            candleEntry.value.forEach{
-                subscribeCandleEventsStream(candleEntry.key, it)
-            }
-        }
+            .subscribeOn(Schedulers.from(threadPoolExecutor))
     }
 
     fun getOrderEventStream(
@@ -126,7 +134,7 @@ class StreamingService {
 
                 emitter.onSuccess(true)
             }
-            .subscribeOn(Schedulers.io())
+            .subscribeOn(Schedulers.from(threadPoolExecutor))
             .flatMapPublisher {
                 publishProcessor.filter{
                     it is OrderEvent && it.depth == depth
@@ -156,7 +164,7 @@ class StreamingService {
 
                 emitter.onSuccess(true)
             }
-            .subscribeOn(Schedulers.io())
+            .subscribeOn(Schedulers.from(threadPoolExecutor))
             .flatMapPublisher {
                 publishProcessor.filter{
                     it is Candle && it.interval == interval
@@ -176,13 +184,15 @@ class StreamingService {
         } ?: false
     }
 
-    private fun subscribeOrderEventsStream(figi: String, depth: Int) {
+    private fun subscribeOrderEventsStream(figi: String, depth: Int, addSubscription: Boolean = true) {
 //        Log.d("StreamingService", "subscribe for order events: figi: $figi, depth: $depth")
         webSocket?.send(Gson().toJson(OrderEventBody("orderbook:subscribe", figi, depth)))
-        if (activeOrderSubscriptions[figi] == null) {
-            activeOrderSubscriptions[figi] = mutableListOf(depth)
-        }  else {
-            activeOrderSubscriptions[figi]?.add(depth)
+        if (addSubscription) {
+            if (activeOrderSubscriptions[figi] == null) {
+                activeOrderSubscriptions[figi] = mutableListOf(depth)
+            }  else {
+                activeOrderSubscriptions[figi]?.add(depth)
+            }
         }
     }
 
@@ -192,13 +202,15 @@ class StreamingService {
     }
 
 
-    private fun subscribeCandleEventsStream(figi: String, interval: Interval) {
+    private fun subscribeCandleEventsStream(figi: String, interval: Interval, addSubscription: Boolean = true) {
 //        Log.d("StreamingService", "subscribe for candle events: figi: $figi, interval: $interval")
         webSocket?.send(Gson().toJson(CandleEventBody("candle:subscribe", figi, interval)))
-        if (activeCandleSubscriptions[figi] == null) {
-            activeCandleSubscriptions[figi] = mutableListOf(interval)
-        }  else {
-            activeCandleSubscriptions[figi]?.add(interval)
+        if (addSubscription) {
+            if (activeCandleSubscriptions[figi] == null) {
+                activeCandleSubscriptions[figi] = mutableListOf(interval)
+            }  else {
+                activeCandleSubscriptions[figi]?.add(interval)
+            }
         }
     }
 
