@@ -1,12 +1,12 @@
 package com.project.ti2358.data.service
 
+import android.util.Log
 import com.google.gson.Gson
 import com.project.ti2358.data.model.body.CandleEventBody
 import com.project.ti2358.data.model.body.OrderEventBody
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.OrderEvent
-import com.project.ti2358.service.log
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.processors.PublishProcessor
@@ -14,23 +14,32 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import okhttp3.*
 import okio.ByteString
 import org.json.JSONObject
-import java.util.Collections.synchronizedList
-import java.util.Collections.synchronizedMap
 
 class StreamingService {
 
     companion object {
         const val STREAMING_URL = "wss://api-invest.tinkoff.ru/openapi/md/v1/md-openapi/ws"
+        const val RECONNECT_ATTEMPT_LIMIT = 3
     }
 
-    private val webSocket: WebSocket
-    private val publishProcessor: PublishProcessor<Any> = PublishProcessor.create()
+    private var webSocket: WebSocket? = null
+    private val client: OkHttpClient = OkHttpClient()
+    private val socketListener = MyWebSocketListener()
     private val gson = Gson()
-    private val activeCandleSubscriptions: MutableMap<String, MutableList<Interval>> = synchronizedMap(mutableMapOf())
-    private val activeOrderSubscriptions: MutableMap<String, MutableList<Int>> = synchronizedMap(mutableMapOf())
+    private var currentAttemptCount = 0
+    private val publishProcessor: PublishProcessor<Any> = PublishProcessor.create()
+    private val activeCandleSubscriptions: MutableMap<String, MutableList<Interval>> = mutableMapOf()
+    private val activeOrderSubscriptions: MutableMap<String, MutableList<Int>> = mutableMapOf()
 
     init {
-        val client = OkHttpClient()
+        connect()
+    }
+
+    private fun connect(){
+        if (currentAttemptCount > RECONNECT_ATTEMPT_LIMIT) {
+            return
+        }
+        currentAttemptCount++
         val handshakeRequest: Request = Request.Builder()
             .url(STREAMING_URL)
             .addHeader(
@@ -38,43 +47,61 @@ class StreamingService {
                 AuthInterceptor.BEARER_PREFIX + SettingsManager.getActiveToken()
             )
             .build()
+        webSocket?.close(1002, null)
         webSocket = client.newWebSocket(
             handshakeRequest,
-            object : WebSocketListener() {
-                override fun onOpen(webSocket: WebSocket, response: Response) {
-                }
+            socketListener
+        )
+    }
 
-                override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-                }
+    inner class MyWebSocketListener: WebSocketListener() {
+        override fun onOpen(webSocket: WebSocket, response: Response) {
+            Log.d("StreamingService", "onOpen")
+            resubscribe()
+            currentAttemptCount = 0
+        }
 
-                override fun onMessage(webSocket: WebSocket, text: String) {
-//                    Log.v("StreamingService", "onMessage, text: $text")
-                    val jsonObject = JSONObject(text)
-                    val eventType = jsonObject.getString("event")
-                    val payload = jsonObject.getString("payload")
-                    when (eventType) {
-                        "candle" -> {
-                            publishProcessor.onNext(gson.fromJson(payload, Candle::class.java))
-                        }
-                        "orderbook" -> {
-                            publishProcessor.onNext(gson.fromJson(payload, OrderEvent::class.java))
-                        }
-                    }
-                }
+        override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+        }
 
-                override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                    log("SOCKET onClosed ${code} ${reason}")
+        override fun onMessage(webSocket: WebSocket, text: String) {
+//            Log.v("StreamingService", "onMessage, text: $text")
+            val jsonObject = JSONObject(text)
+            val eventType = jsonObject.getString("event")
+            val payload = jsonObject.getString("payload")
+            when (eventType) {
+                "candle" -> {
+                    publishProcessor.onNext(gson.fromJson(payload, Candle::class.java))
                 }
-
-                override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                    log("SOCKET onClosing ${code} ${reason}")
-                }
-
-                override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    log("SOCKET onFailure ${response}")
+                "orderbook" -> {
+                    publishProcessor.onNext(gson.fromJson(payload, OrderEvent::class.java))
                 }
             }
-        )
+        }
+
+        override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+        }
+
+        override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+        }
+
+        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+            Log.d("StreamingService", "onFailure")
+            connect()
+        }
+    }
+
+    fun resubscribe(){
+        activeOrderSubscriptions.forEach { orderEntry ->
+            orderEntry.value.forEach{
+                subscribeOrderEventsStream(orderEntry.key, it)
+            }
+        }
+        activeCandleSubscriptions.forEach { candleEntry ->
+            candleEntry.value.forEach{
+                subscribeCandleEventsStream(candleEntry.key, it)
+            }
+        }
     }
 
     fun getOrderEventStream(
@@ -151,33 +178,33 @@ class StreamingService {
 
     private fun subscribeOrderEventsStream(figi: String, depth: Int) {
 //        Log.d("StreamingService", "subscribe for order events: figi: $figi, depth: $depth")
-        webSocket.send(Gson().toJson(OrderEventBody("orderbook:subscribe", figi, depth)))
+        webSocket?.send(Gson().toJson(OrderEventBody("orderbook:subscribe", figi, depth)))
         if (activeOrderSubscriptions[figi] == null) {
             activeOrderSubscriptions[figi] = mutableListOf(depth)
-        } else {
+        }  else {
             activeOrderSubscriptions[figi]?.add(depth)
         }
     }
 
     private fun unsubscribeOrderEventsStream(figi: String, depth: Int) {
-        webSocket.send(Gson().toJson(OrderEventBody("orderbook:unsubscribe", figi, depth)))
+        webSocket?.send(Gson().toJson(OrderEventBody("orderbook:unsubscribe", figi, depth)))
         activeOrderSubscriptions[figi]?.remove(depth)
     }
 
 
     private fun subscribeCandleEventsStream(figi: String, interval: Interval) {
 //        Log.d("StreamingService", "subscribe for candle events: figi: $figi, interval: $interval")
-        webSocket.send(Gson().toJson(CandleEventBody("candle:subscribe", figi, interval)))
+        webSocket?.send(Gson().toJson(CandleEventBody("candle:subscribe", figi, interval)))
         if (activeCandleSubscriptions[figi] == null) {
             activeCandleSubscriptions[figi] = mutableListOf(interval)
-        } else {
+        }  else {
             activeCandleSubscriptions[figi]?.add(interval)
         }
     }
 
     private fun unsubscribeCandleEventsStream(figi: String, interval: Interval) {
 //        Log.d("StreamingService", "unsubscribe from candle events: figi: $figi, interval: $interval")
-        webSocket.send(Gson().toJson(CandleEventBody("candle:unsubscribe", figi, interval)))
+        webSocket?.send(Gson().toJson(CandleEventBody("candle:unsubscribe", figi, interval)))
         activeCandleSubscriptions[figi]?.remove(interval)
     }
 
