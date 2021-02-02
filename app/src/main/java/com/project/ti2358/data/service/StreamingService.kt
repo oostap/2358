@@ -14,6 +14,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import okhttp3.*
 import okio.ByteString
 import org.json.JSONObject
+import java.util.Collections.synchronizedMap
 
 class StreamingService {
 
@@ -28,8 +29,8 @@ class StreamingService {
     private val gson = Gson()
     private var currentAttemptCount = 0
     private val publishProcessor: PublishProcessor<Any> = PublishProcessor.create()
-    private val activeCandleSubscriptions: MutableMap<String, MutableList<Interval>> = mutableMapOf()
-    private val activeOrderSubscriptions: MutableMap<String, MutableList<Int>> = mutableMapOf()
+    private val activeCandleSubscriptions: MutableMap<String, MutableList<Interval>> = synchronizedMap(mutableMapOf())
+    private val activeOrderSubscriptions: MutableMap<String, MutableList<Int>> = synchronizedMap(mutableMapOf())
 
     init {
         connect()
