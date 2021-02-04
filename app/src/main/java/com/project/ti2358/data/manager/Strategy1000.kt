@@ -10,7 +10,7 @@ import org.koin.core.component.inject
 @KoinApiExtension
 class Strategy1000() : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val depoManager: DepoManager by inject()
+    private val depositManager: DepositManager by inject()
     private val ordersService: OrdersService by inject()
 
     var positions: MutableList<PortfolioPosition> = mutableListOf()
@@ -18,7 +18,7 @@ class Strategy1000() : KoinComponent {
     var positionsToSell: MutableList<PurchasePosition> = mutableListOf()
 
     public fun process() : MutableList<PortfolioPosition> {
-        val all = depoManager.portfolioPositions
+        val all = depositManager.portfolioPositions
 
         positions.clear()
         positions.addAll(all)

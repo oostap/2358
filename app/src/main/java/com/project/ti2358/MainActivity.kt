@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
-    val depoManager: DepoManager by inject()
+    val depositManager: DepositManager by inject()
     val sandboxService: SandboxService by inject()
     val marketService: MarketService by inject()
     val ordersService: OrdersService by inject()
@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
             R.string.copy
         ) {
             override fun onDrawerOpened(drawerView: View) {
-                cashView.text = depoManager.getFreeCashUSD()
+                cashView.text = depositManager.getFreeCashUSD()
                 super.onDrawerOpened(drawerView)
             }
 

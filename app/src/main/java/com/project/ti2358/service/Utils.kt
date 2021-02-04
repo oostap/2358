@@ -9,10 +9,14 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import com.project.ti2358.BuildConfig
+import okhttp3.logging.HttpLoggingInterceptor
 import java.util.*
 
 fun log(msg: String) {
-    Log.d("ti2358-service", msg)
+    if (BuildConfig.DEBUG) {
+        Log.d("ti2358-service", msg)
+    }
 }
 
 enum class Sorting {

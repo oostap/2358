@@ -1,18 +1,13 @@
 package com.project.ti2358.data.service
 
-import androidx.lifecycle.MutableLiveData
 import com.project.ti2358.BuildConfig
 import com.project.ti2358.data.model.dto.Currency
-import com.project.ti2358.data.model.dto.Interval
-import com.project.ti2358.data.model.dto.MarketInstrument
 import com.project.ti2358.data.model.dto.OperationType
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -23,7 +18,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 @KoinApiExtension
 class WorkflowManager() : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val depoManager: DepoManager by inject()
+    private val depositManager: DepositManager by inject()
 
     private val sandboxService: SandboxService by inject()
 
@@ -48,7 +43,7 @@ class WorkflowManager() : KoinComponent {
             }
         }
         stockManager.loadStocks()
-        depoManager.startUpdatePortfolio()
+        depositManager.startUpdatePortfolio()
 
         // TODO: запросить вчерашние дневные свечи для вчерашних объёмов
     }
@@ -64,8 +59,8 @@ class WorkflowManager() : KoinComponent {
                 return StockManager()
             }
 
-            fun provideDepoManager(): DepoManager {
-                return DepoManager()
+            fun provideDepoManager(): DepositManager {
+                return DepositManager()
             }
 
             fun provideStrategyScreener(): StrategyScreener {

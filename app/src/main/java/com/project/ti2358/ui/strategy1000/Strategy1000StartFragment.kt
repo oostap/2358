@@ -1,9 +1,5 @@
 package com.project.ti2358.ui.strategy1000
 
-import android.app.AlertDialog
-import android.content.DialogInterface
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.model.dto.PortfolioPosition
-import com.project.ti2358.data.service.DepoManager
+import com.project.ti2358.data.service.DepositManager
 import com.project.ti2358.data.service.Strategy1000
 import com.project.ti2358.service.Utils
 import org.koin.android.ext.android.inject
@@ -29,7 +25,7 @@ import org.koin.core.component.KoinApiExtension
 class Strategy1000StartFragment : Fragment() {
 
     val strategy1000: Strategy1000 by inject()
-    val depoManager: DepoManager by inject()
+    val depositManager: DepositManager by inject()
     var adapterList: ItemPortfolioRecyclerViewAdapter = ItemPortfolioRecyclerViewAdapter(emptyList())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,10 +64,10 @@ class Strategy1000StartFragment : Fragment() {
 
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
         buttonUpdate.setOnClickListener {
-            adapterList.setData(depoManager.portfolioPositions)
+            adapterList.setData(depositManager.portfolioPositions)
         }
 
-        adapterList.setData(depoManager.portfolioPositions)
+        adapterList.setData(depositManager.portfolioPositions)
 
         return view
     }

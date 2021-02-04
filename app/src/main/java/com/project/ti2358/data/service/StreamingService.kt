@@ -7,10 +7,15 @@ import com.project.ti2358.data.model.body.OrderEventBody
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.OrderEvent
+import com.project.ti2358.service.log
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.processors.PublishProcessor
 import io.reactivex.rxjava3.schedulers.Schedulers
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import okhttp3.*
 import okio.ByteString
 import org.json.JSONObject
@@ -20,7 +25,7 @@ class StreamingService {
 
     companion object {
         const val STREAMING_URL = "wss://api-invest.tinkoff.ru/openapi/md/v1/md-openapi/ws"
-        const val RECONNECT_ATTEMPT_LIMIT = 3
+        const val RECONNECT_ATTEMPT_LIMIT = 1000
     }
 
     private var webSocket: WebSocket? = null
@@ -37,7 +42,7 @@ class StreamingService {
         connect()
     }
 
-    private fun connect(){
+    private fun connect() {
         if (currentAttemptCount > RECONNECT_ATTEMPT_LIMIT) {
             return
         }
@@ -67,7 +72,7 @@ class StreamingService {
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-//            Log.v("StreamingService", "onMessage, text: $text")
+//            log("StreamingService::onMessage, text: $text")
             val jsonObject = JSONObject(text)
             val eventType = jsonObject.getString("event")
             val payload = jsonObject.getString("payload")
@@ -89,7 +94,10 @@ class StreamingService {
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             Log.d("StreamingService", "onFailure")
-            connect()
+            GlobalScope.launch(Dispatchers.Main) {
+                delay(3000)
+                connect()
+            }
         }
     }
 

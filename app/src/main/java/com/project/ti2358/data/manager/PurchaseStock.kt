@@ -1,12 +1,10 @@
 package com.project.ti2358.data.manager
 
-import com.google.gson.annotations.SerializedName
 import com.project.ti2358.data.model.dto.*
-import com.project.ti2358.data.service.DepoManager
+import com.project.ti2358.data.service.DepositManager
 import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.data.service.Stock
-import com.project.ti2358.service.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -15,7 +13,7 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.*
-import java.util.concurrent.TimeUnit
+import kotlin.math.roundToInt
 
 enum class PurchaseStatus {
     NONE,
@@ -32,20 +30,19 @@ data class PurchaseStock (
     var stock: Stock
 ) : KoinComponent {
     private val ordersService: OrdersService by inject()
-    private val depoManager: DepoManager by inject()
+    private val depositManager: DepositManager by inject()
 
     var lots: Int = 0               // сколько штук тарим
-    var startChange: Double = 0.0   // сколько % было на старте таймера
     var status: PurchaseStatus = PurchaseStatus.NONE
 
-    public var buyOrder: MarketOrder? = null
-    public var sellOrder: LimitOrder? = null
+    var buyOrder: MarketOrder? = null
+    var sellOrder: LimitOrder? = null
 
-    public fun getPriceString(): String {
+    fun getPriceString(): String {
         return "%.1f".format(stock.getPriceDouble() * lots) + "$"
     }
 
-    public fun getStatusString(): String =
+    fun getStatusString(): String =
         when (status) {
             PurchaseStatus.NONE -> ""
             PurchaseStatus.ORDER_BUY -> "ордер: покупка"
@@ -56,7 +53,7 @@ data class PurchaseStock (
             PurchaseStatus.CANCELED -> "отменена!"
         }
 
-    public fun purchase() {
+    fun purchase() {
         GlobalScope.launch(Dispatchers.Main) {
             try {
                 val lots = if (SettingsManager.isSandbox()) 1 else lots
@@ -71,13 +68,13 @@ data class PurchaseStock (
                 // проверяем появился ли в портфеле тикер
                 var position: PortfolioPosition?
                 while (true) {
-                    delay(500)
-
-                    position = depoManager.getPositionForFigi(stock.marketInstrument.figi)
+                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
                         status = PurchaseStatus.BUYED
                         break
                     }
+
+                    delay(500)
                 }
 
                 // продаём
@@ -90,8 +87,7 @@ data class PurchaseStock (
                     if (price == 0.0) return@launch
 
                     var profitPrice = price + price / 100.0 * profit
-                    profitPrice = Math.round(profitPrice * 100.0) / 100.0
-
+                    profitPrice = (profitPrice * 100.0).roundToInt() / 100.0
                     if (profitPrice == 0.0) return@launch
 
                     // выставить ордер на продажу
@@ -107,7 +103,7 @@ data class PurchaseStock (
                 while (true) {
                     delay(2000)
 
-                    position = depoManager.getPositionForFigi(stock.marketInstrument.figi)
+                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position == null) { // продано!
                         status = PurchaseStatus.SELLED
                         break

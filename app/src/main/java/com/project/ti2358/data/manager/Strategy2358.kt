@@ -69,14 +69,14 @@ class Strategy2358() : KoinComponent {
 
         // проверить и удалить бумаги, которые сильно отросли с момента старта таймера
         if (!prepare) {
-            var stocksToDelete: MutableList<Stock> = mutableListOf()
+            val stocksToDelete: MutableList<Stock> = mutableListOf()
             for (stock in stocksSelected) {
                 if (stock.changeOnStartTimer == 0.0) continue
 
-                var delta = stock.changeOnStartTimer / stock.changePriceDayPercent
+                val delta = stock.changeOnStartTimer / stock.changePriceDayPercent
 
                 // если бумага отросла больше, чем на половину, то отменить покупку
-                if (delta >= 1.4) {
+                if (delta >= 1.6) {
                     stocksToDelete.add(stock)
                 }
             }
@@ -109,7 +109,7 @@ class Strategy2358() : KoinComponent {
         for (stock in stocksToPurchase) {
             value += stock.lots * stock.stock.getPriceDouble()
         }
-        return "%.1f".format(value) + "$"
+        return "%.1f$".format(value)
     }
 
     fun getTotalPurchasePieces() : Int {
@@ -133,7 +133,7 @@ class Strategy2358() : KoinComponent {
     fun getNotificationTextLong(): String {
         var tickers = ""
         for (stock in stocksToPurchase) {
-            val p = "%.1f".format(stock.lots * stock.stock.getPriceDouble()) + "$"
+            val p = "%.1f$".format(stock.lots * stock.stock.getPriceDouble())
             tickers += "${stock.stock.marketInstrument.ticker} * ${stock.lots} шт. = ${p} ${stock.getStatusString()}\n"
         }
 

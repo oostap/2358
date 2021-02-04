@@ -2,7 +2,6 @@ package com.project.ti2358.data.service
 
 import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.Currency
-import com.project.ti2358.service.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -10,18 +9,15 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.util.*
 import java.util.Collections.synchronizedList
-import kotlin.math.round
+import kotlin.math.abs
 
 @KoinApiExtension
-class DepoManager : KoinComponent {
+class DepositManager : KoinComponent {
     private val stocksManager: StockManager by inject()
 
     private val portfolioService: PortfolioService by inject()
     private val ordersService: OrdersService by inject()
-    private val marketService: MarketService by inject()
-    private val operationsService: OperationsService by inject()
 
     var portfolioPositions: MutableList<PortfolioPosition> = synchronizedList(mutableListOf())
     var currencyPositions: MutableList<CurrencyPosition> = synchronizedList(mutableListOf())
@@ -34,21 +30,19 @@ class DepoManager : KoinComponent {
                     portfolioPositions = synchronizedList(portfolioService.portfolio().positions)
                     baseSortPortfolio()
 
-                    delay(1000) // 1 sec
+                    delay(1000) // 1s
 
                     currencyPositions = synchronizedList(portfolioService.currencies().currencies)
 
-                    delay(1000) // 1 sec
+                    delay(1000) // 1s
 
                     orders = ordersService.orders() as MutableList<Order>
-
-//                    log(orders.toString())
 
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
 
-                delay(1 * 5 * 1000) // 5 sec
+                delay(5000) // 5s
             }
         }
     }
@@ -67,14 +61,14 @@ class DepoManager : KoinComponent {
     }
 
     private fun baseSortPortfolio() {
-        portfolioPositions.sortByDescending { it.lots * it.getAveragePrice() }
+        portfolioPositions.sortByDescending { abs(it.lots * it.getAveragePrice()) }
 
         // удалить позицию $
         portfolioPositions.removeAll { it.ticker.contains("USD000") }
 
-        for (posititon in portfolioPositions) {
-            if (posititon.stock == null) {
-                posititon.stock = stocksManager.getStockByFigi(posititon.figi)
+        for (position in portfolioPositions) {
+            if (position.stock == null) {
+                position.stock = stocksManager.getStockByFigi(position.figi)
             }
         }
     }

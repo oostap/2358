@@ -27,9 +27,8 @@ class StockManager() : KoinComponent {
 
     // все акции, которые участвуют в расчётах с учётом базовой сортировки из настроек
     var stocksStream: MutableList<Stock> = mutableListOf()
-    var loadClosingPriceDelay: Long = 0
 
-    public fun loadStocks() {
+    fun loadStocks() {
         val key = "all_instruments"
 
         val gson = GsonBuilder().create()
@@ -37,7 +36,7 @@ class StockManager() : KoinComponent {
         val jsonInstuments = preferences.getString(key, null)
         if (jsonInstuments != null) {
             val itemType = object : TypeToken<List<MarketInstrument>>() {}.type
-            instrumentsAll = gson.fromJson<List<MarketInstrument>>(jsonInstuments, itemType)
+            instrumentsAll = gson.fromJson(jsonInstuments, itemType)
         }
 
         if (instrumentsAll.isNotEmpty()) {
@@ -50,9 +49,9 @@ class StockManager() : KoinComponent {
                 try {
                     instrumentsAll = marketService.stocks().instruments
 
-                    val jsonInstuments = gson.toJson(instrumentsAll)
+                    val jsonInstruments = gson.toJson(instrumentsAll)
                     val editor: SharedPreferences.Editor = preferences.edit()
-                    editor.putString(key, jsonInstuments)
+                    editor.putString(key, jsonInstruments)
                     editor.apply()
 
                     afterLoadInstruments()
@@ -64,7 +63,7 @@ class StockManager() : KoinComponent {
         }
     }
 
-    fun afterLoadInstruments() {
+    private fun afterLoadInstruments() {
         stocksAll.clear()
         for (instrument in instrumentsAll) {
             stocksAll.add(Stock(instrument))
@@ -74,7 +73,7 @@ class StockManager() : KoinComponent {
         resetSubscription()
     }
 
-    public fun getStockByFigi(figi: String) : Stock? {
+    fun getStockByFigi(figi: String) : Stock? {
         for (stock in stocksAll) {
             if (stock.marketInstrument.figi == figi) {
                 return stock
@@ -140,7 +139,7 @@ class StockManager() : KoinComponent {
         }
     }
 
-    public fun unsubscribeStock(stock: Stock, interval: Interval) {
+    fun unsubscribeStock(stock: Stock, interval: Interval) {
         streamingService.getCandleEventStream(listOf(stock.marketInstrument.figi), interval)
     }
 

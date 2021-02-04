@@ -15,7 +15,7 @@ class Strategy1728() : KoinComponent {
     var stocksSelected: MutableList<Stock> = mutableListOf()
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
 
-    public fun process() : MutableList<Stock> {
+    fun process() : MutableList<Stock> {
         stocks.clear()
 
         val min = SettingsManager.getCommonPriceMin()
@@ -40,7 +40,7 @@ class Strategy1728() : KoinComponent {
         return stocks
     }
 
-    public fun resort(sort : Sorting = Sorting.ASCENDING) : MutableList<Stock> {
+    fun resort(sort : Sorting = Sorting.ASCENDING) : MutableList<Stock> {
         if (sort == Sorting.ASCENDING)
             stocks.sortBy { it.changePrice1728DayPercent }
         else
@@ -49,7 +49,7 @@ class Strategy1728() : KoinComponent {
         return stocks
     }
 
-    public fun setSelected(stock: Stock, value : Boolean) {
+    fun setSelected(stock: Stock, value : Boolean) {
         if (value) {
             stocksSelected.remove(stock)
         } else {
@@ -59,27 +59,18 @@ class Strategy1728() : KoinComponent {
         stocksSelected.sortBy { it.changePrice1728DayPercent }
     }
 
-    public fun isSelected(stock: Stock) : Boolean {
+    fun isSelected(stock: Stock) : Boolean {
         return stocksSelected.contains(stock)
     }
 
-    public fun getPurchaseStock() : MutableList<PurchaseStock> {
-//        // !!!!! TODO: тестовый тикер !!!!!!
-//        if (stocksSelected.isEmpty()) {
-//            for (stock in stockManager.stocksStream) {
-//                if (stock.marketInstrument.ticker == "RIG") {
-//                    stocksSelected.add(stock)
-//                }
-//            }
-//        }
-
+    fun getPurchaseStock() : MutableList<PurchaseStock> {
         stocksToPurchase.clear()
         for (stock in stocksSelected) {
             stocksToPurchase.add(PurchaseStock(stock))
         }
 
         val totalMoney : Double = SettingsManager.get2358PurchaseVolume().toDouble()
-        var onePiece : Double = totalMoney / stocksToPurchase.size
+        val onePiece : Double = totalMoney / stocksToPurchase.size
 
         for (stock in stocksToPurchase) {
             stock.lots = (onePiece / stock.stock.getPriceDouble()).roundToInt()

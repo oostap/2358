@@ -34,7 +34,7 @@ data class Stock(
 
     var priceNow: Double = 0.0
 
-    var changeOnStartTimer: Double = 0.0
+    var changeOnStartTimer: Double = 0.0    // сколько % было на старте таймера
 
     var candleWeek: Candle? = null  // недельная свеча
     var candle1000: Candle? = null  // реалтайм, дневная свеча
@@ -49,6 +49,8 @@ data class Stock(
     var changePrice1728DayPercent: Double = 0.0
 
     var minuteCandles: MutableList<Candle> = mutableListOf()
+
+    var candle2359Loaded: Boolean = false
 
     public fun processCandle(candle: Candle) {
         if (candle.interval == Interval.DAY) {
@@ -166,39 +168,36 @@ data class Stock(
     }
 
     public fun getPriceDouble(): Double {
-        if (candle1000 != null) {
-            return candle1000?.closingPrice ?: 0.0
+        if (minuteCandles.isNotEmpty()) {
+            return minuteCandles.last().closingPrice
         }
 
-        if (candleWeek != null) {
-            return candleWeek?.closingPrice ?: 0.0
+        candle1000?.let {
+            return it.closingPrice
+        }
+
+        candleWeek?.let {
+            return it.closingPrice
         }
 
         return 0.0
     }
 
     public fun getPriceString(): String {
-        if (candle1000 != null) {
-            return "${candle1000?.closingPrice ?: 0.0}$"
-        }
-
-        if (candleWeek != null) {
-            return "${candleWeek?.closingPrice ?: 0.0}$"
-        }
-
-        return "0.0$"
+        val price = getPriceDouble()
+        return "$price$"
     }
 
     public fun getPrice2359String(): String {
-        if (candle2359 != null) {
-            return "${candle2359?.closingPrice}$"
+        candle2359?.let {
+            return "${it.closingPrice}$"
         }
         return "0$"
     }
 
     public fun getPrice1728String(): String {
         if (minute1728Candles.isNotEmpty()) {
-            return "${minute1728Candles[0].closingPrice}$"
+            return "${minute1728Candles.first().closingPrice}$"
         }
         return "0$"
     }
@@ -258,14 +257,14 @@ data class Stock(
     private fun updateChange1728() {
         if (minute1728Candles.isNotEmpty()) {
             candleWeek?.let { week ->
-                changePrice1728DayAbsolute = week.closingPrice - minute1728Candles[0].openingPrice
-                changePrice1728DayPercent = (100 * week.closingPrice) / minute1728Candles[0].openingPrice - 100
+                changePrice1728DayAbsolute = week.closingPrice - minute1728Candles.first().openingPrice
+                changePrice1728DayPercent = (100 * week.closingPrice) / minute1728Candles.first().openingPrice - 100
             }
         }
     }
 
     public fun loadClosingPriceCandle(prevDelay: Long): Long {
-        if (candle2359 != null) return prevDelay
+        if (candle2359 != null || candle2359Loaded) return prevDelay
 
         val gson = GsonBuilder().create()
 
@@ -278,13 +277,19 @@ data class Stock(
         val jsonClosingCandle = preferences.getString(key, null)
         if (jsonClosingCandle != null) {
             candle2359 = gson.fromJson(jsonClosingCandle, Candle::class.java)
+            return prevDelay
         }
 
-        val delay = prevDelay + kotlin.random.Random.Default.nextLong(300, 600)
+        val delay = prevDelay + kotlin.random.Random.Default.nextLong(400, 600)
         GlobalScope.launch(Dispatchers.Main) {
             while (candle2359 == null) {
                 try {
                     delay(delay)
+                    if (candle2359Loaded) return@launch
+
+                    val value = preferences.getString(key, null)
+                    if (value != null) return@launch
+
                     val to = getLastClosingDate(false) + zone
 
                     log(marketInstrument.ticker + " " + marketInstrument.figi)
@@ -299,7 +304,7 @@ data class Stock(
                     )
 
                     if (candles.candles.isNotEmpty()) {
-                        candle2359 = candles.candles[0]
+                        candle2359 = candles.candles.first()
                         val data = gson.toJson(candle2359)
 
                         val editor: SharedPreferences.Editor = preferences.edit()
@@ -309,6 +314,7 @@ data class Stock(
                         updateChange2359()
                     }
 
+                    candle2359Loaded = true
                     log(marketInstrument.ticker + " = " + candles)
                     break
                 } catch (e: Exception) {
@@ -387,7 +393,7 @@ data class Stock(
         return offset
     }
 
-    fun getCurrentTimezone(): String? {
+    fun getCurrentTimezone(): String {
         val tz = TimeZone.getDefault()
         val cal = GregorianCalendar.getInstance(tz)
         val offsetInMillis = tz.getOffset(cal.timeInMillis)
