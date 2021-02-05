@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -61,10 +63,19 @@ class Strategy1000SellFinishFragment : Fragment() {
             if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
                 requireContext().stopService(Intent(context, Strategy1000SellService::class.java))
             } else {
-                if (strategy1000Sell.getTotalPurchasePieces() > 0) {
-                    Utils.startService(requireContext(), Strategy1000SellService::class.java)
+                if (Utils.isActiveSession()) {
+                    val localPositions = strategy1000Sell.getSellPosition()
+                    for (position in localPositions) {
+                        position.sell()
+                    }
+                } else {
+                    if (strategy1000Sell.getTotalPurchasePieces() > 0) {
+                        Utils.startService(requireContext(), Strategy1000SellService::class.java)
+                    }
                 }
             }
+
+            this.findNavController().navigateUp()
             updateServiceButtonText()
         }
 
@@ -81,20 +92,34 @@ class Strategy1000SellFinishFragment : Fragment() {
         if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
             buttonStart?.text = getString(R.string.service_2358_stop)
         } else {
-            buttonStart?.text = getString(R.string.service_2358_start)
+            if (Utils.isActiveSession()) {
+                buttonStart?.text = getString(R.string.button_sell)
+            } else {
+                buttonStart?.text = getString(R.string.service_2358_start)
+            }
         }
     }
 
     fun updateInfoText() {
-        val time = "10:00:01"
-
-        val prepareText: String = SettingsManager.context.getString(R.string.prepare_start_1000_sell_text)
-        infoTextView?.text = String.format(
-            prepareText,
-            time,
-            positions.size,
-            strategy1000Sell.getTotalSellString()
-        )
+        if (Utils.isActiveSession()) {
+            val prepareText: String =
+                SettingsManager.context.getString(R.string.sell_now_text)
+            infoTextView?.text = String.format(
+                prepareText,
+                positions.size,
+                strategy1000Sell.getTotalSellString()
+            )
+        } else {
+            val time = "10:00:01"
+            val prepareText: String =
+                SettingsManager.context.getString(R.string.prepare_start_1000_sell_text)
+            infoTextView?.text = String.format(
+                prepareText,
+                time,
+                positions.size,
+                strategy1000Sell.getTotalSellString()
+            )
+        }
     }
 
     inner class Item1000RecyclerViewAdapter(
@@ -118,7 +143,6 @@ class Strategy1000SellFinishFragment : Fragment() {
 
             val avg = item.position.getAveragePrice()
             holder.tickerView.text = "${item.position.ticker} ${item.position.lots} шт."
-            holder.currentPriceView.text = "${avg} $"
 
             val profit = item.position.getProfitAmount()
             var totalCash = item.position.balance * avg
@@ -126,7 +150,7 @@ class Strategy1000SellFinishFragment : Fragment() {
             holder.currentProfitView.text = "%.2f".format(percent) + "%"
 
             totalCash += profit
-            holder.totalPriceView.text = "%.2f $".format(totalCash)
+            holder.currentPriceView.text = "%.2f\$->%.2f\$".format(avg, totalCash)
 
             holder.totalPriceProfitView.text = "%.2f $".format(profit)
             holder.priceProfitView.text = "%.2f $".format(profit / item.position.lots)
@@ -165,6 +189,8 @@ class Strategy1000SellFinishFragment : Fragment() {
             var futureProfitPrice = item.getProfitPrice() - avg
             holder.futureProfitPriceView.text = "%.2f $".format(futureProfitPrice)
             holder.totalFutureProfitPriceView.text = "%.2f $".format(futureProfitPrice * item.position.balance)
+
+            holder.totalPriceView.text = "%.2f$".format(item.getProfitPrice())
 
             if (futureProfitPrice < 0) {
                 holder.futureProfitView.setTextColor(Utils.RED)

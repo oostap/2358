@@ -6,12 +6,12 @@
         android:divider="?android:dividerHorizontal"
         android:dividerPadding="10dp"
         android:showDividers="middle"
-        android:weightSum="3.5" >
+        android:weightSum="40" >
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_weight="10"
         android:orientation="vertical">
 
         <TextView
@@ -37,7 +37,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_weight="10"
         android:orientation="vertical">
 
         <TextView
@@ -62,7 +62,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_weight="10"
         android:orientation="vertical">
 
         <TextView
@@ -84,10 +84,18 @@
             android:textSize="14sp" />
     </LinearLayout>
 
-    <CheckBox
-        android:id="@+id/check_box"
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="0.5"
-        android:layout_gravity="center"
-        android:layout_width="0dp" />
+        android:layout_weight="10"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/buttonBuy"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="20dp"
+            android:text="BUY" />
+    </LinearLayout>
+
 </LinearLayout>

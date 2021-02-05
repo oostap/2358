@@ -74,5 +74,66 @@ class Utils {
             val moscowOffs = msk.timeZone.rawOffset
             return ((nowOffs - moscowOffs) / 1000 / 3600.0).toInt()
         }
+
+        fun isNight(): Boolean {
+            val msk = getTimeMSK()
+            val hour = msk.get(Calendar.HOUR_OF_DAY)
+            val minute = msk.get(Calendar.MINUTE)
+
+            if (hour == 9 && minute > 55) {
+                return false
+            }
+
+            if (hour < 10 || hour > 2) {
+                return true
+            }
+
+            log("MSK: $hour:$minute")
+            return false
+        }
+
+        fun isHighSpeedSession(): Boolean {
+            val msk = getTimeMSK()
+            val hour = msk.get(Calendar.HOUR_OF_DAY)
+            val minute = msk.get(Calendar.MINUTE)
+
+            if (hour == 9 && minute > 58) {
+                return true
+            }
+
+            if (hour == 10 && minute < 10) {
+                return true
+            }
+
+            if (hour == 16 && minute > 55) {
+                return true
+            }
+
+            if (hour == 17 && minute < 20) {
+                return true
+            }
+
+            if (hour == 23 && minute > 55) {
+                return true
+            }
+
+            if (hour == 0 && minute < 5) {
+                return true
+            }
+
+            return false
+        }
+
+        fun isActiveSession(): Boolean {
+            val msk = getTimeMSK()
+            val hour = msk.get(Calendar.HOUR_OF_DAY)
+            val minute = msk.get(Calendar.MINUTE)
+
+            if (hour >= 10 || hour <= 2) {
+                return true
+            }
+
+            return false
+        }
     }
 }

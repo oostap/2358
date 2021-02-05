@@ -2,6 +2,7 @@ package com.project.ti2358.data.service
 
 import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.Currency
+import com.project.ti2358.service.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -23,18 +24,19 @@ class DepositManager : KoinComponent {
     var currencyPositions: MutableList<CurrencyPosition> = synchronizedList(mutableListOf())
     var orders: MutableList<Order> = synchronizedList(mutableListOf())
 
+    private var refreshDepositDelay: Long = 20 * 1000 // 20s
+
     public fun startUpdatePortfolio() {
         GlobalScope.launch(Dispatchers.Main) {
             while (true) {
                 try {
-                    portfolioPositions = synchronizedList(portfolioService.portfolio().positions)
-                    baseSortPortfolio()
+                    refreshDeposit()
 
-                    delay(1000) // 1s
+                    delay(500) // 1s
 
                     currencyPositions = synchronizedList(portfolioService.currencies().currencies)
 
-                    delay(1000) // 1s
+                    delay(500) // 1s
 
                     orders = ordersService.orders() as MutableList<Order>
 
@@ -42,9 +44,31 @@ class DepositManager : KoinComponent {
                     e.printStackTrace()
                 }
 
-                delay(5000) // 5s
+                // ночью делать обновление раз в час
+                if (Utils.isNight()) {
+                    refreshDepositDelay = 1000 * 60 * 30 // 30m
+                } else if (Utils.isHighSpeedSession()) {
+                    refreshDepositDelay = 1000 * 1 // 1s
+                } else {
+                    refreshDepositDelay = 1000 * 20 // 20s
+                }
+
+                delay(refreshDepositDelay)
             }
         }
+    }
+
+    suspend fun refreshDeposit() {
+        portfolioPositions = synchronizedList(portfolioService.portfolio().positions)
+        baseSortPortfolio()
+    }
+
+    fun increaseRefreshDepositDelay() {
+        refreshDepositDelay = 1000 // 1s
+    }
+
+    fun decreaseRefreshDepositDelay() {
+        refreshDepositDelay = 10000 // 10s
     }
 
     public fun getFreeCashUSD(): String {

@@ -11,4 +11,6 @@ class MarketService(retrofit: Retrofit) : BaseService(retrofit) {
     suspend fun searchByTicker(ticker: String) = marketApi.searchByTicker(ticker).payload
 
     suspend fun candles(figi: String, interval: String, from: String, to: String) = marketApi.candles(figi, interval, from, to).payload
+
+    suspend fun orderbook(figi: String, depth: Int) = marketApi.orderbook(figi, depth).payload
 }

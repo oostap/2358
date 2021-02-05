@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.service.Stock
 import com.project.ti2358.data.service.Strategy1728
 import com.project.ti2358.data.service.Strategy2358
@@ -59,22 +60,22 @@ class Strategy1728StartFragment : Fragment() {
             }
         }
 
-        val buttonStart = view.findViewById<Button>(R.id.buttonStart)
-        buttonStart.setOnClickListener { _ ->
-            if (strategy1728.stocksSelected.isNotEmpty()) {
-//                view.findNavController().navigate(R.id.action_nav_1728_start_to_nav_1728_finish)
-            } else {
-                Utils.showErrorAlert(requireContext())
-            }
-        }
+//        val buttonStart = view.findViewById<Button>(R.id.buttonStart)
+//        buttonStart.setOnClickListener { _ ->
+//            if (strategy1728.stocksSelected.isNotEmpty()) {
+////                view.findNavController().navigate(R.id.action_nav_1728_start_to_nav_1728_finish)
+//            } else {
+//                Utils.showErrorAlert(requireContext())
+//            }
+//        }
 
-        val checkBox = view.findViewById<CheckBox>(R.id.check_box)
-        checkBox.setOnCheckedChangeListener { _, isChecked ->
-            for (stock in strategy1728.process()) {
-                strategy1728.setSelected(stock, !isChecked)
-            }
-            adapterList.notifyDataSetChanged()
-        }
+//        val checkBox = view.findViewById<CheckBox>(R.id.check_box)
+//        checkBox.setOnCheckedChangeListener { _, isChecked ->
+//            for (stock in strategy1728.process()) {
+//                strategy1728.setSelected(stock, !isChecked)
+//            }
+//            adapterList.notifyDataSetChanged()
+//        }
 
         var sort = Sorting.DESCENDING
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
@@ -117,9 +118,6 @@ class Strategy1728StartFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            holder.checkBoxView.setOnCheckedChangeListener(null)
-            holder.checkBoxView.isChecked = strategy1728.isSelected(item)
-
             holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
             holder.priceView.text = item.getPrice1728String()
 
@@ -137,12 +135,13 @@ class Strategy1728StartFragment : Fragment() {
                 holder.changePricePercentView.setTextColor(Utils.GREEN)
             }
 
-            holder.checkBoxView.setOnCheckedChangeListener { _, isChecked ->
-                strategy1728.setSelected(holder.stock, !isChecked)
-            }
-
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.marketInstrument.ticker)
+            }
+
+            holder.buttonBuy.setOnClickListener {
+                val purchase = PurchaseStock(holder.stock)
+                purchase.buyLimitFromAsk()
             }
         }
 
@@ -159,7 +158,7 @@ class Strategy1728StartFragment : Fragment() {
             val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
 
-            val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
+            val buttonBuy: Button = view.findViewById(R.id.buttonBuy)
         }
     }
 }

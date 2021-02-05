@@ -7,12 +7,14 @@
     <string name="service_2358_prepare">Продолжить</string>
     <string name="service_2358_start">Старт</string>
     <string name="service_2358_stop">Стоп</string>
+    <string name="button_sell">Продать</string>
     <string name="update">Обновить</string>
     <string name="sort">Сортировка</string>
 
     <string name="prepare_start_2358_text">Запуск таймера на покупку: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
     <string name="prepare_start_1000_sell_text">Запуск таймера на продажу: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
     <string name="prepare_start_1000_buy_text">Запуск таймера на покупку: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
+    <string name="sell_now_text">Создать заявки на продажу:\nБумаг: %d\nСумма: %s</string>
 
     <string name="ticker">тикер</string>
     <string name="volume">объём</string>
