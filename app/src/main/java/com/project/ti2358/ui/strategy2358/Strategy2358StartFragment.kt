@@ -111,7 +111,7 @@ class Strategy2358StartFragment : Fragment() {
             holder.checkBoxView.isChecked = strategy2358.isSelected(item)
 
             holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
-            holder.priceView.text = item.getPriceString()
+            holder.priceView.text = "${item.getPrice1000String()} -> ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
@@ -154,10 +154,6 @@ class Strategy2358StartFragment : Fragment() {
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
 
             val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
-
-            override fun toString(): String {
-                return super.toString() + " '" + tickerView.text + "'"
-            }
         }
     }
 }

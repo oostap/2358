@@ -143,10 +143,6 @@ class Strategy1728FinishFragment : Fragment() {
 
             val purchaseLotsView: TextView = view.findViewById(R.id.stock_purchase_lots)
             val purchasePriceView: TextView = view.findViewById(R.id.stock_purchase_price)
-
-            override fun toString(): String {
-                return super.toString() + " '" + tickerView.text + "'"
-            }
         }
     }
 }

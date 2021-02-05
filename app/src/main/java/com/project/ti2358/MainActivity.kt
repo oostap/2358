@@ -75,7 +75,12 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_settings,
                 R.id.nav_portfolio,
                 R.id.nav_stocks,
-                R.id.nav_1000_start, R.id.nav_2358_start, R.id.nav_1728_start, R.id.nav_1830_start, R.id.nav_rocket_start
+                R.id.nav_1000_sell_start,
+                R.id.nav_1000_buy_start,
+                R.id.nav_2358_start,
+                R.id.nav_1728_start,
+                R.id.nav_1830_start,
+                R.id.nav_rocket_start
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)

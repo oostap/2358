@@ -8,7 +8,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @KoinApiExtension
-class Strategy1000() : KoinComponent {
+class Strategy1000Sell() : KoinComponent {
     private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
     private val ordersService: OrdersService by inject()

@@ -155,10 +155,6 @@ class Strategy1005StartFragment : Fragment() {
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
 
             val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
-
-            override fun toString(): String {
-                return super.toString() + " '" + tickerView.text + "'"
-            }
         }
     }
 }

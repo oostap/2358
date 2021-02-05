@@ -1,8 +1,5 @@
-package com.project.ti2358.ui.strategyRocket
+package com.project.ti2358.ui.strategy1000Buy
 
-import android.content.Intent
-import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,22 +14,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.service.Stock
-import com.project.ti2358.data.service.Strategy2358
-import com.project.ti2358.data.service.StrategyRocket
+import com.project.ti2358.data.service.Strategy1000Buy
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-
 
 @KoinApiExtension
-class StrategyRocketStartFragment : Fragment() {
+class Strategy1000BuyStartFragment : Fragment() {
 
-    val strategyRocket: StrategyRocket by inject()
-    var adapterList: ItemRocketRecyclerViewAdapter = ItemRocketRecyclerViewAdapter(emptyList())
+    val strategy1000Buy: Strategy1000Buy by inject()
+    var adapterList: Item1005RecyclerViewAdapter = Item1005RecyclerViewAdapter(emptyList())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +33,7 @@ class StrategyRocketStartFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_rocket_start, container, false)
+        val view = inflater.inflate(R.layout.fragment_1000_buy_start, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
         list.addItemDecoration(
@@ -60,32 +51,43 @@ class StrategyRocketStartFragment : Fragment() {
         }
 
         val buttonStart = view.findViewById<Button>(R.id.buttonStart)
-        buttonStart.setOnClickListener { _ ->
-            if (strategyRocket.stocksSelected.isNotEmpty())
-                view.findNavController().navigate(R.id.action_nav_rocket_start_to_nav_rocket_finish)
-        }
-
-        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
-        buttonUpdate.setOnClickListener { _ ->
-            adapterList.setData(strategyRocket.process())
+        buttonStart.setOnClickListener {
+            if (strategy1000Buy.stocksSelected.isNotEmpty()) {
+                view.findNavController().navigate(R.id.action_nav_1000_buy_start_to_nav_1000_buy_finish)
+            } else {
+                Utils.showErrorAlert(requireContext())
+            }
         }
 
         val checkBox = view.findViewById<CheckBox>(R.id.check_box)
         checkBox.setOnCheckedChangeListener { _, isChecked ->
-            for (stock in strategyRocket.process()) {
-                strategyRocket.setSelected(stock, !isChecked)
+            for (stock in strategy1000Buy.process()) {
+                strategy1000Buy.setSelected(stock, !isChecked)
             }
             adapterList.notifyDataSetChanged()
         }
 
-        adapterList.setData(strategyRocket.process())
+        var sort = Sorting.DESCENDING
+        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
+        buttonUpdate.setOnClickListener {
+            strategy1000Buy.process()
+            adapterList.setData(strategy1000Buy.resort(sort))
+            sort = if (sort == Sorting.DESCENDING) {
+                Sorting.ASCENDING
+            } else {
+                Sorting.DESCENDING
+            }
+        }
+
+        strategy1000Buy.process()
+        adapterList.setData(strategy1000Buy.resort(sort))
 
         return view
     }
 
-    inner class ItemRocketRecyclerViewAdapter(
+    inner class Item1005RecyclerViewAdapter(
         private var values: List<Stock>
-    ) : RecyclerView.Adapter<ItemRocketRecyclerViewAdapter.ViewHolder>() {
+    ) : RecyclerView.Adapter<Item1005RecyclerViewAdapter.ViewHolder>() {
 
         fun setData(newValues: List<Stock>) {
             values = newValues
@@ -94,7 +96,7 @@ class StrategyRocketStartFragment : Fragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(
-                R.layout.fragment_rocket_start_item,
+                R.layout.fragment_1000_buy_start_item,
                 parent,
                 false
             )
@@ -107,18 +109,21 @@ class StrategyRocketStartFragment : Fragment() {
             holder.stock = item
 
             holder.checkBoxView.setOnCheckedChangeListener(null)
-            holder.checkBoxView.isChecked = strategyRocket.isSelected(item)
+            holder.checkBoxView.isChecked = strategy1000Buy.isSelected(item)
 
             holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
-            holder.priceView.text = item.getPriceString()
+            holder.priceView.text = "${item.getPrice2359String()} -> ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
-            holder.volumeTodayView.text = "%.1f".format(volume) + "k"
+            holder.volumeTodayView.text = "%.1fk".format(volume)
 
-            holder.changePriceAbsoluteView.text = "%.2f".format(item.changePriceDayAbsolute) + " $"
-            holder.changePricePercentView.text = "%.2f".format(item.changePriceDayPercent) + "%"
+            val volumeCash = item.dayVolumeCash / 1000f / 1000f
+            holder.volumeTodayCashView.text = "%.2f B$".format(volumeCash)
 
-            if (item.changePriceDayAbsolute < 0) {
+            holder.changePriceAbsoluteView.text = "%.2f $".format(item.changePrice2359DayAbsolute)
+            holder.changePricePercentView.text = "%.2f".format(item.changePrice2359DayPercent) + "%"
+
+            if (item.changePrice2359DayAbsolute < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)
                 holder.changePricePercentView.setTextColor(Utils.RED)
             } else {
@@ -127,12 +132,11 @@ class StrategyRocketStartFragment : Fragment() {
             }
 
             holder.checkBoxView.setOnCheckedChangeListener { _, isChecked ->
-                strategyRocket.setSelected(holder.stock, !isChecked)
+                strategy1000Buy.setSelected(holder.stock, !isChecked)
             }
 
             holder.itemView.setOnClickListener {
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tinkoff.ru/invest/stocks/${holder.stock.marketInstrument.ticker}/"))
-                startActivity(browserIntent)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.marketInstrument.ticker)
             }
         }
 
@@ -145,6 +149,7 @@ class StrategyRocketStartFragment : Fragment() {
             val priceView: TextView = view.findViewById(R.id.stock_item_price)
 
             val volumeTodayView: TextView = view.findViewById(R.id.stock_item_volume_today)
+            val volumeTodayCashView: TextView = view.findViewById(R.id.stock_item_volume_today_cash)
 
             val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)

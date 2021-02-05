@@ -5,21 +5,28 @@
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/nav_portfolio">
 
+    <!-- настройки -->
     <fragment
         android:id="@+id/nav_settings"
         android:name="com.project.ti2358.ui.settings.SettingsFragment"
         android:label="@string/menu_settings"
         tools:layout="@xml/fragment_settings" />
+
+    <!-- депозит -->
     <fragment
         android:id="@+id/nav_portfolio"
         android:name="com.project.ti2358.ui.portfolio.PortfolioFragment"
         android:label="@string/menu_portfolio"
         tools:layout="@layout/fragment_portfolio_item_list" />
+
+    <!-- скринер -->
     <fragment
         android:id="@+id/nav_stocks"
         android:name="com.project.ti2358.ui.stocks.ScreenerFragment"
         android:label="@string/menu_stocks"
         tools:layout="@layout/fragment_screener_item_list" />
+
+    <!-- 2358 -->
 
     <fragment
         android:id="@+id/nav_2358_start"
@@ -40,6 +47,8 @@
         android:label="@string/menu_2358"
         tools:layout="@layout/fragment_2358_start" />
 
+    <!-- 1728 -->
+
     <fragment
         android:id="@+id/nav_1728_start"
         android:name="com.project.ti2358.ui.strategy1728.Strategy1728StartFragment"
@@ -59,6 +68,7 @@
         android:label="@string/menu_1728"
         tools:layout="@layout/fragment_1728_start" />
 
+    <!-- 1830 -->
 
     <fragment
         android:id="@+id/nav_1830_start"
@@ -79,6 +89,7 @@
         android:label="@string/menu_1830"
         tools:layout="@layout/fragment_1830_start" />
 
+    <!-- Rockets -->
 
     <fragment
         android:id="@+id/nav_rocket_start"
@@ -99,26 +110,49 @@
         android:label="@string/menu_rocket"
         tools:layout="@layout/fragment_rocket_finish" />
 
+    <!-- 1000 Sell -->
 
     <fragment
-        android:id="@+id/nav_1000_start"
-        android:name="com.project.ti2358.ui.strategy1000.Strategy1000StartFragment"
-        android:label="@string/menu_1000"
-        tools:layout="@layout/fragment_1000_start" >
+        android:id="@+id/nav_1000_sell_start"
+        android:name="com.project.ti2358.ui.strategy1000Sell.Strategy1000SellStartFragment"
+        android:label="@string/menu_1000_sell"
+        tools:layout="@layout/fragment_1000_sell_start" >
         <action
-            android:id="@+id/action_nav_1000_start_to_nav_1000_finish"
-            app:destination="@id/nav_1000_finish"
+            android:id="@+id/action_nav_1000_sell_start_to_nav_1000_sell_finish"
+            app:destination="@id/nav_1000_sell_finish"
             app:enterAnim="@animator/slide_in_right"
             app:exitAnim="@animator/slide_out_left"
             />
     </fragment>
 
     <fragment
-        android:id="@+id/nav_1000_finish"
-        android:name="com.project.ti2358.ui.strategy1000.Strategy1000FinishFragment"
-        android:label="@string/menu_1000"
-        tools:layout="@layout/fragment_1000_start" />
+        android:id="@+id/nav_1000_sell_finish"
+        android:name="com.project.ti2358.ui.strategy1000Sell.Strategy1000SellFinishFragment"
+        android:label="@string/menu_1000_sell"
+        tools:layout="@layout/fragment_1000_sell_start" />
 
+    <!-- 1000 Buy -->
+
+    <fragment
+        android:id="@+id/nav_1000_buy_start"
+        android:name="com.project.ti2358.ui.strategy1000Buy.Strategy1000BuyStartFragment"
+        android:label="@string/menu_1000_buy"
+        tools:layout="@layout/fragment_1000_buy_start" >
+        <action
+            android:id="@+id/action_nav_1000_buy_start_to_nav_1000_buy_finish"
+            app:destination="@id/nav_1000_buy_finish"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left"
+            />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_1000_buy_finish"
+        android:name="com.project.ti2358.ui.strategy1000Buy.Strategy1000BuyFinishFragment"
+        android:label="@string/menu_1000_buy"
+        tools:layout="@layout/fragment_1000_buy_start" />
+
+    <!-- 1005 scanner -->
 
     <fragment
         android:id="@+id/nav_1005_start"

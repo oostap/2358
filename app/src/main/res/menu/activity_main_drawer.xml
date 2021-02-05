@@ -17,9 +17,14 @@
             android:icon="@drawable/ic_stocks"
             android:title="@string/menu_stocks" />
         <item
-            android:id="@+id/nav_1000_start"
+            android:id="@+id/nav_1000_sell_start"
             android:icon="@drawable/ic_1000"
-            android:title="@string/menu_1000" />
+            android:title="@string/menu_1000_sell" />
+
+        <item
+            android:id="@+id/nav_1000_buy_start"
+            android:icon="@drawable/ic_1000"
+            android:title="@string/menu_1000_buy" />
 
         <item
             android:id="@+id/nav_1005_start"

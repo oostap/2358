@@ -1,4 +1,4 @@
-package com.project.ti2358.ui.strategy1000
+package com.project.ti2358.ui.strategy1000Sell
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,16 +15,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.data.service.DepositManager
-import com.project.ti2358.data.service.Strategy1000
+import com.project.ti2358.data.service.Strategy1000Sell
 import com.project.ti2358.service.Utils
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 
 @KoinApiExtension
-class Strategy1000StartFragment : Fragment() {
+class Strategy1000SellStartFragment : Fragment() {
 
-    val strategy1000: Strategy1000 by inject()
+    val strategy1000Sell: Strategy1000Sell by inject()
     val depositManager: DepositManager by inject()
     var adapterList: ItemPortfolioRecyclerViewAdapter = ItemPortfolioRecyclerViewAdapter(emptyList())
 
@@ -36,7 +36,7 @@ class Strategy1000StartFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_1000_start, container, false)
+        val view = inflater.inflate(R.layout.fragment_1000_sell_start, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
         list.addItemDecoration(
@@ -55,8 +55,8 @@ class Strategy1000StartFragment : Fragment() {
 
         val buttonStart = view.findViewById<Button>(R.id.buttonStart)
         buttonStart.setOnClickListener {
-            if (strategy1000.positionsSelected.isNotEmpty()) {
-                view.findNavController().navigate(R.id.action_nav_1000_start_to_nav_1000_finish)
+            if (strategy1000Sell.positionsSelected.isNotEmpty()) {
+                view.findNavController().navigate(R.id.action_nav_1000_sell_start_to_nav_1000_sell_finish)
             } else {
                 Utils.showErrorAlert(requireContext())
             }
@@ -83,7 +83,7 @@ class Strategy1000StartFragment : Fragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.fragment_1000_start_item, parent, false)
+                .inflate(R.layout.fragment_1000_sell_start_item, parent, false)
             return ViewHolder(view)
         }
 
@@ -94,11 +94,11 @@ class Strategy1000StartFragment : Fragment() {
             holder.tickerView.text = "${position}. ${item.ticker}"
 
             holder.checkBoxView.setOnCheckedChangeListener(null)
-            holder.checkBoxView.isChecked = strategy1000.isSelected(item)
+            holder.checkBoxView.isChecked = strategy1000Sell.isSelected(item)
 
             var avg = item.getAveragePrice()
             holder.volumePiecesView.text = "${item.lots} шт."
-            holder.priceView.text = "${avg}"
+            holder.priceView.text = "${avg} $"
 
             var profit = item.getProfitAmount()
             holder.changePriceAbsoluteView.text = "${profit} $"
@@ -119,7 +119,7 @@ class Strategy1000StartFragment : Fragment() {
             }
 
             holder.checkBoxView.setOnCheckedChangeListener { _, isChecked ->
-                strategy1000.setSelected(holder.position, !isChecked)
+                strategy1000Sell.setSelected(holder.position, !isChecked)
             }
 
             holder.itemView.setOnClickListener {
@@ -144,10 +144,6 @@ class Strategy1000StartFragment : Fragment() {
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
 
             val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
-
-            override fun toString(): String {
-                return super.toString() + " '" + tickerView.text + "'"
-            }
         }
     }
 }

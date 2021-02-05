@@ -1,10 +1,6 @@
-package com.project.ti2358.ui.strategy1000
+package com.project.ti2358.ui.strategy1000Sell
 
-import android.app.ActivityManager
-import android.content.Context.ACTIVITY_SERVICE
 import android.content.Intent
-import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,19 +13,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.PurchasePosition
-import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.data.service.SettingsManager
-import com.project.ti2358.data.service.Strategy1000
-import com.project.ti2358.data.service.Strategy1728
+import com.project.ti2358.data.service.Strategy1000Sell
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 
 @KoinApiExtension
-class Strategy1000FinishFragment : Fragment() {
+class Strategy1000SellFinishFragment : Fragment() {
 
-    val strategy1000: Strategy1000 by inject()
+    val strategy1000Sell: Strategy1000Sell by inject()
     var adapterList: Item1000RecyclerViewAdapter = Item1000RecyclerViewAdapter(emptyList())
     var infoTextView: TextView? = null
     var positions: MutableList<PurchasePosition> = mutableListOf()
@@ -43,7 +37,7 @@ class Strategy1000FinishFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_1000_finish, container, false)
+        val view = inflater.inflate(R.layout.fragment_1000_sell_finish, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
         list.addItemDecoration(
@@ -64,17 +58,17 @@ class Strategy1000FinishFragment : Fragment() {
         updateServiceButtonText()
 
         buttonStart?.setOnClickListener {
-            if (Utils.isServiceRunning(requireContext(), Strategy1000Service::class.java)) {
-                requireContext().stopService(Intent(context, Strategy1000Service::class.java))
+            if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
+                requireContext().stopService(Intent(context, Strategy1000SellService::class.java))
             } else {
-                if (strategy1000.getTotalPurchasePieces() > 0) {
-                    Utils.startService(requireContext(), Strategy1000Service::class.java)
+                if (strategy1000Sell.getTotalPurchasePieces() > 0) {
+                    Utils.startService(requireContext(), Strategy1000SellService::class.java)
                 }
             }
             updateServiceButtonText()
         }
 
-        positions = strategy1000.getSellPosition()
+        positions = strategy1000Sell.getSellPosition()
         adapterList.setData(positions)
 
         infoTextView = view.findViewById<TextView>(R.id.info_text)
@@ -84,7 +78,7 @@ class Strategy1000FinishFragment : Fragment() {
     }
 
     private fun updateServiceButtonText() {
-        if (Utils.isServiceRunning(requireContext(), Strategy1000Service::class.java)) {
+        if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
             buttonStart?.text = getString(R.string.service_2358_stop)
         } else {
             buttonStart?.text = getString(R.string.service_2358_start)
@@ -92,14 +86,14 @@ class Strategy1000FinishFragment : Fragment() {
     }
 
     fun updateInfoText() {
-        var time = "10:00:01"
+        val time = "10:00:01"
 
-        val prepareText: String = SettingsManager.context.getString(R.string.prepare_start_1000_text)
+        val prepareText: String = SettingsManager.context.getString(R.string.prepare_start_1000_sell_text)
         infoTextView?.text = String.format(
             prepareText,
             time,
             positions.size,
-            strategy1000.getTotalSellString()
+            strategy1000Sell.getTotalSellString()
         )
     }
 
@@ -114,7 +108,7 @@ class Strategy1000FinishFragment : Fragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.fragment_1000_finish_item, parent, false)
+                .inflate(R.layout.fragment_1000_sell_finish_item, parent, false)
             return ViewHolder(view)
         }
 
@@ -135,7 +129,7 @@ class Strategy1000FinishFragment : Fragment() {
             holder.totalPriceView.text = "%.2f $".format(totalCash)
 
             holder.totalPriceProfitView.text = "%.2f $".format(profit)
-            holder.priceProfitView.text = "${profit / item.position.lots} $"
+            holder.priceProfitView.text = "%.2f $".format(profit / item.position.lots)
 
             if (percent < 0) {
                 holder.currentProfitView.setTextColor(Utils.RED)
@@ -204,10 +198,6 @@ class Strategy1000FinishFragment : Fragment() {
 
             val buttonPlus: Button = view.findViewById(R.id.buttonPlus)
             val buttonMinus: Button = view.findViewById(R.id.buttonMinus)
-
-            override fun toString(): String {
-                return super.toString() + " '" + tickerView.text + "'"
-            }
         }
     }
 }

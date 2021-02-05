@@ -151,15 +151,37 @@ class SettingsManager {
             }
         }
 
-        /******************** 1000 *************************/
+        /******************** 1000 sell *************************/
 
-        fun get1000TakeProfit() : Double {
-            val key: String = context.getString(R.string.setting_key_1000_take_profit)
+        fun get1000SellTakeProfit() : Double {
+            val key: String = context.getString(R.string.setting_key_1000_sell_take_profit)
             val value: String? = preferences.getString(key, "1")
             return try {
                 (value ?: "1").toDouble()
             } catch (e: Exception) {
                 1.0
+            }
+        }
+
+        /******************** 1000 sell *************************/
+
+        fun get1000BuyTakeProfit() : Double {
+            val key: String = context.getString(R.string.setting_key_1000_buy_take_profit)
+            val value: String? = preferences.getString(key, "1")
+            return try {
+                (value ?: "1").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun get1000BuyPurchaseVolume() : Int {
+            val key: String = context.getString(R.string.setting_key_1000_buy_purchase_volume)
+            val value: String? = preferences.getString(key, "500")
+            return try {
+                parseInt(value ?: "500")
+            } catch (e: Exception) {
+                500
             }
         }
 

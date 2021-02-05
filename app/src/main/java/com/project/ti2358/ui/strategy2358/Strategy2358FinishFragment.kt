@@ -1,12 +1,10 @@
 package com.project.ti2358.ui.strategy2358
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -86,7 +84,7 @@ class Strategy2358FinishFragment : Fragment() {
     }
 
     private fun updateServiceButtonText() {
-        if (Utils.isServiceRunning(requireContext(), Strategy1000Service::class.java)) {
+        if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
             buttonStart?.text = getString(R.string.service_2358_stop)
         } else {
             buttonStart?.text = getString(R.string.service_2358_start)
@@ -125,10 +123,6 @@ class Strategy2358FinishFragment : Fragment() {
 
             val purchaseLotsView: TextView = view.findViewById(R.id.stock_purchase_lots)
             val purchasePriceView: TextView = view.findViewById(R.id.stock_purchase_price)
-
-            override fun toString(): String {
-                return super.toString() + " '" + tickerView.text + "'"
-            }
         }
     }
 }

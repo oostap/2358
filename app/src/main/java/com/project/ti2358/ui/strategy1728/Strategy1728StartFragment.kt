@@ -124,9 +124,9 @@ class Strategy1728StartFragment : Fragment() {
             holder.priceView.text = item.getPrice1728String()
 
             val volume = item.getTodayVolume() / 1000f
-            holder.volumeTodayView.text = "%.1f".format(volume) + "k"
+            holder.volumeTodayView.text = "%.1fk".format(volume)
 
-            holder.changePriceAbsoluteView.text = "%.2f".format(item.changePrice1728DayAbsolute) + " $"
+            holder.changePriceAbsoluteView.text = "%.2f$".format(item.changePrice1728DayAbsolute)
             holder.changePricePercentView.text = "%.2f".format(item.changePrice1728DayPercent) + "%"
 
             if (item.changePrice1728DayAbsolute < 0) {
@@ -160,10 +160,6 @@ class Strategy1728StartFragment : Fragment() {
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
 
             val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
-
-            override fun toString(): String {
-                return super.toString() + " '" + tickerView.text + "'"
-            }
         }
     }
 }

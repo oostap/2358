@@ -72,12 +72,27 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/stocks_header_1000">
+    <PreferenceCategory app:title="@string/stocks_header_1000_sell">
         <EditTextPreference
-            app:key="@string/setting_key_1000_take_profit"
-            app:title="@string/stocks_1000_take_profit"
+            app:key="@string/setting_key_1000_sell_take_profit"
+            app:title="@string/stocks_1000_sell_take_profit"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="1.0"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/stocks_header_1000_buy">
+        <EditTextPreference
+            app:key="@string/setting_key_1000_buy_take_profit"
+            app:title="@string/stocks_1000_buy_take_profit"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_buy_purchase_volume"
+            app:title="@string/stocks_1000_buy_purchase_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="500"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/stocks_header_1005">

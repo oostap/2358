@@ -26,7 +26,13 @@
         </service>
 
         <service
-            android:name=".service.Strategy1000Service"
+            android:name=".service.Strategy1000SellService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
+
+        <service
+            android:name=".service.Strategy1000BuyService"
             android:enabled="true"
             android:exported="false">
         </service>

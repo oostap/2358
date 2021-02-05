@@ -67,8 +67,12 @@ class WorkflowManager() : KoinComponent {
                 return StrategyScreener()
             }
 
-            fun provideStrategy1000(): Strategy1000 {
-                return Strategy1000()
+            fun provideStrategy1000Sell(): Strategy1000Sell {
+                return Strategy1000Sell()
+            }
+
+            fun provideStrategy1000Buy(): Strategy1000Buy {
+                return Strategy1000Buy()
             }
 
             fun provideStrategy1005(): Strategy1005 {
@@ -96,7 +100,8 @@ class WorkflowManager() : KoinComponent {
             single { provideWorkflowManager() }
 
             single { provideStrategyScreener() }
-            single { provideStrategy1000() }
+            single { provideStrategy1000Sell() }
+            single { provideStrategy1000Buy() }
             single { provideStrategy1005() }
             single { provideStrategy2358() }
             single { provideStrategy1728() }

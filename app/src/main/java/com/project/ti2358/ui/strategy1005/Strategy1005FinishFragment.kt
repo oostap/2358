@@ -1,12 +1,9 @@
 package com.project.ti2358.ui.strategy1005
 
-import android.app.AlertDialog
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -15,9 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.PurchaseStock
-import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.data.service.Strategy1005
-import com.project.ti2358.data.service.Strategy2358
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -87,7 +82,7 @@ class Strategy1005FinishFragment : Fragment() {
     }
 
     private fun updateServiceButtonText() {
-        if (Utils.isServiceRunning(requireContext(), Strategy1000Service::class.java)) {
+        if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
             buttonStart?.text = getString(R.string.service_2358_stop)
         } else {
             buttonStart?.text = getString(R.string.service_2358_start)
@@ -126,10 +121,6 @@ class Strategy1005FinishFragment : Fragment() {
 
             val purchaseLotsView: TextView = view.findViewById(R.id.stock_purchase_lots)
             val purchasePriceView: TextView = view.findViewById(R.id.stock_purchase_price)
-
-            override fun toString(): String {
-                return super.toString() + " '" + tickerView.text + "'"
-            }
         }
     }
 }

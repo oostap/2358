@@ -11,7 +11,8 @@
     <string name="sort">Сортировка</string>
 
     <string name="prepare_start_2358_text">Запуск таймера на покупку: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
-    <string name="prepare_start_1000_text">Запуск таймера на продажу: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
+    <string name="prepare_start_1000_sell_text">Запуск таймера на продажу: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
+    <string name="prepare_start_1000_buy_text">Запуск таймера на покупку: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
 
     <string name="ticker">тикер</string>
     <string name="volume">объём</string>
@@ -20,7 +21,8 @@
     <string name="menu_settings">Настройки</string>
     <string name="menu_portfolio">Депозит</string>
     <string name="menu_stocks">Скринер</string>
-    <string name="menu_1000">1000</string>
+    <string name="menu_1000_sell">1000 sell</string>
+    <string name="menu_1000_buy">1000 buy</string>
     <string name="menu_1005">1005</string>
     <string name="menu_2358">2358</string>
     <string name="menu_1728">1728</string>
@@ -31,7 +33,8 @@
 
     <string name="stocks_header_2358">Стратегия 2358</string>
     <string name="stocks_header_1728">Стратегия 1728</string>
-    <string name="stocks_header_1000">Стратегия 10:00:01</string>
+    <string name="stocks_header_1000_sell">Стратегия 10:00:01 sell</string>
+    <string name="stocks_header_1000_buy">Стратегия 10:00:01 buy</string>
     <string name="stocks_header_1005">Стратегия 1005</string>
 
     <!-- tinkoff settings -->
@@ -53,12 +56,16 @@
     <string name="stocks_2358_purchase_time">Во сколько тарим? МСК</string>
     <string name="stocks_2358_take_profit">Заявка на тейкпрофит в % (0 = не создавать)</string>
 
-    <!-- 1000 settings -->
-    <string name="stocks_1000_take_profit">Заявка на продажу в %</string>
+    <!-- 1000 sell settings -->
+    <string name="stocks_1000_sell_take_profit">Базовый % заявки на продажу</string>
+
+    <!-- 1000 buy settings -->
+    <string name="stocks_1000_buy_take_profit">Заявка на продажу в % (0 = не создавать)</string>
+    <string name="stocks_1000_buy_purchase_volume">На сколько тарим в равных долях? в $</string>
 
     <!-- 1005 settings -->
     <string name="stocks_1005_price_change_percent">Падение от %</string>
-    <string name="stocks_1005_volume_min_day">Объём за день до шт.</string>
+    <string name="stocks_1005_volume_min_day">Объём за день от шт.</string>
 
     <!-- 1728 settings -->
     <string name="stocks_1728_track_start">Время старта МСК</string>
@@ -87,8 +94,12 @@
     <string name="setting_key_2358_purchase_time">2358_purchase_time</string>
     <string name="setting_key_2358_take_profit">2358_take_profit</string>
 
-    <!-- 1000 settings -->
-    <string name="setting_key_1000_take_profit">1000_take_profit</string>
+    <!-- 1000 sell settings -->
+    <string name="setting_key_1000_sell_take_profit">1000_take_sell_profit</string>
+
+    <!-- 1000 buy settings -->
+    <string name="setting_key_1000_buy_take_profit">1000_buy_take_profit</string>
+    <string name="setting_key_1000_buy_purchase_volume">1000_buy_purchase_volume</string>
 
     <!-- 1005 settings -->
     <string name="setting_key_1005_price_change_percent">1005_price_change_percent</string>
