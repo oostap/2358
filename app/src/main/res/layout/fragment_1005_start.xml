@@ -43,12 +43,6 @@
             android:text="@string/change"
             android:textSize="14dp" />
 
-        <CheckBox
-            android:id="@+id/check_box"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:layout_width="0dp" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"

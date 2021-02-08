@@ -13,7 +13,7 @@ import android.os.PowerManager
 import android.widget.Toast
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
-import com.project.ti2358.data.service.Strategy1000Sell
+import com.project.ti2358.data.manager.Strategy1000Sell
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay

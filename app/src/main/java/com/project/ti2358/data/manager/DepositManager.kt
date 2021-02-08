@@ -1,7 +1,9 @@
-package com.project.ti2358.data.service
+package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.Currency
+import com.project.ti2358.data.service.OrdersService
+import com.project.ti2358.data.service.PortfolioService
 import com.project.ti2358.service.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

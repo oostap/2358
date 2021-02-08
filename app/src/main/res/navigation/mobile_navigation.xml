@@ -131,10 +131,6 @@
         android:name="com.project.ti2358.ui.strategy1000Sell.Strategy1000SellFinishFragment"
         android:label="@string/menu_1000_sell"
         tools:layout="@layout/fragment_1000_sell_start" >
-        <action
-            android:id="@+id/action_nav_1000_sell_finish_to_nav_1000_sell_start"
-            app:destination="@id/nav_1000_sell_start"
-            app:popUpToInclusive="true" />
     </fragment>
 
     <!-- 1000 Buy -->

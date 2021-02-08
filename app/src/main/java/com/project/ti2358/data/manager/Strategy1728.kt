@@ -1,10 +1,13 @@
-package com.project.ti2358.data.service
+package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.manager.PurchaseStock
+import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.Sorting
+import com.project.ti2358.service.Utils
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -14,6 +17,11 @@ class Strategy1728() : KoinComponent {
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
+    lateinit var strategyStartTime: Calendar
+
+    init {
+        resetStrategy()
+    }
 
     fun process() : MutableList<Stock> {
         stocks.clear()
@@ -38,6 +46,18 @@ class Strategy1728() : KoinComponent {
         }
 
         return stocks
+    }
+
+    fun resetStrategy() {
+//        val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
+        strategyStartTime = Calendar.getInstance()
+        strategyStartTime.set(Calendar.SECOND, 0)
+//        strategyStartTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
+
+        val all = stockManager.stocksStream
+        for (stock in all) {
+            stock.reset1728()
+        }
     }
 
     fun resort(sort : Sorting = Sorting.ASCENDING) : MutableList<Stock> {

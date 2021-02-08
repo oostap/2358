@@ -2,55 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent" android:layout_height="fill_parent">
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:divider="?android:dividerHorizontal"
-        android:dividerPadding="0dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:showDividers="middle"
-        android:weightSum="4" >
-
-        <TextView
-            android:id="@+id/stock_item_price"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:gravity="center_vertical"
-            android:text="@string/ticker"
-            android:layout_weight="1"
-            android:textSize="14dp" />
-
-        <TextView
-            android:id="@+id/stock_item_volume_today"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:gravity="center_vertical"
-            android:text="@string/volume"
-            android:layout_weight="1"
-            android:textSize="14dp" />
-
-        <TextView
-            android:id="@+id/stock_item_price_change_percent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:gravity="center_vertical"
-            android:layout_weight="1"
-            android:text="@string/change"
-            android:textSize="14dp" />
-
-        <CheckBox
-            android:id="@+id/check_box"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:layout_width="0dp" />
-    </LinearLayout>
-
     <androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -59,8 +10,8 @@
         android:layout_height="match_parent"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginBottom="65dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginBottom="75dp"
+        android:layout_marginTop="50dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.strategy2358.Strategy2358StartFragment"
         tools:listitem="@layout/fragment_2358_start_item" />
@@ -91,5 +42,17 @@
             android:textSize="16dp"
             android:layout_width="0dp" />
     </LinearLayout>
+
+    <SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="0dp"
+        android:layout_alignParentTop="true"
+        android:queryHint="Поиск $"
+
+        android:iconifiedByDefault="false"/>
 
 </RelativeLayout>

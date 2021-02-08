@@ -10,8 +10,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.service.Stock
-import com.project.ti2358.data.service.StrategyScreener
+import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.data.manager.StrategyScreener
 import com.project.ti2358.service.Sorting
 import com.project.ti2358.service.Utils
 import org.koin.android.ext.android.inject
@@ -70,7 +70,7 @@ class ScreenerFragment : Fragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(
-                R.layout.fragment_2358_start_item,
+                R.layout.fragment_screener_item,
                 parent,
                 false
             )

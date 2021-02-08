@@ -1,6 +1,8 @@
-package com.project.ti2358.data.service
+package com.project.ti2358.data.manager
 
+import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.Sorting
+import com.project.ti2358.service.Utils
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -20,7 +22,11 @@ class Strategy1005 : KoinComponent {
         val max = SettingsManager.getCommonPriceMax()
 
         val change = SettingsManager.get1005ChangePercent()
-        val volumeDayPieces = SettingsManager.get1005VolumeDayPieces()
+        var volumeDayPieces = SettingsManager.get1005VolumeDayPieces()
+
+        if (!Utils.isActiveSession()) { // если биржа закрыта, то показать всё
+            volumeDayPieces = 0
+        }
 
         stocks.clear()
         for (stock in all) {

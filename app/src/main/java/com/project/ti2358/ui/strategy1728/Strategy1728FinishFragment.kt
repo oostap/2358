@@ -16,8 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.PurchaseStock
-import com.project.ti2358.data.service.SettingsManager
-import com.project.ti2358.data.service.Strategy1728
+import com.project.ti2358.data.manager.Strategy1728
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension

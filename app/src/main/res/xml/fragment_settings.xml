@@ -24,13 +24,13 @@
             app:key="@string/setting_key_stocks_usd_price_min"
             app:title="@string/stocks_usd_min"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="0"/>
+            app:defaultValue="5"/>
 
         <EditTextPreference
             app:key="@string/setting_key_stocks_usd_price_max"
             app:title="@string/stocks_usd_max"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="100000"/>
+            app:defaultValue="200"/>
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/stocks_header_2358">
@@ -44,13 +44,13 @@
             app:key="@string/setting_key_2358_volume_min_day"
             app:title="@string/stocks_2358_volume_min_day"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="10000"/>
+            app:defaultValue="100000"/>
 
         <EditTextPreference
             app:key="@string/setting_key_2358_volume_min_cash"
             app:title="@string/stocks_2358_volume_min_cash"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="0.1"/>
+            app:defaultValue="1"/>
 
         <EditTextPreference
             app:key="@string/setting_key_2358_purchase_time"
@@ -62,7 +62,7 @@
             app:key="@string/setting_key_2358_purchase_volume"
             app:title="@string/stocks_2358_purchase_volume"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="1000"/>
+            app:defaultValue="0"/>
 
         <EditTextPreference
             app:key="@string/setting_key_2358_take_profit"
@@ -91,7 +91,7 @@
             app:key="@string/setting_key_1000_buy_purchase_volume"
             app:title="@string/stocks_1000_buy_purchase_volume"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="500"/>
+            app:defaultValue="0"/>
 
     </PreferenceCategory>
 
@@ -100,22 +100,16 @@
             app:key="@string/setting_key_1005_price_change_percent"
             app:title="@string/stocks_1005_price_change_percent"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="-2"/>
+            app:defaultValue="-2.0"/>
 
         <EditTextPreference
             app:key="@string/setting_key_1005_volume_min_day"
             app:title="@string/stocks_1005_volume_min_day"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="5000"/>
+            app:defaultValue="500"/>
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/stocks_header_1728">
-        <EditTextPreference
-            app:key="@string/setting_key_1728_track_start"
-            app:title="@string/stocks_1728_track_start"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="17:28:00"/>
-
         <EditTextPreference
             app:key="@string/setting_key_1728_volume_before_start"
             app:title="@string/stocks_1728_volume_before_start"
@@ -132,19 +126,25 @@
             app:key="@string/setting_key_1728_price_change"
             app:title="@string/stocks_1728_price_change"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="1"/>
+            app:defaultValue="1.0"/>
 
         <EditTextPreference
             app:key="@string/setting_key_1728_purchase_volume"
             app:title="@string/stocks_1728_purchase_volume"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="1000"/>
+            app:defaultValue="0"/>
 
         <EditTextPreference
             app:key="@string/setting_key_1728_take_profit"
             app:title="@string/stocks_1728_take_profit"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="1"/>
+            app:defaultValue="1.0"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_1728_quick_buy"
+            app:title="@string/stocks_1728_quick_buy"
+            app:defaultValue="false" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

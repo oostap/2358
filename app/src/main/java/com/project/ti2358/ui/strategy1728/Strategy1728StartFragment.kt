@@ -1,33 +1,27 @@
 package com.project.ti2358.ui.strategy1728
 
-import android.content.Intent
-import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.PurchaseStock
-import com.project.ti2358.data.service.Stock
-import com.project.ti2358.data.service.Strategy1728
-import com.project.ti2358.data.service.Strategy2358
-import com.project.ti2358.service.*
+import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.data.manager.Strategy1728
+import com.project.ti2358.data.service.SettingsManager
+import com.project.ti2358.service.Sorting
+import com.project.ti2358.service.Utils
+import com.project.ti2358.service.toString
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-
 
 @KoinApiExtension
 class Strategy1728StartFragment : Fragment() {
@@ -60,24 +54,16 @@ class Strategy1728StartFragment : Fragment() {
             }
         }
 
-//        val buttonStart = view.findViewById<Button>(R.id.buttonStart)
-//        buttonStart.setOnClickListener { _ ->
-//            if (strategy1728.stocksSelected.isNotEmpty()) {
-////                view.findNavController().navigate(R.id.action_nav_1728_start_to_nav_1728_finish)
-//            } else {
-//                Utils.showErrorAlert(requireContext())
-//            }
-//        }
-
-//        val checkBox = view.findViewById<CheckBox>(R.id.check_box)
-//        checkBox.setOnCheckedChangeListener { _, isChecked ->
-//            for (stock in strategy1728.process()) {
-//                strategy1728.setSelected(stock, !isChecked)
-//            }
-//            adapterList.notifyDataSetChanged()
-//        }
-
         var sort = Sorting.DESCENDING
+        val buttonReset = view.findViewById<Button>(R.id.buttonReset)
+        buttonReset.setOnClickListener { _ ->
+            // сброс времени отслеживания
+            strategy1728.resetStrategy()
+            strategy1728.process()
+            adapterList.setData(strategy1728.resort(sort))
+            updateTime()
+        }
+
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
         buttonUpdate.setOnClickListener {
             strategy1728.process()
@@ -92,7 +78,14 @@ class Strategy1728StartFragment : Fragment() {
         strategy1728.process()
         adapterList.setData(strategy1728.resort(sort))
 
+        updateTime()
         return view
+    }
+
+    fun updateTime() {
+        val time = strategy1728.strategyStartTime.time.toString("HH:mm:ss")
+        val act = requireActivity() as AppCompatActivity
+        act.supportActionBar?.title = time
     }
 
     inner class Item1728RecyclerViewAdapter(
@@ -140,8 +133,18 @@ class Strategy1728StartFragment : Fragment() {
             }
 
             holder.buttonBuy.setOnClickListener {
-                val purchase = PurchaseStock(holder.stock)
-                purchase.buyLimitFromAsk()
+                if (SettingsManager.get1728PurchaseVolume() <= 0) {
+                    Utils.showMessageAlert(requireContext(), "В настройках не задана сумма покупки для позиции, раздел 1728.")
+                } else {
+                    val purchase = PurchaseStock(holder.stock)
+                    purchase.buyLimitFromAsk1728()
+                }
+            }
+
+            if (SettingsManager.get1728QuickBuy()) {
+                holder.buttonBuy.visibility = View.VISIBLE
+            } else {
+                holder.buttonBuy.visibility = View.GONE
             }
         }
 

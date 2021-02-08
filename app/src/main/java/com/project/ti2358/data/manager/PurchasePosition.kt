@@ -1,7 +1,6 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.model.dto.*
-import com.project.ti2358.data.service.DepositManager
 import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.data.service.SettingsManager
 import kotlinx.coroutines.Dispatchers

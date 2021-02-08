@@ -1,4 +1,4 @@
-package com.project.ti2358.data.service
+package com.project.ti2358.data.manager
 
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
@@ -7,7 +7,9 @@ import com.google.gson.reflect.TypeToken
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.MarketInstrument
-import com.project.ti2358.service.log
+import com.project.ti2358.data.service.MarketService
+import com.project.ti2358.data.service.SettingsManager
+import com.project.ti2358.data.service.StreamingService
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

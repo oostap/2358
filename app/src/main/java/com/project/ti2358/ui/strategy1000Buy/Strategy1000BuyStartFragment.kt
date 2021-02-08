@@ -2,19 +2,18 @@ package com.project.ti2358.ui.strategy1000Buy
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.SearchEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.service.Stock
-import com.project.ti2358.data.service.Strategy1000Buy
+import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.data.manager.Strategy1000Buy
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -24,6 +23,8 @@ class Strategy1000BuyStartFragment : Fragment() {
 
     val strategy1000Buy: Strategy1000Buy by inject()
     var adapterList: Item1005RecyclerViewAdapter = Item1005RecyclerViewAdapter(emptyList())
+    lateinit var searchView: SearchView
+    lateinit var stocks: MutableList<Stock>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,19 +60,12 @@ class Strategy1000BuyStartFragment : Fragment() {
             }
         }
 
-        val checkBox = view.findViewById<CheckBox>(R.id.check_box)
-        checkBox.setOnCheckedChangeListener { _, isChecked ->
-            for (stock in strategy1000Buy.process()) {
-                strategy1000Buy.setSelected(stock, !isChecked)
-            }
-            adapterList.notifyDataSetChanged()
-        }
-
         var sort = Sorting.DESCENDING
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
         buttonUpdate.setOnClickListener {
             strategy1000Buy.process()
-            adapterList.setData(strategy1000Buy.resort(sort))
+            stocks = strategy1000Buy.resort(sort)
+            adapterList.setData(stocks)
             sort = if (sort == Sorting.DESCENDING) {
                 Sorting.ASCENDING
             } else {
@@ -80,7 +74,39 @@ class Strategy1000BuyStartFragment : Fragment() {
         }
 
         strategy1000Buy.process()
-        adapterList.setData(strategy1000Buy.resort(sort))
+        stocks = strategy1000Buy.resort(sort)
+        adapterList.setData(stocks)
+
+        searchView = view.findViewById(R.id.searchView)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                processText(query)
+                return false
+            }
+            override fun onQueryTextChange(newText: String): Boolean {
+                processText(newText)
+                return false
+            }
+
+            fun processText(text: String) {
+                strategy1000Buy.process()
+                stocks = strategy1000Buy.resort(sort)
+
+                if (text.isNotEmpty()) {
+                    stocks = stocks.filter {
+                        it.marketInstrument.ticker.contains(text, ignoreCase = true)
+                    } as MutableList<Stock>
+                }
+                adapterList.setData(stocks)
+            }
+        })
+        searchView.requestFocus()
+
+        searchView.setOnCloseListener {
+            stocks = strategy1000Buy.process()
+            adapterList.setData(stocks)
+            false
+        }
 
         return view
     }

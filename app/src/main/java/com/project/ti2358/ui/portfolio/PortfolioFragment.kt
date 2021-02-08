@@ -11,9 +11,12 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.model.dto.PortfolioPosition
-import com.project.ti2358.data.service.DepositManager
 import com.project.ti2358.service.Utils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -55,6 +58,10 @@ class PortfolioFragment : Fragment() {
 
         adapterList.setData(depositManager.portfolioPositions)
 
+        GlobalScope.launch(Dispatchers.Main) {
+            depositManager.refreshDeposit()
+            adapterList.setData(depositManager.portfolioPositions)
+        }
         return view
     }
 

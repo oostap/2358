@@ -15,12 +15,11 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.service.Stock
-import com.project.ti2358.data.service.Strategy1830
+import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.data.manager.Strategy1830
 import com.project.ti2358.service.Utils
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-
 
 @KoinApiExtension
 class Strategy1830StartFragment : Fragment() {

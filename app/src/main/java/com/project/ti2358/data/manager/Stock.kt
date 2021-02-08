@@ -1,4 +1,4 @@
-package com.project.ti2358.data.service
+package com.project.ti2358.data.manager
 
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
@@ -6,12 +6,15 @@ import com.google.gson.GsonBuilder
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.MarketInstrument
+import com.project.ti2358.data.service.MarketService
+import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -24,6 +27,7 @@ import java.util.concurrent.TimeUnit
 data class Stock(
     var marketInstrument: MarketInstrument
 ) : KoinComponent {
+    val strategy1728: Strategy1728 by inject()
     private val marketService: MarketService by inject()
     private val stockManager: StockManager by inject()
 
@@ -105,37 +109,17 @@ data class Stock(
         }
 
         // проверка на стратегию 1728
-        val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
         val timeCandle = Calendar.getInstance()
         timeCandle.time = candle.time
-        timeCandle.add(Calendar.HOUR_OF_DAY, -differenceHours)
 
-//        val currentHour = time.get(Calendar.HOUR_OF_DAY)
-//        val currentMinute = time.get(Calendar.MINUTE)
-//        val currentSecond = time.get(Calendar.SECOND)
-
-        val time1728 = SettingsManager.get1728TrackStart()
-        var dayTime = time1728.split(":").toTypedArray()
-        if (dayTime.size < 3) {
-            dayTime = arrayOf("17", "28", "00")
-        }
-
-        val timeTrackStart = Calendar.getInstance()
-        timeTrackStart.add(Calendar.HOUR_OF_DAY, -differenceHours)
-
-        val strategyHours = Integer.parseInt(dayTime[0])
-        val strategyMinutes = Integer.parseInt(dayTime[1])
-        val strategySeconds = Integer.parseInt(dayTime[2])
-
-        timeTrackStart.set(Calendar.HOUR_OF_DAY, strategyHours)
-        timeTrackStart.set(Calendar.MINUTE, strategyMinutes)
-        timeTrackStart.set(Calendar.SECOND, strategySeconds)
+        val timeTrackStart = strategy1728.strategyStartTime
 
 //        log("timeTrackStart")
+//        log(candle.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"))
 //        log(timeCandle.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"))
 //        log(timeTrackStart.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"))
 
-        if (timeCandle.time > timeTrackStart.time) {
+        if (timeCandle.time >= timeTrackStart.time) {
             exists = false
             for ((index, c) in minute1728Candles.withIndex()) {
                 if (c.time == candle.time) {
@@ -268,6 +252,12 @@ data class Stock(
                 changePrice1728DayPercent = (100 * week.closingPrice) / minute1728Candles.first().openingPrice - 100
             }
         }
+    }
+
+    public fun reset1728() {
+        changePrice1728DayAbsolute = 0.0
+        changePrice1728DayPercent = 0.0
+        minute1728Candles.clear()
     }
 
     public fun loadClosingPriceCandle(prevDelay: Long): Long {

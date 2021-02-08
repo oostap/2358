@@ -1,8 +1,7 @@
-package com.project.ti2358.data.service
+package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.manager.PurchasePosition
-import com.project.ti2358.data.manager.PurchaseStatus
 import com.project.ti2358.data.model.dto.PortfolioPosition
+import com.project.ti2358.data.service.OrdersService
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

@@ -16,15 +16,11 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.service.Stock
-import com.project.ti2358.data.service.Strategy2358
+import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.data.manager.Strategy2358
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 
 @KoinApiExtension
 class Strategy2358StartFragment : Fragment() {
@@ -119,8 +115,8 @@ class Strategy2358StartFragment : Fragment() {
             val volumeCash = item.dayVolumeCash / 1000f / 1000f
             holder.volumeTodayCashView.text = "%.2f B$".format(volumeCash)
 
-            holder.changePriceAbsoluteView.text = "%.2f $".format(item.changePriceDayAbsolute)
-            holder.changePricePercentView.text = "%.2f".format(item.changePriceDayPercent) + "%"
+            holder.changePriceAbsoluteView.text = "%.2f $".format(item.changePrice2359DayAbsolute)
+            holder.changePricePercentView.text = "%.2f".format(item.changePrice2359DayPercent) + "%"
 
             if (item.changePriceDayAbsolute < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)

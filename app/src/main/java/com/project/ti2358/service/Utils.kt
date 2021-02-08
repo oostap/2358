@@ -11,6 +11,7 @@ import android.os.Build
 import android.util.Log
 import com.project.ti2358.BuildConfig
 import okhttp3.logging.HttpLoggingInterceptor
+import java.text.SimpleDateFormat
 import java.util.*
 
 fun log(msg: String) {
@@ -22,6 +23,11 @@ fun log(msg: String) {
 enum class Sorting {
     ASCENDING,
     DESCENDING
+}
+
+fun Date.toString(format: String, locale: Locale = Locale.getDefault()): String {
+    val formatter = SimpleDateFormat(format, locale)
+    return formatter.format(this)
 }
 
 class Utils {
@@ -47,6 +53,14 @@ class Utils {
                     context.startService(it)
                 }
             }
+        }
+
+        fun showMessageAlert(context: Context, text: String) {
+            val alertDialogBuilder = AlertDialog.Builder(context)
+            val alertDialog = alertDialogBuilder.create()
+            alertDialog.setMessage(text)
+            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "понятно") { dialog, which -> dialog.cancel() }
+            alertDialog.show()
         }
 
         fun showErrorAlert(context: Context) {

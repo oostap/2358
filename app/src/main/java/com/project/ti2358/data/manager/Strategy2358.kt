@@ -1,20 +1,10 @@
-package com.project.ti2358.data.service
+package com.project.ti2358.data.manager
 
-import android.util.Log
-import androidx.lifecycle.MutableLiveData
-import com.project.ti2358.data.manager.PurchaseStatus
-import com.project.ti2358.data.manager.PurchaseStock
-import com.project.ti2358.data.model.dto.*
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.kotlin.subscribeBy
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.project.ti2358.data.service.SettingsManager
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.math.roundToInt
-import kotlin.random.Random
 
 @KoinApiExtension
 class Strategy2358() : KoinComponent {
@@ -44,7 +34,7 @@ class Strategy2358() : KoinComponent {
                 stocks.add(stock)
             }
         }
-        stocks.sortBy { it.changePriceDayPercent }
+        stocks.sortBy { it.changePriceDayPercent + it.changePrice2359DayPercent }
         return stocks
     }
 
@@ -55,7 +45,7 @@ class Strategy2358() : KoinComponent {
             if (!stocksSelected.contains(stock))
                 stocksSelected.add(stock)
         }
-        stocksSelected.sortBy { it.changePriceDayPercent }
+        stocksSelected.sortBy { it.changePriceDayPercent + it.changePrice2359DayPercent }
     }
 
     fun isSelected(stock: Stock) : Boolean {

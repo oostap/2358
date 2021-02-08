@@ -13,8 +13,8 @@ import android.os.PowerManager
 import android.widget.Toast
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.Strategy2358
 import com.project.ti2358.data.service.SettingsManager
-import com.project.ti2358.data.service.Strategy2358
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -137,7 +137,7 @@ class Strategy2358Service : Service() {
             override fun run() {
                 val localPurchases = strategy2358.getPurchaseStock(false)
                 for (purchase in localPurchases) {
-                    purchase.buyMarket()
+                    purchase.buyLimitFromAsk2358()
                 }
             }
         }, scheduleDelay)

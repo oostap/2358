@@ -197,12 +197,6 @@ class SettingsManager {
             }
         }
 
-        fun get1728TrackStart() : String {
-            val key: String = context.getString(R.string.setting_key_1728_track_start)
-            val value : String? = preferences.getString(key, "17:28:00")
-            return value ?: "17:28:00"
-        }
-
         fun get1728PurchaseVolume() : Int {
             val key: String = context.getString(R.string.setting_key_1728_purchase_volume)
             val value: String? = preferences.getString(key, "1000")
@@ -241,6 +235,11 @@ class SettingsManager {
             } catch (e: Exception) {
                 10000
             }
+        }
+
+        fun get1728QuickBuy() : Boolean {
+            val key: String = context.getString(R.string.setting_key_1728_quick_buy)
+            return preferences.getBoolean(key, false)
         }
     }
 }

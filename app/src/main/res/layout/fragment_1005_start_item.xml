@@ -84,10 +84,4 @@
             android:textSize="14sp" />
     </LinearLayout>
 
-    <CheckBox
-        android:id="@+id/check_box"
-        android:layout_height="match_parent"
-        android:layout_weight="0.5"
-        android:layout_gravity="center"
-        android:layout_width="0dp" />
 </LinearLayout>

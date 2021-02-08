@@ -13,13 +13,12 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.DepositManager
+import com.project.ti2358.data.manager.Strategy1000Sell
 import com.project.ti2358.data.model.dto.PortfolioPosition
-import com.project.ti2358.data.service.DepositManager
-import com.project.ti2358.data.service.Strategy1000Sell
 import com.project.ti2358.service.Utils
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-
 
 @KoinApiExtension
 class Strategy1000SellStartFragment : Fragment() {
@@ -122,7 +121,7 @@ class Strategy1000SellStartFragment : Fragment() {
                 strategy1000Sell.setSelected(holder.position, !isChecked)
             }
 
-            holder.itemView.setOnClickListener {
+            holder.itemView.setOnClickListener { _ ->
                 holder.position.stock?.let {
                     Utils.openTinkoffForTicker(requireContext(), it.marketInstrument.ticker)
                 }

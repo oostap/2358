@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.service.Stock
-import com.project.ti2358.data.service.Strategy1005
+import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.data.manager.Strategy1005
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -52,19 +52,11 @@ class Strategy1005StartFragment : Fragment() {
 
         val buttonStart = view.findViewById<Button>(R.id.buttonStart)
         buttonStart.setOnClickListener {
-            if (strategy1005.stocksSelected.isNotEmpty()) {
-//                view.findNavController().navigate(R.id.action_nav_1000_start_to_nav_1000_finish)
-            } else {
-                Utils.showErrorAlert(requireContext())
-            }
-        }
-
-        val checkBox = view.findViewById<CheckBox>(R.id.check_box)
-        checkBox.setOnCheckedChangeListener { _, isChecked ->
-            for (stock in strategy1005.process()) {
-                strategy1005.setSelected(stock, !isChecked)
-            }
-            adapterList.notifyDataSetChanged()
+//            if (strategy1005.stocksSelected.isNotEmpty()) {
+////                view.findNavController().navigate(R.id.action_nav_1000_start_to_nav_1000_finish)
+//            } else {
+//                Utils.showErrorAlert(requireContext())
+//            }
         }
 
         var sort = Sorting.DESCENDING
@@ -108,9 +100,6 @@ class Strategy1005StartFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            holder.checkBoxView.setOnCheckedChangeListener(null)
-            holder.checkBoxView.isChecked = strategy1005.isSelected(item)
-
             holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
             holder.priceView.text = "${item.getPrice2359String()} -> ${item.getPriceString()}"
 
@@ -131,10 +120,6 @@ class Strategy1005StartFragment : Fragment() {
                 holder.changePricePercentView.setTextColor(Utils.GREEN)
             }
 
-            holder.checkBoxView.setOnCheckedChangeListener { _, isChecked ->
-                strategy1005.setSelected(holder.stock, !isChecked)
-            }
-
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.marketInstrument.ticker)
             }
@@ -153,8 +138,6 @@ class Strategy1005StartFragment : Fragment() {
 
             val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
-
-            val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
         }
     }
 }

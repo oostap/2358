@@ -1,6 +1,6 @@
 package com.project.ti2358.data.model.dto
 
-import com.project.ti2358.data.service.Stock
+import com.project.ti2358.data.manager.Stock
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
