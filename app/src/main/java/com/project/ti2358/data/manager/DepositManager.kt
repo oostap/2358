@@ -65,14 +65,6 @@ class DepositManager : KoinComponent {
         baseSortPortfolio()
     }
 
-    fun increaseRefreshDepositDelay() {
-        refreshDepositDelay = 1000 // 1s
-    }
-
-    fun decreaseRefreshDepositDelay() {
-        refreshDepositDelay = 10000 // 10s
-    }
-
     public fun getFreeCashUSD(): String {
         for (currency in currencyPositions) {
             if (currency.currency == Currency.USD) {

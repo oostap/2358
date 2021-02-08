@@ -9,7 +9,11 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
+import androidx.preference.PreferenceManager
 import com.project.ti2358.BuildConfig
+import com.project.ti2358.data.service.SettingsManager
 import okhttp3.logging.HttpLoggingInterceptor
 import java.text.SimpleDateFormat
 import java.util.*
@@ -35,6 +39,11 @@ class Utils {
         val GREEN: Int = Color.parseColor("#58D68D")
         val RED: Int = Color.parseColor("#E74C3C")
 
+        lateinit var context: Context
+        fun setApplicationContext(applicationContext : Context) {
+            context = applicationContext
+        }
+
         fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
             val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?
             for (service in manager!!.getRunningServices(Int.MAX_VALUE)) {
@@ -53,6 +62,10 @@ class Utils {
                     context.startService(it)
                 }
             }
+        }
+
+        fun showToastAlert(text: String) {
+            Toast.makeText(context, text, LENGTH_SHORT).show()
         }
 
         fun showMessageAlert(context: Context, text: String) {

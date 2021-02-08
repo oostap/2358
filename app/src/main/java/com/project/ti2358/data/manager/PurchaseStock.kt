@@ -2,6 +2,7 @@ package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.service.*
+import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -139,6 +140,7 @@ data class PurchaseStock (
             try {
                 val lots = lots
 
+                val ticker = stock.marketInstrument.ticker
                 status = PurchaseStatus.ORDER_BUY
                 val buyPrice = getLimitPriceDouble()
                 buyLimitOrder = ordersService.placeLimitOrder(
@@ -147,6 +149,11 @@ data class PurchaseStock (
                     buyPrice,
                     OperationType.BUY
                 )
+
+                Utils.showToastAlert("$ticker: покупка из аска по $buyPrice")
+
+                delay(500)
+                depositManager.refreshDeposit()
 
                 // проверяем появился ли в портфеле тикер
                 var position: PortfolioPosition?
@@ -179,6 +186,7 @@ data class PurchaseStock (
                         profitPrice,
                         OperationType.SELL
                     )
+                    Utils.showToastAlert("$ticker: заявка на продажу по $profitPrice")
                     status = PurchaseStatus.ORDER_SELL
                 }
 
@@ -188,6 +196,7 @@ data class PurchaseStock (
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position == null) { // продано!
                         status = PurchaseStatus.SELLED
+                        Utils.showToastAlert("$ticker: продано!")
                         break
                     }
                 }
@@ -206,6 +215,7 @@ data class PurchaseStock (
                 // получить стакан
                 val orderbook = marketService.orderbook(stock.marketInstrument.figi, 5)
 
+                val ticker = stock.marketInstrument.ticker
                 val volume = SettingsManager.get1728PurchaseVolume()
                 lots = (volume / stock.getPriceDouble()).roundToInt()
 
@@ -220,6 +230,9 @@ data class PurchaseStock (
                     OperationType.BUY
                 )
 
+                Utils.showToastAlert("$ticker: покупка из аска по $buyPrice")
+
+                delay(500)
                 depositManager.refreshDeposit()
 
                 // проверяем появился ли в портфеле тикер
@@ -254,6 +267,8 @@ data class PurchaseStock (
                         OperationType.SELL
                     )
                     status = PurchaseStatus.ORDER_SELL
+
+                    Utils.showToastAlert("$ticker: заявка на продажу по $profitPrice")
                 }
 
                 while (true) {
@@ -262,6 +277,7 @@ data class PurchaseStock (
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position == null) { // продано!
                         status = PurchaseStatus.SELLED
+                        Utils.showToastAlert("$ticker: продано!")
                         break
                     }
                 }
