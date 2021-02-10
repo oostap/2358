@@ -83,7 +83,7 @@ class Strategy1000Sell() : KoinComponent {
     public fun getNotificationTextLong(): String {
         var tickers = ""
         for (position in positionsToSell) {
-            val p = "%.1f$ = %.1f$ = %.1f".format(position.position.lots * position.getProfitPrice(), position.getProfitPrice(), position.profit) + "%"
+            val p = "%.1f$ -> %.1f$ -> %.1f".format(position.position.lots * position.getProfitPrice(), position.getProfitPrice(), position.profit) + "%"
             tickers += "${position.position.ticker} * ${position.position.lots} шт. = ${p} ${position.getStatusString()}\n"
         }
 

@@ -34,6 +34,14 @@ fun Date.toString(format: String, locale: Locale = Locale.getDefault()): String 
     return formatter.format(this)
 }
 
+fun Double.toDollar(): String {
+    return "%.2f$".format(this)
+}
+
+fun Double.toPercent(): String {
+    return "%.2f%%".format(this)
+}
+
 class Utils {
     companion object {
         val GREEN: Int = Color.parseColor("#58D68D")

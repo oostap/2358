@@ -14,6 +14,8 @@ import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StrategyScreener
 import com.project.ti2358.service.Sorting
 import com.project.ti2358.service.Utils
+import com.project.ti2358.service.toDollar
+import com.project.ti2358.service.toPercent
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -86,13 +88,13 @@ class ScreenerFragment : Fragment() {
             holder.priceView.text = item.getPriceString()
 
             val volume = item.getTodayVolume() / 1000f
-            holder.volumeTodayView.text = "%.1f".format(volume) + "k"
+            holder.volumeTodayView.text = "%.1fk".format(volume)
 
             val volumeCash = item.dayVolumeCash / 1000f / 1000f
-            holder.volumeTodayCashView.text = "%.2f".format(volumeCash) + "B$"
+            holder.volumeTodayCashView.text = "%.2fB$".format(volumeCash)
 
-            holder.changePriceAbsoluteView.text = "%.2f".format(item.changePriceDayAbsolute) + " $"
-            holder.changePricePercentView.text = "%.2f".format(item.changePriceDayPercent) + "%"
+            holder.changePriceAbsoluteView.text = item.changePriceDayAbsolute.toDollar()
+            holder.changePricePercentView.text = item.changePriceDayPercent.toPercent()
 
             if (item.changePriceDayAbsolute < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)

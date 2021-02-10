@@ -23,7 +23,7 @@
 
     <string name="menu_settings">Настройки</string>
     <string name="menu_portfolio">Депозит</string>
-    <string name="menu_stocks">Иван-скринер</string>
+    <string name="menu_stocks">Премаркет</string>
     <string name="menu_1000_sell">1000 sell</string>
     <string name="menu_1000_buy">1000 buy</string>
     <string name="menu_1005">1005</string>
@@ -31,6 +31,7 @@
     <string name="menu_1728">1728</string>
     <string name="menu_1830">1830</string>
     <string name="menu_rocket">Ракета</string>
+    <string name="menu_tazik">Автотазик</string>
 
     <!-- Preference Titles -->
 
@@ -39,6 +40,7 @@
     <string name="stocks_header_1000_sell">Стратегия 10:00:01 sell</string>
     <string name="stocks_header_1000_buy">Стратегия 10:00:01 buy</string>
     <string name="stocks_header_1005">Стратегия 1005</string>
+    <string name="stocks_header_tazik">Стратегия автотазик</string>
 
     <!-- tinkoff settings -->
     <string name="token_header">Tinkoff OpenApi Токен</string>
@@ -78,6 +80,11 @@
     <string name="stocks_1728_take_profit">Заявка на продажу в % (0 = не создавать)</string>
     <string name="stocks_1728_quick_buy">Быстрая покупка</string>
 
+    <!-- tazik settings -->
+    <string name="stocks_tazik_min_percent_to_buy">Минимальная просадка в %</string>
+    <string name="stocks_tazik_purchase_volume">Общий объём покупки</string>
+    <string name="stocks_tazik_purchase_parts">Количество бумаг на вход</string>
+
     <!-- setting keys-->
 
     <!-- tinkoff -->
@@ -115,6 +122,11 @@
     <string name="setting_key_1728_purchase_volume">1728_purchase_volume</string>
     <string name="setting_key_1728_take_profit">1728_take_profit</string>
     <string name="setting_key_1728_quick_buy">1728_quick_buy</string>
+
+    <!-- tazik settings -->
+    <string name="setting_key_tazik_min_percent_to_buy">tazik_min_percent_to_buy</string>
+    <string name="setting_key_tazik_purchase_volume">tazik_purchase_volume</string>
+    <string name="setting_key_tazik_purchase_parts">tazik_purchase_parts</string>
 
     <!-- rocket settings -->
     

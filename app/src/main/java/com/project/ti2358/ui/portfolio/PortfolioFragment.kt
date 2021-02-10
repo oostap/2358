@@ -14,6 +14,8 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.service.Utils
+import com.project.ti2358.service.toDollar
+import com.project.ti2358.service.toPercent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -97,10 +99,10 @@ class PortfolioFragment : Fragment() {
 
             var totalCash = item.balance * avg
             val percent = item.getProfitPercent()
-            holder.changePricePercentView.text = "%.2f".format(percent) + "%"
+            holder.changePricePercentView.text = percent.toPercent()
 
             totalCash += profit
-            holder.volumeCashView.text = "%.2f $".format(totalCash)
+            holder.volumeCashView.text = totalCash.toDollar()
 
             if (percent < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)

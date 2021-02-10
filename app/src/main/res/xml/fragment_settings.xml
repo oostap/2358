@@ -147,4 +147,23 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/stocks_header_tazik">
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_min_percent_to_buy"
+            app:title="@string/stocks_tazik_min_percent_to_buy"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="-1"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_purchase_volume"
+            app:title="@string/stocks_tazik_purchase_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="500"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_purchase_parts"
+            app:title="@string/stocks_tazik_purchase_parts"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="2"/>
+    </PreferenceCategory>
 </PreferenceScreen>

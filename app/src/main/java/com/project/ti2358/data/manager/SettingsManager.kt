@@ -241,5 +241,37 @@ class SettingsManager {
             val key: String = context.getString(R.string.setting_key_1728_quick_buy)
             return preferences.getBoolean(key, false)
         }
+
+        /******************** TAZIK *************************/
+
+        fun getTazikChangePercent() : Double {
+            val key: String = context.getString(R.string.setting_key_tazik_min_percent_to_buy)
+            val value: String? = preferences.getString(key, "-1.0")
+            return try {
+                (value ?: "-1.0").toDouble()
+            } catch (e: Exception) {
+                -1.0
+            }
+        }
+
+        fun getTazikPurchaseVolume() : Int {
+            val key: String = context.getString(R.string.setting_key_tazik_purchase_volume)
+            val value: String? = preferences.getString(key, "500")
+            return try {
+                parseInt(value ?: "500")
+            } catch (e: Exception) {
+                500
+            }
+        }
+
+        fun getTazikPurchaseParts() : Int {
+            val key: String = context.getString(R.string.setting_key_tazik_purchase_parts)
+            val value: String? = preferences.getString(key, "2")
+            return try {
+                (value ?: "2").toInt()
+            } catch (e: Exception) {
+                2
+            }
+        }
     }
 }

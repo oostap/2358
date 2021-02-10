@@ -10,7 +10,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @KoinApiExtension
-class Strategy1000Buy : KoinComponent {
+class StrategyTazik : KoinComponent {
     private val stockManager: StockManager by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
@@ -103,7 +103,7 @@ class Strategy1000Buy : KoinComponent {
     fun getNotificationTextLong(): String {
         var tickers = ""
         for (stock in stocksToPurchase) {
-            val p = "%.1f$ -> %.1f$ -> %.1f".format(stock.lots * stock.getLimitPriceDouble(), stock.getLimitPriceDouble(), stock.percentLimitPriceChange) + "%"
+            val p = "%.1f$".format(stock.lots * stock.stock.getPriceDouble())
             tickers += "${stock.stock.marketInstrument.ticker} * ${stock.lots} шт. = ${p} ${stock.getStatusString()}\n"
         }
 

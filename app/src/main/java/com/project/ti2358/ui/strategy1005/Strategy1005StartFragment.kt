@@ -109,8 +109,8 @@ class Strategy1005StartFragment : Fragment() {
             val volumeCash = item.dayVolumeCash / 1000f / 1000f
             holder.volumeTodayCashView.text = "%.2f B$".format(volumeCash)
 
-            holder.changePriceAbsoluteView.text = "%.2f $".format(item.changePrice2359DayAbsolute)
-            holder.changePricePercentView.text = "%.2f".format(item.changePrice2359DayPercent) + "%"
+            holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toDollar()
+            holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
 
             if (item.changePrice2359DayAbsolute < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)

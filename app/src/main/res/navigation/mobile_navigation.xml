@@ -174,4 +174,25 @@
         android:name="com.project.ti2358.ui.strategy1005.Strategy1005FinishFragment"
         android:label="@string/menu_1005"
         tools:layout="@layout/fragment_1005_start" />
+
+    <!-- 1005 tazik -->
+
+    <fragment
+        android:id="@+id/nav_tazik_start"
+        android:name="com.project.ti2358.ui.strategyTazik.StrategyTazikStartFragment"
+        android:label="@string/menu_tazik"
+        tools:layout="@layout/fragment_tazik_start" >
+        <action
+            android:id="@+id/action_nav_tazik_start_to_nav_tazik_finish"
+            app:destination="@id/nav_tazik_finish"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left"
+            />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_tazik_finish"
+        android:name="com.project.ti2358.ui.strategyTazik.StrategyTazikFinishFragment"
+        android:label="@string/menu_tazik"
+        tools:layout="@layout/fragment_tazik_start" />
 </navigation>

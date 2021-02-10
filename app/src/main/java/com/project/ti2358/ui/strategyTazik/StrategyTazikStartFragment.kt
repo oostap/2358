@@ -1,14 +1,10 @@
-package com.project.ti2358.ui.strategy1830
+package com.project.ti2358.ui.strategyTazik
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -16,18 +12,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.manager.Strategy1830
-import com.project.ti2358.service.Utils
-import com.project.ti2358.service.toDollar
-import com.project.ti2358.service.toPercent
+import com.project.ti2358.data.manager.StrategyTazik
+import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class Strategy1830StartFragment : Fragment() {
+class StrategyTazikStartFragment : Fragment() {
 
-    val strategy1830: Strategy1830 by inject()
-    var adapterList: Item1830RecyclerViewAdapter = Item1830RecyclerViewAdapter(emptyList())
+    val strategyTazik: StrategyTazik by inject()
+    var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
+    lateinit var searchView: SearchView
+    lateinit var stocks: MutableList<Stock>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +33,7 @@ class Strategy1830StartFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_1830_start, container, false)
+        val view = inflater.inflate(R.layout.fragment_tazik_start, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
         list.addItemDecoration(
@@ -55,32 +51,68 @@ class Strategy1830StartFragment : Fragment() {
         }
 
         val buttonStart = view.findViewById<Button>(R.id.buttonStart)
-        buttonStart.setOnClickListener { _ ->
-            if (strategy1830.stocksSelected.isNotEmpty())
-                view.findNavController().navigate(R.id.action_nav_1830_start_to_nav_1830_finish)
-        }
-
-        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
-        buttonUpdate.setOnClickListener { _ ->
-            adapterList.setData(strategy1830.process())
-        }
-
-        val checkBox = view.findViewById<CheckBox>(R.id.check_box)
-        checkBox.setOnCheckedChangeListener { _, isChecked ->
-            for (stock in strategy1830.process()) {
-                strategy1830.setSelected(stock, !isChecked)
+        buttonStart.setOnClickListener {
+            if (strategyTazik.stocksSelected.isNotEmpty()) {
+                view.findNavController().navigate(R.id.action_nav_tazik_start_to_nav_tazik_finish)
+            } else {
+                Utils.showErrorAlert(requireContext())
             }
-            adapterList.notifyDataSetChanged()
         }
 
-        adapterList.setData(strategy1830.process())
+        var sort = Sorting.DESCENDING
+        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
+        buttonUpdate.setOnClickListener {
+            strategyTazik.process()
+            stocks = strategyTazik.resort(sort)
+            adapterList.setData(stocks)
+            sort = if (sort == Sorting.DESCENDING) {
+                Sorting.ASCENDING
+            } else {
+                Sorting.DESCENDING
+            }
+        }
+
+        strategyTazik.process()
+        stocks = strategyTazik.resort(sort)
+        adapterList.setData(stocks)
+
+        searchView = view.findViewById(R.id.searchView)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                processText(query)
+                return false
+            }
+            override fun onQueryTextChange(newText: String): Boolean {
+                processText(newText)
+                return false
+            }
+
+            fun processText(text: String) {
+                strategyTazik.process()
+                stocks = strategyTazik.resort(sort)
+
+                if (text.isNotEmpty()) {
+                    stocks = stocks.filter {
+                        it.marketInstrument.ticker.contains(text, ignoreCase = true)
+                    } as MutableList<Stock>
+                }
+                adapterList.setData(stocks)
+            }
+        })
+        searchView.requestFocus()
+
+        searchView.setOnCloseListener {
+            stocks = strategyTazik.process()
+            adapterList.setData(stocks)
+            false
+        }
 
         return view
     }
 
-    inner class Item1830RecyclerViewAdapter(
+    inner class ItemTazikRecyclerViewAdapter(
         private var values: List<Stock>
-    ) : RecyclerView.Adapter<Item1830RecyclerViewAdapter.ViewHolder>() {
+    ) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {
 
         fun setData(newValues: List<Stock>) {
             values = newValues
@@ -89,7 +121,7 @@ class Strategy1830StartFragment : Fragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(
-                R.layout.fragment_1830_start_item,
+                R.layout.fragment_tazik_start_item,
                 parent,
                 false
             )
@@ -102,18 +134,21 @@ class Strategy1830StartFragment : Fragment() {
             holder.stock = item
 
             holder.checkBoxView.setOnCheckedChangeListener(null)
-            holder.checkBoxView.isChecked = strategy1830.isSelected(item)
+            holder.checkBoxView.isChecked = strategyTazik.isSelected(item)
 
             holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
-            holder.priceView.text = item.getPriceString()
+            holder.priceView.text = "${item.getPrice2359String()} -> ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
-            holder.volumeTodayView.text = "%.1f".format(volume) + "k"
+            holder.volumeTodayView.text = "%.1fk".format(volume)
 
-            holder.changePriceAbsoluteView.text = item.changePriceDayAbsolute.toDollar()
-            holder.changePricePercentView.text = item.changePriceDayPercent.toPercent()
+            val volumeCash = item.dayVolumeCash / 1000f / 1000f
+            holder.volumeTodayCashView.text = "%.2f B$".format(volumeCash)
 
-            if (item.changePriceDayAbsolute < 0) {
+            holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toDollar()
+            holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
+
+            if (item.changePrice2359DayAbsolute < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)
                 holder.changePricePercentView.setTextColor(Utils.RED)
             } else {
@@ -122,12 +157,11 @@ class Strategy1830StartFragment : Fragment() {
             }
 
             holder.checkBoxView.setOnCheckedChangeListener { _, isChecked ->
-                strategy1830.setSelected(holder.stock, !isChecked)
+                strategyTazik.setSelected(holder.stock, !isChecked)
             }
 
             holder.itemView.setOnClickListener {
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tinkoff.ru/invest/stocks/${holder.stock.marketInstrument.ticker}/"))
-                startActivity(browserIntent)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.marketInstrument.ticker)
             }
         }
 
@@ -140,6 +174,7 @@ class Strategy1830StartFragment : Fragment() {
             val priceView: TextView = view.findViewById(R.id.stock_item_price)
 
             val volumeTodayView: TextView = view.findViewById(R.id.stock_item_volume_today)
+            val volumeTodayCashView: TextView = view.findViewById(R.id.stock_item_volume_today_cash)
 
             val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)

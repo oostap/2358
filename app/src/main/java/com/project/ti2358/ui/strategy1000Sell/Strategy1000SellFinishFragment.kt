@@ -145,13 +145,13 @@ class Strategy1000SellFinishFragment : Fragment() {
             val profit = item.position.getProfitAmount()
             var totalCash = item.position.balance * avg
             val percent = item.position.getProfitPercent()
-            holder.currentProfitView.text = "%.2f".format(percent) + "%"
+            holder.currentProfitView.text = percent.toPercent()
 
             totalCash += profit
             holder.currentPriceView.text = "%.2f\$->%.2f\$".format(avg, totalCash)
 
-            holder.totalPriceProfitView.text = "%.2f $".format(profit)
-            holder.priceProfitView.text = "%.2f $".format(profit / item.position.lots)
+            holder.totalPriceProfitView.text = profit.toDollar()
+            holder.priceProfitView.text = (profit / item.position.lots).toDollar()
 
             if (percent < 0) {
                 holder.currentProfitView.setTextColor(Utils.RED)
@@ -181,14 +181,14 @@ class Strategy1000SellFinishFragment : Fragment() {
         fun refreshFuturePercent(holder: ViewHolder) {
             val item = holder.position
             var futurePercent = item.profit
-            holder.futureProfitView.text = "%.2f ".format(futurePercent) + "%"
+            holder.futureProfitView.text = futurePercent.toPercent()
 
             val avg = item.position.getAveragePrice()
             var futureProfitPrice = item.getProfitPrice() - avg
-            holder.futureProfitPriceView.text = "%.2f $".format(futureProfitPrice)
-            holder.totalFutureProfitPriceView.text = "%.2f $".format(futureProfitPrice * item.position.balance)
+            holder.futureProfitPriceView.text = futureProfitPrice.toDollar()
+            holder.totalFutureProfitPriceView.text = (futureProfitPrice * item.position.balance).toDollar()
 
-            holder.totalPriceView.text = "%.2f$".format(item.getProfitPrice())
+            holder.totalPriceView.text = item.getProfitPrice().toDollar()
 
             if (futureProfitPrice < 0) {
                 holder.futureProfitView.setTextColor(Utils.RED)

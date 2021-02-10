@@ -1,4 +1,4 @@
-package com.project.ti2358.ui.strategy1000Buy
+package com.project.ti2358.ui.strategyTazik
 
 import android.content.Intent
 import android.os.Bundle
@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.PurchaseStock
-import com.project.ti2358.data.manager.Strategy1000Buy
+import com.project.ti2358.data.manager.StrategyTazik
 import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
@@ -21,10 +21,10 @@ import org.koin.core.component.KoinApiExtension
 
 
 @KoinApiExtension
-class Strategy1000BuyFinishFragment : Fragment() {
+class StrategyTazikFinishFragment : Fragment() {
 
-    val strategy1000Buy: Strategy1000Buy by inject()
-    var adapterList: Item1005RecyclerViewAdapter = Item1005RecyclerViewAdapter(emptyList())
+    val strategyTazik: StrategyTazik by inject()
+    var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
     var infoTextView: TextView? = null
     var buttonStart: Button? = null
     var positions: MutableList<PurchaseStock> = mutableListOf()
@@ -37,7 +37,7 @@ class Strategy1000BuyFinishFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_1000_buy_finish, container, false)
+        val view = inflater.inflate(R.layout.fragment_tazik_finish, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
         list.addItemDecoration(
@@ -59,9 +59,9 @@ class Strategy1000BuyFinishFragment : Fragment() {
 
         buttonStart?.setOnClickListener {
             if (SettingsManager.get1000BuyPurchaseVolume() <= 0) {
-                Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел 1000 buy.")
+                Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел Тазик.")
             } else {
-                if (Utils.isServiceRunning(requireContext(), Strategy1000BuyService::class.java)) {
+                if (Utils.isServiceRunning(requireContext(), StrategyTazikService::class.java)) {
                     requireContext().stopService(
                         Intent(
                             context,
@@ -69,15 +69,15 @@ class Strategy1000BuyFinishFragment : Fragment() {
                         )
                     )
                 } else {
-                    if (strategy1000Buy.getTotalPurchasePieces() > 0) {
-                        Utils.startService(requireContext(), Strategy1000BuyService::class.java)
+                    if (strategyTazik.getTotalPurchasePieces() > 0) {
+                        Utils.startService(requireContext(), StrategyTazikService::class.java)
                     }
                 }
             }
             updateServiceButtonText()
         }
 
-        positions = strategy1000Buy.getPurchaseStock()
+        positions = strategyTazik.getPurchaseStock()
         adapterList.setData(positions)
 
         infoTextView = view.findViewById<TextView>(R.id.info_text)
@@ -94,7 +94,7 @@ class Strategy1000BuyFinishFragment : Fragment() {
             prepareText,
             time,
             positions.size,
-            strategy1000Buy.getTotalPurchaseString()
+            strategyTazik.getTotalPurchaseString()
         )
     }
 
@@ -106,9 +106,9 @@ class Strategy1000BuyFinishFragment : Fragment() {
         }
     }
 
-    inner class Item1005RecyclerViewAdapter(
+    inner class ItemTazikRecyclerViewAdapter(
         private var values: List<PurchaseStock>
-    ) : RecyclerView.Adapter<Item1005RecyclerViewAdapter.ViewHolder>() {
+    ) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {
 
         fun setData(newValues: List<PurchaseStock>) {
             values = newValues
@@ -117,7 +117,7 @@ class Strategy1000BuyFinishFragment : Fragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.fragment_1000_buy_finish_item, parent, false)
+                .inflate(R.layout.fragment_tazik_finish_item, parent, false)
             return ViewHolder(view)
         }
 
@@ -128,7 +128,7 @@ class Strategy1000BuyFinishFragment : Fragment() {
             val avg = item.stock.getPriceDouble()
             holder.tickerView.text = "${item.stock.marketInstrument.ticker} ${item.lots} шт."
             holder.currentPriceView.text = "${item.stock.getPrice2359String()} -> ${avg} $"
-            holder.totalPriceView.text = "%.2f $".format(item.stock.getPriceDouble() * item.lots)
+            holder.totalPriceView.text = (item.stock.getPriceDouble() * item.lots).toDollar()
 
             refreshPercent(holder)
 
