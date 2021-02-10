@@ -61,8 +61,12 @@ class DepositManager : KoinComponent {
     }
 
     suspend fun refreshDeposit() {
-        portfolioPositions = synchronizedList(portfolioService.portfolio().positions)
-        baseSortPortfolio()
+        try {
+            portfolioPositions = synchronizedList(portfolioService.portfolio().positions)
+            baseSortPortfolio()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     public fun getFreeCashUSD(): String {

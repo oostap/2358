@@ -83,15 +83,17 @@ data class PurchaseStock (
                 )
 
                 // проверяем появился ли в портфеле тикер
-                var position: PortfolioPosition?
-                while (true) {
+                var position: PortfolioPosition? = null
+                var counter = 50
+                while (counter > 0) {
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
                         status = PurchaseStatus.BUYED
                         break
                     }
 
-                    delay(500)
+                    delay(2000)
+                    counter--
                 }
 
                 // продаём
@@ -152,19 +154,22 @@ data class PurchaseStock (
 
                 Utils.showToastAlert("$ticker: покупка из аска по $buyPrice")
 
-                delay(500)
-                depositManager.refreshDeposit()
+                delay(250)
 
                 // проверяем появился ли в портфеле тикер
-                var position: PortfolioPosition?
-                while (true) {
+                var position: PortfolioPosition? = null
+                var counter = 50
+                while (counter > 0) {
+                    depositManager.refreshDeposit()
+
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
                         status = PurchaseStatus.BUYED
                         break
                     }
 
-                    delay(250)
+                    delay(1000)
+                    counter--
                 }
 
                 // продаём
@@ -232,19 +237,22 @@ data class PurchaseStock (
 
                 Utils.showToastAlert("$ticker: покупка из аска по $buyPrice")
 
-                delay(500)
-                depositManager.refreshDeposit()
+                delay(250)
 
                 // проверяем появился ли в портфеле тикер
-                var position: PortfolioPosition?
-                while (true) {
+                var position: PortfolioPosition? = null
+                var counter = 20
+                while (counter > 0) {
+                    depositManager.refreshDeposit()
+
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
                         status = PurchaseStatus.BUYED
                         break
                     }
 
-                    delay(100)
+                    delay(1000)
+                    counter--
                 }
 
                 // продаём
@@ -307,18 +315,20 @@ data class PurchaseStock (
                     OperationType.BUY
                 )
 
-                depositManager.refreshDeposit()
+                delay(250)
 
                 // проверяем появился ли в портфеле тикер
                 var position: PortfolioPosition?
                 while (true) {
+                    depositManager.refreshDeposit()
+
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
                         status = PurchaseStatus.BUYED
                         break
                     }
 
-                    delay(100)
+                    delay(1000)
                 }
 
                 // продаём

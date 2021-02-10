@@ -118,7 +118,7 @@ class Strategy2358StartFragment : Fragment() {
             holder.changePriceAbsoluteView.text = "%.2f $".format(item.changePrice2359DayAbsolute)
             holder.changePricePercentView.text = "%.2f".format(item.changePrice2359DayPercent) + "%"
 
-            if (item.changePriceDayAbsolute < 0) {
+            if (item.changePrice2359DayAbsolute < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)
                 holder.changePricePercentView.setTextColor(Utils.RED)
             } else {

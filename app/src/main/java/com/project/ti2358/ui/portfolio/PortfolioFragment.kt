@@ -53,6 +53,10 @@ class PortfolioFragment : Fragment() {
 
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
         buttonUpdate.setOnClickListener {
+            GlobalScope.launch(Dispatchers.Main) {
+                depositManager.refreshDeposit()
+                adapterList.setData(depositManager.portfolioPositions)
+            }
             adapterList.setData(depositManager.portfolioPositions)
         }
 

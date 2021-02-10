@@ -26,7 +26,7 @@ class Strategy2358() : KoinComponent {
         val max = SettingsManager.getCommonPriceMax()
 
         for (stock in all) {
-            if (stock.changePriceDayPercent <= change &&            // изменение
+            if (stock.changePrice2359DayPercent <= change &&            // изменение
                 stock.getTodayVolume() >= volumeDayPieces &&        // объём в шт
                 stock.dayVolumeCash >= volumeDayCash &&             // объём в $
                 stock.getPriceDouble() > min &&          // мин цена
@@ -34,7 +34,7 @@ class Strategy2358() : KoinComponent {
                 stocks.add(stock)
             }
         }
-        stocks.sortBy { it.changePriceDayPercent + it.changePrice2359DayPercent }
+        stocks.sortBy { it.changePrice2359DayPercent }
         return stocks
     }
 
@@ -45,7 +45,7 @@ class Strategy2358() : KoinComponent {
             if (!stocksSelected.contains(stock))
                 stocksSelected.add(stock)
         }
-        stocksSelected.sortBy { it.changePriceDayPercent + it.changePrice2359DayPercent }
+        stocksSelected.sortBy { it.changePrice2359DayPercent }
     }
 
     fun isSelected(stock: Stock) : Boolean {
@@ -63,7 +63,7 @@ class Strategy2358() : KoinComponent {
             for (stock in stocksSelected) {
                 if (stock.changeOnStartTimer == 0.0) continue
 
-                val delta = stock.changeOnStartTimer / stock.changePriceDayPercent
+                val delta = stock.changeOnStartTimer / stock.changePrice2359DayPercent
 
                 // если бумага отросла больше, чем на половину, то отменить покупку
                 if (delta >= 1.6) {
@@ -87,7 +87,7 @@ class Strategy2358() : KoinComponent {
             purchase.status = PurchaseStatus.WAITING
 
             if (prepare) { // запоминаем % подготовки, чтобы после проверить изменение
-                purchase.stock.changeOnStartTimer = purchase.stock.changePriceDayPercent
+                purchase.stock.changeOnStartTimer = purchase.stock.changePrice2359DayPercent
             }
         }
 

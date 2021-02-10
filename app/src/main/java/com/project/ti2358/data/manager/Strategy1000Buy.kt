@@ -23,23 +23,14 @@ class Strategy1000Buy : KoinComponent {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        val change = SettingsManager.get1005ChangePercent()
-        var volumeDayPieces = SettingsManager.get1005VolumeDayPieces()
-
-        if (!Utils.isActiveSession()) { // если биржа закрыта, то показать всё
-            volumeDayPieces = 0
-        }
-
         stocks.clear()
         for (stock in all) {
             if (stock.getPriceDouble() > min &&
-                stock.getPriceDouble() < max &&
-                abs(stock.changePrice2359DayPercent) >= abs(change) &&    // изменение
-                stock.getTodayVolume() >= volumeDayPieces) {              // объём в шт
+                stock.getPriceDouble() < max) {
                 stocks.add(stock)
             }
         }
-
+        stocks.sortBy { it.changePrice2359DayPercent }
         return stocks
     }
 
@@ -59,7 +50,7 @@ class Strategy1000Buy : KoinComponent {
             if (!stocksSelected.contains(stock))
                 stocksSelected.add(stock)
         }
-        stocksSelected.sortBy { it.changePriceDayPercent }
+        stocksSelected.sortBy { it.changePrice2359DayPercent }
     }
 
     fun isSelected(stock: Stock) : Boolean {
