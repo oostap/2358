@@ -8,9 +8,7 @@ import org.koin.core.component.inject
 
 @KoinApiExtension
 class Strategy1000Sell() : KoinComponent {
-    private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
-    private val ordersService: OrdersService by inject()
 
     var positions: MutableList<PortfolioPosition> = mutableListOf()
     var positionsSelected: MutableList<PortfolioPosition> = mutableListOf()
@@ -30,7 +28,7 @@ class Strategy1000Sell() : KoinComponent {
         if (value) {
             positionsSelected.removeAll { it.figi == position.figi }
         } else {
-            var filter = positionsSelected.filter { it.figi == position.figi }
+            val filter = positionsSelected.filter { it.figi == position.figi }
             if (filter.isEmpty())
                 positionsSelected.add(position)
         }
@@ -38,11 +36,11 @@ class Strategy1000Sell() : KoinComponent {
     }
 
     public fun isSelected(position: PortfolioPosition) : Boolean {
-        var filter = positionsSelected.filter { it.figi == position.figi }
+        val filter = positionsSelected.filter { it.figi == position.figi }
         return filter.isNotEmpty()
     }
 
-    public fun getSellPosition() : MutableList<PurchasePosition> {
+    public fun processSellPosition() : MutableList<PurchasePosition> {
         positionsToSell.clear()
         for (position in positionsSelected) {
             positionsToSell.add(PurchasePosition(position))
@@ -85,7 +83,7 @@ class Strategy1000Sell() : KoinComponent {
     public fun getNotificationTextLong(): String {
         var tickers = ""
         for (position in positionsToSell) {
-            val p = "%.1f".format(position.position.lots * position.getProfitPrice()) + "$"
+            val p = "%.1f$ = %.1f$ = %.1f".format(position.position.lots * position.getProfitPrice(), position.getProfitPrice(), position.profit) + "%"
             tickers += "${position.position.ticker} * ${position.position.lots} шт. = ${p} ${position.getStatusString()}\n"
         }
 

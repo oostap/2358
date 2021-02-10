@@ -121,8 +121,7 @@ class Strategy1000SellService : Service() {
         timerSell = Timer()
         timerSell?.schedule(object : TimerTask() {
             override fun run() {
-                var localPositions = strategy1000Sell.getSellPosition()
-                for (position in localPositions) {
+                for (position in strategy1000Sell.positionsToSell) {
                     position.sell()
                 }
             }

@@ -155,9 +155,9 @@ class SettingsManager {
 
         fun get1000SellTakeProfit() : Double {
             val key: String = context.getString(R.string.setting_key_1000_sell_take_profit)
-            val value: String? = preferences.getString(key, "1")
+            val value: String? = preferences.getString(key, "1.0")
             return try {
-                (value ?: "1").toDouble()
+                (value ?: "1.0").toDouble()
             } catch (e: Exception) {
                 1.0
             }

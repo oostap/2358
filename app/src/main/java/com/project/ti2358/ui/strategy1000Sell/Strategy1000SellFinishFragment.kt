@@ -63,8 +63,7 @@ class Strategy1000SellFinishFragment : Fragment() {
                 requireContext().stopService(Intent(context, Strategy1000SellService::class.java))
             } else {
                 if (Utils.isActiveSession()) {
-                    val localPositions = strategy1000Sell.getSellPosition()
-                    for (position in localPositions) {
+                    for (position in positions) {
                         position.sell()
                     }
                 } else {
@@ -78,7 +77,7 @@ class Strategy1000SellFinishFragment : Fragment() {
             updateServiceButtonText()
         }
 
-        positions = strategy1000Sell.getSellPosition()
+        positions = strategy1000Sell.processSellPosition()
         adapterList.setData(positions)
 
         infoTextView = view.findViewById<TextView>(R.id.info_text)
