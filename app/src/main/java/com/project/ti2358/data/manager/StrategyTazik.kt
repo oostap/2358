@@ -116,11 +116,8 @@ class StrategyTazik : KoinComponent {
             purchase.percentLimitPriceChange = percent
             purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
             purchase.updateAbsolutePrice()
-            stocksToPurchase.add(purchase)
-        }
-
-        for (purchase in stocksToPurchase) {
             purchase.status = PurchaseStatus.WAITING
+            stocksToPurchase.add(purchase)
         }
 
         return stocksToPurchase
@@ -130,14 +127,6 @@ class StrategyTazik : KoinComponent {
         val volume = SettingsManager.getTazikPurchaseVolume().toDouble()
         val p = SettingsManager.getTazikPurchaseParts()
         return String.format("%d по %.2f$", p, volume / p)
-    }
-
-    fun getTotalPurchasePieces() : Int {
-        var value = 0
-        for (stock in stocksToPurchase) {
-            value += stock.lots
-        }
-        return value
     }
 
     fun getNotificationTextShort(): String {
@@ -157,7 +146,10 @@ class StrategyTazik : KoinComponent {
             stock.stock.candle1000?.let {
                 change = (100 * it.closingPrice) / stock.stock.priceTazik - 100
             }
-            tickers += "${stock.stock.marketInstrument.ticker} ${stock.percentLimitPriceChange}% = ${stock.stock.priceTazik.toDollar()} -> ${stock.stock.priceNow.toDollar()} = ${change.toPercent()}\n"
+            tickers += "${stock.stock.marketInstrument.ticker} ${stock.percentLimitPriceChange}% = " +
+                    "${stock.stock.priceTazik.toDollar()} -> ${stock.stock.priceNow.toDollar()} = " +
+                    "${change.toPercent()} ${stock.getStatusString()}\n"
+
         }
 
         return tickers
@@ -178,13 +170,6 @@ class StrategyTazik : KoinComponent {
     fun stopStrategy() {
         started = false
         stocksBuyed.clear()
-
-        // сбросить цену
-        for (stock in stocks) {
-            stock.candle1000?.let {
-                stock.priceTazik = 0.0
-            }
-        }
     }
 
     fun processStrategy() {
