@@ -18,17 +18,16 @@ class SettingsManager {
             preferences = PreferenceManager.getDefaultSharedPreferences(context)
         }
 
-        public fun isSandbox() : Boolean {
+        fun isSandbox() : Boolean {
             val sandboxKey: String = context.getString(R.string.setting_key_sandbox)
             return preferences.getBoolean(sandboxKey, true)
         }
 
         fun getActiveToken() : String {
-            val tokenKey : String
-            if (isSandbox()) {
-                tokenKey = context.getString(R.string.setting_key_token_sandbox)
+            val tokenKey = if (isSandbox()) {
+                context.getString(R.string.setting_key_token_sandbox)
             } else {
-                tokenKey = context.getString(R.string.setting_key_token_market)
+                context.getString(R.string.setting_key_token_market)
             }
 
             val token : String? = preferences.getString(tokenKey, "")
@@ -44,7 +43,6 @@ class SettingsManager {
         }
 
         fun isAllowCurrency(currency : Currency) : Boolean {
-//            return true;
             if (currency == Currency.USD) return true
             return false
         }
@@ -53,21 +51,21 @@ class SettingsManager {
 
         fun getCommonPriceMin() : Int {
             val key: String = context.getString(R.string.setting_key_stocks_usd_price_min)
-            val value: String? = preferences.getString(key, "0")
+            val value: String? = preferences.getString(key, "5")
             return try {
-                parseInt(value ?: "0")
+                parseInt(value ?: "5")
             } catch (e: Exception) {
-                0
+                5
             }
         }
 
         fun getCommonPriceMax() : Int {
             val key: String = context.getString(R.string.setting_key_stocks_usd_price_max)
-            val value: String? = preferences.getString(key, "10000")
+            val value: String? = preferences.getString(key, "200")
             return try {
-                parseInt(value ?: "10000")
+                parseInt(value ?: "200")
             } catch (e: Exception) {
-                10000
+                200
             }
         }
 
@@ -271,6 +269,16 @@ class SettingsManager {
                 (value ?: "2").toInt()
             } catch (e: Exception) {
                 2
+            }
+        }
+
+        fun getTazikTakeProfit() : Double {
+            val key: String = context.getString(R.string.setting_key_tazik_take_profit)
+            val value: String? = preferences.getString(key, "1.0")
+            return try {
+                (value ?: "1.0").toDouble()
+            } catch (e: Exception) {
+                1.0
             }
         }
     }

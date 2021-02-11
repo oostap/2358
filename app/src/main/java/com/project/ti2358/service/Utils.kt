@@ -80,7 +80,7 @@ class Utils {
             val alertDialogBuilder = AlertDialog.Builder(context)
             val alertDialog = alertDialogBuilder.create()
             alertDialog.setMessage(text)
-            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "понятно") { dialog, which -> dialog.cancel() }
+            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "понятно") { dialog, _ -> dialog.cancel() }
             alertDialog.show()
         }
 
@@ -89,7 +89,7 @@ class Utils {
             val alertDialog = alertDialogBuilder.create()
             alertDialog.setTitle("Ошибка")
             alertDialog.setMessage("Нужно выбрать хотя бы 1 бумагу")
-            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "ой, всё") { dialog, which -> dialog.cancel() }
+            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "ой, всё") { dialog, _ -> dialog.cancel() }
             alertDialog.show()
         }
 
@@ -162,7 +162,6 @@ class Utils {
         fun isActiveSession(): Boolean {
             val msk = getTimeMSK()
             val hour = msk.get(Calendar.HOUR_OF_DAY)
-            val minute = msk.get(Calendar.MINUTE)
 
             if (hour >= 10 || hour <= 2) {
                 return true

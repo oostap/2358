@@ -21,6 +21,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 
@@ -29,6 +30,7 @@ data class Stock(
     var marketInstrument: MarketInstrument
 ) : KoinComponent {
     val strategy1728: Strategy1728 by inject()
+    val strategyTazik: StrategyTazik by inject()
     private val marketService: MarketService by inject()
     private val stockManager: StockManager by inject()
 
@@ -39,6 +41,7 @@ data class Stock(
 
     var price1000: Double = 0.0
     var priceNow: Double = 0.0
+    var priceTazik: Double = 0.0
 
     var changeOnStartTimer: Double = 0.0    // сколько % было на старте таймера для 2358
 
@@ -82,23 +85,22 @@ data class Stock(
     }
 
     private fun processDayCandle(candle: Candle) {
-        val dayNow = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-        val time = Calendar.getInstance()
-        time.time = candle.time
-        val dayCandle = time.get(Calendar.DAY_OF_MONTH)
+        val diffInMilli: Long = Calendar.getInstance().time.time - candle.time.time
+        val diffInHours: Long = TimeUnit.MILLISECONDS.toHours(diffInMilli)
 
-        val diffInDays = abs(dayNow - dayCandle)
-        if (diffInDays > 2) return
+        if (diffInHours > 24) return
 
-        if (diffInDays == 0) {
-            candle1000 = candle
-        } else {
+        if (diffInHours > 20) {
             candleYesterday = candle
+        } else {
+            candle1000 = candle
         }
 
         updateChangeToday()
         updateChange2359()
         loadClosingPriceDelay = loadClosingPriceCandle(loadClosingPriceDelay)
+
+        strategyTazik.processStrategy()
     }
 
     private fun processWeekCandle(candle: Candle) {
@@ -271,9 +273,9 @@ data class Stock(
 
                     val to = getLastClosingDate(false) + zone
 
-                    log(marketInstrument.ticker + " " + marketInstrument.figi)
-                    log(from)
-                    log(to)
+//                    log(marketInstrument.ticker + " " + marketInstrument.figi)
+//                    log(from)
+//                    log(to)
 
                     val candles = marketService.candles(
                         marketInstrument.figi,
@@ -294,7 +296,7 @@ data class Stock(
                     }
 
                     candle2359Loaded = true
-                    log(marketInstrument.ticker + " = " + candles)
+//                    log(marketInstrument.ticker + " = " + candles)
                     break
                 } catch (e: Exception) {
                     e.printStackTrace()

@@ -54,23 +54,25 @@ class StrategyTazikFinishFragment : Fragment() {
             }
         }
 
-        buttonStart = view.findViewById<Button>(R.id.buttonStart)
+        buttonStart = view.findViewById(R.id.buttonStart)
         updateServiceButtonText()
 
         buttonStart?.setOnClickListener {
-            if (SettingsManager.get1000BuyPurchaseVolume() <= 0) {
-                Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел Тазик.")
+            if (SettingsManager.getTazikPurchaseVolume() <= 0 || SettingsManager.getTazikPurchaseParts() == 0) {
+                Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки или количество частей, раздел Автотазик.")
             } else {
                 if (Utils.isServiceRunning(requireContext(), StrategyTazikService::class.java)) {
                     requireContext().stopService(
                         Intent(
                             context,
-                            Strategy1000BuyService::class.java
+                            StrategyTazikService::class.java
                         )
                     )
+                    strategyTazik.stopStrategy()
                 } else {
-                    if (strategyTazik.getTotalPurchasePieces() > 0) {
+                    if (strategyTazik.stocksToPurchase.size > 0) {
                         Utils.startService(requireContext(), StrategyTazikService::class.java)
+                        strategyTazik.startStrategy()
                     }
                 }
             }
@@ -80,21 +82,25 @@ class StrategyTazikFinishFragment : Fragment() {
         positions = strategyTazik.getPurchaseStock()
         adapterList.setData(positions)
 
-        infoTextView = view.findViewById<TextView>(R.id.info_text)
+        infoTextView = view.findViewById(R.id.info_text)
         updateInfoText()
 
         return view
     }
 
     fun updateInfoText() {
-        val time = "10:00:01"
+        val percent = SettingsManager.getTazikChangePercent()
+        val volume = SettingsManager.getTazikPurchaseVolume().toDouble()
+        val p = SettingsManager.getTazikPurchaseParts()
+        val parts = "%d по %.2f$".format(p, volume / p)
 
-        val prepareText: String = SettingsManager.context.getString(R.string.prepare_start_1000_buy_text)
+        val prepareText: String = SettingsManager.context.getString(R.string.prepare_start_tazik_buy_text)
         infoTextView?.text = String.format(
             prepareText,
-            time,
             positions.size,
-            strategyTazik.getTotalPurchaseString()
+            percent,
+            volume,
+            parts
         )
     }
 

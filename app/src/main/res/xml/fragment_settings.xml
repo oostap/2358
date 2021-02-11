@@ -44,7 +44,7 @@
             app:key="@string/setting_key_2358_volume_min_day"
             app:title="@string/stocks_2358_volume_min_day"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="100000"/>
+            app:defaultValue="200000"/>
 
         <EditTextPreference
             app:key="@string/setting_key_2358_volume_min_cash"
@@ -165,5 +165,11 @@
             app:title="@string/stocks_tazik_purchase_parts"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="2"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_take_profit"
+            app:title="@string/stocks_tazik_take_profit"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1"/>
     </PreferenceCategory>
 </PreferenceScreen>

@@ -59,16 +59,16 @@ class Strategy1000Buy : KoinComponent {
 
     fun getPurchaseStock() : MutableList<PurchaseStock> {
         stocksToPurchase.clear()
-        for (stock in stocksSelected) {
-            stocksToPurchase.add(PurchaseStock(stock))
-        }
-
         val totalMoney : Double = SettingsManager.get1000BuyPurchaseVolume().toDouble()
         val onePiece : Double = totalMoney / stocksToPurchase.size
 
-        for (purchase in stocksToPurchase) {
+        for (stock in stocksSelected) {
+            val purchase = PurchaseStock(stock)
             purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
             purchase.status = PurchaseStatus.WAITING
+            purchase.percentLimitPriceChange = -1.0 // TODO в настройки
+            purchase.updateAbsolutePrice()
+            stocksToPurchase.add(purchase)
         }
 
         return stocksToPurchase

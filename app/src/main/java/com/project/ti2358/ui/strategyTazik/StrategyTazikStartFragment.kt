@@ -99,7 +99,6 @@ class StrategyTazikStartFragment : Fragment() {
                 adapterList.setData(stocks)
             }
         })
-        searchView.requestFocus()
 
         searchView.setOnCloseListener {
             stocks = strategyTazik.process()

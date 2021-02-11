@@ -66,6 +66,10 @@ data class PurchaseStock (
 
     fun addPriceLimitPercent(change: Double) {
         percentLimitPriceChange += change
+        updateAbsolutePrice()
+    }
+
+    fun updateAbsolutePrice() {
         absoluteLimitPriceChange = stock.getPriceDouble() / 100 * percentLimitPriceChange
         absoluteLimitPriceChange = (absoluteLimitPriceChange * 100.0).roundToInt() / 100.0
     }
@@ -334,6 +338,74 @@ data class PurchaseStock (
                 // продаём
                 position?.let {
                     val profit = SettingsManager.get2358TakeProfit()
+                    if (profit == 0.0) return@launch
+
+                    // вычисляем и округляем до 2 после запятой
+                    if (buyPrice == 0.0) return@launch
+
+                    var profitPrice = buyPrice + buyPrice / 100.0 * profit
+                    profitPrice = (profitPrice * 100.0).roundToInt() / 100.0
+                    if (profitPrice == 0.0) return@launch
+
+                    // выставить ордер на продажу
+                    sellLimitOrder = ordersService.placeLimitOrder(
+                        it.lots,
+                        stock.marketInstrument.figi,
+                        profitPrice,
+                        OperationType.SELL
+                    )
+                    status = PurchaseStatus.ORDER_SELL
+                }
+
+                while (true) {
+                    delay(2000)
+
+                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
+                    if (position == null) { // продано!
+                        status = PurchaseStatus.SELLED
+                        break
+                    }
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun buyLimit1000(buyPrice: Double) {
+        if (SettingsManager.isSandbox()) return
+
+        GlobalScope.launch(Dispatchers.Main) {
+            try {
+                // получить стакан
+                status = PurchaseStatus.ORDER_BUY
+                buyLimitOrder = ordersService.placeLimitOrder(
+                    lots,
+                    stock.marketInstrument.figi,
+                    buyPrice,
+                    OperationType.BUY
+                )
+
+                delay(100)
+
+                // проверяем появился ли в портфеле тикер
+                var position: PortfolioPosition?
+                while (true) {
+                    depositManager.refreshDeposit()
+
+                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
+                    if (position != null && position.lots >= lots) { // куплено!
+                        status = PurchaseStatus.BUYED
+                        break
+                    }
+
+                    delay(1000)
+                }
+
+                // продаём
+                position?.let {
+                    val profit = SettingsManager.getTazikTakeProfit()
                     if (profit == 0.0) return@launch
 
                     // вычисляем и округляем до 2 после запятой

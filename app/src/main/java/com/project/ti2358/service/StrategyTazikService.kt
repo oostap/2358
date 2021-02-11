@@ -35,9 +35,7 @@ class StrategyTazikService : Service() {
 
     private var wakeLock: PowerManager.WakeLock? = null
     private var isServiceRunning = false
-    private lateinit var schedulePurchaseTime : Calendar
     private var notificationButtonReceiver : BroadcastReceiver? = null
-    private var timerBuy : Timer? = null
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -53,7 +51,7 @@ class StrategyTazikService : Service() {
                         notificationButtonReceiver
                     )
                     notificationButtonReceiver = null
-                    context.stopService(Intent(context, Strategy1000BuyService::class.java))
+                    context.stopService(Intent(context, StrategyTazikService::class.java))
                 }
             }
         }
@@ -67,25 +65,20 @@ class StrategyTazikService : Service() {
         val notification = createNotification("Tazik")
         startForeground(NOTIFICATION_ID, notification)
 
-        schedulePurchase()
+        scheduleUpdate()
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Покупка Тазика отменена", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Покупка тазика отменена", Toast.LENGTH_LONG).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
 
-        timerBuy?.let {
-            it.cancel()
-            it.purge()
-        }
-
         super.onDestroy()
     }
 
-    private fun schedulePurchase() {
-        Toast.makeText(this, "Запущен таймер на покупку 1000", Toast.LENGTH_LONG).show()
+    private fun scheduleUpdate() {
+        Toast.makeText(this, "Запущен тазик на покупку просадок", Toast.LENGTH_LONG).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
@@ -94,59 +87,10 @@ class StrategyTazikService : Service() {
                 }
             }
 
-        val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
-
-        val time = SettingsManager.get2358PurchaseTime()
-        val dayTime = time.split(":").toTypedArray()
-        if (dayTime.size < 3) {
-            stopService()
-            return
-        }
-
-        // 10:00:01
-        val hours = 10
-        val minutes = 0
-        val seconds = 1
-
-        schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
-        schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
-        schedulePurchaseTime.set(Calendar.HOUR_OF_DAY, hours)
-        schedulePurchaseTime.set(Calendar.MINUTE, minutes)
-        schedulePurchaseTime.set(Calendar.SECOND, seconds)
-        schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, differenceHours)
-
-        ///////////////////////////////////////////////////////////////////////////
-//        // TODO: тест покупки сразу, текущее время + 10 секунд
-//        schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
-//        schedulePurchaseTime.add(Calendar.SECOND, 10)
-        ///////////////////////////////////////////////////////////////////////////
-
-        val now = Calendar.getInstance(TimeZone.getDefault())
-        var scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
-        if (scheduleDelay < 0) {
-            schedulePurchaseTime.add(Calendar.DAY_OF_MONTH, 1)
-            scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
-        }
-
-        if (scheduleDelay < 0) {
-            stopService()
-            return
-        }
-
-        timerBuy = Timer()
-        timerBuy?.schedule(object : TimerTask() {
-            override fun run() {
-                val localPurchases = strategyTazik.stocksToPurchase
-                for (purchase in localPurchases) {
-                    purchase.buyLimit()
-                }
-            }
-        }, scheduleDelay)
-
         GlobalScope.launch(Dispatchers.IO) {
             while (isServiceRunning) {
-                val delaySeconds = updateNotification()
-                delay(1 * 1000 * delaySeconds)
+                var seconds = updateNotification()
+                delay(1 * 1000 * seconds)
             }
         }
     }
@@ -168,42 +112,13 @@ class StrategyTazikService : Service() {
     }
 
     private fun updateNotification(): Long {
-        val now = Calendar.getInstance(TimeZone.getDefault())
-        val scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
-
-        var title = ""
-
-        val allSeconds = scheduleDelay / 1000
-        val hours = allSeconds / 3600
-        val minutes = (allSeconds - hours * 3600) / 60
-        val seconds = allSeconds % 60
-
-        if (scheduleDelay > 0) {
-            title = "Покупка через %02d:%02d:%02d".format(hours, minutes, seconds)
-        } else {
-            title = "Покупка!"
-        }
+        val title = "Внимание! Работает автотазик!"
 
         val notification = createNotification(title)
         synchronized(notification) {
             notification.notify()
             val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             manager.notify(NOTIFICATION_ID, notification)
-        }
-
-        when {
-            hours > 1 -> {
-                return 10
-            }
-            minutes > 10 -> {
-                return 5
-            }
-            minutes > 1 -> {
-                return 2
-            }
-            minutes < 1 -> {
-                return 1
-            }
         }
 
         return 5
