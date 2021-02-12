@@ -23,7 +23,7 @@ class Strategy1728() : KoinComponent {
         resetStrategy()
     }
 
-    fun process() : MutableList<Stock> {
+    fun process(): MutableList<Stock> {
         stocks.clear()
 
         val min = SettingsManager.getCommonPriceMin()
@@ -60,7 +60,7 @@ class Strategy1728() : KoinComponent {
         }
     }
 
-    fun resort(sort : Sorting = Sorting.ASCENDING) : MutableList<Stock> {
+    fun resort(sort: Sorting = Sorting.ASCENDING): MutableList<Stock> {
         if (sort == Sorting.ASCENDING)
             stocks.sortBy { it.changePrice1728DayPercent }
         else
@@ -69,7 +69,7 @@ class Strategy1728() : KoinComponent {
         return stocks
     }
 
-    fun setSelected(stock: Stock, value : Boolean) {
+    fun setSelected(stock: Stock, value: Boolean) {
         if (value) {
             stocksSelected.remove(stock)
         } else {
@@ -79,18 +79,18 @@ class Strategy1728() : KoinComponent {
         stocksSelected.sortBy { it.changePrice1728DayPercent }
     }
 
-    fun isSelected(stock: Stock) : Boolean {
+    fun isSelected(stock: Stock): Boolean {
         return stocksSelected.contains(stock)
     }
 
-    fun getPurchaseStock() : MutableList<PurchaseStock> {
+    fun getPurchaseStock(): MutableList<PurchaseStock> {
         stocksToPurchase.clear()
         for (stock in stocksSelected) {
             stocksToPurchase.add(PurchaseStock(stock))
         }
 
-        val totalMoney : Double = SettingsManager.get2358PurchaseVolume().toDouble()
-        val onePiece : Double = totalMoney / stocksToPurchase.size
+        val totalMoney: Double = SettingsManager.get2358PurchaseVolume().toDouble()
+        val onePiece: Double = totalMoney / stocksToPurchase.size
 
         for (stock in stocksToPurchase) {
             stock.lots = (onePiece / stock.stock.getPriceDouble()).roundToInt()

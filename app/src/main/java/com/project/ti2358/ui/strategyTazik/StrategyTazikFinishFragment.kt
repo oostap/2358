@@ -19,7 +19,6 @@ import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
-
 @KoinApiExtension
 class StrategyTazikFinishFragment : Fragment() {
 

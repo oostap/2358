@@ -35,7 +35,7 @@ class StrategyTazikService : Service() {
 
     private var wakeLock: PowerManager.WakeLock? = null
     private var isServiceRunning = false
-    private var notificationButtonReceiver : BroadcastReceiver? = null
+    private var notificationButtonReceiver: BroadcastReceiver? = null
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -82,10 +82,10 @@ class StrategyTazikService : Service() {
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "EndlessService::lock").apply {
-                    acquire()
-                }
+            newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "EndlessService::lock").apply {
+                acquire()
             }
+        }
 
         GlobalScope.launch(Dispatchers.IO) {
             while (isServiceRunning) {
@@ -162,7 +162,7 @@ class StrategyTazikService : Service() {
 
         val longText: String = strategyTazik.getNotificationTextLong()
         val shortText: String = strategyTazik.getNotificationTextShort()
-        val priceText: String = "~" + strategyTazik.getTotalPurchaseString() + " ="
+        val priceText: String = strategyTazik.getTotalPurchaseString()
 
         return builder
             .setContentText(shortText)

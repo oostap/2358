@@ -12,7 +12,7 @@ class StrategyScreener : KoinComponent {
 
     var stocks: MutableList<Stock> = mutableListOf()
 
-    public fun process() : MutableList<Stock> {
+    public fun process(): MutableList<Stock> {
         val all = stockManager.stocksStream
 
         val min = SettingsManager.getCommonPriceMin()
@@ -28,7 +28,7 @@ class StrategyScreener : KoinComponent {
         return stocks
     }
 
-    public fun resort(sort : Sorting = Sorting.ASCENDING) : MutableList<Stock> {
+    public fun resort(sort: Sorting = Sorting.ASCENDING): MutableList<Stock> {
         if (sort == Sorting.ASCENDING)
             stocks.sortBy { it.changePriceDayPercent }
         else

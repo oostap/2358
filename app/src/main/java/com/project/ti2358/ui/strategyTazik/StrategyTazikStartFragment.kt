@@ -82,6 +82,7 @@ class StrategyTazikStartFragment : Fragment() {
                 processText(query)
                 return false
             }
+
             override fun onQueryTextChange(newText: String): Boolean {
                 processText(newText)
                 return false

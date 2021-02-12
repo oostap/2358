@@ -14,7 +14,7 @@ import java.util.*
 import kotlin.math.roundToInt
 
 @KoinApiExtension
-data class PurchasePosition (
+data class PurchasePosition(
     var position: PortfolioPosition
 ) : KoinComponent {
     private val ordersService: OrdersService by inject()
@@ -53,7 +53,7 @@ data class PurchasePosition (
             else -> ""
         }
 
-    fun getProfitPrice() : Double {
+    fun getProfitPrice(): Double {
         if (profit == 0.0) return 0.0
 
         val avg = position.getAveragePrice()

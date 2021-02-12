@@ -1,7 +1,6 @@
 package com.project.ti2358.ui.strategyRocket
 
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -125,7 +124,8 @@ class StrategyRocketStartFragment : Fragment() {
             }
 
             holder.itemView.setOnClickListener {
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tinkoff.ru/invest/stocks/${holder.stock.marketInstrument.ticker}/"))
+                val browserIntent =
+                    Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tinkoff.ru/invest/stocks/${holder.stock.marketInstrument.ticker}/"))
                 startActivity(browserIntent)
             }
         }

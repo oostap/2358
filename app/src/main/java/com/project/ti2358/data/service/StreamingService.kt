@@ -61,7 +61,7 @@ class StreamingService {
         )
     }
 
-    inner class MyWebSocketListener: WebSocketListener() {
+    inner class MyWebSocketListener : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             Log.d("StreamingService", "onOpen")
             resubscribe().subscribe()
@@ -105,12 +105,12 @@ class StreamingService {
         return Single
             .create<Boolean> { emitter ->
                 activeOrderSubscriptions.forEach { orderEntry ->
-                    orderEntry.value.forEach{
+                    orderEntry.value.forEach {
                         subscribeOrderEventsStream(orderEntry.key, it, addSubscription = false)
                     }
                 }
                 activeCandleSubscriptions.forEach { candleEntry ->
-                    candleEntry.value.forEach{
+                    candleEntry.value.forEach {
                         subscribeCandleEventsStream(candleEntry.key, it, addSubscription = false)
                     }
                 }
@@ -144,7 +144,7 @@ class StreamingService {
             }
             .subscribeOn(Schedulers.from(threadPoolExecutor))
             .flatMapPublisher {
-                publishProcessor.filter{
+                publishProcessor.filter {
                     it is OrderEvent && it.depth == depth
                 } as Flowable<OrderEvent>
             }
@@ -174,7 +174,7 @@ class StreamingService {
             }
             .subscribeOn(Schedulers.from(threadPoolExecutor))
             .flatMapPublisher {
-                publishProcessor.filter{
+                publishProcessor.filter {
                     it is Candle && it.interval == interval
                 } as Flowable<Candle>
             }
@@ -198,7 +198,7 @@ class StreamingService {
         if (addSubscription) {
             if (activeOrderSubscriptions[figi] == null) {
                 activeOrderSubscriptions[figi] = mutableListOf(depth)
-            }  else {
+            } else {
                 activeOrderSubscriptions[figi]?.add(depth)
             }
         }
@@ -216,7 +216,7 @@ class StreamingService {
         if (addSubscription) {
             if (activeCandleSubscriptions[figi] == null) {
                 activeCandleSubscriptions[figi] = mutableListOf(interval)
-            }  else {
+            } else {
                 activeCandleSubscriptions[figi]?.add(interval)
             }
         }

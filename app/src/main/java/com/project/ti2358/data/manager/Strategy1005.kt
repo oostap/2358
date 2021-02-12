@@ -15,7 +15,7 @@ class Strategy1005 : KoinComponent {
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
 
-    fun process() : MutableList<Stock> {
+    fun process(): MutableList<Stock> {
         val all = stockManager.stocksStream
 
         val min = SettingsManager.getCommonPriceMin()
@@ -33,7 +33,8 @@ class Strategy1005 : KoinComponent {
             if (stock.getPriceDouble() > min &&
                 stock.getPriceDouble() < max &&
                 abs(stock.changePrice2359DayPercent) >= abs(change) &&    // изменение
-                stock.getTodayVolume() >= volumeDayPieces) {              // объём в шт
+                stock.getTodayVolume() >= volumeDayPieces
+            ) {              // объём в шт
                 stocks.add(stock)
             }
         }
@@ -41,7 +42,7 @@ class Strategy1005 : KoinComponent {
         return stocks
     }
 
-    fun resort(sort : Sorting = Sorting.ASCENDING) : MutableList<Stock> {
+    fun resort(sort: Sorting = Sorting.ASCENDING): MutableList<Stock> {
         if (sort == Sorting.ASCENDING)
             stocks.sortBy { it.changePrice2359DayPercent }
         else
@@ -50,7 +51,7 @@ class Strategy1005 : KoinComponent {
         return stocks
     }
 
-    fun setSelected(stock: Stock, value : Boolean) {
+    fun setSelected(stock: Stock, value: Boolean) {
         if (value) {
             stocksSelected.remove(stock)
         } else {
@@ -60,7 +61,7 @@ class Strategy1005 : KoinComponent {
         stocksSelected.sortBy { it.changePriceDayPercent }
     }
 
-    fun isSelected(stock: Stock) : Boolean {
+    fun isSelected(stock: Stock): Boolean {
         return stocksSelected.contains(stock)
     }
 }

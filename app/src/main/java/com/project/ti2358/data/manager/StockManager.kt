@@ -75,7 +75,7 @@ class StockManager() : KoinComponent {
         resetSubscription()
     }
 
-    fun getStockByFigi(figi: String) : Stock? {
+    fun getStockByFigi(figi: String): Stock? {
         for (stock in stocksAll) {
             if (stock.marketInstrument.figi == figi) {
                 return stock

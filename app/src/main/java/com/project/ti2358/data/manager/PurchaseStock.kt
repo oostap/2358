@@ -25,7 +25,7 @@ enum class PurchaseStatus {
 }
 
 @KoinApiExtension
-data class PurchaseStock (
+data class PurchaseStock(
     var stock: Stock
 ) : KoinComponent {
     private val ordersService: OrdersService by inject()
@@ -50,10 +50,10 @@ data class PurchaseStock (
     fun getStatusString(): String =
         when (status) {
             PurchaseStatus.NONE -> ""
+            PurchaseStatus.WAITING -> "ждём"
             PurchaseStatus.ORDER_BUY -> "ордер: покупка"
             PurchaseStatus.BUYED -> "куплено!"
             PurchaseStatus.ORDER_SELL -> "ордер: продажа"
-            PurchaseStatus.WAITING -> "ждём"
             PurchaseStatus.SELLED -> "продано!"
             PurchaseStatus.CANCELED -> "отменена!"
         }
@@ -74,11 +74,9 @@ data class PurchaseStock (
         absoluteLimitPriceChange = (absoluteLimitPriceChange * 100.0).roundToInt() / 100.0
     }
 
-    fun buyMarket() { // unused
+    fun buyMarket(priceSell: Double) {
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                val lots = if (SettingsManager.isSandbox()) 1 else lots
-
                 status = PurchaseStatus.ORDER_BUY
                 buyMarketOrder = ordersService.placeMarketOrder(
                     lots,
@@ -90,6 +88,8 @@ data class PurchaseStock (
                 var position: PortfolioPosition? = null
                 var counter = 50
                 while (counter > 0) {
+                    depositManager.refreshDeposit()
+
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
                         status = PurchaseStatus.BUYED
@@ -102,22 +102,11 @@ data class PurchaseStock (
 
                 // продаём
                 position?.let {
-                    val profit = SettingsManager.get2358TakeProfit()
-                    if (profit == 0.0) return@launch
-
-                    // вычисляем и округляем до 2 после запятой
-                    val price = stock.getPriceDouble()
-                    if (price == 0.0) return@launch
-
-                    var profitPrice = price + price / 100.0 * profit
-                    profitPrice = (profitPrice * 100.0).roundToInt() / 100.0
-                    if (profitPrice == 0.0) return@launch
-
                     // выставить ордер на продажу
                     sellLimitOrder = ordersService.placeLimitOrder(
                         it.lots,
                         stock.marketInstrument.figi,
-                        profitPrice,
+                        priceSell,
                         OperationType.SELL
                     )
                     status = PurchaseStatus.ORDER_SELL
@@ -164,8 +153,6 @@ data class PurchaseStock (
                 var position: PortfolioPosition? = null
                 var counter = 50
                 while (counter > 0) {
-                    depositManager.refreshDeposit()
-
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
                         status = PurchaseStatus.BUYED
@@ -373,7 +360,7 @@ data class PurchaseStock (
         }
     }
 
-    fun buyLimit1000(buyPrice: Double) {
+    fun buyLimitTazik(buyPrice: Double) {
         if (SettingsManager.isSandbox()) return
 
         GlobalScope.launch(Dispatchers.Main) {

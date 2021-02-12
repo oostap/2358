@@ -3,14 +3,12 @@ package com.project.ti2358.data.manager
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.MarketInstrument
 import com.project.ti2358.data.service.MarketService
 import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.log
 import com.project.ti2358.service.toString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -19,7 +17,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -100,12 +97,12 @@ data class Stock(
         updateChange2359()
         loadClosingPriceDelay = loadClosingPriceCandle(loadClosingPriceDelay)
 
-        strategyTazik.processStrategy()
+        strategyTazik.processStrategy(this)
     }
 
     private fun processWeekCandle(candle: Candle) {
         candleWeek = candle
-        priceNow = candleWeek?.closingPrice ?: 0.0
+        priceNow = candle.closingPrice
         price1000 = priceNow
 
         stockManager.unsubscribeStock(this, Interval.WEEK)

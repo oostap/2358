@@ -14,7 +14,7 @@ class Strategy2358() : KoinComponent {
     var stocksSelected: MutableList<Stock> = mutableListOf()
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
 
-    fun process() : MutableList<Stock> {
+    fun process(): MutableList<Stock> {
         val all = stockManager.stocksStream
         stocks.clear()
 
@@ -30,7 +30,8 @@ class Strategy2358() : KoinComponent {
                 stock.getTodayVolume() >= volumeDayPieces &&        // объём в шт
                 stock.dayVolumeCash >= volumeDayCash &&             // объём в $
                 stock.getPriceDouble() > min &&          // мин цена
-                stock.getPriceDouble() < max) {          // макс цена
+                stock.getPriceDouble() < max
+            ) {          // макс цена
                 stocks.add(stock)
             }
         }
@@ -38,7 +39,7 @@ class Strategy2358() : KoinComponent {
         return stocks
     }
 
-    fun setSelected(stock: Stock, value : Boolean) {
+    fun setSelected(stock: Stock, value: Boolean) {
         if (value) {
             stocksSelected.remove(stock)
         } else {
@@ -48,11 +49,11 @@ class Strategy2358() : KoinComponent {
         stocksSelected.sortBy { it.changePrice2359DayPercent }
     }
 
-    fun isSelected(stock: Stock) : Boolean {
+    fun isSelected(stock: Stock): Boolean {
         return stocksSelected.contains(stock)
     }
 
-    fun getPurchaseStock(prepare: Boolean) : MutableList<PurchaseStock> {
+    fun getPurchaseStock(prepare: Boolean): MutableList<PurchaseStock> {
         // проверить и удалить бумаги, которые перестали удовлетворять условию 2358
         process()
         stocksSelected.removeAll { !stocks.contains(it) }
@@ -79,8 +80,8 @@ class Strategy2358() : KoinComponent {
             stocksToPurchase.add(PurchaseStock(stock))
         }
 
-        val totalMoney : Double = SettingsManager.get2358PurchaseVolume().toDouble()
-        val onePiece : Double = totalMoney / stocksToPurchase.size
+        val totalMoney: Double = SettingsManager.get2358PurchaseVolume().toDouble()
+        val onePiece: Double = totalMoney / stocksToPurchase.size
 
         for (purchase in stocksToPurchase) {
             purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
@@ -94,7 +95,7 @@ class Strategy2358() : KoinComponent {
         return stocksToPurchase
     }
 
-    fun getTotalPurchaseString() : String {
+    fun getTotalPurchaseString(): String {
         var value = 0.0
         for (stock in stocksToPurchase) {
             value += stock.lots * stock.stock.getPriceDouble()
@@ -102,7 +103,7 @@ class Strategy2358() : KoinComponent {
         return "%.1f$".format(value)
     }
 
-    fun getTotalPurchasePieces() : Int {
+    fun getTotalPurchasePieces(): Int {
         var value = 0
         for (stock in stocksToPurchase) {
             value += stock.lots

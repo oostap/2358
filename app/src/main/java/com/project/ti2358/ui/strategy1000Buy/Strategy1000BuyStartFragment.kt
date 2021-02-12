@@ -2,7 +2,6 @@ package com.project.ti2358.ui.strategy1000Buy
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.SearchEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -83,6 +82,7 @@ class Strategy1000BuyStartFragment : Fragment() {
                 processText(query)
                 return false
             }
+
             override fun onQueryTextChange(newText: String): Boolean {
                 processText(newText)
                 return false

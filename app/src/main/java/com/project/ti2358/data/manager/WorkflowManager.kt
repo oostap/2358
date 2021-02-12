@@ -26,7 +26,7 @@ class WorkflowManager() : KoinComponent {
     private val marketService: MarketService by inject()
     private val ordersService: OrdersService by inject()
 
-    public fun startApp() {
+    fun startApp() {
         if (SettingsManager.isSandbox()) { // TEST
             GlobalScope.launch(Dispatchers.Main) {
                 try {

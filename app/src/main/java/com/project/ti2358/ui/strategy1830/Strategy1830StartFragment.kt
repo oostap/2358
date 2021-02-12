@@ -126,7 +126,8 @@ class Strategy1830StartFragment : Fragment() {
             }
 
             holder.itemView.setOnClickListener {
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tinkoff.ru/invest/stocks/${holder.stock.marketInstrument.ticker}/"))
+                val browserIntent =
+                    Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tinkoff.ru/invest/stocks/${holder.stock.marketInstrument.ticker}/"))
                 startActivity(browserIntent)
             }
         }

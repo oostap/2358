@@ -13,7 +13,7 @@ class Strategy1830() : KoinComponent {
     var stocksSelected: MutableList<Stock> = mutableListOf()
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
 
-    public fun process() : MutableList<Stock> {
+    public fun process(): MutableList<Stock> {
         stocks.clear()
 
         val all = stockManager.stocksStream
@@ -28,7 +28,7 @@ class Strategy1830() : KoinComponent {
         return stocks
     }
 
-    public fun setSelected(stock: Stock, value : Boolean) {
+    public fun setSelected(stock: Stock, value: Boolean) {
         if (value) {
             stocksSelected.remove(stock)
         } else {
@@ -38,18 +38,18 @@ class Strategy1830() : KoinComponent {
         stocksSelected.sortBy { it.changePriceDayPercent }
     }
 
-    public fun isSelected(stock: Stock) : Boolean {
+    public fun isSelected(stock: Stock): Boolean {
         return stocksSelected.contains(stock)
     }
 
-    public fun getPurchaseStock() : MutableList<PurchaseStock> {
+    public fun getPurchaseStock(): MutableList<PurchaseStock> {
         stocksToPurchase.clear()
         for (stock in stocksSelected) {
             stocksToPurchase.add(PurchaseStock(stock))
         }
 
-        val totalMoney : Double = SettingsManager.get2358PurchaseVolume().toDouble()
-        var onePiece : Double = totalMoney / stocksToPurchase.size
+        val totalMoney: Double = SettingsManager.get2358PurchaseVolume().toDouble()
+        var onePiece: Double = totalMoney / stocksToPurchase.size
 
         for (stock in stocksToPurchase) {
             stock.lots = (onePiece / stock.stock.getPriceDouble()).roundToInt()

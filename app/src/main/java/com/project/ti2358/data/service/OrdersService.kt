@@ -12,14 +12,14 @@ import retrofit2.Retrofit
 class OrdersService(retrofit: Retrofit) : BaseService(retrofit) {
     private val ordersApi: OrdersApi = retrofit.create(OrdersApi::class.java)
 
-    suspend fun placeMarketOrder(lots: Int, figi: String, operation : OperationType): MarketOrder {
+    suspend fun placeMarketOrder(lots: Int, figi: String, operation: OperationType): MarketOrder {
         return ordersApi.placeMarketOrder(
             orderBody = MarketOrderBody(lots = lots, operation = operation),
             figi = figi
         ).payload
     }
 
-    suspend fun placeLimitOrder(lots: Int, figi: String, price: Double, operation : OperationType): LimitOrder {
+    suspend fun placeLimitOrder(lots: Int, figi: String, price: Double, operation: OperationType): LimitOrder {
         return ordersApi.placeLimitOrder(
             orderBody = LimitOrderBody(lots = lots, price, operation = operation),
             figi = figi

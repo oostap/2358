@@ -17,7 +17,7 @@ class Strategy1000Buy : KoinComponent {
     var stocksSelected: MutableList<Stock> = mutableListOf()
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
 
-    fun process() : MutableList<Stock> {
+    fun process(): MutableList<Stock> {
         val all = stockManager.stocksStream
 
         val min = SettingsManager.getCommonPriceMin()
@@ -26,7 +26,8 @@ class Strategy1000Buy : KoinComponent {
         stocks.clear()
         for (stock in all) {
             if (stock.getPriceDouble() > min &&
-                stock.getPriceDouble() < max) {
+                stock.getPriceDouble() < max
+            ) {
                 stocks.add(stock)
             }
         }
@@ -34,7 +35,7 @@ class Strategy1000Buy : KoinComponent {
         return stocks
     }
 
-    fun resort(sort : Sorting = Sorting.ASCENDING) : MutableList<Stock> {
+    fun resort(sort: Sorting = Sorting.ASCENDING): MutableList<Stock> {
         if (sort == Sorting.ASCENDING)
             stocks.sortBy { it.changePrice2359DayPercent }
         else
@@ -43,7 +44,7 @@ class Strategy1000Buy : KoinComponent {
         return stocks
     }
 
-    fun setSelected(stock: Stock, value : Boolean) {
+    fun setSelected(stock: Stock, value: Boolean) {
         if (value) {
             stocksSelected.remove(stock)
         } else {
@@ -53,14 +54,14 @@ class Strategy1000Buy : KoinComponent {
         stocksSelected.sortBy { it.changePrice2359DayPercent }
     }
 
-    fun isSelected(stock: Stock) : Boolean {
+    fun isSelected(stock: Stock): Boolean {
         return stocksSelected.contains(stock)
     }
 
-    fun getPurchaseStock() : MutableList<PurchaseStock> {
+    fun getPurchaseStock(): MutableList<PurchaseStock> {
         stocksToPurchase.clear()
-        val totalMoney : Double = SettingsManager.get1000BuyPurchaseVolume().toDouble()
-        val onePiece : Double = totalMoney / stocksToPurchase.size
+        val totalMoney: Double = SettingsManager.get1000BuyPurchaseVolume().toDouble()
+        val onePiece: Double = totalMoney / stocksToPurchase.size
 
         for (stock in stocksSelected) {
             val purchase = PurchaseStock(stock)
@@ -74,7 +75,7 @@ class Strategy1000Buy : KoinComponent {
         return stocksToPurchase
     }
 
-    fun getTotalPurchaseString() : String {
+    fun getTotalPurchaseString(): String {
         var value = 0.0
         for (stock in stocksToPurchase) {
             value += stock.lots * stock.stock.getPriceDouble()
@@ -82,7 +83,7 @@ class Strategy1000Buy : KoinComponent {
         return "%.1f$".format(value)
     }
 
-    fun getTotalPurchasePieces() : Int {
+    fun getTotalPurchasePieces(): Int {
         var value = 0
         for (stock in stocksToPurchase) {
             value += stock.lots
@@ -103,7 +104,11 @@ class Strategy1000Buy : KoinComponent {
     fun getNotificationTextLong(): String {
         var tickers = ""
         for (stock in stocksToPurchase) {
-            val p = "%.1f$ -> %.1f$ -> %.1f".format(stock.lots * stock.getLimitPriceDouble(), stock.getLimitPriceDouble(), stock.percentLimitPriceChange) + "%"
+            val p = "%.1f$ -> %.1f$ -> %.1f".format(
+                stock.lots * stock.getLimitPriceDouble(),
+                stock.getLimitPriceDouble(),
+                stock.percentLimitPriceChange
+            ) + "%"
             tickers += "${stock.stock.marketInstrument.ticker} * ${stock.lots} шт. = ${p} ${stock.getStatusString()}\n"
         }
 

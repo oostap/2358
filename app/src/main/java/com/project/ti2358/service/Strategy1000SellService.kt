@@ -33,9 +33,9 @@ class Strategy1000SellService : Service() {
 
     private var wakeLock: PowerManager.WakeLock? = null
     private var isServiceRunning = false
-    private lateinit var schedulePurchaseTime : Calendar
-    private var notificationButtonReceiver : BroadcastReceiver? = null
-    private var timerSell : Timer? = null       // продажа в 10:00:01
+    private lateinit var schedulePurchaseTime: Calendar
+    private var notificationButtonReceiver: BroadcastReceiver? = null
+    private var timerSell: Timer? = null       // продажа в 10:00:01
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -87,10 +87,10 @@ class Strategy1000SellService : Service() {
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "EndlessService::lock").apply {
-                    acquire()
-                }
+            newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "EndlessService::lock").apply {
+                acquire()
             }
+        }
 
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
 
