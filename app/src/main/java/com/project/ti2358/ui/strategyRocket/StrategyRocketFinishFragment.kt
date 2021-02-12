@@ -74,8 +74,8 @@ class StrategyRocketFinishFragment : Fragment() {
         }
 
 
-        var stocks = strategyRocket.getPurchaseStock()
-        adapterList.setData(stocks)
+//        var stocks = strategyRocket.getPurchaseStock()
+//        adapterList.setData(stocks)
 
 //        var time = SettingsManager.get2358PurchaseTime()
 //

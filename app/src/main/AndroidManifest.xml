@@ -43,6 +43,12 @@
             android:exported="false">
         </service>
 
+        <service
+            android:name=".service.StrategyRocketService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
+
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"

@@ -1,6 +1,18 @@
 package com.project.ti2358.data.manager
 
+import android.app.*
+import android.content.Context
+import android.content.Intent
+import android.graphics.Color
+import android.media.AudioAttributes
+import android.media.RingtoneManager
+import android.net.Uri
+import android.os.Build
+import com.project.ti2358.MainActivity
+import com.project.ti2358.R
 import com.project.ti2358.data.service.SettingsManager
+import com.project.ti2358.service.Utils
+import okhttp3.internal.notify
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -11,48 +23,106 @@ class StrategyRocket() : KoinComponent {
     private val stockManager: StockManager by inject()
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
-    var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
+    private var started: Boolean = false
 
-    public fun process(): MutableList<Stock> {
-        stocks.clear()
-
+    fun process(): MutableList<Stock> {
         val all = stockManager.stocksStream
-        for (stock in all) {
-//            if (SettingsManager.isAllowCurrency(stock.marketInstrument.currency)) {
-            stocks.add(stock)
-//            }
-        }
+
+        val min = SettingsManager.getCommonPriceMin()
+        val max = SettingsManager.getCommonPriceMax()
+
+        stocks.clear()
+        stocks.addAll(all.filter { it.getPriceDouble() > min && it.getPriceDouble() < max })
 
         return stocks
     }
 
-    public fun setSelected(stock: Stock, value: Boolean) {
-        if (value) {
-            stocksSelected.remove(stock)
-        } else {
-            if (!stocksSelected.contains(stock))
-                stocksSelected.add(stock)
-        }
-        stocksSelected.sortBy { it.changePriceDayPercent }
+
+    fun startStrategy() {
+        started = true
+
     }
 
-    public fun isSelected(stock: Stock): Boolean {
-        return stocksSelected.contains(stock)
+    fun stopStrategy() {
+        started = false
     }
 
-    public fun getPurchaseStock(): MutableList<PurchaseStock> {
-        stocksToPurchase.clear()
-        for (stock in stocksSelected) {
-            stocksToPurchase.add(PurchaseStock(stock))
+    var counter: Int = 5
+    fun processStrategy(stock: Stock) {
+        if (!started) return
+
+        var percent = SettingsManager.getRocketChangePercent()
+        var minutes = SettingsManager.getRocketChangeMinutes()
+        var alive = SettingsManager.getRocketNotifyAlive()
+
+        if (counter > 0) {
+            updateNotification(stock.marketInstrument.ticker)
+            counter--
+        }
+    }
+
+    private fun updateNotification(title: String) {
+        val notification = createNotification(Utils.context, title)
+//        notification.notify()
+        val manager = Utils.context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify("text", kotlin.random.Random.Default.nextInt(0, 6000), notification)
+    }
+
+    private fun createNotification(context: Context, title: String): Notification {
+        val notificationChannelId = title
+
+        val alarmSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val audioAttributes = AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_ALARM)
+            .build()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationManager = Utils.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val channel = NotificationChannel(
+                notificationChannelId,
+                "Rocket notifications channel $title",
+                NotificationManager.IMPORTANCE_HIGH
+            ).let {
+                it.description = notificationChannelId
+                it.lightColor = Color.RED
+                it.enableVibration(true)
+                it.enableLights(true)
+                it.setSound(alarmSound, audioAttributes)
+                it
+            }
+            notificationManager.createNotificationChannel(channel)
         }
 
-        val totalMoney: Double = SettingsManager.get2358PurchaseVolume().toDouble()
-        var onePiece: Double = totalMoney / stocksToPurchase.size
-
-        for (stock in stocksToPurchase) {
-            stock.lots = (onePiece / stock.stock.getPriceDouble()).roundToInt()
+        val pendingIntent: PendingIntent = Intent(context, MainActivity::class.java).let { notificationIntent ->
+            PendingIntent.getActivity(context, 0, notificationIntent, 0)
         }
 
-        return stocksToPurchase
+        val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(
+            context,
+            notificationChannelId
+        ) else Notification.Builder(context)
+
+        val cancelIntent = Intent("event.rocket")
+        cancelIntent.putExtra("type", "cancel")
+        val pendingCancelIntent = PendingIntent.getBroadcast(
+            context,
+            1,
+            cancelIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        return builder
+            .setShowWhen(true)
+            .setTicker(title + "1")
+            .setContentTitle(title + "2")
+            .setContentText(title + title + "3")
+            .setStyle(Notification.BigTextStyle().setSummaryText(title + "4"))
+            .setContentIntent(pendingIntent)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setOnlyAlertOnce(true)
+            .setOngoing(false)
+            .addAction(R.mipmap.ic_launcher, "СТОП", pendingCancelIntent)
+            .build()
     }
 }

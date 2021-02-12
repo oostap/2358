@@ -54,24 +54,29 @@ class StrategyRocketStartFragment : Fragment() {
 
         val buttonStart = view.findViewById<Button>(R.id.buttonStart)
         buttonStart.setOnClickListener { _ ->
-            if (strategyRocket.stocksSelected.isNotEmpty())
-                view.findNavController().navigate(R.id.action_nav_rocket_start_to_nav_rocket_finish)
+            if (Utils.isServiceRunning(requireContext(), StrategyRocketService::class.java)) {
+                requireContext().stopService(Intent(context, StrategyRocketService::class.java))
+                strategyRocket.stopStrategy()
+            } else {
+                Utils.startService(requireContext(), StrategyRocketService::class.java)
+                strategyRocket.startStrategy()
+            }
         }
 
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
         buttonUpdate.setOnClickListener { _ ->
-            adapterList.setData(strategyRocket.process())
+//            adapterList.setData(strategyRocket.process())
         }
 
-        val checkBox = view.findViewById<CheckBox>(R.id.check_box)
-        checkBox.setOnCheckedChangeListener { _, isChecked ->
-            for (stock in strategyRocket.process()) {
-                strategyRocket.setSelected(stock, !isChecked)
-            }
-            adapterList.notifyDataSetChanged()
-        }
+//        val checkBox = view.findViewById<CheckBox>(R.id.check_box)
+//        checkBox.setOnCheckedChangeListener { _, isChecked ->
+//            for (stock in strategyRocket.process()) {
+//                strategyRocket.setSelected(stock, !isChecked)
+//            }
+//            adapterList.notifyDataSetChanged()
+//        }
 
-        adapterList.setData(strategyRocket.process())
+//        adapterList.setData(strategyRocket.process())
 
         return view
     }
@@ -99,8 +104,8 @@ class StrategyRocketStartFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            holder.checkBoxView.setOnCheckedChangeListener(null)
-            holder.checkBoxView.isChecked = strategyRocket.isSelected(item)
+//            holder.checkBoxView.setOnCheckedChangeListener(null)
+//            holder.checkBoxView.isChecked = strategyRocket.isSelected(item)
 
             holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
             holder.priceView.text = item.getPriceString()
@@ -119,9 +124,9 @@ class StrategyRocketStartFragment : Fragment() {
                 holder.changePricePercentView.setTextColor(Utils.GREEN)
             }
 
-            holder.checkBoxView.setOnCheckedChangeListener { _, isChecked ->
-                strategyRocket.setSelected(holder.stock, !isChecked)
-            }
+//            holder.checkBoxView.setOnCheckedChangeListener { _, isChecked ->
+//                strategyRocket.setSelected(holder.stock, !isChecked)
+//            }
 
             holder.itemView.setOnClickListener {
                 val browserIntent =
@@ -143,7 +148,7 @@ class StrategyRocketStartFragment : Fragment() {
             val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
 
-            val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
+//            val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
         }
     }
 }

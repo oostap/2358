@@ -46,14 +46,15 @@
             android:icon="@drawable/ic_1000"
             android:title="@string/menu_tazik" />
 
+        <item
+            android:id="@+id/nav_rocket_start"
+            android:icon="@drawable/ic_1000"
+            android:title="@string/menu_rocket" />
+
 <!--        <item-->
 <!--            android:id="@+id/nav_1830_start"-->
 <!--            android:icon="@drawable/ic_1830"-->
 <!--            android:title="@string/menu_1830" />-->
 
-<!--        <item-->
-<!--            android:id="@+id/nav_rocket_start"-->
-<!--            android:icon="@drawable/ic_menu_camera"-->
-<!--            android:title="@string/menu_rocket" />-->
     </group>
 </menu>

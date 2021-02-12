@@ -296,5 +296,36 @@ class SettingsManager {
             val key: String = context.getString(R.string.setting_key_tazik_buy_bid)
             return preferences.getBoolean(key, false)
         }
+
+        /******************** Rockets *************************/
+        fun getRocketChangePercent(): Double {
+            val key: String = context.getString(R.string.setting_key_rocket_change_percent)
+            val value: String? = preferences.getString(key, "3.0")
+            return try {
+                (value ?: "3.0").toDouble()
+            } catch (e: Exception) {
+                3.0
+            }
+        }
+
+        fun getRocketChangeMinutes(): Int {
+            val key: String = context.getString(R.string.setting_key_rocket_change_minutes)
+            val value: String? = preferences.getString(key, "5")
+            return try {
+                (value ?: "5").toInt()
+            } catch (e: Exception) {
+                5
+            }
+        }
+
+        fun getRocketNotifyAlive(): Int {
+            val key: String = context.getString(R.string.setting_key_rocket_notify_alive)
+            val value: String? = preferences.getString(key, "5")
+            return try {
+                (value ?: "5").toInt()
+            } catch (e: Exception) {
+                5
+            }
+        }
     }
 }

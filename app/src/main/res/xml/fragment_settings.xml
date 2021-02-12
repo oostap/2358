@@ -188,4 +188,25 @@
             app:defaultValue="false" />
 
     </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/stocks_header_rocket">
+        <EditTextPreference
+            app:key="@string/setting_key_rocket_change_percent"
+            app:title="@string/stocks_rocket_change_percent"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="2.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_rocket_change_minutes"
+            app:title="@string/stocks_rocket_change_minutes"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="5"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_rocket_notify_alive"
+            app:title="@string/stocks_rocket_notify_alive"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="5"/>
+
+    </PreferenceCategory>
 </PreferenceScreen>

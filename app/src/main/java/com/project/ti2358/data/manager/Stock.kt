@@ -28,6 +28,8 @@ data class Stock(
 ) : KoinComponent {
     val strategy1728: Strategy1728 by inject()
     val strategyTazik: StrategyTazik by inject()
+    val strategyRocket: StrategyRocket by inject()
+
     private val marketService: MarketService by inject()
     private val stockManager: StockManager by inject()
 
@@ -98,6 +100,7 @@ data class Stock(
         loadClosingPriceDelay = loadClosingPriceCandle(loadClosingPriceDelay)
 
         strategyTazik.processStrategy(this)
+        strategyRocket.processStrategy(this)
     }
 
     private fun processWeekCandle(candle: Candle) {

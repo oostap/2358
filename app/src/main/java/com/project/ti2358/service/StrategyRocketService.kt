@@ -1,37 +1,37 @@
 package com.project.ti2358.service
 
 import android.app.*
-import android.app.NotificationManager.*
+import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
+import android.media.AudioAttributes
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.widget.Toast
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.StrategyTazik
-import com.project.ti2358.data.service.SettingsManager
+import com.project.ti2358.data.manager.StrategyRocket
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.internal.notify
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-import java.lang.Integer.parseInt
-import java.util.*
+
 
 @KoinApiExtension
-class StrategyTazikService : Service() {
+class StrategyRocketService : Service() {
 
-    private val NOTIFICATION_CHANNEL_ID = "TAZIK CHANNEL NOTIFICATION"
-    private val NOTIFICATION_ID = 100011
+    private val NOTIFICATION_CHANNEL_ID = "ROCKET CHANNEL NOTIFICATION"
+    private val NOTIFICATION_ID = 1000111
 
-    private val strategyTazik: StrategyTazik by inject()
+    private val strategyRocket: StrategyRocket by inject()
 
     private var wakeLock: PowerManager.WakeLock? = null
     private var isServiceRunning = false
@@ -42,7 +42,7 @@ class StrategyTazikService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val intentFilter = IntentFilter("event.tazik")
+        val intentFilter = IntentFilter("event.rocket")
         notificationButtonReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val type = intent.getStringExtra("type")
@@ -52,7 +52,7 @@ class StrategyTazikService : Service() {
                     )
                     notificationButtonReceiver = null
                     context.stopService(Intent(context, StrategyTazikService::class.java))
-                    strategyTazik.stopStrategy()
+                    strategyRocket.stopStrategy()
                 }
             }
         }
@@ -63,14 +63,14 @@ class StrategyTazikService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notification = createNotification("Tazik")
+        val notification = createNotification("Rocket")
         startForeground(NOTIFICATION_ID, notification)
 
         scheduleUpdate()
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Покупка тазика отменена", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Ракеты выключены", Toast.LENGTH_LONG).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -79,7 +79,7 @@ class StrategyTazikService : Service() {
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Запущен тазик на покупку просадок", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Ракета запущена", Toast.LENGTH_LONG).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
@@ -89,15 +89,12 @@ class StrategyTazikService : Service() {
         }
 
         GlobalScope.launch(Dispatchers.IO) {
-            while (isServiceRunning) {
-                var seconds = updateNotification()
-                delay(1 * 1000 * seconds)
-            }
+            updateNotification()
         }
     }
 
     private fun stopService() {
-        Toast.makeText(this, "Тазик остановлен", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Ракеты остановлены", Toast.LENGTH_SHORT).show()
         try {
             wakeLock?.let {
                 if (it.isHeld) {
@@ -113,7 +110,7 @@ class StrategyTazikService : Service() {
     }
 
     private fun updateNotification(): Long {
-        val title = "Внимание! Работает автотазик!"
+        val title = "Внимание! Работают ракеты!"
 
         val notification = createNotification(title)
         synchronized(notification) {
@@ -132,8 +129,8 @@ class StrategyTazikService : Service() {
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val channel = NotificationChannel(
                 notificationChannelId,
-                "Tazik notifications channel",
-                IMPORTANCE_HIGH
+                "Rocket notifications channel",
+                IMPORTANCE_DEFAULT
             ).let {
                 it.description = notificationChannelId
                 it.lightColor = Color.RED
@@ -152,7 +149,7 @@ class StrategyTazikService : Service() {
             notificationChannelId
         ) else Notification.Builder(this)
 
-        val cancelIntent = Intent("event.tazik")
+        val cancelIntent = Intent("event.rocket")
         cancelIntent.putExtra("type", "cancel")
         val pendingCancelIntent = PendingIntent.getBroadcast(
             this,
@@ -161,17 +158,20 @@ class StrategyTazikService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val longText: String = strategyTazik.getNotificationTextLong()
-        val shortText: String = strategyTazik.getNotificationTextShort()
-        val priceText: String = strategyTazik.getTotalPurchaseString()
+//        val longText: String = strategyTazik.getNotificationTextLong()
+//        val shortText: String = strategyTazik.getNotificationTextShort()
+//        val priceText: String = strategyTazik.getTotalPurchaseString()
+//        builder.setSound(alarmSound)
+//        builder.setDefaults(Notification.DEFAULT_SOUND);
 
         return builder
-            .setContentText(shortText)
-            .setStyle(Notification.BigTextStyle().setSummaryText(title).bigText(longText).setBigContentTitle(priceText))
+//            .setContentTitle(title)
+//            .setContentText(shortText)
+            .setStyle(Notification.BigTextStyle().setSummaryText(title))
             .setContentIntent(pendingIntent)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setOnlyAlertOnce(true)
-            .setOngoing(false)
+            .setOngoing(true)
             .addAction(R.mipmap.ic_launcher, "СТОП", pendingCancelIntent)
             .build()
     }
