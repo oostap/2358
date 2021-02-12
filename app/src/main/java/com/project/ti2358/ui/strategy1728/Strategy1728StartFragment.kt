@@ -19,6 +19,7 @@ import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import kotlin.math.roundToInt
 
 @KoinApiExtension
 class Strategy1728StartFragment : Fragment() {
@@ -134,7 +135,11 @@ class Strategy1728StartFragment : Fragment() {
                     Utils.showMessageAlert(requireContext(), "В настройках не задана сумма покупки для позиции, раздел 1728.")
                 } else {
                     val purchase = PurchaseStock(holder.stock)
-                    purchase.buyLimitFromAsk1728()
+
+                    // считаем лоты
+                    purchase.lots = (SettingsManager.get1728PurchaseVolume() / purchase.stock.getPriceDouble()).roundToInt()
+
+                    purchase.buyLimitFromAsk(SettingsManager.get1728TakeProfit())
                 }
             }
 

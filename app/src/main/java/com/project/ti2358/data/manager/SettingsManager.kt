@@ -282,8 +282,18 @@ class SettingsManager {
             }
         }
 
+        fun getTazikBuyAsk(): Boolean {
+            val key: String = context.getString(R.string.setting_key_tazik_buy_ask)
+            return preferences.getBoolean(key, false)
+        }
+
         fun getTazikBuyMarket(): Boolean {
             val key: String = context.getString(R.string.setting_key_tazik_buy_market)
+            return preferences.getBoolean(key, false)
+        }
+
+        fun getTazikBuyBid(): Boolean {
+            val key: String = context.getString(R.string.setting_key_tazik_buy_bid)
             return preferences.getBoolean(key, false)
         }
     }

@@ -208,18 +208,22 @@ class StrategyTazik : KoinComponent {
                 if (!stocksBuyed.contains(stock)) {
                     log("ПРОСАДКА: ПОКУПАЕМ!! ${stock.marketInstrument}")
 
-                    val market = SettingsManager.getTazikBuyMarket()
+                    when {
+                        SettingsManager.getTazikBuyAsk() -> { // покупка из аска
+                            purchase.buyLimitFromAsk(SettingsManager.getTazikTakeProfit())
+                        }
+                        SettingsManager.getTazikBuyMarket() -> { // покупка по маркету
+                            // примерна цена покупки (! средняя будет неизвестна из-за тинька !)
+                            val priceBuy = stock.priceTazik - stock.priceTazik / 100.0 * purchase.percentLimitPriceChange
 
-                    if (market) { // покупка по маркету
-                        // примерна цена покупки (! средняя будет неизвестна из-за тинька !)
-                        val priceBuy = stock.priceTazik - stock.priceTazik / 100.0 * purchase.percentLimitPriceChange
-
-                        // ставим цену продажу относительно примрной средней
-                        val priceSell = priceBuy + priceBuy / 100.0 * SettingsManager.getTazikTakeProfit()
-                        purchase.buyMarket(priceSell)
-                    } else { // ставим лимитку на наш %
-                        val priceBuy = stock.priceTazik - stock.priceTazik / 100.0 * purchase.percentLimitPriceChange
-                        purchase.buyLimitTazik(priceBuy)
+                            // ставим цену продажу относительно примрной средней
+                            val priceSell = priceBuy + priceBuy / 100.0 * SettingsManager.getTazikTakeProfit()
+                            purchase.buyMarket(priceSell)
+                        }
+                        else -> { // ставим лимитку на наш %
+                            val buyPrice = stock.priceTazik - stock.priceTazik / 100.0 * purchase.percentLimitPriceChange
+                            purchase.buyLimitFromBid(buyPrice, SettingsManager.getTazikTakeProfit())
+                        }
                     }
 
                     // завершение стратегии

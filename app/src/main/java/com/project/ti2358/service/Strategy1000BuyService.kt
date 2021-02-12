@@ -138,7 +138,7 @@ class Strategy1000BuyService : Service() {
             override fun run() {
                 val localPurchases = strategy1000Buy.stocksToPurchase
                 for (purchase in localPurchases) {
-                    purchase.buyLimit()
+                    purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), SettingsManager.get1000BuyTakeProfit())
                 }
             }
         }, scheduleDelay)

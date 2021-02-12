@@ -87,7 +87,9 @@
     <string name="stocks_tazik_purchase_volume">Общий объём покупки</string>
     <string name="stocks_tazik_purchase_parts">Количество бумаг для покупки</string>
     <string name="stocks_tazik_take_profit">Заявка на продажу в % (0 = не создавать)</string>
-    <string name="stocks_tazik_buy_market">Покупка по рынку (иначе лимитка)</string>
+    <string name="stocks_tazik_buy_market">Покупка по рынку</string>
+    <string name="stocks_tazik_buy_ask">Покупка из аска</string>
+    <string name="stocks_tazik_buy_bid">Покупка из бида</string>
 
     <!-- setting keys-->
 
@@ -132,6 +134,8 @@
     <string name="setting_key_tazik_purchase_volume">tazik_purchase_volume</string>
     <string name="setting_key_tazik_purchase_parts">tazik_purchase_parts</string>
     <string name="setting_key_tazik_take_profit">tazik_take_profit</string>
+    <string name="setting_key_tazik_buy_ask">tazik_buy_ask</string>
+    <string name="setting_key_tazik_buy_bid">tazik_buy_bid</string>
     <string name="setting_key_tazik_buy_market">tazik_buy_market</string>
 
     <!-- rocket settings -->

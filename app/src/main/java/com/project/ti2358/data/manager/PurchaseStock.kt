@@ -75,6 +75,8 @@ data class PurchaseStock(
     }
 
     fun buyMarket(priceSell: Double) {
+        if (SettingsManager.isSandbox() || lots == 0) return
+        
         GlobalScope.launch(Dispatchers.Main) {
             try {
                 status = PurchaseStatus.ORDER_BUY
@@ -128,16 +130,12 @@ data class PurchaseStock(
         }
     }
 
-    fun buyLimit() {
-        if (SettingsManager.isSandbox()) return
+    fun buyLimitFromBid(buyPrice: Double, profit: Double) {
+        if (SettingsManager.isSandbox() || lots == 0) return
 
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                val lots = lots
-
-                val ticker = stock.marketInstrument.ticker
                 status = PurchaseStatus.ORDER_BUY
-                val buyPrice = getLimitPriceDouble()
                 buyLimitOrder = ordersService.placeLimitOrder(
                     lots,
                     stock.marketInstrument.figi,
@@ -145,7 +143,8 @@ data class PurchaseStock(
                     OperationType.BUY
                 )
 
-                Utils.showToastAlert("$ticker: покупка из аска по $buyPrice")
+                val ticker = stock.marketInstrument.ticker
+                Utils.showToastAlert("$ticker: покупка по $buyPrice")
 
                 delay(250)
 
@@ -153,6 +152,8 @@ data class PurchaseStock(
                 var position: PortfolioPosition? = null
                 var counter = 50
                 while (counter > 0) {
+                    depositManager.refreshDeposit()
+
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
                         status = PurchaseStatus.BUYED
@@ -165,7 +166,6 @@ data class PurchaseStock(
 
                 // продаём
                 position?.let {
-                    val profit = SettingsManager.get1000BuyTakeProfit()
                     if (profit == 0.0) return@launch
 
                     // вычисляем и округляем до 2 после запятой
@@ -187,7 +187,7 @@ data class PurchaseStock(
                 }
 
                 while (true) {
-                    delay(2000)
+                    delay(3000)
 
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position == null) { // продано!
@@ -203,52 +203,47 @@ data class PurchaseStock(
         }
     }
 
-    fun buyLimitFromAsk1728() {
-        if (SettingsManager.isSandbox()) return
+    fun buyLimitFromAsk(profit: Double) {
+        if (SettingsManager.isSandbox() || lots == 0) return
 
         GlobalScope.launch(Dispatchers.Main) {
             try {
                 // получить стакан
                 val orderbook = marketService.orderbook(stock.marketInstrument.figi, 5)
+
+                val buyPrice = orderbook.getBestPriceFromAsk(lots)
+                log("$orderbook")
+
+                status = PurchaseStatus.ORDER_BUY
+                buyLimitOrder = ordersService.placeLimitOrder(
+                    lots,
+                    stock.marketInstrument.figi,
+                    buyPrice,
+                    OperationType.BUY
+                )
 
                 val ticker = stock.marketInstrument.ticker
-                val volume = SettingsManager.get1728PurchaseVolume()
-                lots = (volume / stock.getPriceDouble()).roundToInt()
-
-                val buyPrice = orderbook.getBestPriceFromAsk(lots)
-                log("$orderbook")
-
-                status = PurchaseStatus.ORDER_BUY
-                buyLimitOrder = ordersService.placeLimitOrder(
-                    lots,
-                    stock.marketInstrument.figi,
-                    buyPrice,
-                    OperationType.BUY
-                )
-
-                Utils.showToastAlert("$ticker: покупка из аска по $buyPrice")
+                Utils.showToastAlert("$ticker: покупка по $buyPrice")
 
                 delay(250)
 
                 // проверяем появился ли в портфеле тикер
-                var position: PortfolioPosition? = null
-                var counter = 20
-                while (counter > 0) {
+                var position: PortfolioPosition?
+                while (true) {
                     depositManager.refreshDeposit()
 
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
                         status = PurchaseStatus.BUYED
+                        Utils.showToastAlert("$ticker: куплено!")
                         break
                     }
 
                     delay(1000)
-                    counter--
                 }
 
                 // продаём
                 position?.let {
-                    val profit = SettingsManager.get1728TakeProfit()
                     if (profit == 0.0) return@launch
 
                     // вычисляем и округляем до 2 после запятой
@@ -271,153 +266,12 @@ data class PurchaseStock(
                 }
 
                 while (true) {
-                    delay(2000)
+                    delay(3000)
 
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position == null) { // продано!
                         status = PurchaseStatus.SELLED
                         Utils.showToastAlert("$ticker: продано!")
-                        break
-                    }
-                }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    fun buyLimitFromAsk2358() {
-        if (SettingsManager.isSandbox()) return
-
-        GlobalScope.launch(Dispatchers.Main) {
-            try {
-                // получить стакан
-                val orderbook = marketService.orderbook(stock.marketInstrument.figi, 5)
-
-                val buyPrice = orderbook.getBestPriceFromAsk(lots)
-                log("$orderbook")
-
-                status = PurchaseStatus.ORDER_BUY
-                buyLimitOrder = ordersService.placeLimitOrder(
-                    lots,
-                    stock.marketInstrument.figi,
-                    buyPrice,
-                    OperationType.BUY
-                )
-
-                delay(250)
-
-                // проверяем появился ли в портфеле тикер
-                var position: PortfolioPosition?
-                while (true) {
-                    depositManager.refreshDeposit()
-
-                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
-                    if (position != null && position.lots >= lots) { // куплено!
-                        status = PurchaseStatus.BUYED
-                        break
-                    }
-
-                    delay(1000)
-                }
-
-                // продаём
-                position?.let {
-                    val profit = SettingsManager.get2358TakeProfit()
-                    if (profit == 0.0) return@launch
-
-                    // вычисляем и округляем до 2 после запятой
-                    if (buyPrice == 0.0) return@launch
-
-                    var profitPrice = buyPrice + buyPrice / 100.0 * profit
-                    profitPrice = (profitPrice * 100.0).roundToInt() / 100.0
-                    if (profitPrice == 0.0) return@launch
-
-                    // выставить ордер на продажу
-                    sellLimitOrder = ordersService.placeLimitOrder(
-                        it.lots,
-                        stock.marketInstrument.figi,
-                        profitPrice,
-                        OperationType.SELL
-                    )
-                    status = PurchaseStatus.ORDER_SELL
-                }
-
-                while (true) {
-                    delay(2000)
-
-                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
-                    if (position == null) { // продано!
-                        status = PurchaseStatus.SELLED
-                        break
-                    }
-                }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    fun buyLimitTazik(buyPrice: Double) {
-        if (SettingsManager.isSandbox()) return
-
-        GlobalScope.launch(Dispatchers.Main) {
-            try {
-                // получить стакан
-                status = PurchaseStatus.ORDER_BUY
-                buyLimitOrder = ordersService.placeLimitOrder(
-                    lots,
-                    stock.marketInstrument.figi,
-                    buyPrice,
-                    OperationType.BUY
-                )
-
-                delay(100)
-
-                // проверяем появился ли в портфеле тикер
-                var position: PortfolioPosition?
-                while (true) {
-                    depositManager.refreshDeposit()
-
-                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
-                    if (position != null && position.lots >= lots) { // куплено!
-                        status = PurchaseStatus.BUYED
-                        break
-                    }
-
-                    delay(1000)
-                }
-
-                // продаём
-                position?.let {
-                    val profit = SettingsManager.getTazikTakeProfit()
-                    if (profit == 0.0) return@launch
-
-                    // вычисляем и округляем до 2 после запятой
-                    if (buyPrice == 0.0) return@launch
-
-                    var profitPrice = buyPrice + buyPrice / 100.0 * profit
-                    profitPrice = (profitPrice * 100.0).roundToInt() / 100.0
-                    if (profitPrice == 0.0) return@launch
-
-                    // выставить ордер на продажу
-                    sellLimitOrder = ordersService.placeLimitOrder(
-                        it.lots,
-                        stock.marketInstrument.figi,
-                        profitPrice,
-                        OperationType.SELL
-                    )
-                    status = PurchaseStatus.ORDER_SELL
-                }
-
-                while (true) {
-                    delay(2000)
-
-                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
-                    if (position == null) { // продано!
-                        status = PurchaseStatus.SELLED
                         break
                     }
                 }
