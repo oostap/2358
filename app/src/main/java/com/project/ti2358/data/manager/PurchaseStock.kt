@@ -76,7 +76,7 @@ data class PurchaseStock(
 
     fun buyMarket(priceSell: Double) {
         if (SettingsManager.isSandbox() || lots == 0) return
-        
+
         GlobalScope.launch(Dispatchers.Main) {
             try {
                 status = PurchaseStatus.ORDER_BUY
