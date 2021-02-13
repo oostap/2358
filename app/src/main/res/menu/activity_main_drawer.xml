@@ -46,10 +46,10 @@
             android:icon="@drawable/ic_1000"
             android:title="@string/menu_tazik" />
 
-        <item
-            android:id="@+id/nav_rocket_start"
-            android:icon="@drawable/ic_1000"
-            android:title="@string/menu_rocket" />
+<!--        <item-->
+<!--            android:id="@+id/nav_rocket_start"-->
+<!--            android:icon="@drawable/ic_1000"-->
+<!--            android:title="@string/menu_rocket" />-->
 
 <!--        <item-->
 <!--            android:id="@+id/nav_1830_start"-->

@@ -86,7 +86,7 @@
     <!-- tazik settings -->
     <string name="stocks_tazik_min_percent_to_buy">Минимальная просадка в %</string>
     <string name="stocks_tazik_purchase_volume">Общий объём покупки</string>
-    <string name="stocks_tazik_purchase_parts">Количество бумаг для покупки</string>
+    <string name="stocks_tazik_purchase_parts">Сколько тазиков? (заявок)</string>
     <string name="stocks_tazik_take_profit">Заявка на продажу в % (0 = не создавать)</string>
     <string name="stocks_tazik_buy_market">Покупка по рынку</string>
     <string name="stocks_tazik_buy_ask">Покупка из аска</string>
