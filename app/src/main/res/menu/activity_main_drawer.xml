@@ -13,39 +13,38 @@
             android:icon="@drawable/ic_portfolio"
             android:title="@string/menu_portfolio" />
         <item
-            android:id="@+id/nav_stocks"
-            android:icon="@drawable/ic_stocks"
-            android:title="@string/menu_stocks" />
-        <item
             android:id="@+id/nav_1000_sell_start"
             android:icon="@drawable/ic_1000"
             android:title="@string/menu_1000_sell" />
-
         <item
             android:id="@+id/nav_1000_buy_start"
             android:icon="@drawable/ic_1000"
             android:title="@string/menu_1000_buy" />
-
+        <item
+            android:id="@+id/nav_tazik_start"
+            android:icon="@drawable/ic_1000"
+            android:title="@string/menu_tazik" />
+        <item
+            android:id="@+id/nav_premarket"
+            android:icon="@drawable/ic_stocks"
+            android:title="@string/menu_premarket" />
         <item
             android:id="@+id/nav_1005_start"
             android:icon="@drawable/ic_1000"
             android:title="@string/menu_1005" />
-
+        <item
+            android:id="@+id/nav_1728_start"
+            android:icon="@drawable/ic_1728"
+            android:title="@string/menu_1728" />
         <item
             android:id="@+id/nav_2358_start"
             android:icon="@drawable/ic_2358"
             android:title="@string/menu_2358" />
 
         <item
-            android:id="@+id/nav_1728_start"
-            android:icon="@drawable/ic_1728"
-            android:title="@string/menu_1728" />
-
-        <item
-            android:id="@+id/nav_tazik_start"
-            android:icon="@drawable/ic_1000"
-            android:title="@string/menu_tazik" />
-
+            android:id="@+id/nav_postmarket"
+            android:icon="@drawable/ic_stocks"
+            android:title="@string/menu_postmarket" />
 <!--        <item-->
 <!--            android:id="@+id/nav_rocket_start"-->
 <!--            android:icon="@drawable/ic_1000"-->

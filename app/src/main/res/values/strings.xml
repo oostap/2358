@@ -25,7 +25,8 @@
 
     <string name="menu_settings">Настройки</string>
     <string name="menu_portfolio">Депозит</string>
-    <string name="menu_stocks">Премаркет</string>
+    <string name="menu_premarket">Премаркет</string>
+    <string name="menu_postmarket">Постмаркет US</string>
     <string name="menu_1000_sell">1000 sell</string>
     <string name="menu_1000_buy">1000 buy</string>
     <string name="menu_1005">1005</string>

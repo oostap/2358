@@ -19,12 +19,19 @@
         android:label="@string/menu_portfolio"
         tools:layout="@layout/fragment_portfolio_item_list" />
 
-    <!-- скринер -->
+    <!-- премаркет РФ -->
     <fragment
-        android:id="@+id/nav_stocks"
-        android:name="com.project.ti2358.ui.stocks.ScreenerFragment"
-        android:label="@string/menu_stocks"
-        tools:layout="@layout/fragment_screener_item_list" />
+        android:id="@+id/nav_premarket"
+        android:name="com.project.ti2358.ui.premarket.PremarketFragment"
+        android:label="@string/menu_premarket"
+        tools:layout="@layout/fragment_premarket_item_list" />
+
+    <!-- постмаркет US -->
+    <fragment
+        android:id="@+id/nav_postmarket"
+        android:name="com.project.ti2358.ui.postmarket.PostmarketFragment"
+        android:label="@string/menu_postmarket"
+        tools:layout="@layout/fragment_postmarket_item_list" />
 
     <!-- 2358 -->
 

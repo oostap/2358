@@ -1,7 +1,6 @@
 package com.project.ti2358.service
 
-import android.app.ActivityManager
-import android.app.AlertDialog
+import android.app.*
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -13,8 +12,11 @@ import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.preference.PreferenceManager
 import com.project.ti2358.BuildConfig
+import com.project.ti2358.MainActivity
+import com.project.ti2358.R
 import com.project.ti2358.data.service.SettingsManager
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.core.component.KoinApiExtension
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -168,6 +170,62 @@ class Utils {
             }
 
             return false
+        }
+
+        @KoinApiExtension
+        fun createNotification(context: Context,
+                               channelId: String,
+                               cancelAction: String,
+                               summaryTitle: String,
+                               shortText: String,
+                               longText: String,
+                               longTitleText: String): Notification {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val channel = NotificationChannel(
+                    channelId,
+                    "2358 notifications channel",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).let {
+                    it.description = channelId
+                    it.lightColor = Color.RED
+                    it.enableVibration(false)
+                    it
+                }
+                notificationManager.createNotificationChannel(channel)
+            }
+
+            val pendingIntent: PendingIntent = Intent(context, MainActivity::class.java).let { notificationIntent ->
+                PendingIntent.getActivity(context, 0, notificationIntent, 0)
+            }
+
+            val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(
+                context,
+                channelId
+            ) else Notification.Builder(context)
+
+            val cancelIntent = Intent(cancelAction)
+            cancelIntent.putExtra("type", "cancel")
+            val pendingCancelIntent = PendingIntent.getBroadcast(
+                context,
+                1,
+                cancelIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+//            val longText: String = strategy1000Buy.getNotificationTextLong()
+//            val shortText: String = strategy1000Buy.getNotificationTextShort()
+//            val longTitleText: String = "~" + strategy1000Buy.getTotalPurchaseString() + " ="
+
+            return builder
+                .setContentText(shortText)
+                .setStyle(Notification.BigTextStyle().setSummaryText(summaryTitle).bigText(longText).setBigContentTitle(longTitleText))
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setOnlyAlertOnce(true)
+                .setOngoing(false)
+                .addAction(R.mipmap.ic_launcher, "СТОП", pendingCancelIntent)
+                .build()
         }
     }
 }

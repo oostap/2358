@@ -1,4 +1,4 @@
-package com.project.ti2358.ui.stocks
+package com.project.ti2358.ui.premarket
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.manager.StrategyScreener
+import com.project.ti2358.data.manager.StrategyPremarket
 import com.project.ti2358.service.Sorting
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toDollar
@@ -20,9 +20,9 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class ScreenerFragment : Fragment() {
+class PremarketFragment : Fragment() {
 
-    val strategyScreener: StrategyScreener by inject()
+    val strategyPremarket: StrategyPremarket by inject()
     var adapterList: ItemStocksRecyclerViewAdapter = ItemStocksRecyclerViewAdapter(emptyList())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +33,7 @@ class ScreenerFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_screener_item_list, container, false)
+        val view = inflater.inflate(R.layout.fragment_premarket_item_list, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
         if (list is RecyclerView) {
@@ -46,8 +46,8 @@ class ScreenerFragment : Fragment() {
         var sort = Sorting.DESCENDING
         val buttonSort = view.findViewById<Button>(R.id.buttonSort)
         buttonSort.setOnClickListener {
-            strategyScreener.process()
-            adapterList.setData(strategyScreener.resort(sort))
+            strategyPremarket.process()
+            adapterList.setData(strategyPremarket.resort(sort))
             sort = if (sort == Sorting.DESCENDING) {
                 Sorting.ASCENDING
             } else {
@@ -55,8 +55,8 @@ class ScreenerFragment : Fragment() {
             }
         }
 
-        strategyScreener.process()
-        adapterList.setData(strategyScreener.resort(sort))
+        strategyPremarket.process()
+        adapterList.setData(strategyPremarket.resort(sort))
 
         return view
     }
@@ -72,7 +72,7 @@ class ScreenerFragment : Fragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(
-                R.layout.fragment_screener_item,
+                R.layout.fragment_premarket_item,
                 parent,
                 false
             )

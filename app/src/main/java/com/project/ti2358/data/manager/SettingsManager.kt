@@ -42,6 +42,10 @@ class SettingsManager {
             }
         }
 
+        fun getYahooBaseUrl(): String {
+            return "https://query1.finance.yahoo.com/v10/finance/quoteSummary/"
+        }
+
         fun isAllowCurrency(currency: Currency): Boolean {
             if (currency == Currency.USD) return true
             return false

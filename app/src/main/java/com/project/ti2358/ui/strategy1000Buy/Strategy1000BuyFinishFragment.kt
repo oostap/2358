@@ -61,12 +61,7 @@ class Strategy1000BuyFinishFragment : Fragment() {
                 Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел 1000 buy.")
             } else {
                 if (Utils.isServiceRunning(requireContext(), Strategy1000BuyService::class.java)) {
-                    requireContext().stopService(
-                        Intent(
-                            context,
-                            Strategy1000BuyService::class.java
-                        )
-                    )
+                    requireContext().stopService(Intent(context, Strategy1000BuyService::class.java))
                 } else {
                     if (strategy1000Buy.getTotalPurchasePieces() > 0) {
                         Utils.startService(requireContext(), Strategy1000BuyService::class.java)
@@ -79,7 +74,7 @@ class Strategy1000BuyFinishFragment : Fragment() {
         positions = strategy1000Buy.getPurchaseStock()
         adapterList.setData(positions)
 
-        infoTextView = view.findViewById<TextView>(R.id.info_text)
+        infoTextView = view.findViewById(R.id.info_text)
         updateInfoText()
 
         return view

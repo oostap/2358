@@ -28,6 +28,7 @@ import java.util.*
 @KoinApiExtension
 class StrategyTazikService : Service() {
 
+    private val NOTIFICATION_CANCEL_ACTION = "event.tazik"
     private val NOTIFICATION_CHANNEL_ID = "TAZIK CHANNEL NOTIFICATION"
     private val NOTIFICATION_ID = 100011
 
@@ -42,14 +43,12 @@ class StrategyTazikService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val intentFilter = IntentFilter("event.tazik")
+        val intentFilter = IntentFilter(NOTIFICATION_CANCEL_ACTION)
         notificationButtonReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val type = intent.getStringExtra("type")
                 if (type == "cancel") {
-                    if (notificationButtonReceiver != null) unregisterReceiver(
-                        notificationButtonReceiver
-                    )
+                    if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
                     notificationButtonReceiver = null
                     context.stopService(Intent(context, StrategyTazikService::class.java))
                     strategyTazik.stopStrategy()
@@ -63,7 +62,7 @@ class StrategyTazikService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notification = createNotification("Tazik")
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION, "Тазик", "", "", "")
         startForeground(NOTIFICATION_ID, notification)
 
         scheduleUpdate()
@@ -84,38 +83,31 @@ class StrategyTazikService : Service() {
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
             newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "EndlessService::lock").apply {
-                acquire()
+                acquire(10*610*1000L /*10 minutes*/)
             }
         }
 
         GlobalScope.launch(Dispatchers.IO) {
             while (isServiceRunning) {
-                var seconds = updateNotification()
+                val seconds = updateNotification()
                 delay(1 * 1000 * seconds)
             }
         }
     }
 
-    private fun stopService() {
-        Toast.makeText(this, "Тазик остановлен", Toast.LENGTH_SHORT).show()
-        try {
-            wakeLock?.let {
-                if (it.isHeld) {
-                    it.release()
-                }
-            }
-            stopForeground(true)
-            stopSelf()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        isServiceRunning = false
-    }
-
     private fun updateNotification(): Long {
         val title = "Внимание! Работает автотазик!"
 
-        val notification = createNotification(title)
+        val longText: String = strategyTazik.getNotificationTextLong()
+        val shortText: String = strategyTazik.getNotificationTextShort()
+        val longTitleText: String = strategyTazik.getTotalPurchaseString()
+
+        val notification = Utils.createNotification(
+            this,
+            NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION,
+            title, shortText, longText, longTitleText
+        )
+
         synchronized(notification) {
             notification.notify()
             val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -123,56 +115,5 @@ class StrategyTazikService : Service() {
         }
 
         return 5
-    }
-
-    private fun createNotification(title: String): Notification {
-        val notificationChannelId = NOTIFICATION_CHANNEL_ID
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val channel = NotificationChannel(
-                notificationChannelId,
-                "Tazik notifications channel",
-                IMPORTANCE_HIGH
-            ).let {
-                it.description = notificationChannelId
-                it.lightColor = Color.RED
-                it.enableVibration(false)
-                it
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val pendingIntent: PendingIntent = Intent(this, MainActivity::class.java).let { notificationIntent ->
-            PendingIntent.getActivity(this, 0, notificationIntent, 0)
-        }
-
-        val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(
-            this,
-            notificationChannelId
-        ) else Notification.Builder(this)
-
-        val cancelIntent = Intent("event.tazik")
-        cancelIntent.putExtra("type", "cancel")
-        val pendingCancelIntent = PendingIntent.getBroadcast(
-            this,
-            1,
-            cancelIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        val longText: String = strategyTazik.getNotificationTextLong()
-        val shortText: String = strategyTazik.getNotificationTextShort()
-        val priceText: String = strategyTazik.getTotalPurchaseString()
-
-        return builder
-            .setContentText(shortText)
-            .setStyle(Notification.BigTextStyle().setSummaryText(title).bigText(longText).setBigContentTitle(priceText))
-            .setContentIntent(pendingIntent)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setOnlyAlertOnce(true)
-            .setOngoing(false)
-            .addAction(R.mipmap.ic_launcher, "СТОП", pendingCancelIntent)
-            .build()
     }
 }

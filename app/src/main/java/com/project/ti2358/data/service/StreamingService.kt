@@ -72,7 +72,7 @@ class StreamingService {
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-//            log("StreamingService::onMessage, text: $text")
+            log("StreamingService::onMessage, text: $text")
             val jsonObject = JSONObject(text)
             val eventType = jsonObject.getString("event")
             val payload = jsonObject.getString("payload")

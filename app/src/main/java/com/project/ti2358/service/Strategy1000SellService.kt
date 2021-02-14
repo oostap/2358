@@ -26,6 +26,7 @@ import java.util.*
 @KoinApiExtension
 class Strategy1000SellService : Service() {
 
+    private val NOTIFICATION_CANCEL_ACTION = "event.1000.sell"
     private val NOTIFICATION_CHANNEL_ID = "1000 SELL CHANNEL NOTIFICATION"
     private val NOTIFICATION_ID = 10000
 
@@ -35,14 +36,14 @@ class Strategy1000SellService : Service() {
     private var isServiceRunning = false
     private lateinit var schedulePurchaseTime: Calendar
     private var notificationButtonReceiver: BroadcastReceiver? = null
-    private var timerSell: Timer? = null       // продажа в 10:00:01
+    private var timerSell: Timer? = null
 
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val intentFilter = IntentFilter("event.1000.sell")
+        val intentFilter = IntentFilter(NOTIFICATION_CANCEL_ACTION)
         notificationButtonReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val type = intent.getStringExtra("type")
@@ -62,7 +63,7 @@ class Strategy1000SellService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notification = createNotification("1000 Sell")
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION, "1000 Sell", "", "", "")
         startForeground(NOTIFICATION_ID, notification)
 
         scheduleSell()
@@ -88,7 +89,7 @@ class Strategy1000SellService : Service() {
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
             newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "EndlessService::lock").apply {
-                acquire()
+                acquire(10*10*1000L /*10 minutes*/)
             }
         }
 
@@ -153,22 +154,29 @@ class Strategy1000SellService : Service() {
 
     private fun updateNotification(): Long {
         val now = Calendar.getInstance(TimeZone.getDefault())
-        var scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
-
-        var title: String
+        val scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
 
         val allSeconds = scheduleDelay / 1000
         val hours = allSeconds / 3600
         val minutes = (allSeconds - hours * 3600) / 60
         val seconds = allSeconds % 60
 
-        if (scheduleDelay > 0) {
-            title = "Продажа через %02d:%02d:%02d".format(hours, minutes, seconds)
+        val title = if (scheduleDelay > 0) {
+            "Продажа через %02d:%02d:%02d".format(hours, minutes, seconds)
         } else {
-            title = "Продажа!"
+            "Продажа!"
         }
 
-        val notification = createNotification(title)
+        val shortText: String = strategy1000Sell.getNotificationTextShort()
+        val longText: String = strategy1000Sell.getNotificationTextLong()
+        val longTitleText: String = "~" + strategy1000Sell.getTotalSellString() + " ="
+
+        val notification = Utils.createNotification(
+            this,
+            NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION,
+            title, shortText, longText, longTitleText
+        )
+
         synchronized(notification) {
             notification.notify()
             val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -191,56 +199,5 @@ class Strategy1000SellService : Service() {
         }
 
         return 5
-    }
-
-    private fun createNotification(title: String): Notification {
-        val notificationChannelId = NOTIFICATION_CHANNEL_ID
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val channel = NotificationChannel(
-                notificationChannelId,
-                "1000 sell notifications channel",
-                IMPORTANCE_HIGH
-            ).let {
-                it.description = notificationChannelId
-                it.lightColor = Color.RED
-                it.enableVibration(false)
-                it
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val pendingIntent: PendingIntent = Intent(this, MainActivity::class.java).let { notificationIntent ->
-            PendingIntent.getActivity(this, 0, notificationIntent, 0)
-        }
-
-        val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(
-            this,
-            notificationChannelId
-        ) else Notification.Builder(this)
-
-        val cancelIntent = Intent("event.1000.sell")
-        cancelIntent.putExtra("type", "cancel")
-        val pendingCancelIntent = PendingIntent.getBroadcast(
-            this,
-            1,
-            cancelIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        val longText: String = strategy1000Sell.getNotificationTextLong()
-        val shortText: String = strategy1000Sell.getNotificationTextShort()
-        val priceText: String = "~" + strategy1000Sell.getTotalSellString() + " ="
-
-        return builder
-            .setContentText(shortText)
-            .setStyle(Notification.BigTextStyle().setSummaryText(title).bigText(longText).setBigContentTitle(priceText))
-            .setContentIntent(pendingIntent)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setOnlyAlertOnce(true)
-            .setOngoing(false)
-            .addAction(R.mipmap.ic_launcher, "СТОП", pendingCancelIntent)
-            .build()
     }
 }

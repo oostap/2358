@@ -30,6 +30,9 @@ class StockManager() : KoinComponent {
     // все акции, которые участвуют в расчётах с учётом базовой сортировки из настроек
     var stocksStream: MutableList<Stock> = mutableListOf()
 
+    var loadClosingPriceOSDelay: Long = 0
+    var loadClosingPricePostmarketDelay: Long = 0
+
     fun loadStocks() {
         val key = "all_instruments"
 
@@ -67,7 +70,22 @@ class StockManager() : KoinComponent {
 
     private fun afterLoadInstruments() {
         stocksAll.clear()
+
+        val ignoreFigi = arrayOf("BBG00GTWPCQ0", "BBG000R3RKT8", "BBG0089KM290", "BBG000D9V7T4", "BBG000TZGXK8", "BBG001P3K000", "BBG003QRSQD3", "BBG001DJNR51", "BBG000MDCJV7", "BBG000BS9HN3", "BBG000BCNYT9", "BBG002BHBHM1", "BBG000GLG0G0", "BBG00F40L971", "BBG000BXNJ07", "BBG00HY28P97", "BBG000PCNQN7", "BBG000C1JTL6", "BBG000BGTX98", "BBG000C15114", "BBG000BB0P33", "BBG000FH5YM1", "BBG00J5LMW10", "BBG000BL4504")
+        val ignoreTickers = arrayOf("AAXN", "LVGO", "TECD", "NBL", "AIMT", "CXO", "ETFC", "LOGM", "IMMU", "LM", "BMCH", "AGN", "MYL", "MYOK", "AXE", "HDS", "AGN", "SINA", "TIF", "TCS")
+
         for (instrument in instrumentsAll) {
+            // исключить фиги, по которым не отдаёт данные
+            if (ignoreFigi.contains(instrument.figi)) continue
+
+            // исключить фиги, по которым не отдаёт данные
+            if (ignoreTickers.contains(instrument.ticker)) continue
+
+            if (instrument.ticker.contains("old")) continue
+
+            // исключить фонды тинькова
+            if (instrument.figi.contains("TCS")) continue
+
             stocksAll.add(Stock(instrument))
         }
         baseSortStocks()
@@ -90,6 +108,9 @@ class StockManager() : KoinComponent {
         for (stock in stocksAll) {
             if (SettingsManager.isAllowCurrency(stock.marketInstrument.currency)) {
                 stocksStream.add(stock)
+
+                loadClosingPriceOSDelay = stock.loadClosingPriceCandle(loadClosingPriceOSDelay)
+                loadClosingPricePostmarketDelay = stock.loadClosingPricePostmarket(loadClosingPricePostmarketDelay)
             }
         }
     }

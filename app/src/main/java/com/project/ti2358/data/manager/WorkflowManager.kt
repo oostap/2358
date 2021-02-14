@@ -45,8 +45,6 @@ class WorkflowManager() : KoinComponent {
         }
         stockManager.loadStocks()
         depositManager.startUpdatePortfolio()
-
-        // TODO: запросить вчерашние дневные свечи для вчерашних объёмов
     }
 
     companion object {
@@ -64,8 +62,12 @@ class WorkflowManager() : KoinComponent {
                 return DepositManager()
             }
 
-            fun provideStrategyScreener(): StrategyScreener {
-                return StrategyScreener()
+            fun provideStrategyPremarket(): StrategyPremarket {
+                return StrategyPremarket()
+            }
+
+            fun provideStrategyPostmarket(): StrategyPostmarket {
+                return StrategyPostmarket()
             }
 
             fun provideStrategy1000Sell(): Strategy1000Sell {
@@ -104,7 +106,8 @@ class WorkflowManager() : KoinComponent {
             single { provideDepoManager() }
             single { provideWorkflowManager() }
 
-            single { provideStrategyScreener() }
+            single { provideStrategyPremarket() }
+            single { provideStrategyPostmarket() }
             single { provideStrategy1000Sell() }
             single { provideStrategy1000Buy() }
             single { provideStrategy1005() }
@@ -140,7 +143,6 @@ class WorkflowManager() : KoinComponent {
                 return StreamingService()
             }
 
-
             single { provideSandboxService(get()) }
             single { provideMarketService(get()) }
             single { provideOrdersService(get()) }
@@ -149,7 +151,7 @@ class WorkflowManager() : KoinComponent {
             single { provideStreamingService() }
         }
 
-        val retrofitModule = module {
+        private val retrofitModule = module {
             fun provideRetrofit(): Retrofit {
                 var level = HttpLoggingInterceptor.Level.NONE
                 if (BuildConfig.DEBUG) {
@@ -160,7 +162,6 @@ class WorkflowManager() : KoinComponent {
                     .addInterceptor(AuthInterceptor())
                     .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(level))
                     .build()
-
 
                 return Retrofit.Builder()
                     .client(httpClient)
