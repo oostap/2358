@@ -17,7 +17,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.2358">
+        android:theme="@style/Theme.2358"
+        android:largeHeap="true">
 
         <service
             android:name=".service.Strategy2358Service"

@@ -81,6 +81,7 @@ class StockManager() : KoinComponent {
             // исключить фиги, по которым не отдаёт данные
             if (ignoreTickers.contains(instrument.ticker)) continue
 
+            // исключить какие-то устаревшие тикеры?
             if (instrument.ticker.contains("old")) continue
 
             // исключить фонды тинькова

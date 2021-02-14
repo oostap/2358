@@ -74,11 +74,7 @@ data class Stock(
     // все минутные свечи с момента запуска приложения
     var minuteCandles: MutableList<Candle> = mutableListOf()
 
-    var candle2359Loaded: Boolean = false
-    var closingPricePostmarketLoaded: Boolean = false
-
     private val gson = Gson()
-
 
     fun processCandle(candle: Candle) {
         when (candle.interval) {
@@ -190,13 +186,24 @@ data class Stock(
             return it.closingPrice
         }
 
+        candle2359?.let {
+            return it.closingPrice
+        }
+
         yahooPostmarket?.let {
-            return it.postMarketPrice.raw
+            return it.getLastPrice()
         }
 
         return 0.0
     }
 
+    fun getPricePostmarketUSDouble(): Double {
+        yahooPostmarket?.let {
+            return it.getLastPrice()
+        }
+
+        return 0.0
+    }
     fun getPriceString(): String {
         val price = getPriceDouble()
         return "$price$"
@@ -238,14 +245,19 @@ data class Stock(
 
     private fun updateChangePostmarket() {
         yahooPostmarket?.let {
+            candle2359?.let { close ->
+                changePricePostmarketAbsolute = it.getLastPrice() - close.closingPrice
+                changePricePostmarketPercent = (100 * it.getLastPrice()) / close.closingPrice - 100
+            }
+
             candleWeek?.let { week ->
-                changePricePostmarketAbsolute = week.closingPrice - it.postMarketPrice.raw
-                changePricePostmarketPercent = (100 * week.closingPrice) / it.postMarketPrice.raw - 100
+                changePricePostmarketAbsolute = it.getLastPrice() - week.closingPrice
+                changePricePostmarketPercent = (100 * it.getLastPrice()) / week.closingPrice - 100
             }
 
             candle1000?.let { today ->
-                changePricePostmarketAbsolute = today.closingPrice - it.postMarketPrice.raw
-                changePricePostmarketPercent = (100 * today.closingPrice) / it.postMarketPrice.raw - 100
+                changePricePostmarketAbsolute = it.getLastPrice() - today.closingPrice
+                changePricePostmarketPercent = (100 * it.getLastPrice()) / today.closingPrice - 100
             }
         }
     }
@@ -280,7 +292,7 @@ data class Stock(
     }
 
     fun loadClosingPriceCandle(prevDelay: Long): Long {
-        if (candle2359 != null || candle2359Loaded) return prevDelay
+        if (candle2359 != null) return prevDelay
 
         val zone = getCurrentTimezone()
         var from = getLastClosingDate(true) + zone
@@ -292,6 +304,8 @@ data class Stock(
         val jsonClosingCandle = preferences.getString(key, null)
         if (jsonClosingCandle != null) {
             candle2359 = gson.fromJson(jsonClosingCandle, Candle::class.java)
+            updateChangePostmarket()
+            updateChange2359()
             return prevDelay
         }
 
@@ -302,11 +316,10 @@ data class Stock(
             while (candle2359 == null) {
                 try {
                     delay(delay)
-                    if (candle2359Loaded) return@launch
+                    if (candle2359 != null) return@launch
 
                     val value = preferences.getString(key, null)
                     if (value != null) return@launch
-
 
                     log("close ${marketInstrument.ticker}")
                     val candles = marketService.candles(marketInstrument.figi, "1min", from, to)
@@ -322,7 +335,6 @@ data class Stock(
                         updateChange2359()
 
                         log("closing price ${marketInstrument.ticker}")
-                        candle2359Loaded = true
                         return@launch
                     } else { // если свечей нет, то сделать шаг назад во времени
                         deltaDay--
@@ -340,7 +352,7 @@ data class Stock(
     }
 
     fun loadClosingPricePostmarket(prevDelay: Long): Long {
-        if (yahooPostmarket != null || closingPricePostmarketLoaded) return prevDelay
+        if (yahooPostmarket != null) return prevDelay
 
         val zone = getCurrentTimezone()
         val from = getLastClosingDate(false) + zone
@@ -351,6 +363,8 @@ data class Stock(
         val jsonClosing = preferences.getString(key, null)
         if (jsonClosing != null) {
             yahooPostmarket = gson.fromJson(jsonClosing, YahooResponse::class.java)
+            updateChangePostmarket()
+            updateChange2359()
             return prevDelay
         }
 
@@ -359,14 +373,12 @@ data class Stock(
             while (yahooPostmarket == null) {
                 try {
                     delay(delay)
-                    if (closingPricePostmarketLoaded) return@launch
+                    if (yahooPostmarket != null) return@launch
 
-                    val value = preferences.getString(key, null)
-                    if (value != null) return@launch
                     val queue = Volley.newRequestQueue(Utils.context)
-
                     var ticker = marketInstrument.ticker
-                    if (ticker == "SPB@US") ticker = "SPB" // костыль, yahoo назван по-другому
+                    if (ticker == "SPB@US") ticker = "SPB" // костыль, в yahoo тикер назван по-другому
+                    ticker.replace(".", "-")
 
                     val url = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=price"
 
@@ -381,7 +393,6 @@ data class Stock(
                                 val price = prices["price"] as JsonObject
                                 yahooPostmarket = gson.fromJson(price, YahooResponse::class.java)
 
-
                                 if (yahooPostmarket != null) {
                                     val data = gson.toJson(yahooPostmarket)
                                     val editor: SharedPreferences.Editor = preferences.edit()
@@ -391,7 +402,6 @@ data class Stock(
                                     updateChangePostmarket()
                                 }
 
-                                closingPricePostmarketLoaded = true
                                 log("yahoo ${marketInstrument.ticker} = $yahooPostmarket")
                             } catch (e: Exception) {
                                 e.printStackTrace()

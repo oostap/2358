@@ -84,8 +84,15 @@ class PostmarketFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
-            holder.priceView.text = item.yahooPostmarket?.postMarketPrice?.raw?.toDollar()
+            var ticker = "${position + 1} ${item.marketInstrument.ticker}"
+            item.yahooPostmarket?.exchange?.let {
+                ticker += " (${it})"
+            }
+            holder.tickerView.text = ticker
+
+            val priceFrom = item.getPriceDouble().toDollar()
+            val priceTo = item.getPricePostmarketUSDouble().toDollar()
+            holder.priceView.text = "$priceFrom -> $priceTo"
 
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
@@ -96,7 +103,7 @@ class PostmarketFragment : Fragment() {
             holder.changePriceAbsoluteView.text = item.changePricePostmarketAbsolute.toDollar()
             holder.changePricePercentView.text = item.changePricePostmarketPercent.toPercent()
 
-            if (item.changePriceDayAbsolute < 0) {
+            if (item.changePricePostmarketAbsolute < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)
                 holder.changePricePercentView.setTextColor(Utils.RED)
             } else {

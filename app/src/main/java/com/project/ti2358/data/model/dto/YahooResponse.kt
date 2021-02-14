@@ -12,4 +12,15 @@ data class YahooResponse (
     val regularMarketVolume: YahooPrice,
     val regularMarketOpen: YahooPrice,
     val postMarketTime: Long,
-)
+
+    val exchange: String?,       // "NMS"
+    val exchangeName: String?,   // "NasdaqGS"
+) {
+    fun getLastPrice(): Double {
+        // если у бумаги есть постмаркет, то берём её
+        if (postMarketPrice.raw != 0.0) return postMarketPrice.raw
+
+        // иначе обычную
+        return regularMarketPrice.raw
+    }
+}
