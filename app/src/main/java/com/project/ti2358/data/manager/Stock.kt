@@ -173,6 +173,14 @@ data class Stock(
         return candle1000?.volume ?: 0
     }
 
+    fun getPostmarketVolume(): Int {
+        return yahooPostmarket?.getVolumeShares() ?: 0
+    }
+
+    fun getPostmarketVolumeCash(): Int {
+        return yahooPostmarket?.getVolumeCash() ?: 0
+    }
+
     fun getPriceDouble(): Double {
         if (minuteCandles.isNotEmpty()) {
             return minuteCandles.last().closingPrice
@@ -291,14 +299,73 @@ data class Stock(
         minute1728Candles.clear()
     }
 
-    fun loadClosingPriceCandle(prevDelay: Long): Long {
+    fun loadClosingPostmarketRUCandle(prevDelay: Long): Long {
+        if (candleWeek != null) return prevDelay
+
+        val zone = getCurrentTimezone()
+        val dayBack = -5
+        val dayFront = 1
+        var from = getLastClosingPostmarketRUDate(dayBack) + zone
+        var to = getLastClosingPostmarketRUDate(dayFront) + zone
+
+        val key = "price_postmarket_ru_${marketInstrument.figi}_${from}"
+
+        val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
+        val jsonClosingCandle = preferences.getString(key, null)
+        if (jsonClosingCandle != null) {
+            candleWeek = gson.fromJson(jsonClosingCandle, Candle::class.java)
+            updateChangePostmarket()
+            updateChange2359()
+            return prevDelay
+        }
+
+        val delay = prevDelay + kotlin.random.Random.Default.nextLong(1000, 1500)
+        GlobalScope.launch(Dispatchers.Main) {
+            while (candleWeek == null) {
+                try {
+                    delay(delay)
+                    if (candleWeek != null) return@launch
+
+                    val value = preferences.getString(key, null)
+                    if (value != null) return@launch
+
+                    log("close ${marketInstrument.ticker}")
+                    val candles = marketService.candles(marketInstrument.figi, "day", from, to)
+
+                    if (candles.candles.isNotEmpty()) {
+                        candleWeek = candles.candles.last()
+                        val data = gson.toJson(candleWeek)
+
+                        val editor: SharedPreferences.Editor = preferences.edit()
+                        editor.putString(key, data)
+                        editor.apply()
+
+                        updateChange2359()
+
+                        log("closing price postmarket ru ${marketInstrument.ticker}")
+                        return@launch
+                    } else { // если свечей нет, то сделать шаг назад во времени
+                        from = getLastClosingPostmarketRUDate(dayBack) + zone
+                        to = getLastClosingPostmarketRUDate(dayFront) + zone
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+                delay(delay)
+            }
+        }
+        return delay
+    }
+
+    fun loadClosingOSCandle(prevDelay: Long): Long {
         if (candle2359 != null) return prevDelay
 
         val zone = getCurrentTimezone()
         var from = getLastClosingDate(true) + zone
         var to = getLastClosingDate(false) + zone
 
-        val key = "closing_${marketInstrument.figi}_${from}"
+        val key = "closing_os_${marketInstrument.figi}_${from}"
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
         val jsonClosingCandle = preferences.getString(key, null)
@@ -311,7 +378,7 @@ data class Stock(
 
         var deltaDay = 0
 
-        val delay = prevDelay + kotlin.random.Random.Default.nextLong(400, 600)
+        val delay = prevDelay + kotlin.random.Random.Default.nextLong(1000, 1500)
         GlobalScope.launch(Dispatchers.Main) {
             while (candle2359 == null) {
                 try {
@@ -334,7 +401,7 @@ data class Stock(
 
                         updateChange2359()
 
-                        log("closing price ${marketInstrument.ticker}")
+                        log("closing price os ${marketInstrument.ticker}")
                         return@launch
                     } else { // если свечей нет, то сделать шаг назад во времени
                         deltaDay--
@@ -345,19 +412,19 @@ data class Stock(
                     e.printStackTrace()
                 }
 
-                delay(5000)
+                delay(delay)
             }
         }
         return delay
     }
 
-    fun loadClosingPricePostmarket(prevDelay: Long): Long {
+    fun loadClosingPostmarketUSPrice(prevDelay: Long): Long {
         if (yahooPostmarket != null) return prevDelay
 
         val zone = getCurrentTimezone()
         val from = getLastClosingDate(false) + zone
 
-        val key = "closing_postmarket_${marketInstrument.figi}_${from}"
+        val key = "closing_postmarket_us_${marketInstrument.figi}_${from}"
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
         val jsonClosing = preferences.getString(key, null)
@@ -368,7 +435,7 @@ data class Stock(
             return prevDelay
         }
 
-        val delay = prevDelay + kotlin.random.Random.Default.nextLong(400, 600)
+        val delay = prevDelay + kotlin.random.Random.Default.nextLong(1000, 1500)
         GlobalScope.launch(Dispatchers.Main) {
             while (yahooPostmarket == null) {
                 try {
@@ -402,7 +469,7 @@ data class Stock(
                                     updateChangePostmarket()
                                 }
 
-                                log("yahoo ${marketInstrument.ticker} = $yahooPostmarket")
+                                log("closing price us yahoo ${marketInstrument.ticker} = $yahooPostmarket")
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
@@ -415,7 +482,7 @@ data class Stock(
                     e.printStackTrace()
                 }
 
-                delay(5000)
+                delay(delay)
             }
         }
         return delay
@@ -442,6 +509,10 @@ data class Stock(
         time.set(Calendar.SECOND, seconds)
         time.set(Calendar.MILLISECOND, 0)
 
+        if (delta != 0) {
+            time.add(Calendar.DAY_OF_MONTH, delta)
+        }
+
         // если воскресенье, то откатиться к субботе
         if (time.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
             time.add(Calendar.DAY_OF_MONTH, -1)
@@ -456,9 +527,32 @@ data class Stock(
             time.add(Calendar.DAY_OF_MONTH, -1)
         }
 
+        return time.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+    }
+
+    private fun getLastClosingPostmarketRUDate(delta: Int = 0): String {
+        val time = Calendar.getInstance()
+        time.set(Calendar.MILLISECOND, 0)
+
         if (delta != 0) {
             time.add(Calendar.DAY_OF_MONTH, delta)
         }
+
+
+        time.set(Calendar.HOUR_OF_DAY, 20)
+        time.set(Calendar.MINUTE, 0)
+        time.set(Calendar.SECOND, 0)
+        time.set(Calendar.MILLISECOND, 0)
+
+        // если воскресенье, то откатиться к субботе
+//        if (time.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+//            time.add(Calendar.DAY_OF_MONTH, -1)
+//        }
+//
+//        // если понедельник, то откатиться к субботе
+//        if (time.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+//            time.add(Calendar.DAY_OF_MONTH, -2)
+//        }
 
         return time.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     }

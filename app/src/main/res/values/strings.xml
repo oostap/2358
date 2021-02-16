@@ -45,6 +45,7 @@
     <string name="stocks_header_1005">Стратегия 1005</string>
     <string name="stocks_header_tazik">Стратегия автотазик</string>
     <string name="stocks_header_rocket">Стратегия ракеты</string>
+    <string name="stocks_header_postmarket">Постмаркет US</string>
 
     <!-- tinkoff settings -->
     <string name="token_header">Tinkoff OpenApi Токен</string>
@@ -148,6 +149,9 @@
     <!-- rocket settings -->
     <string name="setting_key_rocket_change_percent">rocket_change_percent</string>
     <string name="setting_key_rocket_change_minutes">rocket_change_minutes</string>
-    <string name="setting_key_rocket_notify_alive">key_rocket_notify_alive</string>
+    <string name="setting_key_rocket_notify_alive">rocket_notify_alive</string>
+
+    <!-- postmarket settings -->
+    <string name="setting_key_postmarket_volume_min">postmarket_volume_min</string>
 
 </resources>

@@ -31,7 +31,8 @@ class StockManager() : KoinComponent {
     var stocksStream: MutableList<Stock> = mutableListOf()
 
     var loadClosingPriceOSDelay: Long = 0
-    var loadClosingPricePostmarketDelay: Long = 0
+    var loadClosingPricePostmarketUSDelay: Long = 0
+    var loadClosingPricePostmarketRUDelay: Long = 0
 
     fun loadStocks() {
         val key = "all_instruments"
@@ -110,8 +111,9 @@ class StockManager() : KoinComponent {
             if (SettingsManager.isAllowCurrency(stock.marketInstrument.currency)) {
                 stocksStream.add(stock)
 
-                loadClosingPriceOSDelay = stock.loadClosingPriceCandle(loadClosingPriceOSDelay)
-                loadClosingPricePostmarketDelay = stock.loadClosingPricePostmarket(loadClosingPricePostmarketDelay)
+                loadClosingPriceOSDelay = stock.loadClosingOSCandle(loadClosingPriceOSDelay)
+                loadClosingPricePostmarketUSDelay = stock.loadClosingPostmarketUSPrice(loadClosingPricePostmarketUSDelay)
+//                loadClosingPricePostmarketRUDelay = stock.loadClosingPostmarketRUCandle(loadClosingPricePostmarketRUDelay)
             }
         }
     }

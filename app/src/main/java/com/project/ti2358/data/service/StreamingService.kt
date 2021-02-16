@@ -69,10 +69,11 @@ class StreamingService {
         }
 
         override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+            Log.d("StreamingService", "onMessage")
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-            log("StreamingService::onMessage, text: $text")
+//            log("StreamingService::onMessage, text: $text")
             val jsonObject = JSONObject(text)
             val eventType = jsonObject.getString("event")
             val payload = jsonObject.getString("payload")
@@ -87,9 +88,11 @@ class StreamingService {
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+            Log.d("StreamingService", "onClosed")
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+            Log.d("StreamingService", "onClosing")
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {

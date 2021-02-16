@@ -23,4 +23,13 @@ data class YahooResponse (
         // иначе обычную
         return regularMarketPrice.raw
     }
+
+    fun getVolumeShares(): Int {
+        return regularMarketVolume.raw.toInt()
+    }
+
+    fun getVolumeCash(): Int {
+        val price = (regularMarketDayLow.raw + regularMarketDayHigh.raw) / 2.0
+        return (regularMarketVolume.raw * price).toInt()
+    }
 }

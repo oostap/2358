@@ -61,7 +61,7 @@ class Strategy1000Buy : KoinComponent {
     fun getPurchaseStock(): MutableList<PurchaseStock> {
         stocksToPurchase.clear()
         val totalMoney: Double = SettingsManager.get1000BuyPurchaseVolume().toDouble()
-        val onePiece: Double = totalMoney / stocksToPurchase.size
+        val onePiece: Double = totalMoney / stocksSelected.size
 
         for (stock in stocksSelected) {
             val purchase = PurchaseStock(stock)

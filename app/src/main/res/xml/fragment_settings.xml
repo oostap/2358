@@ -189,6 +189,15 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/stocks_header_postmarket">
+        <EditTextPreference
+            app:key="@string/setting_key_rocket_change_percent"
+            app:title="@string/stocks_rocket_change_percent"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="2.0"/>
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/stocks_header_rocket">
         <EditTextPreference
             app:key="@string/setting_key_rocket_change_percent"

@@ -94,10 +94,10 @@ class PostmarketFragment : Fragment() {
             val priceTo = item.getPricePostmarketUSDouble().toDollar()
             holder.priceView.text = "$priceFrom -> $priceTo"
 
-            val volume = item.getTodayVolume() / 1000f
+            val volume = item.getPostmarketVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
 
-            val volumeCash = item.dayVolumeCash / 1000f / 1000f
+            val volumeCash = item.getPostmarketVolumeCash() / 1000f / 1000f
             holder.volumeTodayCashView.text = "%.2fB$".format(volumeCash)
 
             holder.changePriceAbsoluteView.text = item.changePricePostmarketAbsolute.toDollar()

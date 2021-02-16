@@ -128,6 +128,9 @@ class StrategyTazik : KoinComponent {
             depositManager.portfolioPositions.any { it.ticker == p.stock.marketInstrument.ticker }
         }
 
+        // удалить все бумаги, у которых 0 лотов
+        stocksToPurchase.removeAll { it.lots == 0 }
+
         return stocksToPurchase
     }
 
@@ -158,7 +161,7 @@ class StrategyTazik : KoinComponent {
 
         var tickers = ""
         for (stock in stocksToPurchase) {
-            var change = (100 * stock.stock.priceNow) / stock.stock.priceTazik - 100
+            val change = (100 * stock.stock.priceNow) / stock.stock.priceTazik - 100
             tickers += "${stock.stock.marketInstrument.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
                     "${stock.stock.priceTazik.toDollar()} -> ${stock.stock.priceNow.toDollar()} = " +
                     "${change.toPercent()} ${stock.getStatusString()}\n"
@@ -174,7 +177,7 @@ class StrategyTazik : KoinComponent {
 
         // зафикировать цену, чтобы change считать от неё
         for (stock in stocks) {
-            // вчеращняя, если стартуем до сессии
+            // вчерашняя, если стартуем до сессии
             stock.candleYesterday?.let {
                 stock.priceTazik = it.closingPrice
             }
@@ -224,7 +227,8 @@ class StrategyTazik : KoinComponent {
                             purchase.buyMarket(priceSell)
                         }
                         else -> { // ставим лимитку на наш %
-                            val buyPrice = stock.priceTazik - stock.priceTazik / 100.0 * purchase.percentLimitPriceChange
+                            var buyPrice = stock.priceTazik - stock.priceTazik / 100.0 * purchase.percentLimitPriceChange
+                            buyPrice = (buyPrice * 100.0).roundToInt() / 100.0
                             purchase.buyLimitFromBid(buyPrice, SettingsManager.getTazikTakeProfit())
                         }
                     }
