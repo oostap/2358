@@ -65,10 +65,22 @@
             app:defaultValue="0"/>
 
         <EditTextPreference
-            app:key="@string/setting_key_2358_take_profit"
-            app:title="@string/stocks_2358_take_profit"
+            app:key="@string/setting_key_2358_take_profit_from"
+            app:title="@string/stocks_2358_take_profit_from"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="1.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_2358_take_profit_to"
+            app:title="@string/stocks_2358_take_profit_to"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_2358_take_profit_step"
+            app:title="@string/stocks_2358_take_profit_step"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1"/>
 
     </PreferenceCategory>
 

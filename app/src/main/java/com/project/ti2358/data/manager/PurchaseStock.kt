@@ -281,4 +281,125 @@ data class PurchaseStock(
             }
         }
     }
+
+    fun buyLimit2358() {
+        if (SettingsManager.isSandbox() || lots == 0) return
+
+        GlobalScope.launch(Dispatchers.Main) {
+            try {
+                // получить стакан
+                val orderbook = marketService.orderbook(stock.marketInstrument.figi, 5)
+
+                val buyPrice = orderbook.getBestPriceFromAsk(lots)
+                if (buyPrice == 0.0) return@launch
+                log("$orderbook")
+
+                status = PurchaseStatus.ORDER_BUY
+                buyLimitOrder = ordersService.placeLimitOrder(
+                    lots,
+                    stock.marketInstrument.figi,
+                    buyPrice,
+                    OperationType.BUY
+                )
+
+                val ticker = stock.marketInstrument.ticker
+                Utils.showToastAlert("$ticker: покупка по $buyPrice")
+
+                delay(250)
+
+                // проверяем появился ли в портфеле тикер
+                var position: PortfolioPosition?
+                while (true) {
+                    depositManager.refreshDeposit()
+
+                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
+                    if (position != null && position.lots >= lots) { // куплено!
+                        status = PurchaseStatus.BUYED
+                        Utils.showToastAlert("$ticker: куплено!")
+                        break
+                    }
+
+                    delay(1000)
+                }
+
+                // продаём
+                position?.let {
+                    val totalLots = it.lots
+                    val profitFrom = SettingsManager.get2358TakeProfitFrom()
+                    val profitTo = SettingsManager.get2358TakeProfitTo()
+                    val profitStep = SettingsManager.get2358TakeProfitStep()
+
+                    // в случае кривых настроек просто не создаём заявки
+                    if (profitTo < profitFrom || profitStep == 0 || profitFrom == 0.0 || profitTo == 0.0) return@launch
+
+                    val list: MutableList<Pair<Int, Double>> = mutableListOf()
+                    if (profitStep == 1) { // если шаг 1, то создать заявку на нижний % и всё
+                        list.add(Pair(totalLots, profitFrom))
+                    } else if (profitStep == 2) { // первый и последний
+                        val partLots1 = totalLots / 2
+                        val partLots2 = totalLots - partLots1
+                        list.add(Pair(partLots1, profitFrom))
+                        list.add(Pair(partLots2, profitTo))
+                    } else { // промежуточные
+                        val delta = (profitTo - profitFrom) / (profitStep - 1)
+                        val basePartLots = totalLots / profitStep
+
+                        var currentLots = basePartLots
+                        var currentProfit = profitFrom
+
+                        // стартовый профит
+                        list.add(Pair(basePartLots, currentProfit))
+
+                        var step = profitStep - 2
+                        while (step > 0) {
+                            currentLots += basePartLots
+                            currentProfit += delta
+                            list.add(Pair(basePartLots, currentProfit))
+                            step--
+                        }
+
+                        // финальный профит
+                        val lastPartLots = totalLots - currentLots
+                        list.add(Pair(lastPartLots, profitTo))
+                    }
+
+                    if (list.isEmpty()) return@launch
+
+                    for (p in list) {
+                        val lots = p.first
+                        val profit = p.second
+
+                        // вычисляем и округляем до 2 после запятой
+                        var profitPrice = buyPrice + buyPrice / 100.0 * profit
+                        profitPrice = (profitPrice * 100.0).roundToInt() / 100.0
+
+                        // выставить ордер на продажу
+                        sellLimitOrder = ordersService.placeLimitOrder(
+                            lots,
+                            stock.marketInstrument.figi,
+                            profitPrice,
+                            OperationType.SELL
+                        )
+                    }
+
+                    status = PurchaseStatus.ORDER_SELL
+                    Utils.showToastAlert("$ticker: заявка на продажу по $profitFrom")
+                }
+
+                while (true) {
+                    delay(3000)
+
+                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
+                    if (position == null) { // продано!
+                        status = PurchaseStatus.SELLED
+                        Utils.showToastAlert("$ticker: продано!")
+                        break
+                    }
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 }

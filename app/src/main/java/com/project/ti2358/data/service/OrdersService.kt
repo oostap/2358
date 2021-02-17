@@ -21,7 +21,7 @@ class OrdersService(retrofit: Retrofit) : BaseService(retrofit) {
 
     suspend fun placeLimitOrder(lots: Int, figi: String, price: Double, operation: OperationType): LimitOrder {
         return ordersApi.placeLimitOrder(
-            orderBody = LimitOrderBody(lots = lots, price, operation = operation),
+            orderBody = LimitOrderBody(lots = lots, price = price, operation = operation),
             figi = figi
         ).payload
     }

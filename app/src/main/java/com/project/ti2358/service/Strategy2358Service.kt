@@ -130,7 +130,7 @@ class Strategy2358Service : Service() {
             override fun run() {
                 val localPurchases = strategy2358.getPurchaseStock(false)
                 for (purchase in localPurchases) {
-                    purchase.buyLimitFromAsk(SettingsManager.get2358TakeProfit())
+                    purchase.buyLimit2358()
                 }
             }
         }, scheduleDelay)

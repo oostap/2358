@@ -4,7 +4,9 @@ import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.data.service.PortfolioService
+import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.Utils
+import com.project.ti2358.service.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -14,6 +16,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.Collections.synchronizedList
 import kotlin.math.abs
+import kotlin.math.log
 
 @KoinApiExtension
 class DepositManager : KoinComponent {
@@ -41,7 +44,9 @@ class DepositManager : KoinComponent {
                     delay(500) // 1s
 
                     orders = ordersService.orders() as MutableList<Order>
-
+                    for (order in orders) {
+                        ordersService.cancel(order.orderId)
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }

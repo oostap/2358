@@ -101,13 +101,33 @@ class SettingsManager {
             }
         }
 
-        fun get2358TakeProfit(): Double {
-            val key: String = context.getString(R.string.setting_key_2358_take_profit)
-            val value: String? = preferences.getString(key, "1")
+        fun get2358TakeProfitFrom(): Double {
+            val key: String = context.getString(R.string.setting_key_2358_take_profit_from)
+            val value: String? = preferences.getString(key, "1.0")
             return try {
-                (value ?: "1").toDouble()
+                (value ?: "1.0").toDouble()
             } catch (e: Exception) {
                 1.0
+            }
+        }
+
+        fun get2358TakeProfitTo(): Double {
+            val key: String = context.getString(R.string.setting_key_2358_take_profit_to)
+            val value: String? = preferences.getString(key, "1.0")
+            return try {
+                (value ?: "1.0").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun get2358TakeProfitStep(): Int {
+            val key: String = context.getString(R.string.setting_key_2358_take_profit_step)
+            val value: String? = preferences.getString(key, "1")
+            return try {
+                parseInt(value ?: "1")
+            } catch (e: Exception) {
+                1
             }
         }
 
