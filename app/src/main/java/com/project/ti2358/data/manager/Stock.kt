@@ -1,8 +1,10 @@
 package com.project.ti2358.data.manager
 
+import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.android.volley.Request
+import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.gson.*
@@ -24,6 +26,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.schedule
 import kotlin.math.abs
 
 
@@ -378,7 +381,7 @@ data class Stock(
 
         var deltaDay = 0
 
-        val delay = prevDelay + kotlin.random.Random.Default.nextLong(1000, 1500)
+        val delay = prevDelay + kotlin.random.Random.Default.nextLong(400, 600)
         GlobalScope.launch(Dispatchers.Main) {
             while (candle2359 == null) {
                 try {
@@ -418,13 +421,17 @@ data class Stock(
         return delay
     }
 
+    companion object {
+        var requestQueue: RequestQueue? = null
+    }
+
     fun loadClosingPostmarketUSPrice(prevDelay: Long): Long {
         if (yahooPostmarket != null) return prevDelay
 
         val zone = getCurrentTimezone()
-        val from = getLastClosingDate(false) + zone
+        val from = getLastClosingPostmarketUSDate() + zone
 
-        val key = "closing_postmarket_us_${marketInstrument.figi}_${from}"
+        val key = "close_postmarket_us_${marketInstrument.figi}_${from}"
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
         val jsonClosing = preferences.getString(key, null)
@@ -435,17 +442,19 @@ data class Stock(
             return prevDelay
         }
 
-        val delay = prevDelay + kotlin.random.Random.Default.nextLong(1000, 1500)
-        GlobalScope.launch(Dispatchers.Main) {
-            while (yahooPostmarket == null) {
-                try {
-                    delay(delay)
-                    if (yahooPostmarket != null) return@launch
+        val delay = prevDelay + kotlin.random.Random.Default.nextLong(200, 400)
+        Timer("load", false).schedule(delay) {
 
-                    val queue = Volley.newRequestQueue(Utils.context)
+    //        }
+    //        GlobalScope.launch(Dispatchers.Main) {
+    //            while (yahooPostmarket == null) {
+                try {
+    //                    delay(delay)
+                    if (yahooPostmarket != null) return@schedule//break //return@launch
+
                     var ticker = marketInstrument.ticker
                     if (ticker == "SPB@US") ticker = "SPB" // костыль, в yahoo тикер назван по-другому
-                    ticker.replace(".", "-")
+                    ticker = ticker.replace(".", "-")
 
                     val url = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=price"
 
@@ -476,16 +485,46 @@ data class Stock(
                         },
                         { log("error") })
 
-                    queue.add(stringRequest)
-                    break
+                    if (requestQueue == null) {
+                        requestQueue = Volley.newRequestQueue(Utils.context)
+                    }
+                    requestQueue?.add(stringRequest)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
 
-                delay(delay)
-            }
+    //                delay(delay)
+    //            }
         }
         return delay
+    }
+
+    private fun getLastClosingPostmarketUSDate(): String {
+        val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
+
+        val hours = 8
+        val minutes = 0
+        val seconds = 0
+
+        val time = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow"))
+        time.add(Calendar.HOUR_OF_DAY, -differenceHours)
+
+        time.set(Calendar.HOUR_OF_DAY, hours)
+        time.set(Calendar.MINUTE, minutes)
+        time.set(Calendar.SECOND, seconds)
+        time.set(Calendar.MILLISECOND, 0)
+
+        // если воскресенье, то откатиться к субботе
+        if (time.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+            time.add(Calendar.DAY_OF_MONTH, -1)
+        }
+
+        // если понедельник, то откатиться к субботе
+        if (time.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+            time.add(Calendar.DAY_OF_MONTH, -2)
+        }
+
+        return time.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     }
 
     private fun getLastClosingDate(before: Boolean, delta: Int = 0): String {

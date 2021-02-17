@@ -26,7 +26,7 @@ class Strategy2358() : KoinComponent {
         val max = SettingsManager.getCommonPriceMax()
 
         for (stock in all) {
-            if (stock.changePrice2359DayPercent <= change &&            // изменение
+            if (stock.changePrice2359DayPercent <= change &&        // изменение
                 stock.getTodayVolume() >= volumeDayPieces &&        // объём в шт
                 stock.dayVolumeCash >= volumeDayCash &&             // объём в $
                 stock.getPriceDouble() > min &&          // мин цена
