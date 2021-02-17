@@ -217,7 +217,7 @@ class StrategyTazik : KoinComponent {
                         }
                         SettingsManager.getTazikBuyMarket() -> { // покупка по маркету
                             // примерна цена покупки (! средняя будет неизвестна из-за тинька !)
-                            val priceBuy = stock.priceTazik - stock.priceTazik / 100.0 * purchase.percentLimitPriceChange
+                            val priceBuy = stock.priceTazik - abs(stock.priceTazik / 100.0 * purchase.percentLimitPriceChange)
 
                             // ставим цену продажу относительно примрной средней
                             var priceSell = priceBuy + priceBuy / 100.0 * SettingsManager.getTazikTakeProfit()
@@ -227,7 +227,7 @@ class StrategyTazik : KoinComponent {
                             purchase.buyMarket(priceSell)
                         }
                         else -> { // ставим лимитку на наш %
-                            var buyPrice = stock.priceTazik - stock.priceTazik / 100.0 * purchase.percentLimitPriceChange
+                            var buyPrice = stock.priceTazik - abs(stock.priceTazik / 100.0 * purchase.percentLimitPriceChange)
                             buyPrice = (buyPrice * 100.0).roundToInt() / 100.0
                             purchase.buyLimitFromBid(buyPrice, SettingsManager.getTazikTakeProfit())
                         }
