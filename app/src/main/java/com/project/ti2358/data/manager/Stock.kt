@@ -443,58 +443,46 @@ data class Stock(
         }
 
         val delay = prevDelay + kotlin.random.Random.Default.nextLong(200, 400)
-        Timer("load", false).schedule(delay) {
+        try {
+            var ticker = marketInstrument.ticker
+            if (ticker == "SPB@US") ticker = "SPB" // костыль, в yahoo тикер назван по-другому
+            ticker = ticker.replace(".", "-")
 
-    //        }
-    //        GlobalScope.launch(Dispatchers.Main) {
-    //            while (yahooPostmarket == null) {
-                try {
-    //                    delay(delay)
-                    if (yahooPostmarket != null) return@schedule//break //return@launch
+            val url = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=price"
 
-                    var ticker = marketInstrument.ticker
-                    if (ticker == "SPB@US") ticker = "SPB" // костыль, в yahoo тикер назван по-другому
-                    ticker = ticker.replace(".", "-")
+            val stringRequest = StringRequest(Request.Method.GET, url,
+                { response ->
+                    val convertedObject: JsonObject = gson.fromJson(response, JsonObject::class.java)
 
-                    val url = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=price"
+                    try {
+                        val summary = convertedObject["quoteSummary"] as JsonObject
+                        val result = summary["result"] as JsonArray
+                        val prices = result[0] as JsonObject
+                        val price = prices["price"] as JsonObject
+                        yahooPostmarket = gson.fromJson(price, YahooResponse::class.java)
 
-                    val stringRequest = StringRequest(Request.Method.GET, url,
-                        { response ->
-                            val convertedObject: JsonObject = gson.fromJson(response, JsonObject::class.java)
+                        if (yahooPostmarket != null) {
+                            val data = gson.toJson(yahooPostmarket)
+                            val editor: SharedPreferences.Editor = preferences.edit()
+                            editor.putString(key, data)
+                            editor.apply()
 
-                            try {
-                                val summary = convertedObject["quoteSummary"] as JsonObject
-                                val result = summary["result"] as JsonArray
-                                val prices = result[0] as JsonObject
-                                val price = prices["price"] as JsonObject
-                                yahooPostmarket = gson.fromJson(price, YahooResponse::class.java)
+                            updateChangePostmarket()
+                        }
 
-                                if (yahooPostmarket != null) {
-                                    val data = gson.toJson(yahooPostmarket)
-                                    val editor: SharedPreferences.Editor = preferences.edit()
-                                    editor.putString(key, data)
-                                    editor.apply()
-
-                                    updateChangePostmarket()
-                                }
-
-                                log("closing price us yahoo ${marketInstrument.ticker} = $yahooPostmarket")
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                        },
-                        { log("error") })
-
-                    if (requestQueue == null) {
-                        requestQueue = Volley.newRequestQueue(Utils.context)
+                        log("closing price us yahoo ${marketInstrument.ticker} = $yahooPostmarket")
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
-                    requestQueue?.add(stringRequest)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+                },
+                { log("error") })
 
-    //                delay(delay)
-    //            }
+            if (requestQueue == null) {
+                requestQueue = Volley.newRequestQueue(Utils.context)
+            }
+            requestQueue?.add(stringRequest)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
         return delay
     }

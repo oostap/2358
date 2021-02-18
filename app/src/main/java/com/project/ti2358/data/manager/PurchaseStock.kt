@@ -373,6 +373,8 @@ data class PurchaseStock(
                         var profitPrice = buyPrice + buyPrice / 100.0 * profit
                         profitPrice = (profitPrice * 100.0).roundToInt() / 100.0
 
+                        if (lots <= 0 || profitPrice == 0.0) continue
+
                         // выставить ордер на продажу
                         sellLimitOrder = ordersService.placeLimitOrder(
                             lots,

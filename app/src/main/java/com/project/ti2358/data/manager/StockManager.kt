@@ -110,10 +110,15 @@ class StockManager() : KoinComponent {
         for (stock in stocksAll) {
             if (SettingsManager.isAllowCurrency(stock.marketInstrument.currency)) {
                 stocksStream.add(stock)
-
                 loadClosingPriceOSDelay = stock.loadClosingOSCandle(loadClosingPriceOSDelay)
+            }
+        }
+
+        // загрузить постмаркет
+        GlobalScope.launch(Dispatchers.Main) {
+            for (stock in stocksStream) {
                 loadClosingPricePostmarketUSDelay = stock.loadClosingPostmarketUSPrice(loadClosingPricePostmarketUSDelay)
-//                loadClosingPricePostmarketRUDelay = stock.loadClosingPostmarketRUCandle(loadClosingPricePostmarketRUDelay)
+                delay(kotlin.random.Random.Default.nextLong(200, 400))
             }
         }
     }
