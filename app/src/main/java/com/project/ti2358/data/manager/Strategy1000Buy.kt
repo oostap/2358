@@ -25,9 +25,7 @@ class Strategy1000Buy : KoinComponent {
 
         stocks.clear()
         for (stock in all) {
-            if (stock.getPriceDouble() > min &&
-                stock.getPriceDouble() < max
-            ) {
+            if (stock.getPriceDouble() > min && stock.getPriceDouble() < max) {
                 stocks.add(stock)
             }
         }

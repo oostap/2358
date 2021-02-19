@@ -95,10 +95,10 @@ class Strategy1000SellService : Service() {
 
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
 
-        // 10:00:01
+        // 10:00:02
         val hours = 10
         val minutes = 0
-        val seconds = 1
+        val seconds = 2 // дать время прогрузиться свечам, чтобы выбрать лучший профит
 
         schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
         schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)

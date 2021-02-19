@@ -19,6 +19,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.component.KoinApiExtension
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.roundToInt
 
 fun log(msg: String) {
     if (BuildConfig.DEBUG) {
@@ -226,6 +227,10 @@ class Utils {
                 .setOngoing(false)
                 .addAction(R.mipmap.ic_launcher, "СТОП", pendingCancelIntent)
                 .build()
+        }
+
+        fun makeNicePrice(price: Double): Double {
+            return (price * 100.0).roundToInt() / 100.0
         }
     }
 }

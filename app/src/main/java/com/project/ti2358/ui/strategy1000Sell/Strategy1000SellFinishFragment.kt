@@ -23,7 +23,7 @@ import org.koin.core.component.KoinApiExtension
 @KoinApiExtension
 class Strategy1000SellFinishFragment : Fragment() {
 
-    val strategy1000Sell: Strategy1000Sell by inject()
+    private val strategy1000Sell: Strategy1000Sell by inject()
     var adapterList: Item1000RecyclerViewAdapter = Item1000RecyclerViewAdapter(emptyList())
     var infoTextView: TextView? = null
     var positions: MutableList<PurchasePosition> = mutableListOf()
@@ -54,7 +54,7 @@ class Strategy1000SellFinishFragment : Fragment() {
             }
         }
 
-        buttonStart = view.findViewById<Button>(R.id.buttonStart)
+        buttonStart = view.findViewById(R.id.buttonStart)
         updateServiceButtonText()
 
         buttonStart?.setOnClickListener {
@@ -79,7 +79,7 @@ class Strategy1000SellFinishFragment : Fragment() {
         positions = strategy1000Sell.processSellPosition()
         adapterList.setData(positions)
 
-        infoTextView = view.findViewById<TextView>(R.id.info_text)
+        infoTextView = view.findViewById(R.id.info_text)
         updateInfoText()
 
         return view
@@ -179,11 +179,11 @@ class Strategy1000SellFinishFragment : Fragment() {
 
         fun refreshFuturePercent(holder: ViewHolder) {
             val item = holder.position
-            var futurePercent = item.profit
+            val futurePercent = item.profit
             holder.futureProfitView.text = futurePercent.toPercent()
 
             val avg = item.position.getAveragePrice()
-            var futureProfitPrice = item.getProfitPrice() - avg
+            val futureProfitPrice = item.getProfitPrice() - avg
             holder.futureProfitPriceView.text = futureProfitPrice.toDollar()
             holder.totalFutureProfitPriceView.text = (futureProfitPrice * item.position.balance).toDollar()
 

@@ -42,9 +42,7 @@ class StrategyTazik : KoinComponent {
 
         stocks.clear()
         for (stock in all) {
-            if (stock.getPriceDouble() > min &&
-                stock.getPriceDouble() < max
-            ) {
+            if (stock.getPriceDouble() > min && stock.getPriceDouble() < max) {
                 stocks.add(stock)
             }
         }
@@ -204,7 +202,7 @@ class StrategyTazik : KoinComponent {
         val purchase = sorted.first()
         stock.candle1000?.let {
             val change = (100 * it.closingPrice) / stock.priceTazik - 100
-            if (change < purchase.percentLimitPriceChange) { // просадка -1%
+            if (change < purchase.percentLimitPriceChange) { // просадка < -1%
                 log("ПРОСАДКА: ${stock.marketInstrument} -> $change -> ${it.closingPrice}")
 
                 // лимитная покупка по этой цене
@@ -215,20 +213,27 @@ class StrategyTazik : KoinComponent {
                         SettingsManager.getTazikBuyAsk() -> { // покупка из аска
                             purchase.buyLimitFromAsk(SettingsManager.getTazikTakeProfit())
                         }
-                        SettingsManager.getTazikBuyMarket() -> { // покупка по маркету
+                        SettingsManager.getTazikBuyMarket() -> { // покупка по рынку
                             // примерна цена покупки (! средняя будет неизвестна из-за тинька !)
                             val priceBuy = stock.priceTazik - abs(stock.priceTazik / 100.0 * purchase.percentLimitPriceChange)
 
                             // ставим цену продажу относительно примрной средней
-                            var priceSell = priceBuy + priceBuy / 100.0 * SettingsManager.getTazikTakeProfit()
-                            // привести цену к норм виду
-                            priceSell = (priceSell * 100.0).roundToInt() / 100.0
+                            val priceSell = priceBuy + priceBuy / 100.0 * SettingsManager.getTazikTakeProfit()
 
                             purchase.buyMarket(priceSell)
                         }
-                        else -> { // ставим лимитку на наш %
-                            var buyPrice = stock.priceTazik - abs(stock.priceTazik / 100.0 * purchase.percentLimitPriceChange)
-                            buyPrice = (buyPrice * 100.0).roundToInt() / 100.0
+                        else -> { // ставим лимитку
+                            // ищем цену максимально близкую к просадке
+                            var delta = abs(change) - abs(purchase.percentLimitPriceChange)
+
+                            // 0.80 коэф приближения к нижней точке, в самом низу могут не налить
+                            delta *= 0.80
+
+                            // корректируем % падения для покупки
+                            val percent = abs(purchase.percentLimitPriceChange) + delta
+
+                            // вычислияем финальную цену лимитки
+                            val buyPrice = stock.priceTazik - abs(stock.priceTazik / 100.0 * percent)
                             purchase.buyLimitFromBid(buyPrice, SettingsManager.getTazikTakeProfit())
                         }
                     }

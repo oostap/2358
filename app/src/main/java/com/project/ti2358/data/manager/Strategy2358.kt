@@ -1,6 +1,7 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.service.SettingsManager
+import com.project.ti2358.service.Sorting
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -30,12 +31,13 @@ class Strategy2358() : KoinComponent {
                 stock.getTodayVolume() >= volumeDayPieces &&        // объём в шт
                 stock.dayVolumeCash >= volumeDayCash &&             // объём в $
                 stock.getPriceDouble() > min &&          // мин цена
-                stock.getPriceDouble() < max
-            ) {          // макс цена
+                stock.getPriceDouble() < max             // макс цена
+            ) {
                 stocks.add(stock)
             }
         }
         stocks.sortBy { it.changePrice2359DayPercent }
+        stocks.sortByDescending { stocksSelected.contains(it) }
         return stocks
     }
 

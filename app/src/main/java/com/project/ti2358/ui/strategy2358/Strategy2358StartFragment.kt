@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.SearchView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
@@ -24,6 +25,7 @@ class Strategy2358StartFragment : Fragment() {
 
     val strategy2358: Strategy2358 by inject()
     var adapterList: Item2358RecyclerViewAdapter = Item2358RecyclerViewAdapter(emptyList())
+    lateinit var stocks: MutableList<Stock>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,18 +63,44 @@ class Strategy2358StartFragment : Fragment() {
 
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
         buttonUpdate.setOnClickListener {
-            adapterList.setData(strategy2358.process())
+            stocks = strategy2358.process()
+            adapterList.setData(stocks)
         }
 
-        val checkBox = view.findViewById<CheckBox>(R.id.check_box)
-        checkBox.setOnCheckedChangeListener { _, isChecked ->
-            for (stock in strategy2358.process()) {
-                strategy2358.setSelected(stock, !isChecked)
+        stocks = strategy2358.process()
+        adapterList.setData(stocks)
+
+        val searchView: SearchView = view.findViewById(R.id.searchView)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                processText(query)
+                return false
             }
-            adapterList.notifyDataSetChanged()
-        }
 
-        adapterList.setData(strategy2358.process())
+            override fun onQueryTextChange(newText: String): Boolean {
+                processText(newText)
+                return false
+            }
+
+            fun processText(text: String) {
+                stocks = strategy2358.process()
+
+                if (text.isNotEmpty()) {
+                    stocks = stocks.filter {
+                        it.marketInstrument.ticker.contains(text, ignoreCase = true) || it.marketInstrument.name.contains(text, ignoreCase = true)
+
+                    } as MutableList<Stock>
+                }
+                adapterList.setData(stocks)
+            }
+        })
+        searchView.requestFocus()
+
+        searchView.setOnCloseListener {
+            stocks = strategy2358.process()
+            adapterList.setData(stocks)
+            false
+        }
 
         return view
     }

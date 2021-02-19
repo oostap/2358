@@ -94,7 +94,7 @@ class Strategy1000BuyStartFragment : Fragment() {
 
                 if (text.isNotEmpty()) {
                     stocks = stocks.filter {
-                        it.marketInstrument.ticker.contains(text, ignoreCase = true)
+                        it.marketInstrument.ticker.contains(text, ignoreCase = true) || it.marketInstrument.name.contains(text, ignoreCase = true)
                     } as MutableList<Stock>
                 }
                 adapterList.setData(stocks)

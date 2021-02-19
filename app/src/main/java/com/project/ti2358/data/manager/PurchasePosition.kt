@@ -3,6 +3,7 @@ package com.project.ti2358.data.manager
 import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.data.service.SettingsManager
+import com.project.ti2358.service.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -11,6 +12,7 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.*
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @KoinApiExtension
@@ -25,7 +27,7 @@ data class PurchasePosition(
     var sellOrder: LimitOrder? = null
 
     fun processInitialProfit() {
-        // по умолчанию взять профит из 2358
+        // по умолчанию взять профит из настроек
         var futureProfit = SettingsManager.get1000SellTakeProfit()
 
         // если не задан в настройках, то 1% по умолчанию
@@ -57,10 +59,8 @@ data class PurchasePosition(
         if (profit == 0.0) return 0.0
 
         val avg = position.getAveragePrice()
-        var priceProfit = avg + avg / 100.0 * profit
-        priceProfit = (priceProfit * 100.0).roundToInt() / 100.0
-
-        return priceProfit
+        val priceProfit = avg + avg / 100.0 * profit
+        return Utils.makeNicePrice(priceProfit)
     }
 
     fun sell() {
@@ -74,6 +74,23 @@ data class PurchasePosition(
 
                 position = pos
                 if (position.lots == 0 || profit == 0.0) return@launch
+
+                // скорректировать процент профита в зависимости от свечи открытия
+                val startPrice = position.stock?.candleYesterday?.closingPrice ?: 0.0
+                val currentPrice = position.stock?.candle1000?.closingPrice ?: 0.0
+                if (startPrice != 0.0 && currentPrice != 0.0) {
+                    val change = (100.0 * currentPrice) / startPrice - 100.0
+                    if (change > profit) { // если изменение больше текущего профита, то приблизить его к этой цене
+                        var delta = abs(change) - abs(profit)
+
+                        // 0.50 коэф приближения к нижней точке, в самом низу могут не налить
+                        delta *= 0.50
+
+                        // корректируем % профита продажи
+                        profit = abs(profit) + delta
+                    }
+                }
+
                 val profitPrice = getProfitPrice()
                 if (profitPrice == 0.0) return@launch
 
@@ -88,7 +105,7 @@ data class PurchasePosition(
 
                 // проверяем продалось или нет
                 while (true) {
-                    delay(1000)
+                    delay(2000)
 
                     val p = depositManager.getPositionForFigi(position.figi)
                     if (p == null) { // продано!
@@ -97,6 +114,7 @@ data class PurchasePosition(
                     }
                 }
             } catch (e: Exception) {
+                status = PurchaseStatus.CANCELED
                 e.printStackTrace()
             }
         }

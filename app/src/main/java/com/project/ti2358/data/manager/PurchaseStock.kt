@@ -55,13 +55,12 @@ data class PurchaseStock(
             PurchaseStatus.BUYED -> "куплено!"
             PurchaseStatus.ORDER_SELL -> "ордер: продажа"
             PurchaseStatus.SELLED -> "продано!"
-            PurchaseStatus.CANCELED -> "отменена!"
+            PurchaseStatus.CANCELED -> "отменена! (шок, скринь!)"
         }
 
     fun getLimitPriceDouble(): Double {
-        var price = stock.getPriceDouble() + absoluteLimitPriceChange
-        price = (price * 100.0).roundToInt() / 100.0
-        return price
+        val price = stock.getPriceDouble() + absoluteLimitPriceChange
+        return Utils.makeNicePrice(price)
     }
 
     fun addPriceLimitPercent(change: Double) {
@@ -71,11 +70,13 @@ data class PurchaseStock(
 
     fun updateAbsolutePrice() {
         absoluteLimitPriceChange = stock.getPriceDouble() / 100 * percentLimitPriceChange
-        absoluteLimitPriceChange = (absoluteLimitPriceChange * 100.0).roundToInt() / 100.0
+        absoluteLimitPriceChange = Utils.makeNicePrice(absoluteLimitPriceChange)
     }
 
-    fun buyMarket(priceSell: Double) {
+    fun buyMarket(price: Double) {
         if (SettingsManager.isSandbox() || lots == 0) return
+
+        val sellPrice = Utils.makeNicePrice(price)
 
         GlobalScope.launch(Dispatchers.Main) {
             try {
@@ -102,13 +103,12 @@ data class PurchaseStock(
                     counter--
                 }
 
-                // продаём
+                // выставить ордер на продажу
                 position?.let {
-                    // выставить ордер на продажу
                     sellLimitOrder = ordersService.placeLimitOrder(
                         it.lots,
                         stock.marketInstrument.figi,
-                        priceSell,
+                        sellPrice,
                         OperationType.SELL
                     )
                     status = PurchaseStatus.ORDER_SELL
@@ -125,13 +125,16 @@ data class PurchaseStock(
                 }
 
             } catch (e: Exception) {
+                status = PurchaseStatus.CANCELED
                 e.printStackTrace()
             }
         }
     }
 
-    fun buyLimitFromBid(buyPrice: Double, profit: Double) {
+    fun buyLimitFromBid(price: Double, profit: Double) {
         if (SettingsManager.isSandbox() || lots == 0) return
+
+        val buyPrice = Utils.makeNicePrice(price)
 
         GlobalScope.launch(Dispatchers.Main) {
             try {
@@ -172,7 +175,7 @@ data class PurchaseStock(
                     if (buyPrice == 0.0) return@launch
 
                     var profitPrice = buyPrice + buyPrice / 100.0 * profit
-                    profitPrice = (profitPrice * 100.0).roundToInt() / 100.0
+                    profitPrice = Utils.makeNicePrice(profitPrice)
                     if (profitPrice == 0.0) return@launch
 
                     // выставить ордер на продажу
@@ -198,6 +201,7 @@ data class PurchaseStock(
                 }
 
             } catch (e: Exception) {
+                status = PurchaseStatus.CANCELED
                 e.printStackTrace()
             }
         }
@@ -250,7 +254,7 @@ data class PurchaseStock(
                     if (buyPrice == 0.0) return@launch
 
                     var profitPrice = buyPrice + buyPrice / 100.0 * profit
-                    profitPrice = (profitPrice * 100.0).roundToInt() / 100.0
+                    profitPrice = Utils.makeNicePrice(profitPrice)
                     if (profitPrice == 0.0) return@launch
 
                     // выставить ордер на продажу
@@ -277,6 +281,7 @@ data class PurchaseStock(
                 }
 
             } catch (e: Exception) {
+                status = PurchaseStatus.CANCELED
                 e.printStackTrace()
             }
         }
@@ -289,10 +294,10 @@ data class PurchaseStock(
             try {
                 // получить стакан
                 val orderbook = marketService.orderbook(stock.marketInstrument.figi, 5)
+                log("$orderbook")
 
                 val buyPrice = orderbook.getBestPriceFromAsk(lots)
                 if (buyPrice == 0.0) return@launch
-                log("$orderbook")
 
                 status = PurchaseStatus.ORDER_BUY
                 buyLimitOrder = ordersService.placeLimitOrder(
@@ -322,7 +327,7 @@ data class PurchaseStock(
                     delay(1000)
                 }
 
-                // продаём
+                // продаём 2358 лесенкой
                 position?.let {
                     val totalLots = it.lots
                     val profitFrom = SettingsManager.get2358TakeProfitFrom()
@@ -333,34 +338,38 @@ data class PurchaseStock(
                     if (profitTo < profitFrom || profitStep == 0 || profitFrom == 0.0 || profitTo == 0.0) return@launch
 
                     val list: MutableList<Pair<Int, Double>> = mutableListOf()
-                    if (profitStep == 1) { // если шаг 1, то создать заявку на нижний % и всё
-                        list.add(Pair(totalLots, profitFrom))
-                    } else if (profitStep == 2) { // первый и последний
-                        val partLots1 = totalLots / 2
-                        val partLots2 = totalLots - partLots1
-                        list.add(Pair(partLots1, profitFrom))
-                        list.add(Pair(partLots2, profitTo))
-                    } else { // промежуточные
-                        val delta = (profitTo - profitFrom) / (profitStep - 1)
-                        val basePartLots = totalLots / profitStep
-
-                        var currentLots = basePartLots
-                        var currentProfit = profitFrom
-
-                        // стартовый профит
-                        list.add(Pair(basePartLots, currentProfit))
-
-                        var step = profitStep - 2
-                        while (step > 0) {
-                            currentLots += basePartLots
-                            currentProfit += delta
-                            list.add(Pair(basePartLots, currentProfit))
-                            step--
+                    when (profitStep) {
+                        1 -> { // если шаг 1, то создать заявку на нижний % и всё
+                            list.add(Pair(totalLots, profitFrom))
                         }
+                        2 -> { // первый и последний
+                            val partLots1 = totalLots / 2
+                            val partLots2 = totalLots - partLots1
+                            list.add(Pair(partLots1, profitFrom))
+                            list.add(Pair(partLots2, profitTo))
+                        }
+                        else -> { // промежуточные
+                            val delta = (profitTo - profitFrom) / (profitStep - 1)
+                            val basePartLots = totalLots / profitStep
 
-                        // финальный профит
-                        val lastPartLots = totalLots - currentLots
-                        list.add(Pair(lastPartLots, profitTo))
+                            var currentLots = basePartLots
+                            var currentProfit = profitFrom
+
+                            // стартовый профит
+                            list.add(Pair(basePartLots, currentProfit))
+
+                            var step = profitStep - 2
+                            while (step > 0) {
+                                currentLots += basePartLots
+                                currentProfit += delta
+                                list.add(Pair(basePartLots, currentProfit))
+                                step--
+                            }
+
+                            // финальный профит
+                            val lastPartLots = totalLots - currentLots
+                            list.add(Pair(lastPartLots, profitTo))
+                        }
                     }
 
                     if (list.isEmpty()) return@launch
@@ -371,7 +380,7 @@ data class PurchaseStock(
 
                         // вычисляем и округляем до 2 после запятой
                         var profitPrice = buyPrice + buyPrice / 100.0 * profit
-                        profitPrice = (profitPrice * 100.0).roundToInt() / 100.0
+                        profitPrice = Utils.makeNicePrice(profitPrice)
 
                         if (lots <= 0 || profitPrice == 0.0) continue
 
@@ -400,6 +409,7 @@ data class PurchaseStock(
                 }
 
             } catch (e: Exception) {
+                status = PurchaseStatus.CANCELED
                 e.printStackTrace()
             }
         }

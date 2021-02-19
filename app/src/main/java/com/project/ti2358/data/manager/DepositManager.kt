@@ -44,9 +44,6 @@ class DepositManager : KoinComponent {
                     delay(500) // 1s
 
                     orders = ordersService.orders() as MutableList<Order>
-//                    for (order in orders) {
-//                        ordersService.cancel(order.orderId)
-//                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
