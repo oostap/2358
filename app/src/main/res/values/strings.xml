@@ -49,8 +49,6 @@
 
     <!-- tinkoff settings -->
     <string name="token_header">Tinkoff OpenApi Токен</string>
-    <string name="is_sandbox_token_title">Sandbox</string>
-    <string name="sandbox_token_title">Sandbox token</string>
     <string name="market_token_title">Market token</string>
 
     <!-- common settings -->
@@ -104,8 +102,6 @@
     <!-- setting keys-->
 
     <!-- tinkoff -->
-    <string name="setting_key_sandbox">sandbox</string>
-    <string name="setting_key_token_sandbox">token_sandbox</string>
     <string name="setting_key_token_market">token_market</string>
 
     <!-- common settings -->

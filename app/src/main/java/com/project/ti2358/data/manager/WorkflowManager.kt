@@ -21,28 +21,10 @@ class WorkflowManager() : KoinComponent {
     private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
 
-    private val sandboxService: SandboxService by inject()
-
     private val marketService: MarketService by inject()
     private val ordersService: OrdersService by inject()
 
     fun startApp() {
-        if (SettingsManager.isSandbox()) { // TEST
-            GlobalScope.launch(Dispatchers.Main) {
-                try {
-                    sandboxService.register()
-                    sandboxService.setCurrencyBalance(Currency.USD, 10000)
-                    val figi = marketService.searchByTicker("TSLA").instruments[0].figi
-                    ordersService.placeMarketOrder(1, figi, OperationType.BUY)
-
-                    // !!! в sandbox больше 1 лота нельзя покупать!
-                    ordersService.placeMarketOrder(1, "BBG000BH5LT6", OperationType.BUY)
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
         stockManager.loadStocks()
         depositManager.startUpdatePortfolio()
     }
@@ -119,10 +101,6 @@ class WorkflowManager() : KoinComponent {
         }
 
         private val apiModule = module {
-            fun provideSandboxService(retrofit: Retrofit): SandboxService {
-                return SandboxService(retrofit)
-            }
-
             fun provideMarketService(retrofit: Retrofit): MarketService {
                 return MarketService(retrofit)
             }
@@ -143,7 +121,6 @@ class WorkflowManager() : KoinComponent {
                 return StreamingService()
             }
 
-            single { provideSandboxService(get()) }
             single { provideMarketService(get()) }
             single { provideOrdersService(get()) }
             single { providePortfolioService(get()) }

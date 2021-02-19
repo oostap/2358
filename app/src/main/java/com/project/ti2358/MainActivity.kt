@@ -26,12 +26,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     val depositManager: DepositManager by inject()
-    val sandboxService: SandboxService by inject()
-    val marketService: MarketService by inject()
-    val ordersService: OrdersService by inject()
-    val portfolioService: PortfolioService by inject()
-    val streamingService: StreamingService by inject()
-
     val workflowManager: WorkflowManager by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {

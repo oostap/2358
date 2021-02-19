@@ -74,7 +74,7 @@ data class PurchaseStock(
     }
 
     fun buyMarket(price: Double) {
-        if (SettingsManager.isSandbox() || lots == 0) return
+        if (lots == 0) return
 
         val sellPrice = Utils.makeNicePrice(price)
 
@@ -132,7 +132,7 @@ data class PurchaseStock(
     }
 
     fun buyLimitFromBid(price: Double, profit: Double) {
-        if (SettingsManager.isSandbox() || lots == 0) return
+        if (lots == 0) return
 
         val buyPrice = Utils.makeNicePrice(price)
 
@@ -208,7 +208,7 @@ data class PurchaseStock(
     }
 
     fun buyLimitFromAsk(profit: Double) {
-        if (SettingsManager.isSandbox() || lots == 0) return
+        if (lots == 0) return
 
         GlobalScope.launch(Dispatchers.Main) {
             try {
@@ -288,7 +288,7 @@ data class PurchaseStock(
     }
 
     fun buyLimit2358() {
-        if (SettingsManager.isSandbox() || lots == 0) return
+        if (lots == 0) return
 
         GlobalScope.launch(Dispatchers.Main) {
             try {

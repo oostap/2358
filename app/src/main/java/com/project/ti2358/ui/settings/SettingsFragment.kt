@@ -13,19 +13,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.fragment_settings, rootKey)
 
-        val sandboxKey: String = getString(R.string.setting_key_sandbox)
-        val sandboxPreference: SwitchPreferenceCompat? = findPreference(sandboxKey)
-
-        sandboxPreference?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
-            updateSandbox(newValue as Boolean)
-            true
-        }
-
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
-        val isSandbox = sharedPreferences.getBoolean(sandboxKey, true)
-
-        updateSandbox(isSandbox)
-
         val tazikAskKey: String = getString(R.string.setting_key_tazik_buy_ask)
         tazikAskPreference = findPreference(tazikAskKey)
 
@@ -54,16 +41,5 @@ class SettingsFragment : PreferenceFragmentCompat() {
         tazikMarketPreference?.onPreferenceChangeListener = listener
         tazikAskPreference?.onPreferenceChangeListener = listener
         tazikBidPreference?.onPreferenceChangeListener = listener
-    }
-
-    private fun updateSandbox(sandbox: Boolean) {
-        val sandboxTokenKey: String = getString(R.string.setting_key_token_sandbox)
-        val marketTokenKey: String = getString(R.string.setting_key_token_market)
-
-        val marketPreference: EditTextPreference? = findPreference(marketTokenKey)
-        val sandboxPreference: EditTextPreference? = findPreference(sandboxTokenKey)
-
-        marketPreference?.isVisible = !sandbox
-        sandboxPreference?.isVisible = sandbox
     }
 }

@@ -71,6 +71,14 @@ class DepositManager : KoinComponent {
         }
     }
 
+    suspend fun refreshKotleta() {
+        try {
+            currencyPositions = synchronizedList(portfolioService.currencies().currencies)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     public fun getFreeCashUSD(): String {
         for (currency in currencyPositions) {
             if (currency.currency == Currency.USD) {

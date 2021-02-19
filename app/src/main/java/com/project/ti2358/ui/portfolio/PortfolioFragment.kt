@@ -57,6 +57,7 @@ class PortfolioFragment : Fragment() {
         buttonUpdate.setOnClickListener {
             GlobalScope.launch(Dispatchers.Main) {
                 depositManager.refreshDeposit()
+                depositManager.refreshKotleta()
                 adapterList.setData(depositManager.portfolioPositions)
             }
             adapterList.setData(depositManager.portfolioPositions)

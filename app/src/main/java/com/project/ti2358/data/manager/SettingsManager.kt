@@ -18,33 +18,14 @@ class SettingsManager {
             preferences = PreferenceManager.getDefaultSharedPreferences(context)
         }
 
-        fun isSandbox(): Boolean {
-            val sandboxKey: String = context.getString(R.string.setting_key_sandbox)
-            return preferences.getBoolean(sandboxKey, true)
-        }
-
         fun getActiveToken(): String {
-            val tokenKey = if (isSandbox()) {
-                context.getString(R.string.setting_key_token_sandbox)
-            } else {
-                context.getString(R.string.setting_key_token_market)
-            }
-
-            val token: String? = preferences.getString(tokenKey, "")
+            val tokenKey = context.getString(R.string.setting_key_token_market)
+            val token: String? = preferences.getString(tokenKey, "")?.trim()
             return token ?: "TODO"
         }
 
-        fun getActiveBaseUrl(): String {
-            return if (isSandbox()) {
-                "https://api-invest.tinkoff.ru/openapi/sandbox/"
-            } else {
-                "https://api-invest.tinkoff.ru/openapi/"
-            }
-        }
-
-        fun getYahooBaseUrl(): String {
-            return "https://query1.finance.yahoo.com/v10/finance/quoteSummary/"
-        }
+        fun getActiveBaseUrl(): String = "https://api-invest.tinkoff.ru/openapi/"
+        fun getYahooBaseUrl(): String = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/"
 
         fun isAllowCurrency(currency: Currency): Boolean {
             if (currency == Currency.USD) return true

@@ -2,16 +2,6 @@
 
     <PreferenceCategory app:title="@string/token_header">
 
-        <SwitchPreferenceCompat
-            app:key="@string/setting_key_sandbox"
-            app:title="@string/is_sandbox_token_title"
-            app:defaultValue="true" />
-
-        <EditTextPreference
-            app:key="@string/setting_key_token_sandbox"
-            app:title="@string/sandbox_token_title"
-            app:useSimpleSummaryProvider="true" />
-
         <EditTextPreference
             app:key="@string/setting_key_token_market"
             app:title="@string/market_token_title"
