@@ -1,7 +1,7 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.service.SettingsManager
-import com.project.ti2358.service.Sorting
+import com.project.ti2358.service.toPercent
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -56,8 +56,9 @@ class Strategy2358() : KoinComponent {
     }
 
     fun getPurchaseStock(prepare: Boolean): MutableList<PurchaseStock> {
-        // проверить и удалить бумаги, которые перестали удовлетворять условию 2358
         process()
+
+        // удалить бумаги, которые перестали удовлетворять условию 2358
         stocksSelected.removeAll { !stocks.contains(it) }
 
         // проверить и удалить бумаги, которые сильно отросли с момента старта таймера
@@ -77,10 +78,28 @@ class Strategy2358() : KoinComponent {
             stocksSelected.removeAll { stocksToDelete.contains(it) }
         }
 
-        stocksToPurchase.clear()
+        val purchases: MutableList<PurchaseStock> = mutableListOf()
         for (stock in stocksSelected) {
-            stocksToPurchase.add(PurchaseStock(stock))
+            val purchase = PurchaseStock(stock)
+
+            var exists = false
+            for (p in stocksToPurchase) {
+                if (p.stock.marketInstrument.ticker == stock.marketInstrument.ticker) {
+                    purchase.percentSellFrom = p.percentSellFrom
+                    purchase.percentSellTo = p.percentSellTo
+                    exists = true
+                    break
+                }
+            }
+
+            if (!exists) {
+                purchase.percentSellFrom = SettingsManager.get2358TakeProfitFrom()
+                purchase.percentSellTo = SettingsManager.get2358TakeProfitTo()
+            }
+
+            purchases.add(purchase)
         }
+        stocksToPurchase = purchases
 
         val totalMoney: Double = SettingsManager.get2358PurchaseVolume().toDouble()
         val onePiece: Double = totalMoney / stocksToPurchase.size
@@ -127,7 +146,7 @@ class Strategy2358() : KoinComponent {
         var tickers = ""
         for (stock in stocksToPurchase) {
             val p = "%.1f$".format(stock.lots * stock.stock.getPriceDouble())
-            tickers += "${stock.stock.marketInstrument.ticker} * ${stock.lots} шт. = ${p} ${stock.getStatusString()}\n"
+            tickers += "${stock.stock.marketInstrument.ticker} * ${stock.lots} шт. = ${p}, ${stock.percentSellFrom.toPercent()}-${stock.percentSellTo.toPercent()}, ${stock.getStatusString()}\n"
         }
 
         return tickers

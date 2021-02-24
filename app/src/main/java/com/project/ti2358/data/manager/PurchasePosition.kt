@@ -114,7 +114,9 @@ data class PurchasePosition(
                     }
                 }
             } catch (e: Exception) {
-                status = PurchaseStatus.CANCELED
+                if (status != PurchaseStatus.ORDER_SELL) {
+                    status = PurchaseStatus.CANCELED
+                }
                 e.printStackTrace()
             }
         }

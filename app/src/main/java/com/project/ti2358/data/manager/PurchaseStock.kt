@@ -11,8 +11,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.util.*
-import kotlin.math.roundToInt
 
 enum class PurchaseStatus {
     NONE,
@@ -43,6 +41,9 @@ data class PurchaseStock(
 
     var sellLimitOrder: LimitOrder? = null
 
+    var percentSellFrom: Double = 0.0
+    var percentSellTo: Double = 0.0
+
     fun getPriceString(): String {
         return "%.1f$".format(stock.getPriceDouble() * lots)
     }
@@ -71,6 +72,11 @@ data class PurchaseStock(
     fun updateAbsolutePrice() {
         absoluteLimitPriceChange = stock.getPriceDouble() / 100 * percentLimitPriceChange
         absoluteLimitPriceChange = Utils.makeNicePrice(absoluteLimitPriceChange)
+    }
+
+    fun addPriceProfit2358Percent(change: Double) {
+        percentSellFrom += change
+        percentSellTo += change
     }
 
     fun buyMarket(price: Double) {
@@ -330,8 +336,17 @@ data class PurchaseStock(
                 // продаём 2358 лесенкой
                 position?.let {
                     val totalLots = it.lots
-                    val profitFrom = SettingsManager.get2358TakeProfitFrom()
-                    val profitTo = SettingsManager.get2358TakeProfitTo()
+                    var profitFrom = percentSellFrom
+                    var profitTo = percentSellTo
+
+                    if (profitFrom == 0.0) {
+                        profitFrom = SettingsManager.get2358TakeProfitFrom()
+                    }
+
+                    if (profitTo == 0.0) {
+                        profitTo = SettingsManager.get2358TakeProfitTo()
+                    }
+
                     val profitStep = SettingsManager.get2358TakeProfitStep()
 
                     // в случае кривых настроек просто не создаём заявки

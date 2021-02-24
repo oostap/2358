@@ -176,6 +176,11 @@ class StrategyTazik : KoinComponent {
         // зафикировать цену, чтобы change считать от неё
         for (stock in stocks) {
             // вчерашняя, если стартуем до сессии
+            stock.candleWeek?.let {
+                stock.priceTazik = it.closingPrice
+            }
+
+            // вчерашняя, если стартуем до сессии
             stock.candleYesterday?.let {
                 stock.priceTazik = it.closingPrice
             }
@@ -227,7 +232,7 @@ class StrategyTazik : KoinComponent {
                             var delta = abs(change) - abs(purchase.percentLimitPriceChange)
 
                             // 0.80 коэф приближения к нижней точке, в самом низу могут не налить
-                            delta *= 0.80
+                            delta *= 0.70
 
                             // корректируем % падения для покупки
                             val percent = abs(purchase.percentLimitPriceChange) + delta

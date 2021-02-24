@@ -6,12 +6,12 @@
         android:divider="?android:dividerHorizontal"
         android:dividerPadding="10dp"
         android:showDividers="middle"
-        android:weightSum="3" >
+        android:weightSum="40" >
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_weight="10"
         android:orientation="vertical">
 
         <TextView
@@ -34,25 +34,82 @@
             android:textSize="14sp" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/stock_purchase_lots"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="8dp"
-        android:gravity="center_vertical"
-        android:text="1 шт."
-        android:layout_weight="1"
-        android:textSize="14sp" />
+        android:layout_height="wrap_content"
+        android:layout_weight="10"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/stock_purchase_lots"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:gravity="center_vertical"
+            android:text="1 шт."
+            android:layout_weight="1"
+            android:textSize="14sp" />
 
 
-    <TextView
-        android:id="@+id/stock_purchase_price"
+        <TextView
+            android:id="@+id/stock_purchase_price"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:gravity="center_vertical"
+            android:text="+5%"
+            android:layout_weight="1"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="8dp"
-        android:gravity="center_vertical"
-        android:text="+5%"
-        android:layout_weight="1"
-        android:textSize="14sp" />
+        android:layout_height="wrap_content"
+        android:layout_weight="10.5"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/stock_price_profit_percent_from"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:padding="8dp"
+            android:text="-0.2%"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/stock_price_profit_percent_to"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:gravity="center_vertical"
+            android:text="-10$"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="9.5"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/buttonPlus"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="20dp"
+            android:text="+" />
+
+
+        <Button
+            android:id="@+id/buttonMinus"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="20dp"
+            android:text="-" />
+
+    </LinearLayout>
 
 </LinearLayout>

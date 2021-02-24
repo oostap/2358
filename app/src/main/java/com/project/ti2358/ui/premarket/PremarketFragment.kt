@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.SearchView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,6 +25,7 @@ class PremarketFragment : Fragment() {
 
     val strategyPremarket: StrategyPremarket by inject()
     var adapterList: ItemStocksRecyclerViewAdapter = ItemStocksRecyclerViewAdapter(emptyList())
+    lateinit var stocks: MutableList<Stock>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,8 +57,40 @@ class PremarketFragment : Fragment() {
             }
         }
 
-        strategyPremarket.process()
-        adapterList.setData(strategyPremarket.resort(sort))
+        stocks = strategyPremarket.process()
+        stocks = strategyPremarket.resort(sort)
+        adapterList.setData(stocks)
+
+        val searchView: SearchView = view.findViewById(R.id.searchView)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                processText(query)
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                processText(newText)
+                return false
+            }
+
+            fun processText(text: String) {
+                stocks = strategyPremarket.process()
+                stocks = strategyPremarket.resort(sort)
+
+                if (text.isNotEmpty()) {
+                    stocks = stocks.filter {
+                        it.marketInstrument.ticker.contains(text, ignoreCase = true) || it.marketInstrument.name.contains(text, ignoreCase = true)
+                    } as MutableList<Stock>
+                }
+                adapterList.setData(stocks)
+            }
+        })
+
+        searchView.setOnCloseListener {
+            stocks = strategyPremarket.process()
+            adapterList.setData(stocks)
+            false
+        }
 
         return view
     }

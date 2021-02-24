@@ -111,21 +111,47 @@ class Strategy2358FinishFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
+            holder.position = item
+
             holder.tickerView.text = "${position}. ${item.stock.marketInstrument.ticker}"
             holder.priceView.text = item.stock.getPriceString()
 
             holder.purchaseLotsView.text = "${item.lots} шт."
             holder.purchasePriceView.text = item.getPriceString()
+
+            refreshPercent(holder)
+            holder.buttonPlus.setOnClickListener {
+                item.addPriceProfit2358Percent(0.05)
+                refreshPercent(holder)
+            }
+
+            holder.buttonMinus.setOnClickListener {
+                item.addPriceProfit2358Percent(-0.05)
+                refreshPercent(holder)
+            }
+        }
+
+        fun refreshPercent(holder: ViewHolder) {
+            holder.profitPriceFromView.text = holder.position.percentSellFrom.toPercent()
+            holder.profitPriceToView.text = holder.position.percentSellTo.toPercent()
         }
 
         override fun getItemCount(): Int = values.size
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            lateinit var position: PurchaseStock
+
             val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
             val priceView: TextView = view.findViewById(R.id.stock_item_price)
 
             val purchaseLotsView: TextView = view.findViewById(R.id.stock_purchase_lots)
             val purchasePriceView: TextView = view.findViewById(R.id.stock_purchase_price)
+
+            val profitPriceFromView: TextView = view.findViewById(R.id.stock_price_profit_percent_from)
+            val profitPriceToView: TextView = view.findViewById(R.id.stock_price_profit_percent_to)
+
+            val buttonPlus: Button = view.findViewById(R.id.buttonPlus)
+            val buttonMinus: Button = view.findViewById(R.id.buttonMinus)
         }
     }
 }

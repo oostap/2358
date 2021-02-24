@@ -1,6 +1,7 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.model.dto.PortfolioPosition
+import com.project.ti2358.service.toDollar
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -13,7 +14,7 @@ class Strategy1000Sell() : KoinComponent {
     var positionsSelected: MutableList<PortfolioPosition> = mutableListOf()
     var positionsToSell: MutableList<PurchasePosition> = mutableListOf()
 
-    public fun process(): MutableList<PortfolioPosition> {
+    fun process(): MutableList<PortfolioPosition> {
         val all = depositManager.portfolioPositions
 
         positions.clear()
@@ -23,7 +24,7 @@ class Strategy1000Sell() : KoinComponent {
         return positions
     }
 
-    public fun setSelected(position: PortfolioPosition, value: Boolean) {
+    fun setSelected(position: PortfolioPosition, value: Boolean) {
         if (value) {
             positionsSelected.removeAll { it.figi == position.figi }
         } else {
@@ -34,12 +35,12 @@ class Strategy1000Sell() : KoinComponent {
         positionsSelected.sortByDescending { it.lots * it.getAveragePrice() }
     }
 
-    public fun isSelected(position: PortfolioPosition): Boolean {
+    fun isSelected(position: PortfolioPosition): Boolean {
         val filter = positionsSelected.filter { it.figi == position.figi }
         return filter.isNotEmpty()
     }
 
-    public fun processSellPosition(): MutableList<PurchasePosition> {
+    fun processSellPosition(): MutableList<PurchasePosition> {
         positionsToSell.clear()
         for (position in positionsSelected) {
             positionsToSell.add(PurchasePosition(position))
@@ -53,15 +54,15 @@ class Strategy1000Sell() : KoinComponent {
         return positionsToSell
     }
 
-    public fun getTotalSellString(): String {
+    fun getTotalSellString(): String {
         var value = 0.0
         for (position in positionsToSell) {
             value += position.getProfitPrice() * position.position.balance
         }
-        return "%.1f".format(value) + "$"
+        return value.toDollar()
     }
 
-    public fun getTotalPurchasePieces(): Int {
+    fun getTotalPurchasePieces(): Int {
         var value = 0
         for (position in positionsToSell) {
             value += position.position.lots
@@ -69,8 +70,8 @@ class Strategy1000Sell() : KoinComponent {
         return value
     }
 
-    public fun getNotificationTextShort(): String {
-        var price = getTotalSellString()
+    fun getNotificationTextShort(): String {
+        val price = getTotalSellString()
         var tickers = ""
         for (position in positionsToSell) {
             tickers += "${position.position.lots}*${position.position.ticker} "
@@ -79,12 +80,12 @@ class Strategy1000Sell() : KoinComponent {
         return "$price:\n$tickers"
     }
 
-    public fun getNotificationTextLong(): String {
+    fun getNotificationTextLong(): String {
         var tickers = ""
         for (position in positionsToSell) {
             val p =
                 "%.1f$ -> %.1f$ -> %.1f".format(position.position.lots * position.getProfitPrice(), position.getProfitPrice(), position.profit) + "%"
-            tickers += "${position.position.ticker} * ${position.position.lots} шт. = ${p} ${position.getStatusString()}\n"
+            tickers += "${position.position.ticker} * ${position.position.lots} шт. = $p ${position.getStatusString()}\n"
         }
 
         return tickers
