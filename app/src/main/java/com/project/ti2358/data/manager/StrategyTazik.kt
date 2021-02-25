@@ -239,7 +239,14 @@ class StrategyTazik : KoinComponent {
 
                             // вычислияем финальную цену лимитки
                             val buyPrice = stock.priceTazik - abs(stock.priceTazik / 100.0 * percent)
-                            purchase.buyLimitFromBid(buyPrice, SettingsManager.getTazikTakeProfit())
+
+                            // вычисляем процент профита после сдвига лимитки ниже
+                            val baseProfit = SettingsManager.getTazikTakeProfit()
+
+                            // финальный профит
+                            delta *= 0.70
+                            val finalProfit = baseProfit + abs(delta)
+                            purchase.buyLimitFromBid(buyPrice, finalProfit)
                         }
                     }
 

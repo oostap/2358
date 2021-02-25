@@ -6,7 +6,9 @@ import retrofit2.Retrofit
 class PortfolioService(retrofit: Retrofit) : BaseService(retrofit) {
     private val portfolioApi: PortfolioApi = retrofit.create(PortfolioApi::class.java)
 
-    suspend fun portfolio() = portfolioApi.portfolio().payload
+    suspend fun portfolio(brokerId: String) = portfolioApi.portfolio(brokerId).payload
 
-    suspend fun currencies() = portfolioApi.currencies().payload
+    suspend fun currencies(brokerId: String) = portfolioApi.currencies(brokerId).payload
+
+    suspend fun accounts() = portfolioApi.accounts().payload
 }

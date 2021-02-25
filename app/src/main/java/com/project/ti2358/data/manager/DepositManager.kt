@@ -16,6 +16,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.Collections.synchronizedList
 import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.log
 
 @KoinApiExtension
@@ -28,6 +29,7 @@ class DepositManager : KoinComponent {
     var portfolioPositions: MutableList<PortfolioPosition> = synchronizedList(mutableListOf())
     var currencyPositions: MutableList<CurrencyPosition> = synchronizedList(mutableListOf())
     var orders: MutableList<Order> = synchronizedList(mutableListOf())
+    var accounts: MutableList<Account> = synchronizedList(mutableListOf())
 
     private var refreshDepositDelay: Long = 20 * 1000 // 20s
 
@@ -35,15 +37,17 @@ class DepositManager : KoinComponent {
         GlobalScope.launch(Dispatchers.Main) {
             while (true) {
                 try {
+                    accounts = synchronizedList(portfolioService.accounts().accounts)
+
                     refreshDeposit()
 
                     delay(500) // 1s
 
-                    currencyPositions = synchronizedList(portfolioService.currencies().currencies)
+                    refreshKotleta()
 
                     delay(500) // 1s
 
-                    orders = ordersService.orders() as MutableList<Order>
+                    orders = ordersService.orders(getActiveBrokerAccountId()) as MutableList<Order>
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -62,9 +66,19 @@ class DepositManager : KoinComponent {
         }
     }
 
+    fun getActiveBrokerAccountId(): String {
+        val accountType = SettingsManager.getActiveBrokerType()
+        for (acc in accounts) {
+            if (acc.brokerAccountType == accountType) {
+                return acc.brokerAccountId
+            }
+        }
+        return accounts.first().brokerAccountId
+    }
+
     suspend fun refreshDeposit() {
         try {
-            portfolioPositions = synchronizedList(portfolioService.portfolio().positions)
+            portfolioPositions = synchronizedList(portfolioService.portfolio(getActiveBrokerAccountId()).positions)
             baseSortPortfolio()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -73,7 +87,7 @@ class DepositManager : KoinComponent {
 
     suspend fun refreshKotleta() {
         try {
-            currencyPositions = synchronizedList(portfolioService.currencies().currencies)
+            currencyPositions = synchronizedList(portfolioService.currencies(getActiveBrokerAccountId()).currencies)
         } catch (e: Exception) {
             e.printStackTrace()
         }

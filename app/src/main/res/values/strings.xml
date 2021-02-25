@@ -50,6 +50,7 @@
     <!-- tinkoff settings -->
     <string name="token_header">Tinkoff OpenApi Токен</string>
     <string name="market_token_title">Market token</string>
+    <string name="tinkoff_iis_title">У меня ИИС</string>
 
     <!-- common settings -->
     <string name="stocks_header">Общие настройки</string>
@@ -103,6 +104,7 @@
 
     <!-- tinkoff -->
     <string name="setting_key_token_market">token_market</string>
+    <string name="setting_key_tinkoff_iis">tinkoff_iis</string>
 
     <!-- common settings -->
     <string name="setting_key_stocks_usd_price_min">stocks_usd_price_min</string>

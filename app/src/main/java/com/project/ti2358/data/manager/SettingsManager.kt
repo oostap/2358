@@ -27,6 +27,17 @@ class SettingsManager {
         fun getActiveBaseUrl(): String = "https://api-invest.tinkoff.ru/openapi/"
         fun getYahooBaseUrl(): String = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/"
 
+        fun getActiveBrokerType(): String {
+            val key: String = context.getString(R.string.setting_key_tinkoff_iis)
+            val iis = preferences.getBoolean(key, false)
+
+            return if (iis) {
+                "TinkoffIis"
+            } else {
+                "Tinkoff"
+            }
+        }
+
         fun isAllowCurrency(currency: Currency): Boolean {
             if (currency == Currency.USD) return true
             return false

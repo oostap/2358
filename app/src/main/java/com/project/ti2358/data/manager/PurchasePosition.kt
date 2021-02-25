@@ -94,14 +94,23 @@ data class PurchasePosition(
                 val profitPrice = getProfitPrice()
                 if (profitPrice == 0.0) return@launch
 
-                // выставить ордер на продажу
-                sellOrder = ordersService.placeLimitOrder(
-                    position.lots,
-                    position.figi,
-                    profitPrice,
-                    OperationType.SELL
-                )
-                status = PurchaseStatus.ORDER_SELL
+                while (true) {
+                    try {
+                        // выставить ордер на продажу
+                        sellOrder = ordersService.placeLimitOrder(
+                            position.lots,
+                            position.figi,
+                            profitPrice,
+                            OperationType.SELL,
+                            depositManager.getActiveBrokerAccountId()
+                        )
+                        status = PurchaseStatus.ORDER_SELL
+                        break
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    delay(200)
+                }
 
                 // проверяем продалось или нет
                 while (true) {

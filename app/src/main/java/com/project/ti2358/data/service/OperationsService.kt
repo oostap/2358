@@ -6,5 +6,5 @@ import retrofit2.Retrofit
 class OperationsService(retrofit: Retrofit) : BaseService(retrofit) {
     private val operationsApi: OperationsApi = retrofit.create(OperationsApi::class.java)
 
-    suspend fun operations(from: String, to: String) = operationsApi.candles(from, to).payload
+    suspend fun operations(from: String, to: String, brokerAccountId: String) = operationsApi.candles(from, to, brokerAccountId).payload
 }

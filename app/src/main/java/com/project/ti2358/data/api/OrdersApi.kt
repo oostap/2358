@@ -7,6 +7,7 @@ import com.project.ti2358.data.model.dto.MarketOrder
 import com.project.ti2358.data.model.dto.Order
 import com.project.ti2358.data.model.dto.Orders
 import com.project.ti2358.data.model.response.Response
+import com.project.ti2358.data.service.SettingsManager
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -17,24 +18,24 @@ interface OrdersApi {
     suspend fun placeMarketOrder(
         @Body orderBody: MarketOrderBody,
         @Query("figi") figi: String,
-        @Query("brokerAccountId") brokerAccountId: String? = null
+        @Query("brokerAccountId") brokerAccountId: String
     ): Response<MarketOrder>
 
     @POST("orders/limit-order")
     suspend fun placeLimitOrder(
         @Body orderBody: LimitOrderBody,
         @Query("figi") figi: String,
-        @Query("brokerAccountId") brokerAccountId: String? = null
+        @Query("brokerAccountId") brokerAccountId: String
     ): Response<LimitOrder>
 
     @GET("orders")
     suspend fun orders(
-        @Query("brokerAccountId") brokerAccountId: String? = null
+        @Query("brokerAccountId") brokerAccountId: String
     ): Response<List<Order>>
 
     @POST("orders/cancel")
     suspend fun cancel(
-        @Query("orderId") orderId: String? = null,
-        @Query("brokerAccountId") brokerAccountId: String? = null
+        @Query("orderId") orderId: String,
+        @Query("brokerAccountId") brokerAccountId: String
     ): Response<Any?>
 }

@@ -7,6 +7,11 @@
             app:title="@string/market_token_title"
             app:useSimpleSummaryProvider="true" />
 
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tinkoff_iis"
+            app:title="@string/tinkoff_iis_title"
+            app:defaultValue="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/stocks_header">

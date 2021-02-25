@@ -381,7 +381,7 @@ data class Stock(
 
         var deltaDay = 0
 
-        val delay = prevDelay + kotlin.random.Random.Default.nextLong(400, 600)
+        val delay = prevDelay + kotlin.random.Random.Default.nextLong(500, 700)
         GlobalScope.launch(Dispatchers.Main) {
             while (candle2359 == null) {
                 try {
