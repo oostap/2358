@@ -19,7 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:padding="8dp"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
             android:text="1. TSLA 10 шт."
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -28,16 +29,18 @@
             android:id="@+id/stock_item_price"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
             android:gravity="center_vertical"
             android:text="700$ -> 650$"
-            android:textSize="14sp" />
+            android:textSize="13sp" />
 
         <TextView
             android:id="@+id/stock_total_price"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
             android:gravity="center_vertical"
             android:text="6500$"
             android:textSize="14sp" />
@@ -46,7 +49,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="10"
+        android:layout_weight="10.6"
         android:orientation="vertical">
 
         <TextView
@@ -54,7 +57,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:padding="8dp"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
             android:text=""
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -63,7 +67,8 @@
             android:id="@+id/stock_item_price_buy"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
             android:gravity="center_vertical"
             android:text="640$"
             android:textSize="14sp" />
@@ -72,7 +77,8 @@
             android:id="@+id/stock_item_price_total_buy"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
             android:gravity="center_vertical"
             android:text="6400$"
             android:textSize="14sp" />
@@ -82,7 +88,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="10.5"
+        android:layout_weight="10.9"
         android:orientation="vertical">
 
         <TextView
@@ -90,7 +96,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:padding="8dp"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
             android:text="-0.2%"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -99,7 +106,8 @@
             android:id="@+id/stock_price_absolute_change"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
             android:gravity="center_vertical"
             android:text="-10$"
             android:textSize="14sp" />
@@ -108,7 +116,8 @@
             android:id="@+id/stock_price_absolute_total_change"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
             android:gravity="center_vertical"
             android:text="-100$"
             android:textSize="14sp" />
@@ -116,25 +125,29 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="10"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:layout_weight="9"
+        android:orientation="horizontal">
 
         <Button
-            android:id="@+id/buttonPlus"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textSize="20dp"
-            android:text="+" />
-
-
-        <Button
+            android:layout_weight="2"
             android:id="@+id/buttonMinus"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:textSize="20dp"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:textSize="30dp"
             android:text="-" />
 
+        <Button
+            android:layout_weight="2"
+            android:id="@+id/buttonPlus"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginRight="3dp"
+            android:layout_marginLeft="3dp"
+            android:textSize="30dp"
+            android:text="+" />
     </LinearLayout>
 
 </LinearLayout>

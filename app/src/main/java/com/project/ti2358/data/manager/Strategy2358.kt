@@ -55,14 +55,14 @@ class Strategy2358() : KoinComponent {
         return stocksSelected.contains(stock)
     }
 
-    fun getPurchaseStock(prepare: Boolean): MutableList<PurchaseStock> {
+    fun getPurchaseStock(reset: Boolean): MutableList<PurchaseStock> {
         process()
 
         // удалить бумаги, которые перестали удовлетворять условию 2358
         stocksSelected.removeAll { !stocks.contains(it) }
 
         // проверить и удалить бумаги, которые сильно отросли с момента старта таймера
-        if (!prepare) {
+        if (!reset) {
             val stocksToDelete: MutableList<Stock> = mutableListOf()
             for (stock in stocksSelected) {
                 if (stock.changeOnStartTimer == 0.0) continue
@@ -108,8 +108,10 @@ class Strategy2358() : KoinComponent {
             purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
             purchase.status = PurchaseStatus.WAITING
 
-            if (prepare) { // запоминаем % подготовки, чтобы после проверить изменение
+            if (reset) { // запоминаем % подготовки, чтобы после проверить изменение
                 purchase.stock.changeOnStartTimer = purchase.stock.changePrice2359DayPercent
+                purchase.percentSellFrom = SettingsManager.get2358TakeProfitFrom()
+                purchase.percentSellTo = SettingsManager.get2358TakeProfitTo()
             }
         }
 

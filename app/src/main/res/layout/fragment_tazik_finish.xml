@@ -8,9 +8,9 @@
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="200dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginBottom="170dp"
         android:layout_marginTop="0dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.strategyTazik.StrategyTazikFinishFragment"
@@ -32,8 +32,8 @@
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:layout_marginBottom="90dp"
-        android:text="Запуск таймера на покупку: \nВремя МСК: 2358: \nБумаг: 5\nСумма: ~1000$"
+        android:layout_marginBottom="70dp"
+        android:text="Запуск таймера на покупку: \nВремя МСК: 2358: \nБумаг: 5\nСумма: ~1000$\nещё строка"
         android:textSize="16sp"
         android:textStyle="bold" />
 
