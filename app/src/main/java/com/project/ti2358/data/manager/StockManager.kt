@@ -2,14 +2,19 @@ package com.project.ti2358.data.manager
 
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.MarketInstrument
+import com.project.ti2358.data.model.dto.yahoo.YahooResponse
 import com.project.ti2358.data.service.MarketService
 import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.data.service.StreamingService
+import com.project.ti2358.data.service.ThirdPartyService
+import com.project.ti2358.service.Utils
+import com.project.ti2358.service.log
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -21,6 +26,7 @@ import org.koin.core.component.inject
 
 @KoinApiExtension
 class StockManager() : KoinComponent {
+    private val thirdPartyService: ThirdPartyService by inject()
     private val marketService: MarketService by inject()
     private val streamingService: StreamingService by inject()
 
@@ -31,6 +37,7 @@ class StockManager() : KoinComponent {
     var stocksStream: MutableList<Stock> = mutableListOf()
 
     var loadClosingPriceOSDelay: Long = 0
+    private val gson = Gson()
     var loadClosingPricePostmarketUSDelay: Long = 0
     var loadClosingPricePostmarketRUDelay: Long = 0
 
@@ -110,17 +117,110 @@ class StockManager() : KoinComponent {
         for (stock in stocksAll) {
             if (SettingsManager.isAllowCurrency(stock.marketInstrument.currency)) {
                 stocksStream.add(stock)
-                loadClosingPriceOSDelay = stock.loadClosingOSCandle(loadClosingPriceOSDelay)
+//                loadClosingPriceOSDelay = stock.loadClosingOSCandle(loadClosingPriceOSDelay)
             }
         }
 
+        val zone = Utils.getTimezoneCurrent()
+
+        // загрузить цену закрытия
+        GlobalScope.launch(Dispatchers.Main) {
+            for (stock in stocksStream) {
+                var delay: Long = 0
+                var from = Utils.getLastClosingDate(true) + zone
+                var to = Utils.getLastClosingDate(false) + zone
+
+                val ticker = stock.marketInstrument.ticker
+                val figi = stock.marketInstrument.figi
+                val key = "closing_os_new_${ticker}_${from}"
+                var deltaDay = 0
+
+                var candle2359: Candle? = null
+                val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
+                val jsonClosingCandle = preferences.getString(key, null)
+                if (jsonClosingCandle != null) {
+                    candle2359 = gson.fromJson(jsonClosingCandle, Candle::class.java)
+                }
+
+                try {
+                    while (candle2359 == null) {
+                        delay = kotlin.random.Random.Default.nextLong(400, 600)
+                        val candles = marketService.candles(figi, "1min", from, to)
+                        if (candles.candles.isNotEmpty()) {
+                            candle2359 = candles.candles.first()
+                        } else { // если свечей нет, то сделать шаг назад во времени
+                            deltaDay--
+                            from = Utils.getLastClosingDate(true, deltaDay) + zone
+                            to = Utils.getLastClosingDate(false, deltaDay) + zone
+                            delay(delay)
+                            continue
+                        }
+
+                        val data = gson.toJson(candle2359)
+                        val editor: SharedPreferences.Editor = preferences.edit()
+                        editor.putString(key, data)
+                        editor.apply()
+
+                        log("close price $ticker $candle2359")
+                    }
+
+                    stock.processCandle2359(candle2359)
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                }
+
+                if (Utils.isHighSpeedSession()) {
+                    delay *= 10
+                }
+                delay(delay)
+            }
+        }
+
+        val from = Utils.getLastClosingPostmarketUSDate() + zone
         // загрузить постмаркет
         GlobalScope.launch(Dispatchers.Main) {
             for (stock in stocksStream) {
-                loadClosingPricePostmarketUSDelay = stock.loadClosingPostmarketUSPrice(loadClosingPricePostmarketUSDelay)
-                delay(kotlin.random.Random.Default.nextLong(200, 400))
+                var delay: Long = 0
+                var ticker = stock.marketInstrument.ticker
+                if (ticker == "SPB@US") ticker = "SPB" // костыль, в yahoo тикер назван по-другому
+                ticker = ticker.replace(".", "-")
+
+                val key = "close_postmarket_us_new_${ticker}_${from}"
+
+                var yahooResponse: YahooResponse? = null
+                val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
+                val jsonClosing = preferences.getString(key, null)
+                if (jsonClosing != null) {
+                    yahooResponse = gson.fromJson(jsonClosing, YahooResponse::class.java)
+                }
+
+                if (yahooResponse == null) {
+                    val url = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=price"
+
+                    yahooResponse = thirdPartyService.yahooPostmarket(url)
+                    if (yahooResponse != null) {
+
+                        val data = gson.toJson(yahooResponse)
+                        val editor: SharedPreferences.Editor = preferences.edit()
+                        editor.putString(key, data)
+                        editor.apply()
+                    }
+
+                    log("yahoo $yahooResponse  $url")
+                    delay = kotlin.random.Random.Default.nextLong(200, 300)
+                }
+
+                if (yahooResponse != null) {
+                    stock.processPostmarketPrice(yahooResponse)
+                }
+
+                if (Utils.isHighSpeedSession()) {
+                    delay *= 10
+                }
+                delay(delay)
             }
         }
+
     }
 
     private fun resetSubscription() {

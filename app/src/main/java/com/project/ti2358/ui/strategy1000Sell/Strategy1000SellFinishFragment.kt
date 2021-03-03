@@ -27,7 +27,8 @@ class Strategy1000SellFinishFragment : Fragment() {
     var adapterList: Item1000RecyclerViewAdapter = Item1000RecyclerViewAdapter(emptyList())
     var infoTextView: TextView? = null
     var positions: MutableList<PurchasePosition> = mutableListOf()
-    var buttonStart: Button? = null
+    var buttonStart700: Button? = null
+    var buttonStart1000: Button? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,27 +55,36 @@ class Strategy1000SellFinishFragment : Fragment() {
             }
         }
 
-        buttonStart = view.findViewById(R.id.buttonStart)
-        updateServiceButtonText()
-
-        buttonStart?.setOnClickListener {
+        ///////////////////////
+        buttonStart1000 = view.findViewById(R.id.buttonStart1000)
+        buttonStart1000?.setOnClickListener {
             if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
                 requireContext().stopService(Intent(context, Strategy1000SellService::class.java))
             } else {
-                if (Utils.isActiveSession()) {
-                    for (position in positions) {
-                        position.sell()
-                    }
-                } else {
-                    if (strategy1000Sell.getTotalPurchasePieces() > 0) {
-                        Utils.startService(requireContext(), Strategy1000SellService::class.java)
-                    }
+                if (strategy1000Sell.getTotalPurchasePieces() > 0) {
+                    Utils.startService(requireContext(), Strategy1000SellService::class.java)
                 }
             }
 
             this.findNavController().navigateUp()
-            updateServiceButtonText()
+            updateServiceButtonText1000()
         }
+        updateServiceButtonText1000()
+        //////////////////////
+        buttonStart700 = view.findViewById(R.id.buttonStart700)
+        buttonStart700?.setOnClickListener {
+            if (Utils.isServiceRunning(requireContext(), Strategy700SellService::class.java)) {
+                requireContext().stopService(Intent(context, Strategy700SellService::class.java))
+            } else {
+                if (strategy1000Sell.getTotalPurchasePieces() > 0) {
+                    Utils.startService(requireContext(), Strategy700SellService::class.java)
+                }
+            }
+
+            this.findNavController().navigateUp()
+            updateServiceButtonText700()
+        }
+        updateServiceButtonText700()
 
         positions = strategy1000Sell.processSellPosition()
         adapterList.setData(positions)
@@ -85,38 +95,32 @@ class Strategy1000SellFinishFragment : Fragment() {
         return view
     }
 
-    private fun updateServiceButtonText() {
+    private fun updateServiceButtonText1000() {
         if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
-            buttonStart?.text = getString(R.string.service_2358_stop)
+            buttonStart1000?.text = getString(R.string.stop_sell_1000)
         } else {
-            if (Utils.isActiveSession()) {
-                buttonStart?.text = getString(R.string.button_sell)
-            } else {
-                buttonStart?.text = getString(R.string.service_2358_start)
-            }
+            buttonStart1000?.text = getString(R.string.start_sell_1000)
+        }
+    }
+
+    private fun updateServiceButtonText700() {
+        if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
+            buttonStart700?.text = getString(R.string.stop_sell_700)
+        } else {
+            buttonStart700?.text = getString(R.string.start_sell_700)
         }
     }
 
     fun updateInfoText() {
-        if (Utils.isActiveSession()) {
-            val prepareText: String =
-                SettingsManager.context.getString(R.string.sell_now_text)
-            infoTextView?.text = String.format(
-                prepareText,
-                positions.size,
-                strategy1000Sell.getTotalSellString()
-            )
-        } else {
-            val time = "10:00:01"
-            val prepareText: String =
-                SettingsManager.context.getString(R.string.prepare_start_1000_sell_text)
-            infoTextView?.text = String.format(
-                prepareText,
-                time,
-                positions.size,
-                strategy1000Sell.getTotalSellString()
-            )
-        }
+        val time = "07:00:01 или 10:00:01"
+        val prepareText: String =
+            SettingsManager.context.getString(R.string.prepare_start_1000_sell_text)
+        infoTextView?.text = String.format(
+            prepareText,
+            time,
+            positions.size,
+            strategy1000Sell.getTotalSellString()
+        )
     }
 
     inner class Item1000RecyclerViewAdapter(

@@ -19,6 +19,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.component.KoinApiExtension
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 fun log(msg: String) {
@@ -135,6 +136,14 @@ class Utils {
             val hour = msk.get(Calendar.HOUR_OF_DAY)
             val minute = msk.get(Calendar.MINUTE)
 
+            if (hour == 6 && minute > 58) {
+                return true
+            }
+
+            if (hour == 7 && minute < 10) {
+                return true
+            }
+
             if (hour == 9 && minute > 58) {
                 return true
             }
@@ -166,7 +175,7 @@ class Utils {
             val msk = getTimeMSK()
             val hour = msk.get(Calendar.HOUR_OF_DAY)
 
-            if (hour >= 10 || hour <= 2) {
+            if (hour >= 7 || hour <= 2) {
                 return true
             }
 
@@ -231,6 +240,99 @@ class Utils {
 
         fun makeNicePrice(price: Double): Double {
             return (price * 100.0).roundToInt() / 100.0
+        }
+
+
+        fun getTimezoneMSK(): String {
+            val tz = TimeZone.getTimeZone("Europe/Moscow")
+            val cal = Calendar.getInstance(tz)
+            val offsetInMillis = tz.getOffset(cal.timeInMillis)
+            var offset = String.format("%02d:%02d", abs(offsetInMillis / 3600000), abs(offsetInMillis / 60000 % 60))
+            offset = (if (offsetInMillis >= 0) "+" else "-") + offset
+            return offset
+        }
+
+        fun getTimezoneCurrent(): String {
+            val tz = TimeZone.getDefault()
+            val cal = Calendar.getInstance(tz)
+            val offsetInMillis = tz.getOffset(cal.timeInMillis)
+            var offset = String.format("%02d:%02d", abs(offsetInMillis / 3600000), abs(offsetInMillis / 60000 % 60))
+            offset = (if (offsetInMillis >= 0) "+" else "-") + offset
+            return offset
+        }
+
+        fun getLastClosingPostmarketUSDate(): String {
+            val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
+
+            val hours = 8
+            val minutes = 0
+            val seconds = 0
+
+            val time = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow"))
+            time.add(Calendar.HOUR_OF_DAY, -differenceHours)
+
+            time.set(Calendar.HOUR_OF_DAY, hours)
+            time.set(Calendar.MINUTE, minutes)
+            time.set(Calendar.SECOND, seconds)
+            time.set(Calendar.MILLISECOND, 0)
+
+            // если воскресенье, то откатиться к субботе
+            if (time.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                time.add(Calendar.DAY_OF_MONTH, -1)
+            }
+
+            // если понедельник, то откатиться к субботе
+            if (time.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+                time.add(Calendar.DAY_OF_MONTH, -2)
+            }
+
+            return time.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+        }
+
+        fun getLastClosingDate(before: Boolean, delta: Int = 0): String {
+            val differenceHours: Int = getTimeDiffBetweenMSK()
+
+            var hours = 23
+            var minutes = 59
+            var seconds = 0
+
+            if (!before) {
+                hours = 0
+                minutes = 0
+                seconds = 0
+            }
+
+            val time = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow"))
+            time.add(Calendar.HOUR_OF_DAY, -differenceHours)
+
+            time.set(Calendar.HOUR_OF_DAY, hours)
+            time.set(Calendar.MINUTE, minutes)
+            time.set(Calendar.SECOND, seconds)
+            time.set(Calendar.MILLISECOND, 0)
+
+            if (delta != 0) {
+                time.add(Calendar.DAY_OF_MONTH, delta)
+            }
+
+            // если воскресенье, то откатиться к субботе
+            if (time.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                time.add(Calendar.DAY_OF_MONTH, -1)
+            }
+
+            // если понедельник, то откатиться к субботе
+            if (time.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+                time.add(Calendar.DAY_OF_MONTH, -2)
+            }
+
+            if (before) {
+                time.add(Calendar.DAY_OF_MONTH, -1)
+            }
+
+            return time.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+        }
+
+        fun convertDateToTinkoffDate(calendar: Calendar, zone: String): String {
+            return calendar.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS") + zone
         }
     }
 }

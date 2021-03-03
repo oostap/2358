@@ -12,7 +12,10 @@ class Strategy1000Sell() : KoinComponent {
 
     var positions: MutableList<PortfolioPosition> = mutableListOf()
     var positionsSelected: MutableList<PortfolioPosition> = mutableListOf()
-    var positionsToSell: MutableList<PurchasePosition> = mutableListOf()
+    private var positionsToSell: MutableList<PurchasePosition> = mutableListOf()
+
+    var positionsToSell700: MutableList<PurchasePosition> = mutableListOf()
+    var positionsToSell1000: MutableList<PurchasePosition> = mutableListOf()
 
     fun process(): MutableList<PortfolioPosition> {
         val all = depositManager.portfolioPositions
@@ -54,14 +57,6 @@ class Strategy1000Sell() : KoinComponent {
         return positionsToSell
     }
 
-    fun getTotalSellString(): String {
-        var value = 0.0
-        for (position in positionsToSell) {
-            value += position.getProfitPrice() * position.position.balance
-        }
-        return value.toDollar()
-    }
-
     fun getTotalPurchasePieces(): Int {
         var value = 0
         for (position in positionsToSell) {
@@ -70,24 +65,93 @@ class Strategy1000Sell() : KoinComponent {
         return value
     }
 
-    fun getNotificationTextShort(): String {
-        val price = getTotalSellString()
-        var tickers = ""
+    fun getTotalSellString(): String {
+        var value = 0.0
         for (position in positionsToSell) {
+            value += position.getProfitPrice() * position.position.balance
+        }
+        return value.toDollar()
+    }
+
+    fun getTotalSellString1000(): String {
+        var value = 0.0
+        for (position in positionsToSell1000) {
+            value += position.getProfitPrice() * position.position.balance
+        }
+        return value.toDollar()
+    }
+
+    fun getTotalPurchasePieces1000(): Int {
+        var value = 0
+        for (position in positionsToSell1000) {
+            value += position.position.lots
+        }
+        return value
+    }
+
+    fun getNotificationTextShort1000(): String {
+        val price = getTotalSellString1000()
+        var tickers = ""
+        for (position in positionsToSell1000) {
             tickers += "${position.position.lots}*${position.position.ticker} "
         }
 
         return "$price:\n$tickers"
     }
 
-    fun getNotificationTextLong(): String {
+    fun getNotificationTextLong1000(): String {
         var tickers = ""
-        for (position in positionsToSell) {
+        for (position in positionsToSell1000) {
             val p =
                 "%.1f$ -> %.1f$ -> %.1f".format(position.position.lots * position.getProfitPrice(), position.getProfitPrice(), position.profit) + "%"
             tickers += "${position.position.ticker} * ${position.position.lots} шт. = $p ${position.getStatusString()}\n"
         }
 
         return tickers
+    }
+
+    fun getTotalPurchasePieces700(): Int {
+        var value = 0
+        for (position in positionsToSell700) {
+            value += position.position.lots
+        }
+        return value
+    }
+
+    fun getTotalSellString700(): String {
+        var value = 0.0
+        for (position in positionsToSell700) {
+            value += position.getProfitPrice() * position.position.balance
+        }
+        return value.toDollar()
+    }
+
+    fun getNotificationTextShort700(): String {
+        val price = getTotalSellString700()
+        var tickers = ""
+        for (position in positionsToSell700) {
+            tickers += "${position.position.lots}*${position.position.ticker} "
+        }
+
+        return "$price:\n$tickers"
+    }
+
+    fun getNotificationTextLong700(): String {
+        var tickers = ""
+        for (position in positionsToSell700) {
+            val p =
+                "%.1f$ -> %.1f$ -> %.1f".format(position.position.lots * position.getProfitPrice(), position.getProfitPrice(), position.profit) + "%"
+            tickers += "${position.position.ticker} * ${position.position.lots} шт. = $p ${position.getStatusString()}\n"
+        }
+
+        return tickers
+    }
+
+    fun startSell700() {
+        positionsToSell700 = positionsToSell
+    }
+
+    fun startSell1000() {
+        positionsToSell1000 = positionsToSell
     }
 }

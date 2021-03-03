@@ -1,20 +1,14 @@
 package com.project.ti2358.data.manager
 
-import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
-import com.android.volley.Request
-import com.android.volley.RequestQueue
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
 import com.google.gson.*
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.MarketInstrument
-import com.project.ti2358.data.model.dto.YahooResponse
+import com.project.ti2358.data.model.dto.yahoo.YahooResponse
 import com.project.ti2358.data.service.MarketService
 import com.project.ti2358.data.service.SettingsManager
-import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toString
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +20,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.concurrent.schedule
 import kotlin.math.abs
 
 
@@ -47,7 +40,6 @@ data class Stock(
     var price1000: Double = 0.0             // цена открытия премаркета РФ
     var priceNow: Double = 0.0              // текущая цена
     var priceTazik: Double = 0.0            // цена для утреннего тазика
-    var pricePostmarketUS: Double = 0.0     // цена закрытия постмаркета US
 
     var changeOnStartTimer: Double = 0.0    // сколько % было на старте таймера для 2358
 
@@ -302,6 +294,18 @@ data class Stock(
         minute1728Candles.clear()
     }
 
+    fun processCandle2359(candle: Candle) {
+        candle2359 = candle
+        updateChange2359()
+        updateChangePostmarket()
+    }
+
+    fun processPostmarketPrice(yahoo: YahooResponse) {
+        yahooPostmarket = yahoo
+        updateChange2359()
+        updateChangePostmarket()
+    }
+
     fun loadClosingPostmarketRUCandle(prevDelay: Long): Long {
         if (candleWeek != null) return prevDelay
 
@@ -359,202 +363,6 @@ data class Stock(
             }
         }
         return delay
-    }
-
-    fun loadClosingOSCandle(prevDelay: Long): Long {
-        if (candle2359 != null) return prevDelay
-
-        val zone = getCurrentTimezone()
-        var from = getLastClosingDate(true) + zone
-        var to = getLastClosingDate(false) + zone
-
-        val key = "closing_os_${marketInstrument.figi}_${from}"
-
-        val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
-        val jsonClosingCandle = preferences.getString(key, null)
-        if (jsonClosingCandle != null) {
-            candle2359 = gson.fromJson(jsonClosingCandle, Candle::class.java)
-            updateChangePostmarket()
-            updateChange2359()
-            return prevDelay
-        }
-
-        var deltaDay = 0
-
-        val delay = prevDelay + kotlin.random.Random.Default.nextLong(500, 700)
-        GlobalScope.launch(Dispatchers.Main) {
-            while (candle2359 == null) {
-                try {
-                    delay(delay)
-                    if (candle2359 != null) return@launch
-
-                    val value = preferences.getString(key, null)
-                    if (value != null) return@launch
-
-                    log("close ${marketInstrument.ticker}")
-                    val candles = marketService.candles(marketInstrument.figi, "1min", from, to)
-
-                    if (candles.candles.isNotEmpty()) {
-                        candle2359 = candles.candles.first()
-                        val data = gson.toJson(candle2359)
-
-                        val editor: SharedPreferences.Editor = preferences.edit()
-                        editor.putString(key, data)
-                        editor.apply()
-
-                        updateChange2359()
-
-                        log("closing price os ${marketInstrument.ticker}")
-                        return@launch
-                    } else { // если свечей нет, то сделать шаг назад во времени
-                        deltaDay--
-                        from = getLastClosingDate(true, deltaDay) + zone
-                        to = getLastClosingDate(false, deltaDay) + zone
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-
-                delay(delay)
-            }
-        }
-        return delay
-    }
-
-    companion object {
-        var requestQueue: RequestQueue? = null
-    }
-
-    fun loadClosingPostmarketUSPrice(prevDelay: Long): Long {
-        if (yahooPostmarket != null) return prevDelay
-
-        val zone = getCurrentTimezone()
-        val from = getLastClosingPostmarketUSDate() + zone
-
-        val key = "close_postmarket_us_${marketInstrument.figi}_${from}"
-
-        val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
-        val jsonClosing = preferences.getString(key, null)
-        if (jsonClosing != null) {
-            yahooPostmarket = gson.fromJson(jsonClosing, YahooResponse::class.java)
-            updateChangePostmarket()
-            updateChange2359()
-            return prevDelay
-        }
-
-        val delay = prevDelay + kotlin.random.Random.Default.nextLong(200, 400)
-        try {
-            var ticker = marketInstrument.ticker
-            if (ticker == "SPB@US") ticker = "SPB" // костыль, в yahoo тикер назван по-другому
-            ticker = ticker.replace(".", "-")
-
-            val url = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=price"
-
-            val stringRequest = StringRequest(Request.Method.GET, url,
-                { response ->
-                    val convertedObject: JsonObject = gson.fromJson(response, JsonObject::class.java)
-
-                    try {
-                        val summary = convertedObject["quoteSummary"] as JsonObject
-                        val result = summary["result"] as JsonArray
-                        val prices = result[0] as JsonObject
-                        val price = prices["price"] as JsonObject
-                        yahooPostmarket = gson.fromJson(price, YahooResponse::class.java)
-
-                        if (yahooPostmarket != null) {
-                            val data = gson.toJson(yahooPostmarket)
-                            val editor: SharedPreferences.Editor = preferences.edit()
-                            editor.putString(key, data)
-                            editor.apply()
-
-                            updateChangePostmarket()
-                        }
-
-                        log("closing price us yahoo ${marketInstrument.ticker} = $yahooPostmarket")
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                },
-                { log("error") })
-
-            if (requestQueue == null) {
-                requestQueue = Volley.newRequestQueue(Utils.context)
-            }
-            requestQueue?.add(stringRequest)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return delay
-    }
-
-    private fun getLastClosingPostmarketUSDate(): String {
-        val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
-
-        val hours = 8
-        val minutes = 0
-        val seconds = 0
-
-        val time = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow"))
-        time.add(Calendar.HOUR_OF_DAY, -differenceHours)
-
-        time.set(Calendar.HOUR_OF_DAY, hours)
-        time.set(Calendar.MINUTE, minutes)
-        time.set(Calendar.SECOND, seconds)
-        time.set(Calendar.MILLISECOND, 0)
-
-        // если воскресенье, то откатиться к субботе
-        if (time.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            time.add(Calendar.DAY_OF_MONTH, -1)
-        }
-
-        // если понедельник, то откатиться к субботе
-        if (time.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
-            time.add(Calendar.DAY_OF_MONTH, -2)
-        }
-
-        return time.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
-    }
-
-    private fun getLastClosingDate(before: Boolean, delta: Int = 0): String {
-        val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
-
-        var hours = 23
-        var minutes = 59
-        var seconds = 0
-
-        if (!before) {
-            hours = 0
-            minutes = 0
-            seconds = 0
-        }
-
-        val time = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow"))
-        time.add(Calendar.HOUR_OF_DAY, -differenceHours)
-
-        time.set(Calendar.HOUR_OF_DAY, hours)
-        time.set(Calendar.MINUTE, minutes)
-        time.set(Calendar.SECOND, seconds)
-        time.set(Calendar.MILLISECOND, 0)
-
-        if (delta != 0) {
-            time.add(Calendar.DAY_OF_MONTH, delta)
-        }
-
-        // если воскресенье, то откатиться к субботе
-        if (time.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            time.add(Calendar.DAY_OF_MONTH, -1)
-        }
-
-        // если понедельник, то откатиться к субботе
-        if (time.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
-            time.add(Calendar.DAY_OF_MONTH, -2)
-        }
-
-        if (before) {
-            time.add(Calendar.DAY_OF_MONTH, -1)
-        }
-
-        return time.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     }
 
     private fun getLastClosingPostmarketRUDate(delta: Int = 0): String {

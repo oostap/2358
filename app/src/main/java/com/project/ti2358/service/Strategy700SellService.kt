@@ -24,11 +24,11 @@ import org.koin.core.component.KoinApiExtension
 import java.util.*
 
 @KoinApiExtension
-class Strategy1000SellService : Service() {
+class Strategy700SellService : Service() {
 
-    private val NOTIFICATION_CANCEL_ACTION = "event.1000.sell"
-    private val NOTIFICATION_CHANNEL_ID = "1000 SELL CHANNEL NOTIFICATION"
-    private val NOTIFICATION_ID = 10000
+    private val NOTIFICATION_CANCEL_ACTION = "event.700.sell"
+    private val NOTIFICATION_CHANNEL_ID = "700 SELL CHANNEL NOTIFICATION"
+    private val NOTIFICATION_ID = 7000
 
     private val strategy1000Sell: Strategy1000Sell by inject()
 
@@ -52,7 +52,7 @@ class Strategy1000SellService : Service() {
                         notificationButtonReceiver
                     )
                     notificationButtonReceiver = null
-                    context.stopService(Intent(context, Strategy1000SellService::class.java))
+                    context.stopService(Intent(context, Strategy700SellService::class.java))
                 }
             }
         }
@@ -63,15 +63,15 @@ class Strategy1000SellService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION, "1000 Sell", "", "", "")
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION, "700 Sell", "", "", "")
         startForeground(NOTIFICATION_ID, notification)
 
-        strategy1000Sell.startSell1000()
+        strategy1000Sell.startSell700()
         scheduleSell()
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Продажа 1000 sell отменена", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Продажа 700 sell отменена", Toast.LENGTH_LONG).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -85,7 +85,7 @@ class Strategy1000SellService : Service() {
     }
 
     private fun scheduleSell() {
-        Toast.makeText(this, "Запущен таймер на продажу 1000", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Запущен таймер на продажу 700", Toast.LENGTH_LONG).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
@@ -96,16 +96,18 @@ class Strategy1000SellService : Service() {
 
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
 
-        // 10:00:02
-        val hours = 10
+        // 07:00:01
+        val hours = 7
         val minutes = 0
-        val seconds = 1 // дать время прогрузиться свечам, чтобы выбрать лучший профит
+        val seconds = 0
+        val milliseconds = 500
 
         schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
         schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
         schedulePurchaseTime.set(Calendar.HOUR_OF_DAY, hours)
         schedulePurchaseTime.set(Calendar.MINUTE, minutes)
         schedulePurchaseTime.set(Calendar.SECOND, seconds)
+        schedulePurchaseTime.set(Calendar.MILLISECOND, milliseconds)
         schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, differenceHours)
 
         val now = Calendar.getInstance(TimeZone.getDefault())
@@ -123,7 +125,7 @@ class Strategy1000SellService : Service() {
         timerSell = Timer()
         timerSell?.schedule(object : TimerTask() {
             override fun run() {
-                for (position in strategy1000Sell.positionsToSell1000) {
+                for (position in strategy1000Sell.positionsToSell700) {
                     position.sell()
                 }
             }
@@ -138,7 +140,7 @@ class Strategy1000SellService : Service() {
     }
 
     private fun stopService() {
-        Toast.makeText(this, "1000 Sell остановлена", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "700 sell остановлена", Toast.LENGTH_SHORT).show()
         try {
             wakeLock?.let {
                 if (it.isHeld) {
@@ -168,9 +170,9 @@ class Strategy1000SellService : Service() {
             "Продажа!"
         }
 
-        val shortText: String = strategy1000Sell.getNotificationTextShort1000()
-        val longText: String = strategy1000Sell.getNotificationTextLong1000()
-        val longTitleText: String = "~" + strategy1000Sell.getTotalSellString1000() + " ="
+        val shortText: String = strategy1000Sell.getNotificationTextShort700()
+        val longText: String = strategy1000Sell.getNotificationTextLong700()
+        val longTitleText: String = "~" + strategy1000Sell.getTotalSellString700() + " ="
 
         val notification = Utils.createNotification(
             this,

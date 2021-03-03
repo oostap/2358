@@ -121,11 +121,16 @@ class WorkflowManager() : KoinComponent {
                 return StreamingService()
             }
 
+            fun provideThirdPartyService(retrofit: Retrofit): ThirdPartyService {
+                return ThirdPartyService(retrofit)
+            }
+
             single { provideMarketService(get()) }
             single { provideOrdersService(get()) }
             single { providePortfolioService(get()) }
             single { provideOperationsService(get()) }
             single { provideStreamingService() }
+            single { provideThirdPartyService(get()) }
         }
 
         private val retrofitModule = module {

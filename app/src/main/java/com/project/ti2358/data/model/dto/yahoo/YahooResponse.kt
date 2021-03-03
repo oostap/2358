@@ -1,7 +1,4 @@
-package com.project.ti2358.data.model.dto
-
-import com.google.gson.annotations.SerializedName
-import java.util.*
+package com.project.ti2358.data.model.dto.yahoo
 
 data class YahooResponse (
     val preMarketPrice: YahooPrice,
@@ -18,18 +15,21 @@ data class YahooResponse (
 ) {
     fun getLastPrice(): Double {
         // если у бумаги есть постмаркет, то берём её
-        if (postMarketPrice.raw != 0.0) return postMarketPrice.raw
+        if (postMarketPrice.raw != 0.0) return postMarketPrice.raw ?: 0.0
 
         // иначе обычную
-        return regularMarketPrice.raw
+        return regularMarketPrice.raw ?: 0.0
     }
 
     fun getVolumeShares(): Int {
-        return regularMarketVolume.raw.toInt()
+        return regularMarketVolume.raw?.toInt() ?: 0
     }
 
     fun getVolumeCash(): Int {
-        val price = (regularMarketDayLow.raw + regularMarketDayHigh.raw) / 2.0
-        return (regularMarketVolume.raw * price).toInt()
+        val high = regularMarketDayHigh.raw ?: 0.0
+        val low = regularMarketDayLow.raw ?: 0.0
+        val volume = regularMarketVolume.raw ?: 0.0
+        val price = (low + high) / 2.0
+        return (volume * price).toInt()
     }
 }

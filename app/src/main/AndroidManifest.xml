@@ -33,6 +33,12 @@
         </service>
 
         <service
+            android:name=".service.Strategy700SellService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
+
+        <service
             android:name=".service.Strategy1000BuyService"
             android:enabled="true"
             android:exported="false">

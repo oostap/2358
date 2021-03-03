@@ -12,6 +12,11 @@
     <string name="sort">Сортировка</string>
     <string name="service_1728_reset">Рестарт</string>
 
+    <string name="start_sell_700">СТАРТ 700</string>
+    <string name="start_sell_1000">СТАРТ 1000</string>
+    <string name="stop_sell_700">СТОП 700</string>
+    <string name="stop_sell_1000">СТОП 1000</string>
+
     <string name="prepare_start_2358_text">Запуск таймера на покупку: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
     <string name="prepare_start_1000_sell_text">Запуск таймера на продажу: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
     <string name="prepare_start_1000_buy_text">Запуск таймера на покупку: \nВремя: %s\nБумаг: %d\nСумма: %s</string>

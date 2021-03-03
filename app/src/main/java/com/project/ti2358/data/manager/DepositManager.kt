@@ -56,7 +56,7 @@ class DepositManager : KoinComponent {
                 if (Utils.isNight()) {
                     refreshDepositDelay = 1000 * 60 * 30 // 30m
                 } else if (Utils.isHighSpeedSession()) {
-                    refreshDepositDelay = 1000 * 1 // 1s
+                    refreshDepositDelay = 1000 * 5 // 1s
                 } else {
                     refreshDepositDelay = 1000 * 20 // 20s
                 }
