@@ -53,12 +53,16 @@ class DepositManager : KoinComponent {
                 }
 
                 // ночью делать обновление раз в час
-                if (Utils.isNight()) {
-                    refreshDepositDelay = 1000 * 60 * 30 // 30m
-                } else if (Utils.isHighSpeedSession()) {
-                    refreshDepositDelay = 1000 * 5 // 1s
-                } else {
-                    refreshDepositDelay = 1000 * 20 // 20s
+                refreshDepositDelay = when {
+                    Utils.isNight() -> {
+                        1000 * 60 * 30 // 30m
+                    }
+                    Utils.isHighSpeedSession() -> {
+                        1000 * 5 // 1s
+                    }
+                    else -> {
+                        1000 * 20 // 20s
+                    }
                 }
 
                 delay(refreshDepositDelay)
@@ -76,13 +80,15 @@ class DepositManager : KoinComponent {
         return accounts.first().brokerAccountId
     }
 
-    suspend fun refreshDeposit() {
+    suspend fun refreshDeposit(): Boolean {
         try {
             portfolioPositions = synchronizedList(portfolioService.portfolio(getActiveBrokerAccountId()).positions)
             baseSortPortfolio()
+            return true
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        return false
     }
 
     suspend fun refreshKotleta() {

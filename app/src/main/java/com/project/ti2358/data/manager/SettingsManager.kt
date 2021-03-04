@@ -5,7 +5,9 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.data.model.dto.Currency
+import com.project.ti2358.service.Utils
 import java.lang.Integer.parseInt
+import java.util.*
 
 class SettingsManager {
 
@@ -311,6 +313,45 @@ class SettingsManager {
         fun getTazikBuyBid(): Boolean {
             val key: String = context.getString(R.string.setting_key_tazik_buy_bid)
             return preferences.getBoolean(key, false)
+        }
+
+        fun getTazikNearestTime(): String {
+            val key: String = context.getString(R.string.setting_key_tazik_times2)
+            val time = preferences.getString(key, "06:59:50")
+            if (time != null && time != "") {
+                val times = time.split(",").toTypedArray()
+
+                // отсортировать по возрастанию
+                times.sortBy { t ->
+                    val dayTime = t.split(":").toTypedArray()
+                    parseInt(dayTime[0]) * 3600 + parseInt(dayTime[1]) * 60 + parseInt(dayTime[2])
+                }
+
+                for (t in times) {
+                    val dayTime = t.split(":").toTypedArray()
+                    if (dayTime.size < 3) {
+                        continue
+                    }
+
+                    val hours = parseInt(dayTime[0])
+                    val minutes = parseInt(dayTime[1])
+                    val seconds = parseInt(dayTime[2])
+
+                    val currentMskTime = Utils.getTimeMSK()
+
+                    val hoursMsk = currentMskTime.get(Calendar.HOUR_OF_DAY)
+                    val minutesMsk = currentMskTime.get(Calendar.MINUTE)
+                    val secondsMsk = currentMskTime.get(Calendar.SECOND)
+
+                    val total = hours * 3600 + minutes * 60 + seconds
+                    val totalMsk = hoursMsk * 3600 + minutesMsk * 60 + secondsMsk
+                    if (totalMsk < total) {
+                        return t
+                    }
+                }
+            }
+
+            return ""
         }
 
         /******************** Rockets *************************/

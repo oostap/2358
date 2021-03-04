@@ -4,16 +4,16 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.project.ti2358.data.model.dto.Candle
-import com.project.ti2358.data.model.dto.MarketInstrument
 import com.project.ti2358.data.service.SettingsManager
-import com.project.ti2358.service.Sorting
-import com.project.ti2358.service.log
-import com.project.ti2358.service.toDollar
-import com.project.ti2358.service.toPercent
+import com.project.ti2358.service.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -32,6 +32,9 @@ class StrategyTazik : KoinComponent {
 
     var started: Boolean = false
 
+    var scheduledStartTime: Calendar? = null
+    var timerStartTazik: Timer? = null
+
     private val gson = Gson()
 
     fun process(): MutableList<Stock> {
@@ -40,12 +43,7 @@ class StrategyTazik : KoinComponent {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks.clear()
-        for (stock in all) {
-            if (stock.getPriceDouble() > min && stock.getPriceDouble() < max) {
-                stocks.add(stock)
-            }
-        }
+        stocks = all.filter { it.getPriceDouble() > min && it.getPriceDouble() < max } as MutableList<Stock>
         stocks.sortBy { it.changePrice2359DayPercent }
         loadSavedSelectedStocks()
         return stocks
@@ -57,13 +55,7 @@ class StrategyTazik : KoinComponent {
         if (jsonStocks != null) {
             val itemType = object : TypeToken<List<String>>() {}.type
             val stocksSelectedList: MutableList<String> = gson.fromJson(jsonStocks, itemType)
-
-            stocksSelected.clear()
-            for (stock in stocks) {
-                if (stocksSelectedList.contains(stock.marketInstrument.ticker)) {
-                    stocksSelected.add(stock)
-                }
-            }
+            stocksSelected = stocks.filter { stocksSelectedList.contains(it.marketInstrument.ticker) } as MutableList<Stock>
         }
 
         stocks.sortBy { stocksSelected.contains(it) }
@@ -81,10 +73,10 @@ class StrategyTazik : KoinComponent {
 
     fun setSelected(stock: Stock, value: Boolean) {
         if (value) {
-            stocksSelected.remove(stock)
-        } else {
-            if (!stocksSelected.contains(stock))
+            if (stock !in stocksSelected)
                 stocksSelected.add(stock)
+        } else {
+            stocksSelected.remove(stock)
         }
         stocksSelected.sortBy { it.changePrice2359DayPercent }
 
@@ -117,7 +109,7 @@ class StrategyTazik : KoinComponent {
             purchase.percentLimitPriceChange = percent
             purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
             purchase.updateAbsolutePrice()
-            purchase.status = PurchaseStatus.WAITING
+            purchase.status = OrderStatus.WAITING
             stocksToPurchase.add(purchase)
         }
 
@@ -130,6 +122,25 @@ class StrategyTazik : KoinComponent {
         stocksToPurchase.removeAll { it.lots == 0 }
 
         return stocksToPurchase
+    }
+
+    fun getNotificationTitle(): String {
+        if (started) return "Внимание! Работает автотазик!"
+
+        return if (scheduledStartTime == null) {
+            "Старт тазика через ???"
+        } else {
+            val now = Calendar.getInstance(TimeZone.getDefault())
+            val current = scheduledStartTime?.timeInMillis ?: 0
+            val scheduleDelay = current - now.timeInMillis
+
+            val allSeconds = scheduleDelay / 1000
+            val hours = allSeconds / 3600
+            val minutes = (allSeconds - hours * 3600) / 60
+            val seconds = allSeconds % 60
+
+            "Старт тазика через %02d:%02d:%02d".format(hours, minutes, seconds)
+        }
     }
 
     fun getTotalPurchaseString(): String {
@@ -149,13 +160,8 @@ class StrategyTazik : KoinComponent {
     }
 
     fun getNotificationTextLong(): String {
-        stocksToPurchase.sortBy {
-            (100 * it.stock.priceNow) / it.stock.priceTazik - 100
-        }
-
-        stocksToPurchase.sortBy {
-            it.status
-        }
+        stocksToPurchase.sortBy { (100 * it.stock.priceNow) / it.stock.priceTazik - 100 }
+        stocksToPurchase.sortBy { it.status }
 
         var tickers = ""
         for (stock in stocksToPurchase) {
@@ -169,10 +175,61 @@ class StrategyTazik : KoinComponent {
         return tickers
     }
 
-    fun startStrategy() {
-        started = true
-        stocksBuyed.clear()
+    fun prepareStrategy(scheduled : Boolean, time: String) {
+        if (!scheduled) {
+            startStrategy()
+            return
+        }
 
+        // запустить таймер
+        val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
+        val dayTime = time.split(":").toTypedArray()
+        if (dayTime.size < 3) {
+            Utils.showToastAlert("Неверный формат времени $time")
+            return
+        }
+
+        val hours = Integer.parseInt(dayTime[0])
+        val minutes = Integer.parseInt(dayTime[1])
+        val seconds = Integer.parseInt(dayTime[2])
+
+        scheduledStartTime = Calendar.getInstance(TimeZone.getDefault())
+        scheduledStartTime?.let {
+            it.add(Calendar.HOUR_OF_DAY, -differenceHours)
+            it.set(Calendar.HOUR_OF_DAY, hours)
+            it.set(Calendar.MINUTE, minutes)
+            it.set(Calendar.SECOND, seconds)
+            it.add(Calendar.HOUR_OF_DAY, differenceHours)
+
+            val now = Calendar.getInstance(TimeZone.getDefault())
+            var scheduleDelay = it.timeInMillis - now.timeInMillis
+            if (scheduleDelay < 0) {
+                it.add(Calendar.DAY_OF_MONTH, 1)
+                scheduleDelay = it.timeInMillis - now.timeInMillis
+            }
+
+            if (scheduleDelay < 0) {
+                startStrategy()
+                return
+            }
+
+            timerStartTazik = Timer()
+            timerStartTazik?.schedule(object : TimerTask() {
+                override fun run() {
+                    startStrategy()
+                }
+            }, scheduleDelay)
+        }
+
+        GlobalScope.launch(Dispatchers.IO) {
+            while (!started) {
+                fixPrice()
+                delay(1 * 1000 * 3)
+            }
+        }
+    }
+
+    private fun fixPrice() {
         // зафикировать цену, чтобы change считать от неё
         for (stock in stocks) {
             // вчерашняя, если стартуем до сессии
@@ -192,7 +249,18 @@ class StrategyTazik : KoinComponent {
         }
     }
 
+    fun startStrategy() {
+        started = true
+        stocksBuyed.clear()
+
+        fixPrice()
+    }
+
     fun stopStrategy() {
+        timerStartTazik?.let {
+            it.cancel()
+            it.purge()
+        }
         started = false
         stocksBuyed.clear()
     }
@@ -207,56 +275,56 @@ class StrategyTazik : KoinComponent {
         val purchase = sorted.first()
         stock.candle1000?.let {
             val change = (100 * it.closingPrice) / stock.priceTazik - 100
-            if (change < purchase.percentLimitPriceChange) { // просадка < -1%
-                log("ПРОСАДКА: ${stock.marketInstrument} -> $change -> ${it.closingPrice}")
+            if (change >= purchase.percentLimitPriceChange) return
 
-                // лимитная покупка по этой цене
-                if (!stocksBuyed.contains(stock)) {
-                    log("ПРОСАДКА: ПОКУПАЕМ!! ${stock.marketInstrument}")
+            // просадка < -1%
+            log("ПРОСАДКА: ${stock.marketInstrument} -> $change -> ${it.closingPrice}")
 
-                    when {
-                        SettingsManager.getTazikBuyAsk() -> { // покупка из аска
-                            purchase.buyLimitFromAsk(SettingsManager.getTazikTakeProfit())
-                        }
-                        SettingsManager.getTazikBuyMarket() -> { // покупка по рынку
-                            // примерна цена покупки (! средняя будет неизвестна из-за тинька !)
-                            val priceBuy = stock.priceTazik - abs(stock.priceTazik / 100.0 * purchase.percentLimitPriceChange)
+            // уже брали бумагу?
+            if (stocksBuyed.contains(stock)) return
 
-                            // ставим цену продажу относительно примрной средней
-                            val priceSell = priceBuy + priceBuy / 100.0 * SettingsManager.getTazikTakeProfit()
-
-                            purchase.buyMarket(priceSell)
-                        }
-                        else -> { // ставим лимитку
-                            // ищем цену максимально близкую к просадке
-                            var delta = abs(change) - abs(purchase.percentLimitPriceChange)
-
-                            // 0.80 коэф приближения к нижней точке, в самом низу могут не налить
-                            delta *= 0.70
-
-                            // корректируем % падения для покупки
-                            val percent = abs(purchase.percentLimitPriceChange) + delta
-
-                            // вычислияем финальную цену лимитки
-                            val buyPrice = stock.priceTazik - abs(stock.priceTazik / 100.0 * percent)
-
-                            // вычисляем процент профита после сдвига лимитки ниже
-                            val baseProfit = SettingsManager.getTazikTakeProfit()
-
-                            // финальный профит
-                            delta *= 0.70
-                            val finalProfit = baseProfit + abs(delta)
-                            purchase.buyLimitFromBid(buyPrice, finalProfit)
-                        }
-                    }
-
-                    // завершение стратегии
-                    val parts = SettingsManager.getTazikPurchaseParts()
-                    stocksBuyed.add(stock)
-                    if (stocksBuyed.size >= parts) {
-                        stopStrategy()
-                    }
+            log("ПРОСАДКА: ПОКУПАЕМ!! ${stock.marketInstrument}")
+            when {
+                SettingsManager.getTazikBuyAsk() -> { // покупка из аска
+                    purchase.buyLimitFromAsk(SettingsManager.getTazikTakeProfit())
                 }
+                SettingsManager.getTazikBuyMarket() -> { // покупка по рынку
+                    // примерна цена покупки (! средняя будет неизвестна из-за тинька !)
+                    val priceBuy = stock.priceTazik - abs(stock.priceTazik / 100.0 * purchase.percentLimitPriceChange)
+
+                    // ставим цену продажу относительно примрной средней
+                    val priceSell = priceBuy + priceBuy / 100.0 * SettingsManager.getTazikTakeProfit()
+
+                    purchase.buyMarket(priceSell)
+                }
+                else -> { // ставим лимитку
+                    // ищем цену максимально близкую к просадке
+                    var delta = abs(change) - abs(purchase.percentLimitPriceChange)
+
+                    // 0.80 коэф приближения к нижней точке, в самом низу могут не налить
+                    delta *= 0.70
+
+                    // корректируем % падения для покупки
+                    val percent = abs(purchase.percentLimitPriceChange) + delta
+
+                    // вычислияем финальную цену лимитки
+                    val buyPrice = stock.priceTazik - abs(stock.priceTazik / 100.0 * percent)
+
+                    // вычисляем процент профита после сдвига лимитки ниже
+                    val baseProfit = SettingsManager.getTazikTakeProfit()
+
+                    // финальный профит
+                    delta *= 0.70
+                    val finalProfit = baseProfit + abs(delta)
+                    purchase.buyLimitFromBid(buyPrice, finalProfit)
+                }
+            }
+
+            // завершение стратегии
+            val parts = SettingsManager.getTazikPurchaseParts()
+            stocksBuyed.add(stock)
+            if (stocksBuyed.size >= parts) {
+                stopStrategy()
             }
         }
     }

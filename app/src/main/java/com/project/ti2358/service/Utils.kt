@@ -119,11 +119,11 @@ class Utils {
             val hour = msk.get(Calendar.HOUR_OF_DAY)
             val minute = msk.get(Calendar.MINUTE)
 
-            if (hour == 9 && minute > 55) {
+            if (hour == 6 && minute > 55) {
                 return false
             }
 
-            if (hour < 10 || hour > 2) {
+            if (hour < 7 || hour > 2) {
                 return true
             }
 

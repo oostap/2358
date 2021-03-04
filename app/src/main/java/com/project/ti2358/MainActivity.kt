@@ -17,6 +17,7 @@ import com.google.android.material.navigation.NavigationView
 import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.manager.WorkflowManager
 import com.project.ti2358.data.service.*
+import com.project.ti2358.service.Utils
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -84,7 +85,6 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         workflowManager.startApp()
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

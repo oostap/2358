@@ -24,8 +24,6 @@ class Strategy1728() : KoinComponent {
     }
 
     fun process(): MutableList<Stock> {
-        stocks.clear()
-
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
@@ -33,29 +31,21 @@ class Strategy1728() : KoinComponent {
         val volumeBeforeStart = SettingsManager.get1728VolumeBeforeStart()
         val volumeAfterStart = SettingsManager.get1728VolumeAfterStart()
 
-        val all = stockManager.stocksStream
-        for (stock in all) {
-            if (stock.getPriceDouble() > min &&
-                stock.getPriceDouble() < max &&
-                abs(stock.changePrice1728DayPercent) >= abs(change) &&   // изменение
-                stock.getVolume1728AfterStart() >= volumeAfterStart &&
-                stock.getVolume1728BeforeStart() >= volumeBeforeStart
-            ) {
-                stocks.add(stock)
-            }
-        }
+        stocks = stockManager.stocksStream.filter { stock ->
+            stock.getPriceDouble() > min &&
+            stock.getPriceDouble() < max &&
+            abs(stock.changePrice1728DayPercent) >= abs(change) &&   // изменение
+            stock.getVolume1728AfterStart() >= volumeAfterStart &&
+            stock.getVolume1728BeforeStart() >= volumeBeforeStart
+        } as MutableList<Stock>
 
         return stocks
     }
 
     fun resetStrategy() {
-//        val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
         strategyStartTime = Calendar.getInstance()
         strategyStartTime.set(Calendar.SECOND, 0)
-//        strategyStartTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
-
-        val all = stockManager.stocksStream
-        for (stock in all) {
+        for (stock in stockManager.stocksStream) {
             stock.reset1728()
         }
     }

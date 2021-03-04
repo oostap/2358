@@ -18,9 +18,11 @@ import com.project.ti2358.service.toDollar
 import com.project.ti2358.service.toPercent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import java.lang.Exception
 
 @KoinApiExtension
 class PortfolioFragment : Fragment() {
@@ -66,8 +68,13 @@ class PortfolioFragment : Fragment() {
         adapterList.setData(depositManager.portfolioPositions)
 
         GlobalScope.launch(Dispatchers.Main) {
-            depositManager.refreshDeposit()
-            adapterList.setData(depositManager.portfolioPositions)
+            while (true) {
+                delay(1000)
+                if (depositManager.refreshDeposit()) {
+                    adapterList.setData(depositManager.portfolioPositions)
+                    break
+                }
+            }
         }
         return view
     }

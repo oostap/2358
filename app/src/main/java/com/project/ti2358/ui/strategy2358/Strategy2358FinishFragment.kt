@@ -87,7 +87,7 @@ class Strategy2358FinishFragment : Fragment() {
     }
 
     private fun updateServiceButtonText() {
-        if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
+        if (Utils.isServiceRunning(requireContext(), Strategy2358Service::class.java)) {
             buttonStart?.text = getString(R.string.service_2358_stop)
         } else {
             buttonStart?.text = getString(R.string.service_2358_start)
@@ -132,8 +132,8 @@ class Strategy2358FinishFragment : Fragment() {
         }
 
         fun refreshPercent(holder: ViewHolder) {
-            holder.profitPriceFromView.text = holder.position.percentSellFrom.toPercent()
-            holder.profitPriceToView.text = holder.position.percentSellTo.toPercent()
+            holder.profitPriceFromView.text = holder.position.percentProfitSellFrom.toPercent()
+            holder.profitPriceToView.text = holder.position.percentProfitSellTo.toPercent()
         }
 
         override fun getItemCount(): Int = values.size

@@ -2,11 +2,9 @@ package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.Sorting
-import com.project.ti2358.service.Utils
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @KoinApiExtension
@@ -18,17 +16,10 @@ class Strategy1000Buy : KoinComponent {
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
 
     fun process(): MutableList<Stock> {
-        val all = stockManager.stocksStream
-
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks.clear()
-        for (stock in all) {
-            if (stock.getPriceDouble() > min && stock.getPriceDouble() < max) {
-                stocks.add(stock)
-            }
-        }
+        stocks = stockManager.stocksStream.filter { it.getPriceDouble() > min && it.getPriceDouble() < max } as MutableList<Stock>
         stocks.sortBy { it.changePrice2359DayPercent }
         return stocks
     }
@@ -44,10 +35,10 @@ class Strategy1000Buy : KoinComponent {
 
     fun setSelected(stock: Stock, value: Boolean) {
         if (value) {
-            stocksSelected.remove(stock)
-        } else {
-            if (!stocksSelected.contains(stock))
+            if (stock !in stocksSelected)
                 stocksSelected.add(stock)
+        } else {
+            stocksSelected.remove(stock)
         }
         stocksSelected.sortBy { it.changePrice2359DayPercent }
     }
@@ -64,7 +55,7 @@ class Strategy1000Buy : KoinComponent {
         for (stock in stocksSelected) {
             val purchase = PurchaseStock(stock)
             purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
-            purchase.status = PurchaseStatus.WAITING
+            purchase.status = OrderStatus.WAITING
             purchase.percentLimitPriceChange = -1.0 // TODO в настройки
             purchase.updateAbsolutePrice()
             stocksToPurchase.add(purchase)
@@ -102,12 +93,12 @@ class Strategy1000Buy : KoinComponent {
     fun getNotificationTextLong(): String {
         var tickers = ""
         for (stock in stocksToPurchase) {
-            val p = "%.1f$ -> %.1f$ -> %.1f".format(
+            val p = "%.1f$ > %.1f$ > %.1f%%".format(
                 stock.lots * stock.getLimitPriceDouble(),
                 stock.getLimitPriceDouble(),
                 stock.percentLimitPriceChange
-            ) + "%"
-            tickers += "${stock.stock.marketInstrument.ticker} * ${stock.lots} шт. = ${p} ${stock.getStatusString()}\n"
+            )
+            tickers += "${stock.stock.marketInstrument.ticker} * ${stock.lots} шт. = $p ${stock.getStatusString()}\n"
         }
 
         return tickers

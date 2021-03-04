@@ -66,9 +66,9 @@ class Strategy1830StartFragment : Fragment() {
         }
 
         val checkBox = view.findViewById<CheckBox>(R.id.check_box)
-        checkBox.setOnCheckedChangeListener { _, isChecked ->
+        checkBox.setOnCheckedChangeListener { _, checked ->
             for (stock in strategy1830.process()) {
-                strategy1830.setSelected(stock, !isChecked)
+                strategy1830.setSelected(stock, checked)
             }
             adapterList.notifyDataSetChanged()
         }
@@ -121,8 +121,8 @@ class Strategy1830StartFragment : Fragment() {
                 holder.changePricePercentView.setTextColor(Utils.GREEN)
             }
 
-            holder.checkBoxView.setOnCheckedChangeListener { _, isChecked ->
-                strategy1830.setSelected(holder.stock, !isChecked)
+            holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
+                strategy1830.setSelected(holder.stock, checked)
             }
 
             holder.itemView.setOnClickListener {

@@ -10,11 +10,15 @@ class AuthInterceptor() : Interceptor {
         const val BEARER_PREFIX = "Bearer "
     }
 
-    override fun intercept(chain: Interceptor.Chain): Response =
-        chain.proceed(
-            chain.request().newBuilder().addHeader(
-                AUTHORIZATION_HEADER,
-                BEARER_PREFIX + SettingsManager.getActiveToken()
-            ).build()
-        )
+    override fun intercept(chain: Interceptor.Chain): Response {
+        if (chain.request().url.host.contains("tinkoff")) {
+            return chain.proceed(
+                chain.request().newBuilder().addHeader(
+                    AUTHORIZATION_HEADER,
+                    BEARER_PREFIX + SettingsManager.getActiveToken()
+                ).build()
+            )
+        }
+        return chain.proceed(chain.request().newBuilder().build())
+    }
 }

@@ -89,7 +89,7 @@ class Strategy2358Service : Service() {
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
             newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "EndlessService::lock").apply {
-                acquire(10*10*1000L /*10 minutes*/)
+                acquire(10 * 10 * 1000)
             }
         }
 
@@ -111,6 +111,7 @@ class Strategy2358Service : Service() {
         schedulePurchaseTime.set(Calendar.HOUR_OF_DAY, hours)
         schedulePurchaseTime.set(Calendar.MINUTE, minutes)
         schedulePurchaseTime.set(Calendar.SECOND, seconds)
+        schedulePurchaseTime.set(Calendar.MILLISECOND, 0)
         schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, differenceHours)
 
         val now = Calendar.getInstance(TimeZone.getDefault())

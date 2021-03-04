@@ -31,7 +31,7 @@ class Strategy1005StartFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_2358_start, container, false)
+        val view = inflater.inflate(R.layout.fragment_1005_start, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
         list.addItemDecoration(
@@ -46,15 +46,6 @@ class Strategy1005StartFragment : Fragment() {
                 layoutManager = LinearLayoutManager(context)
                 adapter = adapterList
             }
-        }
-
-        val buttonStart = view.findViewById<Button>(R.id.buttonStart)
-        buttonStart.setOnClickListener {
-//            if (strategy1005.stocksSelected.isNotEmpty()) {
-////                view.findNavController().navigate(R.id.action_nav_1000_start_to_nav_1000_finish)
-//            } else {
-//                Utils.showErrorAlert(requireContext())
-//            }
         }
 
         var sort = Sorting.DESCENDING

@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.PurchasePosition
+import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.manager.Strategy1000Sell
 import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.*
@@ -26,7 +26,7 @@ class Strategy1000SellFinishFragment : Fragment() {
     private val strategy1000Sell: Strategy1000Sell by inject()
     var adapterList: Item1000RecyclerViewAdapter = Item1000RecyclerViewAdapter(emptyList())
     var infoTextView: TextView? = null
-    var positions: MutableList<PurchasePosition> = mutableListOf()
+    var positions: MutableList<PurchaseStock> = mutableListOf()
     var buttonStart700: Button? = null
     var buttonStart1000: Button? = null
 
@@ -104,7 +104,7 @@ class Strategy1000SellFinishFragment : Fragment() {
     }
 
     private fun updateServiceButtonText700() {
-        if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
+        if (Utils.isServiceRunning(requireContext(), Strategy700SellService::class.java)) {
             buttonStart700?.text = getString(R.string.stop_sell_700)
         } else {
             buttonStart700?.text = getString(R.string.start_sell_700)
@@ -124,10 +124,10 @@ class Strategy1000SellFinishFragment : Fragment() {
     }
 
     inner class Item1000RecyclerViewAdapter(
-        private var values: List<PurchasePosition>
+        private var values: List<PurchaseStock>
     ) : RecyclerView.Adapter<Item1000RecyclerViewAdapter.ViewHolder>() {
 
-        fun setData(newValues: List<PurchasePosition>) {
+        fun setData(newValues: List<PurchaseStock>) {
             values = newValues
             notifyDataSetChanged()
         }
@@ -140,7 +140,7 @@ class Strategy1000SellFinishFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
-            holder.position = item
+            holder.stock = item
 
             val avg = item.position.getAveragePrice()
             holder.tickerView.text = "${item.position.ticker} ${item.position.lots} шт."
@@ -169,29 +169,29 @@ class Strategy1000SellFinishFragment : Fragment() {
             refreshFuturePercent(holder)
 
             holder.buttonPlus.setOnClickListener {
-                item.profit += 0.05
+                item.percentProfitSellFrom += 0.05
                 refreshFuturePercent(holder)
                 updateInfoText()
             }
 
             holder.buttonMinus.setOnClickListener {
-                item.profit += -0.05
+                item.percentProfitSellFrom += -0.05
                 refreshFuturePercent(holder)
                 updateInfoText()
             }
         }
 
         fun refreshFuturePercent(holder: ViewHolder) {
-            val item = holder.position
-            val futurePercent = item.profit
+            val item = holder.stock
+            val futurePercent = item.percentProfitSellFrom
             holder.futureProfitView.text = futurePercent.toPercent()
 
             val avg = item.position.getAveragePrice()
-            val futureProfitPrice = item.getProfitPrice() - avg
+            val futureProfitPrice = item.getProfitPriceForSell() - avg
             holder.futureProfitPriceView.text = futureProfitPrice.toDollar()
             holder.totalFutureProfitPriceView.text = (futureProfitPrice * item.position.balance).toDollar()
 
-            holder.totalPriceView.text = item.getProfitPrice().toDollar()
+            holder.totalPriceView.text = item.getProfitPriceForSell().toDollar()
 
             if (futureProfitPrice < 0) {
                 holder.futureProfitView.setTextColor(Utils.RED)
@@ -207,7 +207,7 @@ class Strategy1000SellFinishFragment : Fragment() {
         override fun getItemCount(): Int = values.size
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            lateinit var position: PurchasePosition
+            lateinit var stock: PurchaseStock
 
             val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
             val currentPriceView: TextView = view.findViewById(R.id.stock_item_price)

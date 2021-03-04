@@ -97,11 +97,11 @@ class Strategy1000SellStartFragment : Fragment() {
             holder.checkBoxView.setOnCheckedChangeListener(null)
             holder.checkBoxView.isChecked = strategy1000Sell.isSelected(item)
 
-            var avg = item.getAveragePrice()
+            val avg = item.getAveragePrice()
             holder.volumePiecesView.text = "${item.lots} шт."
             holder.priceView.text = "${avg} $"
 
-            var profit = item.getProfitAmount()
+            val profit = item.getProfitAmount()
             holder.changePriceAbsoluteView.text = "${profit} $"
 
             var totalCash = item.balance * avg
@@ -119,8 +119,8 @@ class Strategy1000SellStartFragment : Fragment() {
                 holder.changePricePercentView.setTextColor(Utils.GREEN)
             }
 
-            holder.checkBoxView.setOnCheckedChangeListener { _, isChecked ->
-                strategy1000Sell.setSelected(holder.position, !isChecked)
+            holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
+                strategy1000Sell.setSelected(holder.position, checked)
             }
 
             holder.itemView.setOnClickListener { _ ->

@@ -83,7 +83,7 @@ class StrategyTazikService : Service() {
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
             newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "EndlessService::lock").apply {
-                acquire(10*610*1000L /*10 minutes*/)
+                acquire(10 * 10 * 1000)
             }
         }
 
@@ -96,7 +96,7 @@ class StrategyTazikService : Service() {
     }
 
     private fun updateNotification(): Long {
-        val title = "Внимание! Работает автотазик!"
+        val title = strategyTazik.getNotificationTitle()
 
         val longText: String = strategyTazik.getNotificationTextLong()
         val shortText: String = strategyTazik.getNotificationTextShort()

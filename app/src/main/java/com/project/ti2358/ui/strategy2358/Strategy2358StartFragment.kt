@@ -151,8 +151,8 @@ class Strategy2358StartFragment : Fragment() {
                 holder.changePricePercentView.setTextColor(Utils.GREEN)
             }
 
-            holder.checkBoxView.setOnCheckedChangeListener { _, isChecked ->
-                strategy2358.setSelected(holder.stock, !isChecked)
+            holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
+                strategy2358.setSelected(holder.stock, checked)
             }
 
             holder.itemView.setOnClickListener {

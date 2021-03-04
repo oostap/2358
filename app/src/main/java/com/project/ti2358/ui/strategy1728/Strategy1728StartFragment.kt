@@ -132,7 +132,7 @@ class Strategy1728StartFragment : Fragment() {
 
             holder.buttonBuy.setOnClickListener {
                 if (SettingsManager.get1728PurchaseVolume() <= 0) {
-                    Utils.showMessageAlert(requireContext(), "В настройках не задана сумма покупки для позиции, раздел 1728.")
+                    Utils.showMessageAlert(requireContext(),"В настройках не задана сумма покупки для позиции, раздел 1728.")
                 } else {
                     val purchase = PurchaseStock(holder.stock)
 

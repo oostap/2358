@@ -25,7 +25,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @KoinApiExtension
-class StockManager() : KoinComponent {
+class StockManager : KoinComponent {
     private val thirdPartyService: ThirdPartyService by inject()
     private val marketService: MarketService by inject()
     private val streamingService: StreamingService by inject()
@@ -36,20 +36,17 @@ class StockManager() : KoinComponent {
     // все акции, которые участвуют в расчётах с учётом базовой сортировки из настроек
     var stocksStream: MutableList<Stock> = mutableListOf()
 
-    var loadClosingPriceOSDelay: Long = 0
     private val gson = Gson()
-    var loadClosingPricePostmarketUSDelay: Long = 0
-    var loadClosingPricePostmarketRUDelay: Long = 0
 
     fun loadStocks() {
         val key = "all_instruments"
 
         val gson = GsonBuilder().create()
         val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
-        val jsonInstuments = preferences.getString(key, null)
-        if (jsonInstuments != null) {
+        val jsonInstruments = preferences.getString(key, null)
+        if (jsonInstruments != null) {
             val itemType = object : TypeToken<List<MarketInstrument>>() {}.type
-            instrumentsAll = gson.fromJson(jsonInstuments, itemType)
+            instrumentsAll = gson.fromJson(jsonInstruments, itemType)
         }
 
         if (instrumentsAll.isNotEmpty()) {
@@ -103,24 +100,13 @@ class StockManager() : KoinComponent {
     }
 
     fun getStockByFigi(figi: String): Stock? {
-        for (stock in stocksAll) {
-            if (stock.marketInstrument.figi == figi) {
-                return stock
-            }
-        }
-        return null
+        return stocksAll.find { it.marketInstrument.figi == figi }
     }
 
     private fun baseSortStocks() {
         stocksStream.clear()
 
-        for (stock in stocksAll) {
-            if (SettingsManager.isAllowCurrency(stock.marketInstrument.currency)) {
-                stocksStream.add(stock)
-//                loadClosingPriceOSDelay = stock.loadClosingOSCandle(loadClosingPriceOSDelay)
-            }
-        }
-
+        stocksStream = stocksAll.filter { SettingsManager.isAllowCurrency(it.marketInstrument.currency) } as MutableList<Stock>
         val zone = Utils.getTimezoneCurrent()
 
         // загрузить цену закрытия

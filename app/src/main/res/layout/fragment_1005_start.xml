@@ -57,7 +57,7 @@
         android:layout_marginTop="40dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.strategy2358.Strategy2358StartFragment"
-        tools:listitem="@layout/fragment_2358_start_item" />
+        tools:listitem="@layout/fragment_1005_start_item" />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -66,24 +66,15 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_alignParentBottom="true"
-        android:weightSum="2" >
-        <Button
+        android:weightSum="1" >
+        <Button android:layout_width="fill_parent"
             android:layout_height="70dp"
             android:id="@+id/buttonUpdate"
-            android:layout_marginRight="5dp"
-            android:text="@string/update"
-            android:layout_weight="1"
-            android:textSize="16dp"
-            android:layout_width="0dp" />
-
-        <Button
-            android:layout_height="70dp"
-            android:id="@+id/buttonStart"
-            android:layout_marginLeft="5dp"
-            android:text="@string/service_2358_prepare"
-            android:layout_weight="1"
-            android:textSize="16dp"
-            android:layout_width="0dp" />
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:text="@string/sort"
+            android:textSize="20sp"
+            android:layout_alignParentBottom="true" />
     </LinearLayout>
 
 </RelativeLayout>

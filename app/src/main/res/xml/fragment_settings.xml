@@ -180,19 +180,25 @@
             app:defaultValue="1"/>
 
         <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_buy_bid"
+            app:title="@string/stocks_tazik_buy_bid"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
             app:key="@string/setting_key_tazik_buy_ask"
             app:title="@string/stocks_tazik_buy_ask"
-            app:defaultValue="true" />
+            app:defaultValue="false" />
 
         <SwitchPreferenceCompat
             app:key="@string/setting_key_tazik_buy_market"
             app:title="@string/stocks_tazik_buy_market"
             app:defaultValue="false" />
 
-        <SwitchPreferenceCompat
-            app:key="@string/setting_key_tazik_buy_bid"
-            app:title="@string/stocks_tazik_buy_bid"
-            app:defaultValue="false" />
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_times2"
+            app:title="@string/stocks_tazik_times"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="06:59:50,09:59:50,11:59:50"/>
 
     </PreferenceCategory>
 

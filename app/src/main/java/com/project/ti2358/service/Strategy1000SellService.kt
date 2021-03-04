@@ -90,22 +90,24 @@ class Strategy1000SellService : Service() {
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
             newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "EndlessService::lock").apply {
-                acquire(10*10*1000L /*10 minutes*/)
+                acquire(10 * 10 * 1000)
             }
         }
 
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
 
-        // 10:00:02
+        // 10:00:00.100
         val hours = 10
         val minutes = 0
-        val seconds = 1 // дать время прогрузиться свечам, чтобы выбрать лучший профит
+        val seconds = 0
+        val milliseconds = 100
 
         schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
         schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
         schedulePurchaseTime.set(Calendar.HOUR_OF_DAY, hours)
         schedulePurchaseTime.set(Calendar.MINUTE, minutes)
         schedulePurchaseTime.set(Calendar.SECOND, seconds)
+        schedulePurchaseTime.set(Calendar.MILLISECOND, milliseconds)
         schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, differenceHours)
 
         val now = Calendar.getInstance(TimeZone.getDefault())
@@ -141,9 +143,7 @@ class Strategy1000SellService : Service() {
         Toast.makeText(this, "1000 Sell остановлена", Toast.LENGTH_SHORT).show()
         try {
             wakeLock?.let {
-                if (it.isHeld) {
-                    it.release()
-                }
+                if (it.isHeld) it.release()
             }
             stopForeground(true)
             stopSelf()

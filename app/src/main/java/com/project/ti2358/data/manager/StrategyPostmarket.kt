@@ -12,23 +12,15 @@ class StrategyPostmarket : KoinComponent {
 
     var stocks: MutableList<Stock> = mutableListOf()
 
-    public fun process(): MutableList<Stock> {
-        val all = stockManager.stocksStream
-
+    fun process(): MutableList<Stock> {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks.clear()
-        for (stock in all) {
-            if (stock.getPriceDouble() > min && stock.getPriceDouble() < max) {
-                stocks.add(stock)
-            }
-        }
-
+        stocks = stockManager.stocksStream.filter { it.getPriceDouble() > min && it.getPriceDouble() < max } as MutableList<Stock>
         return stocks
     }
 
-    public fun resort(sort: Sorting = Sorting.ASCENDING): MutableList<Stock> {
+    fun resort(sort: Sorting = Sorting.ASCENDING): MutableList<Stock> {
         if (sort == Sorting.ASCENDING)
             stocks.sortBy { it.changePricePostmarketPercent }
         else

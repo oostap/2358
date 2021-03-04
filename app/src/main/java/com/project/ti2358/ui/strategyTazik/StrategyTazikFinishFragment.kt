@@ -25,8 +25,11 @@ class StrategyTazikFinishFragment : Fragment() {
     val strategyTazik: StrategyTazik by inject()
     var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
     var infoTextView: TextView? = null
-    var buttonStart: Button? = null
+    var buttonStartNow: Button? = null
+    var buttonStartLater: Button? = null
     var positions: MutableList<PurchaseStock> = mutableListOf()
+    var startTime: String = ""
+    var scheduledStart: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,38 +56,43 @@ class StrategyTazikFinishFragment : Fragment() {
             }
         }
 
-        buttonStart = view.findViewById(R.id.buttonStart)
-        updateServiceButtonText()
+        buttonStartNow = view.findViewById(R.id.buttonStartNow)
+        buttonStartNow?.setOnClickListener {
+            tryStartTazik(false)
+        }
 
-        buttonStart?.setOnClickListener {
-            if (SettingsManager.getTazikPurchaseVolume() <= 0 || SettingsManager.getTazikPurchaseParts() == 0) {
-                Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки или количество частей, раздел Автотазик.")
-            } else {
-                if (Utils.isServiceRunning(requireContext(), StrategyTazikService::class.java)) {
-                    requireContext().stopService(
-                        Intent(
-                            context,
-                            StrategyTazikService::class.java
-                        )
-                    )
-                    strategyTazik.stopStrategy()
-                } else {
-                    if (strategyTazik.stocksToPurchase.size > 0) {
-                        Utils.startService(requireContext(), StrategyTazikService::class.java)
-                        strategyTazik.startStrategy()
-                    }
-                }
-            }
-            updateServiceButtonText()
+        buttonStartLater = view.findViewById(R.id.buttonStartSchedule)
+        buttonStartLater?.setOnClickListener {
+            tryStartTazik(true)
         }
 
         positions = strategyTazik.getPurchaseStock()
         adapterList.setData(positions)
 
         infoTextView = view.findViewById(R.id.info_text)
+
         updateInfoText()
+        updateServiceButtonText()
 
         return view
+    }
+
+    fun tryStartTazik(scheduled : Boolean) {
+        if (SettingsManager.getTazikPurchaseVolume() <= 0 || SettingsManager.getTazikPurchaseParts() == 0) {
+            Utils.showMessageAlert(requireContext(),"В настройках не задана общая сумма покупки или количество частей, раздел Автотазик.")
+        } else {
+            if (Utils.isServiceRunning(requireContext(), StrategyTazikService::class.java)) {
+                requireContext().stopService(Intent(context, StrategyTazikService::class.java))
+                strategyTazik.stopStrategy()
+            } else {
+                if (strategyTazik.stocksToPurchase.size > 0) {
+                    Utils.startService(requireContext(), StrategyTazikService::class.java)
+                    strategyTazik.prepareStrategy(scheduled, startTime)
+                }
+            }
+        }
+        scheduledStart = scheduled
+        updateServiceButtonText()
     }
 
     fun updateInfoText() {
@@ -92,6 +100,7 @@ class StrategyTazikFinishFragment : Fragment() {
         val volume = SettingsManager.getTazikPurchaseVolume().toDouble()
         val p = SettingsManager.getTazikPurchaseParts()
         val parts = "%d по %.2f$".format(p, volume / p)
+        startTime = SettingsManager.getTazikNearestTime()
 
         val prepareText: String = SettingsManager.context.getString(R.string.prepare_start_tazik_buy_text)
         infoTextView?.text = String.format(
@@ -99,15 +108,24 @@ class StrategyTazikFinishFragment : Fragment() {
             positions.size,
             percent,
             volume,
-            parts
+            parts,
+            startTime
         )
     }
 
     private fun updateServiceButtonText() {
-        if (Utils.isServiceRunning(requireContext(), Strategy1000BuyService::class.java)) {
-            buttonStart?.text = getString(R.string.service_2358_stop)
+        if (Utils.isServiceRunning(requireContext(), StrategyTazikService::class.java)) {
+            if (scheduledStart) {
+                buttonStartLater?.text = getString(R.string.service_2358_stop)
+            } else {
+                buttonStartNow?.text = getString(R.string.service_2358_stop)
+            }
         } else {
-            buttonStart?.text = getString(R.string.service_2358_start)
+            if (scheduledStart) {
+                buttonStartLater?.text = getString(R.string.service_2358_stop)
+            } else {
+                buttonStartNow?.text = getString(R.string.start_now)
+            }
         }
     }
 

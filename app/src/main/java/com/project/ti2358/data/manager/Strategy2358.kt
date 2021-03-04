@@ -26,16 +26,14 @@ class Strategy2358() : KoinComponent {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        for (stock in all) {
-            if (stock.changePrice2359DayPercent <= change &&        // изменение
-                stock.getTodayVolume() >= volumeDayPieces &&        // объём в шт
-                stock.dayVolumeCash >= volumeDayCash &&             // объём в $
-                stock.getPriceDouble() > min &&          // мин цена
-                stock.getPriceDouble() < max             // макс цена
-            ) {
-                stocks.add(stock)
-            }
-        }
+        stocks = all.filter { stock ->
+            stock.changePrice2359DayPercent <= change &&            // изменение
+                    stock.getTodayVolume() >= volumeDayPieces &&    // объём в шт
+                    stock.dayVolumeCash >= volumeDayCash &&         // объём в $
+                    stock.getPriceDouble() > min &&                 // мин цена
+                    stock.getPriceDouble() < max                    // макс цена
+        } as MutableList<Stock>
+
         stocks.sortBy { it.changePrice2359DayPercent }
         stocks.sortByDescending { stocksSelected.contains(it) }
         return stocks
@@ -43,10 +41,10 @@ class Strategy2358() : KoinComponent {
 
     fun setSelected(stock: Stock, value: Boolean) {
         if (value) {
-            stocksSelected.remove(stock)
-        } else {
-            if (!stocksSelected.contains(stock))
+            if (stock !in stocksSelected)
                 stocksSelected.add(stock)
+        } else {
+            stocksSelected.remove(stock)
         }
         stocksSelected.sortBy { it.changePrice2359DayPercent }
     }
@@ -85,16 +83,16 @@ class Strategy2358() : KoinComponent {
             var exists = false
             for (p in stocksToPurchase) {
                 if (p.stock.marketInstrument.ticker == stock.marketInstrument.ticker) {
-                    purchase.percentSellFrom = p.percentSellFrom
-                    purchase.percentSellTo = p.percentSellTo
+                    purchase.percentProfitSellFrom = p.percentProfitSellFrom
+                    purchase.percentProfitSellTo = p.percentProfitSellTo
                     exists = true
                     break
                 }
             }
 
             if (!exists) {
-                purchase.percentSellFrom = SettingsManager.get2358TakeProfitFrom()
-                purchase.percentSellTo = SettingsManager.get2358TakeProfitTo()
+                purchase.percentProfitSellFrom = SettingsManager.get2358TakeProfitFrom()
+                purchase.percentProfitSellTo = SettingsManager.get2358TakeProfitTo()
             }
 
             purchases.add(purchase)
@@ -106,12 +104,12 @@ class Strategy2358() : KoinComponent {
 
         for (purchase in stocksToPurchase) {
             purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
-            purchase.status = PurchaseStatus.WAITING
+            purchase.status = OrderStatus.WAITING
 
             if (reset) { // запоминаем % подготовки, чтобы после проверить изменение
                 purchase.stock.changeOnStartTimer = purchase.stock.changePrice2359DayPercent
-                purchase.percentSellFrom = SettingsManager.get2358TakeProfitFrom()
-                purchase.percentSellTo = SettingsManager.get2358TakeProfitTo()
+                purchase.percentProfitSellFrom = SettingsManager.get2358TakeProfitFrom()
+                purchase.percentProfitSellTo = SettingsManager.get2358TakeProfitTo()
             }
         }
 
@@ -148,7 +146,7 @@ class Strategy2358() : KoinComponent {
         var tickers = ""
         for (stock in stocksToPurchase) {
             val p = "%.1f$".format(stock.lots * stock.stock.getPriceDouble())
-            tickers += "${stock.stock.marketInstrument.ticker} * ${stock.lots} шт. = ${p}, ${stock.percentSellFrom.toPercent()}-${stock.percentSellTo.toPercent()}, ${stock.getStatusString()}\n"
+            tickers += "${stock.stock.marketInstrument.ticker} * ${stock.lots} шт. = ${p}, ${stock.percentProfitSellFrom.toPercent()}-${stock.percentProfitSellTo.toPercent()}, ${stock.getStatusString()}\n"
         }
 
         return tickers

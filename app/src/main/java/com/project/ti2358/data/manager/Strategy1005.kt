@@ -16,8 +16,6 @@ class Strategy1005 : KoinComponent {
     var stocksSelected: MutableList<Stock> = mutableListOf()
 
     fun process(): MutableList<Stock> {
-        val all = stockManager.stocksStream
-
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
@@ -28,16 +26,11 @@ class Strategy1005 : KoinComponent {
             volumeDayPieces = 0
         }
 
-        stocks.clear()
-        for (stock in all) {
-            if (stock.getPriceDouble() > min &&
-                stock.getPriceDouble() < max &&
-                abs(stock.changePrice2359DayPercent) >= abs(change) &&    // изменение
-                stock.getTodayVolume() >= volumeDayPieces
-            ) {              // объём в шт
-                stocks.add(stock)
-            }
-        }
+        stocks = stockManager.stocksStream.filter { stock ->
+            stock.getPriceDouble() > min && stock.getPriceDouble() < max &&
+            abs(stock.changePrice2359DayPercent) >= abs(change) &&              // изменение
+            stock.getTodayVolume() >= volumeDayPieces                           // объём в шт
+        } as MutableList<Stock>
 
         return stocks
     }

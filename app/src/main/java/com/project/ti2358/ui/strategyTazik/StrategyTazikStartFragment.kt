@@ -156,8 +156,8 @@ class StrategyTazikStartFragment : Fragment() {
                 holder.changePricePercentView.setTextColor(Utils.GREEN)
             }
 
-            holder.checkBoxView.setOnCheckedChangeListener { _, isChecked ->
-                strategyTazik.setSelected(holder.stock, !isChecked)
+            holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
+                strategyTazik.setSelected(holder.stock, checked)
             }
 
             holder.itemView.setOnClickListener {

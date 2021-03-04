@@ -96,11 +96,11 @@ class Strategy700SellService : Service() {
 
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
 
-        // 07:00:01
+        // 07:00:00.100
         val hours = 7
         val minutes = 0
         val seconds = 0
-        val milliseconds = 500
+        val milliseconds = 100
 
         schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
         schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
