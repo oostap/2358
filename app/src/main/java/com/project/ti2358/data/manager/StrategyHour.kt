@@ -30,7 +30,7 @@ class StrategyHour : KoinComponent {
             stock.getPriceDouble() > min && stock.getPriceDouble() < max &&
 //            abs(stock.changePrice2359DayPercent) >= abs(change) &&              // изменение
             stock.getTodayVolume() >= volumeDayPieces                           // объём в шт
-        } as MutableList<Stock>
+        }.toMutableList()
 
         return stocks
     }

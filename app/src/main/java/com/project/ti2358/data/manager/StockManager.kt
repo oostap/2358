@@ -81,16 +81,16 @@ class StockManager : KoinComponent {
 
         for (instrument in instrumentsAll) {
             // исключить фиги, по которым не отдаёт данные
-            if (ignoreFigi.contains(instrument.figi)) continue
+            if (instrument.figi in ignoreFigi) continue
 
             // исключить фиги, по которым не отдаёт данные
-            if (ignoreTickers.contains(instrument.ticker)) continue
+            if (instrument.ticker in ignoreTickers) continue
 
             // исключить какие-то устаревшие тикеры?
-            if (instrument.ticker.contains("old")) continue
+            if ("old" in instrument.ticker) continue
 
             // исключить фонды тинькова
-            if (instrument.figi.contains("TCS")) continue
+            if ("TCS" in instrument.figi) continue
 
             stocksAll.add(Stock(instrument))
         }
@@ -104,9 +104,7 @@ class StockManager : KoinComponent {
     }
 
     private fun baseSortStocks() {
-        stocksStream.clear()
-
-        stocksStream = stocksAll.filter { SettingsManager.isAllowCurrency(it.marketInstrument.currency) } as MutableList<Stock>
+        stocksStream = stocksAll.filter { SettingsManager.isAllowCurrency(it.marketInstrument.currency) }.toMutableList()
         val zone = Utils.getTimezoneCurrent()
 
         // загрузить цену закрытия
@@ -289,10 +287,7 @@ class StockManager : KoinComponent {
     }
 
     private fun addCandle(candle: Candle) {
-        for (stock in stocksStream) {
-            if (stock.marketInstrument.figi == candle.figi) {
-                stock.processCandle(candle)
-            }
-        }
+        val stock = stocksStream.find { it.marketInstrument.figi == candle.figi}
+        stock?.processCandle(candle)
     }
 }

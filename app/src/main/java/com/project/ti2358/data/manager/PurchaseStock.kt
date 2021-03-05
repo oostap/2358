@@ -639,5 +639,7 @@ data class PurchaseStock(
         } else {
             futureProfit
         }
+
+        status = OrderStatus.WAITING
     }
 }

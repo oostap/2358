@@ -41,25 +41,34 @@ class StrategyTazik : KoinComponent {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks = stockManager.stocksStream.filter { it.getPriceDouble() > min && it.getPriceDouble() < max } as MutableList<Stock>
+        stocks = stockManager.stocksStream.filter { it.getPriceDouble() > min && it.getPriceDouble() < max }.toMutableList()
         stocks.sortBy { it.changePrice2359DayPercent }
-        loadSavedSelectedStocks(numberSet)
+        loadSelectedStocks(numberSet)
         return stocks
     }
 
-    private fun loadSavedSelectedStocks(numberSet: Int) {
+    private fun loadSelectedStocks(numberSet: Int) {
         stocksSelected.clear()
 
         val key = "${keySavedSelectedStock}_$numberSet"
         val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
         val jsonStocks = preferences.getString(key, null)
-        if (jsonStocks != null) {
+        jsonStocks?.let {
             val itemType = object : TypeToken<List<String>>() {}.type
             val stocksSelectedList: MutableList<String> = gson.fromJson(jsonStocks, itemType)
-            stocksSelected = stocks.filter { stocksSelectedList.contains(it.marketInstrument.ticker) } as MutableList<Stock>
+            stocksSelected = stocks.filter { it.marketInstrument.ticker in stocksSelectedList }.toMutableList()
         }
+    }
 
-        stocks.sortBy { stocksSelected.contains(it) }
+    private fun saveSelectedStocks(numberSet: Int) {
+        val list = stocksSelected.map { it.marketInstrument.ticker }.toMutableList()
+
+        val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
+        val editor: SharedPreferences.Editor = preferences.edit()
+        val data = gson.toJson(list)
+        val key = "${keySavedSelectedStock}_$numberSet"
+        editor.putString(key, data)
+        editor.apply()
     }
 
     fun resort(sort: Sorting = Sorting.ASCENDING): MutableList<Stock> {
@@ -81,18 +90,7 @@ class StrategyTazik : KoinComponent {
         }
         stocksSelected.sortBy { it.changePrice2359DayPercent }
 
-        // сохранить выбранные тикеры
-        val list: MutableList<String> = mutableListOf()
-        for (s in stocksSelected) {
-            list.add(s.marketInstrument.ticker)
-        }
-
-        val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
-        val editor: SharedPreferences.Editor = preferences.edit()
-        val data = gson.toJson(list)
-        val key = "${keySavedSelectedStock}_$numberSet"
-        editor.putString(key, data)
-        editor.apply()
+        saveSelectedStocks(numberSet)
     }
 
     fun isSelected(stock: Stock): Boolean {

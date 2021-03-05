@@ -26,7 +26,6 @@ class Strategy1728() : KoinComponent {
     fun process(): MutableList<Stock> {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
-
         val change = SettingsManager.get1728ChangePercent()
         val volumeBeforeStart = SettingsManager.get1728VolumeBeforeStart()
         val volumeAfterStart = SettingsManager.get1728VolumeAfterStart()
@@ -37,7 +36,7 @@ class Strategy1728() : KoinComponent {
             abs(stock.changePrice1728DayPercent) >= abs(change) &&   // изменение
             stock.getVolume1728AfterStart() >= volumeAfterStart &&
             stock.getVolume1728BeforeStart() >= volumeBeforeStart
-        } as MutableList<Stock>
+        }.toMutableList()
 
         return stocks
     }
@@ -45,8 +44,9 @@ class Strategy1728() : KoinComponent {
     fun resetStrategy() {
         strategyStartTime = Calendar.getInstance()
         strategyStartTime.set(Calendar.SECOND, 0)
-        for (stock in stockManager.stocksStream) {
-            stock.reset1728()
+
+        stockManager.stocksStream.forEach {
+            it.reset1728()
         }
     }
 
@@ -60,17 +60,14 @@ class Strategy1728() : KoinComponent {
     }
 
     fun getPurchaseStock(): MutableList<PurchaseStock> {
-        stocksToPurchase.clear()
-        for (stock in stocksSelected) {
-            stocksToPurchase.add(PurchaseStock(stock))
-        }
-
         val totalMoney: Double = SettingsManager.get2358PurchaseVolume().toDouble()
-        val onePiece: Double = totalMoney / stocksToPurchase.size
+        val onePiece: Double = totalMoney / stocksSelected.size
 
-        for (stock in stocksToPurchase) {
-            stock.lots = (onePiece / stock.stock.getPriceDouble()).roundToInt()
-        }
+        stocksToPurchase = stocksSelected.map {
+            PurchaseStock(it).apply {
+                lots = (onePiece / stock.getPriceDouble()).roundToInt()
+            }
+        }.toMutableList()
 
         return stocksToPurchase
     }

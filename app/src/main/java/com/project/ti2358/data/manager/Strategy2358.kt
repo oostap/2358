@@ -16,26 +16,25 @@ class Strategy2358() : KoinComponent {
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
 
     fun process(): MutableList<Stock> {
-        val all = stockManager.stocksStream
-        stocks.clear()
-
         val change = SettingsManager.get2358ChangePercent()
         val volumeDayPieces = SettingsManager.get2358VolumeDayPieces()
         val volumeDayCash = SettingsManager.get2358VolumeDayCash() * 1000 * 1000
-
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks = all.filter { stock ->
-            stock.changePrice2359DayPercent <= change &&            // изменение
-                    stock.getTodayVolume() >= volumeDayPieces &&    // объём в шт
-                    stock.dayVolumeCash >= volumeDayCash &&         // объём в $
-                    stock.getPriceDouble() > min &&                 // мин цена
-                    stock.getPriceDouble() < max                    // макс цена
-        } as MutableList<Stock>
+        stocks = stockManager.stocksStream.filter { stock ->
+            stock.changePrice2359DayPercent <= change &&    // изменение
+            stock.getTodayVolume() >= volumeDayPieces &&    // объём в шт
+            stock.dayVolumeCash >= volumeDayCash &&         // объём в $
+            stock.getPriceDouble() > min &&                 // мин цена
+            stock.getPriceDouble() < max                    // макс цена
+        }.toMutableList()
 
-        stocks.sortBy { it.changePrice2359DayPercent }
-        stocks.sortByDescending { stocksSelected.contains(it) }
+        stocks.sortBy {
+            val multiplier = if (stocksSelected.contains(it)) 100 else 1
+            it.changePrice2359DayPercent * multiplier
+        }
+
         return stocks
     }
 
@@ -146,7 +145,7 @@ class Strategy2358() : KoinComponent {
         var tickers = ""
         for (stock in stocksToPurchase) {
             val p = "%.1f$".format(stock.lots * stock.stock.getPriceDouble())
-            tickers += "${stock.stock.marketInstrument.ticker} * ${stock.lots} шт. = ${p}, ${stock.percentProfitSellFrom.toPercent()}-${stock.percentProfitSellTo.toPercent()}, ${stock.getStatusString()}\n"
+            tickers += "${stock.stock.marketInstrument.ticker}*${stock.lots} = ${p}, ${stock.percentProfitSellFrom.toPercent()}-${stock.percentProfitSellTo.toPercent()}, ${stock.getStatusString()}\n"
         }
 
         return tickers

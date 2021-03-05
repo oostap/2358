@@ -143,7 +143,7 @@ class Strategy1000SellFinishFragment : Fragment() {
             holder.stock = item
 
             val avg = item.position.getAveragePrice()
-            holder.tickerView.text = "${item.position.ticker} ${item.position.lots} шт."
+            holder.tickerView.text = "${item.position.ticker} x ${item.position.lots}"
 
             val profit = item.position.getProfitAmount()
             var totalCash = item.position.balance * avg
@@ -151,7 +151,7 @@ class Strategy1000SellFinishFragment : Fragment() {
             holder.currentProfitView.text = percent.toPercent()
 
             totalCash += profit
-            holder.currentPriceView.text = "%.2f\$->%.2f\$".format(avg, totalCash)
+            holder.currentPriceView.text = "%.2f\$ ➡ %.2f\$".format(avg, totalCash)
 
             holder.totalPriceProfitView.text = profit.toDollar()
             holder.priceProfitView.text = (profit / item.position.lots).toDollar()

@@ -5,6 +5,7 @@ import com.project.ti2358.service.toDollar
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.math.abs
 
 @KoinApiExtension
 class Strategy1000Sell() : KoinComponent {
@@ -19,7 +20,7 @@ class Strategy1000Sell() : KoinComponent {
 
     fun process(): MutableList<PortfolioPosition> {
         positions = depositManager.portfolioPositions
-        positions.sortByDescending { it.lots * it.getAveragePrice() }
+        positions.sortByDescending { abs(it.lots * it.getAveragePrice()) }
         return positions
     }
 
@@ -30,7 +31,7 @@ class Strategy1000Sell() : KoinComponent {
         } else {
             positionsSelected.removeAll { it.figi == position.figi }
         }
-        positionsSelected.sortByDescending { it.lots * it.getAveragePrice() }
+        positionsSelected.sortByDescending { abs(it.lots * it.getAveragePrice()) }
     }
 
     fun isSelected(position: PortfolioPosition): Boolean {
@@ -39,19 +40,14 @@ class Strategy1000Sell() : KoinComponent {
 
     fun processSellPosition(): MutableList<PurchaseStock> {
         positionsToSell.clear()
-        for (position in positionsSelected) {
-            position.stock?.let {
-                val stock = PurchaseStock(it)
-                stock.position = position
-                positionsToSell.add(stock)
+        for (pos in positionsSelected) {
+            pos.stock?.let {
+                positionsToSell.add(PurchaseStock(it).apply {
+                    position = pos
+                    processInitialProfit()
+                })
             }
         }
-
-        for (position in positionsToSell) {
-            position.processInitialProfit()
-            position.status = OrderStatus.WAITING
-        }
-
         return positionsToSell
     }
 
@@ -93,7 +89,7 @@ class Strategy1000Sell() : KoinComponent {
         var tickers = ""
         for (position in positionsToSell1000) {
             val p = "%.1f$ > %.1f$ > %.1f%%".format(position.position.lots * position.getProfitPriceForSell(), position.getProfitPriceForSell(), position.percentProfitSellFrom)
-            tickers += "${position.position.ticker} * ${position.position.lots} шт. = $p ${position.getStatusString()}\n"
+            tickers += "${position.position.ticker} * ${position.position.lots} = $p ${position.getStatusString()}\n"
         }
 
         return tickers
@@ -121,7 +117,7 @@ class Strategy1000Sell() : KoinComponent {
         var tickers = ""
         for (position in positionsToSell700) {
             val p = "%.1f$ > %.1f$ > %.1f%%".format(position.position.lots * position.getProfitPriceForSell(), position.getProfitPriceForSell(), position.percentProfitSellFrom)
-            tickers += "${position.position.ticker} * ${position.position.lots} шт. = $p ${position.getStatusString()}\n"
+            tickers += "${position.position.ticker} * ${position.position.lots} = $p ${position.getStatusString()}\n"
         }
 
         return tickers

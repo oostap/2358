@@ -19,7 +19,7 @@ class Strategy1000Buy : KoinComponent {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks = stockManager.stocksStream.filter { it.getPriceDouble() > min && it.getPriceDouble() < max } as MutableList<Stock>
+        stocks = stockManager.stocksStream.filter { it.getPriceDouble() > min && it.getPriceDouble() < max }.toMutableList()
         stocks.sortBy { it.changePrice2359DayPercent }
         return stocks
     }
@@ -48,18 +48,17 @@ class Strategy1000Buy : KoinComponent {
     }
 
     fun getPurchaseStock(): MutableList<PurchaseStock> {
-        stocksToPurchase.clear()
         val totalMoney: Double = SettingsManager.get1000BuyPurchaseVolume().toDouble()
         val onePiece: Double = totalMoney / stocksSelected.size
 
-        for (stock in stocksSelected) {
-            val purchase = PurchaseStock(stock)
-            purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
-            purchase.status = OrderStatus.WAITING
-            purchase.percentLimitPriceChange = -1.0 // TODO в настройки
-            purchase.updateAbsolutePrice()
-            stocksToPurchase.add(purchase)
-        }
+        stocksToPurchase = stocksSelected.map { stock ->
+            PurchaseStock(stock).apply {
+                lots = (onePiece / stock.getPriceDouble()).roundToInt()
+                status = OrderStatus.WAITING
+                percentLimitPriceChange = -1.0 // TODO в настройки
+                updateAbsolutePrice()
+            }
+        }.toMutableList()
 
         return stocksToPurchase
     }
@@ -98,7 +97,7 @@ class Strategy1000Buy : KoinComponent {
                 stock.getLimitPriceDouble(),
                 stock.percentLimitPriceChange
             )
-            tickers += "${stock.stock.marketInstrument.ticker} * ${stock.lots} шт. = $p ${stock.getStatusString()}\n"
+            tickers += "${stock.stock.marketInstrument.ticker} * ${stock.lots} = $p ${stock.getStatusString()}\n"
         }
 
         return tickers
