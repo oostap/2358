@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
+import com.project.ti2358.TheApplication
 import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.Utils
 import okhttp3.internal.notify
@@ -62,9 +63,9 @@ class StrategyRocket() : KoinComponent {
     }
 
     private fun updateNotification(title: String) {
-        val notification = createNotification(Utils.context, title)
+        val notification = createNotification(TheApplication.application.applicationContext, title)
 //        notification.notify()
-        val manager = Utils.context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
+        val manager = TheApplication.application.applicationContext.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify("text", kotlin.random.Random.Default.nextInt(0, 6000), notification)
     }
 
@@ -78,7 +79,7 @@ class StrategyRocket() : KoinComponent {
             .build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = Utils.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager = TheApplication.application.applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val channel = NotificationChannel(
                 notificationChannelId,
                 "Rocket notifications channel $title",

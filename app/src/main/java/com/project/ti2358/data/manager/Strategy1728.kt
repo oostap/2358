@@ -59,20 +59,6 @@ class Strategy1728() : KoinComponent {
         return stocks
     }
 
-    fun setSelected(stock: Stock, value: Boolean) {
-        if (value) {
-            stocksSelected.remove(stock)
-        } else {
-            if (!stocksSelected.contains(stock))
-                stocksSelected.add(stock)
-        }
-        stocksSelected.sortBy { it.changePrice1728DayPercent }
-    }
-
-    fun isSelected(stock: Stock): Boolean {
-        return stocksSelected.contains(stock)
-    }
-
     fun getPurchaseStock(): MutableList<PurchaseStock> {
         stocksToPurchase.clear()
         for (stock in stocksSelected) {

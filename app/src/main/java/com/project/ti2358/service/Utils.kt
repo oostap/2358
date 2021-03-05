@@ -13,6 +13,7 @@ import android.widget.Toast.LENGTH_SHORT
 import com.project.ti2358.BuildConfig
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
+import com.project.ti2358.TheApplication
 import org.koin.core.component.KoinApiExtension
 import java.text.SimpleDateFormat
 import java.util.*
@@ -44,20 +45,18 @@ fun Double.toPercent(): String {
 }
 
 class Utils {
+    @KoinApiExtension
     companion object {
         val GREEN: Int = Color.parseColor("#58D68D")
         val RED: Int = Color.parseColor("#E74C3C")
 
-        lateinit var context: Context
-        fun setApplicationContext(applicationContext : Context) {
-            context = applicationContext
-        }
-
         fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
             val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?
-            for (service in manager!!.getRunningServices(Int.MAX_VALUE)) {
-                if (serviceClass.name == service.service.className) {
-                    return true
+            manager?.let {
+                for (service in it.getRunningServices(Int.MAX_VALUE)) {
+                    if (serviceClass.name == service.service.className) {
+                        return true
+                    }
                 }
             }
             return false
@@ -74,7 +73,7 @@ class Utils {
         }
 
         fun showToastAlert(text: String) {
-            Toast.makeText(context, text, LENGTH_SHORT).show()
+            Toast.makeText(TheApplication.application.applicationContext, text, LENGTH_SHORT).show()
         }
 
         fun showMessageAlert(context: Context, text: String) {
