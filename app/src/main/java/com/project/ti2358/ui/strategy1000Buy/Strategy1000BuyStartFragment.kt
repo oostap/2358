@@ -59,22 +59,10 @@ class Strategy1000BuyStartFragment : Fragment() {
             }
         }
 
-        var sort = Sorting.DESCENDING
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
         buttonUpdate.setOnClickListener {
-            strategy1000Buy.process()
-            stocks = strategy1000Buy.resort(sort)
-            adapterList.setData(stocks)
-            sort = if (sort == Sorting.DESCENDING) {
-                Sorting.ASCENDING
-            } else {
-                Sorting.DESCENDING
-            }
+            updateData()
         }
-
-        strategy1000Buy.process()
-        stocks = strategy1000Buy.resort(sort)
-        adapterList.setData(stocks)
 
         searchView = view.findViewById(R.id.searchView)
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -89,13 +77,12 @@ class Strategy1000BuyStartFragment : Fragment() {
             }
 
             fun processText(text: String) {
-                strategy1000Buy.process()
-                stocks = strategy1000Buy.resort(sort)
+                updateData()
 
                 if (text.isNotEmpty()) {
                     stocks = stocks.filter {
                         it.marketInstrument.ticker.contains(text, ignoreCase = true) || it.marketInstrument.name.contains(text, ignoreCase = true)
-                    } as MutableList<Stock>
+                    }.toMutableList()
                 }
                 adapterList.setData(stocks)
             }
@@ -108,7 +95,15 @@ class Strategy1000BuyStartFragment : Fragment() {
             false
         }
 
+        updateData()
+
         return view
+    }
+
+    private fun updateData() {
+        stocks = strategy1000Buy.process()
+        stocks = strategy1000Buy.resort()
+        adapterList.setData(stocks)
     }
 
     inner class Item1005RecyclerViewAdapter(

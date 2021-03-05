@@ -14,6 +14,7 @@ class StrategyHour : KoinComponent {
     private val stockManager: StockManager by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
+    var currentSort: Sorting = Sorting.DESCENDING
 
     fun process(): MutableList<Stock> {
         val min = SettingsManager.getCommonPriceMin()
@@ -35,19 +36,13 @@ class StrategyHour : KoinComponent {
         return stocks
     }
 
-    fun resort(sort: Sorting = Sorting.ASCENDING, interval: Interval): MutableList<Stock> {
-        if (interval == Interval.HOUR) {
-            if (sort == Sorting.ASCENDING)
-                stocks.sortBy { it.changePriceHour1Percent }
-            else
-                stocks.sortByDescending { it.changePriceHour1Percent }
-        } else if (interval == Interval.TWO_HOURS) {
-            if (sort == Sorting.ASCENDING)
-                stocks.sortBy { it.changePriceHour2Percent }
-            else
-                stocks.sortByDescending { it.changePriceHour2Percent }
+    fun resort(interval: Interval): MutableList<Stock> {
+        currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
+        stocks.sortBy {
+            val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
+            val value = if (interval == Interval.HOUR) it.changePriceHour1Percent else it.changePriceHour2Percent
+            value * sign
         }
-
         return stocks
     }
 }

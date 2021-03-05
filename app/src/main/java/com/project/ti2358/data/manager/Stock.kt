@@ -248,7 +248,7 @@ data class Stock(
     }
 
     fun getPrice1000String(): String {
-        candle2359?.let {
+        candle1000?.let {
             return "${it.openingPrice}$"
         }
         return "0$"

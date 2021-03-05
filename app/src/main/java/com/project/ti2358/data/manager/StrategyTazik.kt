@@ -35,6 +35,7 @@ class StrategyTazik : KoinComponent {
     var scheduledStartTime: Calendar? = null
     var timerStartTazik: Timer? = null
 
+    var currentSort: Sorting = Sorting.DESCENDING
     private val gson = Gson()
 
     fun process(numberSet: Int): MutableList<Stock> {
@@ -51,11 +52,10 @@ class StrategyTazik : KoinComponent {
         stocksSelected.clear()
 
         val key = "${keySavedSelectedStock}_$numberSet"
-        val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
-        val jsonStocks = preferences.getString(key, null)
+        val jsonStocks = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context).getString(key, null)
         jsonStocks?.let {
             val itemType = object : TypeToken<List<String>>() {}.type
-            val stocksSelectedList: MutableList<String> = gson.fromJson(jsonStocks, itemType)
+            val stocksSelectedList: List<String> = gson.fromJson(jsonStocks, itemType)
             stocksSelected = stocks.filter { it.marketInstrument.ticker in stocksSelectedList }.toMutableList()
         }
     }
@@ -71,13 +71,13 @@ class StrategyTazik : KoinComponent {
         editor.apply()
     }
 
-    fun resort(sort: Sorting = Sorting.ASCENDING): MutableList<Stock> {
-        if (sort == Sorting.ASCENDING)
-            stocks.sortBy { it.changePrice2359DayPercent }
-        else
-            stocks.sortByDescending { it.changePrice2359DayPercent }
-
-        stocks.sortByDescending { stocksSelected.contains(it) }
+    fun resort(): MutableList<Stock> {
+        currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
+        stocks.sortBy {
+            val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
+            val multiplier = if (it in stocksSelected) 100 else 1
+            it.changePrice2359DayPercent * multiplier * sign
+        }
         return stocks
     }
 
@@ -104,22 +104,20 @@ class StrategyTazik : KoinComponent {
         val totalMoney: Double = SettingsManager.getTazikPurchaseVolume().toDouble()
         val onePiece: Double = totalMoney / SettingsManager.getTazikPurchaseParts()
 
-        for (stock in stocksSelected) {
-            val purchase = PurchaseStock(stock)
-            purchase.percentLimitPriceChange = percent
-            purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
-            purchase.updateAbsolutePrice()
-            purchase.status = OrderStatus.WAITING
-            stocksToPurchase.add(purchase)
-        }
+        stocksToPurchase = stocksSelected.map {
+            PurchaseStock(it).apply {
+                percentLimitPriceChange = percent
+                lots = (onePiece / stock.getPriceDouble()).roundToInt()
+                updateAbsolutePrice()
+                status = OrderStatus.WAITING
+            }
+        }.toMutableList()
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
-        stocksToPurchase.removeAll { p ->
-            depositManager.portfolioPositions.any { it.ticker == p.stock.marketInstrument.ticker }
-        }
-
         // удалить все бумаги, у которых 0 лотов
-        stocksToPurchase.removeAll { it.lots == 0 }
+        stocksToPurchase.removeAll { p ->
+            p.lots == 0 || depositManager.portfolioPositions.any { it.ticker == p.stock.marketInstrument.ticker }
+        }
 
         return stocksToPurchase
     }

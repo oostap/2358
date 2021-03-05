@@ -57,30 +57,28 @@ class Strategy1728StartFragment : Fragment() {
         buttonReset.setOnClickListener { _ ->
             // сброс времени отслеживания
             strategy1728.resetStrategy()
-            strategy1728.process()
-            adapterList.setData(strategy1728.resort(sort))
             updateTime()
+
+            updateData()
         }
 
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
         buttonUpdate.setOnClickListener {
-            strategy1728.process()
-            adapterList.setData(strategy1728.resort(sort))
-            sort = if (sort == Sorting.DESCENDING) {
-                Sorting.ASCENDING
-            } else {
-                Sorting.DESCENDING
-            }
+            updateData()
         }
 
-        strategy1728.process()
-        adapterList.setData(strategy1728.resort(sort))
+        updateData()
 
         updateTime()
         return view
     }
 
-    fun updateTime() {
+    private fun updateData() {
+        strategy1728.process()
+        adapterList.setData(strategy1728.resort())
+    }
+
+    private fun updateTime() {
         val time = strategy1728.strategyStartTime.time.toString("HH:mm:ss")
         val act = requireActivity() as AppCompatActivity
         act.supportActionBar?.title = time

@@ -14,6 +14,7 @@ class Strategy1005 : KoinComponent {
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
+    var currentSort: Sorting = Sorting.DESCENDING
 
     fun process(): MutableList<Stock> {
         val min = SettingsManager.getCommonPriceMin()
@@ -34,12 +35,12 @@ class Strategy1005 : KoinComponent {
         return stocks
     }
 
-    fun resort(sort: Sorting = Sorting.ASCENDING): MutableList<Stock> {
-        if (sort == Sorting.ASCENDING)
-            stocks.sortBy { it.changePrice2359DayPercent }
-        else
-            stocks.sortByDescending { it.changePrice2359DayPercent }
-
+    fun resort(): MutableList<Stock> {
+        currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
+        stocks.sortBy {
+            val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
+            it.changePrice2359DayPercent * sign
+        }
         return stocks
     }
 }

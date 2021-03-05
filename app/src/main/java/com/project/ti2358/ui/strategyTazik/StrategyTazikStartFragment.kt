@@ -65,14 +65,7 @@ class StrategyTazikStartFragment : Fragment() {
 
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
         buttonUpdate.setOnClickListener {
-            strategyTazik.process(numberSet)
-            stocks = strategyTazik.resort(sort)
-            adapterList.setData(stocks)
-            sort = if (sort == Sorting.DESCENDING) {
-                Sorting.ASCENDING
-            } else {
-                Sorting.DESCENDING
-            }
+            updateData()
         }
 
         searchView = view.findViewById(R.id.searchView)
@@ -88,13 +81,12 @@ class StrategyTazikStartFragment : Fragment() {
             }
 
             fun processText(text: String) {
-                strategyTazik.process(numberSet)
-                stocks = strategyTazik.resort(sort)
+                updateData()
 
                 if (text.isNotEmpty()) {
                     stocks = stocks.filter {
                         it.marketInstrument.ticker.contains(text, ignoreCase = true) || it.marketInstrument.name.contains(text, ignoreCase = true)
-                    } as MutableList<Stock>
+                    }.toMutableList()
                 }
                 adapterList.setData(stocks)
             }
@@ -123,7 +115,7 @@ class StrategyTazikStartFragment : Fragment() {
 
     private fun updateData() {
         stocks = strategyTazik.process(numberSet)
-        stocks = strategyTazik.resort(sort)
+        stocks = strategyTazik.resort()
         adapterList.setData(stocks)
 
         updateTitle()

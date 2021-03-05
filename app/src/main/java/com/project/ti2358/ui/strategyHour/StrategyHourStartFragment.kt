@@ -51,34 +51,25 @@ class StrategyHourStartFragment : Fragment() {
             }
         }
 
-        var sort = Sorting.DESCENDING
         val buttonHour1 = view.findViewById<Button>(R.id.buttonHour1)
         buttonHour1.setOnClickListener {
             interval = Interval.HOUR
-            strategyHour.process()
-            adapterList.setData(strategyHour.resort(sort, interval))
-            sort = if (sort == Sorting.DESCENDING) {
-                Sorting.ASCENDING
-            } else {
-                Sorting.DESCENDING
-            }
+            updateData()
+
         }
         val buttonHour2 = view.findViewById<Button>(R.id.buttonHour2)
         buttonHour2.setOnClickListener {
             interval = Interval.TWO_HOURS
-            strategyHour.process()
-            adapterList.setData(strategyHour.resort(sort, interval))
-            sort = if (sort == Sorting.DESCENDING) {
-                Sorting.ASCENDING
-            } else {
-                Sorting.DESCENDING
-            }
+            updateData()
         }
 
-        strategyHour.process()
-        adapterList.setData(strategyHour.resort(sort, interval))
-
+        updateData()
         return view
+    }
+
+    private fun updateData() {
+        strategyHour.process()
+        adapterList.setData(strategyHour.resort(interval))
     }
 
     inner class Item1005RecyclerViewAdapter(

@@ -104,16 +104,18 @@ class Strategy1000BuyService : Service() {
             return
         }
 
-        // 10:00:01
+        // 10:00:00.100
         val hours = 10
         val minutes = 0
-        val seconds = 1
+        val seconds = 0
+        val milliseconds = 100
 
         schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
         schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
         schedulePurchaseTime.set(Calendar.HOUR_OF_DAY, hours)
         schedulePurchaseTime.set(Calendar.MINUTE, minutes)
         schedulePurchaseTime.set(Calendar.SECOND, seconds)
+        schedulePurchaseTime.set(Calendar.MILLISECOND, milliseconds)
         schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, differenceHours)
 
         val now = Calendar.getInstance(TimeZone.getDefault())

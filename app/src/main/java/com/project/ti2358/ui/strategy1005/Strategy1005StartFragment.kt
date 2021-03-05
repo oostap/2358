@@ -48,22 +48,19 @@ class Strategy1005StartFragment : Fragment() {
             }
         }
 
-        var sort = Sorting.DESCENDING
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
         buttonUpdate.setOnClickListener {
-            strategy1005.process()
-            adapterList.setData(strategy1005.resort(sort))
-            sort = if (sort == Sorting.DESCENDING) {
-                Sorting.ASCENDING
-            } else {
-                Sorting.DESCENDING
-            }
+            updateData()
         }
 
-        strategy1005.process()
-        adapterList.setData(strategy1005.resort(sort))
+        updateData()
 
         return view
+    }
+
+    private fun updateData() {
+        strategy1005.process()
+        adapterList.setData(strategy1005.resort())
     }
 
     inner class Item1005RecyclerViewAdapter(

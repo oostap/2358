@@ -1,6 +1,7 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.manager.PurchaseStock
+import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.Sorting
 import com.project.ti2358.service.Utils
@@ -17,7 +18,9 @@ class Strategy1728() : KoinComponent {
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
+
     lateinit var strategyStartTime: Calendar
+    var currentSort: Sorting = Sorting.DESCENDING
 
     init {
         resetStrategy()
@@ -50,12 +53,12 @@ class Strategy1728() : KoinComponent {
         }
     }
 
-    fun resort(sort: Sorting = Sorting.ASCENDING): MutableList<Stock> {
-        if (sort == Sorting.ASCENDING)
-            stocks.sortBy { it.changePrice1728DayPercent }
-        else
-            stocks.sortByDescending { it.changePrice1728DayPercent }
-
+    fun resort(): MutableList<Stock> {
+        currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
+        stocks.sortBy {
+            val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
+            it.changePrice1728DayPercent * sign
+        }
         return stocks
     }
 
