@@ -18,6 +18,7 @@ import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.manager.WorkflowManager
 import com.project.ti2358.data.service.*
 import com.project.ti2358.service.Utils
+import com.project.ti2358.service.toDollar
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -57,7 +58,7 @@ class MainActivity : AppCompatActivity() {
             R.string.copy
         ) {
             override fun onDrawerOpened(drawerView: View) {
-                cashView.text = depositManager.getFreeCashUSD()
+                cashView.text = depositManager.getFreeCashUSD().toDollar()
                 super.onDrawerOpened(drawerView)
             }
 
@@ -78,7 +79,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_2358_start,
                 R.id.nav_1728_start,
                 R.id.nav_1830_start,
-                R.id.nav_rocket_start
+                R.id.nav_rocket_start,
+                R.id.nav_hour_start
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)

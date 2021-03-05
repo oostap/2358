@@ -202,4 +202,11 @@
         android:name="com.project.ti2358.ui.strategyTazik.StrategyTazikFinishFragment"
         android:label="@string/menu_tazik"
         tools:layout="@layout/fragment_tazik_start" />
+
+    <!-- hours -->
+    <fragment
+        android:id="@+id/nav_hour_start"
+        android:name="com.project.ti2358.ui.strategyHour.StrategyHourStartFragment"
+        android:label="@string/menu_hour"
+        tools:layout="@layout/fragment_hour_start" />
 </navigation>

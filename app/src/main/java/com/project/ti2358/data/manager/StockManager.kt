@@ -253,6 +253,34 @@ class StockManager : KoinComponent {
                         it.printStackTrace()
                     }
                 )
+
+            streamingService
+                .getCandleEventStream(
+                    stocks.map { it.marketInstrument.figi },
+                    Interval.HOUR
+                )
+                .subscribeBy(
+                    onNext = {
+                        addCandle(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
+
+            streamingService
+                .getCandleEventStream(
+                    stocks.map { it.marketInstrument.figi },
+                    Interval.TWO_HOURS
+                )
+                .subscribeBy(
+                    onNext = {
+                        addCandle(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
         }
     }
 

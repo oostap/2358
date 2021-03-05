@@ -45,6 +45,12 @@
             android:id="@+id/nav_postmarket"
             android:icon="@drawable/ic_stocks"
             android:title="@string/menu_postmarket" />
+
+        <item
+            android:id="@+id/nav_hour_start"
+            android:icon="@drawable/ic_1000"
+            android:title="@string/menu_hour" />
+
 <!--        <item-->
 <!--            android:id="@+id/nav_rocket_start"-->
 <!--            android:icon="@drawable/ic_1000"-->

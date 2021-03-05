@@ -8,13 +8,41 @@
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginBottom="75dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="145dp"
         android:layout_marginTop="50dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.strategyTazik.StrategyTazikStartFragment"
         tools:listitem="@layout/fragment_tazik_start_item" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="75dp"
+        android:layout_alignParentBottom="true"
+        android:weightSum="2" >
+        <Button
+            android:layout_height="70dp"
+            android:id="@+id/buttonSet1"
+            android:layout_marginRight="5dp"
+            android:text="@string/set_1"
+            android:layout_weight="1"
+            android:textSize="16dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="70dp"
+            android:id="@+id/buttonSet2"
+            android:layout_marginLeft="5dp"
+            android:text="@string/set_2"
+            android:layout_weight="1"
+            android:textSize="16dp"
+            android:layout_width="0dp" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"

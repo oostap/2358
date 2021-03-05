@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -63,6 +64,7 @@ class PortfolioFragment : Fragment() {
                 adapterList.setData(depositManager.portfolioPositions)
             }
             adapterList.setData(depositManager.portfolioPositions)
+            updateTitle()
         }
 
         adapterList.setData(depositManager.portfolioPositions)
@@ -72,11 +74,20 @@ class PortfolioFragment : Fragment() {
                 delay(1000)
                 if (depositManager.refreshDeposit()) {
                     adapterList.setData(depositManager.portfolioPositions)
+                    depositManager.refreshKotleta()
+                    updateTitle()
                     break
                 }
             }
         }
         return view
+    }
+
+    private fun updateTitle() {
+        val act = requireActivity() as AppCompatActivity
+
+        val percent = depositManager.getPercentBusyInStocks()
+        act.supportActionBar?.title = "Депозит $percent%"
     }
 
     class ItemPortfolioRecyclerViewAdapter(

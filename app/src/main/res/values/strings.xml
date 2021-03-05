@@ -11,6 +11,11 @@
     <string name="update">Обновить</string>
     <string name="sort">Сортировка</string>
     <string name="service_1728_reset">Рестарт</string>
+    <string name="title_hour_1">1 час</string>
+    <string name="title_hour_2">2 часа</string>
+
+    <string name="set_1">Набор 1</string>
+    <string name="set_2">Набор 2</string>
 
     <string name="start_sell_700">СТАРТ 700</string>
     <string name="start_sell_1000">СТАРТ 1000</string>
@@ -33,7 +38,7 @@
 
     <string name="menu_settings">Настройки</string>
     <string name="menu_portfolio">Депозит</string>
-    <string name="menu_premarket">Премаркет</string>
+    <string name="menu_premarket">Премаркет RU</string>
     <string name="menu_postmarket">Постмаркет US</string>
     <string name="menu_1000_sell">1000 sell</string>
     <string name="menu_1000_buy">1000 buy</string>
@@ -43,6 +48,7 @@
     <string name="menu_1830">1830</string>
     <string name="menu_rocket">Ракета</string>
     <string name="menu_tazik">Автотазик</string>
+    <string name="menu_hour">Часовики</string>
 
     <!-- Preference Titles -->
 

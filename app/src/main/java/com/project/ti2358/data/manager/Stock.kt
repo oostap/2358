@@ -50,6 +50,9 @@ data class Stock(
     var candle2359: Candle? = null                               // цена закрытия 2359, минутная свеча
     var minute1728Candles: MutableList<Candle> = mutableListOf() // все свечи после 1728
 
+    lateinit var candleHour1: Candle                             // текущая часовая свеча
+    lateinit var candleHour2: Candle                             // текущая двухчасовая свеча
+    
     // разница с ценой открытия премаркета
     var changePriceDayAbsolute: Double = 0.0
     var changePriceDayPercent: Double = 0.0
@@ -66,6 +69,16 @@ data class Stock(
     var changePrice1728DayAbsolute: Double = 0.0
     var changePrice1728DayPercent: Double = 0.0
 
+    // разница по 1 часовой свече
+    var changePriceHour1Start: Double = 0.0
+    var changePriceHour1Absolute: Double = 0.0
+    var changePriceHour1Percent: Double = 0.0
+
+    // разница по 2 часовой свече
+    var changePriceHour2Start: Double = 0.0
+    var changePriceHour2Absolute: Double = 0.0
+    var changePriceHour2Percent: Double = 0.0
+
     // все минутные свечи с момента запуска приложения
     var minuteCandles: MutableList<Candle> = mutableListOf()
 
@@ -81,6 +94,12 @@ data class Stock(
             }
             Interval.WEEK -> {
                 processWeekCandle(candle)
+            }
+            Interval.HOUR -> {
+                processHour1Candle(candle)
+            }
+            Interval.TWO_HOURS -> {
+                processHour2Candle(candle)
             }
             else -> {
 
@@ -106,6 +125,22 @@ data class Stock(
 
         strategyTazik.processStrategy(this)
         strategyRocket.processStrategy(this)
+    }
+
+    private fun processHour1Candle(candle: Candle) {
+        candleHour1 = candle
+
+        changePriceHour1Start = candleHour1.openingPrice
+        changePriceHour1Absolute = candleHour1.closingPrice - candleHour1.openingPrice
+        changePriceHour1Percent = (100 * candleHour1.closingPrice) / candleHour1.openingPrice - 100
+    }
+
+    private fun processHour2Candle(candle: Candle) {
+        candleHour2 = candle
+
+        changePriceHour2Start = candleHour2.openingPrice
+        changePriceHour2Absolute = candleHour2.closingPrice - candleHour2.openingPrice
+        changePriceHour2Percent = (100 * candleHour2.closingPrice) / candleHour2.openingPrice - 100
     }
 
     private fun processWeekCandle(candle: Candle) {

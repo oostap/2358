@@ -90,7 +90,7 @@ class Strategy1005StartFragment : Fragment() {
             holder.stock = item
 
             holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
-            holder.priceView.text = "${item.getPrice2359String()} -> ${item.getPriceString()}"
+            holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)

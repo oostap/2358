@@ -1,29 +1,30 @@
-package com.project.ti2358.ui.strategy1000Buy
+package com.project.ti2358.ui.strategyHour
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Button
+import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.manager.Strategy1000Buy
+import com.project.ti2358.data.manager.StrategyHour
+import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class Strategy1000BuyStartFragment : Fragment() {
+class StrategyHourStartFragment : Fragment() {
 
-    val strategy1000Buy: Strategy1000Buy by inject()
+    val strategyHour: StrategyHour by inject()
     var adapterList: Item1005RecyclerViewAdapter = Item1005RecyclerViewAdapter(emptyList())
-    lateinit var searchView: SearchView
-    lateinit var stocks: MutableList<Stock>
+
+    var interval: Interval = Interval.HOUR
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +34,7 @@ class Strategy1000BuyStartFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_1000_buy_start, container, false)
+        val view = inflater.inflate(R.layout.fragment_hour_start, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
         list.addItemDecoration(
@@ -50,21 +51,23 @@ class Strategy1000BuyStartFragment : Fragment() {
             }
         }
 
-        val buttonStart = view.findViewById<Button>(R.id.buttonStart)
-        buttonStart.setOnClickListener {
-            if (strategy1000Buy.stocksSelected.isNotEmpty()) {
-                view.findNavController().navigate(R.id.action_nav_1000_buy_start_to_nav_1000_buy_finish)
+        var sort = Sorting.DESCENDING
+        val buttonHour1 = view.findViewById<Button>(R.id.buttonHour1)
+        buttonHour1.setOnClickListener {
+            interval = Interval.HOUR
+            strategyHour.process()
+            adapterList.setData(strategyHour.resort(sort, interval))
+            sort = if (sort == Sorting.DESCENDING) {
+                Sorting.ASCENDING
             } else {
-                Utils.showErrorAlert(requireContext())
+                Sorting.DESCENDING
             }
         }
-
-        var sort = Sorting.DESCENDING
-        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
-        buttonUpdate.setOnClickListener {
-            strategy1000Buy.process()
-            stocks = strategy1000Buy.resort(sort)
-            adapterList.setData(stocks)
+        val buttonHour2 = view.findViewById<Button>(R.id.buttonHour2)
+        buttonHour2.setOnClickListener {
+            interval = Interval.TWO_HOURS
+            strategyHour.process()
+            adapterList.setData(strategyHour.resort(sort, interval))
             sort = if (sort == Sorting.DESCENDING) {
                 Sorting.ASCENDING
             } else {
@@ -72,41 +75,8 @@ class Strategy1000BuyStartFragment : Fragment() {
             }
         }
 
-        strategy1000Buy.process()
-        stocks = strategy1000Buy.resort(sort)
-        adapterList.setData(stocks)
-
-        searchView = view.findViewById(R.id.searchView)
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                processText(query)
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String): Boolean {
-                processText(newText)
-                return false
-            }
-
-            fun processText(text: String) {
-                strategy1000Buy.process()
-                stocks = strategy1000Buy.resort(sort)
-
-                if (text.isNotEmpty()) {
-                    stocks = stocks.filter {
-                        it.marketInstrument.ticker.contains(text, ignoreCase = true) || it.marketInstrument.name.contains(text, ignoreCase = true)
-                    } as MutableList<Stock>
-                }
-                adapterList.setData(stocks)
-            }
-        })
-        searchView.requestFocus()
-
-        searchView.setOnCloseListener {
-            stocks = strategy1000Buy.process()
-            adapterList.setData(stocks)
-            false
-        }
+        strategyHour.process()
+        adapterList.setData(strategyHour.resort(sort, interval))
 
         return view
     }
@@ -122,7 +92,7 @@ class Strategy1000BuyStartFragment : Fragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(
-                R.layout.fragment_1000_buy_start_item,
+                R.layout.fragment_hour_start_item,
                 parent,
                 false
             )
@@ -134,11 +104,22 @@ class Strategy1000BuyStartFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            holder.checkBoxView.setOnCheckedChangeListener(null)
-            holder.checkBoxView.isChecked = strategy1000Buy.isSelected(item)
+            var changeAbsolute = 0.0
+            var changePercent = 0.0
+            var startPrice = 0.0
+
+            if (interval == Interval.HOUR) {
+                changeAbsolute = item.changePriceHour1Absolute
+                changePercent = item.changePriceHour1Percent
+                startPrice = item.changePriceHour1Start
+            } else if (interval == Interval.TWO_HOURS) {
+                changeAbsolute = item.changePriceHour2Absolute
+                changePercent = item.changePriceHour2Percent
+                startPrice = item.changePriceHour2Start
+            }
 
             holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
-            holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
+            holder.priceView.text = "${startPrice.toDollar()} ➡ ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
@@ -146,19 +127,16 @@ class Strategy1000BuyStartFragment : Fragment() {
             val volumeCash = item.dayVolumeCash / 1000f / 1000f
             holder.volumeTodayCashView.text = "%.2f B$".format(volumeCash)
 
-            holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toDollar()
-            holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
 
-            if (item.changePrice2359DayAbsolute < 0) {
+            holder.changePriceAbsoluteView.text = changeAbsolute.toDollar()
+            holder.changePricePercentView.text = changePercent.toPercent()
+
+            if (changeAbsolute < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)
                 holder.changePricePercentView.setTextColor(Utils.RED)
             } else {
                 holder.changePriceAbsoluteView.setTextColor(Utils.GREEN)
                 holder.changePricePercentView.setTextColor(Utils.GREEN)
-            }
-
-            holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
-                strategy1000Buy.setSelected(holder.stock, checked)
             }
 
             holder.itemView.setOnClickListener {
@@ -179,8 +157,6 @@ class Strategy1000BuyStartFragment : Fragment() {
 
             val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
-
-            val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
         }
     }
 }

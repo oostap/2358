@@ -10,12 +10,9 @@ import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
-import androidx.preference.PreferenceManager
 import com.project.ti2358.BuildConfig
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
-import com.project.ti2358.data.service.SettingsManager
-import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.component.KoinApiExtension
 import java.text.SimpleDateFormat
 import java.util.*

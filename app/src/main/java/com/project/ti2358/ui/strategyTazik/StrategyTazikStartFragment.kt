@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -24,6 +25,9 @@ class StrategyTazikStartFragment : Fragment() {
     var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
     lateinit var searchView: SearchView
     lateinit var stocks: MutableList<Stock>
+
+    var numberSet: Int = 1
+    var sort = Sorting.DESCENDING
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,10 +63,9 @@ class StrategyTazikStartFragment : Fragment() {
             }
         }
 
-        var sort = Sorting.DESCENDING
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
         buttonUpdate.setOnClickListener {
-            strategyTazik.process()
+            strategyTazik.process(numberSet)
             stocks = strategyTazik.resort(sort)
             adapterList.setData(stocks)
             sort = if (sort == Sorting.DESCENDING) {
@@ -71,10 +74,6 @@ class StrategyTazikStartFragment : Fragment() {
                 Sorting.DESCENDING
             }
         }
-
-        strategyTazik.process()
-        stocks = strategyTazik.resort(sort)
-        adapterList.setData(stocks)
 
         searchView = view.findViewById(R.id.searchView)
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -89,7 +88,7 @@ class StrategyTazikStartFragment : Fragment() {
             }
 
             fun processText(text: String) {
-                strategyTazik.process()
+                strategyTazik.process(numberSet)
                 stocks = strategyTazik.resort(sort)
 
                 if (text.isNotEmpty()) {
@@ -102,12 +101,37 @@ class StrategyTazikStartFragment : Fragment() {
         })
 
         searchView.setOnCloseListener {
-            stocks = strategyTazik.process()
-            adapterList.setData(stocks)
+            updateData()
             false
         }
 
+        val buttonSet1 = view.findViewById<Button>(R.id.buttonSet1)
+        buttonSet1.setOnClickListener {
+            numberSet = 1
+            updateData()
+        }
+
+        val buttonSet2 = view.findViewById<Button>(R.id.buttonSet2)
+        buttonSet2.setOnClickListener {
+            numberSet = 2
+            updateData()
+        }
+
+        updateData()
         return view
+    }
+
+    private fun updateData() {
+        stocks = strategyTazik.process(numberSet)
+        stocks = strategyTazik.resort(sort)
+        adapterList.setData(stocks)
+
+        updateTitle()
+    }
+
+    private fun updateTitle() {
+        val act = requireActivity() as AppCompatActivity
+        act.supportActionBar?.title = "Автотазик - Набор $numberSet (${strategyTazik.stocksSelected.size} шт.)"
     }
 
     inner class ItemTazikRecyclerViewAdapter(
@@ -137,13 +161,13 @@ class StrategyTazikStartFragment : Fragment() {
             holder.checkBoxView.isChecked = strategyTazik.isSelected(item)
 
             holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
-            holder.priceView.text = "${item.getPrice2359String()} -> ${item.getPriceString()}"
+            holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
 
             val volumeCash = item.dayVolumeCash / 1000f / 1000f
-            holder.volumeTodayCashView.text = "%.2f B$".format(volumeCash)
+            holder.volumeTodayCashView.text = "%.2fB$".format(volumeCash)
 
             holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toDollar()
             holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
@@ -157,7 +181,8 @@ class StrategyTazikStartFragment : Fragment() {
             }
 
             holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
-                strategyTazik.setSelected(holder.stock, checked)
+                strategyTazik.setSelected(holder.stock, checked, numberSet)
+                updateTitle()
             }
 
             holder.itemView.setOnClickListener {

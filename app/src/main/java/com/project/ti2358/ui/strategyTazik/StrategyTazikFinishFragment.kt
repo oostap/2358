@@ -150,7 +150,7 @@ class StrategyTazikFinishFragment : Fragment() {
 
             val avg = item.stock.getPriceDouble()
             holder.tickerView.text = "${item.stock.marketInstrument.ticker} ${item.lots} шт."
-            holder.currentPriceView.text = "${item.stock.getPrice2359String()} -> ${avg} $"
+            holder.currentPriceView.text = "${item.stock.getPrice2359String()} ➡ ${avg} $"
             holder.totalPriceView.text = (item.stock.getPriceDouble() * item.lots).toDollar()
 
             refreshPercent(holder)

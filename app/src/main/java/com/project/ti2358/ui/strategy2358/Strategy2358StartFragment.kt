@@ -132,7 +132,7 @@ class Strategy2358StartFragment : Fragment() {
             holder.checkBoxView.isChecked = strategy2358.isSelected(item)
 
             holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
-            holder.priceView.text = "${item.getPrice1000String()} -> ${item.getPriceString()}"
+            holder.priceView.text = "${item.getPrice1000String()} ➡ ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)

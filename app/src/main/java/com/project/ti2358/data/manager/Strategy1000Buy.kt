@@ -44,7 +44,7 @@ class Strategy1000Buy : KoinComponent {
     }
 
     fun isSelected(stock: Stock): Boolean {
-        return stocksSelected.contains(stock)
+        return stock in stocksSelected
     }
 
     fun getPurchaseStock(): MutableList<PurchaseStock> {

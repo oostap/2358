@@ -99,13 +99,26 @@ class DepositManager : KoinComponent {
         }
     }
 
-    public fun getFreeCashUSD(): String {
+    public fun getFreeCashUSD(): Double {
         for (currency in currencyPositions) {
             if (currency.currency == Currency.USD) {
-                return "${currency.balance} $"
+                return currency.balance
             }
         }
-        return ""
+        return 0.0
+    }
+
+    public fun getPercentBusyInStocks(): Int {
+        var free = getFreeCashUSD()
+        var busy = 0.0
+
+        for (position in portfolioPositions) {
+            if (position.averagePositionPrice?.currency == Currency.USD) {
+                busy += position.getAveragePrice() * position.balance
+            }
+        }
+
+        return (busy / (free + busy) * 100).toInt()
     }
 
     public fun getPositionForFigi(figi: String): PortfolioPosition? {

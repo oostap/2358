@@ -37,21 +37,22 @@ class StrategyTazik : KoinComponent {
 
     private val gson = Gson()
 
-    fun process(): MutableList<Stock> {
-        val all = stockManager.stocksStream
-
+    fun process(numberSet: Int): MutableList<Stock> {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks = all.filter { it.getPriceDouble() > min && it.getPriceDouble() < max } as MutableList<Stock>
+        stocks = stockManager.stocksStream.filter { it.getPriceDouble() > min && it.getPriceDouble() < max } as MutableList<Stock>
         stocks.sortBy { it.changePrice2359DayPercent }
-        loadSavedSelectedStocks()
+        loadSavedSelectedStocks(numberSet)
         return stocks
     }
 
-    private fun loadSavedSelectedStocks() {
+    private fun loadSavedSelectedStocks(numberSet: Int) {
+        stocksSelected.clear()
+
+        val key = "${keySavedSelectedStock}_$numberSet"
         val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
-        val jsonStocks = preferences.getString(keySavedSelectedStock, null)
+        val jsonStocks = preferences.getString(key, null)
         if (jsonStocks != null) {
             val itemType = object : TypeToken<List<String>>() {}.type
             val stocksSelectedList: MutableList<String> = gson.fromJson(jsonStocks, itemType)
@@ -71,7 +72,7 @@ class StrategyTazik : KoinComponent {
         return stocks
     }
 
-    fun setSelected(stock: Stock, value: Boolean) {
+    fun setSelected(stock: Stock, value: Boolean, numberSet: Int) {
         if (value) {
             if (stock !in stocksSelected)
                 stocksSelected.add(stock)
@@ -89,12 +90,13 @@ class StrategyTazik : KoinComponent {
         val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
         val editor: SharedPreferences.Editor = preferences.edit()
         val data = gson.toJson(list)
-        editor.putString(keySavedSelectedStock, data)
+        val key = "${keySavedSelectedStock}_$numberSet"
+        editor.putString(key, data)
         editor.apply()
     }
 
     fun isSelected(stock: Stock): Boolean {
-        return stocksSelected.contains(stock)
+        return stock in stocksSelected
     }
 
     fun getPurchaseStock(): MutableList<PurchaseStock> {
@@ -167,7 +169,7 @@ class StrategyTazik : KoinComponent {
         for (stock in stocksToPurchase) {
             val change = (100 * stock.stock.priceNow) / stock.stock.priceTazik - 100
             tickers += "${stock.stock.marketInstrument.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
-                    "${stock.stock.priceTazik.toDollar()} -> ${stock.stock.priceNow.toDollar()} = " +
+                    "${stock.stock.priceTazik.toDollar()} ➡ ${stock.stock.priceNow.toDollar()} = " +
                     "${change.toPercent()} ${stock.getStatusString()}\n"
 
         }
@@ -278,7 +280,7 @@ class StrategyTazik : KoinComponent {
             if (change >= purchase.percentLimitPriceChange) return
 
             // просадка < -1%
-            log("ПРОСАДКА: ${stock.marketInstrument} -> $change -> ${it.closingPrice}")
+            log("ПРОСАДКА: ${stock.marketInstrument} ➡ $change ➡ ${it.closingPrice}")
 
             // уже брали бумагу?
             if (stocksBuyed.contains(stock)) return
