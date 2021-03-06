@@ -4,7 +4,6 @@ import com.project.ti2358.data.model.dto.Accounts
 import com.project.ti2358.data.model.dto.Currencies
 import com.project.ti2358.data.model.dto.Portfolio
 import com.project.ti2358.data.model.response.Response
-import com.project.ti2358.data.service.SettingsManager
 
 import retrofit2.http.GET
 import retrofit2.http.Query

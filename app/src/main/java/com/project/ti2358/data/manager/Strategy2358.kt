@@ -1,6 +1,5 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.toPercent
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent

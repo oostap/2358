@@ -1,5 +1,6 @@
 package com.project.ti2358.data.service
 
+import com.project.ti2358.data.manager.SettingsManager
 import okhttp3.Interceptor
 import okhttp3.Response
 
@@ -15,7 +16,7 @@ class AuthInterceptor() : Interceptor {
             return chain.proceed(
                 chain.request().newBuilder().addHeader(
                     AUTHORIZATION_HEADER,
-                    BEARER_PREFIX + SettingsManager.getActiveToken()
+                    BEARER_PREFIX + SettingsManager.getActiveTokenTinkoff()
                 ).build()
             )
         }

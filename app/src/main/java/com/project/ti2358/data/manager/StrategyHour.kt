@@ -1,13 +1,11 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.model.dto.Interval
-import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.Sorting
 import com.project.ti2358.service.Utils
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.math.abs
 
 @KoinApiExtension
 class StrategyHour : KoinComponent {

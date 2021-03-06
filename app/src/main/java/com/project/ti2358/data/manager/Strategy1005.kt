@@ -1,6 +1,5 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.Sorting
 import com.project.ti2358.service.Utils
 import org.koin.core.component.KoinApiExtension

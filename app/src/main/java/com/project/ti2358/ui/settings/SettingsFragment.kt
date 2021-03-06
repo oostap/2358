@@ -3,8 +3,13 @@ package com.project.ti2358.ui.settings
 import android.os.Bundle
 import androidx.preference.*
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.AlorManager
+import org.koin.android.ext.android.inject
+import org.koin.core.component.KoinApiExtension
 
+@KoinApiExtension
 class SettingsFragment : PreferenceFragmentCompat() {
+    private val alorManager: AlorManager by inject()
 
     var tazikAskPreference: SwitchPreferenceCompat? = null
     var tazikBidPreference: SwitchPreferenceCompat? = null
@@ -41,5 +46,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
         tazikMarketPreference?.onPreferenceChangeListener = listener
         tazikAskPreference?.onPreferenceChangeListener = listener
         tazikBidPreference?.onPreferenceChangeListener = listener
+
+        val alorKey: String = getString(R.string.setting_key_token_market_alor)
+        val alor: EditTextPreference? = findPreference(alorKey)
+        alor?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference, newValue: Any ->
+            alorManager.refreshToken()
+            true
+        }
     }
 }

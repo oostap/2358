@@ -1,20 +1,15 @@
 package com.project.ti2358.service
 
 import android.app.*
-import android.app.NotificationManager.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
-import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.widget.Toast
-import com.project.ti2358.MainActivity
-import com.project.ti2358.R
 import com.project.ti2358.data.manager.Strategy1000Buy
-import com.project.ti2358.data.service.SettingsManager
+import com.project.ti2358.data.manager.SettingsManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -22,7 +17,6 @@ import kotlinx.coroutines.launch
 import okhttp3.internal.notify
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-import java.lang.Integer.parseInt
 import java.util.*
 
 @KoinApiExtension

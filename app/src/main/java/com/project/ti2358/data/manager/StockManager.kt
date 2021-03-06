@@ -5,13 +5,14 @@ import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.MarketInstrument
 import com.project.ti2358.data.model.dto.yahoo.YahooResponse
 import com.project.ti2358.data.service.MarketService
-import com.project.ti2358.data.service.SettingsManager
-import com.project.ti2358.data.service.StreamingService
+import com.project.ti2358.data.service.StreamingAlorService
+import com.project.ti2358.data.service.StreamingTinkoffService
 import com.project.ti2358.data.service.ThirdPartyService
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
@@ -28,7 +29,9 @@ import org.koin.core.component.inject
 class StockManager : KoinComponent {
     private val thirdPartyService: ThirdPartyService by inject()
     private val marketService: MarketService by inject()
-    private val streamingService: StreamingService by inject()
+    private val streamingTinkoffService: StreamingTinkoffService by inject()
+    private val streamingAlorService: StreamingAlorService by inject()
+    private val alorManager: AlorManager by inject()
 
     private var instrumentsAll: List<MarketInstrument> = emptyList()
     private var stocksAll: MutableList<Stock> = mutableListOf()
@@ -42,7 +45,7 @@ class StockManager : KoinComponent {
         val key = "all_instruments"
 
         val gson = GsonBuilder().create()
-        val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
+        val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
         val jsonInstruments = preferences.getString(key, null)
         if (jsonInstruments != null) {
             val itemType = object : TypeToken<List<MarketInstrument>>() {}.type
@@ -120,7 +123,7 @@ class StockManager : KoinComponent {
                 var deltaDay = 0
 
                 var candle2359: Candle? = null
-                val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
+                val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
                 val jsonClosingCandle = preferences.getString(key, null)
                 if (jsonClosingCandle != null) {
                     candle2359 = gson.fromJson(jsonClosingCandle, Candle::class.java)
@@ -172,7 +175,7 @@ class StockManager : KoinComponent {
                 val key = "close_postmarket_us_new_${ticker}_${from}"
 
                 var yahooResponse: YahooResponse? = null
-                val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
+                val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
                 val jsonClosing = preferences.getString(key, null)
                 if (jsonClosing != null) {
                     yahooResponse = gson.fromJson(jsonClosing, YahooResponse::class.java)
@@ -190,7 +193,7 @@ class StockManager : KoinComponent {
                         editor.apply()
                     }
 
-                    log("yahoo $yahooResponse  $url")
+                    log("yahoo $yahooResponse $url")
                     delay = kotlin.random.Random.Default.nextLong(200, 300)
                 }
 
@@ -210,7 +213,7 @@ class StockManager : KoinComponent {
     private fun resetSubscription() {
         stocksStream.let { stocks ->
 
-            streamingService
+            streamingTinkoffService
                 .getCandleEventStream(
                     stocks.map { it.marketInstrument.figi },
                     Interval.DAY
@@ -224,7 +227,7 @@ class StockManager : KoinComponent {
                     }
                 )
 
-            streamingService
+            streamingTinkoffService
                 .getCandleEventStream(
                     stocks.map { it.marketInstrument.figi },
                     Interval.MINUTE
@@ -238,7 +241,7 @@ class StockManager : KoinComponent {
                     }
                 )
 
-            streamingService
+            streamingTinkoffService
                 .getCandleEventStream(
                     stocks.map { it.marketInstrument.figi },
                     Interval.WEEK
@@ -252,7 +255,7 @@ class StockManager : KoinComponent {
                     }
                 )
 
-            streamingService
+            streamingTinkoffService
                 .getCandleEventStream(
                     stocks.map { it.marketInstrument.figi },
                     Interval.HOUR
@@ -266,9 +269,23 @@ class StockManager : KoinComponent {
                     }
                 )
 
-            streamingService
+            streamingTinkoffService
                 .getCandleEventStream(
                     stocks.map { it.marketInstrument.figi },
+                    Interval.TWO_HOURS
+                )
+                .subscribeBy(
+                    onNext = {
+                        addCandle(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
+
+            streamingAlorService
+                .getBarEventStream(
+                    stocks,
                     Interval.TWO_HOURS
                 )
                 .subscribeBy(
@@ -283,7 +300,7 @@ class StockManager : KoinComponent {
     }
 
     fun unsubscribeStock(stock: Stock, interval: Interval) {
-        streamingService.getCandleEventStream(listOf(stock.marketInstrument.figi), interval)
+        streamingTinkoffService.getCandleEventStream(listOf(stock.marketInstrument.figi), interval)
     }
 
     private fun addCandle(candle: Candle) {

@@ -1,12 +1,7 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.BuildConfig
-import com.project.ti2358.data.model.dto.Currency
-import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.service.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.component.KoinApiExtension
@@ -18,13 +13,12 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 @KoinApiExtension
 class WorkflowManager() : KoinComponent {
+    private val alorManager: AlorManager by inject()
     private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
 
-    private val marketService: MarketService by inject()
-    private val ordersService: OrdersService by inject()
-
     fun startApp() {
+        alorManager.refreshToken()
         stockManager.loadStocks()
         depositManager.startUpdatePortfolio()
     }
@@ -42,6 +36,10 @@ class WorkflowManager() : KoinComponent {
 
             fun provideDepoManager(): DepositManager {
                 return DepositManager()
+            }
+
+            fun provideAlorManager(): AlorManager {
+                return AlorManager()
             }
 
             fun provideStrategyPremarket(): StrategyPremarket {
@@ -91,6 +89,7 @@ class WorkflowManager() : KoinComponent {
             single { provideStocksManager() }
             single { provideDepoManager() }
             single { provideWorkflowManager() }
+            single { provideAlorManager() }
 
             single { provideStrategyPremarket() }
             single { provideStrategyPostmarket() }
@@ -122,8 +121,12 @@ class WorkflowManager() : KoinComponent {
                 return OperationsService(retrofit)
             }
 
-            fun provideStreamingService(): StreamingService {
-                return StreamingService()
+            fun provideStreamingTinkoffService(): StreamingTinkoffService {
+                return StreamingTinkoffService()
+            }
+
+            fun provideStreamingAlorService(): StreamingAlorService {
+                return StreamingAlorService()
             }
 
             fun provideThirdPartyService(retrofit: Retrofit): ThirdPartyService {
@@ -134,7 +137,8 @@ class WorkflowManager() : KoinComponent {
             single { provideOrdersService(get()) }
             single { providePortfolioService(get()) }
             single { provideOperationsService(get()) }
-            single { provideStreamingService() }
+            single { provideStreamingTinkoffService() }
+            single { provideStreamingAlorService() }
             single { provideThirdPartyService(get()) }
         }
 
@@ -152,7 +156,7 @@ class WorkflowManager() : KoinComponent {
 
                 return Retrofit.Builder()
                     .client(httpClient)
-                    .baseUrl(SettingsManager.getActiveBaseUrl())
+                    .baseUrl(SettingsManager.getActiveBaseUrlTinkoff())
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
             }

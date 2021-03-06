@@ -11,13 +11,9 @@ import android.os.Build
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.data.service.SettingsManager
-import com.project.ti2358.service.Utils
-import okhttp3.internal.notify
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.math.roundToInt
 
 @KoinApiExtension
 class StrategyRocket() : KoinComponent {

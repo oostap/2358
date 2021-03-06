@@ -1,8 +1,8 @@
 package com.project.ti2358
 
 import android.app.Application
+import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.WorkflowManager
-import com.project.ti2358.data.service.*
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension

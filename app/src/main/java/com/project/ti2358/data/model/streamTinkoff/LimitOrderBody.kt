@@ -1,4 +1,4 @@
-package com.project.ti2358.data.model.body
+package com.project.ti2358.data.model.streamTinkoff
 
 import com.project.ti2358.data.model.dto.OperationType
 

@@ -2,12 +2,12 @@ package com.project.ti2358.data.service
 
 import android.util.Log
 import com.google.gson.Gson
-import com.project.ti2358.data.model.body.CandleEventBody
-import com.project.ti2358.data.model.body.OrderEventBody
+import com.project.ti2358.data.manager.SettingsManager
+import com.project.ti2358.data.model.streamTinkoff.OrderEventBody
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.OrderEvent
-import com.project.ti2358.service.log
+import com.project.ti2358.data.model.streamTinkoff.CandleEventBody
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.processors.PublishProcessor
@@ -21,7 +21,7 @@ import okio.ByteString
 import org.json.JSONObject
 import java.util.concurrent.Executors
 
-class StreamingService {
+class StreamingTinkoffService {
 
     companion object {
         const val STREAMING_URL = "wss://api-invest.tinkoff.ru/openapi/md/v1/md-openapi/ws"
@@ -30,7 +30,7 @@ class StreamingService {
 
     private var webSocket: WebSocket? = null
     private val client: OkHttpClient = OkHttpClient()
-    private val socketListener = MyWebSocketListener()
+    private val socketListener = TinkoffSocketListener()
     private val gson = Gson()
     private var currentAttemptCount = 0
     private val publishProcessor: PublishProcessor<Any> = PublishProcessor.create()
@@ -51,7 +51,7 @@ class StreamingService {
             .url(STREAMING_URL)
             .addHeader(
                 AuthInterceptor.AUTHORIZATION_HEADER,
-                AuthInterceptor.BEARER_PREFIX + SettingsManager.getActiveToken()
+                AuthInterceptor.BEARER_PREFIX + SettingsManager.getActiveTokenTinkoff()
             )
             .build()
         webSocket?.close(1002, null)
@@ -61,15 +61,15 @@ class StreamingService {
         )
     }
 
-    inner class MyWebSocketListener : WebSocketListener() {
+    inner class TinkoffSocketListener : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
-            Log.d("StreamingService", "onOpen")
+            Log.d("StreamingTinkoffService", "onOpen")
             resubscribe().subscribe()
             currentAttemptCount = 0
         }
 
         override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-            Log.d("StreamingService", "onMessage")
+            Log.d("StreamingTinkoffService", "onMessage")
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -88,15 +88,15 @@ class StreamingService {
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            Log.d("StreamingService", "onClosed")
+            Log.d("StreamingTinkoffService", "onClosed")
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-            Log.d("StreamingService", "onClosing")
+            Log.d("StreamingTinkoffService", "onClosing")
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            Log.d("StreamingService", "onFailure")
+            Log.d("StreamingTinkoffService", "onFailure")
             GlobalScope.launch(Dispatchers.Main) {
                 delay(3000)
                 connect()

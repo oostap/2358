@@ -62,9 +62,11 @@
     <string name="stocks_header_postmarket">Постмаркет US</string>
 
     <!-- tinkoff settings -->
-    <string name="token_header">Tinkoff OpenApi Токен</string>
-    <string name="market_token_title">Market token</string>
-    <string name="tinkoff_iis_title">У меня ИИС</string>
+    <string name="token_header">Торговые токены</string>
+    <string name="tinkoff_token_title">Tinkoff OpenApi токен</string>
+    <string name="alor_token_title">Alor OpenApi токен</string>
+
+    <string name="tinkoff_iis_title">У меня ИИС в ТИ</string>
 
     <!-- common settings -->
     <string name="stocks_header">Общие настройки</string>
@@ -119,6 +121,7 @@
 
     <!-- tinkoff -->
     <string name="setting_key_token_market">token_market</string>
+    <string name="setting_key_token_market_alor">token_market_alor</string>
     <string name="setting_key_tinkoff_iis">tinkoff_iis</string>
 
     <!-- common settings -->

@@ -4,9 +4,8 @@ import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.data.service.PortfolioService
-import com.project.ti2358.data.service.SettingsManager
+import com.project.ti2358.data.service.ThirdPartyService
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -16,8 +15,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.Collections.synchronizedList
 import kotlin.math.abs
-import kotlin.math.ceil
-import kotlin.math.log
 
 @KoinApiExtension
 class DepositManager : KoinComponent {

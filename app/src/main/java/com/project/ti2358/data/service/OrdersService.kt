@@ -1,8 +1,8 @@
 package com.project.ti2358.data.service
 
 import com.project.ti2358.data.api.OrdersApi
-import com.project.ti2358.data.model.body.LimitOrderBody
-import com.project.ti2358.data.model.body.MarketOrderBody
+import com.project.ti2358.data.model.streamTinkoff.LimitOrderBody
+import com.project.ti2358.data.model.streamTinkoff.MarketOrderBody
 import com.project.ti2358.data.model.dto.LimitOrder
 import com.project.ti2358.data.model.dto.MarketOrder
 import com.project.ti2358.data.model.dto.OperationType

@@ -12,9 +12,10 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.manager.Strategy2358
-import com.project.ti2358.data.service.SettingsManager
+import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -75,7 +76,7 @@ class Strategy2358FinishFragment : Fragment() {
         var time = SettingsManager.get2358PurchaseTime()
 
         val textInfo = view.findViewById<TextView>(R.id.info_text)
-        val prepareText: String = SettingsManager.context.getString(R.string.prepare_start_2358_text)
+        val prepareText: String = TheApplication.application.applicationContext.getString(R.string.prepare_start_2358_text)
         textInfo.text = String.format(
             prepareText,
             time,

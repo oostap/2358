@@ -1,13 +1,11 @@
 package com.project.ti2358.data.api
 
-import com.project.ti2358.data.model.body.LimitOrderBody
-import com.project.ti2358.data.model.body.MarketOrderBody
+import com.project.ti2358.data.model.streamTinkoff.LimitOrderBody
+import com.project.ti2358.data.model.streamTinkoff.MarketOrderBody
 import com.project.ti2358.data.model.dto.LimitOrder
 import com.project.ti2358.data.model.dto.MarketOrder
 import com.project.ti2358.data.model.dto.Order
-import com.project.ti2358.data.model.dto.Orders
 import com.project.ti2358.data.model.response.Response
-import com.project.ti2358.data.service.SettingsManager
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST

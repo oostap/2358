@@ -4,7 +4,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.project.ti2358.data.service.SettingsManager
+import com.project.ti2358.TheApplication
 import com.project.ti2358.service.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -52,7 +52,7 @@ class StrategyTazik : KoinComponent {
         stocksSelected.clear()
 
         val key = "${keySavedSelectedStock}_$numberSet"
-        val jsonStocks = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context).getString(key, null)
+        val jsonStocks = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext).getString(key, null)
         jsonStocks?.let {
             val itemType = object : TypeToken<List<String>>() {}.type
             val stocksSelectedList: List<String> = gson.fromJson(jsonStocks, itemType)
@@ -63,7 +63,7 @@ class StrategyTazik : KoinComponent {
     private fun saveSelectedStocks(numberSet: Int) {
         val list = stocksSelected.map { it.marketInstrument.ticker }.toMutableList()
 
-        val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
+        val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
         val editor: SharedPreferences.Editor = preferences.edit()
         val data = gson.toJson(list)
         val key = "${keySavedSelectedStock}_$numberSet"

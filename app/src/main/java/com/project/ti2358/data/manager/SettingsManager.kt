@@ -1,36 +1,42 @@
-package com.project.ti2358.data.service
+package com.project.ti2358.data.manager
 
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
+import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.service.Utils
+import org.koin.core.component.KoinApiExtension
 import java.lang.Integer.parseInt
 import java.util.*
 
+@KoinApiExtension
 class SettingsManager {
 
     companion object {
-        lateinit var context: Context
         lateinit var preferences: SharedPreferences
 
         fun setSettingsContext(applicationContext: Context) {
-            context = applicationContext
-            preferences = PreferenceManager.getDefaultSharedPreferences(context)
+            preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         }
 
-        fun getActiveToken(): String {
-            val tokenKey = context.getString(R.string.setting_key_token_market)
+        fun getActiveTokenTinkoff(): String {
+            val tokenKey = TheApplication.application.applicationContext.getString(R.string.setting_key_token_market)
             val token: String? = preferences.getString(tokenKey, "")?.trim()
             return token ?: "TODO"
         }
 
-        fun getActiveBaseUrl(): String = "https://api-invest.tinkoff.ru/openapi/"
-        fun getYahooBaseUrl(): String = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/"
+        fun getActiveBaseUrlTinkoff(): String = "https://api-invest.tinkoff.ru/openapi/"
+
+        fun getActiveTokenAlor(): String {
+            val tokenKey = TheApplication.application.applicationContext.getString(R.string.setting_key_token_market_alor)
+            val token: String? = preferences.getString(tokenKey, "")?.trim()
+            return token ?: "TODO"
+        }
 
         fun getActiveBrokerType(): String {
-            val key: String = context.getString(R.string.setting_key_tinkoff_iis)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tinkoff_iis)
             val iis = preferences.getBoolean(key, false)
 
             return if (iis) {
@@ -48,7 +54,7 @@ class SettingsManager {
         /******************** common *************************/
 
         fun getCommonPriceMin(): Int {
-            val key: String = context.getString(R.string.setting_key_stocks_usd_price_min)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_stocks_usd_price_min)
             val value: String? = preferences.getString(key, "5")
             return try {
                 parseInt(value ?: "5")
@@ -58,7 +64,7 @@ class SettingsManager {
         }
 
         fun getCommonPriceMax(): Int {
-            val key: String = context.getString(R.string.setting_key_stocks_usd_price_max)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_stocks_usd_price_max)
             val value: String? = preferences.getString(key, "200")
             return try {
                 parseInt(value ?: "200")
@@ -70,7 +76,7 @@ class SettingsManager {
         /******************** 2358 *************************/
 
         fun get2358ChangePercent(): Double {
-            val key: String = context.getString(R.string.setting_key_2358_price_change_percent)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_price_change_percent)
             val value: String? = preferences.getString(key, "-1")
             return try {
                 (value ?: "-1").toDouble()
@@ -80,13 +86,13 @@ class SettingsManager {
         }
 
         fun get2358PurchaseTime(): String {
-            val key: String = context.getString(R.string.setting_key_2358_purchase_time)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_purchase_time)
             val value: String? = preferences.getString(key, "")
             return value ?: "23:58:00"
         }
 
         fun get2358PurchaseVolume(): Int {
-            val key: String = context.getString(R.string.setting_key_2358_purchase_volume)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_purchase_volume)
             val value: String? = preferences.getString(key, "1000")
             return try {
                 parseInt(value ?: "1000")
@@ -96,7 +102,7 @@ class SettingsManager {
         }
 
         fun get2358TakeProfitFrom(): Double {
-            val key: String = context.getString(R.string.setting_key_2358_take_profit_from)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_take_profit_from)
             val value: String? = preferences.getString(key, "1.0")
             return try {
                 (value ?: "1.0").toDouble()
@@ -106,7 +112,7 @@ class SettingsManager {
         }
 
         fun get2358TakeProfitTo(): Double {
-            val key: String = context.getString(R.string.setting_key_2358_take_profit_to)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_take_profit_to)
             val value: String? = preferences.getString(key, "1.0")
             return try {
                 (value ?: "1.0").toDouble()
@@ -116,7 +122,7 @@ class SettingsManager {
         }
 
         fun get2358TakeProfitStep(): Int {
-            val key: String = context.getString(R.string.setting_key_2358_take_profit_step)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_take_profit_step)
             val value: String? = preferences.getString(key, "1")
             return try {
                 parseInt(value ?: "1")
@@ -126,7 +132,7 @@ class SettingsManager {
         }
 
         fun get2358VolumeDayPieces(): Int {
-            val key: String = context.getString(R.string.setting_key_2358_volume_min_day)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_volume_min_day)
             val value: String? = preferences.getString(key, "10000")
             return try {
                 parseInt(value ?: "10000")
@@ -136,7 +142,7 @@ class SettingsManager {
         }
 
         fun get2358VolumeDayCash(): Double {
-            val key: String = context.getString(R.string.setting_key_2358_volume_min_cash)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_volume_min_cash)
             val value: String? = preferences.getString(key, "0.1")
             return try {
                 (value ?: "0.1").toDouble()
@@ -148,7 +154,7 @@ class SettingsManager {
         /******************** 1005 *************************/
 
         fun get1005ChangePercent(): Double {
-            val key: String = context.getString(R.string.setting_key_1005_price_change_percent)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1005_price_change_percent)
             val value: String? = preferences.getString(key, "2")
             return try {
                 (value ?: "2").toDouble()
@@ -158,7 +164,7 @@ class SettingsManager {
         }
 
         fun get1005VolumeDayPieces(): Int {
-            val key: String = context.getString(R.string.setting_key_1005_volume_min_day)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1005_volume_min_day)
             val value: String? = preferences.getString(key, "5000")
             return try {
                 parseInt(value ?: "5000")
@@ -170,7 +176,7 @@ class SettingsManager {
         /******************** 1000 sell *************************/
 
         fun get1000SellTakeProfit(): Double {
-            val key: String = context.getString(R.string.setting_key_1000_sell_take_profit)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_take_profit)
             val value: String? = preferences.getString(key, "1.0")
             return try {
                 (value ?: "1.0").toDouble()
@@ -182,7 +188,7 @@ class SettingsManager {
         /******************** 1000 sell *************************/
 
         fun get1000BuyTakeProfit(): Double {
-            val key: String = context.getString(R.string.setting_key_1000_buy_take_profit)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_take_profit)
             val value: String? = preferences.getString(key, "1")
             return try {
                 (value ?: "1").toDouble()
@@ -192,7 +198,7 @@ class SettingsManager {
         }
 
         fun get1000BuyPurchaseVolume(): Int {
-            val key: String = context.getString(R.string.setting_key_1000_buy_purchase_volume)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_purchase_volume)
             val value: String? = preferences.getString(key, "500")
             return try {
                 parseInt(value ?: "500")
@@ -204,7 +210,7 @@ class SettingsManager {
         /******************** 1728 *************************/
 
         fun get1728ChangePercent(): Double {
-            val key: String = context.getString(R.string.setting_key_1728_price_change)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_price_change)
             val value: String? = preferences.getString(key, "-1")
             return try {
                 (value ?: "-1").toDouble()
@@ -214,7 +220,7 @@ class SettingsManager {
         }
 
         fun get1728PurchaseVolume(): Int {
-            val key: String = context.getString(R.string.setting_key_1728_purchase_volume)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_purchase_volume)
             val value: String? = preferences.getString(key, "1000")
             return try {
                 parseInt(value ?: "1000")
@@ -224,7 +230,7 @@ class SettingsManager {
         }
 
         fun get1728TakeProfit(): Double {
-            val key: String = context.getString(R.string.setting_key_1728_take_profit)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_take_profit)
             val value: String? = preferences.getString(key, "1")
             return try {
                 (value ?: "1").toDouble()
@@ -234,7 +240,7 @@ class SettingsManager {
         }
 
         fun get1728VolumeBeforeStart(): Int {
-            val key: String = context.getString(R.string.setting_key_1728_volume_before_start)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_volume_before_start)
             val value: String? = preferences.getString(key, "10000")
             return try {
                 parseInt(value ?: "10000")
@@ -244,7 +250,7 @@ class SettingsManager {
         }
 
         fun get1728VolumeAfterStart(): Int {
-            val key: String = context.getString(R.string.setting_key_1728_volume_after_start)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_volume_after_start)
             val value: String? = preferences.getString(key, "10000")
             return try {
                 parseInt(value ?: "10000")
@@ -254,14 +260,14 @@ class SettingsManager {
         }
 
         fun get1728QuickBuy(): Boolean {
-            val key: String = context.getString(R.string.setting_key_1728_quick_buy)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_quick_buy)
             return preferences.getBoolean(key, false)
         }
 
         /******************** TAZIK *************************/
 
         fun getTazikChangePercent(): Double {
-            val key: String = context.getString(R.string.setting_key_tazik_min_percent_to_buy)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_min_percent_to_buy)
             val value: String? = preferences.getString(key, "-1.0")
             return try {
                 (value ?: "-1.0").toDouble()
@@ -271,7 +277,7 @@ class SettingsManager {
         }
 
         fun getTazikPurchaseVolume(): Int {
-            val key: String = context.getString(R.string.setting_key_tazik_purchase_volume)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_purchase_volume)
             val value: String? = preferences.getString(key, "500")
             return try {
                 parseInt(value ?: "500")
@@ -281,7 +287,7 @@ class SettingsManager {
         }
 
         fun getTazikPurchaseParts(): Int {
-            val key: String = context.getString(R.string.setting_key_tazik_purchase_parts)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_purchase_parts)
             val value: String? = preferences.getString(key, "2")
             return try {
                 (value ?: "2").toInt()
@@ -291,7 +297,7 @@ class SettingsManager {
         }
 
         fun getTazikTakeProfit(): Double {
-            val key: String = context.getString(R.string.setting_key_tazik_take_profit)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_take_profit)
             val value: String? = preferences.getString(key, "1.0")
             return try {
                 (value ?: "1.0").toDouble()
@@ -301,22 +307,22 @@ class SettingsManager {
         }
 
         fun getTazikBuyAsk(): Boolean {
-            val key: String = context.getString(R.string.setting_key_tazik_buy_ask)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_buy_ask)
             return preferences.getBoolean(key, false)
         }
 
         fun getTazikBuyMarket(): Boolean {
-            val key: String = context.getString(R.string.setting_key_tazik_buy_market)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_buy_market)
             return preferences.getBoolean(key, false)
         }
 
         fun getTazikBuyBid(): Boolean {
-            val key: String = context.getString(R.string.setting_key_tazik_buy_bid)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_buy_bid)
             return preferences.getBoolean(key, false)
         }
 
         fun getTazikNearestTime(): String {
-            val key: String = context.getString(R.string.setting_key_tazik_times2)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_times2)
             val time = preferences.getString(key, "06:59:50")
             if (time != null && time != "") {
                 val times = time.split(",").toTypedArray()
@@ -356,7 +362,7 @@ class SettingsManager {
 
         /******************** Rockets *************************/
         fun getRocketChangePercent(): Double {
-            val key: String = context.getString(R.string.setting_key_rocket_change_percent)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_rocket_change_percent)
             val value: String? = preferences.getString(key, "3.0")
             return try {
                 (value ?: "3.0").toDouble()
@@ -366,7 +372,7 @@ class SettingsManager {
         }
 
         fun getRocketChangeMinutes(): Int {
-            val key: String = context.getString(R.string.setting_key_rocket_change_minutes)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_rocket_change_minutes)
             val value: String? = preferences.getString(key, "5")
             return try {
                 (value ?: "5").toInt()
@@ -376,7 +382,7 @@ class SettingsManager {
         }
 
         fun getRocketNotifyAlive(): Int {
-            val key: String = context.getString(R.string.setting_key_rocket_notify_alive)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_rocket_notify_alive)
             val value: String? = preferences.getString(key, "5")
             return try {
                 (value ?: "5").toInt()

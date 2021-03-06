@@ -13,9 +13,10 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.manager.Strategy1000Sell
-import com.project.ti2358.data.service.SettingsManager
+import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -112,9 +113,9 @@ class Strategy1000SellFinishFragment : Fragment() {
     }
 
     fun updateInfoText() {
-        val time = "07:00:01 или 10:00:01"
+        val time = "07:00:00.100ms или 10:00:00.100ms"
         val prepareText: String =
-            SettingsManager.context.getString(R.string.prepare_start_1000_sell_text)
+            TheApplication.application.applicationContext.getString(R.string.prepare_start_1000_sell_text)
         infoTextView?.text = String.format(
             prepareText,
             time,

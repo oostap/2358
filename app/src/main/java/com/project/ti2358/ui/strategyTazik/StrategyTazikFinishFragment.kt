@@ -12,9 +12,10 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.manager.StrategyTazik
-import com.project.ti2358.data.service.SettingsManager
+import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -102,7 +103,7 @@ class StrategyTazikFinishFragment : Fragment() {
         val parts = "%d по %.2f$".format(p, volume / p)
         startTime = SettingsManager.getTazikNearestTime()
 
-        val prepareText: String = SettingsManager.context.getString(R.string.prepare_start_tazik_buy_text)
+        val prepareText: String = TheApplication.application.applicationContext.getString(R.string.prepare_start_tazik_buy_text)
         infoTextView?.text = String.format(
             prepareText,
             positions.size,

@@ -3,12 +3,12 @@ package com.project.ti2358.data.manager
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.google.gson.*
+import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.MarketInstrument
 import com.project.ti2358.data.model.dto.yahoo.YahooResponse
 import com.project.ti2358.data.service.MarketService
-import com.project.ti2358.data.service.SettingsManager
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toString
 import kotlinx.coroutines.Dispatchers
@@ -352,7 +352,7 @@ data class Stock(
 
         val key = "price_postmarket_ru_${marketInstrument.figi}_${from}"
 
-        val preferences = PreferenceManager.getDefaultSharedPreferences(SettingsManager.context)
+        val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
         val jsonClosingCandle = preferences.getString(key, null)
         if (jsonClosingCandle != null) {
             candleWeek = gson.fromJson(jsonClosingCandle, Candle::class.java)
