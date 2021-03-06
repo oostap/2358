@@ -2,14 +2,15 @@ package com.project.ti2358.data.service
 
 import android.util.Log
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.project.ti2358.data.manager.AlorManager
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.model.streamAlor.BarGetEventBody
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
-import com.project.ti2358.data.model.dto.OrderEvent
+import com.project.ti2358.data.model.streamAlor.BarGetEventBody
 import com.project.ti2358.data.model.streamAlor.CancelEventBody
+import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
@@ -79,20 +80,15 @@ class StreamingAlorService {
             if (jsonObject.has("guid")) {
                 val eventType = jsonObject.getString("guid")
                 if ("1min" in eventType) {
-                    if (eventType == "AAPL_1min") {
-                        log("StreamingAlorService::onMessage: $jsonObject")
-                    }
+                    val ticker = eventType.split("_").first()
+                    val data = jsonObject.getJSONObject("data")
+                    val time = data.getLong("time")
+
+                    val candle = Candle(data.getDouble("open"), data.getDouble("close"), data.getDouble("high"),
+                        data.getDouble("low"), data.getInt("volume"), Date(time), Interval.MINUTE, ticker)
+                    publishProcessor.onNext(candle)
                 }
             }
-//            val payload = jsonObject.getString("payload")
-//            when (eventType) {
-//                "candle" -> {
-//                    publishProcessor.onNext(gson.fromJson(payload, Candle::class.java))
-//                }
-//                "orderbook" -> {
-//                    publishProcessor.onNext(gson.fromJson(payload, OrderEvent::class.java))
-//                }
-//            }
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
@@ -162,17 +158,21 @@ class StreamingAlorService {
     private fun subscribeBarEventsStream(stock: Stock, interval: Interval, addSubscription: Boolean = true) {
 //        log("StreamingAlorService :: subscribe for bars events: ticker: ${stock.marketInstrument.ticker}, interval: $interval")
 
-        val time = Calendar.getInstance().timeInMillis / 1000 - 60 * 60 * 36
+        val timeFrame = Utils.convertIntervalToSeconds(interval)
+        val timeName = Utils.convertIntervalToString(interval)
+        val time = Calendar.getInstance().timeInMillis / 1000 - 60
+
         val bar = BarGetEventBody(
             AlorManager.TOKEN,
             "BarsGetAndSubscribe",
             stock.marketInstrument.ticker,
             "SPBX",
-            60,
+            timeFrame,
             time,
             "Simple",
             false,
-            "${stock.marketInstrument.ticker}_1min")
+            "${stock.marketInstrument.ticker}_$timeName"
+        )
 
         webSocket?.send(Gson().toJson(bar))
         if (addSubscription) {
@@ -186,8 +186,8 @@ class StreamingAlorService {
 
     private fun unsubscribeCandleEventsStream(stock: Stock, interval: Interval) {
         Log.d("StreamingAlorService", "unsubscribe from candle events: ticker: ${stock.marketInstrument.ticker}, interval: $interval")
-
-        val cancel = CancelEventBody(SettingsManager.getActiveTokenAlor(), "unsubscribe", stock.marketInstrument.ticker)
+        val timeName = Utils.convertIntervalToString(interval)
+        val cancel = CancelEventBody(SettingsManager.getActiveTokenAlor(), "unsubscribe", "${stock.marketInstrument.ticker}_$timeName")
         webSocket?.send(Gson().toJson(cancel))
         activeBarSubscriptions[stock]?.remove(interval)
     }

@@ -14,6 +14,7 @@ import com.project.ti2358.BuildConfig
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.model.dto.Interval
 import org.koin.core.component.KoinApiExtension
 import java.text.SimpleDateFormat
 import java.util.*
@@ -329,6 +330,50 @@ class Utils {
 
         fun convertDateToTinkoffDate(calendar: Calendar, zone: String): String {
             return calendar.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS") + zone
+        }
+
+        fun convertIntervalToSeconds(interval: Interval): Int {
+            when (interval) {
+                Interval.MINUTE -> {
+                    return 60
+                }
+                Interval.HOUR -> {
+                    return 60 * 60
+                }
+                Interval.TWO_HOURS -> {
+                    return 60 * 60 * 2
+                }
+                Interval.DAY -> {
+                    return 60 * 60 * 24
+                }
+                Interval.WEEK -> {
+                    return 60 * 60 * 24 * 7
+                }
+            }
+
+            return 60
+        }
+
+        fun convertIntervalToString(interval: Interval): String {
+            when (interval) {
+                Interval.MINUTE -> {
+                    return "1min"
+                }
+                Interval.HOUR -> {
+                    return "hour"
+                }
+                Interval.TWO_HOURS -> {
+                    return "2hour"
+                }
+                Interval.DAY -> {
+                    return "day"
+                }
+                Interval.WEEK -> {
+                    return "week"
+                }
+            }
+
+            return "1min"
         }
     }
 }

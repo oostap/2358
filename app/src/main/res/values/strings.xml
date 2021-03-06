@@ -65,6 +65,7 @@
     <string name="token_header">Торговые токены</string>
     <string name="tinkoff_token_title">Tinkoff OpenApi токен</string>
     <string name="alor_token_title">Alor OpenApi токен</string>
+    <string name="alor_qoutes_title">Котировки из Alor</string>
 
     <string name="tinkoff_iis_title">У меня ИИС в ТИ</string>
 
@@ -121,8 +122,10 @@
 
     <!-- tinkoff -->
     <string name="setting_key_token_market">token_market</string>
-    <string name="setting_key_token_market_alor">token_market_alor</string>
     <string name="setting_key_tinkoff_iis">tinkoff_iis</string>
+
+    <string name="setting_key_token_market_alor">token_market_alor</string>
+    <string name="setting_key_market_alor">market_alor</string>
 
     <!-- common settings -->
     <string name="setting_key_stocks_usd_price_min">stocks_usd_price_min</string>

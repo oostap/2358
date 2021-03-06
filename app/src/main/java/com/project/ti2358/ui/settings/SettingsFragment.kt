@@ -4,12 +4,14 @@ import android.os.Bundle
 import androidx.preference.*
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.AlorManager
+import com.project.ti2358.data.manager.StockManager
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
 class SettingsFragment : PreferenceFragmentCompat() {
     private val alorManager: AlorManager by inject()
+    private val stockManager: StockManager by inject()
 
     var tazikAskPreference: SwitchPreferenceCompat? = null
     var tazikBidPreference: SwitchPreferenceCompat? = null
@@ -47,11 +49,34 @@ class SettingsFragment : PreferenceFragmentCompat() {
         tazikAskPreference?.onPreferenceChangeListener = listener
         tazikBidPreference?.onPreferenceChangeListener = listener
 
-        val alorKey: String = getString(R.string.setting_key_token_market_alor)
-        val alor: EditTextPreference? = findPreference(alorKey)
-        alor?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference, newValue: Any ->
+        /////////// ALOR
+
+        val alorKey: String = getString(R.string.setting_key_market_alor)
+        val alorPreference: SwitchPreferenceCompat? = findPreference(alorKey)
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        val isAlor = sharedPreferences.getBoolean(alorKey, false)
+
+        alorPreference?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+            updateAlor(newValue as Boolean)
             alorManager.refreshToken()
+            stockManager.loadStocks(true)
             true
         }
+
+        updateAlor(isAlor)
+
+        val alorTokenKey: String = getString(R.string.setting_key_token_market_alor)
+        val alorToken: EditTextPreference? = findPreference(alorTokenKey)
+        alorToken?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+            alorManager.refreshToken()
+            stockManager.loadStocks(true)
+            true
+        }
+    }
+
+    private fun updateAlor(alor: Boolean) {
+        val alorTokenKey: String = getString(R.string.setting_key_token_market_alor)
+        val alorPreference: EditTextPreference? = findPreference(alorTokenKey)
+        alorPreference?.isVisible = alor
     }
 }

@@ -7,15 +7,21 @@
             app:title="@string/tinkoff_token_title"
             app:useSimpleSummaryProvider="true" />
 
-        <EditTextPreference
-            app:key="@string/setting_key_token_market_alor"
-            app:title="@string/alor_token_title"
-            app:useSimpleSummaryProvider="true" />
-
         <SwitchPreferenceCompat
             app:key="@string/setting_key_tinkoff_iis"
             app:title="@string/tinkoff_iis_title"
             app:defaultValue="false" />
+
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_market_alor"
+            app:title="@string/alor_qoutes_title"
+            app:defaultValue="false" />
+
+        <EditTextPreference
+            app:key="@string/setting_key_token_market_alor"
+            app:title="@string/alor_token_title"
+            app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
 

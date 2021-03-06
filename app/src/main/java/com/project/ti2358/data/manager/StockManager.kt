@@ -33,7 +33,7 @@ class StockManager : KoinComponent {
     private val streamingAlorService: StreamingAlorService by inject()
     private val alorManager: AlorManager by inject()
 
-    private var instrumentsAll: List<MarketInstrument> = emptyList()
+    private var instrumentsAll: MutableList<MarketInstrument> = mutableListOf()
     private var stocksAll: MutableList<Stock> = mutableListOf()
 
     // все акции, которые участвуют в расчётах с учётом базовой сортировки из настроек
@@ -41,7 +41,7 @@ class StockManager : KoinComponent {
 
     private val gson = Gson()
 
-    fun loadStocks() {
+    fun loadStocks(force: Boolean = false) {
         val key = "all_instruments"
 
         val gson = GsonBuilder().create()
@@ -52,15 +52,17 @@ class StockManager : KoinComponent {
             instrumentsAll = gson.fromJson(jsonInstruments, itemType)
         }
 
-        if (instrumentsAll.isNotEmpty()) {
+        if (instrumentsAll.isNotEmpty() && !force) {
             afterLoadInstruments()
             return
         }
 
+        instrumentsAll.clear()
+
         GlobalScope.launch(Dispatchers.Main) {
             while (instrumentsAll.isEmpty()) {
                 try {
-                    instrumentsAll = marketService.stocks().instruments
+                    instrumentsAll = marketService.stocks().instruments as MutableList<MarketInstrument>
 
                     val jsonInstruments = gson.toJson(instrumentsAll)
                     val editor: SharedPreferences.Editor = preferences.edit()
@@ -283,19 +285,21 @@ class StockManager : KoinComponent {
                     }
                 )
 
-            streamingAlorService
-                .getBarEventStream(
-                    stocks,
-                    Interval.TWO_HOURS
-                )
-                .subscribeBy(
-                    onNext = {
-                        addCandle(it)
-                    },
-                    onError = {
-                        it.printStackTrace()
-                    }
-                )
+            if (SettingsManager.isAlorQoutes()) {
+                streamingAlorService
+                    .getBarEventStream(
+                        stocks,
+                        Interval.MINUTE
+                    )
+                    .subscribeBy(
+                        onNext = {
+                            addCandle(it)
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        }
+                    )
+            }
         }
     }
 
@@ -304,7 +308,18 @@ class StockManager : KoinComponent {
     }
 
     private fun addCandle(candle: Candle) {
-        val stock = stocksStream.find { it.marketInstrument.figi == candle.figi}
-        stock?.processCandle(candle)
+        if (candle.interval == Interval.MINUTE && SettingsManager.isAlorQoutes()) {
+            val stock = stocksStream.find { it.marketInstrument.ticker == candle.figi }
+            if (stock != null) {
+                stock.processCandle(candle)
+                return
+            }
+        } else {
+            val stock = stocksStream.find { it.marketInstrument.figi == candle.figi }
+            if (stock != null) {
+                stock.processCandle(candle)
+                return
+            }
+        }
     }
 }
