@@ -209,4 +209,11 @@
         android:name="com.project.ti2358.ui.strategyHour.StrategyHourStartFragment"
         android:label="@string/menu_hour"
         tools:layout="@layout/fragment_hour_start" />
+
+    <!-- diagnostics -->
+    <fragment
+        android:id="@+id/nav_diagnostics"
+        android:name="com.project.ti2358.ui.diagnostics.DiagnosticsFragment"
+        android:label="@string/menu_diagnostics"
+        tools:layout="@layout/fragment_diagnostics" />
 </navigation>

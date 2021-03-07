@@ -37,6 +37,7 @@
     <string name="change">изменение</string>
 
     <string name="menu_settings">Настройки</string>
+    <string name="menu_diagnostics">Диагностика</string>
     <string name="menu_portfolio">Депозит</string>
     <string name="menu_premarket">Премаркет RU</string>
     <string name="menu_postmarket">Постмаркет US</string>

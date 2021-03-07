@@ -44,11 +44,14 @@ class StreamingAlorService {
     private val activeBarSubscriptions: MutableMap<Stock, MutableList<Interval>> = mutableMapOf()
     private val threadPoolExecutor = Executors.newSingleThreadExecutor()
 
+    var connectedStatus: Boolean = false
+    var messagesStatus: Boolean = false
+
     init {
         connect()
     }
 
-    private fun connect() {
+    fun connect() {
         if (currentAttemptCount > RECONNECT_ATTEMPT_LIMIT) {
             return
         }
@@ -63,11 +66,18 @@ class StreamingAlorService {
         )
     }
 
+    fun disconnect() {
+        activeBarSubscriptions.clear()
+        webSocket?.close(1002, null)
+    }
+
     inner class AlorSocketListener : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             log("StreamingAlorService::onOpen")
             resubscribe().subscribe()
             currentAttemptCount = 0
+            connectedStatus = true
+            messagesStatus = false
         }
 
         override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
@@ -76,11 +86,16 @@ class StreamingAlorService {
 
         override fun onMessage(webSocket: WebSocket, text: String) {
 //            log("StreamingAlorService::onMessage, text: $text")
+            messagesStatus = true
+
             val jsonObject = JSONObject(text)
             if (jsonObject.has("guid")) {
                 val eventType = jsonObject.getString("guid")
                 if ("1min" in eventType) {
-                    val ticker = eventType.split("_").first()
+                    val list = eventType.split("_")
+                    if (list.size != 2) return
+
+                    val ticker = list.first()
                     val data = jsonObject.getJSONObject("data")
                     val time = data.getLong("time")
 
@@ -93,10 +108,14 @@ class StreamingAlorService {
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             log("StreamingAlorService::onClosed")
+            connectedStatus = false
+            messagesStatus = false
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
             log("StreamingAlorService::onClosing")
+            connectedStatus = false
+            messagesStatus = false
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
@@ -105,6 +124,8 @@ class StreamingAlorService {
                 delay(3000)
                 connect()
             }
+            connectedStatus = false
+            messagesStatus = false
         }
     }
 

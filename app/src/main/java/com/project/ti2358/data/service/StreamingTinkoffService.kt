@@ -38,6 +38,9 @@ class StreamingTinkoffService {
     private val activeOrderSubscriptions: MutableMap<String, MutableList<Int>> = mutableMapOf()
     private val threadPoolExecutor = Executors.newSingleThreadExecutor()
 
+    var connectedStatus: Boolean = false
+    var messagesStatus: Boolean = false
+
     init {
         connect()
     }
@@ -66,6 +69,8 @@ class StreamingTinkoffService {
             Log.d("StreamingTinkoffService", "onOpen")
             resubscribe().subscribe()
             currentAttemptCount = 0
+            connectedStatus = true
+            messagesStatus = false
         }
 
         override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
@@ -73,6 +78,7 @@ class StreamingTinkoffService {
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
+            messagesStatus = true
 //            log("StreamingService::onMessage, text: $text")
             val jsonObject = JSONObject(text)
             val eventType = jsonObject.getString("event")
@@ -89,10 +95,14 @@ class StreamingTinkoffService {
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             Log.d("StreamingTinkoffService", "onClosed")
+            connectedStatus = false
+            messagesStatus = false
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
             Log.d("StreamingTinkoffService", "onClosing")
+            connectedStatus = false
+            messagesStatus = false
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
@@ -101,6 +111,8 @@ class StreamingTinkoffService {
                 delay(3000)
                 connect()
             }
+            connectedStatus = false
+            messagesStatus = false
         }
     }
 

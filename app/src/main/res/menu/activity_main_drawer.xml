@@ -51,6 +51,11 @@
             android:icon="@drawable/ic_1000"
             android:title="@string/menu_hour" />
 
+        <item
+            android:id="@+id/nav_diagnostics"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/menu_diagnostics" />
+
 <!--        <item-->
 <!--            android:id="@+id/nav_rocket_start"-->
 <!--            android:icon="@drawable/ic_1000"-->

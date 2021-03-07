@@ -5,6 +5,7 @@ import androidx.preference.*
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.AlorManager
 import com.project.ti2358.data.manager.StockManager
+import com.project.ti2358.data.service.StreamingAlorService
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -12,6 +13,7 @@ import org.koin.core.component.KoinApiExtension
 class SettingsFragment : PreferenceFragmentCompat() {
     private val alorManager: AlorManager by inject()
     private val stockManager: StockManager by inject()
+    private val streamingAlorService: StreamingAlorService by inject()
 
     var tazikAskPreference: SwitchPreferenceCompat? = null
     var tazikBidPreference: SwitchPreferenceCompat? = null
@@ -59,6 +61,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
         alorPreference?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
             updateAlor(newValue as Boolean)
             alorManager.refreshToken()
+            if (!newValue) {
+                streamingAlorService.disconnect()
+            } else {
+                streamingAlorService.connect()
+            }
             stockManager.loadStocks(true)
             true
         }

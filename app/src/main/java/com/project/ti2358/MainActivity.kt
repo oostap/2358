@@ -80,7 +80,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_1728_start,
                 R.id.nav_1830_start,
                 R.id.nav_rocket_start,
-                R.id.nav_hour_start
+                R.id.nav_hour_start,
+                R.id.nav_diagnostics
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
