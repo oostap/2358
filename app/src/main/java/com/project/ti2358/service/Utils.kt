@@ -348,7 +348,7 @@ class Utils {
                     return 60 * 60 * 24
                 }
                 Interval.WEEK -> {
-                    return 60 * 60 * 24 * 7
+                    return 60 * 60 * 24 * 3
                 }
             }
 
@@ -375,6 +375,28 @@ class Utils {
             }
 
             return "1min"
+        }
+
+        fun convertStringToInterval(interval: String): Interval? {
+            when (interval) {
+                "1min" -> {
+                    return Interval.MINUTE
+                }
+                "hour" -> {
+                    return Interval.HOUR
+                }
+                "2hour" -> {
+                    return Interval.TWO_HOURS
+                }
+                "day" -> {
+                    return Interval.DAY
+                }
+                "week" -> {
+                    return Interval.WEEK
+                }
+            }
+
+            return null
         }
 
         fun search(stocks: List<Stock>, text: String): MutableList<Stock> {

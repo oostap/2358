@@ -8,6 +8,7 @@ import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.OrderEvent
 import com.project.ti2358.data.model.streamTinkoff.CandleEventBody
+import com.project.ti2358.service.log
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.processors.PublishProcessor
@@ -45,7 +46,7 @@ class StreamingTinkoffService {
         connect()
     }
 
-    private fun connect() {
+    fun connect() {
         if (currentAttemptCount > RECONNECT_ATTEMPT_LIMIT) {
             return
         }
@@ -64,9 +65,14 @@ class StreamingTinkoffService {
         )
     }
 
+    fun disconnect() {
+        activeCandleSubscriptions.clear()
+        webSocket?.close(1002, null)
+    }
+
     inner class TinkoffSocketListener : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
-            Log.d("StreamingTinkoffService", "onOpen")
+            log("StreamingTinkoffService::onOpen")
             resubscribe().subscribe()
             currentAttemptCount = 0
             connectedStatus = true
@@ -74,7 +80,7 @@ class StreamingTinkoffService {
         }
 
         override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-            Log.d("StreamingTinkoffService", "onMessage")
+            log("StreamingTinkoffService :: onMessage")
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -94,19 +100,19 @@ class StreamingTinkoffService {
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            Log.d("StreamingTinkoffService", "onClosed")
+            log("StreamingTinkoffService :: onClosed")
             connectedStatus = false
             messagesStatus = false
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-            Log.d("StreamingTinkoffService", "onClosing")
+            log("StreamingTinkoffService :: onClosing")
             connectedStatus = false
             messagesStatus = false
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            Log.d("StreamingTinkoffService", "onFailure")
+            log("StreamingTinkoffService :: onFailure")
             GlobalScope.launch(Dispatchers.Main) {
                 delay(3000)
                 connect()

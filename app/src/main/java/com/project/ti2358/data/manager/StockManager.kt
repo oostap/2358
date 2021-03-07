@@ -228,82 +228,139 @@ class StockManager : KoinComponent {
 
     private fun resetSubscription() {
         stocksStream.let { stocks ->
-
-            streamingTinkoffService
-                .getCandleEventStream(
-                    stocks.map { it.marketInstrument.figi },
-                    Interval.DAY
-                )
-                .subscribeBy(
-                    onNext = {
-                        addCandle(it)
-                    },
-                    onError = {
-                        it.printStackTrace()
-                    }
-                )
-
-            streamingTinkoffService
-                .getCandleEventStream(
-                    stocks.map { it.marketInstrument.figi },
-                    Interval.MINUTE
-                )
-                .subscribeBy(
-                    onNext = {
-                        addCandle(it)
-                    },
-                    onError = {
-                        it.printStackTrace()
-                    }
-                )
-
-            streamingTinkoffService
-                .getCandleEventStream(
-                    stocks.map { it.marketInstrument.figi },
-                    Interval.WEEK
-                )
-                .subscribeBy(
-                    onNext = {
-                        addCandle(it)
-                    },
-                    onError = {
-                        it.printStackTrace()
-                    }
-                )
-
-            streamingTinkoffService
-                .getCandleEventStream(
-                    stocks.map { it.marketInstrument.figi },
-                    Interval.HOUR
-                )
-                .subscribeBy(
-                    onNext = {
-                        addCandle(it)
-                    },
-                    onError = {
-                        it.printStackTrace()
-                    }
-                )
-
-            streamingTinkoffService
-                .getCandleEventStream(
-                    stocks.map { it.marketInstrument.figi },
-                    Interval.TWO_HOURS
-                )
-                .subscribeBy(
-                    onNext = {
-                        addCandle(it)
-                    },
-                    onError = {
-                        it.printStackTrace()
-                    }
-                )
-
             if (SettingsManager.isAlorQoutes()) {
                 streamingAlorService
-                    .getBarEventStream(
+                    .getCandleEventStream(
                         stocks,
                         Interval.MINUTE
+                    )
+                    .subscribeBy(
+                        onNext = {
+                            addCandle(it)
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        }
+                    )
+
+                streamingAlorService
+                    .getCandleEventStream(
+                        stocks,
+                        Interval.WEEK
+                    )
+                    .subscribeBy(
+                        onNext = {
+                            addCandle(it)
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        }
+                    )
+
+                streamingAlorService
+                    .getCandleEventStream(
+                        stocks,
+                        Interval.DAY
+                    )
+                    .subscribeBy(
+                        onNext = {
+                            addCandle(it)
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        }
+                    )
+
+                streamingAlorService
+                    .getCandleEventStream(
+                        stocks,
+                        Interval.HOUR
+                    )
+                    .subscribeBy(
+                        onNext = {
+                            addCandle(it)
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        }
+                    )
+
+                streamingAlorService
+                    .getCandleEventStream(
+                        stocks,
+                        Interval.TWO_HOURS
+                    )
+                    .subscribeBy(
+                        onNext = {
+                            addCandle(it)
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        }
+                    )
+
+            } else {
+                streamingTinkoffService
+                    .getCandleEventStream(
+                        stocks.map { it.marketInstrument.figi },
+                        Interval.DAY
+                    )
+                    .subscribeBy(
+                        onNext = {
+                            addCandle(it)
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        }
+                    )
+
+                streamingTinkoffService
+                    .getCandleEventStream(
+                        stocks.map { it.marketInstrument.figi },
+                        Interval.HOUR
+                    )
+                    .subscribeBy(
+                        onNext = {
+                            addCandle(it)
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        }
+                    )
+
+                streamingTinkoffService
+                    .getCandleEventStream(
+                        stocks.map { it.marketInstrument.figi },
+                        Interval.TWO_HOURS
+                    )
+                    .subscribeBy(
+                        onNext = {
+                            addCandle(it)
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        }
+                    )
+
+
+                streamingTinkoffService
+                    .getCandleEventStream(
+                        stocks.map { it.marketInstrument.figi },
+                        Interval.MINUTE
+                    )
+                    .subscribeBy(
+                        onNext = {
+                            addCandle(it)
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        }
+                    )
+
+                streamingTinkoffService
+                    .getCandleEventStream(
+                        stocks.map { it.marketInstrument.figi },
+                        Interval.WEEK
                     )
                     .subscribeBy(
                         onNext = {
@@ -322,7 +379,7 @@ class StockManager : KoinComponent {
     }
 
     private fun addCandle(candle: Candle) {
-        if (candle.interval == Interval.MINUTE && SettingsManager.isAlorQoutes()) {
+        if ((candle.interval == Interval.MINUTE || candle.interval == Interval.WEEK) && SettingsManager.isAlorQoutes()) {
             val stock = stocksStream.find { it.marketInstrument.ticker == candle.figi }
             if (stock != null) {
                 stock.processCandle(candle)
