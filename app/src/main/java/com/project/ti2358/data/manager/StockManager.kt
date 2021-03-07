@@ -78,6 +78,18 @@ class StockManager : KoinComponent {
         }
     }
 
+    val alterNames: Map<String, String> = mapOf(
+        "SPCE" to "галя|вирджин",
+        "ZYNE" to "зина",
+        "COTY" to "кот",
+        "M" to "мася",
+        "BABA" to "баба",
+        "CCL" to "карнавал",
+        "HEAR" to "черепаха",
+        "CNK" to "кино",
+        "ENDP" to "эндо",
+    )
+
     private fun afterLoadInstruments() {
         stocksAll.clear()
 
@@ -97,7 +109,9 @@ class StockManager : KoinComponent {
             // исключить фонды тинькова
             if ("TCS" in instrument.figi) continue
 
-            stocksAll.add(Stock(instrument))
+            stocksAll.add(Stock(instrument).apply {
+                alterName = alterNames[instrument.ticker] ?: ""
+            })
         }
         baseSortStocks()
 

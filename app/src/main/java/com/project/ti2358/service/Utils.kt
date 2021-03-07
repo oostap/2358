@@ -14,6 +14,7 @@ import com.project.ti2358.BuildConfig
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.model.dto.Interval
 import org.koin.core.component.KoinApiExtension
 import java.text.SimpleDateFormat
@@ -374,6 +375,17 @@ class Utils {
             }
 
             return "1min"
+        }
+
+        fun search(stocks: List<Stock>, text: String): MutableList<Stock> {
+            if (text.isNotEmpty()) {
+                return stocks.filter {
+                    it.marketInstrument.ticker.contains(text, ignoreCase = true) || it.marketInstrument.name.contains(text, ignoreCase = true) ||
+                    it.alterName.contains(text, ignoreCase = true)
+
+                }.toMutableList()
+            }
+            return stocks.toMutableList()
         }
     }
 }

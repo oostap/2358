@@ -85,12 +85,7 @@ class Strategy2358StartFragment : Fragment() {
             fun processText(text: String) {
                 stocks = strategy2358.process()
 
-                if (text.isNotEmpty()) {
-                    stocks = stocks.filter {
-                        it.marketInstrument.ticker.contains(text, ignoreCase = true) || it.marketInstrument.name.contains(text, ignoreCase = true)
-
-                    } as MutableList<Stock>
-                }
+                stocks = Utils.search(stocks, text)
                 adapterList.setData(stocks)
             }
         })

@@ -75,8 +75,8 @@ class StrategyTazik : KoinComponent {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-            val multiplier = if (it in stocksSelected) 100 else 1
-            it.changePrice2359DayPercent * multiplier * sign
+            val multiplier = if (it in stocksSelected) 100 else 0
+            it.changePrice2359DayPercent * sign - multiplier
         }
         return stocks
     }

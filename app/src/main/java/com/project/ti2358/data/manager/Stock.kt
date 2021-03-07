@@ -27,6 +27,7 @@ import kotlin.math.abs
 data class Stock(
     var marketInstrument: MarketInstrument
 ) : KoinComponent {
+    var alterName: String = ""
     val strategy1728: Strategy1728 by inject()
     val strategyTazik: StrategyTazik by inject()
     val strategyRocket: StrategyRocket by inject()

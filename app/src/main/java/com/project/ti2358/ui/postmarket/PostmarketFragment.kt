@@ -72,11 +72,7 @@ class PostmarketFragment : Fragment() {
 
             fun processText(text: String) {
                 updateData()
-                if (text.isNotEmpty()) {
-                    stocks = stocks.filter {
-                        it.marketInstrument.ticker.contains(text, ignoreCase = true) || it.marketInstrument.name.contains(text, ignoreCase = true)
-                    }.toMutableList()
-                }
+                stocks = Utils.search(stocks, text)
                 adapterList.setData(stocks)
             }
         })
