@@ -88,7 +88,7 @@ class StrategyRocketService : Service() {
             }
         }
 
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.Main) {
             updateNotification()
         }
     }

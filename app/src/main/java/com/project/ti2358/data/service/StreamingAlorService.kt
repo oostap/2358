@@ -99,7 +99,7 @@ class StreamingAlorService {
                 val interval: Interval? = Utils.convertStringToInterval(intervalString)
                 interval?.let {
                     val data = jsonObject.getJSONObject("data")
-                    val time = data.getLong("time")
+                    val time = data.getLong("time") * 1000
 
                     val candle = Candle(data.getDouble("open"), data.getDouble("close"), data.getDouble("high"),
                         data.getDouble("low"), data.getInt("volume"), Date(time), interval, ticker)
@@ -181,6 +181,7 @@ class StreamingAlorService {
     private fun subscribeBarEventsStream(stock: Stock, interval: Interval, addSubscription: Boolean = true) {
 //        log("StreamingAlorService :: subscribe for bars events: ticker: ${stock.marketInstrument.ticker}, interval: $interval")
 
+        val tf = Utils.convertIntervalToAlorTimeframe(interval)
         val timeFrame = Utils.convertIntervalToSeconds(interval)
         val timeName = Utils.convertIntervalToString(interval)
         val time = Calendar.getInstance().timeInMillis / 1000 - timeFrame
@@ -190,7 +191,7 @@ class StreamingAlorService {
             "BarsGetAndSubscribe",
             stock.marketInstrument.ticker,
             "SPBX",
-            timeFrame,
+            tf,
             time,
             "Simple",
             false,

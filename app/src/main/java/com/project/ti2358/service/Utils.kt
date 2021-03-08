@@ -333,6 +333,28 @@ class Utils {
             return calendar.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS") + zone
         }
 
+        fun convertIntervalToAlorTimeframe(interval: Interval): Any {
+            when (interval) {
+                Interval.MINUTE -> {
+                    return 60
+                }
+                Interval.HOUR -> {
+                    return 60 * 60
+                }
+                Interval.TWO_HOURS -> {
+                    return 60 * 60 * 2
+                }
+                Interval.DAY -> {
+                    return "D"
+                }
+                Interval.WEEK -> {
+                    return 60 * 60 * 24 * 7
+                }
+            }
+
+            return 60
+        }
+
         fun convertIntervalToSeconds(interval: Interval): Int {
             when (interval) {
                 Interval.MINUTE -> {
@@ -348,7 +370,7 @@ class Utils {
                     return 60 * 60 * 24
                 }
                 Interval.WEEK -> {
-                    return 60 * 60 * 24 * 3
+                    return 60 * 60 * 24 * 7
                 }
             }
 

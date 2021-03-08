@@ -79,7 +79,7 @@ class StrategyTazikService : Service() {
             }
         }
 
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.Main) {
             while (isServiceRunning) {
                 val seconds = updateNotification()
                 delay(1 * 1000 * seconds)

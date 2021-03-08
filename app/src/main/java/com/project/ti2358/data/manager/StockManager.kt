@@ -86,8 +86,12 @@ class StockManager : KoinComponent {
         "BABA" to "баба",
         "CCL" to "карнавал",
         "HEAR" to "черепаха",
-        "CNK" to "кино",
+        "CNK" to "кино|синька",
         "ENDP" to "эндо",
+        "GTHX" to "перч|тварь",
+        "AIMT" to "арахис",
+        "SAVE" to "спирит|жёлтый",
+        "SWN" to "свин",
     )
 
     private fun afterLoadInstruments() {
@@ -379,7 +383,7 @@ class StockManager : KoinComponent {
     }
 
     private fun addCandle(candle: Candle) {
-        if ((candle.interval == Interval.MINUTE || candle.interval == Interval.WEEK) && SettingsManager.isAlorQoutes()) {
+        if (SettingsManager.isAlorQoutes()) {
             val stock = stocksStream.find { it.marketInstrument.ticker == candle.figi }
             if (stock != null) {
                 stock.processCandle(candle)

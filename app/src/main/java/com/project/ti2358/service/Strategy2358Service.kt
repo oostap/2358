@@ -131,7 +131,7 @@ class Strategy2358Service : Service() {
             }
         }, scheduleDelay)
 
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.Main) {
             while (isServiceRunning) {
                 val delaySeconds = updateNotification()
                 delay(1 * 1000 * delaySeconds)

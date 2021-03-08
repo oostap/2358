@@ -131,7 +131,7 @@ class Strategy700SellService : Service() {
             }
         }, scheduleDelay)
 
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.Main) {
             while (isServiceRunning) {
                 val delaySeconds: Long = updateNotification()
                 delay(1 * 1000 * delaySeconds)

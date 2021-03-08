@@ -6,7 +6,7 @@ data class BarGetEventBody(
     val code: String,           // "code": "AAPL",
 
     val exchange: String,       // "exchange": "SPBEX",
-    val tf: Int,                // 60
+    val tf: Any,                // 60
     val from: Long,             // 1536057084
     val format: String,         // "format": "Simple",
     val delayed: Boolean,       // "delayed": false,

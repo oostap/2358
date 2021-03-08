@@ -178,6 +178,7 @@ class StrategyTazik : KoinComponent {
             startStrategy()
             return
         }
+        started = false
 
         // запустить таймер
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
@@ -219,7 +220,7 @@ class StrategyTazik : KoinComponent {
             }, scheduleDelay)
         }
 
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.Main) {
             while (!started) {
                 fixPrice()
                 delay(1 * 1000 * 3)
