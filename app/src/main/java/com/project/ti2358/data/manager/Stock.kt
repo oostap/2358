@@ -112,7 +112,10 @@ data class Stock(
         val diffInMilli: Long = Calendar.getInstance().time.time - candle.time.time
         val diffInHours: Long = TimeUnit.MILLISECONDS.toHours(diffInMilli)
 
-        if (diffInHours > 24) return
+        if (diffInHours > 29) {
+            log(candle.toString())
+            return
+        }
 
         if (diffInHours > 20) {
             candleYesterday = candle

@@ -32,7 +32,6 @@ class Strategy1000BuyService : Service() {
     private var isServiceRunning = false
     private lateinit var schedulePurchaseTime: Calendar
     private var notificationButtonReceiver: BroadcastReceiver? = null
-    private var timerBuy: Timer? = null
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -70,12 +69,6 @@ class Strategy1000BuyService : Service() {
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
-
-        timerBuy?.let {
-            it.cancel()
-            it.purge()
-        }
-
         super.onDestroy()
     }
 
@@ -104,35 +97,33 @@ class Strategy1000BuyService : Service() {
         val seconds = 0
         val milliseconds = 100
 
-        schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
-        schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
-        schedulePurchaseTime.set(Calendar.HOUR_OF_DAY, hours)
-        schedulePurchaseTime.set(Calendar.MINUTE, minutes)
-        schedulePurchaseTime.set(Calendar.SECOND, seconds)
-        schedulePurchaseTime.set(Calendar.MILLISECOND, milliseconds)
-        schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, differenceHours)
+        GlobalScope.launch(Dispatchers.Main) {
+            schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
+            schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
+            schedulePurchaseTime.set(Calendar.HOUR_OF_DAY, hours)
+            schedulePurchaseTime.set(Calendar.MINUTE, minutes)
+            schedulePurchaseTime.set(Calendar.SECOND, seconds)
+            schedulePurchaseTime.set(Calendar.MILLISECOND, milliseconds)
+            schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, differenceHours)
 
-        val now = Calendar.getInstance(TimeZone.getDefault())
-        var scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
-        if (scheduleDelay < 0) {
-            schedulePurchaseTime.add(Calendar.DAY_OF_MONTH, 1)
-            scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
-        }
-
-        if (scheduleDelay < 0) {
-            stopService()
-            return
-        }
-
-        timerBuy = Timer()
-        timerBuy?.schedule(object : TimerTask() {
-            override fun run() {
-                val localPurchases = strategy1000Buy.stocksToPurchase
-                for (purchase in localPurchases) {
-                    purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), SettingsManager.get1000BuyTakeProfit())
-                }
+            val now = Calendar.getInstance(TimeZone.getDefault())
+            var scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
+            if (scheduleDelay < 0) {
+                schedulePurchaseTime.add(Calendar.DAY_OF_MONTH, 1)
+                scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
             }
-        }, scheduleDelay)
+
+            if (scheduleDelay < 0) {
+                stopService()
+                return@launch
+            }
+
+            delay(scheduleDelay)
+            val localPurchases = strategy1000Buy.stocksToPurchase
+            for (purchase in localPurchases) {
+                purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), SettingsManager.get1000BuyTakeProfit())
+            }
+        }
 
         GlobalScope.launch(Dispatchers.Main) {
             while (isServiceRunning) {

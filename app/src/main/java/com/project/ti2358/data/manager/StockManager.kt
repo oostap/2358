@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.util.Collections.synchronizedList
 
 @KoinApiExtension
 class StockManager : KoinComponent {
@@ -49,7 +50,7 @@ class StockManager : KoinComponent {
         val jsonInstruments = preferences.getString(key, null)
         if (jsonInstruments != null) {
             val itemType = object : TypeToken<List<MarketInstrument>>() {}.type
-            instrumentsAll = gson.fromJson(jsonInstruments, itemType)
+            instrumentsAll = synchronizedList(gson.fromJson(jsonInstruments, itemType))
         }
 
         if (instrumentsAll.isNotEmpty() && !force) {
@@ -62,7 +63,7 @@ class StockManager : KoinComponent {
         GlobalScope.launch(Dispatchers.Main) {
             while (instrumentsAll.isEmpty()) {
                 try {
-                    instrumentsAll = marketService.stocks().instruments as MutableList<MarketInstrument>
+                    instrumentsAll = synchronizedList(marketService.stocks().instruments as MutableList<MarketInstrument>)
 
                     val jsonInstruments = gson.toJson(instrumentsAll)
                     val editor: SharedPreferences.Editor = preferences.edit()
@@ -147,6 +148,8 @@ class StockManager : KoinComponent {
                 val jsonClosingCandle = preferences.getString(key, null)
                 if (jsonClosingCandle != null) {
                     candle2359 = gson.fromJson(jsonClosingCandle, Candle::class.java)
+                    stock.processCandle2359(candle2359)
+                    continue
                 }
 
                 try {
@@ -199,6 +202,8 @@ class StockManager : KoinComponent {
                 val jsonClosing = preferences.getString(key, null)
                 if (jsonClosing != null) {
                     yahooResponse = gson.fromJson(jsonClosing, YahooResponse::class.java)
+                    stock.processPostmarketPrice(yahooResponse)
+                    continue
                 }
 
                 if (yahooResponse == null) {
@@ -274,35 +279,6 @@ class StockManager : KoinComponent {
                             it.printStackTrace()
                         }
                     )
-
-                streamingAlorService
-                    .getCandleEventStream(
-                        stocks,
-                        Interval.HOUR
-                    )
-                    .subscribeBy(
-                        onNext = {
-                            addCandle(it)
-                        },
-                        onError = {
-                            it.printStackTrace()
-                        }
-                    )
-
-                streamingAlorService
-                    .getCandleEventStream(
-                        stocks,
-                        Interval.TWO_HOURS
-                    )
-                    .subscribeBy(
-                        onNext = {
-                            addCandle(it)
-                        },
-                        onError = {
-                            it.printStackTrace()
-                        }
-                    )
-
             } else {
                 streamingTinkoffService
                     .getCandleEventStream(
@@ -317,35 +293,6 @@ class StockManager : KoinComponent {
                             it.printStackTrace()
                         }
                     )
-
-                streamingTinkoffService
-                    .getCandleEventStream(
-                        stocks.map { it.marketInstrument.figi },
-                        Interval.HOUR
-                    )
-                    .subscribeBy(
-                        onNext = {
-                            addCandle(it)
-                        },
-                        onError = {
-                            it.printStackTrace()
-                        }
-                    )
-
-                streamingTinkoffService
-                    .getCandleEventStream(
-                        stocks.map { it.marketInstrument.figi },
-                        Interval.TWO_HOURS
-                    )
-                    .subscribeBy(
-                        onNext = {
-                            addCandle(it)
-                        },
-                        onError = {
-                            it.printStackTrace()
-                        }
-                    )
-
 
                 streamingTinkoffService
                     .getCandleEventStream(
@@ -375,6 +322,34 @@ class StockManager : KoinComponent {
                         }
                     )
             }
+
+            streamingTinkoffService
+                .getCandleEventStream(
+                    stocks.map { it.marketInstrument.figi },
+                    Interval.HOUR
+                )
+                .subscribeBy(
+                    onNext = {
+                        addCandle(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
+
+            streamingTinkoffService
+                .getCandleEventStream(
+                    stocks.map { it.marketInstrument.figi },
+                    Interval.TWO_HOURS
+                )
+                .subscribeBy(
+                    onNext = {
+                        addCandle(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
         }
     }
 
@@ -383,7 +358,7 @@ class StockManager : KoinComponent {
     }
 
     private fun addCandle(candle: Candle) {
-        if (SettingsManager.isAlorQoutes()) {
+        if (SettingsManager.isAlorQoutes() && (candle.interval == Interval.MINUTE || candle.interval == Interval.WEEK || candle.interval == Interval.DAY)) {
             val stock = stocksStream.find { it.marketInstrument.ticker == candle.figi }
             if (stock != null) {
                 stock.processCandle(candle)

@@ -15,13 +15,14 @@ class Strategy2358() : KoinComponent {
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
 
     fun process(): MutableList<Stock> {
+        val all = stockManager.stocksStream
         val change = SettingsManager.get2358ChangePercent()
         val volumeDayPieces = SettingsManager.get2358VolumeDayPieces()
         val volumeDayCash = SettingsManager.get2358VolumeDayCash() * 1000 * 1000
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks = stockManager.stocksStream.filter { stock ->
+        stocks = all.filter { stock ->
             stock.changePrice2359DayPercent <= change &&    // изменение
             stock.getTodayVolume() >= volumeDayPieces &&    // объём в шт
             stock.dayVolumeCash >= volumeDayCash &&         // объём в $

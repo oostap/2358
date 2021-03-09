@@ -23,13 +23,14 @@ class Strategy1728() : KoinComponent {
     }
 
     fun process(): MutableList<Stock> {
+        val all = stockManager.stocksStream
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
         val change = SettingsManager.get1728ChangePercent()
         val volumeBeforeStart = SettingsManager.get1728VolumeBeforeStart()
         val volumeAfterStart = SettingsManager.get1728VolumeAfterStart()
 
-        stocks = stockManager.stocksStream.filter { stock ->
+        stocks = all.filter { stock ->
             stock.getPriceDouble() > min &&
             stock.getPriceDouble() < max &&
             abs(stock.changePrice1728DayPercent) >= abs(change) &&   // изменение

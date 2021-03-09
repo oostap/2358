@@ -13,10 +13,11 @@ class StrategyPremarket : KoinComponent {
     private var currentSort: Sorting = Sorting.DESCENDING
 
     fun process(): MutableList<Stock> {
+        val all = stockManager.stocksStream
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks = stockManager.stocksStream.filter { it.getPriceDouble() > min && it.getPriceDouble() < max }.toMutableList()
+        stocks = all.filter { it.getPriceDouble() > min && it.getPriceDouble() < max }.toMutableList()
         return stocks
     }
 

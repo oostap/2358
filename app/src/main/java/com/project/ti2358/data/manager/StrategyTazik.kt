@@ -33,16 +33,16 @@ class StrategyTazik : KoinComponent {
     var started: Boolean = false
 
     var scheduledStartTime: Calendar? = null
-    var timerStartTazik: Timer? = null
 
     var currentSort: Sorting = Sorting.DESCENDING
     private val gson = Gson()
 
     fun process(numberSet: Int): MutableList<Stock> {
+        val all = stockManager.stocksStream
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks = stockManager.stocksStream.filter { it.getPriceDouble() > min && it.getPriceDouble() < max }.toMutableList()
+        stocks = all.filter { it.getPriceDouble() > min && it.getPriceDouble() < max }.toMutableList()
         stocks.sortBy { it.changePrice2359DayPercent }
         loadSelectedStocks(numberSet)
         return stocks
@@ -75,7 +75,7 @@ class StrategyTazik : KoinComponent {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-            val multiplier = if (it in stocksSelected) 100 else 0
+            val multiplier = if (it in stocksSelected) 100 else 1
             it.changePrice2359DayPercent * sign - multiplier
         }
         return stocks
@@ -151,7 +151,7 @@ class StrategyTazik : KoinComponent {
         val price = getTotalPurchaseString()
         var tickers = ""
         for (stock in stocksToPurchase) {
-            tickers += "${stock.stock.marketInstrument.ticker}*${stock.percentLimitPriceChange}%%"
+            tickers += "${stock.stock.marketInstrument.ticker}*${stock.percentLimitPriceChange}%"
         }
 
         return "$price:\n$tickers"
@@ -180,7 +180,6 @@ class StrategyTazik : KoinComponent {
         }
         started = false
 
-        // запустить таймер
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
         val dayTime = time.split(":").toTypedArray()
         if (dayTime.size < 3) {
@@ -188,36 +187,35 @@ class StrategyTazik : KoinComponent {
             return
         }
 
-        val hours = Integer.parseInt(dayTime[0])
-        val minutes = Integer.parseInt(dayTime[1])
-        val seconds = Integer.parseInt(dayTime[2])
+        // запустить таймер
+        GlobalScope.launch(Dispatchers.Main) {
+            val hours = Integer.parseInt(dayTime[0])
+            val minutes = Integer.parseInt(dayTime[1])
+            val seconds = Integer.parseInt(dayTime[2])
 
-        scheduledStartTime = Calendar.getInstance(TimeZone.getDefault())
-        scheduledStartTime?.let {
-            it.add(Calendar.HOUR_OF_DAY, -differenceHours)
-            it.set(Calendar.HOUR_OF_DAY, hours)
-            it.set(Calendar.MINUTE, minutes)
-            it.set(Calendar.SECOND, seconds)
-            it.add(Calendar.HOUR_OF_DAY, differenceHours)
+            scheduledStartTime = Calendar.getInstance(TimeZone.getDefault())
+            scheduledStartTime?.let {
+                it.add(Calendar.HOUR_OF_DAY, -differenceHours)
+                it.set(Calendar.HOUR_OF_DAY, hours)
+                it.set(Calendar.MINUTE, minutes)
+                it.set(Calendar.SECOND, seconds)
+                it.add(Calendar.HOUR_OF_DAY, differenceHours)
 
-            val now = Calendar.getInstance(TimeZone.getDefault())
-            var scheduleDelay = it.timeInMillis - now.timeInMillis
-            if (scheduleDelay < 0) {
-                it.add(Calendar.DAY_OF_MONTH, 1)
-                scheduleDelay = it.timeInMillis - now.timeInMillis
-            }
-
-            if (scheduleDelay < 0) {
-                startStrategy()
-                return
-            }
-
-            timerStartTazik = Timer()
-            timerStartTazik?.schedule(object : TimerTask() {
-                override fun run() {
-                    startStrategy()
+                val now = Calendar.getInstance(TimeZone.getDefault())
+                var scheduleDelay = it.timeInMillis - now.timeInMillis
+                if (scheduleDelay < 0) {
+                    it.add(Calendar.DAY_OF_MONTH, 1)
+                    scheduleDelay = it.timeInMillis - now.timeInMillis
                 }
-            }, scheduleDelay)
+
+                if (scheduleDelay < 0) {
+                    startStrategy()
+                    return@launch
+                }
+
+                delay(scheduleDelay)
+                startStrategy()
+            }
         }
 
         GlobalScope.launch(Dispatchers.Main) {
@@ -256,10 +254,6 @@ class StrategyTazik : KoinComponent {
     }
 
     fun stopStrategy() {
-        timerStartTazik?.let {
-            it.cancel()
-            it.purge()
-        }
         started = false
         stocksBuyed.clear()
     }

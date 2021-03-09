@@ -24,6 +24,11 @@ enum class OrderStatus {
     WAITING,
     SELLED,
     CANCELED,
+
+    WTF_1,
+    WTF_2,
+    WTF_3,
+    WTF_4,
 }
 
 @KoinApiExtension
@@ -59,7 +64,7 @@ data class PurchaseStock(
 
     fun getStatusString(): String =
         when (status) {
-            OrderStatus.NONE -> ""
+            OrderStatus.NONE -> "NONE"
             OrderStatus.WAITING -> "ждём ⏳"
             OrderStatus.ORDER_BUY_PREPARE -> "ордер: до покупки"
             OrderStatus.ORDER_BUY -> "ордер: покупка"
@@ -68,6 +73,10 @@ data class PurchaseStock(
             OrderStatus.ORDER_SELL -> "ордер: продажа 🙋"
             OrderStatus.SELLED -> "продано! 🤑"
             OrderStatus.CANCELED -> "отменена! шок, скринь! 😱"
+            OrderStatus.WTF_1 -> "wtf 1"
+            OrderStatus.WTF_2 -> "wtf 2"
+            OrderStatus.WTF_3 -> "wtf 3"
+            OrderStatus.WTF_4 -> "wtf 4"
         }
 
     fun getLimitPriceDouble(): Double {
@@ -545,17 +554,23 @@ data class PurchaseStock(
     fun sell() {
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                val figi = position.figi
-                if (figi == "") return@launch
+                val figi = stock.marketInstrument.figi
+                if (figi == "") {
+                    status = OrderStatus.WTF_1
+                    return@launch
+                }
 
                 val pos = depositManager.getPositionForFigi(figi)
                 if (pos == null) {
-                    status = OrderStatus.CANCELED
+                    status = OrderStatus.WTF_2
                     return@launch
                 }
 
                 position = pos
-                if (pos.lots == 0 || percentProfitSellFrom == 0.0) return@launch
+                if (pos.lots == 0 || percentProfitSellFrom == 0.0) {
+                    status = OrderStatus.WTF_3
+                    return@launch
+                }
 
                 // скорректировать процент профита в зависимости от свечи открытия
                 val startPrice = pos.stock?.candleYesterday?.closingPrice ?: 0.0
@@ -574,7 +589,10 @@ data class PurchaseStock(
                 }
 
                 val profitPrice = getProfitPriceForSell()
-                if (profitPrice == 0.0) return@launch
+                if (profitPrice == 0.0) {
+                    status = OrderStatus.WTF_4
+                    return@launch
+                }
 
                 while (true) {
                     try {
