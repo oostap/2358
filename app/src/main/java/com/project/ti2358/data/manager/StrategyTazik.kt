@@ -6,10 +6,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.project.ti2358.TheApplication
 import com.project.ti2358.service.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -33,6 +30,7 @@ class StrategyTazik : KoinComponent {
     var started: Boolean = false
 
     var scheduledStartTime: Calendar? = null
+    var job: Job? = null
 
     var currentSort: Sorting = Sorting.DESCENDING
     private val gson = Gson()
@@ -188,7 +186,7 @@ class StrategyTazik : KoinComponent {
         }
 
         // запустить таймер
-        GlobalScope.launch(Dispatchers.Main) {
+        job = GlobalScope.launch(Dispatchers.Main) {
             val hours = Integer.parseInt(dayTime[0])
             val minutes = Integer.parseInt(dayTime[1])
             val seconds = Integer.parseInt(dayTime[2])
@@ -254,6 +252,7 @@ class StrategyTazik : KoinComponent {
     }
 
     fun stopStrategy() {
+        job?.cancel()
         started = false
         stocksBuyed.clear()
     }

@@ -14,10 +14,7 @@ import android.widget.Toast
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Strategy1000Sell
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import okhttp3.internal.notify
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -36,6 +33,7 @@ class Strategy1000SellService : Service() {
     private var isServiceRunning = false
     private lateinit var schedulePurchaseTime: Calendar
     private var notificationButtonReceiver: BroadcastReceiver? = null
+    var job: Job? = null
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -74,6 +72,7 @@ class Strategy1000SellService : Service() {
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
+        job?.cancel()
         super.onDestroy()
     }
 
@@ -95,7 +94,7 @@ class Strategy1000SellService : Service() {
         val seconds = 0
         val milliseconds = 100
 
-        GlobalScope.launch(Dispatchers.Main) {
+        job = GlobalScope.launch(Dispatchers.Main) {
             schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
             schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
             schedulePurchaseTime.set(Calendar.HOUR_OF_DAY, hours)

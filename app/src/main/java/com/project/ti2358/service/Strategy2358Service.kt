@@ -10,10 +10,7 @@ import android.os.PowerManager
 import android.widget.Toast
 import com.project.ti2358.data.manager.Strategy2358
 import com.project.ti2358.data.manager.SettingsManager
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import okhttp3.internal.notify
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -33,6 +30,8 @@ class Strategy2358Service : Service() {
     private var isServiceRunning = false
     private lateinit var schedulePurchaseTime: Calendar
     private var notificationButtonReceiver: BroadcastReceiver? = null
+
+    var job: Job? = null
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -68,6 +67,7 @@ class Strategy2358Service : Service() {
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
+        job?.cancel()
         super.onDestroy()
     }
 
@@ -88,7 +88,7 @@ class Strategy2358Service : Service() {
             return
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        job = GlobalScope.launch(Dispatchers.Main) {
             val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
 
             val hours = parseInt(dayTime[0])
