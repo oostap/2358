@@ -186,6 +186,7 @@ class StrategyTazik : KoinComponent {
         }
 
         // запустить таймер
+        job?.cancel()
         job = GlobalScope.launch(Dispatchers.Main) {
             val hours = Integer.parseInt(dayTime[0])
             val minutes = Integer.parseInt(dayTime[1])
@@ -200,14 +201,9 @@ class StrategyTazik : KoinComponent {
                 it.add(Calendar.HOUR_OF_DAY, differenceHours)
 
                 val now = Calendar.getInstance(TimeZone.getDefault())
-                var scheduleDelay = it.timeInMillis - now.timeInMillis
+                val scheduleDelay = it.timeInMillis - now.timeInMillis
                 if (scheduleDelay < 0) {
-                    it.add(Calendar.DAY_OF_MONTH, 1)
-                    scheduleDelay = it.timeInMillis - now.timeInMillis
-                }
-
-                if (scheduleDelay < 0) {
-                    startStrategy()
+                    Utils.showToastAlert("Ошибка! Отрицательное время!? втф = $time")
                     return@launch
                 }
 
@@ -219,7 +215,7 @@ class StrategyTazik : KoinComponent {
         GlobalScope.launch(Dispatchers.Main) {
             while (!started) {
                 fixPrice()
-                delay(1 * 1000 * 3)
+                delay(1 * 1000 * 2)
             }
         }
     }

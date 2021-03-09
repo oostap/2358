@@ -2,6 +2,13 @@ package com.project.ti2358.data.manager
 
 import com.project.ti2358.BuildConfig
 import com.project.ti2358.data.service.*
+import com.project.ti2358.service.log
+import com.project.ti2358.service.toDollar
+import com.project.ti2358.service.toPercent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.component.KoinApiExtension
