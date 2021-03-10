@@ -10,6 +10,7 @@
     <string name="button_sell">Продать</string>
     <string name="update">Обновить</string>
     <string name="sort">Сортировка</string>
+    <string name="orders">Заявки</string>
     <string name="service_1728_reset">Рестарт</string>
     <string name="title_hour_1">1 час</string>
     <string name="title_hour_2">2 часа</string>
@@ -25,6 +26,9 @@
     <string name="start_now">СТАРТ СЕЙЧАС</string>
     <string name="start_later">СТАРТ ПОЗЖЕ</string>
 
+    <string name="cancel_all">Отменить все</string>
+    <string name="cancel">ОТМЕНА</string>
+
     <string name="prepare_start_2358_text">Запуск таймера на покупку: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
     <string name="prepare_start_1000_sell_text">Запуск таймера на продажу: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
     <string name="prepare_start_1000_buy_text">Запуск таймера на покупку: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
@@ -39,6 +43,7 @@
     <string name="menu_settings">Настройки</string>
     <string name="menu_diagnostics">Диагностика</string>
     <string name="menu_portfolio">Депозит</string>
+    <string name="menu_orders">Заявки</string>
     <string name="menu_premarket">Премаркет RU</string>
     <string name="menu_postmarket">Постмаркет US</string>
     <string name="menu_1000_sell">1000 sell</string>

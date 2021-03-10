@@ -31,17 +31,17 @@
             android:layout_marginRight="5dp"
             android:text="@string/update"
             android:layout_weight="1"
-            android:textSize="16dp"
+            android:textSize="14sp"
             android:layout_width="0dp" />
 
         <Button
             android:layout_height="70dp"
             android:layout_width="0dp"
-            android:id="@+id/buttonOrders"
+            android:id="@+id/buttonCancel"
             android:layout_marginLeft="5dp"
-            android:text="@string/orders"
+            android:text="@string/cancel_all"
             android:layout_weight="1"
-            android:textSize="16dp" />
+            android:textSize="14sp" />
 
     </LinearLayout>
 </RelativeLayout>

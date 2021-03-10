@@ -54,10 +54,8 @@ class StockManager : KoinComponent {
             }
 
             val key = "all_instruments"
-
-            val gson = GsonBuilder().create()
             val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
-            val jsonInstruments = preferences.getString(key, null)
+            var jsonInstruments = preferences.getString(key, null)
             if (jsonInstruments != null) {
                 val itemType = object : TypeToken<List<MarketInstrument>>() {}.type
                 instrumentsAll = synchronizedList(gson.fromJson(jsonInstruments, itemType))
@@ -74,7 +72,7 @@ class StockManager : KoinComponent {
                 try {
                     instrumentsAll = synchronizedList(marketService.stocks().instruments as MutableList<MarketInstrument>)
 
-                    val jsonInstruments = gson.toJson(instrumentsAll)
+                    jsonInstruments = gson.toJson(instrumentsAll)
                     val editor: SharedPreferences.Editor = preferences.edit()
                     editor.putString(key, jsonInstruments)
                     editor.apply()
@@ -100,7 +98,8 @@ class StockManager : KoinComponent {
         "ENDP" to "эндо",
         "GTHX" to "перч|тварь",
         "AIMT" to "арахис",
-        "SAVE" to "спирит|жёлтый",
+        "SAVE" to "спирит жёлтый",
+        "SPR" to "спирит синий",
         "SWN" to "свин",
     )
 

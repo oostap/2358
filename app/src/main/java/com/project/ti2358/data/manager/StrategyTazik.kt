@@ -30,8 +30,6 @@ class StrategyTazik : KoinComponent {
     var started: Boolean = false
 
     var scheduledStartTime: Calendar? = null
-    var job: Job? = null
-
     var currentSort: Sorting = Sorting.DESCENDING
     private val gson = Gson()
 
@@ -123,8 +121,8 @@ class StrategyTazik : KoinComponent {
     fun getNotificationTitle(): String {
         if (started) return "Внимание! Работает автотазик!"
 
-        return if (scheduledStartTime == null) {
-            "Старт тазика через ???"
+        if (scheduledStartTime == null) {
+            return "Старт тазика через ???"
         } else {
             val now = Calendar.getInstance(TimeZone.getDefault())
             val current = scheduledStartTime?.timeInMillis ?: 0
@@ -135,7 +133,13 @@ class StrategyTazik : KoinComponent {
             val minutes = (allSeconds - hours * 3600) / 60
             val seconds = allSeconds % 60
 
-            "Старт тазика через %02d:%02d:%02d".format(hours, minutes, seconds)
+            if (hours + minutes + seconds <= 0) {
+                startStrategy()
+            } else {
+                fixPrice()
+            }
+
+            return "Старт тазика через %02d:%02d:%02d".format(hours, minutes, seconds)
         }
     }
 
@@ -185,37 +189,22 @@ class StrategyTazik : KoinComponent {
             return
         }
 
-        // запустить таймер
-        job?.cancel()
-        job = GlobalScope.launch(Dispatchers.Main) {
-            val hours = Integer.parseInt(dayTime[0])
-            val minutes = Integer.parseInt(dayTime[1])
-            val seconds = Integer.parseInt(dayTime[2])
+        val hours = Integer.parseInt(dayTime[0])
+        val minutes = Integer.parseInt(dayTime[1])
+        val seconds = Integer.parseInt(dayTime[2])
 
-            scheduledStartTime = Calendar.getInstance(TimeZone.getDefault())
-            scheduledStartTime?.let {
-                it.add(Calendar.HOUR_OF_DAY, -differenceHours)
-                it.set(Calendar.HOUR_OF_DAY, hours)
-                it.set(Calendar.MINUTE, minutes)
-                it.set(Calendar.SECOND, seconds)
-                it.add(Calendar.HOUR_OF_DAY, differenceHours)
+        scheduledStartTime = Calendar.getInstance(TimeZone.getDefault())
+        scheduledStartTime?.let {
+            it.add(Calendar.HOUR_OF_DAY, -differenceHours)
+            it.set(Calendar.HOUR_OF_DAY, hours)
+            it.set(Calendar.MINUTE, minutes)
+            it.set(Calendar.SECOND, seconds)
+            it.add(Calendar.HOUR_OF_DAY, differenceHours)
 
-                val now = Calendar.getInstance(TimeZone.getDefault())
-                val scheduleDelay = it.timeInMillis - now.timeInMillis
-                if (scheduleDelay < 0) {
-                    Utils.showToastAlert("Ошибка! Отрицательное время!? втф = $time")
-                    return@launch
-                }
-
-                delay(scheduleDelay)
-                startStrategy()
-            }
-        }
-
-        GlobalScope.launch(Dispatchers.Main) {
-            while (!started) {
-                fixPrice()
-                delay(1 * 1000 * 2)
+            val now = Calendar.getInstance(TimeZone.getDefault())
+            val scheduleDelay = it.timeInMillis - now.timeInMillis
+            if (scheduleDelay < 0) {
+                Utils.showToastAlert("Ошибка! Отрицательное время!? втф = $scheduleDelay")
             }
         }
     }
@@ -248,7 +237,6 @@ class StrategyTazik : KoinComponent {
     }
 
     fun stopStrategy() {
-        job?.cancel()
         started = false
         stocksBuyed.clear()
     }

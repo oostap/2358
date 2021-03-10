@@ -31,6 +31,9 @@ class Strategy2358Service : Service() {
     private lateinit var schedulePurchaseTime: Calendar
     private var notificationButtonReceiver: BroadcastReceiver? = null
 
+    var title: String = ""
+    var updateTitle: Boolean = true
+
     var job: Job? = null
 
     override fun onBind(intent: Intent): IBinder? {
@@ -88,45 +91,34 @@ class Strategy2358Service : Service() {
             return
         }
 
-        job = GlobalScope.launch(Dispatchers.Main) {
-            val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
+        val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
 
-            val hours = parseInt(dayTime[0])
-            val minutes = parseInt(dayTime[1])
-            val seconds = parseInt(dayTime[2])
+        val hours = parseInt(dayTime[0])
+        val minutes = parseInt(dayTime[1])
+        val seconds = parseInt(dayTime[2])
 
-            schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
-            schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
-            schedulePurchaseTime.set(Calendar.HOUR_OF_DAY, hours)
-            schedulePurchaseTime.set(Calendar.MINUTE, minutes)
-            schedulePurchaseTime.set(Calendar.SECOND, seconds)
-            schedulePurchaseTime.set(Calendar.MILLISECOND, 0)
-            schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, differenceHours)
+        schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
+        schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
+        schedulePurchaseTime.set(Calendar.HOUR_OF_DAY, hours)
+        schedulePurchaseTime.set(Calendar.MINUTE, minutes)
+        schedulePurchaseTime.set(Calendar.SECOND, seconds)
+        schedulePurchaseTime.set(Calendar.MILLISECOND, 0)
+        schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, differenceHours)
 
-            val now = Calendar.getInstance(TimeZone.getDefault())
-            var scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
-            if (scheduleDelay < 0) {
-                schedulePurchaseTime.add(Calendar.DAY_OF_MONTH, 1)
-                scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
-            }
-
-            if (scheduleDelay < 0) {
-                stopService()
-                return@launch
-            }
-
-            delay(scheduleDelay)
-            val localPurchases = strategy2358.getPurchaseStock(false)
-            for (purchase in localPurchases) {
-                if (SettingsManager.is2358ChainProfit()) {
-                    purchase.buyLimitFromAsk2358WithChainTakeProfit()
-                } else {
-                    purchase.buyFromAsk2358WithTrailingTakeProfit()
-                }
-            }
+        val now = Calendar.getInstance(TimeZone.getDefault())
+        var scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
+        if (scheduleDelay < 0) {
+            schedulePurchaseTime.add(Calendar.DAY_OF_MONTH, 1)
+            scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        if (scheduleDelay < 0) {
+            stopService()
+            return
+        }
+
+        updateTitle = true
+        job = GlobalScope.launch(Dispatchers.Main) {
             while (isServiceRunning) {
                 val delaySeconds = updateNotification()
                 delay(1 * 1000 * delaySeconds)
@@ -159,10 +151,17 @@ class Strategy2358Service : Service() {
         val minutes = (allSeconds - hours * 3600) / 60
         val seconds = allSeconds % 60
 
-        val title = if (scheduleDelay > 0) {
-            "Покупка через %02d:%02d:%02d".format(hours, minutes, seconds)
-        } else {
-            "Покупка!"
+        if (updateTitle) {
+            title = if (scheduleDelay > 0) {
+                "Покупка через %02d:%02d:%02d".format(hours, minutes, seconds)
+            } else {
+                "Покупка!"
+            }
+
+            if (hours + minutes + seconds <= 0) {
+                strategy2358.startStrategy()
+                updateTitle = false
+            }
         }
 
         val shortText: String = strategy2358.getNotificationTextShort()

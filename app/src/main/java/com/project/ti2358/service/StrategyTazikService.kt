@@ -106,6 +106,6 @@ class StrategyTazikService : Service() {
             manager.notify(NOTIFICATION_ID, notification)
         }
 
-        return 5
+        return 1
     }
 }

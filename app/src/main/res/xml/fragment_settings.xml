@@ -231,7 +231,7 @@
             app:key="@string/setting_key_tazik_times2"
             app:title="@string/stocks_tazik_times"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="06:59:50,09:59:50,11:59:50"/>
+            app:defaultValue="06:59:55,09:59:55,11:59:55,15:29:55"/>
 
     </PreferenceCategory>
 

@@ -13,6 +13,7 @@ class Strategy2358() : KoinComponent {
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
+    var started: Boolean = false
 
     fun process(): MutableList<Stock> {
         val all = stockManager.stocksStream
@@ -54,6 +55,8 @@ class Strategy2358() : KoinComponent {
 
     fun getPurchaseStock(reset: Boolean): MutableList<PurchaseStock> {
         process()
+
+        if (reset) started = false
 
         // удалить бумаги, которые перестали удовлетворять условию 2358
         stocksSelected.removeAll { !stocks.contains(it) }
@@ -155,5 +158,19 @@ class Strategy2358() : KoinComponent {
         }
 
         return tickers
+    }
+
+    fun startStrategy() {
+        if (started) return
+        started = true
+
+        val localPurchases = getPurchaseStock(false)
+        for (purchase in localPurchases) {
+            if (SettingsManager.is2358ChainProfit()) {
+                purchase.buyLimitFromAsk2358WithChainTakeProfit()
+            } else {
+                purchase.buyFromAsk2358WithTrailingTakeProfit()
+            }
+        }
     }
 }

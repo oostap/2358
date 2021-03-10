@@ -44,7 +44,7 @@ class DepositManager : KoinComponent {
 
                     delay(500) // 1s
 
-                    orders = ordersService.orders(getActiveBrokerAccountId()) as MutableList<Order>
+                    refreshOrders()
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -77,10 +77,41 @@ class DepositManager : KoinComponent {
         return accounts.first().brokerAccountId
     }
 
+    suspend fun cancelOrder(order: Order): Boolean {
+        try {
+            ordersService.cancel(order.orderId, getActiveBrokerAccountId())
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return false
+    }
+
+    suspend fun cancelAllOrders() {
+        for (order in orders) {
+            try {
+                cancelOrder(order)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        refreshOrders()
+    }
+
+    suspend fun refreshOrders(): Boolean {
+        try {
+            if (accounts.isEmpty()) accounts = synchronizedList(portfolioService.accounts().accounts)
+            orders = ordersService.orders(getActiveBrokerAccountId()) as MutableList<Order>
+            baseSortOrders()
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return false
+    }
+
     suspend fun refreshDeposit(): Boolean {
         try {
             if (accounts.isEmpty()) accounts = synchronizedList(portfolioService.accounts().accounts)
-
             portfolioPositions = synchronizedList(portfolioService.portfolio(getActiveBrokerAccountId()).positions)
             baseSortPortfolio()
             return true
@@ -108,7 +139,7 @@ class DepositManager : KoinComponent {
     }
 
     public fun getPercentBusyInStocks(): Int {
-        var free = getFreeCashUSD()
+        val free = getFreeCashUSD()
         var busy = 0.0
 
         for (position in portfolioPositions) {
@@ -133,6 +164,16 @@ class DepositManager : KoinComponent {
         for (position in portfolioPositions) {
             if (position.stock == null) {
                 position.stock = stocksManager.getStockByFigi(position.figi)
+            }
+        }
+    }
+
+    private fun baseSortOrders() {
+        orders.sortByDescending { abs(it.requestedLots * it.price) }
+
+        for (order in orders) {
+            if (order.stock == null) {
+                order.stock = stocksManager.getStockByFigi(order.figi)
             }
         }
     }

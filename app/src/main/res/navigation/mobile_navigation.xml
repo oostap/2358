@@ -17,7 +17,18 @@
         android:id="@+id/nav_portfolio"
         android:name="com.project.ti2358.ui.portfolio.PortfolioFragment"
         android:label="@string/menu_portfolio"
-        tools:layout="@layout/fragment_portfolio_item_list" />
+        tools:layout="@layout/fragment_portfolio_item_list" >
+        <action
+            android:id="@+id/action_nav_portfolio_to_nav_orders"
+            app:destination="@id/nav_orders" />
+    </fragment>
+
+    <!-- заявки -->
+    <fragment
+        android:id="@+id/nav_orders"
+        android:name="com.project.ti2358.ui.orders.OrdersFragment"
+        android:label="@string/menu_orders"
+        tools:layout="@layout/fragment_orders_item_list" />
 
     <!-- премаркет РФ -->
     <fragment
