@@ -5,9 +5,8 @@ import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.project.ti2358.data.manager.SettingsManager
-import com.project.ti2358.data.model.dto.alor.AlorResponse
+import com.project.ti2358.data.model.dto.reports.ReportStock
 import com.project.ti2358.data.model.dto.yahoo.YahooResponse
-import com.project.ti2358.service.log
 import retrofit2.Retrofit
 import retrofit2.http.Url
 
@@ -31,4 +30,6 @@ class ThirdPartyService(
         val json = thirdPartyApi.alorRefreshToken(urlToken)
         return json["AccessToken"].toString().replace("\"", "")
     }
+
+    suspend fun daagerReports(): Map<String, ReportStock> = thirdPartyApi.daagerReports("https://tinvest.daager.ru/ostap-api/list.json")
 }

@@ -272,17 +272,19 @@ class StrategyTazik : KoinComponent {
             if (stocksBuyed.contains(stock)) return
 
             log("ПРОСАДКА: ПОКУПАЕМ!! ${stock.marketInstrument}")
+            val baseProfit = SettingsManager.getTazikTakeProfit()
             when {
                 SettingsManager.getTazikBuyAsk() -> { // покупка из аска
-                    purchase.buyLimitFromAsk(SettingsManager.getTazikTakeProfit())
+                    purchase.buyLimitFromAsk(baseProfit)
                 }
                 SettingsManager.getTazikBuyMarket() -> { // покупка по рынку
                     // примерна цена покупки (! средняя будет неизвестна из-за тинька !)
                     val priceBuy = stock.priceTazik - abs(stock.priceTazik / 100.0 * purchase.percentLimitPriceChange)
 
                     // ставим цену продажу относительно примрной средней
-                    val priceSell = priceBuy + priceBuy / 100.0 * SettingsManager.getTazikTakeProfit()
+                    var priceSell = priceBuy + priceBuy / 100.0 * baseProfit
 
+                    if (baseProfit == 0.0) priceSell = 0.0
                     purchase.buyMarket(priceSell)
                 }
                 else -> { // ставим лимитку
@@ -299,11 +301,12 @@ class StrategyTazik : KoinComponent {
                     val buyPrice = stock.priceTazik - abs(stock.priceTazik / 100.0 * percent)
 
                     // вычисляем процент профита после сдвига лимитки ниже
-                    val baseProfit = SettingsManager.getTazikTakeProfit()
 
                     // финальный профит
                     delta *= 0.70
-                    val finalProfit = baseProfit + abs(delta)
+                    var finalProfit = baseProfit + abs(delta)
+
+                    if (baseProfit == 0.0) finalProfit = 0.0
                     purchase.buyLimitFromBid(buyPrice, finalProfit)
                 }
             }

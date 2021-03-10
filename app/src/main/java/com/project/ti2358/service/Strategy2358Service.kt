@@ -118,7 +118,11 @@ class Strategy2358Service : Service() {
             delay(scheduleDelay)
             val localPurchases = strategy2358.getPurchaseStock(false)
             for (purchase in localPurchases) {
-                purchase.buyFromAsk2358WithTrailingTakeProfit()
+                if (SettingsManager.is2358ChainProfit()) {
+                    purchase.buyLimitFromAsk2358WithChainTakeProfit()
+                } else {
+                    purchase.buyFromAsk2358WithTrailingTakeProfit()
+                }
             }
         }
 

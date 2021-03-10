@@ -1,6 +1,7 @@
 package com.project.ti2358.data.api
 
 import com.google.gson.JsonObject
+import com.project.ti2358.data.model.dto.reports.ReportStock
 
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -12,4 +13,7 @@ interface ThirdPartyApi {
 
     @POST
     suspend fun alorRefreshToken(@Url url: String): JsonObject
+
+    @GET
+    suspend fun daagerReports(@Url url: String): Map<String, ReportStock>
 }

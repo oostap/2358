@@ -9,6 +9,7 @@ import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.MarketInstrument
+import com.project.ti2358.data.model.dto.reports.ReportStock
 import com.project.ti2358.data.model.dto.yahoo.YahooResponse
 import com.project.ti2358.data.service.MarketService
 import com.project.ti2358.data.service.StreamingAlorService
@@ -37,30 +38,38 @@ class StockManager : KoinComponent {
     private var instrumentsAll: MutableList<MarketInstrument> = mutableListOf()
     private var stocksAll: MutableList<Stock> = mutableListOf()
 
+    private var reportsStock: Map<String, ReportStock> = mutableMapOf()
     // все акции, которые участвуют в расчётах с учётом базовой сортировки из настроек
     var stocksStream: MutableList<Stock> = mutableListOf()
 
     private val gson = Gson()
 
     fun loadStocks(force: Boolean = false) {
-        val key = "all_instruments"
-
-        val gson = GsonBuilder().create()
-        val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
-        val jsonInstruments = preferences.getString(key, null)
-        if (jsonInstruments != null) {
-            val itemType = object : TypeToken<List<MarketInstrument>>() {}.type
-            instrumentsAll = synchronizedList(gson.fromJson(jsonInstruments, itemType))
-        }
-
-        if (instrumentsAll.isNotEmpty() && !force) {
-            afterLoadInstruments()
-            return
-        }
-
-        instrumentsAll.clear()
-
         GlobalScope.launch(Dispatchers.Main) {
+            try {
+                reportsStock = thirdPartyService.daagerReports()
+                log(reportsStock.toString())
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            val key = "all_instruments"
+
+            val gson = GsonBuilder().create()
+            val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
+            val jsonInstruments = preferences.getString(key, null)
+            if (jsonInstruments != null) {
+                val itemType = object : TypeToken<List<MarketInstrument>>() {}.type
+                instrumentsAll = synchronizedList(gson.fromJson(jsonInstruments, itemType))
+            }
+
+            if (instrumentsAll.isNotEmpty() && !force) {
+                afterLoadInstruments()
+                return@launch
+            }
+
+            instrumentsAll.clear()
+
             while (instrumentsAll.isEmpty()) {
                 try {
                     instrumentsAll = synchronizedList(marketService.stocks().instruments as MutableList<MarketInstrument>)
@@ -116,6 +125,8 @@ class StockManager : KoinComponent {
 
             stocksAll.add(Stock(instrument).apply {
                 alterName = alterNames[instrument.ticker] ?: ""
+                reportDate = reportsStock[instrument.ticker]?.report
+                dividendDate = reportsStock[instrument.ticker]?.dividend
             })
         }
         baseSortStocks()
@@ -163,6 +174,8 @@ class StockManager : KoinComponent {
                             from = Utils.getLastClosingDate(true, deltaDay) + zone
                             to = Utils.getLastClosingDate(false, deltaDay) + zone
                             delay(delay)
+
+                            if (deltaDay < 5) break
                             continue
                         }
 
@@ -174,7 +187,7 @@ class StockManager : KoinComponent {
                         log("close price $ticker $candle2359")
                     }
 
-                    stock.processCandle2359(candle2359)
+                    if (candle2359 != null) stock.processCandle2359(candle2359)
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
                 }
@@ -211,7 +224,6 @@ class StockManager : KoinComponent {
 
                     yahooResponse = thirdPartyService.yahooPostmarket(url)
                     if (yahooResponse != null) {
-
                         val data = gson.toJson(yahooResponse)
                         val editor: SharedPreferences.Editor = preferences.edit()
                         editor.putString(key, data)

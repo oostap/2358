@@ -71,7 +71,7 @@ class PortfolioFragment : Fragment() {
 
         GlobalScope.launch(Dispatchers.Main) {
             while (true) {
-                delay(1000)
+                delay(500)
                 if (depositManager.refreshDeposit()) {
                     adapterList.setData(depositManager.portfolioPositions)
                     depositManager.refreshKotleta()

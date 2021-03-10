@@ -21,17 +21,44 @@ class SettingsFragment : PreferenceFragmentCompat() {
     var tazikBidPreference: SwitchPreferenceCompat? = null
     var tazikMarketPreference: SwitchPreferenceCompat? = null
 
+    var strategy2358ChainPreference: SwitchPreferenceCompat? = null
+    var strategy2358TrailingPreference: SwitchPreferenceCompat? = null
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.fragment_settings, rootKey)
 
-        val tazikAskKey: String = getString(R.string.setting_key_tazik_buy_ask)
+        var chainProfit: String = getString(R.string.setting_key_2358_take_profit_chain)
+        strategy2358ChainPreference = findPreference(chainProfit)
+
+        val trailingStop = getString(R.string.setting_key_2358_trailing_take_profit)
+        strategy2358TrailingPreference = findPreference(trailingStop)
+
+        val listener2358 = Preference.OnPreferenceChangeListener { preference, newValue ->
+            if (newValue as Boolean) {
+                strategy2358ChainPreference?.isChecked = false
+                strategy2358TrailingPreference?.isChecked = false
+                true
+            } else {
+                if (preference.key == chainProfit) {
+                    false
+                } else {
+                    strategy2358ChainPreference?.isChecked = true
+                    true
+                }
+            }
+        }
+
+        strategy2358ChainPreference?.onPreferenceChangeListener = listener2358
+        strategy2358TrailingPreference?.onPreferenceChangeListener = listener2358
+
+        val tazikAskKey = getString(R.string.setting_key_tazik_buy_ask)
         tazikAskPreference = findPreference(tazikAskKey)
 
-        val tazikMarketKey: String = getString(R.string.setting_key_tazik_buy_market)
-        tazikMarketPreference = findPreference(tazikMarketKey)
+        var key = getString(R.string.setting_key_tazik_buy_market)
+        tazikMarketPreference = findPreference(key)
 
-        val tazikBidKey: String = getString(R.string.setting_key_tazik_buy_bid)
-        tazikBidPreference = findPreference(tazikBidKey)
+        key = getString(R.string.setting_key_tazik_buy_bid)
+        tazikBidPreference = findPreference(key)
 
         val listener = Preference.OnPreferenceChangeListener { preference, newValue ->
             if (newValue as Boolean) {

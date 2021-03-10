@@ -81,9 +81,15 @@
     <string name="stocks_2358_volume_min_cash">Объём в день от млрд. $</string>
     <string name="stocks_2358_purchase_volume">Общая сумма покупки в $</string>
     <string name="stocks_2358_purchase_time">Во сколько тарим? МСК</string>
+
+    <string name="stocks_2358_take_profit_chain">Продажа лесенкой</string>
     <string name="stocks_2358_take_profit_from">Заявка на продажу от в % (0 = не создавать)</string>
     <string name="stocks_2358_take_profit_to">Заявка на продажу до в % (0 = не создавать)</string>
     <string name="stocks_2358_take_profit_step">Количество заявок в равных долях</string>
+
+    <string name="stocks_2358_trailing_take_profit">Трейлинг тейк профит</string>
+    <string name="stocks_2358_trailing_take_profit_percent">Тейк профит в %</string>
+    <string name="stocks_2358_trailing_take_profit_percent_delta">Отклонение в %</string>
 
     <!-- 1000 sell settings -->
     <string name="stocks_1000_sell_take_profit">Базовый % заявки на продажу</string>
@@ -138,9 +144,15 @@
     <string name="setting_key_2358_volume_min_cash">2358_volume_min_cash</string>
     <string name="setting_key_2358_purchase_volume">2358_purchase_volume</string>
     <string name="setting_key_2358_purchase_time">2358_purchase_time</string>
+
+    <string name="setting_key_2358_take_profit_chain">2358_take_profit_chain</string>
     <string name="setting_key_2358_take_profit_from">2358_take_profit_from</string>
     <string name="setting_key_2358_take_profit_to">2358_take_profit_to</string>
     <string name="setting_key_2358_take_profit_step">2358_take_profit_step</string>
+
+    <string name="setting_key_2358_trailing_take_profit">2358_trailing_take_profit</string>
+    <string name="setting_key_2358_trailing_take_profit_percent">2358_trailing_take_profit_percent</string>
+    <string name="setting_key_2358_trailing_take_profit_percent_delta">2358_trailing_take_profit_percent_delta</string>
 
     <!-- 1000 sell settings -->
     <string name="setting_key_1000_sell_take_profit">1000_take_sell_profit</string>

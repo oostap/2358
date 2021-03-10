@@ -28,6 +28,9 @@ data class Stock(
     var marketInstrument: MarketInstrument
 ) : KoinComponent {
     var alterName: String = ""
+    var reportDate: String? = ""
+    var dividendDate: String? = ""
+
     val strategy1728: Strategy1728 by inject()
     val strategyTazik: StrategyTazik by inject()
     val strategyRocket: StrategyRocket by inject()
@@ -84,6 +87,19 @@ data class Stock(
     var minuteCandles: MutableList<Candle> = mutableListOf()
 
     private val gson = Gson()
+
+    fun getReportInfo(): String {
+        var info = ""
+        reportDate?.let {
+            info += "О: $reportDate "
+        }
+
+        dividendDate?.let {
+            info += "Д: $dividendDate"
+        }
+
+        return info
+    }
 
     fun processCandle(candle: Candle) {
         when (candle.interval) {

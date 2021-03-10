@@ -153,6 +153,9 @@ class Strategy2358StartFragment : Fragment() {
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.marketInstrument.ticker)
             }
+
+            holder.reportView.text = item.getReportInfo()
+            holder.reportView.setTextColor(Utils.RED)
         }
 
         override fun getItemCount(): Int = values.size
@@ -170,6 +173,8 @@ class Strategy2358StartFragment : Fragment() {
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
 
             val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
+
+            val reportView: TextView = view.findViewById(R.id.stock_report_info)
         }
     }
 }

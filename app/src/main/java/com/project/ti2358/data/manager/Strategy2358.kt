@@ -84,6 +84,9 @@ class Strategy2358() : KoinComponent {
                 if (p.stock.marketInstrument.ticker == stock.marketInstrument.ticker) {
                     purchase.percentProfitSellFrom = p.percentProfitSellFrom
                     purchase.percentProfitSellTo = p.percentProfitSellTo
+
+                    purchase.trailingStopActivationPercent = p.trailingStopActivationPercent
+                    purchase.trailingStopDelta = p.trailingStopDelta
                     exists = true
                     break
                 }
@@ -92,6 +95,9 @@ class Strategy2358() : KoinComponent {
             if (!exists) {
                 purchase.percentProfitSellFrom = SettingsManager.get2358TakeProfitFrom()
                 purchase.percentProfitSellTo = SettingsManager.get2358TakeProfitTo()
+
+                purchase.trailingStopActivationPercent = SettingsManager.get2358TrailingTakeProfitPercent()
+                purchase.trailingStopDelta = SettingsManager.get2358TrailingTakeProfitPercentDelta()
             }
 
             purchases.add(purchase)

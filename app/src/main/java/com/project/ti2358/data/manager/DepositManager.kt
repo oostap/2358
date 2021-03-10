@@ -34,7 +34,7 @@ class DepositManager : KoinComponent {
         GlobalScope.launch(Dispatchers.Main) {
             while (true) {
                 try {
-                    accounts = synchronizedList(portfolioService.accounts().accounts)
+                    if (accounts.isEmpty()) accounts = synchronizedList(portfolioService.accounts().accounts)
 
                     refreshDeposit()
 
@@ -79,6 +79,8 @@ class DepositManager : KoinComponent {
 
     suspend fun refreshDeposit(): Boolean {
         try {
+            if (accounts.isEmpty()) accounts = synchronizedList(portfolioService.accounts().accounts)
+
             portfolioPositions = synchronizedList(portfolioService.portfolio(getActiveBrokerAccountId()).positions)
             baseSortPortfolio()
             return true

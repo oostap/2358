@@ -120,21 +120,26 @@ class Strategy2358FinishFragment : Fragment() {
             holder.purchaseLotsView.text = "${item.lots} шт."
             holder.purchasePriceView.text = item.getPriceString()
 
-            refreshPercent(holder)
+            refreshPercent(holder, 0.0)
             holder.buttonPlus.setOnClickListener {
-                item.addPriceProfit2358Percent(0.05)
-                refreshPercent(holder)
+                refreshPercent(holder, 0.05)
             }
 
             holder.buttonMinus.setOnClickListener {
-                item.addPriceProfit2358Percent(-0.05)
-                refreshPercent(holder)
+                refreshPercent(holder, -0.05)
             }
         }
 
-        fun refreshPercent(holder: ViewHolder) {
-            holder.profitPriceFromView.text = holder.position.percentProfitSellFrom.toPercent()
-            holder.profitPriceToView.text = holder.position.percentProfitSellTo.toPercent()
+        fun refreshPercent(holder: ViewHolder, delta: Double) {
+            if (SettingsManager.is2358ChainProfit()) {
+                holder.position.addPriceProfit2358Percent(delta)
+                holder.profitPriceFromView.text = holder.position.percentProfitSellFrom.toPercent()
+                holder.profitPriceToView.text = holder.position.percentProfitSellTo.toPercent()
+            } else {
+                holder.position.addPriceProfit2358TrailingTakeProfit(delta)
+                holder.profitPriceFromView.text = holder.position.trailingStopActivationPercent.toPercent()
+                holder.profitPriceToView.text = holder.position.trailingStopDelta.toPercent()
+            }
         }
 
         override fun getItemCount(): Int = values.size

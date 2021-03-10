@@ -106,6 +106,11 @@ class SettingsManager {
             }
         }
 
+        fun is2358ChainProfit(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_take_profit_chain)
+            return preferences.getBoolean(key, true)
+        }
+
         fun get2358TakeProfitFrom(): Double {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_take_profit_from)
             val value: String? = preferences.getString(key, "1.0")
@@ -133,6 +138,31 @@ class SettingsManager {
                 parseInt(value ?: "1")
             } catch (e: Exception) {
                 1
+            }
+        }
+
+        fun is2358TrailingTakeProfit(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_trailing_take_profit)
+            return preferences.getBoolean(key, false)
+        }
+
+        fun get2358TrailingTakeProfitPercent(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_trailing_take_profit_percent)
+            val value: String? = preferences.getString(key, "1.0")
+            return try {
+                (value ?: "1.0").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun get2358TrailingTakeProfitPercentDelta(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_trailing_take_profit_percent_delta)
+            val value: String? = preferences.getString(key, "0.25")
+            return try {
+                (value ?: "0.25").toDouble()
+            } catch (e: Exception) {
+                0.25
             }
         }
 
