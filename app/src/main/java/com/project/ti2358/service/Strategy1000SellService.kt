@@ -33,6 +33,9 @@ class Strategy1000SellService : Service() {
     private var isServiceRunning = false
     private lateinit var schedulePurchaseTime: Calendar
     private var notificationButtonReceiver: BroadcastReceiver? = null
+
+    var title: String = ""
+    var updateTitle: Boolean = true
     var job: Job? = null
 
     override fun onBind(intent: Intent): IBinder? {
@@ -63,7 +66,7 @@ class Strategy1000SellService : Service() {
         val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION, "1000 Sell", "", "", "")
         startForeground(NOTIFICATION_ID, notification)
 
-        strategy1000Sell.startSell1000()
+        strategy1000Sell.prepareSell1000()
         scheduleSell()
     }
 
@@ -94,37 +97,31 @@ class Strategy1000SellService : Service() {
         val seconds = 0
         val milliseconds = 100
 
-        job = GlobalScope.launch(Dispatchers.Main) {
-            schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
-            schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
-            schedulePurchaseTime.set(Calendar.HOUR_OF_DAY, hours)
-            schedulePurchaseTime.set(Calendar.MINUTE, minutes)
-            schedulePurchaseTime.set(Calendar.SECOND, seconds)
-            schedulePurchaseTime.set(Calendar.MILLISECOND, milliseconds)
-            schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, differenceHours)
+        schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
+        schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
+        schedulePurchaseTime.set(Calendar.HOUR_OF_DAY, hours)
+        schedulePurchaseTime.set(Calendar.MINUTE, minutes)
+        schedulePurchaseTime.set(Calendar.SECOND, seconds)
+        schedulePurchaseTime.set(Calendar.MILLISECOND, milliseconds)
+        schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, differenceHours)
 
-            val now = Calendar.getInstance(TimeZone.getDefault())
-            var scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
-            if (scheduleDelay < 0) {
-                schedulePurchaseTime.add(Calendar.DAY_OF_MONTH, 1)
-                scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
-            }
-
-            if (scheduleDelay < 0) {
-                stopService()
-                return@launch
-            }
-
-            delay(scheduleDelay)
-            for (position in strategy1000Sell.positionsToSell1000) {
-                position.sell()
-            }
+        val now = Calendar.getInstance(TimeZone.getDefault())
+        var scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
+        if (scheduleDelay < 0) {
+            schedulePurchaseTime.add(Calendar.DAY_OF_MONTH, 1)
+            scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        if (scheduleDelay < 0) {
+            stopService()
+            return
+        }
+
+        job?.cancel()
+        job = GlobalScope.launch(Dispatchers.Main) {
             while (isServiceRunning) {
                 val delaySeconds: Long = updateNotification()
-                delay(1 * 1000 * delaySeconds)
+                delay(1 * 100 * delaySeconds)
             }
         }
     }
@@ -152,15 +149,22 @@ class Strategy1000SellService : Service() {
         val minutes = (allSeconds - hours * 3600) / 60
         val seconds = allSeconds % 60
 
-        val title = if (scheduleDelay > 0) {
-            "Продажа через %02d:%02d:%02d".format(hours, minutes, seconds)
-        } else {
-            "Продажа!"
+        if (updateTitle) {
+            title = if (scheduleDelay > 0) {
+                "Продажа через %02d:%02d:%02d".format(hours, minutes, seconds)
+            } else {
+                "Продажа!"
+            }
+
+            if (hours + minutes + seconds <= 0) {
+                strategy1000Sell.startStrategy1000Sell()
+                updateTitle = false
+            }
         }
 
-        val shortText: String = strategy1000Sell.getNotificationTextShort1000()
-        val longText: String = strategy1000Sell.getNotificationTextLong1000()
-        val longTitleText: String = "~" + strategy1000Sell.getTotalSellString1000() + " ="
+        val shortText: String = strategy1000Sell.getNotificationTextShort(strategy1000Sell.positionsToSell1000)
+        val longText: String = strategy1000Sell.getNotificationTextLong(strategy1000Sell.positionsToSell1000)
+        val longTitleText: String = "~" + strategy1000Sell.getTotalSellString(strategy1000Sell.positionsToSell1000) + " ="
 
         val notification = Utils.createNotification(
             this,
@@ -176,19 +180,19 @@ class Strategy1000SellService : Service() {
 
         when {
             hours > 1 -> {
-                return 10
+                return 100
             }
             minutes > 10 -> {
-                return 5
+                return 50
             }
             minutes > 1 -> {
-                return 2
+                return 20
             }
             minutes < 1 -> {
                 return 1
             }
         }
 
-        return 5
+        return 50
     }
 }

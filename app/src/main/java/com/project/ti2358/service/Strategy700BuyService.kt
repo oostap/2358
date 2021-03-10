@@ -1,19 +1,15 @@
 package com.project.ti2358.service
 
 import android.app.*
-import android.app.NotificationManager.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
-import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.widget.Toast
-import com.project.ti2358.MainActivity
-import com.project.ti2358.R
-import com.project.ti2358.data.manager.Strategy1000Sell
+import com.project.ti2358.data.manager.Strategy1000Buy
+import com.project.ti2358.data.manager.SettingsManager
 import kotlinx.coroutines.*
 import okhttp3.internal.notify
 import org.koin.android.ext.android.inject
@@ -21,13 +17,13 @@ import org.koin.core.component.KoinApiExtension
 import java.util.*
 
 @KoinApiExtension
-class Strategy700SellService : Service() {
+class Strategy700BuyService : Service() {
 
-    private val NOTIFICATION_CANCEL_ACTION = "event.700.sell"
-    private val NOTIFICATION_CHANNEL_ID = "700 SELL CHANNEL NOTIFICATION"
-    private val NOTIFICATION_ID = 7000
+    private val NOTIFICATION_CANCEL_ACTION = "event.700.buy"
+    private val NOTIFICATION_CHANNEL_ID = "700 BUY CHANNEL NOTIFICATION"
+    private val NOTIFICATION_ID = 17001
 
-    private val strategy1000Sell: Strategy1000Sell by inject()
+    private val strategy1000Buy: Strategy1000Buy by inject()
 
     private var wakeLock: PowerManager.WakeLock? = null
     private var isServiceRunning = false
@@ -52,7 +48,7 @@ class Strategy700SellService : Service() {
                         notificationButtonReceiver
                     )
                     notificationButtonReceiver = null
-                    context.stopService(Intent(context, Strategy700SellService::class.java))
+                    context.stopService(Intent(context, Strategy700BuyService::class.java))
                 }
             }
         }
@@ -63,15 +59,15 @@ class Strategy700SellService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION, "700 Sell", "", "", "")
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION, "700 buy","",  "", "")
         startForeground(NOTIFICATION_ID, notification)
 
-        strategy1000Sell.prepareSell700()
-        scheduleSell()
+        strategy1000Buy.prepareBuy700()
+        schedulePurchase()
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Продажа 700 sell отменена", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Покупка 700 Buy отменена", Toast.LENGTH_LONG).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -79,8 +75,8 @@ class Strategy700SellService : Service() {
         super.onDestroy()
     }
 
-    private fun scheduleSell() {
-        Toast.makeText(this, "Запущен таймер на продажу 700", Toast.LENGTH_LONG).show()
+    private fun schedulePurchase() {
+        Toast.makeText(this, "Запущен таймер на покупку 700", Toast.LENGTH_LONG).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
@@ -90,6 +86,13 @@ class Strategy700SellService : Service() {
         }
 
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
+
+        val time = SettingsManager.get2358PurchaseTime()
+        val dayTime = time.split(":").toTypedArray()
+        if (dayTime.size < 3) {
+            stopService()
+            return
+        }
 
         // 07:00:00.100
         val hours = 7
@@ -120,14 +123,14 @@ class Strategy700SellService : Service() {
         job?.cancel()
         job = GlobalScope.launch(Dispatchers.Main) {
             while (isServiceRunning) {
-                val delaySeconds: Long = updateNotification()
+                val delaySeconds = updateNotification()
                 delay(1 * 100 * delaySeconds)
             }
         }
     }
 
     private fun stopService() {
-        Toast.makeText(this, "700 sell остановлена", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "700 Buy остановлена", Toast.LENGTH_SHORT).show()
         try {
             wakeLock?.let {
                 if (it.isHeld) {
@@ -153,26 +156,24 @@ class Strategy700SellService : Service() {
 
         if (updateTitle) {
             title = if (scheduleDelay > 0) {
-                "Продажа через %02d:%02d:%02d".format(hours, minutes, seconds)
+                "Покупка через %02d:%02d:%02d".format(hours, minutes, seconds)
             } else {
-                "Продажа!"
+                "Покупка!"
             }
 
             if (hours + minutes + seconds <= 0) {
-                strategy1000Sell.startStrategy700Sell()
+                strategy1000Buy.startStrategy700Buy()
                 updateTitle = false
             }
         }
 
-        val shortText: String = strategy1000Sell.getNotificationTextShort(strategy1000Sell.positionsToSell700)
-        val longText: String = strategy1000Sell.getNotificationTextLong(strategy1000Sell.positionsToSell700)
-        val longTitleText: String = "~" + strategy1000Sell.getTotalSellString(strategy1000Sell.positionsToSell700) + " ="
+        val shortText: String = strategy1000Buy.getNotificationTextShort(strategy1000Buy.stocksToBuy700)
+        val longText: String = strategy1000Buy.getNotificationTextLong(strategy1000Buy.stocksToBuy700)
+        val longTitleText: String = "~" + strategy1000Buy.getTotalPurchaseString(strategy1000Buy.stocksToBuy700) + " ="
 
-        val notification = Utils.createNotification(
-            this,
+        val notification = Utils.createNotification(this,
             NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION,
-            title, shortText, longText, longTitleText
-        )
+            title, shortText, longText, longTitleText)
 
         synchronized(notification) {
             notification.notify()

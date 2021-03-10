@@ -93,6 +93,10 @@ class WorkflowManager() : KoinComponent {
                 return StrategyHour()
             }
 
+            fun provideStrategyReports(): StrategyReports {
+                return StrategyReports()
+            }
+
             single { provideStocksManager() }
             single { provideDepoManager() }
             single { provideWorkflowManager() }
@@ -109,6 +113,7 @@ class WorkflowManager() : KoinComponent {
             single { provideStrategyRocket() }
             single { provideStrategyTazik() }
             single { provideStrategyHour() }
+            single { provideStrategyReports() }
         }
 
         private val apiModule = module {

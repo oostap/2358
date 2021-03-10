@@ -33,7 +33,6 @@ class Strategy2358Service : Service() {
 
     var title: String = ""
     var updateTitle: Boolean = true
-
     var job: Job? = null
 
     override fun onBind(intent: Intent): IBinder? {

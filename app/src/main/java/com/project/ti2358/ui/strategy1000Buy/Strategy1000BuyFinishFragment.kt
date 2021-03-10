@@ -25,9 +25,10 @@ class Strategy1000BuyFinishFragment : Fragment() {
 
     val strategy1000Buy: Strategy1000Buy by inject()
     var adapterList: Item1005RecyclerViewAdapter = Item1005RecyclerViewAdapter(emptyList())
-    var infoTextView: TextView? = null
-    var buttonStart: Button? = null
     var positions: MutableList<PurchaseStock> = mutableListOf()
+    var infoTextView: TextView? = null
+    var buttonStart700: Button? = null
+    var buttonStart1000: Button? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,10 +55,27 @@ class Strategy1000BuyFinishFragment : Fragment() {
             }
         }
 
-        buttonStart = view.findViewById<Button>(R.id.buttonStart)
-        updateServiceButtonText()
-
-        buttonStart?.setOnClickListener {
+        ///////////////////////////////////////////////////////////////
+        buttonStart700 = view.findViewById(R.id.buttonStart700)
+        buttonStart700?.setOnClickListener {
+            if (SettingsManager.get1000BuyPurchaseVolume() <= 0) {
+                Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел 1000 buy.")
+            } else {
+                if (Utils.isServiceRunning(requireContext(), Strategy700BuyService::class.java)) {
+                    requireContext().stopService(Intent(context, Strategy700BuyService::class.java))
+                } else {
+                    if (strategy1000Buy.getTotalPurchasePieces() > 0) {
+                        Utils.startService(requireContext(), Strategy700BuyService::class.java)
+                    }
+                }
+            }
+            updateServiceButtonText700()
+        }
+        updateServiceButtonText700()
+        ///////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////
+        buttonStart1000 = view.findViewById(R.id.buttonStart1000)
+        buttonStart1000?.setOnClickListener {
             if (SettingsManager.get1000BuyPurchaseVolume() <= 0) {
                 Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел 1000 buy.")
             } else {
@@ -69,8 +87,10 @@ class Strategy1000BuyFinishFragment : Fragment() {
                     }
                 }
             }
-            updateServiceButtonText()
+            updateServiceButtonText1000()
         }
+        updateServiceButtonText1000()
+        ///////////////////////////////////////////////////////////////
 
         positions = strategy1000Buy.getPurchaseStock()
         adapterList.setData(positions)
@@ -82,22 +102,30 @@ class Strategy1000BuyFinishFragment : Fragment() {
     }
 
     fun updateInfoText() {
-        val time = "10:00:01"
+        val time = "07:00:00.100ms или 10:00:00.100ms"
 
         val prepareText: String = TheApplication.application.applicationContext.getString(R.string.prepare_start_1000_buy_text)
         infoTextView?.text = String.format(
             prepareText,
             time,
             positions.size,
-            strategy1000Buy.getTotalPurchaseString()
+            strategy1000Buy.getTotalPurchaseString(strategy1000Buy.stocksToBuy)
         )
     }
 
-    private fun updateServiceButtonText() {
-        if (Utils.isServiceRunning(requireContext(), Strategy1000BuyService::class.java)) {
-            buttonStart?.text = getString(R.string.service_2358_stop)
+    private fun updateServiceButtonText700() {
+        if (Utils.isServiceRunning(requireContext(), Strategy700BuyService::class.java)) {
+            buttonStart700?.text = getString(R.string.stop_sell_700)
         } else {
-            buttonStart?.text = getString(R.string.service_2358_start)
+            buttonStart700?.text = getString(R.string.start_sell_700)
+        }
+    }
+
+    private fun updateServiceButtonText1000() {
+        if (Utils.isServiceRunning(requireContext(), Strategy1000BuyService::class.java)) {
+            buttonStart1000?.text = getString(R.string.stop_sell_1000)
+        } else {
+            buttonStart1000?.text = getString(R.string.start_sell_1000)
         }
     }
 

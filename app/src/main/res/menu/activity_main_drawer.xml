@@ -52,6 +52,11 @@
             android:title="@string/menu_hour" />
 
         <item
+            android:id="@+id/nav_reports"
+            android:icon="@drawable/ic_stocks"
+            android:title="@string/menu_reports" />
+
+        <item
             android:id="@+id/nav_diagnostics"
             android:icon="@drawable/ic_settings"
             android:title="@string/menu_diagnostics" />

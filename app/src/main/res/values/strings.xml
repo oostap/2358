@@ -44,6 +44,8 @@
     <string name="menu_diagnostics">Диагностика</string>
     <string name="menu_portfolio">Депозит</string>
     <string name="menu_orders">Заявки</string>
+    <string name="menu_reports">Отчёты</string>
+    <string name="menu_reports_and_divs">Отчёты и дивиденды</string>
     <string name="menu_premarket">Премаркет RU</string>
     <string name="menu_postmarket">Постмаркет US</string>
     <string name="menu_1000_sell">1000 sell</string>

@@ -3,6 +3,7 @@ package com.project.ti2358
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
+import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -81,13 +82,21 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_1830_start,
                 R.id.nav_rocket_start,
                 R.id.nav_hour_start,
-                R.id.nav_diagnostics
+                R.id.nav_reports,
+                R.id.nav_diagnostics,
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
         workflowManager.startApp()
+        this.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
+        drawerLayout.requestFocus()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

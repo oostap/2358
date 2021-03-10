@@ -18,6 +18,9 @@ class Strategy1000Sell() : KoinComponent {
     var positionsToSell700: MutableList<PurchaseStock> = mutableListOf()
     var positionsToSell1000: MutableList<PurchaseStock> = mutableListOf()
 
+    var started700: Boolean = false
+    var started1000: Boolean = false
+
     fun process(): MutableList<PortfolioPosition> {
         positions = depositManager.portfolioPositions
         positions.sortByDescending { abs(it.lots * it.getAveragePrice()) }
@@ -67,27 +70,27 @@ class Strategy1000Sell() : KoinComponent {
         return value.toDollar()
     }
 
-    fun getTotalSellString1000(): String {
+    fun getTotalSellString(positions: MutableList<PurchaseStock>): String {
         var value = 0.0
-        for (position in positionsToSell1000) {
+        for (position in positions) {
             value += position.getProfitPriceForSell() * position.position.balance
         }
         return value.toDollar()
     }
 
-    fun getNotificationTextShort1000(): String {
-        val price = getTotalSellString1000()
+    fun getNotificationTextShort(positions: MutableList<PurchaseStock>): String {
+        val price = getTotalSellString(positions)
         var tickers = ""
-        for (position in positionsToSell1000) {
+        for (position in positions) {
             tickers += "${position.position.lots}*${position.position.ticker} "
         }
 
         return "$price:\n$tickers"
     }
 
-    fun getNotificationTextLong1000(): String {
+    fun getNotificationTextLong(positions: MutableList<PurchaseStock>): String {
         var tickers = ""
-        for (position in positionsToSell1000) {
+        for (position in positions) {
             val p = "%.1f$ > %.2f$ > %.1f%%".format(position.position.lots * position.getProfitPriceForSell(), position.getProfitPriceForSell(), position.percentProfitSellFrom)
             tickers += "${position.position.ticker} * ${position.position.lots} = $p ${position.getStatusString()}\n"
         }
@@ -95,39 +98,29 @@ class Strategy1000Sell() : KoinComponent {
         return tickers
     }
 
-    fun getTotalSellString700(): String {
-        var value = 0.0
-        for (position in positionsToSell700) {
-            value += position.getProfitPriceForSell() * position.position.balance
-        }
-        return value.toDollar()
-    }
-
-    fun getNotificationTextShort700(): String {
-        val price = getTotalSellString700()
-        var tickers = ""
-        for (position in positionsToSell700) {
-            tickers += "${position.position.lots}*${position.position.ticker} "
-        }
-
-        return "$price:\n$tickers"
-    }
-
-    fun getNotificationTextLong700(): String {
-        var tickers = ""
-        for (position in positionsToSell700) {
-            val p = "%.1f$ > %.2f$ > %.1f%%".format(position.position.lots * position.getProfitPriceForSell(), position.getProfitPriceForSell(), position.percentProfitSellFrom)
-            tickers += "${position.position.ticker} * ${position.position.lots} = $p ${position.getStatusString()}\n"
-        }
-
-        return tickers
-    }
-
-    fun startSell700() {
+    fun prepareSell700() {
+        started700 = false
         positionsToSell700 = positionsToSell
     }
 
-    fun startSell1000() {
+    fun prepareSell1000() {
+        started1000 = false
         positionsToSell1000 = positionsToSell
+    }
+
+    fun startStrategy700Sell() {
+        if (started700) return
+        started700 = true
+        for (position in positionsToSell700) {
+            position.sell()
+        }
+    }
+
+    fun startStrategy1000Sell() {
+        if (started1000) return
+        started1000 = true
+        for (position in positionsToSell1000) {
+            position.sell()
+        }
     }
 }

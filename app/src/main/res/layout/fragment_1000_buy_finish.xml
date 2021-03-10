@@ -14,15 +14,6 @@
         tools:context=".ui.strategy2358.Strategy2358FinishFragment"
         tools:listitem="@layout/fragment_2358_finish_item" />
 
-    <Button android:layout_width="fill_parent"
-        android:layout_height="70dp"
-        android:id="@+id/buttonStart"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:text="@string/service_2358_start"
-        android:textSize="20dp"
-        android:layout_alignParentBottom="true" />
-
     <TextView
         android:id="@+id/info_text"
         android:layout_width="fill_parent"
@@ -34,5 +25,34 @@
         android:text="Запуск таймера на покупку: \nВремя МСК: 2358: \nБумаг: 5\nСумма: ~1000$"
         android:textSize="16sp"
         android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_alignParentBottom="true"
+        android:weightSum="2" >
+
+        <Button
+            android:layout_height="70dp"
+            android:id="@+id/buttonStart700"
+            android:layout_marginRight="5dp"
+            android:text="@string/start_sell_700"
+            android:layout_weight="1"
+            android:textSize="16dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="70dp"
+            android:layout_width="0dp"
+            android:id="@+id/buttonStart1000"
+            android:layout_marginLeft="5dp"
+            android:text="@string/start_sell_1000"
+            android:layout_weight="1"
+            android:textSize="16dp" />
+
+    </LinearLayout>
 
 </RelativeLayout>

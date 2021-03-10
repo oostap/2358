@@ -129,7 +129,7 @@ data class Stock(
         val diffInHours: Long = TimeUnit.MILLISECONDS.toHours(diffInMilli)
 
         if (diffInHours > 29) {
-            log(candle.toString())
+            log(candle.toString() + marketInstrument.ticker)
             return
         }
 
