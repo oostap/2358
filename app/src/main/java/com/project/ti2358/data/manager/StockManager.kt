@@ -220,9 +220,7 @@ class StockManager : KoinComponent {
                 }
 
                 if (yahooResponse == null) {
-                    val url = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=price"
-
-                    yahooResponse = thirdPartyService.yahooPostmarket(url)
+                    yahooResponse = thirdPartyService.yahooPostmarket(ticker)
                     if (yahooResponse != null) {
                         val data = gson.toJson(yahooResponse)
                         val editor: SharedPreferences.Editor = preferences.edit()
@@ -230,7 +228,7 @@ class StockManager : KoinComponent {
                         editor.apply()
                     }
 
-                    log("yahoo $yahooResponse $url")
+                    log("yahoo $yahooResponse $ticker")
                     delay = kotlin.random.Random.Default.nextLong(200, 300)
                 }
 

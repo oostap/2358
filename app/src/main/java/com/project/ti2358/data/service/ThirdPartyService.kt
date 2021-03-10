@@ -16,7 +16,8 @@ class ThirdPartyService(
     private val gson = Gson()
     private val thirdPartyApi: ThirdPartyApi = retrofit.create(ThirdPartyApi::class.java)
 
-    suspend fun yahooPostmarket(@Url url: String): YahooResponse? {
+    suspend fun yahooPostmarket(ticker: String): YahooResponse? {
+        val url = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=price"
         val json = thirdPartyApi.yahooPostmarket(url)
         val summary = json["quoteSummary"] as JsonObject
         val result = summary["result"] as JsonArray

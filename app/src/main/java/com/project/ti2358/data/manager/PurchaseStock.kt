@@ -621,54 +621,11 @@ data class PurchaseStock(
                 }
 
                 // запускаем трейлинг стоп
-                var currentTakeProfitValue = 0.0
-
-                var currentPrice = buyPrice
-                var profitSellPrice = 0.0
-                log("TRAILING_STOP покупка по $buyPrice, активация на $trailingStopActivationPercent%, стоп $trailingStopDelta%")
-
-                while (true) {
-                    delay(DelayFast)
-                    status = OrderStatus.ORDER_SELL_TRAILING
-
-                    val change = currentPrice - stock.getPriceDouble()
-
-                    currentPrice = stock.getPriceDouble()
-                    val currentDeltaPercent = (100 * currentPrice) / buyPrice - 100
-                    log("TRAILING_STOP изменение: $buyPrice + $change -> ${currentPrice.toDollar()} = ${currentDeltaPercent.toPercent()}")
-                    // активация тейкпрофита, виртуальная лимитка на -trailingStopDelta %
-                    if (currentTakeProfitValue == 0.0) {
-                        if (currentDeltaPercent >= trailingStopActivationPercent) {
-                            currentTakeProfitValue = currentPrice - currentPrice / 100.0 * trailingStopDelta
-                            log("TRAILING_STOP активация тейкпрофита, цена = ${currentTakeProfitValue.toDollar()}")
-                        }
-                    } else { // если тейк активирован
-                        // если текущая цена больше тейкпрофита, то переместить лимитку выше
-                        if (currentPrice > currentTakeProfitValue) {
-                            val newTake = currentPrice - currentPrice / 100.0 * trailingStopDelta
-                            if (newTake >= currentTakeProfitValue) {
-                                currentTakeProfitValue = newTake
-                                log("TRAILING_STOP поднимаем выше тейкпрофит, цена = ${currentTakeProfitValue.toDollar()}")
-                            } else {
-                                log("TRAILING_STOP не меняем тейкпрофит, цена = ${currentTakeProfitValue.toDollar()}")
-                            }
-                        }
-
-                        // если текущая цена ниже тейкпрофита, то выставить лимитку по этой цене
-                        if (currentPrice <= currentTakeProfitValue) {
-                            log("TRAILING_STOP продаём по цене ${currentPrice.toDollar()}, профит ${currentDeltaPercent.toPercent()}")
-
-                            profitSellPrice = if (currentDeltaPercent < trailingStopActivationPercent) {
-                                buyPrice + buyPrice / 100.0 * trailingStopActivationPercent // если скачок ниже базового, то тейк на базовый
-                            } else {
-                                currentPrice                                                // иначе по текущей
-                            }
-                            break
-                        }
-                    }
-                }
-
+                val trailing = TrailingTakeProfit(stock, buyPrice, trailingStopActivationPercent, trailingStopDelta)
+                status = OrderStatus.ORDER_SELL_TRAILING
+                var profitSellPrice = trailing.process()
                 status = OrderStatus.ORDER_SELL_PREPARE
+                if (profitSellPrice == 0.0) return@launch
 
                 // выставить ордер на продажу
                 while (true) {
