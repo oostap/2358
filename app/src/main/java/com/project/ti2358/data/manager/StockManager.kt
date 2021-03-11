@@ -101,6 +101,7 @@ class StockManager : KoinComponent {
         "SAVE" to "спирит жёлтый",
         "SPR" to "спирит синий",
         "SWN" to "свин",
+        "SRPT" to "сергей копытов",
     )
 
     private fun afterLoadInstruments() {
