@@ -90,17 +90,6 @@ class Strategy1728FinishFragment : Fragment() {
         return view
     }
 
-    private fun isServiceRunning(serviceClass: Class<*>): Boolean {
-        val context = requireContext()
-        val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager?
-        for (service in manager!!.getRunningServices(Int.MAX_VALUE)) {
-            if (serviceClass.name == service.service.className) {
-                return true
-            }
-        }
-        return false
-    }
-
     class Item1728RecyclerViewAdapter(
         private var values: List<PurchaseStock>
     ) : RecyclerView.Adapter<Item1728RecyclerViewAdapter.ViewHolder>() {

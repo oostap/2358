@@ -96,6 +96,19 @@ class Utils {
             alertDialog.show()
         }
 
+        fun showUpdateAlert(context: Context, from: String, to: String) {
+            val alertDialogBuilder = AlertDialog.Builder(context)
+            val alertDialog = alertDialogBuilder.create()
+            alertDialog.setTitle("Новая версия!")
+            alertDialog.setMessage("Хотите обновиться? \n$from >>> $to")
+            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "ДА!") { dialog, _ ->
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/oostap/2358/releases/latest"))
+                context.startActivity(browserIntent)
+                dialog.cancel() }
+            alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "НЕТ.") { dialog, _ -> dialog.cancel() }
+            alertDialog.show()
+        }
+
         fun openTinkoffForTicker(context: Context, ticker: String) {
             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tinkoff.ru/invest/stocks/$ticker/"))
             context.startActivity(browserIntent)
@@ -362,47 +375,39 @@ class Utils {
         }
 
         fun convertIntervalToSeconds(interval: Interval): Int {
-            when (interval) {
-                Interval.MINUTE -> {
-                    return 60
-                }
-                Interval.HOUR -> {
-                    return 60 * 60
-                }
-                Interval.TWO_HOURS -> {
-                    return 60 * 60 * 2
-                }
-                Interval.DAY -> {
-                    return 60 * 60 * 24
-                }
-                Interval.WEEK -> {
-                    return 60 * 60 * 24 * 7
-                }
+            return when (interval) {
+                Interval.MINUTE -> 60
+                Interval.HOUR -> 60 * 60
+                Interval.TWO_HOURS -> 60 * 60 * 2
+                Interval.DAY -> 60 * 60 * 24
+                Interval.WEEK -> 60 * 60 * 24 * 7
+                Interval.TWO_MINUTES -> 60 * 2
+                Interval.THREE_MINUTES -> 60 * 3
+                Interval.FIVE_MINUTES -> 60 * 5
+                Interval.TEN_MINUTES -> 60 * 10
+                Interval.FIFTEEN_MINUTES -> 60 * 15
+                Interval.THIRTY_MINUTES -> 60 * 30
+                Interval.FOUR_HOURS -> 60 * 60 * 5
+                Interval.MONTH -> 60 * 60 * 24 * 30
             }
-
-            return 60
         }
 
         fun convertIntervalToString(interval: Interval): String {
-            when (interval) {
-                Interval.MINUTE -> {
-                    return "1min"
-                }
-                Interval.HOUR -> {
-                    return "hour"
-                }
-                Interval.TWO_HOURS -> {
-                    return "2hour"
-                }
-                Interval.DAY -> {
-                    return "day"
-                }
-                Interval.WEEK -> {
-                    return "week"
-                }
+            return when (interval) {
+                Interval.MINUTE -> "1min"
+                Interval.HOUR -> "hour"
+                Interval.TWO_HOURS -> "2hour"
+                Interval.DAY -> "day"
+                Interval.WEEK -> "week"
+                Interval.TWO_MINUTES -> "2min"
+                Interval.THREE_MINUTES -> "3min"
+                Interval.FIVE_MINUTES -> "5min"
+                Interval.TEN_MINUTES -> "10min"
+                Interval.FIFTEEN_MINUTES -> "15min"
+                Interval.THIRTY_MINUTES -> "30min"
+                Interval.FOUR_HOURS -> "5hours"
+                Interval.MONTH -> "month"
             }
-
-            return "1min"
         }
 
         fun convertStringToInterval(interval: String): Interval? {

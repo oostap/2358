@@ -106,7 +106,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         val alorTokenKey: String = getString(R.string.setting_key_token_market_alor)
         val alorToken: EditTextPreference? = findPreference(alorTokenKey)
-        alorToken?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+        alorToken?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, _ ->
             alorManager.refreshToken()
             stockManager.loadStocks(true)
             true

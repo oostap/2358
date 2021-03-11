@@ -33,4 +33,9 @@ class ThirdPartyService(
     }
 
     suspend fun daagerReports(): Map<String, ReportStock> = thirdPartyApi.daagerReports("https://tinvest.daager.ru/ostap-api/list.json")
+
+    suspend fun githubVersion(): String {
+        val json = thirdPartyApi.githubVersion("https://api.github.com/repos/oostap/2358/releases/latest")
+        return json["tag_name"].toString().replace("\"", "")
+    }
 }

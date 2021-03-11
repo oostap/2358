@@ -16,4 +16,7 @@ interface ThirdPartyApi {
 
     @GET
     suspend fun daagerReports(@Url url: String): Map<String, ReportStock>
+
+    @GET
+    suspend fun githubVersion(@Url url: String): JsonObject
 }

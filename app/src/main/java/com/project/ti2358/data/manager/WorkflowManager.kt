@@ -1,10 +1,11 @@
 package com.project.ti2358.data.manager
 
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import com.project.ti2358.BuildConfig
+import com.project.ti2358.TheApplication
 import com.project.ti2358.data.service.*
-import com.project.ti2358.service.log
-import com.project.ti2358.service.toDollar
-import com.project.ti2358.service.toPercent
+import com.project.ti2358.service.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -17,6 +18,7 @@ import org.koin.core.component.inject
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+
 
 @KoinApiExtension
 class WorkflowManager() : KoinComponent {

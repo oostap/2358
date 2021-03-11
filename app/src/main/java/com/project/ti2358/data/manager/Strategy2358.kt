@@ -9,6 +9,7 @@ import kotlin.math.roundToInt
 @KoinApiExtension
 class Strategy2358() : KoinComponent {
     private val stockManager: StockManager by inject()
+    private val depositManager: DepositManager by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
@@ -76,6 +77,11 @@ class Strategy2358() : KoinComponent {
             }
 
             stocksSelected.removeAll { stocksToDelete.contains(it) }
+        }
+
+        // удалить бумаги, которые уже есть в депо, иначе среднюю невозможно узнать
+        stocksSelected.removeAll { stock ->
+            depositManager.portfolioPositions.any { it.ticker == stock.marketInstrument.ticker }
         }
 
         val purchases: MutableList<PurchaseStock> = mutableListOf()

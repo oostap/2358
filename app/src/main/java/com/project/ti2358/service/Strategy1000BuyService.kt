@@ -174,7 +174,7 @@ class Strategy1000BuyService : Service() {
 
         val cancelIntent = Intent(NOTIFICATION_ACTION_FILTER).apply { putExtra("type", NOTIFICATION_ACTION_CANCEL) }
         val pendingCancelIntent = PendingIntent.getBroadcast(this, 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val actionCancel: Notification.Action = Notification.Action.Builder(R.mipmap.ic_launcher, "СТОП", pendingCancelIntent).build()
+        val actionCancel: Notification.Action = Notification.Action.Builder(null, "СТОП", pendingCancelIntent).build()
 
         val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, title, shortText, longText, longTitleText, actionCancel)
 
