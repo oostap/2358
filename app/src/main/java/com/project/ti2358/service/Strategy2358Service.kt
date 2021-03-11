@@ -151,15 +151,12 @@ class Strategy2358Service : Service() {
         val seconds = allSeconds % 60
 
         if (updateTitle) {
-            title = if (scheduleDelay > 0) {
-                "Покупка через %02d:%02d:%02d".format(hours, minutes, seconds)
-            } else {
-                "Покупка!"
-            }
-
             if (hours + minutes + seconds <= 0) {
                 strategy2358.startStrategy()
                 updateTitle = false
+                title = "Покупка!"
+            } else {
+                title = "Покупка через %02d:%02d:%02d".format(hours, minutes, seconds)
             }
         }
 

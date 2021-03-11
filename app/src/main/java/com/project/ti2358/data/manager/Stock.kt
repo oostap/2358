@@ -128,6 +128,14 @@ data class Stock(
         val diffInMilli: Long = Calendar.getInstance().time.time - candle.time.time
         val diffInHours: Long = TimeUnit.MILLISECONDS.toHours(diffInMilli)
 
+//        if (marketInstrument.ticker == "NARI") {
+//            log("ALOR = ${marketInstrument.ticker} = $candle")
+//        }
+//
+//        if (marketInstrument.ticker == "MAC") {
+//            log("ALOR = ${marketInstrument.ticker} = $candle")
+//        }
+
         if (diffInHours > 29) {
             log(candle.toString() + marketInstrument.ticker)
             return

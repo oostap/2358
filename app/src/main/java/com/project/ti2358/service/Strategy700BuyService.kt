@@ -155,15 +155,12 @@ class Strategy700BuyService : Service() {
         val seconds = allSeconds % 60
 
         if (updateTitle) {
-            title = if (scheduleDelay > 0) {
-                "Покупка через %02d:%02d:%02d".format(hours, minutes, seconds)
-            } else {
-                "Покупка!"
-            }
-
             if (hours + minutes + seconds <= 0) {
                 strategy1000Buy.startStrategy700Buy()
                 updateTitle = false
+                title = "Покупка!"
+            } else {
+                title = "Покупка через %02d:%02d:%02d".format(hours, minutes, seconds)
             }
         }
 
