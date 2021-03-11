@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.os.IBinder
 import android.os.PowerManager
 import android.widget.Toast
+import com.project.ti2358.R
 import com.project.ti2358.data.manager.Strategy2358
 import com.project.ti2358.data.manager.SettingsManager
 import kotlinx.coroutines.*
@@ -20,7 +21,8 @@ import java.util.*
 @KoinApiExtension
 class Strategy2358Service : Service() {
 
-    private val NOTIFICATION_CANCEL_ACTION = "event.2358"
+    private val NOTIFICATION_ACTION = "event.2358"
+    private val NOTIFICATION_CANCEL_ACTION = "event.2358.cancel"
     private val NOTIFICATION_CHANNEL_ID = "2358 CHANNEL NOTIFICATION"
     private val NOTIFICATION_ID = 2358
 
@@ -40,11 +42,11 @@ class Strategy2358Service : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val intentFilter = IntentFilter(NOTIFICATION_CANCEL_ACTION)
+        val intentFilter = IntentFilter(NOTIFICATION_ACTION)
         notificationButtonReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val type = intent.getStringExtra("type")
-                if (type == "cancel") {
+                if (type == NOTIFICATION_CANCEL_ACTION) {
                     if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
                     notificationButtonReceiver = null
                     context.stopService(Intent(context, Strategy2358Service::class.java))
@@ -58,7 +60,7 @@ class Strategy2358Service : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION, "2358","",  "", "")
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "2358","",  "", "")
         startForeground(NOTIFICATION_ID, notification)
 
         schedulePurchase()
@@ -164,11 +166,11 @@ class Strategy2358Service : Service() {
         val longText: String = strategy2358.getNotificationTextLong()
         val longTitleText: String = "~" + strategy2358.getTotalPurchaseString() + " ="
 
-        val notification = Utils.createNotification(
-            this,
-            NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION,
-            title, shortText, longText, longTitleText
-        )
+        val cancelIntent = Intent(NOTIFICATION_ACTION).apply { putExtra("type", NOTIFICATION_CANCEL_ACTION) }
+        val pendingCancelIntent = PendingIntent.getBroadcast(this, 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val actionCancel: Notification.Action = Notification.Action.Builder(R.mipmap.ic_launcher, "СТОП", pendingCancelIntent).build()
+
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, title, shortText, longText, longTitleText, actionCancel)
 
         synchronized(notification) {
             notification.notify()

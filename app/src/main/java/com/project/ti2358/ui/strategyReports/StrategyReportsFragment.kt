@@ -14,15 +14,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.Strategy1005
 import com.project.ti2358.data.manager.StrategyReports
 import com.project.ti2358.service.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
 class StrategyReportsStartFragment : Fragment() {
-
+    val stockManager: StockManager by inject()
     val strategyReports: StrategyReports by inject()
     var adapterList: ItemReportsRecyclerViewAdapter = ItemReportsRecyclerViewAdapter(emptyList())
     lateinit var stocks: MutableList<Stock>
@@ -86,6 +90,10 @@ class StrategyReportsStartFragment : Fragment() {
 
         updateData()
 
+        GlobalScope.launch(Dispatchers.Main) {
+            stockManager.reloadReports()
+            updateData()
+        }
         return view
     }
 

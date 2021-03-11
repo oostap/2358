@@ -23,7 +23,8 @@ import java.util.*
 @KoinApiExtension
 class Strategy1000SellService : Service() {
 
-    private val NOTIFICATION_CANCEL_ACTION = "event.1000.sell"
+    private val NOTIFICATION_ACTION = "event.1000sell"
+    private val NOTIFICATION_CANCEL_ACTION = "event.1000sell.cancel"
     private val NOTIFICATION_CHANNEL_ID = "1000 SELL CHANNEL NOTIFICATION"
     private val NOTIFICATION_ID = 10000
 
@@ -43,11 +44,11 @@ class Strategy1000SellService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val intentFilter = IntentFilter(NOTIFICATION_CANCEL_ACTION)
+        val intentFilter = IntentFilter(NOTIFICATION_ACTION)
         notificationButtonReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val type = intent.getStringExtra("type")
-                if (type == "cancel") {
+                if (type == NOTIFICATION_CANCEL_ACTION) {
                     if (notificationButtonReceiver != null) unregisterReceiver(
                         notificationButtonReceiver
                     )
@@ -63,7 +64,7 @@ class Strategy1000SellService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION, "1000 Sell", "", "", "")
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "1000 Sell", "", "", "")
         startForeground(NOTIFICATION_ID, notification)
 
         strategy1000Sell.prepareSell1000()
@@ -163,11 +164,11 @@ class Strategy1000SellService : Service() {
         val longText: String = strategy1000Sell.getNotificationTextLong(strategy1000Sell.positionsToSell1000)
         val longTitleText: String = "~" + strategy1000Sell.getTotalSellString(strategy1000Sell.positionsToSell1000) + " ="
 
-        val notification = Utils.createNotification(
-            this,
-            NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION,
-            title, shortText, longText, longTitleText
-        )
+        val cancelIntent = Intent(NOTIFICATION_ACTION).apply { putExtra("type", NOTIFICATION_CANCEL_ACTION) }
+        val pendingCancelIntent = PendingIntent.getBroadcast(this, 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val actionCancel: Notification.Action = Notification.Action.Builder(R.mipmap.ic_launcher, "СТОП", pendingCancelIntent).build()
+
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, title, shortText, longText, longTitleText, actionCancel)
 
         synchronized(notification) {
             notification.notify()

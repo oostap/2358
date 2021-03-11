@@ -10,6 +10,7 @@ import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
+import androidx.core.app.NotificationCompat
 import com.project.ti2358.BuildConfig
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
@@ -181,13 +182,18 @@ class Utils {
         }
 
         @KoinApiExtension
-        fun createNotification(context: Context,
-                               channelId: String,
-                               cancelAction: String,
-                               summaryTitle: String,
-                               shortText: String,
-                               longText: String,
-                               longTitleText: String): Notification {
+        fun createNotification(
+            context: Context,
+            channelId: String,
+            summaryTitle: String,
+            shortText: String,
+            longText: String,
+            longTitleText: String,
+            action1: Notification.Action? = null,
+            action2: Notification.Action? = null,
+            action3: Notification.Action? = null,
+            action4: Notification.Action? = null,
+        ): Notification {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 val channel = NotificationChannel(
@@ -207,33 +213,33 @@ class Utils {
                 PendingIntent.getActivity(context, 0, notificationIntent, 0)
             }
 
-            val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(
-                context,
-                channelId
-            ) else Notification.Builder(context)
+            val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(context, channelId) else Notification.Builder(context)
 
-            val cancelIntent = Intent(cancelAction)
-            cancelIntent.putExtra("type", "cancel")
-            val pendingCancelIntent = PendingIntent.getBroadcast(
-                context,
-                1,
-                cancelIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-
-//            val longText: String = strategy1000Buy.getNotificationTextLong()
-//            val shortText: String = strategy1000Buy.getNotificationTextShort()
-//            val longTitleText: String = "~" + strategy1000Buy.getTotalPurchaseString() + " ="
-
-            return builder
+            builder
                 .setContentText(shortText)
                 .setStyle(Notification.BigTextStyle().setSummaryText(summaryTitle).bigText(longText).setBigContentTitle(longTitleText))
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setOnlyAlertOnce(true)
                 .setOngoing(false)
-                .addAction(R.mipmap.ic_launcher, "СТОП", pendingCancelIntent)
-                .build()
+
+            if (action1 != null) {
+                builder.addAction(action1)
+            }
+
+            if (action2 != null) {
+                builder.addAction(action2)
+            }
+
+            if (action3 != null) {
+                builder.addAction(action3)
+            }
+
+            if (action4 != null) {
+                builder.addAction(action4)
+            }
+
+            return builder.build()
         }
 
         fun makeNicePrice(price: Double): Double {

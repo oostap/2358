@@ -5,9 +5,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import com.project.ti2358.R
 import com.project.ti2358.data.manager.StrategyTazik
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -20,9 +23,16 @@ import org.koin.core.component.KoinApiExtension
 @KoinApiExtension
 class StrategyTazikService : Service() {
 
-    private val NOTIFICATION_CANCEL_ACTION = "event.tazik"
-    private val NOTIFICATION_CHANNEL_ID = "TAZIK CHANNEL NOTIFICATION"
-    private val NOTIFICATION_ID = 100011
+    companion object {
+        private const val NOTIFICATION_ACTION_FILTER = "event.tazik"
+        private const val NOTIFICATION_ACTION_PLUS = "event.tazik.plus"
+        private const val NOTIFICATION_ACTION_MINUS = "event.tazik.minus"
+        private const val NOTIFICATION_ACTION_CANCEL = "event.tazik.cancel"
+        private const val NOTIFICATION_ACTION_BUY = "event.tazik.buy"
+
+        private const val NOTIFICATION_CHANNEL_ID = "TAZIK CHANNEL NOTIFICATION"
+        private const val NOTIFICATION_ID = 100011
+    }
 
     private val strategyTazik: StrategyTazik by inject()
 
@@ -35,15 +45,30 @@ class StrategyTazikService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val intentFilter = IntentFilter(NOTIFICATION_CANCEL_ACTION)
+        val intentFilter = IntentFilter(NOTIFICATION_ACTION_FILTER)
         notificationButtonReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val type = intent.getStringExtra("type")
-                if (type == "cancel") {
+                if (type == NOTIFICATION_ACTION_CANCEL) {
                     if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
                     notificationButtonReceiver = null
                     context.stopService(Intent(context, StrategyTazikService::class.java))
                     strategyTazik.stopStrategy()
+                }
+
+                if (type == NOTIFICATION_ACTION_PLUS) {
+                    strategyTazik.addBasicPercentLimitPriceChange(1)
+                    updateNotification()
+                }
+
+                if (type == NOTIFICATION_ACTION_MINUS) {
+                    strategyTazik.addBasicPercentLimitPriceChange(-1)
+                    updateNotification()
+                }
+
+                if (type == NOTIFICATION_ACTION_BUY) {
+                    strategyTazik.buyFirstOne()
+                    updateNotification()
                 }
             }
         }
@@ -54,14 +79,14 @@ class StrategyTazikService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION, "Тазик", "", "", "")
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "Тазик", "", "", "")
         startForeground(NOTIFICATION_ID, notification)
 
         scheduleUpdate()
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Покупка тазика отменена", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Тазики убраны", Toast.LENGTH_LONG).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -70,7 +95,7 @@ class StrategyTazikService : Service() {
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Запущен тазик на покупку просадок", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Запущены тазики на покупку просадок", Toast.LENGTH_LONG).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
@@ -82,7 +107,7 @@ class StrategyTazikService : Service() {
         GlobalScope.launch(Dispatchers.Main) {
             while (isServiceRunning) {
                 val seconds = updateNotification()
-                delay(1 * 1000 * seconds)
+                delay(1 * 500 * seconds)
             }
         }
     }
@@ -94,11 +119,27 @@ class StrategyTazikService : Service() {
         val shortText: String = strategyTazik.getNotificationTextShort()
         val longTitleText: String = strategyTazik.getTotalPurchaseString()
 
-        val notification = Utils.createNotification(
-            this,
-            NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION,
-            title, shortText, longText, longTitleText
-        )
+        val cancelIntent = Intent(NOTIFICATION_ACTION_FILTER).apply { putExtra("type", NOTIFICATION_ACTION_CANCEL) }
+        val pendingCancelIntent = PendingIntent.getBroadcast(this, 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val actionCancel: Notification.Action = Notification.Action.Builder(null, "СТОП", pendingCancelIntent).build()
+
+        val plusIntent = Intent(NOTIFICATION_ACTION_FILTER).apply { putExtra("type", NOTIFICATION_ACTION_PLUS) }
+        val pendingPlusIntent = PendingIntent.getBroadcast(this, 2, plusIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val actionPlus: Notification.Action = Notification.Action.Builder(null, "  +${StrategyTazik.PercentLimitChangeDelta}  ", pendingPlusIntent).build()
+
+        val minusIntent = Intent(NOTIFICATION_ACTION_FILTER).apply { putExtra("type", NOTIFICATION_ACTION_MINUS) }
+        val pendingMinusIntent = PendingIntent.getBroadcast(this, 3, minusIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val actionMinus: Notification.Action = Notification.Action.Builder(null, "  -${StrategyTazik.PercentLimitChangeDelta}  ", pendingMinusIntent).build()
+
+        val buyIntent = Intent(NOTIFICATION_ACTION_FILTER).apply { putExtra("type", NOTIFICATION_ACTION_BUY) }
+        val pendingBuyIntent = PendingIntent.getBroadcast(this, 4, buyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        var actionBuy: Notification.Action? = Notification.Action.Builder(null, "ТАРИМ ПЕРВУЮ", pendingBuyIntent).build()
+
+        if (!strategyTazik.started) {
+            actionBuy = null
+        }
+
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, title, shortText, longText, longTitleText, actionCancel, actionPlus, /*actionMinus,*/ actionBuy) // больше трёх кнопок нельзя
 
         synchronized(notification) {
             notification.notify()

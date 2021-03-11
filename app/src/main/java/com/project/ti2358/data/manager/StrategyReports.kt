@@ -17,12 +17,8 @@ class StrategyReports : KoinComponent {
 
     fun process(): MutableList<Stock> {
         val all = stockManager.stocksStream
-        val min = SettingsManager.getCommonPriceMin()
-        val max = SettingsManager.getCommonPriceMax()
 
-        stocks = all.filter { stock ->
-            stock.getPriceDouble() > min && stock.getPriceDouble() < max && (stock.reportDate != null || stock.dividendDate != null)
-        }.toMutableList()
+        stocks = all.filter { it.reportDate != null || it.dividendDate != null }.toMutableList()
 
         return stocks
     }

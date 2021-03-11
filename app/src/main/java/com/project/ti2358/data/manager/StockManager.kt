@@ -46,12 +46,7 @@ class StockManager : KoinComponent {
 
     fun loadStocks(force: Boolean = false) {
         GlobalScope.launch(Dispatchers.Main) {
-            try {
-                reportsStock = thirdPartyService.daagerReports()
-                log(reportsStock.toString())
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            reloadReports()
 
             val key = "all_instruments"
             val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
@@ -83,6 +78,23 @@ class StockManager : KoinComponent {
                 }
                 delay(1500) // 1 sec
             }
+        }
+    }
+
+    suspend fun reloadReports() {
+        try {
+            reportsStock = thirdPartyService.daagerReports()
+
+            for (stock in stocksAll) {
+                stock.apply {
+                    reportDate = reportsStock[stock.marketInstrument.ticker]?.report
+                    dividendDate = reportsStock[stock.marketInstrument.ticker]?.dividend
+                }
+            }
+
+            log(reportsStock.toString())
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.os.IBinder
 import android.os.PowerManager
 import android.widget.Toast
+import com.project.ti2358.R
 import com.project.ti2358.data.manager.Strategy1000Buy
 import com.project.ti2358.data.manager.SettingsManager
 import kotlinx.coroutines.*
@@ -19,7 +20,8 @@ import java.util.*
 @KoinApiExtension
 class Strategy700BuyService : Service() {
 
-    private val NOTIFICATION_CANCEL_ACTION = "event.700.buy"
+    private val NOTIFICATION_ACTION = "event.700buy"
+    private val NOTIFICATION_CANCEL_ACTION = "event.700buy.cancel"
     private val NOTIFICATION_CHANNEL_ID = "700 BUY CHANNEL NOTIFICATION"
     private val NOTIFICATION_ID = 17001
 
@@ -39,11 +41,11 @@ class Strategy700BuyService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val intentFilter = IntentFilter(NOTIFICATION_CANCEL_ACTION)
+        val intentFilter = IntentFilter(NOTIFICATION_ACTION)
         notificationButtonReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val type = intent.getStringExtra("type")
-                if (type == "cancel") {
+                if (type == NOTIFICATION_CANCEL_ACTION) {
                     if (notificationButtonReceiver != null) unregisterReceiver(
                         notificationButtonReceiver
                     )
@@ -59,7 +61,7 @@ class Strategy700BuyService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION, "700 buy","",  "", "")
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "700 buy","",  "", "")
         startForeground(NOTIFICATION_ID, notification)
 
         strategy1000Buy.prepareBuy700()
@@ -168,9 +170,12 @@ class Strategy700BuyService : Service() {
         val longText: String = strategy1000Buy.getNotificationTextLong(strategy1000Buy.stocksToBuy700)
         val longTitleText: String = "~" + strategy1000Buy.getTotalPurchaseString(strategy1000Buy.stocksToBuy700) + " ="
 
-        val notification = Utils.createNotification(this,
-            NOTIFICATION_CHANNEL_ID, NOTIFICATION_CANCEL_ACTION,
-            title, shortText, longText, longTitleText)
+        val cancelIntent = Intent(NOTIFICATION_ACTION).apply { putExtra("type", NOTIFICATION_CANCEL_ACTION) }
+        val pendingCancelIntent = PendingIntent.getBroadcast(this, 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val actionCancel: Notification.Action = Notification.Action.Builder(R.mipmap.ic_launcher, "СТОП", pendingCancelIntent).build()
+
+
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, title, shortText, longText, longTitleText, actionCancel)
 
         synchronized(notification) {
             notification.notify()
