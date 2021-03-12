@@ -30,6 +30,7 @@ class WorkflowManager() : KoinComponent {
         alorManager.refreshToken()
         stockManager.loadStocks()
         depositManager.startUpdatePortfolio()
+        stockManager.startUpdateIndices()
     }
 
     companion object {

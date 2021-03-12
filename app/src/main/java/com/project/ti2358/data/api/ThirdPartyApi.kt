@@ -1,6 +1,8 @@
 package com.project.ti2358.data.api
 
 import com.google.gson.JsonObject
+import com.project.ti2358.data.model.dto.reports.ClosePrice
+import com.project.ti2358.data.model.dto.reports.Index
 import com.project.ti2358.data.model.dto.reports.ReportStock
 
 import retrofit2.http.GET
@@ -16,6 +18,12 @@ interface ThirdPartyApi {
 
     @GET
     suspend fun daagerReports(@Url url: String): Map<String, ReportStock>
+
+    @GET
+    suspend fun daagerIndices(@Url url: String): List<Index>
+
+    @GET
+    suspend fun daagerClosePrice(@Url url: String): Map<String, ClosePrice>
 
     @GET
     suspend fun githubVersion(@Url url: String): JsonObject

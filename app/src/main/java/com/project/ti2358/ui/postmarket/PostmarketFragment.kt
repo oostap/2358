@@ -116,21 +116,18 @@ class PostmarketFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            var ticker = "${position + 1} ${item.marketInstrument.ticker}"
-            item.yahooPostmarket?.exchange?.let {
-                ticker += " (${it})"
-            }
+            val ticker = "${position + 1} ${item.marketInstrument.ticker}"
             holder.tickerView.text = ticker
 
             val priceFrom = item.getPriceDouble().toDollar()
             val priceTo = item.getPricePostmarketUSDouble().toDollar()
             holder.priceView.text = "$priceFrom ➡ $priceTo"
 
-            val volume = item.getPostmarketVolume() / 1000f
-            holder.volumeTodayView.text = "%.1fk".format(volume)
+//            val volume = item.getPostmarketVolume() / 1000f
+            holder.volumeTodayView.text = "TODO"//"%.1fk".format(volume)
 
-            val volumeCash = item.getPostmarketVolumeCash() / 1000f / 1000f
-            holder.volumeTodayCashView.text = "%.2fB$".format(volumeCash)
+//            val volumeCash = item.getPostmarketVolumeCash() / 1000f / 1000f
+            holder.volumeTodayCashView.text = "TODO" //"%.2fB$".format(volumeCash)
 
             holder.changePriceAbsoluteView.text = item.changePricePostmarketAbsolute.toDollar()
             holder.changePricePercentView.text = item.changePricePostmarketPercent.toPercent()

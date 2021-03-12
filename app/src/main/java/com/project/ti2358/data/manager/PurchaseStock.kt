@@ -618,8 +618,8 @@ data class PurchaseStock(
                 }
 
                 // скорректировать процент профита в зависимости от свечи открытия
-                val startPrice = pos.stock?.candleYesterday?.closingPrice ?: 0.0
-                val currentPrice = pos.stock?.candle1000?.closingPrice ?: 0.0
+                val startPrice = pos.stock?.closePrices?.close_post ?: 0.0
+                val currentPrice = pos.stock?.candleToday?.closingPrice ?: 0.0
                 if (startPrice != 0.0 && currentPrice != 0.0) {
                     val change = (100.0 * currentPrice) / startPrice - 100.0
                     if (change > percentProfitSellFrom) { // если изменение больше текущего профита, то приблизить его к этой цене

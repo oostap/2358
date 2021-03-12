@@ -76,9 +76,9 @@ class PortfolioFragment : Fragment() {
         }
 
         GlobalScope.launch(Dispatchers.Main) {
+            delay(3000)
             updateData()
-
-            delay(2000)
+            delay(3000)
             val version = thirdPartyService.githubVersion()
             val currentVersion = try {
                 val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(TheApplication.application.applicationContext.packageName, 0)
@@ -88,7 +88,7 @@ class PortfolioFragment : Fragment() {
             }
 
             if (version != currentVersion) { // показать окно обновления
-                Utils.showUpdateAlert(TheApplication.application.applicationContext, currentVersion, version)
+                Utils.showUpdateAlert(requireContext(), currentVersion, version)
             }
         }
         return view

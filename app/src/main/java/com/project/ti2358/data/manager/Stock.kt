@@ -1,26 +1,17 @@
 package com.project.ti2358.data.manager
 
-import android.content.SharedPreferences
-import androidx.preference.PreferenceManager
 import com.google.gson.*
-import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.MarketInstrument
-import com.project.ti2358.data.model.dto.yahoo.YahooResponse
+import com.project.ti2358.data.model.dto.reports.ClosePrice
 import com.project.ti2358.data.service.MarketService
 import com.project.ti2358.service.log
-import com.project.ti2358.service.toString
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 
 
 @KoinApiExtension
@@ -47,11 +38,8 @@ data class Stock(
 
     var changeOnStartTimer: Double = 0.0    // сколько % было на старте таймера для 2358
 
-    var yahooPostmarket: YahooResponse? = null
-    var candleWeek: Candle? = null                               // недельная свеча
-    var candleYesterday: Candle? = null                          // вчерашняя свеча (есть не всегда)
-    var candle1000: Candle? = null                               // реалтайм, дневная свеча
-    var candle2359: Candle? = null                               // цена закрытия 2359, минутная свеча
+    var closePrices: ClosePrice? = null
+    var candleToday: Candle? = null                               // реалтайм, дневная свеча
     var minute1728Candles: MutableList<Candle> = mutableListOf() // все свечи после 1728
 
     lateinit var candleHour1: Candle                             // текущая часовая свеча
@@ -109,9 +97,6 @@ data class Stock(
             Interval.MINUTE -> {
                 processMinuteCandle(candle)
             }
-            Interval.WEEK -> {
-                processWeekCandle(candle)
-            }
             Interval.HOUR -> {
                 processHour1Candle(candle)
             }
@@ -142,9 +127,9 @@ data class Stock(
         }
 
         if (diffInHours > 20) {
-            candleYesterday = candle
+
         } else {
-            candle1000 = candle
+            candleToday = candle
         }
 
         updateChangeToday()
@@ -169,17 +154,6 @@ data class Stock(
         changePriceHour2Start = candleHour2.openingPrice
         changePriceHour2Absolute = candleHour2.closingPrice - candleHour2.openingPrice
         changePriceHour2Percent = (100 * candleHour2.closingPrice) / candleHour2.openingPrice - 100
-    }
-
-    private fun processWeekCandle(candle: Candle) {
-        candleWeek = candle
-        priceNow = candle.closingPrice
-        price1000 = priceNow
-
-        stockManager.unsubscribeStock(this, Interval.WEEK)
-
-        updateChange2359()
-        updateChangePostmarket()
     }
 
     private fun processMinuteCandle(candle: Candle) {
@@ -228,15 +202,7 @@ data class Stock(
     }
 
     fun getTodayVolume(): Int {
-        return candle1000?.volume ?: 0
-    }
-
-    fun getPostmarketVolume(): Int {
-        return yahooPostmarket?.getVolumeShares() ?: 0
-    }
-
-    fun getPostmarketVolumeCash(): Int {
-        return yahooPostmarket?.getVolumeCash() ?: 0
+        return candleToday?.volume ?: 0
     }
 
     fun getPriceDouble(): Double {
@@ -244,28 +210,24 @@ data class Stock(
             return minuteCandles.last().closingPrice
         }
 
-        candle1000?.let {
+        candleToday?.let {
             return it.closingPrice
         }
 
-        candleWeek?.let {
-            return it.closingPrice
+        closePrices?.let {
+            return it.close_post
         }
 
-        candle2359?.let {
-            return it.closingPrice
-        }
-
-        yahooPostmarket?.let {
-            return it.getLastPrice()
+        closePrices?.let {
+            return it.close_post_yahoo ?: 0.0
         }
 
         return 0.0
     }
 
     fun getPricePostmarketUSDouble(): Double {
-        yahooPostmarket?.let {
-            return it.getLastPrice()
+        closePrices?.let {
+            return it.close_post_yahoo ?: 0.0
         }
 
         return 0.0
@@ -276,15 +238,15 @@ data class Stock(
     }
 
     fun getPrice1000String(): String {
-        candle1000?.let {
+        candleToday?.let {
             return "${it.openingPrice}$"
         }
         return "0$"
     }
 
     fun getPrice2359String(): String {
-        candle2359?.let {
-            return "${it.closingPrice}$"
+        closePrices?.let {
+            return "${it.close_os}$"
         }
         return "0$"
     }
@@ -297,7 +259,7 @@ data class Stock(
     }
 
     private fun updateChangeToday() {
-        candle1000?.let {
+        candleToday?.let {
             changePriceDayAbsolute = it.closingPrice - it.openingPrice
             changePriceDayPercent = (100 * it.closingPrice) / it.openingPrice - 100
 
@@ -310,41 +272,34 @@ data class Stock(
     }
 
     private fun updateChangePostmarket() {
-        yahooPostmarket?.let {
-            candle2359?.let { close ->
-                changePricePostmarketAbsolute = it.getLastPrice() - close.closingPrice
-                changePricePostmarketPercent = (100 * it.getLastPrice()) / close.closingPrice - 100
-            }
+        closePrices?.let { close ->
+            close.close_post_yahoo?.let {
+                changePricePostmarketAbsolute = close.close_post_yahoo - close.close_os
+                changePricePostmarketPercent = (100 * close.close_post_yahoo) / close.close_os - 100
 
-            candleWeek?.let { week ->
-                changePricePostmarketAbsolute = it.getLastPrice() - week.closingPrice
-                changePricePostmarketPercent = (100 * it.getLastPrice()) / week.closingPrice - 100
-            }
-
-            candle1000?.let { today ->
-                changePricePostmarketAbsolute = it.getLastPrice() - today.closingPrice
-                changePricePostmarketPercent = (100 * it.getLastPrice()) / today.closingPrice - 100
+                candleToday?.let { today ->
+                    changePricePostmarketAbsolute = close.close_post_yahoo - today.closingPrice
+                    changePricePostmarketPercent = (100 * close.close_post_yahoo) / today.closingPrice - 100
+                }
             }
         }
     }
 
     private fun updateChange2359() {
-        candle2359?.let {
-            candleWeek?.let { week ->
-                changePrice2359DayAbsolute = week.closingPrice - it.closingPrice
-                changePrice2359DayPercent = (100 * week.closingPrice) / it.closingPrice - 100
-            }
+        closePrices?.let {
+            changePrice2359DayAbsolute = it.close_post - it.close_os
+            changePrice2359DayPercent = (100 * it.close_post) / it.close_os - 100
 
-            candle1000?.let { today ->
-                changePrice2359DayAbsolute = today.closingPrice - it.closingPrice
-                changePrice2359DayPercent = (100 * today.closingPrice) / it.closingPrice - 100
+            candleToday?.let { today ->
+                changePrice2359DayAbsolute = today.closingPrice - it.close_os
+                changePrice2359DayPercent = (100 * today.closingPrice) / it.close_os - 100
             }
         }
     }
 
     private fun updateChange1728() {
         if (minute1728Candles.isNotEmpty()) {
-            candleWeek?.let { week ->
+            candleToday?.let { week ->
                 changePrice1728DayAbsolute = week.closingPrice - minute1728Candles.first().openingPrice
                 changePrice1728DayPercent = (100 * week.closingPrice) / minute1728Candles.first().openingPrice - 100
             }
@@ -357,110 +312,8 @@ data class Stock(
         minute1728Candles.clear()
     }
 
-    fun processCandle2359(candle: Candle) {
-        candle2359 = candle
+    fun process2359() {
         updateChange2359()
         updateChangePostmarket()
-    }
-
-    fun processPostmarketPrice(yahoo: YahooResponse) {
-        yahooPostmarket = yahoo
-        updateChange2359()
-        updateChangePostmarket()
-    }
-
-    fun loadClosingPostmarketRUCandle(prevDelay: Long): Long {
-        if (candleWeek != null) return prevDelay
-
-        val zone = getCurrentTimezone()
-        val dayBack = -5
-        val dayFront = 1
-        var from = getLastClosingPostmarketRUDate(dayBack) + zone
-        var to = getLastClosingPostmarketRUDate(dayFront) + zone
-
-        val key = "price_postmarket_ru_${marketInstrument.figi}_${from}"
-
-        val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
-        val jsonClosingCandle = preferences.getString(key, null)
-        if (jsonClosingCandle != null) {
-            candleWeek = gson.fromJson(jsonClosingCandle, Candle::class.java)
-            updateChangePostmarket()
-            updateChange2359()
-            return prevDelay
-        }
-
-        val delay = prevDelay + kotlin.random.Random.Default.nextLong(1000, 1500)
-        GlobalScope.launch(Dispatchers.Main) {
-            while (candleWeek == null) {
-                try {
-                    delay(delay)
-                    if (candleWeek != null) return@launch
-
-                    val value = preferences.getString(key, null)
-                    if (value != null) return@launch
-
-                    log("close ${marketInstrument.ticker}")
-                    val candles = marketService.candles(marketInstrument.figi, "day", from, to)
-
-                    if (candles.candles.isNotEmpty()) {
-                        candleWeek = candles.candles.last()
-                        val data = gson.toJson(candleWeek)
-
-                        val editor: SharedPreferences.Editor = preferences.edit()
-                        editor.putString(key, data)
-                        editor.apply()
-
-                        updateChange2359()
-
-                        log("closing price postmarket ru ${marketInstrument.ticker}")
-                        return@launch
-                    } else { // если свечей нет, то сделать шаг назад во времени
-                        from = getLastClosingPostmarketRUDate(dayBack) + zone
-                        to = getLastClosingPostmarketRUDate(dayFront) + zone
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-
-                delay(delay)
-            }
-        }
-        return delay
-    }
-
-    private fun getLastClosingPostmarketRUDate(delta: Int = 0): String {
-        val time = Calendar.getInstance()
-        time.set(Calendar.MILLISECOND, 0)
-
-        if (delta != 0) {
-            time.add(Calendar.DAY_OF_MONTH, delta)
-        }
-
-
-        time.set(Calendar.HOUR_OF_DAY, 20)
-        time.set(Calendar.MINUTE, 0)
-        time.set(Calendar.SECOND, 0)
-        time.set(Calendar.MILLISECOND, 0)
-
-        // если воскресенье, то откатиться к субботе
-//        if (time.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-//            time.add(Calendar.DAY_OF_MONTH, -1)
-//        }
-//
-//        // если понедельник, то откатиться к субботе
-//        if (time.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
-//            time.add(Calendar.DAY_OF_MONTH, -2)
-//        }
-
-        return time.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
-    }
-
-    private fun getCurrentTimezone(): String {
-        val tz = TimeZone.getDefault()
-        val cal = GregorianCalendar.getInstance(tz)
-        val offsetInMillis = tz.getOffset(cal.timeInMillis)
-        var offset = String.format("%02d:%02d", abs(offsetInMillis / 3600000), abs(offsetInMillis / 60000 % 60))
-        offset = (if (offsetInMillis >= 0) "+" else "-") + offset
-        return offset
     }
 }

@@ -220,17 +220,12 @@ class StrategyTazik : KoinComponent {
         // зафикировать цену, чтобы change считать от неё
         for (stock in stocks) {
             // вчерашняя, если стартуем до сессии
-            stock.candleWeek?.let {
-                stock.priceTazik = it.closingPrice
-            }
-
-            // вчерашняя, если стартуем до сессии
-            stock.candleYesterday?.let {
-                stock.priceTazik = it.closingPrice
+            stock.closePrices?.let {
+                stock.priceTazik = it.close_post
             }
 
             // сегодняшняя, если внутри дня
-            stock.candle1000?.let {
+            stock.candleToday?.let {
                 stock.priceTazik = it.closingPrice
             }
         }
@@ -276,7 +271,7 @@ class StrategyTazik : KoinComponent {
         if (sorted.isEmpty()) return
 
         val purchase = sorted.first()
-        stock.candle1000?.let {
+        stock.candleToday?.let {
             // уже брали бумагу?
             if (ticker in stocksTickerBuyed) return
 
@@ -288,7 +283,7 @@ class StrategyTazik : KoinComponent {
     }
 
     private fun processBuy(purchase: PurchaseStock, stock: Stock) {
-        stock.candle1000?.let {
+        stock.candleToday?.let {
             val change = (100 * it.closingPrice) / stock.priceTazik - 100
 
             // просадка < -1%

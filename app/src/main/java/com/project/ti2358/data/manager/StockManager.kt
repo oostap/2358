@@ -3,14 +3,14 @@ package com.project.ti2358.data.manager
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.MarketInstrument
+import com.project.ti2358.data.model.dto.reports.ClosePrice
+import com.project.ti2358.data.model.dto.reports.Index
 import com.project.ti2358.data.model.dto.reports.ReportStock
-import com.project.ti2358.data.model.dto.yahoo.YahooResponse
 import com.project.ti2358.data.service.MarketService
 import com.project.ti2358.data.service.StreamingAlorService
 import com.project.ti2358.data.service.StreamingTinkoffService
@@ -26,6 +26,7 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.Collections.synchronizedList
+import java.util.Collections.synchronizedMap
 
 @KoinApiExtension
 class StockManager : KoinComponent {
@@ -37,7 +38,9 @@ class StockManager : KoinComponent {
 
     private var instrumentsAll: MutableList<MarketInstrument> = mutableListOf()
     private var stocksAll: MutableList<Stock> = mutableListOf()
+    var indexAll: MutableList<Index> = mutableListOf()
 
+    private var stockClosePrices: Map<String, ClosePrice> = mutableMapOf()
     private var reportsStock: Map<String, ReportStock> = mutableMapOf()
     // все акции, которые участвуют в расчётах с учётом базовой сортировки из настроек
     var stocksStream: MutableList<Stock> = mutableListOf()
@@ -77,6 +80,22 @@ class StockManager : KoinComponent {
                     e.printStackTrace()
                 }
                 delay(1500) // 1 sec
+            }
+        }
+    }
+
+    fun startUpdateIndices() {
+        GlobalScope.launch(Dispatchers.Main) {
+            while (true) {
+                try {
+                    indexAll = synchronizedList(thirdPartyService.daagerIndices() as MutableList<Index>)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    delay(1000)
+                    continue
+                }
+
+                delay(1000 * 30)
             }
         }
     }
@@ -156,111 +175,21 @@ class StockManager : KoinComponent {
 
         // загрузить цену закрытия
         GlobalScope.launch(Dispatchers.Main) {
-            for (stock in stocksStream) {
-                var delay: Long = 0
-                var from = Utils.getLastClosingDate(true) + zone
-                var to = Utils.getLastClosingDate(false) + zone
-
-                val ticker = stock.marketInstrument.ticker
-                val figi = stock.marketInstrument.figi
-                val key = "closing_os_new_${ticker}_${from}"
-                var deltaDay = 0
-
-                var candle2359: Candle? = null
-                val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
-                val jsonClosingCandle = preferences.getString(key, null)
-                if (jsonClosingCandle != null) {
-                    candle2359 = gson.fromJson(jsonClosingCandle, Candle::class.java)
-                    stock.processCandle2359(candle2359)
-                    continue
-                }
-
+            while (true) {
                 try {
-                    while (candle2359 == null) {
-                        delay = kotlin.random.Random.Default.nextLong(400, 600)
-                        val candles = marketService.candles(figi, "1min", from, to)
-                        if (candles.candles.isNotEmpty()) {
-                            candle2359 = candles.candles.first()
-                        } else { // если свечей нет, то сделать шаг назад во времени
-                            deltaDay--
-                            from = Utils.getLastClosingDate(true, deltaDay) + zone
-                            to = Utils.getLastClosingDate(false, deltaDay) + zone
-                            delay(delay)
-
-                            if (deltaDay < 5) break
-                            continue
-                        }
-
-                        val data = gson.toJson(candle2359)
-                        val editor: SharedPreferences.Editor = preferences.edit()
-                        editor.putString(key, data)
-                        editor.apply()
-
-                        log("close price $ticker $candle2359")
-                    }
-
-                    if (candle2359 != null) stock.processCandle2359(candle2359)
-                } catch (e: java.lang.Exception) {
-                    e.printStackTrace()
-                }
-
-                if (Utils.isHighSpeedSession()) {
-                    delay *= 10
-                }
-                delay(delay)
-            }
-        }
-
-        val from = Utils.getLastClosingPostmarketUSDate() + zone
-        // загрузить постмаркет
-        GlobalScope.launch(Dispatchers.Main) {
-            for (stock in stocksStream) {
-                var delay: Long = 0
-                var ticker = stock.marketInstrument.ticker
-                if (ticker == "SPB@US") ticker = "SPB" // костыль, в yahoo тикер назван по-другому
-                ticker = ticker.replace(".", "-")
-
-                val key = "close_postmarket_us_new_${ticker}_${from}"
-
-                var yahooResponse: YahooResponse? = null
-                val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
-                val jsonClosing = preferences.getString(key, null)
-                if (jsonClosing != null) {
-                    yahooResponse = gson.fromJson(jsonClosing, YahooResponse::class.java)
-                    stock.processPostmarketPrice(yahooResponse)
-                    continue
-                }
-
-                try {
-                    if (yahooResponse == null) {
-                        yahooResponse = thirdPartyService.yahooPostmarket(ticker)
-                        if (yahooResponse != null) {
-                            val data = gson.toJson(yahooResponse)
-                            val editor: SharedPreferences.Editor = preferences.edit()
-                            editor.putString(key, data)
-                            editor.apply()
-                        }
-
-                        log("yahoo $yahooResponse $ticker")
-                        delay = kotlin.random.Random.Default.nextLong(200, 300)
-                    }
+                    stockClosePrices = synchronizedMap(thirdPartyService.daagerClosePrices() as MutableMap<String, ClosePrice>)
+                    break
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    delay(delay)
-                    continue
                 }
+                delay(1000)
+            }
 
-                if (yahooResponse != null) {
-                    stock.processPostmarketPrice(yahooResponse)
-                }
-
-                if (Utils.isHighSpeedSession()) {
-                    delay *= 10
-                }
-                delay(delay)
+            stocksStream.forEach {
+                it.closePrices = stockClosePrices[it.marketInstrument.ticker]
+                it.process2359()
             }
         }
-
     }
 
     private fun resetSubscription() {
@@ -270,20 +199,6 @@ class StockManager : KoinComponent {
                     .getCandleEventStream(
                         stocks,
                         Interval.MINUTE
-                    )
-                    .subscribeBy(
-                        onNext = {
-                            addCandle(it)
-                        },
-                        onError = {
-                            it.printStackTrace()
-                        }
-                    )
-
-                streamingAlorService
-                    .getCandleEventStream(
-                        stocks,
-                        Interval.WEEK
                     )
                     .subscribeBy(
                         onNext = {
@@ -335,20 +250,6 @@ class StockManager : KoinComponent {
                             it.printStackTrace()
                         }
                     )
-
-                streamingTinkoffService
-                    .getCandleEventStream(
-                        stocks.map { it.marketInstrument.figi },
-                        Interval.WEEK
-                    )
-                    .subscribeBy(
-                        onNext = {
-                            addCandle(it)
-                        },
-                        onError = {
-                            it.printStackTrace()
-                        }
-                    )
             }
 
             streamingTinkoffService
@@ -386,7 +287,7 @@ class StockManager : KoinComponent {
     }
 
     private fun addCandle(candle: Candle) {
-        if (SettingsManager.isAlorQoutes() && (candle.interval == Interval.MINUTE || candle.interval == Interval.WEEK || candle.interval == Interval.DAY)) {
+        if (SettingsManager.isAlorQoutes() && (candle.interval == Interval.MINUTE || candle.interval == Interval.DAY)) {
             val stock = stocksStream.find { it.marketInstrument.ticker == candle.figi }
             if (stock != null) {
                 stock.processCandle(candle)

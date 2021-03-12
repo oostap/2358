@@ -16,18 +16,22 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.project.ti2358.data.manager.DepositManager
+import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.WorkflowManager
+import com.project.ti2358.data.model.dto.reports.Index
 import com.project.ti2358.data.service.*
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toDollar
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import kotlin.math.abs
 
 @KoinApiExtension
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
+    val stockManager: StockManager by inject()
     val depositManager: DepositManager by inject()
     val workflowManager: WorkflowManager by inject()
 
@@ -49,7 +53,26 @@ class MainActivity : AppCompatActivity() {
 
         val header = navView.getHeaderView(0)
         val cashView: TextView = header.findViewById(R.id.free_cash)
-        cashView.text = ""
+
+        val index1NameView: TextView = header.findViewById(R.id.index_1_name)
+        val index2NameView: TextView = header.findViewById(R.id.index_2_name)
+        val index3NameView: TextView = header.findViewById(R.id.index_3_name)
+        val index4NameView: TextView = header.findViewById(R.id.index_4_name)
+
+        val index1ValueView: TextView = header.findViewById(R.id.index_1_value)
+        val index2ValueView: TextView = header.findViewById(R.id.index_2_value)
+        val index3ValueView: TextView = header.findViewById(R.id.index_3_value)
+        val index4ValueView: TextView = header.findViewById(R.id.index_4_value)
+
+        val index1ChangeView: TextView = header.findViewById(R.id.index_1_change)
+        val index2ChangeView: TextView = header.findViewById(R.id.index_2_change)
+        val index3ChangeView: TextView = header.findViewById(R.id.index_3_change)
+        val index4ChangeView: TextView = header.findViewById(R.id.index_4_change)
+
+        val index1EmojiView: TextView = header.findViewById(R.id.index_1_emoji)
+        val index2EmojiView: TextView = header.findViewById(R.id.index_2_emoji)
+        val index3EmojiView: TextView = header.findViewById(R.id.index_3_emoji)
+        val index4EmojiView: TextView = header.findViewById(R.id.index_4_emoji)
 
         val actionBarDrawerToggle: ActionBarDrawerToggle = object : ActionBarDrawerToggle(
             this,
@@ -59,12 +82,63 @@ class MainActivity : AppCompatActivity() {
             R.string.copy
         ) {
             override fun onDrawerOpened(drawerView: View) {
-                cashView.text = depositManager.getFreeCashUSD().toDollar()
+                updateInfo()
                 super.onDrawerOpened(drawerView)
             }
 
             override fun onDrawerClosed(drawerView: View) {
+                updateInfo()
                 super.onDrawerClosed(drawerView)
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {
+                updateInfo()
+                super.onDrawerStateChanged(newState)
+            }
+
+            fun updateInfo() {
+                cashView.text = depositManager.getFreeCashUSD().toDollar()
+
+                val indices = stockManager.indexAll
+
+                if (indices.size >= 4) {
+                    processIndex(indices[0], index1NameView, index1ValueView, index1ChangeView, index1EmojiView)
+                    processIndex(indices[1], index2NameView, index2ValueView, index2ChangeView, index2EmojiView)
+                    processIndex(indices[2], index3NameView, index3ValueView, index3ChangeView, index3EmojiView)
+                    processIndex(indices[3], index4NameView, index4ValueView, index4ChangeView, index4EmojiView, true)
+                }
+            }
+
+            fun processIndex(index: Index, name: TextView, value: TextView, change: TextView, emoji: TextView, invertedEmoji: Boolean = false) {
+                index.let {
+                    name.text = it.name
+                    value.text = "${it.value}"
+                    if (it.change_per < 0) {
+                        change.text = "${it.change_per}%"
+                        change.setTextColor(Utils.RED)
+                        value.setTextColor(Utils.RED)
+
+                        if (it.change_per < -1) {
+                            emoji.text = if (invertedEmoji) "🤑" else "😱"
+                        } else {
+                            emoji.text = if (invertedEmoji) "😍" else "😰"
+                        }
+                    } else {
+                        change.text = "+${it.change_per}%"
+                        change.setTextColor(Utils.GREEN)
+                        value.setTextColor(Utils.GREEN)
+
+                        if (it.change_per > 1) {
+                            emoji.text = if (invertedEmoji) "😱" else "🤑"
+                        } else {
+                            emoji.text = if (invertedEmoji) "😰" else "😍"
+                        }
+                    }
+
+                    if (abs(it.change_per) <= 0.15) {
+                        emoji.text = "😐"
+                    }
+                }
             }
         }
         drawerLayout.addDrawerListener(actionBarDrawerToggle)
