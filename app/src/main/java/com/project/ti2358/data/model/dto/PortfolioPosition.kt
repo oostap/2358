@@ -1,9 +1,7 @@
 package com.project.ti2358.data.model.dto
 
 import com.project.ti2358.data.manager.Stock
-import org.koin.core.component.KoinApiExtension
 
-@KoinApiExtension
 data class PortfolioPosition(
     val figi: String,
     val ticker: String,

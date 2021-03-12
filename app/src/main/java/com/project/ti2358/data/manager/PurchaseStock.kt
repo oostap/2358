@@ -18,12 +18,12 @@ enum class OrderStatus {
     NONE,
     ORDER_BUY_PREPARE,
     ORDER_BUY,
-    BUYED,
+    BOUGHT,
     ORDER_SELL_TRAILING,
     ORDER_SELL_PREPARE,
     ORDER_SELL,
     WAITING,
-    SELLED,
+    SOLD,
     CANCELED,
 
     WTF_1,
@@ -61,8 +61,8 @@ data class PurchaseStock(
     var currentTrailingTakeProfit: TrailingTakeProfit? = null
 
     companion object {
-        val DelayFast: Long = 200
-        val DelayLong: Long = 2000
+        const val DelayFast: Long = 200
+        const val DelayLong: Long = 2000
     }
 
     fun getPriceString(): String {
@@ -75,11 +75,11 @@ data class PurchaseStock(
             OrderStatus.WAITING -> "ждём ⏳"
             OrderStatus.ORDER_BUY_PREPARE -> "ордер: до покупки"
             OrderStatus.ORDER_BUY -> "ордер: покупка"
-            OrderStatus.BUYED -> "куплено! 💸"
+            OrderStatus.BOUGHT -> "куплено! 💸"
             OrderStatus.ORDER_SELL_TRAILING -> "трейлинг стоп 📈"
             OrderStatus.ORDER_SELL_PREPARE -> "ордер: до продажи"
             OrderStatus.ORDER_SELL -> "ордер: продажа 🙋"
-            OrderStatus.SELLED -> "продано! 🤑"
+            OrderStatus.SOLD -> "продано! 🤑"
             OrderStatus.CANCELED -> "отменена! шок, скринь! 😱"
             OrderStatus.WTF_1 -> "wtf 1"
             OrderStatus.WTF_2 -> "wtf 2"
@@ -144,7 +144,7 @@ data class PurchaseStock(
 
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
-                        status = OrderStatus.BUYED
+                        status = OrderStatus.BOUGHT
                         break
                     }
 
@@ -180,7 +180,7 @@ data class PurchaseStock(
 
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position == null) { // продано!
-                        status = OrderStatus.SELLED
+                        status = OrderStatus.SOLD
                         break
                     }
                 }
@@ -235,7 +235,7 @@ data class PurchaseStock(
 
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
-                        status = OrderStatus.BUYED
+                        status = OrderStatus.BOUGHT
                         break
                     }
 
@@ -280,7 +280,7 @@ data class PurchaseStock(
 
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position == null) { // продано!
-                        status = OrderStatus.SELLED
+                        status = OrderStatus.SOLD
                         Utils.showToastAlert("$ticker: продано!")
                         break
                     }
@@ -338,7 +338,7 @@ data class PurchaseStock(
 
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
-                        status = OrderStatus.BUYED
+                        status = OrderStatus.BOUGHT
                         Utils.showToastAlert("$ticker: куплено!")
                         break
                     }
@@ -384,7 +384,7 @@ data class PurchaseStock(
 
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position == null) { // продано!
-                        status = OrderStatus.SELLED
+                        status = OrderStatus.SOLD
                         Utils.showToastAlert("$ticker: продано!")
                         break
                     }
@@ -448,7 +448,7 @@ data class PurchaseStock(
 
                     // если позиция появилась и ордер исчез
                     if (position != null && position.lots >= lots/* && order == null*/) {
-                        status = OrderStatus.BUYED
+                        status = OrderStatus.BOUGHT
                         Utils.showToastAlert("$ticker: куплено!")
                         break
                     }
@@ -584,7 +584,7 @@ data class PurchaseStock(
 
                     position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
                     if (position == null) { // продано!
-                        status = OrderStatus.SELLED
+                        status = OrderStatus.SOLD
                         Utils.showToastAlert("$ticker: продано!")
                         break
                     }
@@ -600,11 +600,6 @@ data class PurchaseStock(
         GlobalScope.launch(Dispatchers.Main) {
             try {
                 val figi = stock.marketInstrument.figi
-                if (figi == "") {
-                    status = OrderStatus.WTF_1
-                    return@launch
-                }
-
                 val pos = depositManager.getPositionForFigi(figi)
                 if (pos == null) {
                     status = OrderStatus.WTF_2
@@ -664,7 +659,7 @@ data class PurchaseStock(
 
                     val p = depositManager.getPositionForFigi(figi)
                     if (p == null) { // продано!
-                        status = OrderStatus.SELLED
+                        status = OrderStatus.SOLD
                         break
                     }
                 }

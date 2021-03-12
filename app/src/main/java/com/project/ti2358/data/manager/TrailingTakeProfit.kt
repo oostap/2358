@@ -4,9 +4,7 @@ import com.project.ti2358.service.log
 import com.project.ti2358.service.toDollar
 import com.project.ti2358.service.toPercent
 import kotlinx.coroutines.delay
-import org.koin.core.component.KoinApiExtension
 
-@KoinApiExtension
 data class TrailingTakeProfit(
     val stock: Stock,
     val buyPrice: Double,

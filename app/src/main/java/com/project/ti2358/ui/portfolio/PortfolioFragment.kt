@@ -131,7 +131,7 @@ class PortfolioFragment : Fragment() {
 
             val avg = item.getAveragePrice()
             holder.volumePiecesView.text = "${item.lots} шт."
-            holder.priceView.text = "${avg}"
+            holder.priceView.text = "$avg"
 
             val profit = item.getProfitAmount()
             holder.changePriceAbsoluteView.text = "%.2f $".format(profit)

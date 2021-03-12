@@ -51,7 +51,7 @@ class StrategyRocketFinishFragment : Fragment() {
         }
 
         val buttonStart = view.findViewById<Button>(R.id.buttonStart)
-        if (isServiceRunning(Strategy2358Service::class.java)) {
+        if (Utils.isServiceRunning(requireContext(), Strategy2358Service::class.java)) {
             buttonStart.text = getString(R.string.service_2358_stop)
         } else {
             buttonStart.text = getString(R.string.service_2358_start)
@@ -89,17 +89,6 @@ class StrategyRocketFinishFragment : Fragment() {
 //        )
 
         return view
-    }
-
-    private fun isServiceRunning(serviceClass: Class<*>): Boolean {
-        val context = requireContext()
-        val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager?
-        for (service in manager!!.getRunningServices(Int.MAX_VALUE)) {
-            if (serviceClass.name == service.service.className) {
-                return true
-            }
-        }
-        return false
     }
 
     class ItemRocketRecyclerViewAdapter(

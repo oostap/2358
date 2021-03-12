@@ -35,6 +35,8 @@ class StockManager : KoinComponent {
     private val streamingTinkoffService: StreamingTinkoffService by inject()
     private val streamingAlorService: StreamingAlorService by inject()
     private val alorManager: AlorManager by inject()
+    private val strategyTazik: StrategyTazik by inject()
+    private val strategyRocket: StrategyRocket by inject()
 
     private var instrumentsAll: MutableList<MarketInstrument> = mutableListOf()
     private var stocksAll: MutableList<Stock> = mutableListOf()
@@ -171,7 +173,6 @@ class StockManager : KoinComponent {
 
     private fun baseSortStocks() {
         stocksStream = stocksAll.filter { SettingsManager.isAllowCurrency(it.marketInstrument.currency) }.toMutableList()
-        val zone = Utils.getTimezoneCurrent()
 
         // загрузить цену закрытия
         GlobalScope.launch(Dispatchers.Main) {
@@ -289,15 +290,17 @@ class StockManager : KoinComponent {
     private fun addCandle(candle: Candle) {
         if (SettingsManager.isAlorQoutes() && (candle.interval == Interval.MINUTE || candle.interval == Interval.DAY)) {
             val stock = stocksStream.find { it.marketInstrument.ticker == candle.figi }
-            if (stock != null) {
-                stock.processCandle(candle)
-                return
-            }
+            stock?.processCandle(candle)
         } else {
             val stock = stocksStream.find { it.marketInstrument.figi == candle.figi }
-            if (stock != null) {
-                stock.processCandle(candle)
-                return
+            stock?.processCandle(candle)
+        }
+
+        if (candle.interval == Interval.DAY) {
+            val stock = stocksStream.find { it.marketInstrument.figi == candle.figi || it.marketInstrument.ticker == candle.figi }
+            stock?.let {
+                strategyTazik.processStrategy(stock)
+                strategyRocket.processStrategy(stock)
             }
         }
     }

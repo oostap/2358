@@ -5,29 +5,16 @@ import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.MarketInstrument
 import com.project.ti2358.data.model.dto.reports.ClosePrice
-import com.project.ti2358.data.service.MarketService
 import com.project.ti2358.service.log
-import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-
-@KoinApiExtension
 data class Stock(
     var marketInstrument: MarketInstrument
-) : KoinComponent {
+) {
     var alterName: String = ""
     var reportDate: String? = ""
     var dividendDate: String? = ""
-
-    val strategy1728: Strategy1728 by inject()
-    val strategyTazik: StrategyTazik by inject()
-    val strategyRocket: StrategyRocket by inject()
-
-    private val marketService: MarketService by inject()
-    private val stockManager: StockManager by inject()
 
     var middlePrice: Double = 0.0
     var dayVolumeCash: Double = 0.0
@@ -121,23 +108,16 @@ data class Stock(
 //            log("ALOR = ${marketInstrument.ticker} = $candle")
 //        }
 
-        if (diffInHours > 29) {
+        if (diffInHours > 20) {
             log(candle.toString() + marketInstrument.ticker)
             return
         }
 
-        if (diffInHours > 20) {
-
-        } else {
-            candleToday = candle
-        }
+        candleToday = candle
 
         updateChangeToday()
         updateChange2359()
         updateChangePostmarket()
-
-        strategyTazik.processStrategy(this)
-        strategyRocket.processStrategy(this)
     }
 
     private fun processHour1Candle(candle: Candle) {
@@ -171,7 +151,7 @@ data class Stock(
         // проверка на стратегию 1728
         val timeCandle = Calendar.getInstance()
         timeCandle.time = candle.time
-        val timeTrackStart = strategy1728.strategyStartTime
+        val timeTrackStart = Strategy1728.strategyStartTime
 
         if (timeCandle.time >= timeTrackStart.time) {
             exists = false
@@ -216,10 +196,6 @@ data class Stock(
 
         closePrices?.let {
             return it.close_post
-        }
-
-        closePrices?.let {
-            return it.close_post_yahoo ?: 0.0
         }
 
         return 0.0

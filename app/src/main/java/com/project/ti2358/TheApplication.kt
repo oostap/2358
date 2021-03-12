@@ -5,13 +5,13 @@ import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.WorkflowManager
 import org.koin.core.component.KoinApiExtension
 
-@KoinApiExtension
 class TheApplication : Application() {
 
     companion object {
         lateinit var application: TheApplication
     }
 
+    @KoinApiExtension
     override fun onCreate() {
         super.onCreate()
 

@@ -15,11 +15,14 @@ class Strategy1728() : KoinComponent {
     var stocksSelected: MutableList<Stock> = mutableListOf()
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
 
-    lateinit var strategyStartTime: Calendar
     var currentSort: Sorting = Sorting.DESCENDING
 
     init {
         resetStrategy()
+    }
+
+    companion object {
+        lateinit var strategyStartTime: Calendar
     }
 
     fun process(): MutableList<Stock> {
