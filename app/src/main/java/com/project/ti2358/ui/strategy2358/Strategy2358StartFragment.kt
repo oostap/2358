@@ -38,12 +38,7 @@ class Strategy2358StartFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_2358_start, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
-        list.addItemDecoration(
-            DividerItemDecoration(
-                list.context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
+        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
 
         if (list is RecyclerView) {
             with(list) {
@@ -126,14 +121,14 @@ class Strategy2358StartFragment : Fragment() {
             holder.checkBoxView.setOnCheckedChangeListener(null)
             holder.checkBoxView.isChecked = strategy2358.isSelected(item)
 
-            holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.marketInstrument.ticker}"
             holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
 
             val volumeCash = item.dayVolumeCash / 1000f / 1000f
-            holder.volumeTodayCashView.text = "%.2f B$".format(volumeCash)
+            holder.volumeTodayCashView.text = "%.2fB$".format(volumeCash)
 
             holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toDollar()
             holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()

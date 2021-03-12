@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -38,12 +39,7 @@ class Strategy2358FinishFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_2358_finish, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
-        list.addItemDecoration(
-            DividerItemDecoration(
-                list.context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
+        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
 
         if (list is RecyclerView) {
             with(list) {
@@ -95,7 +91,7 @@ class Strategy2358FinishFragment : Fragment() {
         }
     }
 
-    class Item2358RecyclerViewAdapter(
+    inner class Item2358RecyclerViewAdapter(
         private var values: List<PurchaseStock>
     ) : RecyclerView.Adapter<Item2358RecyclerViewAdapter.ViewHolder>() {
 
@@ -105,16 +101,15 @@ class Strategy2358FinishFragment : Fragment() {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.fragment_2358_finish_item, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_2358_finish_item, parent, false)
             return ViewHolder(view)
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
-            holder.position = item
+            holder.purchaseStock = item
 
-            holder.tickerView.text = "${position}. ${item.stock.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.stock.marketInstrument.ticker}"
             holder.priceView.text = item.stock.getPriceString()
 
             holder.purchaseLotsView.text = "${item.lots} шт."
@@ -128,24 +123,29 @@ class Strategy2358FinishFragment : Fragment() {
             holder.buttonMinus.setOnClickListener {
                 refreshPercent(holder, -0.05)
             }
+
+            holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
+                holder.purchaseStock.trailingTake = checked
+                refreshPercent(holder, 0.0)
+            }
         }
 
-        fun refreshPercent(holder: ViewHolder, delta: Double) {
-            if (SettingsManager.is2358ChainProfit()) {
-                holder.position.addPriceProfit2358Percent(delta)
-                holder.profitPriceFromView.text = holder.position.percentProfitSellFrom.toPercent()
-                holder.profitPriceToView.text = holder.position.percentProfitSellTo.toPercent()
+        private fun refreshPercent(holder: ViewHolder, delta: Double) {
+            if (holder.purchaseStock.trailingTake) {
+                holder.purchaseStock.addPriceProfit2358TrailingTakeProfit(delta)
+                holder.profitPriceFromView.text = holder.purchaseStock.trailingTakeActivationPercent.toPercent()
+                holder.profitPriceToView.text = holder.purchaseStock.trailingTakeStopDelta.toPercent()
             } else {
-                holder.position.addPriceProfit2358TrailingTakeProfit(delta)
-                holder.profitPriceFromView.text = holder.position.trailingStopActivationPercent.toPercent()
-                holder.profitPriceToView.text = holder.position.trailingStopDelta.toPercent()
+                holder.purchaseStock.addPriceProfit2358Percent(delta)
+                holder.profitPriceFromView.text = holder.purchaseStock.percentProfitSellFrom.toPercent()
+                holder.profitPriceToView.text = holder.purchaseStock.percentProfitSellTo.toPercent()
             }
         }
 
         override fun getItemCount(): Int = values.size
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            lateinit var position: PurchaseStock
+            lateinit var purchaseStock: PurchaseStock
 
             val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
             val priceView: TextView = view.findViewById(R.id.stock_item_price)
@@ -158,6 +158,8 @@ class Strategy2358FinishFragment : Fragment() {
 
             val buttonPlus: Button = view.findViewById(R.id.buttonPlus)
             val buttonMinus: Button = view.findViewById(R.id.buttonMinus)
+
+            val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
         }
     }
 }

@@ -107,7 +107,7 @@ class Strategy1728FinishFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
-            holder.tickerView.text = "${position}. ${item.stock.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.stock.marketInstrument.ticker}"
             holder.priceView.text = "${item.stock.getPriceDouble()} $"
 
             holder.purchaseLotsView.text = "${item.lots} шт."

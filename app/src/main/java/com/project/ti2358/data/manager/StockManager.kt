@@ -231,17 +231,23 @@ class StockManager : KoinComponent {
                     continue
                 }
 
-                if (yahooResponse == null) {
-                    yahooResponse = thirdPartyService.yahooPostmarket(ticker)
-                    if (yahooResponse != null) {
-                        val data = gson.toJson(yahooResponse)
-                        val editor: SharedPreferences.Editor = preferences.edit()
-                        editor.putString(key, data)
-                        editor.apply()
-                    }
+                try {
+                    if (yahooResponse == null) {
+                        yahooResponse = thirdPartyService.yahooPostmarket(ticker)
+                        if (yahooResponse != null) {
+                            val data = gson.toJson(yahooResponse)
+                            val editor: SharedPreferences.Editor = preferences.edit()
+                            editor.putString(key, data)
+                            editor.apply()
+                        }
 
-                    log("yahoo $yahooResponse $ticker")
-                    delay = kotlin.random.Random.Default.nextLong(200, 300)
+                        log("yahoo $yahooResponse $ticker")
+                        delay = kotlin.random.Random.Default.nextLong(200, 300)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    delay(delay)
+                    continue
                 }
 
                 if (yahooResponse != null) {

@@ -81,14 +81,14 @@ class PortfolioFragment : Fragment() {
             delay(2000)
             val version = thirdPartyService.githubVersion()
             val currentVersion = try {
-                val pInfo: PackageInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
+                val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(TheApplication.application.applicationContext.packageName, 0)
                 pInfo.versionName
             } catch (e: PackageManager.NameNotFoundException) {
                 version
             }
 
             if (version != currentVersion) { // показать окно обновления
-                Utils.showUpdateAlert(requireContext(), currentVersion, version)
+                Utils.showUpdateAlert(TheApplication.application.applicationContext, currentVersion, version)
             }
         }
         return view
@@ -127,7 +127,7 @@ class PortfolioFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
-            holder.tickerView.text = "${position}. ${item.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.ticker}"
 
             val avg = item.getAveragePrice()
             holder.volumePiecesView.text = "${item.lots} шт."

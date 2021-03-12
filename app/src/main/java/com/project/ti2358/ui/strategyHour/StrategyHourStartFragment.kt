@@ -109,7 +109,7 @@ class StrategyHourStartFragment : Fragment() {
                 startPrice = item.changePriceHour2Start
             }
 
-            holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.marketInstrument.ticker}"
             holder.priceView.text = "${startPrice.toDollar()} ➡ ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f

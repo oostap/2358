@@ -107,7 +107,7 @@ class StrategyRocketStartFragment : Fragment() {
 //            holder.checkBoxView.setOnCheckedChangeListener(null)
 //            holder.checkBoxView.isChecked = strategyRocket.isSelected(item)
 
-            holder.tickerView.text = "${position}. ${item.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.marketInstrument.ticker}"
             holder.priceView.text = item.getPriceString()
 
             val volume = item.getTodayVolume() / 1000f

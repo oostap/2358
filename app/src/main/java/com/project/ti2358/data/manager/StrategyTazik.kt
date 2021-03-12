@@ -25,7 +25,7 @@ class StrategyTazik : KoinComponent {
     var stocksSelected: MutableList<Stock> = mutableListOf()
 
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
-    var stocksBuyed: MutableList<Stock> = mutableListOf()
+    var stocksTickerBuyed: MutableList<String> = mutableListOf()
 
     var basicPercentLimitPriceChange: Double = 0.0
     var started: Boolean = false
@@ -238,14 +238,14 @@ class StrategyTazik : KoinComponent {
 
     fun startStrategy() {
         started = true
-        stocksBuyed.clear()
+        stocksTickerBuyed.clear()
 
         fixPrice()
     }
 
     fun stopStrategy() {
         started = false
-        stocksBuyed.clear()
+        stocksTickerBuyed.clear()
     }
 
     fun addBasicPercentLimitPriceChange(sign: Int) {
@@ -259,7 +259,7 @@ class StrategyTazik : KoinComponent {
     fun buyFirstOne() {
         stocksToPurchase.sortBy { (100 * it.stock.priceNow) / it.stock.priceTazik - 100 }
         for (purchase in stocksToPurchase) {
-            if (purchase.stock in stocksBuyed) continue
+            if (purchase.stock.marketInstrument.ticker in stocksTickerBuyed) continue
 
             processBuy(purchase, purchase.stock)
             break
@@ -269,14 +269,16 @@ class StrategyTazik : KoinComponent {
     fun processStrategy(stock: Stock) {
         if (!started) return
 
+        val ticker = stock.marketInstrument.ticker
+
         // если бумага не в списке скана - игнорируем
-        val sorted = stocksToPurchase.filter { it.stock.marketInstrument.ticker == stock.marketInstrument.ticker }
+        val sorted = stocksToPurchase.filter { it.stock.marketInstrument.ticker == ticker }
         if (sorted.isEmpty()) return
 
         val purchase = sorted.first()
         stock.candle1000?.let {
             // уже брали бумагу?
-            if (stock in stocksBuyed) return
+            if (ticker in stocksTickerBuyed) return
 
             val change = (100 * it.closingPrice) / stock.priceTazik - 100
             if (change >= purchase.percentLimitPriceChange) return
@@ -331,13 +333,13 @@ class StrategyTazik : KoinComponent {
                     purchase.buyLimitFromBid(buyPrice, finalProfit)
                 }
             }
-        }
 
-        // завершение стратегии
-        val parts = SettingsManager.getTazikPurchaseParts()
-        stocksBuyed.add(stock)
-        if (stocksBuyed.size >= parts) {
-            stopStrategy()
+            // завершение стратегии
+            val parts = SettingsManager.getTazikPurchaseParts()
+            stocksTickerBuyed.add(stock.marketInstrument.ticker)
+            if (stocksTickerBuyed.size >= parts) {
+                stopStrategy()
+            }
         }
     }
 }

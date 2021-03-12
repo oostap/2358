@@ -1,5 +1,6 @@
 package com.project.ti2358.data.manager
 
+import com.project.ti2358.service.toDollar
 import com.project.ti2358.service.toPercent
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -91,22 +92,27 @@ class Strategy2358() : KoinComponent {
             var exists = false
             for (p in stocksToPurchase) {
                 if (p.stock.marketInstrument.ticker == stock.marketInstrument.ticker) {
-                    purchase.percentProfitSellFrom = p.percentProfitSellFrom
-                    purchase.percentProfitSellTo = p.percentProfitSellTo
+                    purchase.apply {
+                        percentProfitSellFrom = p.percentProfitSellFrom
+                        percentProfitSellTo = p.percentProfitSellTo
 
-                    purchase.trailingStopActivationPercent = p.trailingStopActivationPercent
-                    purchase.trailingStopDelta = p.trailingStopDelta
+                        trailingTake = p.trailingTake
+                        trailingTakeActivationPercent = p.trailingTakeActivationPercent
+                        trailingTakeStopDelta = p.trailingTakeStopDelta
+                    }
                     exists = true
                     break
                 }
             }
 
             if (!exists) {
-                purchase.percentProfitSellFrom = SettingsManager.get2358TakeProfitFrom()
-                purchase.percentProfitSellTo = SettingsManager.get2358TakeProfitTo()
+                purchase.apply {
+                    percentProfitSellFrom = SettingsManager.get2358TakeProfitFrom()
+                    percentProfitSellTo = SettingsManager.get2358TakeProfitTo()
 
-                purchase.trailingStopActivationPercent = SettingsManager.get2358TrailingTakeProfitPercent()
-                purchase.trailingStopDelta = SettingsManager.get2358TrailingTakeProfitPercentDelta()
+                    trailingTakeActivationPercent = SettingsManager.get2358TrailingTakeProfitPercent()
+                    trailingTakeStopDelta = SettingsManager.get2358TrailingTakeProfitPercentDelta()
+                }
             }
 
             purchases.add(purchase)
@@ -122,8 +128,6 @@ class Strategy2358() : KoinComponent {
 
             if (reset) { // запоминаем % подготовки, чтобы после проверить изменение
                 purchase.stock.changeOnStartTimer = purchase.stock.changePrice2359DayPercent
-                purchase.percentProfitSellFrom = SettingsManager.get2358TakeProfitFrom()
-                purchase.percentProfitSellTo = SettingsManager.get2358TakeProfitTo()
             }
         }
 
@@ -132,35 +136,32 @@ class Strategy2358() : KoinComponent {
 
     fun getTotalPurchaseString(): String {
         var value = 0.0
-        for (stock in stocksToPurchase) {
-            value += stock.lots * stock.stock.getPriceDouble()
-        }
-        return "%.1f$".format(value)
+        stocksToPurchase.forEach { value += it.lots * it.stock.getPriceDouble() }
+        return value.toDollar()
     }
 
     fun getTotalPurchasePieces(): Int {
         var value = 0
-        for (stock in stocksToPurchase) {
-            value += stock.lots
-        }
+        stocksToPurchase.forEach { value += it.lots }
         return value
     }
 
     fun getNotificationTextShort(): String {
-        val price = getTotalPurchaseString()
         var tickers = ""
-        for (stock in stocksToPurchase) {
-            tickers += "${stock.lots}*${stock.stock.marketInstrument.ticker} "
-        }
-
-        return "$price:\n$tickers"
+        stocksToPurchase.forEach { tickers += "${it.lots}*${it.stock.marketInstrument.ticker} " }
+        return "${getTotalPurchaseString()}:\n$tickers"
     }
 
     fun getNotificationTextLong(): String {
         var tickers = ""
-        for (stock in stocksToPurchase) {
-            val p = "%.1f$".format(stock.lots * stock.stock.getPriceDouble())
-            tickers += "${stock.stock.marketInstrument.ticker}*${stock.lots} = ${p}, ${stock.percentProfitSellFrom.toPercent()}-${stock.percentProfitSellTo.toPercent()}, ${stock.getStatusString()}\n"
+        for (purchase in stocksToPurchase) {
+            val p = "%.1f$".format(purchase.lots * purchase.stock.getPriceDouble())
+            tickers += "${purchase.stock.marketInstrument.ticker}*${purchase.lots} = ${p}, "
+            tickers += if (purchase.trailingTake) {
+                "ТТ:${purchase.trailingTakeActivationPercent.toPercent()}/${purchase.trailingTakeStopDelta.toPercent()}, ${purchase.getStatusString()} ${purchase.currentTrailingTakeProfit?.currentTakeProfitValue ?: ""}\n"
+            } else {
+                "Л:${purchase.percentProfitSellFrom.toPercent()}/${purchase.percentProfitSellTo.toPercent()}, ${purchase.getStatusString()}\n"
+            }
         }
 
         return tickers
@@ -171,12 +172,6 @@ class Strategy2358() : KoinComponent {
         started = true
 
         val localPurchases = getPurchaseStock(false)
-        for (purchase in localPurchases) {
-            if (SettingsManager.is2358ChainProfit()) {
-                purchase.buyLimitFromAsk2358WithChainTakeProfit()
-            } else {
-                purchase.buyFromAsk2358WithTrailingTakeProfit()
-            }
-        }
+        localPurchases.forEach { it.buyFromAsk2358() }
     }
 }

@@ -92,7 +92,7 @@ class Strategy1000SellStartFragment : Fragment() {
             val item = values[position]
             holder.position = item
 
-            holder.tickerView.text = "${position}. ${item.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.ticker}"
 
             holder.checkBoxView.setOnCheckedChangeListener(null)
             holder.checkBoxView.isChecked = strategy1000Sell.isSelected(item)

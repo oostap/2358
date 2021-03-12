@@ -39,6 +39,7 @@
     <string name="ticker">тикер</string>
     <string name="volume">объём</string>
     <string name="change">изменение</string>
+    <string name="trailing_take">трейлинг тейк ✔</string>
 
     <string name="menu_settings">Настройки</string>
     <string name="menu_diagnostics">Диагностика</string>
@@ -89,7 +90,6 @@
     <string name="stocks_2358_purchase_volume">Общая сумма покупки в $</string>
     <string name="stocks_2358_purchase_time">Во сколько тарим? МСК</string>
 
-    <string name="stocks_2358_take_profit_chain">Продажа лесенкой</string>
     <string name="stocks_2358_take_profit_from">Заявка на продажу от в % (0 = не создавать)</string>
     <string name="stocks_2358_take_profit_to">Заявка на продажу до в % (0 = не создавать)</string>
     <string name="stocks_2358_take_profit_step">Количество заявок в равных долях</string>
@@ -152,12 +152,10 @@
     <string name="setting_key_2358_purchase_volume">2358_purchase_volume</string>
     <string name="setting_key_2358_purchase_time">2358_purchase_time</string>
 
-    <string name="setting_key_2358_take_profit_chain">2358_take_profit_chain</string>
     <string name="setting_key_2358_take_profit_from">2358_take_profit_from</string>
     <string name="setting_key_2358_take_profit_to">2358_take_profit_to</string>
     <string name="setting_key_2358_take_profit_step">2358_take_profit_step</string>
 
-    <string name="setting_key_2358_trailing_take_profit">2358_trailing_take_profit</string>
     <string name="setting_key_2358_trailing_take_profit_percent">2358_trailing_take_profit_percent</string>
     <string name="setting_key_2358_trailing_take_profit_percent_delta">2358_trailing_take_profit_percent_delta</string>
 

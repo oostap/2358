@@ -106,11 +106,6 @@ class SettingsManager {
             }
         }
 
-        fun is2358ChainProfit(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_take_profit_chain)
-            return preferences.getBoolean(key, true)
-        }
-
         fun get2358TakeProfitFrom(): Double {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_take_profit_from)
             val value: String? = preferences.getString(key, "1.0")
@@ -139,11 +134,6 @@ class SettingsManager {
             } catch (e: Exception) {
                 1
             }
-        }
-
-        fun is2358TrailingTakeProfit(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_trailing_take_profit)
-            return preferences.getBoolean(key, false)
         }
 
         fun get2358TrailingTakeProfitPercent(): Double {
@@ -358,7 +348,11 @@ class SettingsManager {
 
         fun getTazikNearestTime(): String {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_times2)
-            val time = preferences.getString(key, "06:59:50")
+            var time = preferences.getString(key, "06:59:50")
+
+            time = time?.replace(" ", "")
+            time = time?.replace("\n", "")
+
             if (time != null && time != "") {
                 val times = time.split(",").toTypedArray()
 

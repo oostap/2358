@@ -155,6 +155,10 @@ class DepositManager : KoinComponent {
         return portfolioPositions.find { it.figi == figi }
     }
 
+    public fun getOrderForFigi(figi: String): Order? {
+        return orders.find { it.figi == figi }
+    }
+
     private fun baseSortPortfolio() {
         portfolioPositions.sortByDescending { abs(it.lots * it.getAveragePrice()) }
 

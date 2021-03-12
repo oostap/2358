@@ -13,8 +13,10 @@ data class TrailingTakeProfit(
     var trailingStopActivationPercent: Double,
     var trailingStopDelta: Double,
 ) {
+    var currentTakeProfitValue = 0.0
+
     suspend fun process(): Double {
-        var currentTakeProfitValue = 0.0
+        currentTakeProfitValue = 0.0
         var currentPrice = buyPrice
         val profitSellPrice: Double
         log("TRAILING_STOP покупка по $buyPrice, активация на $trailingStopActivationPercent%, стоп $trailingStopDelta%")
