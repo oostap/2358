@@ -38,12 +38,7 @@ class Strategy1728StartFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_1728_start, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
-        list.addItemDecoration(
-            DividerItemDecoration(
-                list.context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
+        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
 
         if (list is RecyclerView) {
             with(list) {
@@ -104,7 +99,7 @@ class Strategy1728StartFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            holder.tickerView.text = "${position + 1}) ${item.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
             holder.priceView.text = item.getPrice1728String()
 
             val volume = item.getTodayVolume() / 1000f
@@ -122,7 +117,7 @@ class Strategy1728StartFragment : Fragment() {
             }
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.marketInstrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
             }
 
             holder.buttonBuy.setOnClickListener {

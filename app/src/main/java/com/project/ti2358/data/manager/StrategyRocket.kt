@@ -53,7 +53,7 @@ class StrategyRocket() : KoinComponent {
         var alive = SettingsManager.getRocketNotifyAlive()
 
         if (counter > 0) {
-            updateNotification(stock.marketInstrument.ticker)
+            updateNotification(stock.instrument.ticker)
             counter--
         }
     }

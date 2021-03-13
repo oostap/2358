@@ -7,10 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -107,7 +105,7 @@ class StrategyRocketStartFragment : Fragment() {
 //            holder.checkBoxView.setOnCheckedChangeListener(null)
 //            holder.checkBoxView.isChecked = strategyRocket.isSelected(item)
 
-            holder.tickerView.text = "${position + 1}) ${item.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
             holder.priceView.text = item.getPriceString()
 
             val volume = item.getTodayVolume() / 1000f
@@ -130,7 +128,7 @@ class StrategyRocketStartFragment : Fragment() {
 
             holder.itemView.setOnClickListener {
                 val browserIntent =
-                    Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tinkoff.ru/invest/stocks/${holder.stock.marketInstrument.ticker}/"))
+                    Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tinkoff.ru/invest/stocks/${holder.stock.instrument.ticker}/"))
                 startActivity(browserIntent)
             }
         }

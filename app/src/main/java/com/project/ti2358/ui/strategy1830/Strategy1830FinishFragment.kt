@@ -1,7 +1,5 @@
 package com.project.ti2358.ui.strategy1830
 
-import android.app.ActivityManager
-import android.content.Context.ACTIVITY_SERVICE
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.manager.Strategy1830
-import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -103,7 +100,7 @@ class Strategy1830FinishFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
-            holder.tickerView.text = "${position + 1}) ${item.stock.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.stock.instrument.ticker}"
             holder.priceView.text = item.stock.getPriceString()
 
             holder.purchaseLotsView.text = "${item.lots} шт."

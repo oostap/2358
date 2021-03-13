@@ -109,7 +109,7 @@ class Strategy2358FinishFragment : Fragment() {
             val item = values[position]
             holder.purchaseStock = item
 
-            holder.tickerView.text = "${position + 1}) ${item.stock.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.stock.instrument.ticker}"
             holder.priceView.text = item.stock.getPriceString()
 
             holder.purchaseLotsView.text = "${item.lots} шт."

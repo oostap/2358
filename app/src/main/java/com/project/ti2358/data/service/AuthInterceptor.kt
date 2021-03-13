@@ -3,6 +3,7 @@ package com.project.ti2358.data.service
 import com.project.ti2358.data.manager.SettingsManager
 import okhttp3.Interceptor
 import okhttp3.Response
+import org.koin.core.component.KoinApiExtension
 
 class AuthInterceptor() : Interceptor {
 
@@ -11,8 +12,18 @@ class AuthInterceptor() : Interceptor {
         const val BEARER_PREFIX = "Bearer "
     }
 
+    @KoinApiExtension
     override fun intercept(chain: Interceptor.Chain): Response {
-        if (chain.request().url.host.contains("tinkoff")) {
+        if ("d" + "a" + "a" + "g" + "e" + "r" in chain.request().url.host) {
+            return chain.proceed(
+                chain.request().newBuilder().addHeader(
+                    AUTHORIZATION_HEADER,
+                    BEARER_PREFIX + "bnVybGFuJm9zdGFwIGNvbGxhYg"
+                ).build()
+            )
+        }
+
+        if ("tinkoff" in chain.request().url.host) {
             return chain.proceed(
                 chain.request().newBuilder().addHeader(
                     AUTHORIZATION_HEADER,
@@ -20,6 +31,7 @@ class AuthInterceptor() : Interceptor {
                 ).build()
             )
         }
+
         return chain.proceed(chain.request().newBuilder().build())
     }
 }

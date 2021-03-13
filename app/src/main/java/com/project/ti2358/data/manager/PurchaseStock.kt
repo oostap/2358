@@ -124,7 +124,7 @@ data class PurchaseStock(
                         status = OrderStatus.ORDER_BUY_PREPARE
                         buyMarketOrder = ordersService.placeMarketOrder(
                             lots,
-                            stock.marketInstrument.figi,
+                            stock.instrument.figi,
                             OperationType.BUY,
                             depositManager.getActiveBrokerAccountId()
                         )
@@ -142,7 +142,7 @@ data class PurchaseStock(
                 while (counter > 0) {
                     depositManager.refreshDeposit()
 
-                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
+                    position = depositManager.getPositionForFigi(stock.instrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
                         status = OrderStatus.BOUGHT
                         break
@@ -161,7 +161,7 @@ data class PurchaseStock(
                         position?.let {
                             sellLimitOrder = ordersService.placeLimitOrder(
                                 it.lots,
-                                stock.marketInstrument.figi,
+                                stock.instrument.figi,
                                 sellPrice,
                                 OperationType.SELL,
                                 depositManager.getActiveBrokerAccountId()
@@ -178,7 +178,7 @@ data class PurchaseStock(
                 while (true) {
                     delay(DelayLong)
 
-                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
+                    position = depositManager.getPositionForFigi(stock.instrument.figi)
                     if (position == null) { // продано!
                         status = OrderStatus.SOLD
                         break
@@ -205,7 +205,7 @@ data class PurchaseStock(
                         status = OrderStatus.ORDER_BUY_PREPARE
                         buyLimitOrder = ordersService.placeLimitOrder(
                             lots,
-                            stock.marketInstrument.figi,
+                            stock.instrument.figi,
                             buyPrice,
                             OperationType.BUY,
                             depositManager.getActiveBrokerAccountId()
@@ -218,7 +218,7 @@ data class PurchaseStock(
                     delay(DelayFast)
                 }
 
-                val ticker = stock.marketInstrument.ticker
+                val ticker = stock.instrument.ticker
                 Utils.showToastAlert("$ticker: покупка по $buyPrice")
 
                 delay(DelayFast)
@@ -233,7 +233,7 @@ data class PurchaseStock(
                         e.printStackTrace()
                     }
 
-                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
+                    position = depositManager.getPositionForFigi(stock.instrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
                         status = OrderStatus.BOUGHT
                         break
@@ -260,7 +260,7 @@ data class PurchaseStock(
                             status = OrderStatus.ORDER_SELL_PREPARE
                             sellLimitOrder = ordersService.placeLimitOrder(
                                 it.lots,
-                                stock.marketInstrument.figi,
+                                stock.instrument.figi,
                                 profitPrice,
                                 OperationType.SELL,
                                 depositManager.getActiveBrokerAccountId()
@@ -278,7 +278,7 @@ data class PurchaseStock(
                 while (true) {
                     delay(DelayLong)
 
-                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
+                    position = depositManager.getPositionForFigi(stock.instrument.figi)
                     if (position == null) { // продано!
                         status = OrderStatus.SOLD
                         Utils.showToastAlert("$ticker: продано!")
@@ -298,10 +298,10 @@ data class PurchaseStock(
 
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                val ticker = stock.marketInstrument.ticker
+                val ticker = stock.instrument.ticker
 
                 // получить стакан
-                val orderbook = marketService.orderbook(stock.marketInstrument.figi, 5)
+                val orderbook = marketService.orderbook(stock.instrument.figi, 5)
 
                 val buyPrice = orderbook.getBestPriceFromAsk(lots)
                 log("$orderbook")
@@ -311,7 +311,7 @@ data class PurchaseStock(
                         status = OrderStatus.ORDER_BUY_PREPARE
                         buyLimitOrder = ordersService.placeLimitOrder(
                             lots,
-                            stock.marketInstrument.figi,
+                            stock.instrument.figi,
                             buyPrice,
                             OperationType.BUY,
                             depositManager.getActiveBrokerAccountId()
@@ -336,7 +336,7 @@ data class PurchaseStock(
                         e.printStackTrace()
                     }
 
-                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
+                    position = depositManager.getPositionForFigi(stock.instrument.figi)
                     if (position != null && position.lots >= lots) { // куплено!
                         status = OrderStatus.BOUGHT
                         Utils.showToastAlert("$ticker: куплено!")
@@ -363,7 +363,7 @@ data class PurchaseStock(
                             status = OrderStatus.ORDER_SELL_PREPARE
                             sellLimitOrder = ordersService.placeLimitOrder(
                                 it.lots,
-                                stock.marketInstrument.figi,
+                                stock.instrument.figi,
                                 profitPrice,
                                 OperationType.SELL,
                                 depositManager.getActiveBrokerAccountId()
@@ -382,7 +382,7 @@ data class PurchaseStock(
                 while (true) {
                     delay(DelayLong)
 
-                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
+                    position = depositManager.getPositionForFigi(stock.instrument.figi)
                     if (position == null) { // продано!
                         status = OrderStatus.SOLD
                         Utils.showToastAlert("$ticker: продано!")
@@ -407,7 +407,7 @@ data class PurchaseStock(
                     try {
                         status = OrderStatus.ORDER_BUY_PREPARE
                         // получить стакан
-                        val orderbook = marketService.orderbook(stock.marketInstrument.figi, 5)
+                        val orderbook = marketService.orderbook(stock.instrument.figi, 5)
                         log("$orderbook")
 
                         buyPrice = orderbook.getBestPriceFromAsk(lots)
@@ -415,7 +415,7 @@ data class PurchaseStock(
 
                         buyLimitOrder = ordersService.placeLimitOrder(
                             lots,
-                            stock.marketInstrument.figi,
+                            stock.instrument.figi,
                             buyPrice,
                             OperationType.BUY,
                             depositManager.getActiveBrokerAccountId()
@@ -428,7 +428,7 @@ data class PurchaseStock(
                     delay(DelayFast)
                 }
 
-                val ticker = stock.marketInstrument.ticker
+                val ticker = stock.instrument.ticker
                 Utils.showToastAlert("$ticker: покупка по $buyPrice")
 
                 delay(DelayFast)
@@ -443,7 +443,7 @@ data class PurchaseStock(
                         e.printStackTrace()
                     }
 
-                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
+                    position = depositManager.getPositionForFigi(stock.instrument.figi)
 //                    val order = depositManager.getOrderForFigi(stock.marketInstrument.figi)
 
                     // если позиция появилась и ордер исчез
@@ -469,7 +469,7 @@ data class PurchaseStock(
                             profitSellPrice = Utils.makeNicePrice(profitSellPrice)
                             sellLimitOrder = ordersService.placeLimitOrder(
                                 lots,
-                                stock.marketInstrument.figi,
+                                stock.instrument.figi,
                                 profitSellPrice,
                                 OperationType.SELL,
                                 depositManager.getActiveBrokerAccountId()
@@ -562,7 +562,7 @@ data class PurchaseStock(
                                 try {
                                     sellLimitOrder = ordersService.placeLimitOrder(
                                         lots,
-                                        stock.marketInstrument.figi,
+                                        stock.instrument.figi,
                                         profitPrice,
                                         OperationType.SELL,
                                         depositManager.getActiveBrokerAccountId()
@@ -582,7 +582,7 @@ data class PurchaseStock(
                 while (true) {
                     delay(DelayLong)
 
-                    position = depositManager.getPositionForFigi(stock.marketInstrument.figi)
+                    position = depositManager.getPositionForFigi(stock.instrument.figi)
                     if (position == null) { // продано!
                         status = OrderStatus.SOLD
                         Utils.showToastAlert("$ticker: продано!")
@@ -599,7 +599,7 @@ data class PurchaseStock(
     fun sell() {
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                val figi = stock.marketInstrument.figi
+                val figi = stock.instrument.figi
                 val pos = depositManager.getPositionForFigi(figi)
                 if (pos == null) {
                     status = OrderStatus.WTF_2

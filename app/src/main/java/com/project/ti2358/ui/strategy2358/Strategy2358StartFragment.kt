@@ -1,5 +1,7 @@
 package com.project.ti2358.ui.strategy2358
 
+import android.graphics.Color
+import android.opengl.Visibility
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -121,7 +123,7 @@ class Strategy2358StartFragment : Fragment() {
             holder.checkBoxView.setOnCheckedChangeListener(null)
             holder.checkBoxView.isChecked = strategy2358.isSelected(item)
 
-            holder.tickerView.text = "${position + 1}) ${item.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
             holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
@@ -132,6 +134,9 @@ class Strategy2358StartFragment : Fragment() {
 
             holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toDollar()
             holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
+
+            holder.sectorView.text = item.getSectorName()
+            holder.sectorView.setTextColor(item.closePrices?.sector?.getColor() ?: Color.BLACK)
 
             if (item.changePrice2359DayAbsolute < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)
@@ -146,10 +151,15 @@ class Strategy2358StartFragment : Fragment() {
             }
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.marketInstrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
             }
 
-            holder.reportView.text = item.getReportInfo()
+            if (item.report != null) {
+                holder.reportView.text = item.getReportInfo()
+                holder.reportView.visibility = View.VISIBLE
+            } else {
+                holder.reportView.visibility = View.GONE
+            }
             holder.reportView.setTextColor(Utils.RED)
         }
 
@@ -170,6 +180,7 @@ class Strategy2358StartFragment : Fragment() {
             val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
 
             val reportView: TextView = view.findViewById(R.id.stock_report_info)
+            val sectorView: TextView = view.findViewById(R.id.stock_sector)
         }
     }
 }

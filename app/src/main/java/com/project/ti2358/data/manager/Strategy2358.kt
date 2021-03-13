@@ -82,7 +82,7 @@ class Strategy2358() : KoinComponent {
 
         // удалить бумаги, которые уже есть в депо, иначе среднюю невозможно узнать
         stocksSelected.removeAll { stock ->
-            depositManager.portfolioPositions.any { it.ticker == stock.marketInstrument.ticker }
+            depositManager.portfolioPositions.any { it.ticker == stock.instrument.ticker }
         }
 
         val purchases: MutableList<PurchaseStock> = mutableListOf()
@@ -91,7 +91,7 @@ class Strategy2358() : KoinComponent {
 
             var exists = false
             for (p in stocksToPurchase) {
-                if (p.stock.marketInstrument.ticker == stock.marketInstrument.ticker) {
+                if (p.stock.instrument.ticker == stock.instrument.ticker) {
                     purchase.apply {
                         percentProfitSellFrom = p.percentProfitSellFrom
                         percentProfitSellTo = p.percentProfitSellTo
@@ -148,7 +148,7 @@ class Strategy2358() : KoinComponent {
 
     fun getNotificationTextShort(): String {
         var tickers = ""
-        stocksToPurchase.forEach { tickers += "${it.lots}*${it.stock.marketInstrument.ticker} " }
+        stocksToPurchase.forEach { tickers += "${it.lots}*${it.stock.instrument.ticker} " }
         return "${getTotalPurchaseString()}:\n$tickers"
     }
 
@@ -156,7 +156,7 @@ class Strategy2358() : KoinComponent {
         var tickers = ""
         for (purchase in stocksToPurchase) {
             val p = "%.1f$".format(purchase.lots * purchase.stock.getPriceDouble())
-            tickers += "${purchase.stock.marketInstrument.ticker}*${purchase.lots} = ${p}, "
+            tickers += "${purchase.stock.instrument.ticker}*${purchase.lots} = ${p}, "
             tickers += if (purchase.trailingTake) {
                 "ТТ:${purchase.trailingTakeActivationPercent.toPercent()}/${purchase.trailingTakeStopDelta.toPercent()}, ${purchase.getStatusString()} ${purchase.currentTrailingTakeProfit?.currentTakeProfitValue ?: ""}\n"
             } else {

@@ -13,14 +13,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.DepositManager
-import com.project.ti2358.data.manager.PurchaseStock
-import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.model.dto.Order
-import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toDollar
-import com.project.ti2358.service.toPercent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -115,7 +111,7 @@ class OrdersFragment : Fragment() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
             holder.order = item
-            holder.tickerView.text = "${position + 1}) ${item.stock?.marketInstrument?.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.stock?.instrument?.ticker}"
             holder.lotsView.text = "${item.executedLots} / ${item.requestedLots} шт."
             holder.priceView.text = item.price.toDollar()
 

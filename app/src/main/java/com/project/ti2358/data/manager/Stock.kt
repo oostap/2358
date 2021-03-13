@@ -3,18 +3,20 @@ package com.project.ti2358.data.manager
 import com.google.gson.*
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
-import com.project.ti2358.data.model.dto.MarketInstrument
+import com.project.ti2358.data.model.dto.Instrument
 import com.project.ti2358.data.model.dto.reports.ClosePrice
+import com.project.ti2358.data.model.dto.reports.Dividend
+import com.project.ti2358.data.model.dto.reports.Report
 import com.project.ti2358.service.log
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 data class Stock(
-    var marketInstrument: MarketInstrument
+    var instrument: Instrument
 ) {
     var alterName: String = ""
-    var reportDate: String? = ""
-    var dividendDate: String? = ""
+    var report: Report? = null
+    var dividend: Dividend? = null
 
     var middlePrice: Double = 0.0
     var dayVolumeCash: Double = 0.0
@@ -61,16 +63,18 @@ data class Stock(
     // все минутные свечи с момента запуска приложения
     var minuteCandles: MutableList<Candle> = mutableListOf()
 
-    private val gson = Gson()
+    fun getSectorName(): String {
+        return closePrices?.sector?.eng ?: ""
+    }
 
     fun getReportInfo(): String {
         var info = ""
-        reportDate?.let {
-            info += "О: $reportDate "
+        report?.let {
+            info += "О: ${it.date_format} "
         }
 
-        dividendDate?.let {
-            info += "Д: $dividendDate"
+        dividend?.let {
+            info += "Д: ${it.date_format}"
         }
 
         return info
@@ -109,7 +113,7 @@ data class Stock(
 //        }
 
         if (diffInHours > 20) {
-            log(candle.toString() + marketInstrument.ticker)
+            log(candle.toString() + instrument.ticker)
             return
         }
 

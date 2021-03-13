@@ -1,7 +1,5 @@
 package com.project.ti2358.ui.strategy1728
 
-import android.app.ActivityManager
-import android.content.Context.ACTIVITY_SERVICE
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -107,7 +105,7 @@ class Strategy1728FinishFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
-            holder.tickerView.text = "${position + 1}) ${item.stock.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.stock.instrument.ticker}"
             holder.priceView.text = "${item.stock.getPriceDouble()} $"
 
             holder.purchaseLotsView.text = "${item.lots} шт."

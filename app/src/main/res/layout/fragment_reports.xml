@@ -11,7 +11,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="65dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="0dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.strategy2358.Strategy2358StartFragment"
         tools:listitem="@layout/fragment_1005_start_item" />
@@ -23,26 +23,23 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_alignParentBottom="true"
-        android:weightSum="1" >
-        <Button android:layout_width="fill_parent"
+        android:weightSum="2" >
+        <Button
             android:layout_height="70dp"
-            android:id="@+id/buttonUpdate"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/sort"
-            android:textSize="20sp"
-            android:layout_alignParentBottom="true" />
+            android:id="@+id/buttonReport"
+            android:layout_marginRight="5dp"
+            android:text="@string/reports"
+            android:layout_weight="1"
+            android:textSize="16dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="70dp"
+            android:id="@+id/buttonDiv"
+            android:layout_marginLeft="5dp"
+            android:text="@string/dividends"
+            android:layout_weight="1"
+            android:textSize="16dp"
+            android:layout_width="0dp" />
     </LinearLayout>
-
-    <SearchView
-        android:id="@+id/searchView"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="0dp"
-        android:layout_alignParentTop="true"
-        android:queryHint="Поиск $"
-        android:iconifiedByDefault="false"/>
-
 </RelativeLayout>

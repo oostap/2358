@@ -46,7 +46,7 @@
     <string name="menu_portfolio">Депозит</string>
     <string name="menu_orders">Заявки</string>
     <string name="menu_reports">Отчёты</string>
-    <string name="menu_reports_and_divs">Отчёты и дивиденды</string>
+    <string name="menu_divindens">Дивиденды</string>
     <string name="menu_premarket">Премаркет RU</string>
     <string name="menu_postmarket">Постмаркет US</string>
     <string name="menu_1000_sell">1000 sell</string>
@@ -58,6 +58,9 @@
     <string name="menu_rocket">Ракета</string>
     <string name="menu_tazik">Автотазик</string>
     <string name="menu_hour">Часовики</string>
+
+    <string name="reports">ОТЧЁТЫ</string>
+    <string name="dividends">ДИВЫ</string>
 
     <!-- Preference Titles -->
 

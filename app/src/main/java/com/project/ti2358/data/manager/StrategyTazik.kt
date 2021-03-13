@@ -6,7 +6,6 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.project.ti2358.TheApplication
 import com.project.ti2358.service.*
-import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -57,12 +56,12 @@ class StrategyTazik : KoinComponent {
         jsonStocks?.let {
             val itemType = object : TypeToken<List<String>>() {}.type
             val stocksSelectedList: List<String> = gson.fromJson(jsonStocks, itemType)
-            stocksSelected = stocks.filter { it.marketInstrument.ticker in stocksSelectedList }.toMutableList()
+            stocksSelected = stocks.filter { it.instrument.ticker in stocksSelectedList }.toMutableList()
         }
     }
 
     private fun saveSelectedStocks(numberSet: Int) {
-        val list = stocksSelected.map { it.marketInstrument.ticker }.toMutableList()
+        val list = stocksSelected.map { it.instrument.ticker }.toMutableList()
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
         val editor: SharedPreferences.Editor = preferences.edit()
@@ -117,7 +116,7 @@ class StrategyTazik : KoinComponent {
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         // удалить все бумаги, у которых 0 лотов
         stocksToPurchase.removeAll { p ->
-            p.lots == 0 || depositManager.portfolioPositions.any { it.ticker == p.stock.marketInstrument.ticker }
+            p.lots == 0 || depositManager.portfolioPositions.any { it.ticker == p.stock.instrument.ticker }
         }
 
         return stocksToPurchase
@@ -158,7 +157,7 @@ class StrategyTazik : KoinComponent {
         val price = getTotalPurchaseString()
         var tickers = ""
         for (stock in stocksToPurchase) {
-            tickers += "${stock.stock.marketInstrument.ticker}*${stock.percentLimitPriceChange}%"
+            tickers += "${stock.stock.instrument.ticker}*${stock.percentLimitPriceChange}%"
         }
 
         return "$price:\n$tickers"
@@ -171,7 +170,7 @@ class StrategyTazik : KoinComponent {
         var tickers = ""
         for (stock in stocksToPurchase) {
             val change = (100 * stock.stock.priceNow) / stock.stock.priceTazik - 100
-            tickers += "${stock.stock.marketInstrument.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
+            tickers += "${stock.stock.instrument.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
                     "${stock.stock.priceTazik.toDollar()} ➡ ${stock.stock.priceNow.toDollar()} = " +
                     "${change.toPercent()} ${stock.getStatusString()}\n"
 
@@ -254,7 +253,7 @@ class StrategyTazik : KoinComponent {
     fun buyFirstOne() {
         stocksToPurchase.sortBy { (100 * it.stock.priceNow) / it.stock.priceTazik - 100 }
         for (purchase in stocksToPurchase) {
-            if (purchase.stock.marketInstrument.ticker in stocksTickerBuyed) continue
+            if (purchase.stock.instrument.ticker in stocksTickerBuyed) continue
 
             processBuy(purchase, purchase.stock)
             break
@@ -264,10 +263,10 @@ class StrategyTazik : KoinComponent {
     fun processStrategy(stock: Stock) {
         if (!started) return
 
-        val ticker = stock.marketInstrument.ticker
+        val ticker = stock.instrument.ticker
 
         // если бумага не в списке скана - игнорируем
-        val sorted = stocksToPurchase.filter { it.stock.marketInstrument.ticker == ticker }
+        val sorted = stocksToPurchase.filter { it.stock.instrument.ticker == ticker }
         if (sorted.isEmpty()) return
 
         val purchase = sorted.first()
@@ -287,9 +286,9 @@ class StrategyTazik : KoinComponent {
             val change = (100 * it.closingPrice) / stock.priceTazik - 100
 
             // просадка < -1%
-            log("ПРОСАДКА: ${stock.marketInstrument} ➡ $change ➡ ${it.closingPrice}")
+            log("ПРОСАДКА: ${stock.instrument} ➡ $change ➡ ${it.closingPrice}")
 
-            log("ПРОСАДКА: ПОКУПАЕМ!! ${stock.marketInstrument}")
+            log("ПРОСАДКА: ПОКУПАЕМ!! ${stock.instrument}")
             val baseProfit = SettingsManager.getTazikTakeProfit()
             when {
                 SettingsManager.getTazikBuyAsk() -> { // покупка из аска
@@ -331,7 +330,7 @@ class StrategyTazik : KoinComponent {
 
             // завершение стратегии
             val parts = SettingsManager.getTazikPurchaseParts()
-            stocksTickerBuyed.add(stock.marketInstrument.ticker)
+            stocksTickerBuyed.add(stock.instrument.ticker)
             if (stocksTickerBuyed.size >= parts) {
                 stopStrategy()
             }

@@ -51,7 +51,7 @@ class SettingsManager {
             }
         }
 
-        fun isAllowCurrency(currency: Currency): Boolean {
+        fun isAllowCurrency(currency: Currency?): Boolean {
             if (currency == Currency.USD) return true
             return false
         }

@@ -11,24 +11,39 @@ import kotlin.math.abs
 class StrategyReports : KoinComponent {
     private val stockManager: StockManager by inject()
 
-    var stocks: MutableList<Stock> = mutableListOf()
-    var stocksSelected: MutableList<Stock> = mutableListOf()
+    var stocksDividend: MutableList<Stock> = mutableListOf()
+    var stocksReport: MutableList<Stock> = mutableListOf()
+
     var currentSort: Sorting = Sorting.DESCENDING
 
     fun process(): MutableList<Stock> {
         val all = stockManager.stocksStream
 
-        stocks = all.filter { it.reportDate != null || it.dividendDate != null }.toMutableList()
+        stocksDividend = all.filter { it.dividend != null }.toMutableList()
+        stocksReport = all.filter { it.report != null }.toMutableList()
 
-        return stocks
+        return stocksReport
     }
 
-    fun resort(): MutableList<Stock> {
+    fun resortReport(): MutableList<Stock> {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
-        stocks.sortBy {
-            val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-            it.changePrice2359DayPercent * sign
+        stocksReport.sortBy {
+            val sign = if (currentSort == Sorting.ASCENDING) -1 else 1
+            it.report?.let { r ->
+                r.date * sign
+            }
         }
-        return stocks
+        return stocksReport
+    }
+
+    fun resortDivs(): MutableList<Stock> {
+        currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
+        stocksDividend.sortBy {
+            val sign = if (currentSort == Sorting.ASCENDING) -1 else 1
+            it.dividend?.let { d ->
+                d.date * sign
+            }
+        }
+        return stocksDividend
     }
 }

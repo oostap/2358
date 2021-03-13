@@ -4,7 +4,7 @@
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/main_bg</item>
         <item name="colorPrimaryVariant">@color/main_bg</item>
-        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorOnPrimary">@color/main_text</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
         <item name="colorSecondaryVariant">@color/teal_200</item>
@@ -12,5 +12,22 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+    </style>
+
+    <style name="Theme.2358.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.2358.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="colorOnBackground">@color/main_text</item>
+        <item name="colorPrimary">@color/main_text</item>
+        <item name="colorPrimaryVariant">@color/main_text</item>
+        <item name="android:textColorPrimary">@color/main_text</item>
+        <item name="android:textColorSecondary">@color/main_text</item>
+    </style>
+
+    <style name="Theme.2358.PopupOverlay" parent="ThemeOverlay.AppCompat.Light">
+
     </style>
 </resources>

@@ -7,7 +7,7 @@ import com.google.gson.reflect.TypeToken
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
-import com.project.ti2358.data.model.dto.MarketInstrument
+import com.project.ti2358.data.model.dto.Instrument
 import com.project.ti2358.data.model.dto.reports.ClosePrice
 import com.project.ti2358.data.model.dto.reports.Index
 import com.project.ti2358.data.model.dto.reports.ReportStock
@@ -15,7 +15,6 @@ import com.project.ti2358.data.service.MarketService
 import com.project.ti2358.data.service.StreamingAlorService
 import com.project.ti2358.data.service.StreamingTinkoffService
 import com.project.ti2358.data.service.ThirdPartyService
-import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +37,7 @@ class StockManager : KoinComponent {
     private val strategyTazik: StrategyTazik by inject()
     private val strategyRocket: StrategyRocket by inject()
 
-    private var instrumentsAll: MutableList<MarketInstrument> = mutableListOf()
+    private var instrumentsAll: MutableList<Instrument> = mutableListOf()
     private var stocksAll: MutableList<Stock> = mutableListOf()
     var indexAll: MutableList<Index> = mutableListOf()
 
@@ -50,38 +49,35 @@ class StockManager : KoinComponent {
     private val gson = Gson()
 
     fun loadStocks(force: Boolean = false) {
+        val key = "all_instruments"
+        val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
+        var jsonInstruments = preferences.getString(key, null)
+        if (jsonInstruments != null) {
+            val itemType = object : TypeToken<List<Instrument>>() {}.type
+            instrumentsAll = synchronizedList(gson.fromJson(jsonInstruments, itemType))
+        }
+
+        if (instrumentsAll.isNotEmpty() && !force) {
+            afterLoadInstruments()
+            return
+        }
+
+        instrumentsAll.clear()
+
         GlobalScope.launch(Dispatchers.Main) {
-            reloadReports()
-
-            val key = "all_instruments"
-            val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
-            var jsonInstruments = preferences.getString(key, null)
-            if (jsonInstruments != null) {
-                val itemType = object : TypeToken<List<MarketInstrument>>() {}.type
-                instrumentsAll = synchronizedList(gson.fromJson(jsonInstruments, itemType))
-            }
-
-            if (instrumentsAll.isNotEmpty() && !force) {
-                afterLoadInstruments()
-                return@launch
-            }
-
-            instrumentsAll.clear()
-
             while (instrumentsAll.isEmpty()) {
                 try {
-                    instrumentsAll = synchronizedList(marketService.stocks().instruments as MutableList<MarketInstrument>)
-
+                    instrumentsAll = synchronizedList(marketService.stocks().instruments as MutableList<Instrument>)
                     jsonInstruments = gson.toJson(instrumentsAll)
                     val editor: SharedPreferences.Editor = preferences.edit()
                     editor.putString(key, jsonInstruments)
                     editor.apply()
-
                     afterLoadInstruments()
+                    break
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-                delay(1500) // 1 sec
+                delay(1000) // 1 sec
             }
         }
     }
@@ -92,8 +88,8 @@ class StockManager : KoinComponent {
                 try {
                     indexAll = synchronizedList(thirdPartyService.daagerIndices() as MutableList<Index>)
                 } catch (e: Exception) {
-                    e.printStackTrace()
-                    delay(1000)
+                    log("daager Indices not reached")
+                    delay(5000)
                     continue
                 }
 
@@ -108,14 +104,14 @@ class StockManager : KoinComponent {
 
             for (stock in stocksAll) {
                 stock.apply {
-                    reportDate = reportsStock[stock.marketInstrument.ticker]?.report
-                    dividendDate = reportsStock[stock.marketInstrument.ticker]?.dividend
+                    report = reportsStock[stock.instrument.ticker]?.report
+                    dividend = reportsStock[stock.instrument.ticker]?.dividend
                 }
             }
 
             log(reportsStock.toString())
         } catch (e: Exception) {
-            e.printStackTrace()
+            log("daager Reports not reached")
         }
     }
 
@@ -158,8 +154,6 @@ class StockManager : KoinComponent {
 
             stocksAll.add(Stock(instrument).apply {
                 alterName = alterNames[instrument.ticker] ?: ""
-                reportDate = reportsStock[instrument.ticker]?.report
-                dividendDate = reportsStock[instrument.ticker]?.dividend
             })
         }
         baseSortStocks()
@@ -168,26 +162,28 @@ class StockManager : KoinComponent {
     }
 
     fun getStockByFigi(figi: String): Stock? {
-        return stocksAll.find { it.marketInstrument.figi == figi }
+        return stocksAll.find { it.instrument.figi == figi }
     }
 
     private fun baseSortStocks() {
-        stocksStream = stocksAll.filter { SettingsManager.isAllowCurrency(it.marketInstrument.currency) }.toMutableList()
+        stocksStream = stocksAll.filter { SettingsManager.isAllowCurrency(it.instrument.currency) }.toMutableList()
 
         // загрузить цену закрытия
         GlobalScope.launch(Dispatchers.Main) {
             while (true) {
                 try {
                     stockClosePrices = synchronizedMap(thirdPartyService.daagerClosePrices() as MutableMap<String, ClosePrice>)
+                    reloadReports()
                     break
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    log("daager ClosePrices not reached")
                 }
                 delay(1000)
             }
 
             stocksStream.forEach {
-                it.closePrices = stockClosePrices[it.marketInstrument.ticker]
+                it.closePrices = stockClosePrices[it.instrument.ticker]
                 it.process2359()
             }
         }
@@ -226,7 +222,7 @@ class StockManager : KoinComponent {
             } else {
                 streamingTinkoffService
                     .getCandleEventStream(
-                        stocks.map { it.marketInstrument.figi },
+                        stocks.map { it.instrument.figi },
                         Interval.DAY
                     )
                     .subscribeBy(
@@ -240,7 +236,7 @@ class StockManager : KoinComponent {
 
                 streamingTinkoffService
                     .getCandleEventStream(
-                        stocks.map { it.marketInstrument.figi },
+                        stocks.map { it.instrument.figi },
                         Interval.MINUTE
                     )
                     .subscribeBy(
@@ -255,7 +251,7 @@ class StockManager : KoinComponent {
 
             streamingTinkoffService
                 .getCandleEventStream(
-                    stocks.map { it.marketInstrument.figi },
+                    stocks.map { it.instrument.figi },
                     Interval.HOUR
                 )
                 .subscribeBy(
@@ -269,7 +265,7 @@ class StockManager : KoinComponent {
 
             streamingTinkoffService
                 .getCandleEventStream(
-                    stocks.map { it.marketInstrument.figi },
+                    stocks.map { it.instrument.figi },
                     Interval.TWO_HOURS
                 )
                 .subscribeBy(
@@ -284,20 +280,20 @@ class StockManager : KoinComponent {
     }
 
     fun unsubscribeStock(stock: Stock, interval: Interval) {
-        streamingTinkoffService.getCandleEventStream(listOf(stock.marketInstrument.figi), interval)
+        streamingTinkoffService.getCandleEventStream(listOf(stock.instrument.figi), interval)
     }
 
     private fun addCandle(candle: Candle) {
         if (SettingsManager.isAlorQoutes() && (candle.interval == Interval.MINUTE || candle.interval == Interval.DAY)) {
-            val stock = stocksStream.find { it.marketInstrument.ticker == candle.figi }
+            val stock = stocksStream.find { it.instrument.ticker == candle.figi }
             stock?.processCandle(candle)
         } else {
-            val stock = stocksStream.find { it.marketInstrument.figi == candle.figi }
+            val stock = stocksStream.find { it.instrument.figi == candle.figi }
             stock?.processCandle(candle)
         }
 
         if (candle.interval == Interval.DAY) {
-            val stock = stocksStream.find { it.marketInstrument.figi == candle.figi || it.marketInstrument.ticker == candle.figi }
+            val stock = stocksStream.find { it.instrument.figi == candle.figi || it.instrument.ticker == candle.figi }
             stock?.let {
                 strategyTazik.processStrategy(stock)
                 strategyRocket.processStrategy(stock)

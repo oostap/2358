@@ -1,13 +1,13 @@
-package com.project.ti2358.ui.strategy1005
+package com.project.ti2358.ui.strategyReports
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.CheckBox
-import android.widget.SearchView
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StockManager
-import com.project.ti2358.data.manager.Strategy1005
+import com.project.ti2358.data.manager.Strategy1728
 import com.project.ti2358.data.manager.StrategyReports
 import com.project.ti2358.service.*
 import kotlinx.coroutines.Dispatchers
@@ -41,13 +41,7 @@ class StrategyReportsStartFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_reports, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
-
-        list.addItemDecoration(
-            DividerItemDecoration(
-                list.context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
+        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
 
         if (list is RecyclerView) {
             with(list) {
@@ -56,51 +50,41 @@ class StrategyReportsStartFragment : Fragment() {
             }
         }
 
-        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
-        buttonUpdate.setOnClickListener {
-            updateData()
+        val buttonReports = view.findViewById<Button>(R.id.buttonReport)
+        buttonReports.setOnClickListener {
+            updateDataReport()
         }
 
-        val search = view.findViewById<SearchView>(R.id.searchView)
-        search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                processText(query)
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String): Boolean {
-                processText(newText)
-                return false
-            }
-
-            fun processText(text: String) {
-                updateData()
-
-                stocks = Utils.search(stocks, text)
-                adapterList.setData(stocks)
-            }
-        })
-        search.requestFocus()
-
-        search.setOnCloseListener {
-            stocks = strategyReports.process()
-            adapterList.setData(stocks)
-            false
+        val buttonDivs = view.findViewById<Button>(R.id.buttonDiv)
+        buttonDivs.setOnClickListener {
+            updateDataDivs()
         }
 
-        updateData()
+        updateDataReport()
 
         GlobalScope.launch(Dispatchers.Main) {
             stockManager.reloadReports()
-            updateData()
+            updateDataReport()
         }
         return view
     }
 
-    private fun updateData() {
+    private fun updateDataReport() {
         stocks = strategyReports.process()
-        stocks = strategyReports.resort()
+        stocks = strategyReports.resortReport()
         adapterList.setData(stocks)
+
+        val act = requireActivity() as AppCompatActivity
+        act.supportActionBar?.title = getString(R.string.menu_reports)
+    }
+
+    private fun updateDataDivs() {
+        stocks = strategyReports.process()
+        stocks = strategyReports.resortDivs()
+        adapterList.setData(stocks)
+
+        val act = requireActivity() as AppCompatActivity
+        act.supportActionBar?.title = getString(R.string.menu_divindens)
     }
 
     inner class ItemReportsRecyclerViewAdapter(
@@ -126,14 +110,8 @@ class StrategyReportsStartFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            holder.tickerView.text = "${position + 1}) ${item.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
             holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
-
-            val volume = item.getTodayVolume() / 1000f
-            holder.volumeTodayView.text = "%.1fk".format(volume)
-
-            val volumeCash = item.dayVolumeCash / 1000f / 1000f
-            holder.volumeTodayCashView.text = "%.2f B$".format(volumeCash)
 
             holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toDollar()
             holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
@@ -147,11 +125,70 @@ class StrategyReportsStartFragment : Fragment() {
             }
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.marketInstrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
             }
 
-            holder.reportView.text = item.getReportInfo()
-            holder.reportView.setTextColor(Utils.RED)
+            holder.sectorView.text = item.getSectorName()
+            holder.sectorView.setTextColor(item.closePrices?.sector?.getColor() ?: Color.BLACK)
+
+            item.dividend?.let {
+                val emoji = if (it.profit > 1.0) " 🤑" else ""
+                holder.info1View.text = "+${it.profit}%$emoji"
+                holder.info1View.setTextColor(Utils.GREEN)
+                holder.info2View.visibility = View.GONE
+
+                holder.dateView.text = "${it.date_format}"
+                holder.dateView.setTextColor(Utils.RED)
+            }
+
+            item.report?.let {
+                if (it.estimate_rev_per != null) {
+                    if (it.estimate_rev_per > 0) {
+                        holder.info1View.text = "REV: +${it.estimate_rev_per}"
+                        holder.info1View.setTextColor(Utils.GREEN)
+                    } else {
+                        holder.info1View.text = "REV: ${it.estimate_rev_per}"
+                        holder.info1View.setTextColor(Utils.RED)
+                    }
+                }
+
+                if (it.estimate_eps != null) {
+                    if (it.estimate_eps > 0) {
+                        holder.info2View.text = "EPS: (+${it.estimate_eps})"
+                        holder.info2View.setTextColor(Utils.GREEN)
+                    } else {
+                        holder.info2View.text = "EPS: (${it.estimate_eps})"
+                        holder.info2View.setTextColor(Utils.RED)
+                    }
+                }
+
+                if (it.actual_rev_per != null) {
+                    if (it.actual_rev_per > 0) {
+                        holder.info1View.text = "REV: +${it.actual_rev_per}"
+                        holder.info1View.setTextColor(Utils.GREEN)
+                    } else {
+                        holder.info1View.text = "REV: ${it.actual_rev_per}"
+                        holder.info1View.setTextColor(Utils.RED)
+                    }
+                }
+
+                if (it.actual_eps != null) {
+                    if (it.actual_eps > 0) {
+                        holder.info2View.text = "EPS: (+${it.actual_eps})"
+                        holder.info2View.setTextColor(Utils.GREEN)
+                    } else {
+                        holder.info2View.text = "EPS: (${it.actual_eps})"
+                        holder.info2View.setTextColor(Utils.RED)
+                    }
+                }
+
+                var tod = if (it.tod == "post") " 🌚" else " 🌞"
+                if (it.actual_eps != null || it.actual_rev_per != null) {
+                    tod += "✅"
+                }
+                holder.dateView.text = "${it.date_format} $tod"
+                holder.dateView.setTextColor(Utils.RED)
+            }
         }
 
         override fun getItemCount(): Int = values.size
@@ -162,13 +199,14 @@ class StrategyReportsStartFragment : Fragment() {
             val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
             val priceView: TextView = view.findViewById(R.id.stock_item_price)
 
-            val volumeTodayView: TextView = view.findViewById(R.id.stock_item_volume_today)
-            val volumeTodayCashView: TextView = view.findViewById(R.id.stock_item_volume_today_cash)
-
             val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
 
-            val reportView: TextView = view.findViewById(R.id.stock_report_info)
+            val sectorView: TextView = view.findViewById(R.id.stock_sector)
+            val info1View: TextView = view.findViewById(R.id.stock_info_1)
+            val info2View: TextView = view.findViewById(R.id.stock_info_2)
+
+            val dateView: TextView = view.findViewById(R.id.stock_date)
         }
     }
 }

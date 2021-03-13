@@ -189,13 +189,13 @@ class StreamingAlorService {
         val bar = BarGetEventBody(
             AlorManager.TOKEN,
             "BarsGetAndSubscribe",
-            stock.marketInstrument.ticker,
+            stock.instrument.ticker,
             "SPBX",
             tf,
             time,
             "Simple",
             false,
-            "${stock.marketInstrument.ticker}_$timeName"
+            "${stock.instrument.ticker}_$timeName"
         )
 
         webSocket?.send(Gson().toJson(bar))
@@ -209,9 +209,9 @@ class StreamingAlorService {
     }
 
     private fun unsubscribeCandleEventsStream(stock: Stock, interval: Interval) {
-        log("StreamingAlorService :: unsubscribe from candle events: ticker: ${stock.marketInstrument.ticker}, interval: $interval")
+        log("StreamingAlorService :: unsubscribe from candle events: ticker: ${stock.instrument.ticker}, interval: $interval")
         val timeName = Utils.convertIntervalToString(interval)
-        val cancel = CancelEventBody(SettingsManager.getActiveTokenAlor(), "unsubscribe", "${stock.marketInstrument.ticker}_$timeName")
+        val cancel = CancelEventBody(SettingsManager.getActiveTokenAlor(), "unsubscribe", "${stock.instrument.ticker}_$timeName")
         webSocket?.send(Gson().toJson(cancel))
         activeCandleSubscriptions[stock]?.remove(interval)
     }

@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StrategyPremarket
-import com.project.ti2358.service.Sorting
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toDollar
 import com.project.ti2358.service.toPercent
@@ -117,7 +116,7 @@ class PremarketFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            holder.tickerView.text = "${position + 1}) ${item.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
             holder.priceView.text = "${item.getPrice1000String()} ➡ ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
@@ -138,7 +137,7 @@ class PremarketFragment : Fragment() {
             }
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.marketInstrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
             }
         }
 

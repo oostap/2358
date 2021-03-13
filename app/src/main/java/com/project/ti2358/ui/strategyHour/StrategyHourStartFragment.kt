@@ -109,7 +109,7 @@ class StrategyHourStartFragment : Fragment() {
                 startPrice = item.changePriceHour2Start
             }
 
-            holder.tickerView.text = "${position + 1}) ${item.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
             holder.priceView.text = "${startPrice.toDollar()} ➡ ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
@@ -131,7 +131,7 @@ class StrategyHourStartFragment : Fragment() {
             }
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.marketInstrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
             }
         }
 

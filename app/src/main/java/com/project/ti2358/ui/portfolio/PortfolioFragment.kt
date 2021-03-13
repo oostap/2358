@@ -75,16 +75,16 @@ class PortfolioFragment : Fragment() {
             view.findNavController().navigate(R.id.action_nav_portfolio_to_nav_orders)
         }
 
+        updateData()
         GlobalScope.launch(Dispatchers.Main) {
-            delay(3000)
-            updateData()
-            delay(3000)
-            val version = thirdPartyService.githubVersion()
-            val currentVersion = try {
-                val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(TheApplication.application.applicationContext.packageName, 0)
-                pInfo.versionName
-            } catch (e: PackageManager.NameNotFoundException) {
-                version
+            delay(5000)
+            val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(TheApplication.application.applicationContext.packageName, 0)
+            val currentVersion = pInfo.versionName
+
+            val version = try {
+                thirdPartyService.githubVersion()
+            } catch (e: Exception) {
+                currentVersion
             }
 
             if (version != currentVersion) { // показать окно обновления

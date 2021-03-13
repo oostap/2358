@@ -25,12 +25,16 @@ class WorkflowManager() : KoinComponent {
     private val alorManager: AlorManager by inject()
     private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
+    private val strategyTelegram: StrategyTelegram by inject()
 
     fun startApp() {
-        alorManager.refreshToken()
         stockManager.loadStocks()
         depositManager.startUpdatePortfolio()
         stockManager.startUpdateIndices()
+
+        if (SettingsManager.isAlorQoutes()) alorManager.refreshToken()
+
+        strategyTelegram.start()
     }
 
     companion object {
@@ -100,6 +104,10 @@ class WorkflowManager() : KoinComponent {
                 return StrategyReports()
             }
 
+            fun provideStrategyTelegram(): StrategyTelegram {
+                return StrategyTelegram()
+            }
+
             single { provideStocksManager() }
             single { provideDepoManager() }
             single { provideWorkflowManager() }
@@ -117,6 +125,7 @@ class WorkflowManager() : KoinComponent {
             single { provideStrategyTazik() }
             single { provideStrategyHour() }
             single { provideStrategyReports() }
+            single { provideStrategyTelegram() }
         }
 
         private val apiModule = module {

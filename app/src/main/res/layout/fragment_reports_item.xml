@@ -4,14 +4,14 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:divider="?android:dividerHorizontal"
-        android:dividerPadding="10dp"
+        android:dividerPadding="5dp"
         android:showDividers="middle"
         android:weightSum="3.6">
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1.6"
+        android:layout_weight="1.5"
         android:orientation="vertical">
 
         <TextView
@@ -30,13 +30,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
-            android:paddingTop="4dp"
+            android:paddingTop="2dp"
             android:gravity="center_vertical"
             android:text="700$"
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/stock_report_info"
+            android:id="@+id/stock_sector"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingTop="2dp"
+            android:gravity="center_vertical"
+            android:text="700$"
+            android:textSize="10sp" />
+
+        <TextView
+            android:id="@+id/stock_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
@@ -44,16 +54,18 @@
             android:gravity="center_vertical"
             android:text="700$"
             android:textSize="14sp" />
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:layout_weight="1.1"
+        android:orientation="vertical"
+        android:layout_gravity="center">
 
         <TextView
-            android:id="@+id/stock_item_volume_today"
+            android:id="@+id/stock_info_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -62,7 +74,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/stock_item_volume_today_cash"
+            android:id="@+id/stock_info_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -75,7 +87,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_gravity="center">
 
         <TextView
             android:id="@+id/stock_item_price_change_percent"

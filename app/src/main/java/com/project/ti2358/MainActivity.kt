@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity() {
 
             fun processIndex(index: Index, name: TextView, value: TextView, change: TextView, emoji: TextView, invertedEmoji: Boolean = false) {
                 index.let {
-                    name.text = it.name
+                    name.text = it.name.replace(" 2000", "")
                     value.text = "${it.value}"
                     if (it.change_per < 0) {
                         change.text = "${it.change_per}%"

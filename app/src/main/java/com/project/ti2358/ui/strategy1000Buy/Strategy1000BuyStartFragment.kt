@@ -128,7 +128,7 @@ class Strategy1000BuyStartFragment : Fragment() {
             holder.checkBoxView.setOnCheckedChangeListener(null)
             holder.checkBoxView.isChecked = strategy1000Buy.isSelected(item)
 
-            holder.tickerView.text = "${position + 1}) ${item.marketInstrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
             holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
@@ -153,7 +153,7 @@ class Strategy1000BuyStartFragment : Fragment() {
             }
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.marketInstrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
             }
         }
 

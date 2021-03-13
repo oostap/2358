@@ -125,7 +125,7 @@ class Strategy1000SellStartFragment : Fragment() {
 
             holder.itemView.setOnClickListener { _ ->
                 holder.position.stock?.let {
-                    Utils.openTinkoffForTicker(requireContext(), it.marketInstrument.ticker)
+                    Utils.openTinkoffForTicker(requireContext(), it.instrument.ticker)
                 }
             }
         }

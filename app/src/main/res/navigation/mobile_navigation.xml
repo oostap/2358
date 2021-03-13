@@ -33,8 +33,8 @@
     <!-- отчёты -->
     <fragment
         android:id="@+id/nav_reports"
-        android:name="com.project.ti2358.ui.strategy1005.StrategyReportsStartFragment"
-        android:label="@string/menu_reports_and_divs"
+        android:name="com.project.ti2358.ui.strategyReports.StrategyReportsStartFragment"
+        android:label="@string/menu_reports"
         tools:layout="@layout/fragment_reports" />
 
     <!-- премаркет РФ -->

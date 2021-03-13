@@ -4,14 +4,14 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:divider="?android:dividerHorizontal"
-        android:dividerPadding="10dp"
+        android:dividerPadding="5dp"
         android:showDividers="middle"
         android:weightSum="4" >
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1.6"
+        android:layout_weight="1.7"
         android:orientation="vertical">
 
         <TextView
@@ -29,11 +29,21 @@
             android:id="@+id/stock_item_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="8dp"
+            android:paddingStart="6dp"
             android:paddingTop="4dp"
             android:gravity="center_vertical"
             android:text="700$"
             android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/stock_sector"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="6dp"
+            android:paddingTop="2dp"
+            android:gravity="center_vertical"
+            android:text="700$"
+            android:textSize="10sp" />
 
         <TextView
             android:id="@+id/stock_report_info"
@@ -43,7 +53,9 @@
             android:paddingTop="4dp"
             android:gravity="center_vertical"
             android:text="700$"
-            android:textSize="14sp" />
+            android:textSize="12sp" />
+
+
     </LinearLayout>
 
     <LinearLayout

@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StrategyPostmarket
-import com.project.ti2358.service.Sorting
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toDollar
 import com.project.ti2358.service.toPercent
@@ -116,7 +115,7 @@ class PostmarketFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            val ticker = "${position + 1} ${item.marketInstrument.ticker}"
+            val ticker = "${position + 1} ${item.instrument.ticker}"
             holder.tickerView.text = ticker
 
             val priceFrom = item.getPriceDouble().toDollar()
@@ -124,10 +123,10 @@ class PostmarketFragment : Fragment() {
             holder.priceView.text = "$priceFrom ➡ $priceTo"
 
 //            val volume = item.getPostmarketVolume() / 1000f
-            holder.volumeTodayView.text = "TODO"//"%.1fk".format(volume)
+            holder.volumeTodayView.text = "что сюда"//"%.1fk".format(volume)
 
 //            val volumeCash = item.getPostmarketVolumeCash() / 1000f / 1000f
-            holder.volumeTodayCashView.text = "TODO" //"%.2fB$".format(volumeCash)
+            holder.volumeTodayCashView.text = "вывести? 🤔" //"%.2fB$".format(volumeCash)
 
             holder.changePriceAbsoluteView.text = item.changePricePostmarketAbsolute.toDollar()
             holder.changePricePercentView.text = item.changePricePostmarketPercent.toPercent()
@@ -141,7 +140,7 @@ class PostmarketFragment : Fragment() {
             }
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.marketInstrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
             }
         }
 
