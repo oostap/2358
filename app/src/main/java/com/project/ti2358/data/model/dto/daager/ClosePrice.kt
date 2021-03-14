@@ -1,4 +1,4 @@
-package com.project.ti2358.data.model.dto.reports
+package com.project.ti2358.data.model.dto.daager
 
 data class ClosePrice (
     val close_os: Double,

@@ -6,6 +6,7 @@ import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.data.service.PortfolioService
 import com.project.ti2358.data.service.ThirdPartyService
 import com.project.ti2358.service.Utils
+import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -129,22 +130,50 @@ class DepositManager : KoinComponent {
         }
     }
 
-    public fun getFreeCashUSD(): Double {
+    fun getFreeCashUSD(): String {
+        var total = 0.0
         for (currency in currencyPositions) {
             if (currency.currency == Currency.USD) {
-                return currency.balance
+                total += currency.balance
             }
         }
-        return 0.0
+        return "%.2f$".format(total)
+    }
+
+    fun getFreeCashRUB(): String {
+        var total = 0.0
+        for (currency in currencyPositions) {
+            if (currency.currency == Currency.RUB) {
+                total += currency.balance
+            }
+        }
+        return "%.2f₽".format(total)
+    }
+
+    fun getFreeCash(): Double {
+        var total = 0.0
+        for (currency in currencyPositions) {
+            if (currency.currency == Currency.USD) {
+                total += currency.balance
+            }
+            if (currency.currency == Currency.RUB) {
+                total += currency.balance * 74.0        // todo: взять реальную цену
+            }
+        }
+        return total
     }
 
     public fun getPercentBusyInStocks(): Int {
-        val free = getFreeCashUSD()
+        val free = getFreeCash()
         var busy = 0.0
 
         for (position in portfolioPositions) {
             if (position.averagePositionPrice?.currency == Currency.USD) {
                 busy += position.getAveragePrice() * position.balance
+            }
+
+            if (position.averagePositionPrice?.currency == Currency.RUB) {
+                busy += position.getAveragePrice() * position.balance * 74.0    // todo: взять реальную цену
             }
         }
 
@@ -165,11 +194,7 @@ class DepositManager : KoinComponent {
         // удалить позицию $
         portfolioPositions.removeAll { it.ticker.contains("USD000") }
 
-        for (position in portfolioPositions) {
-            if (position.stock == null) {
-                position.stock = stocksManager.getStockByFigi(position.figi)
-            }
-        }
+        portfolioPositions.forEach { it.stock = stocksManager.getStockByFigi(it.figi) }
     }
 
     private fun baseSortOrders() {

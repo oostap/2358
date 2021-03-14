@@ -1,7 +1,7 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.model.dto.PortfolioPosition
-import com.project.ti2358.service.toDollar
+import com.project.ti2358.service.toMoney
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -67,7 +67,7 @@ class Strategy1000Sell() : KoinComponent {
         for (position in positionsToSell) {
             value += position.getProfitPriceForSell() * position.position.balance
         }
-        return value.toDollar()
+        return value.toMoney(null)
     }
 
     fun getTotalSellString(positions: MutableList<PurchaseStock>): String {
@@ -75,7 +75,7 @@ class Strategy1000Sell() : KoinComponent {
         for (position in positions) {
             value += position.getProfitPriceForSell() * position.position.balance
         }
-        return value.toDollar()
+        return value.toMoney(null)
     }
 
     fun getNotificationTextShort(positions: MutableList<PurchaseStock>): String {

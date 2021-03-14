@@ -1,7 +1,6 @@
 package com.project.ti2358.ui.portfolio
 
 import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -20,7 +19,7 @@ import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.data.service.ThirdPartyService
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.toDollar
+import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -28,7 +27,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.inject
 import java.lang.Exception
 
 @KoinApiExtension
@@ -49,12 +47,7 @@ class PortfolioFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_portfolio_item_list, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
-        list.addItemDecoration(
-            DividerItemDecoration(
-                list.context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
+        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
 
         if (list is RecyclerView) {
             with(list) {
@@ -134,22 +127,21 @@ class PortfolioFragment : Fragment() {
             holder.priceView.text = "$avg"
 
             val profit = item.getProfitAmount()
-            holder.changePriceAbsoluteView.text = "%.2f $".format(profit)
+            holder.changePriceAbsoluteView.text = profit.toMoney(item.stock)
 
             var totalCash = item.balance * avg
-            val percent = item.getProfitPercent()
+            var percent = item.getProfitPercent()
             holder.changePricePercentView.text = percent.toPercent()
 
             totalCash += profit
-            holder.volumeCashView.text = totalCash.toDollar()
+            holder.volumeCashView.text = totalCash.toMoney(item.stock)
 
-            if (percent < 0) {
-                holder.changePriceAbsoluteView.setTextColor(Utils.RED)
-                holder.changePricePercentView.setTextColor(Utils.RED)
-            } else {
-                holder.changePriceAbsoluteView.setTextColor(Utils.GREEN)
-                holder.changePricePercentView.setTextColor(Utils.GREEN)
+            if (item.lots < 0) { // шорт
+                percent *= -1
             }
+
+            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(percent))
+            holder.changePricePercentView.setTextColor(Utils.getColorForValue(percent))
         }
 
         override fun getItemCount(): Int = values.size

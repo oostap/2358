@@ -15,7 +15,7 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StrategyPostmarket
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.toDollar
+import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -118,8 +118,8 @@ class PostmarketFragment : Fragment() {
             val ticker = "${position + 1} ${item.instrument.ticker}"
             holder.tickerView.text = ticker
 
-            val priceFrom = item.getPriceDouble().toDollar()
-            val priceTo = item.getPricePostmarketUSDouble().toDollar()
+            val priceFrom = item.getPriceDouble().toMoney(item)
+            val priceTo = item.getPricePostmarketUSDouble().toMoney(item)
             holder.priceView.text = "$priceFrom ➡ $priceTo"
 
 //            val volume = item.getPostmarketVolume() / 1000f
@@ -128,7 +128,7 @@ class PostmarketFragment : Fragment() {
 //            val volumeCash = item.getPostmarketVolumeCash() / 1000f / 1000f
             holder.volumeTodayCashView.text = "вывести? 🤔" //"%.2fB$".format(volumeCash)
 
-            holder.changePriceAbsoluteView.text = item.changePricePostmarketAbsolute.toDollar()
+            holder.changePriceAbsoluteView.text = item.changePricePostmarketAbsolute.toMoney(item)
             holder.changePricePercentView.text = item.changePricePostmarketPercent.toPercent()
 
             if (item.changePricePostmarketAbsolute < 0) {

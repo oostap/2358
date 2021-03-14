@@ -171,7 +171,7 @@ class StrategyTazik : KoinComponent {
         for (stock in stocksToPurchase) {
             val change = (100 * stock.stock.priceNow) / stock.stock.priceTazik - 100
             tickers += "${stock.stock.instrument.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
-                    "${stock.stock.priceTazik.toDollar()} ➡ ${stock.stock.priceNow.toDollar()} = " +
+                    "${stock.stock.priceTazik.toMoney(stock.stock)} ➡ ${stock.stock.priceNow.toMoney(stock.stock)} = " +
                     "${change.toPercent()} ${stock.getStatusString()}\n"
 
         }

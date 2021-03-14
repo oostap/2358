@@ -2,10 +2,9 @@ package com.project.ti2358.data.service
 
 import com.project.ti2358.data.api.ThirdPartyApi
 import com.project.ti2358.data.manager.SettingsManager
-import com.project.ti2358.data.model.dto.Instrument
-import com.project.ti2358.data.model.dto.reports.ClosePrice
-import com.project.ti2358.data.model.dto.reports.Index
-import com.project.ti2358.data.model.dto.reports.ReportStock
+import com.project.ti2358.data.model.dto.daager.ClosePrice
+import com.project.ti2358.data.model.dto.daager.Index
+import com.project.ti2358.data.model.dto.daager.ReportStock
 import org.koin.core.component.KoinApiExtension
 import retrofit2.Retrofit
 import retrofit2.http.Url
@@ -28,6 +27,8 @@ class ThirdPartyService(
     suspend fun daagerIndices(): List<Index> = thirdPartyApi.daagerIndices("https://tinvest.daager.ru/ostap-api/indices.php")
 
     suspend fun daagerClosePrices(): Map<String, ClosePrice> = thirdPartyApi.daagerClosePrice("https://tinvest.daager.ru/ostap-api/close.json")
+
+    suspend fun daagerShortInfo(): Map<String, Short> = thirdPartyApi.daagerShortInfo("https://tinvest.daager.ru/ostap-api/short.json")
 
 //    suspend fun daagerStocks(): Map<String, Instrument> = thirdPartyApi.daagerStocks("https://tinvest.daager.ru/tinkoff_stocks.json")
 

@@ -105,7 +105,7 @@ class Strategy1728StartFragment : Fragment() {
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
 
-            holder.changePriceAbsoluteView.text = item.changePrice1728DayAbsolute.toDollar()
+            holder.changePriceAbsoluteView.text = item.changePrice1728DayAbsolute.toMoney(item)
             holder.changePricePercentView.text = item.changePrice1728DayPercent.toPercent()
 
             if (item.changePrice1728DayAbsolute < 0) {

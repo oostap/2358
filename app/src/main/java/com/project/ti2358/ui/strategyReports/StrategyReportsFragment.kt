@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StockManager
-import com.project.ti2358.data.manager.Strategy1728
 import com.project.ti2358.data.manager.StrategyReports
 import com.project.ti2358.service.*
 import kotlinx.coroutines.Dispatchers
@@ -113,7 +112,7 @@ class StrategyReportsStartFragment : Fragment() {
             holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
             holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
 
-            holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toDollar()
+            holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
             holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
 
             if (item.changePrice2359DayAbsolute < 0) {
@@ -144,40 +143,40 @@ class StrategyReportsStartFragment : Fragment() {
             item.report?.let {
                 if (it.estimate_rev_per != null) {
                     if (it.estimate_rev_per > 0) {
-                        holder.info1View.text = "REV: +${it.estimate_rev_per}"
+                        holder.info1View.text = "REV: +${it.estimate_rev_per}$"
                         holder.info1View.setTextColor(Utils.GREEN)
                     } else {
-                        holder.info1View.text = "REV: ${it.estimate_rev_per}"
+                        holder.info1View.text = "REV: ${it.estimate_rev_per}$"
                         holder.info1View.setTextColor(Utils.RED)
                     }
                 }
 
                 if (it.estimate_eps != null) {
                     if (it.estimate_eps > 0) {
-                        holder.info2View.text = "EPS: (+${it.estimate_eps})"
+                        holder.info2View.text = "EPS: (+${it.estimate_eps})%"
                         holder.info2View.setTextColor(Utils.GREEN)
                     } else {
-                        holder.info2View.text = "EPS: (${it.estimate_eps})"
+                        holder.info2View.text = "EPS: (${it.estimate_eps})%"
                         holder.info2View.setTextColor(Utils.RED)
                     }
                 }
 
                 if (it.actual_rev_per != null) {
                     if (it.actual_rev_per > 0) {
-                        holder.info1View.text = "REV: +${it.actual_rev_per}"
+                        holder.info1View.text = "REV: +${it.actual_rev_per}$"
                         holder.info1View.setTextColor(Utils.GREEN)
                     } else {
-                        holder.info1View.text = "REV: ${it.actual_rev_per}"
+                        holder.info1View.text = "REV: ${it.actual_rev_per}$"
                         holder.info1View.setTextColor(Utils.RED)
                     }
                 }
 
                 if (it.actual_eps != null) {
                     if (it.actual_eps > 0) {
-                        holder.info2View.text = "EPS: (+${it.actual_eps})"
+                        holder.info2View.text = "EPS: (+${it.actual_eps})%"
                         holder.info2View.setTextColor(Utils.GREEN)
                     } else {
-                        holder.info2View.text = "EPS: (${it.actual_eps})"
+                        holder.info2View.text = "EPS: (${it.actual_eps})%"
                         holder.info2View.setTextColor(Utils.RED)
                     }
                 }

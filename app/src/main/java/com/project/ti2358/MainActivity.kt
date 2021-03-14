@@ -18,9 +18,9 @@ import com.google.android.material.navigation.NavigationView
 import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.WorkflowManager
-import com.project.ti2358.data.model.dto.reports.Index
+import com.project.ti2358.data.model.dto.daager.Index
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.toDollar
+import com.project.ti2358.service.toMoney
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import kotlin.math.abs
@@ -51,7 +51,8 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
 
         val header = navView.getHeaderView(0)
-        val cashView: TextView = header.findViewById(R.id.free_cash)
+        val cashUSDView: TextView = header.findViewById(R.id.free_cash_usd)
+        val cashRUBView: TextView = header.findViewById(R.id.free_cash_rub)
 
         val index1NameView: TextView = header.findViewById(R.id.index_1_name)
         val index2NameView: TextView = header.findViewById(R.id.index_2_name)
@@ -96,7 +97,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             fun updateInfo() {
-                cashView.text = depositManager.getFreeCashUSD().toDollar()
+                cashUSDView.text = depositManager.getFreeCashUSD()
+                cashRUBView.text = depositManager.getFreeCashRUB()
 
                 val indices = stockManager.indexAll
 

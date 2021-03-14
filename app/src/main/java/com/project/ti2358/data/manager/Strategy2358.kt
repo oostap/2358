@@ -1,6 +1,6 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.service.toDollar
+import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -137,7 +137,7 @@ class Strategy2358() : KoinComponent {
     fun getTotalPurchaseString(): String {
         var value = 0.0
         stocksToPurchase.forEach { value += it.lots * it.stock.getPriceDouble() }
-        return value.toDollar()
+        return value.toMoney(null)
     }
 
     fun getTotalPurchasePieces(): Int {

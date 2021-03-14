@@ -137,7 +137,7 @@ class Strategy1000BuyStartFragment : Fragment() {
             val volumeCash = item.dayVolumeCash / 1000f / 1000f
             holder.volumeTodayCashView.text = "%.2fB$".format(volumeCash)
 
-            holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toDollar()
+            holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
             holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
 
             if (item.changePrice2359DayAbsolute < 0) {

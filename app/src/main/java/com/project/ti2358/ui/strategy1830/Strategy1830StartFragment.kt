@@ -18,7 +18,7 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.Strategy1830
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.toDollar
+import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -108,9 +108,9 @@ class Strategy1830StartFragment : Fragment() {
             holder.priceView.text = item.getPriceString()
 
             val volume = item.getTodayVolume() / 1000f
-            holder.volumeTodayView.text = "%.1f".format(volume) + "k"
+            holder.volumeTodayView.text = "%.1fk".format(volume)
 
-            holder.changePriceAbsoluteView.text = item.changePriceDayAbsolute.toDollar()
+            holder.changePriceAbsoluteView.text = item.changePriceDayAbsolute.toMoney(item)
             holder.changePricePercentView.text = item.changePriceDayPercent.toPercent()
 
             if (item.changePriceDayAbsolute < 0) {

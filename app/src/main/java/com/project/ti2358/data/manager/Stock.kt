@@ -1,12 +1,13 @@
 package com.project.ti2358.data.manager
 
-import com.google.gson.*
+import android.graphics.Color
 import com.project.ti2358.data.model.dto.Candle
+import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.Instrument
-import com.project.ti2358.data.model.dto.reports.ClosePrice
-import com.project.ti2358.data.model.dto.reports.Dividend
-import com.project.ti2358.data.model.dto.reports.Report
+import com.project.ti2358.data.model.dto.daager.ClosePrice
+import com.project.ti2358.data.model.dto.daager.Dividend
+import com.project.ti2358.data.model.dto.daager.Report
 import com.project.ti2358.service.log
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -17,6 +18,7 @@ data class Stock(
     var alterName: String = ""
     var report: Report? = null
     var dividend: Dividend? = null
+    var short: Short? = null
 
     var middlePrice: Double = 0.0
     var dayVolumeCash: Double = 0.0
@@ -62,6 +64,21 @@ data class Stock(
 
     // все минутные свечи с момента запуска приложения
     var minuteCandles: MutableList<Candle> = mutableListOf()
+
+    fun getCurrencySymbol(): String {
+        return when (instrument.currency) {
+            Currency.USD -> "$"
+            Currency.RUB -> "₽"
+            Currency.EUR -> "€"
+            Currency.GBP -> "£"
+            Currency.CHF -> "₣"
+            Currency.HKD -> "HK$"
+            Currency.CNY -> "¥"
+            Currency.JPY -> "¥"
+            Currency.TRY -> "₺"
+            else -> "$"
+        }
+    }
 
     fun getSectorName(): String {
         return closePrices?.sector?.eng ?: ""

@@ -16,7 +16,6 @@ import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.manager.Strategy1000Sell
-import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -152,10 +151,10 @@ class Strategy1000SellFinishFragment : Fragment() {
             holder.currentProfitView.text = percent.toPercent()
 
             totalCash += profit
-            holder.currentPriceView.text = "%.2f\$ ➡ %.2f\$".format(avg, totalCash)
+            holder.currentPriceView.text = "${avg.toMoney(item.stock)} ➡ ${totalCash.toMoney(item.stock)}"
 
-            holder.totalPriceProfitView.text = profit.toDollar()
-            holder.priceProfitView.text = (profit / item.position.lots).toDollar()
+            holder.totalPriceProfitView.text = profit.toMoney(item.stock)
+            holder.priceProfitView.text = (profit / item.position.lots).toMoney(item.stock)
 
             if (percent < 0) {
                 holder.currentProfitView.setTextColor(Utils.RED)
@@ -189,10 +188,10 @@ class Strategy1000SellFinishFragment : Fragment() {
 
             val avg = item.position.getAveragePrice()
             val futureProfitPrice = item.getProfitPriceForSell() - avg
-            holder.futureProfitPriceView.text = futureProfitPrice.toDollar()
-            holder.totalFutureProfitPriceView.text = (futureProfitPrice * item.position.balance).toDollar()
+            holder.futureProfitPriceView.text = futureProfitPrice.toMoney(item.stock)
+            holder.totalFutureProfitPriceView.text = (futureProfitPrice * item.position.balance).toMoney(item.stock)
 
-            holder.totalPriceView.text = item.getProfitPriceForSell().toDollar()
+            holder.totalPriceView.text = item.getProfitPriceForSell().toMoney(item.stock)
 
             if (futureProfitPrice < 0) {
                 holder.futureProfitView.setTextColor(Utils.RED)

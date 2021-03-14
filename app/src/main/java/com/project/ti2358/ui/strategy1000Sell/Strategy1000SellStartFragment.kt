@@ -17,7 +17,7 @@ import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.manager.Strategy1000Sell
 import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.toDollar
+import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -99,17 +99,17 @@ class Strategy1000SellStartFragment : Fragment() {
 
             val avg = item.getAveragePrice()
             holder.volumePiecesView.text = "${item.lots} шт."
-            holder.priceView.text = "${avg} $"
+            holder.priceView.text = avg.toMoney(item.stock)
 
             val profit = item.getProfitAmount()
-            holder.changePriceAbsoluteView.text = "${profit} $"
+            holder.changePriceAbsoluteView.text = profit.toMoney(item.stock)
 
             var totalCash = item.balance * avg
             val percent = item.getProfitPercent()
             holder.changePricePercentView.text = percent.toPercent()
 
             totalCash += profit
-            holder.volumeCashView.text = totalCash.toDollar()
+            holder.volumeCashView.text = totalCash.toMoney(item.stock)
 
             if (profit < 0) {
                 holder.changePriceAbsoluteView.setTextColor(Utils.RED)

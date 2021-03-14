@@ -151,8 +151,8 @@ class StrategyTazikFinishFragment : Fragment() {
 
             val avg = item.stock.getPriceDouble()
             holder.tickerView.text = "${item.stock.instrument.ticker} x ${item.lots}"
-            holder.currentPriceView.text = "${item.stock.getPrice2359String()} ➡ ${avg.toDollar()}"
-            holder.totalPriceView.text = (item.stock.getPriceDouble() * item.lots).toDollar()
+            holder.currentPriceView.text = "${item.stock.getPrice2359String()} ➡ ${avg.toMoney(item.stock)}"
+            holder.totalPriceView.text = (item.stock.getPriceDouble() * item.lots).toMoney(item.stock)
 
             refreshPercent(holder)
 
@@ -174,11 +174,11 @@ class StrategyTazikFinishFragment : Fragment() {
             val percent = item.percentLimitPriceChange
 
             holder.priceChangePercentView.text = percent.toPercent()
-            holder.priceChangeAbsoluteView.text = item.absoluteLimitPriceChange.toDollar()
-            holder.priceChangeAbsoluteTotalView.text = (item.absoluteLimitPriceChange * item.lots).toDollar()
+            holder.priceChangeAbsoluteView.text = item.absoluteLimitPriceChange.toMoney(item.stock)
+            holder.priceChangeAbsoluteTotalView.text = (item.absoluteLimitPriceChange * item.lots).toMoney(item.stock)
 
-            holder.priceBuyView.text = item.getLimitPriceDouble().toDollar()
-            holder.priceBuyTotalView.text = (item.getLimitPriceDouble() * item.lots).toDollar()
+            holder.priceBuyView.text = item.getLimitPriceDouble().toMoney(item.stock)
+            holder.priceBuyTotalView.text = (item.getLimitPriceDouble() * item.lots).toMoney(item.stock)
 
             if (percent < 0) {
                 holder.priceChangePercentView.setTextColor(Utils.RED)

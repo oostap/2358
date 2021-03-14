@@ -1,7 +1,6 @@
-package com.project.ti2358.data.model.dto.reports
+package com.project.ti2358.data.model.dto.daager
 
 import android.graphics.Color
-import com.project.ti2358.data.manager.OrderStatus
 
 data class Sector (
     val rus: String,

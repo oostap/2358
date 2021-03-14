@@ -110,16 +110,16 @@ class StrategyHourStartFragment : Fragment() {
             }
 
             holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
-            holder.priceView.text = "${startPrice.toDollar()} ➡ ${item.getPriceString()}"
+            holder.priceView.text = "${startPrice.toMoney(item)} ➡ ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
 
             val volumeCash = item.dayVolumeCash / 1000f / 1000f
-            holder.volumeTodayCashView.text = "%.2f B$".format(volumeCash)
+            holder.volumeTodayCashView.text = "%.2fB$".format(volumeCash)
 
 
-            holder.changePriceAbsoluteView.text = changeAbsolute.toDollar()
+            holder.changePriceAbsoluteView.text = changeAbsolute.toMoney(item)
             holder.changePricePercentView.text = changePercent.toPercent()
 
             if (changeAbsolute < 0) {

@@ -8,9 +8,9 @@ import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.Instrument
-import com.project.ti2358.data.model.dto.reports.ClosePrice
-import com.project.ti2358.data.model.dto.reports.Index
-import com.project.ti2358.data.model.dto.reports.ReportStock
+import com.project.ti2358.data.model.dto.daager.ClosePrice
+import com.project.ti2358.data.model.dto.daager.Index
+import com.project.ti2358.data.model.dto.daager.ReportStock
 import com.project.ti2358.data.service.MarketService
 import com.project.ti2358.data.service.StreamingAlorService
 import com.project.ti2358.data.service.StreamingTinkoffService
@@ -33,7 +33,6 @@ class StockManager : KoinComponent {
     private val marketService: MarketService by inject()
     private val streamingTinkoffService: StreamingTinkoffService by inject()
     private val streamingAlorService: StreamingAlorService by inject()
-    private val alorManager: AlorManager by inject()
     private val strategyTazik: StrategyTazik by inject()
     private val strategyRocket: StrategyRocket by inject()
 
@@ -42,7 +41,8 @@ class StockManager : KoinComponent {
     var indexAll: MutableList<Index> = mutableListOf()
 
     private var stockClosePrices: Map<String, ClosePrice> = mutableMapOf()
-    private var reportsStock: Map<String, ReportStock> = mutableMapOf()
+    private var stockReports: Map<String, ReportStock> = mutableMapOf()
+    private var stockShorts: Map<String, Short> = mutableMapOf()
     // все акции, которые участвуют в расчётах с учётом базовой сортировки из настроек
     var stocksStream: MutableList<Stock> = mutableListOf()
 
@@ -100,22 +100,28 @@ class StockManager : KoinComponent {
 
     suspend fun reloadReports() {
         try {
-            reportsStock = thirdPartyService.daagerReports()
-
-            for (stock in stocksAll) {
-                stock.apply {
-                    report = reportsStock[stock.instrument.ticker]?.report
-                    dividend = reportsStock[stock.instrument.ticker]?.dividend
-                }
-            }
-
-            log(reportsStock.toString())
+            stockReports = thirdPartyService.daagerReports()
+            stocksAll.forEach { it.apply {
+                report = stockReports[it.instrument.ticker]?.report
+                dividend = stockReports[it.instrument.ticker]?.dividend
+            }}
+            log(stockReports.toString())
         } catch (e: Exception) {
             log("daager Reports not reached")
         }
     }
 
-    val alterNames: Map<String, String> = mapOf(
+    suspend fun reloadShortInfo() {
+        try {
+            stockShorts = thirdPartyService.daagerShortInfo()
+            stocksAll.forEach { it.short = stockShorts[it.instrument.ticker] }
+            log(stockShorts.toString())
+        } catch (e: Exception) {
+            log("daager Shorts not reached")
+        }
+    }
+
+    private val alterNames: Map<String, String> = mapOf(
         "SPCE" to "галя|вирджин",
         "ZYNE" to "зина",
         "COTY" to "кот",
@@ -143,7 +149,7 @@ class StockManager : KoinComponent {
             // исключить фиги, по которым не отдаёт данные
             if (instrument.figi in ignoreFigi) continue
 
-            // исключить фиги, по которым не отдаёт данные
+            // исключить тикеры, по которым не отдаёт данные
             if (instrument.ticker in ignoreTickers) continue
 
             // исключить какие-то устаревшие тикеры?
@@ -157,7 +163,6 @@ class StockManager : KoinComponent {
             })
         }
         baseSortStocks()
-
         resetSubscription()
     }
 
@@ -174,6 +179,7 @@ class StockManager : KoinComponent {
                 try {
                     stockClosePrices = synchronizedMap(thirdPartyService.daagerClosePrices() as MutableMap<String, ClosePrice>)
                     reloadReports()
+                    reloadShortInfo()
                     break
                 } catch (e: Exception) {
                     e.printStackTrace()

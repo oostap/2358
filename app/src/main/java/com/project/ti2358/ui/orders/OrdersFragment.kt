@@ -16,7 +16,7 @@ import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.model.dto.Order
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.toDollar
+import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -113,7 +113,7 @@ class OrdersFragment : Fragment() {
             holder.order = item
             holder.tickerView.text = "${position + 1}) ${item.stock?.instrument?.ticker}"
             holder.lotsView.text = "${item.executedLots} / ${item.requestedLots} шт."
-            holder.priceView.text = item.price.toDollar()
+            holder.priceView.text = item.price.toMoney(item.stock)
 
             holder.typeView.text = item.getOperationStatusString()
 

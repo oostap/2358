@@ -38,8 +38,9 @@ fun Date.toString(format: String, locale: Locale = Locale.getDefault()): String 
     return formatter.format(this)
 }
 
-fun Double.toDollar(): String {
-    return "%.2f$".format(this)
+fun Double.toMoney(stock: Stock?): String {
+    val symbol = stock?.getCurrencySymbol() ?: "$"
+    return "%.2f%s".format(this, symbol)
 }
 
 fun Double.toPercent(): String {
@@ -50,6 +51,10 @@ class Utils {
     companion object {
         val GREEN: Int = Color.parseColor("#58D68D")
         val RED: Int = Color.parseColor("#E74C3C")
+
+        fun getColorForValue(value: Double): Int {
+            return if (value < 0) RED else GREEN
+        }
 
         fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
             val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?

@@ -15,7 +15,7 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StrategyPremarket
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.toDollar
+import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -125,7 +125,7 @@ class PremarketFragment : Fragment() {
             val volumeCash = item.dayVolumeCash / 1000f / 1000f
             holder.volumeTodayCashView.text = "%.2fB$".format(volumeCash)
 
-            holder.changePriceAbsoluteView.text = item.changePriceDayAbsolute.toDollar()
+            holder.changePriceAbsoluteView.text = item.changePriceDayAbsolute.toMoney(item)
             holder.changePricePercentView.text = item.changePriceDayPercent.toPercent()
 
             if (item.changePriceDayAbsolute < 0) {
