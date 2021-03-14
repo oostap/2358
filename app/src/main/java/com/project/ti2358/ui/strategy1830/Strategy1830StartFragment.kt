@@ -113,13 +113,8 @@ class Strategy1830StartFragment : Fragment() {
             holder.changePriceAbsoluteView.text = item.changePriceDayAbsolute.toMoney(item)
             holder.changePricePercentView.text = item.changePriceDayPercent.toPercent()
 
-            if (item.changePriceDayAbsolute < 0) {
-                holder.changePriceAbsoluteView.setTextColor(Utils.RED)
-                holder.changePricePercentView.setTextColor(Utils.RED)
-            } else {
-                holder.changePriceAbsoluteView.setTextColor(Utils.GREEN)
-                holder.changePricePercentView.setTextColor(Utils.GREEN)
-            }
+            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePriceDayAbsolute))
+            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePriceDayAbsolute))
 
             holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
                 strategy1830.setSelected(holder.stock, checked)

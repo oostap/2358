@@ -115,13 +115,8 @@ class StrategyReportsStartFragment : Fragment() {
             holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
             holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
 
-            if (item.changePrice2359DayAbsolute < 0) {
-                holder.changePriceAbsoluteView.setTextColor(Utils.RED)
-                holder.changePricePercentView.setTextColor(Utils.RED)
-            } else {
-                holder.changePriceAbsoluteView.setTextColor(Utils.GREEN)
-                holder.changePricePercentView.setTextColor(Utils.GREEN)
-            }
+            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
+            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
 
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
@@ -136,7 +131,7 @@ class StrategyReportsStartFragment : Fragment() {
                 holder.info1View.setTextColor(Utils.GREEN)
                 holder.info2View.visibility = View.GONE
 
-                holder.dateView.text = "${it.date_format}"
+                holder.dateView.text = it.date_format
                 holder.dateView.setTextColor(Utils.RED)
             }
 
@@ -144,41 +139,37 @@ class StrategyReportsStartFragment : Fragment() {
                 if (it.estimate_rev_per != null) {
                     if (it.estimate_rev_per > 0) {
                         holder.info1View.text = "REV: +${it.estimate_rev_per}$"
-                        holder.info1View.setTextColor(Utils.GREEN)
                     } else {
                         holder.info1View.text = "REV: ${it.estimate_rev_per}$"
-                        holder.info1View.setTextColor(Utils.RED)
                     }
+                    holder.info1View.setTextColor(Utils.getColorForValue(it.estimate_rev_per))
                 }
 
                 if (it.estimate_eps != null) {
                     if (it.estimate_eps > 0) {
                         holder.info2View.text = "EPS: (+${it.estimate_eps})%"
-                        holder.info2View.setTextColor(Utils.GREEN)
                     } else {
                         holder.info2View.text = "EPS: (${it.estimate_eps})%"
-                        holder.info2View.setTextColor(Utils.RED)
                     }
+                    holder.info2View.setTextColor(Utils.getColorForValue(it.estimate_eps))
                 }
 
                 if (it.actual_rev_per != null) {
                     if (it.actual_rev_per > 0) {
                         holder.info1View.text = "REV: +${it.actual_rev_per}$"
-                        holder.info1View.setTextColor(Utils.GREEN)
                     } else {
                         holder.info1View.text = "REV: ${it.actual_rev_per}$"
-                        holder.info1View.setTextColor(Utils.RED)
                     }
+                    holder.info1View.setTextColor(Utils.getColorForValue(it.actual_rev_per))
                 }
 
                 if (it.actual_eps != null) {
                     if (it.actual_eps > 0) {
                         holder.info2View.text = "EPS: (+${it.actual_eps})%"
-                        holder.info2View.setTextColor(Utils.GREEN)
                     } else {
                         holder.info2View.text = "EPS: (${it.actual_eps})%"
-                        holder.info2View.setTextColor(Utils.RED)
                     }
+                    holder.info2View.setTextColor(Utils.getColorForValue(it.actual_eps))
                 }
 
                 var tod = if (it.tod == "post") " 🌚" else " 🌞"

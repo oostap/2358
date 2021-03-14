@@ -52,7 +52,7 @@ class Strategy2358() : KoinComponent {
     }
 
     fun isSelected(stock: Stock): Boolean {
-        return stocksSelected.contains(stock)
+        return stock in stocksSelected
     }
 
     fun getPurchaseStock(reset: Boolean): MutableList<PurchaseStock> {

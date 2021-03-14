@@ -157,7 +157,7 @@ class DepositManager : KoinComponent {
                 total += currency.balance
             }
             if (currency.currency == Currency.RUB) {
-                total += currency.balance * 74.0        // todo: взять реальную цену
+                total += currency.balance / 74.0        // todo: взять реальную цену
             }
         }
         return total
@@ -173,7 +173,7 @@ class DepositManager : KoinComponent {
             }
 
             if (position.averagePositionPrice?.currency == Currency.RUB) {
-                busy += position.getAveragePrice() * position.balance * 74.0    // todo: взять реальную цену
+                busy += position.getAveragePrice() * position.balance / 74.0    // todo: взять реальную цену
             }
         }
 
@@ -189,12 +189,15 @@ class DepositManager : KoinComponent {
     }
 
     private fun baseSortPortfolio() {
-        portfolioPositions.sortByDescending { abs(it.lots * it.getAveragePrice()) }
+        portfolioPositions.forEach { it.stock = stocksManager.getStockByFigi(it.figi) }
+
+        portfolioPositions.sortByDescending {
+            val multiplier = if (it.stock?.instrument?.currency == Currency.USD) 1.0 else 1.0 / 74.0 // todo: взять реальную цену
+            abs(it.lots * it.getAveragePrice() * multiplier)
+        }
 
         // удалить позицию $
         portfolioPositions.removeAll { it.ticker.contains("USD000") }
-
-        portfolioPositions.forEach { it.stock = stocksManager.getStockByFigi(it.figi) }
     }
 
     private fun baseSortOrders() {

@@ -131,13 +131,8 @@ class PostmarketFragment : Fragment() {
             holder.changePriceAbsoluteView.text = item.changePricePostmarketAbsolute.toMoney(item)
             holder.changePricePercentView.text = item.changePricePostmarketPercent.toPercent()
 
-            if (item.changePricePostmarketAbsolute < 0) {
-                holder.changePriceAbsoluteView.setTextColor(Utils.RED)
-                holder.changePricePercentView.setTextColor(Utils.RED)
-            } else {
-                holder.changePriceAbsoluteView.setTextColor(Utils.GREEN)
-                holder.changePricePercentView.setTextColor(Utils.GREEN)
-            }
+            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePricePostmarketAbsolute))
+            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePricePostmarketAbsolute))
 
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)

@@ -179,15 +179,9 @@ class Strategy1000BuyFinishFragment : Fragment() {
             holder.priceBuyView.text = item.getLimitPriceDouble().toMoney(item.stock)
             holder.priceBuyTotalView.text = (item.getLimitPriceDouble() * item.lots).toMoney(item.stock)
 
-            if (percent < 0) {
-                holder.priceChangePercentView.setTextColor(Utils.RED)
-                holder.priceChangeAbsoluteView.setTextColor(Utils.RED)
-                holder.priceChangeAbsoluteTotalView.setTextColor(Utils.RED)
-            } else {
-                holder.priceChangePercentView.setTextColor(Utils.GREEN)
-                holder.priceChangeAbsoluteView.setTextColor(Utils.GREEN)
-                holder.priceChangeAbsoluteTotalView.setTextColor(Utils.GREEN)
-            }
+            holder.priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
+            holder.priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
+            holder.priceChangeAbsoluteTotalView.setTextColor(Utils.getColorForValue(percent))
         }
 
         override fun getItemCount(): Int = values.size

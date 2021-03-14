@@ -160,13 +160,8 @@ class StrategyTazikStartFragment : Fragment() {
             holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
             holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
 
-            if (item.changePrice2359DayAbsolute < 0) {
-                holder.changePriceAbsoluteView.setTextColor(Utils.RED)
-                holder.changePricePercentView.setTextColor(Utils.RED)
-            } else {
-                holder.changePriceAbsoluteView.setTextColor(Utils.GREEN)
-                holder.changePricePercentView.setTextColor(Utils.GREEN)
-            }
+            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
+            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
 
             holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
                 strategyTazik.setSelected(holder.stock, checked, numberSet)

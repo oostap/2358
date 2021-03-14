@@ -137,13 +137,8 @@ class Strategy2358StartFragment : Fragment() {
             holder.sectorView.text = item.getSectorName()
             holder.sectorView.setTextColor(item.closePrices?.sector?.getColor() ?: Color.BLACK)
 
-            if (item.changePrice2359DayAbsolute < 0) {
-                holder.changePriceAbsoluteView.setTextColor(Utils.RED)
-                holder.changePricePercentView.setTextColor(Utils.RED)
-            } else {
-                holder.changePriceAbsoluteView.setTextColor(Utils.GREEN)
-                holder.changePricePercentView.setTextColor(Utils.GREEN)
-            }
+            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
+            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
 
             holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
                 strategy2358.setSelected(holder.stock, checked)

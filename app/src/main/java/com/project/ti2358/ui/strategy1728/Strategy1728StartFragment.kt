@@ -108,13 +108,8 @@ class Strategy1728StartFragment : Fragment() {
             holder.changePriceAbsoluteView.text = item.changePrice1728DayAbsolute.toMoney(item)
             holder.changePricePercentView.text = item.changePrice1728DayPercent.toPercent()
 
-            if (item.changePrice1728DayAbsolute < 0) {
-                holder.changePriceAbsoluteView.setTextColor(Utils.RED)
-                holder.changePricePercentView.setTextColor(Utils.RED)
-            } else {
-                holder.changePriceAbsoluteView.setTextColor(Utils.GREEN)
-                holder.changePricePercentView.setTextColor(Utils.GREEN)
-            }
+            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice1728DayAbsolute))
+            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice1728DayAbsolute))
 
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)

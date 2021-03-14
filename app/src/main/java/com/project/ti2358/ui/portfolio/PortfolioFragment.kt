@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.lang.Exception
+import kotlin.math.sign
 
 @KoinApiExtension
 class PortfolioFragment : Fragment() {
@@ -129,16 +130,26 @@ class PortfolioFragment : Fragment() {
             val profit = item.getProfitAmount()
             holder.changePriceAbsoluteView.text = profit.toMoney(item.stock)
 
-            var totalCash = item.balance * avg
             var percent = item.getProfitPercent()
-            holder.changePricePercentView.text = percent.toPercent()
 
+            // инвертировать доходность шорта
+            if (item.lots < 0) percent *= sign(profit)
+
+            var totalCash = item.balance * avg
             totalCash += profit
             holder.volumeCashView.text = totalCash.toMoney(item.stock)
 
-            if (item.lots < 0) { // шорт
-                percent *= -1
+            val emoji = when {
+                percent <= -5 -> " 😡"
+                percent <= -3 -> " 😱"
+                percent <= -1 -> " 😰"
+                percent >= 5 -> " 💰"
+                percent >= 3 -> " 💸"
+                percent >= 1 -> " 🤑"
+                else -> ""
             }
+
+            holder.changePricePercentView.text = percent.toPercent() + emoji
 
             holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(percent))
             holder.changePricePercentView.setTextColor(Utils.getColorForValue(percent))

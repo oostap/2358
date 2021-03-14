@@ -122,13 +122,8 @@ class StrategyHourStartFragment : Fragment() {
             holder.changePriceAbsoluteView.text = changeAbsolute.toMoney(item)
             holder.changePricePercentView.text = changePercent.toPercent()
 
-            if (changeAbsolute < 0) {
-                holder.changePriceAbsoluteView.setTextColor(Utils.RED)
-                holder.changePricePercentView.setTextColor(Utils.RED)
-            } else {
-                holder.changePriceAbsoluteView.setTextColor(Utils.GREEN)
-                holder.changePricePercentView.setTextColor(Utils.GREEN)
-            }
+            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(changeAbsolute))
+            holder.changePricePercentView.setTextColor(Utils.getColorForValue(changeAbsolute))
 
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)

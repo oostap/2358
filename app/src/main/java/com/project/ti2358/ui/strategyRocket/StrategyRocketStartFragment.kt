@@ -114,17 +114,8 @@ class StrategyRocketStartFragment : Fragment() {
             holder.changePriceAbsoluteView.text = item.changePriceDayAbsolute.toMoney(item)
             holder.changePricePercentView.text = item.changePriceDayPercent.toPercent()
 
-            if (item.changePriceDayAbsolute < 0) {
-                holder.changePriceAbsoluteView.setTextColor(Utils.RED)
-                holder.changePricePercentView.setTextColor(Utils.RED)
-            } else {
-                holder.changePriceAbsoluteView.setTextColor(Utils.GREEN)
-                holder.changePricePercentView.setTextColor(Utils.GREEN)
-            }
-
-//            holder.checkBoxView.setOnCheckedChangeListener { _, isChecked ->
-//                strategyRocket.setSelected(holder.stock, !isChecked)
-//            }
+            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePriceDayAbsolute))
+            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePriceDayAbsolute))
 
             holder.itemView.setOnClickListener {
                 val browserIntent =

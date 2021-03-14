@@ -156,15 +156,9 @@ class Strategy1000SellFinishFragment : Fragment() {
             holder.totalPriceProfitView.text = profit.toMoney(item.stock)
             holder.priceProfitView.text = (profit / item.position.lots).toMoney(item.stock)
 
-            if (percent < 0) {
-                holder.currentProfitView.setTextColor(Utils.RED)
-                holder.priceProfitView.setTextColor(Utils.RED)
-                holder.totalPriceProfitView.setTextColor(Utils.RED)
-            } else {
-                holder.currentProfitView.setTextColor(Utils.GREEN)
-                holder.priceProfitView.setTextColor(Utils.GREEN)
-                holder.totalPriceProfitView.setTextColor(Utils.GREEN)
-            }
+            holder.currentProfitView.setTextColor(Utils.getColorForValue(percent))
+            holder.priceProfitView.setTextColor(Utils.getColorForValue(percent))
+            holder.totalPriceProfitView.setTextColor(Utils.getColorForValue(percent))
 
             refreshFuturePercent(holder)
 
@@ -193,15 +187,9 @@ class Strategy1000SellFinishFragment : Fragment() {
 
             holder.totalPriceView.text = item.getProfitPriceForSell().toMoney(item.stock)
 
-            if (futureProfitPrice < 0) {
-                holder.futureProfitView.setTextColor(Utils.RED)
-                holder.futureProfitPriceView.setTextColor(Utils.RED)
-                holder.totalFutureProfitPriceView.setTextColor(Utils.RED)
-            } else {
-                holder.futureProfitView.setTextColor(Utils.GREEN)
-                holder.futureProfitPriceView.setTextColor(Utils.GREEN)
-                holder.totalFutureProfitPriceView.setTextColor(Utils.GREEN)
-            }
+            holder.futureProfitView.setTextColor(Utils.getColorForValue(futureProfitPrice))
+            holder.futureProfitPriceView.setTextColor(Utils.getColorForValue(futureProfitPrice))
+            holder.totalFutureProfitPriceView.setTextColor(Utils.getColorForValue(futureProfitPrice))
         }
 
         override fun getItemCount(): Int = values.size

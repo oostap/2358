@@ -111,13 +111,8 @@ class Strategy1000SellStartFragment : Fragment() {
             totalCash += profit
             holder.volumeCashView.text = totalCash.toMoney(item.stock)
 
-            if (profit < 0) {
-                holder.changePriceAbsoluteView.setTextColor(Utils.RED)
-                holder.changePricePercentView.setTextColor(Utils.RED)
-            } else {
-                holder.changePriceAbsoluteView.setTextColor(Utils.GREEN)
-                holder.changePricePercentView.setTextColor(Utils.GREEN)
-            }
+            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(profit))
+            holder.changePricePercentView.setTextColor(Utils.getColorForValue(profit))
 
             holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
                 strategy1000Sell.setSelected(holder.position, checked)

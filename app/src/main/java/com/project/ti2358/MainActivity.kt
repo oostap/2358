@@ -116,9 +116,6 @@ class MainActivity : AppCompatActivity() {
                     value.text = "${it.value}"
                     if (it.change_per < 0) {
                         change.text = "${it.change_per}%"
-                        change.setTextColor(Utils.RED)
-                        value.setTextColor(Utils.RED)
-
                         if (it.change_per < -1) {
                             emoji.text = if (invertedEmoji) "🤑" else "😱"
                         } else {
@@ -126,15 +123,14 @@ class MainActivity : AppCompatActivity() {
                         }
                     } else {
                         change.text = "+${it.change_per}%"
-                        change.setTextColor(Utils.GREEN)
-                        value.setTextColor(Utils.GREEN)
-
                         if (it.change_per > 1) {
                             emoji.text = if (invertedEmoji) "😱" else "🤑"
                         } else {
                             emoji.text = if (invertedEmoji) "😰" else "😍"
                         }
                     }
+                    change.setTextColor(Utils.getColorForValue(it.change_per))
+                    value.setTextColor(Utils.getColorForValue(it.change_per))
 
                     if (abs(it.change_per) <= 0.15) {
                         emoji.text = "😐"
