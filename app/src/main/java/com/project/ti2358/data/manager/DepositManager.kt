@@ -184,8 +184,8 @@ class DepositManager : KoinComponent {
         return portfolioPositions.find { it.figi == figi }
     }
 
-    public fun getOrderForFigi(figi: String): Order? {
-        return orders.find { it.figi == figi }
+    public fun getOrderForFigi(figi: String, operation: OperationType): Order? {
+        return orders.find { it.figi == figi && it.operation == operation }
     }
 
     private fun baseSortPortfolio() {

@@ -56,6 +56,11 @@
             android:icon="@drawable/ic_stocks"
             android:title="@string/menu_reports" />
 
+<!--        <item-->
+<!--            android:id="@+id/nav_shorts"-->
+<!--            android:icon="@drawable/ic_stocks"-->
+<!--            android:title="@string/menu_shorts" />-->
+
         <item
             android:id="@+id/nav_diagnostics"
             android:icon="@drawable/ic_settings"

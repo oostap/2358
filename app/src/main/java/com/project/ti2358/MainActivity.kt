@@ -154,6 +154,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_rocket_start,
                 R.id.nav_hour_start,
                 R.id.nav_reports,
+                R.id.nav_shorts,
+                R.id.nav_orderbook,
                 R.id.nav_diagnostics,
             ), drawerLayout
         )

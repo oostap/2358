@@ -25,6 +25,10 @@ enum class OrderStatus {
     WAITING,
     SOLD,
     CANCELED,
+    NOT_FILLED,
+    PART_FILLED,
+
+    ERROR_NEED_WATCH,
 
     WTF_1,
     WTF_2,
@@ -61,7 +65,7 @@ data class PurchaseStock(
     var currentTrailingTakeProfit: TrailingTakeProfit? = null
 
     companion object {
-        const val DelayFast: Long = 200
+        const val DelayFast: Long = 100
         const val DelayLong: Long = 2000
     }
 
@@ -81,6 +85,10 @@ data class PurchaseStock(
             OrderStatus.ORDER_SELL -> "ордер: продажа 🙋"
             OrderStatus.SOLD -> "продано! 🤑"
             OrderStatus.CANCELED -> "отменена! шок, скринь! 😱"
+            OrderStatus.NOT_FILLED -> "не налили 😰"
+            OrderStatus.PART_FILLED -> "частично налили, продаём"
+            OrderStatus.ERROR_NEED_WATCH -> "ошибка, дальше руками"
+
             OrderStatus.WTF_1 -> "wtf 1"
             OrderStatus.WTF_2 -> "wtf 2"
             OrderStatus.WTF_3 -> "wtf 3"
@@ -193,13 +201,11 @@ data class PurchaseStock(
     }
 
     fun buyLimitFromBid(price: Double, profit: Double) {
-        if (lots == 0) return
-
+        if (lots == 0 || price == 0.0 || profit == 0.0) return
         val buyPrice = Utils.makeNicePrice(price)
 
         GlobalScope.launch(Dispatchers.Main) {
             try {
-
                 while (true) {
                     try {
                         status = OrderStatus.ORDER_BUY_PREPARE
@@ -219,69 +225,110 @@ data class PurchaseStock(
                 }
 
                 val ticker = stock.instrument.ticker
-                Utils.showToastAlert("$ticker: покупка по $buyPrice")
-
-                delay(DelayFast)
+                Utils.showToastAlert("$ticker: ордер по $buyPrice")
 
                 // проверяем появился ли в портфеле тикер
-                var position: PortfolioPosition? = null
-                var counter = 50
-                while (counter > 0) {
+                var position: PortfolioPosition?
+                while (true) {
                     try {
                         depositManager.refreshDeposit()
+                        depositManager.refreshOrders()
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
 
+                    val order = depositManager.getOrderForFigi(stock.instrument.figi, OperationType.BUY)
                     position = depositManager.getPositionForFigi(stock.instrument.figi)
-                    if (position != null && position.lots >= lots) { // куплено!
+
+                    if (order == null && position != null) { // заявка отменена, продаём всё что куплено
                         status = OrderStatus.BOUGHT
+                        Utils.showToastAlert("$ticker: куплено по $buyPrice")
+
+                        // продаём
+                        if (profit == 0.0 || buyPrice == 0.0) {
+                            status = OrderStatus.ERROR_NEED_WATCH
+                            return@launch
+                        }
+                        var profitPrice = buyPrice + buyPrice / 100.0 * profit
+                        profitPrice = Utils.makeNicePrice(profitPrice)
+
+                        // выставить ордер на продажу
+                        while (true) {
+                            try {
+                                val lotsLeft = position.lots - position.blocked.toInt()
+                                status = OrderStatus.ORDER_SELL_PREPARE
+                                sellLimitOrder = ordersService.placeLimitOrder(
+                                    lotsLeft,
+                                    stock.instrument.figi,
+                                    profitPrice,
+                                    OperationType.SELL,
+                                    depositManager.getActiveBrokerAccountId()
+                                )
+                                status = OrderStatus.ORDER_SELL
+                                Utils.showToastAlert("$ticker: заявка на продажу по $profitPrice")
+                                break
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                            delay(DelayFast)
+                        }
                         break
                     }
 
-                    delay(DelayLong)
-                    counter--
-                }
-
-                // продаём
-                position?.let {
-                    if (profit == 0.0) return@launch
-
-                    // вычисляем и округляем до 2 после запятой
-                    if (buyPrice == 0.0) return@launch
-
-                    var profitPrice = buyPrice + buyPrice / 100.0 * profit
-                    profitPrice = Utils.makeNicePrice(profitPrice)
-                    if (profitPrice == 0.0) return@launch
-
-                    // выставить ордер на продажу
-                    while (true) {
-                        try {
-                            status = OrderStatus.ORDER_SELL_PREPARE
-                            sellLimitOrder = ordersService.placeLimitOrder(
-                                it.lots,
-                                stock.instrument.figi,
-                                profitPrice,
-                                OperationType.SELL,
-                                depositManager.getActiveBrokerAccountId()
-                            )
-                            status = OrderStatus.ORDER_SELL
-                            Utils.showToastAlert("$ticker: заявка на продажу по $profitPrice")
-                            break
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                        delay(DelayFast)
+                    if (order == null && position == null) { // заявка отменена, ничего не куплено
+                        status = OrderStatus.NOT_FILLED
+                        Utils.showToastAlert("$ticker: не налили по $buyPrice")
+                        return@launch
                     }
+
+                    if (order != null && position == null) { // заявка стоит, ничего не куплено
+                        status = OrderStatus.ORDER_BUY
+                        delay(DelayFast)
+                        continue
+                    }
+
+                    if (order != null && position != null) { // заявка стоит, частично куплено, можно продавать
+                        status = OrderStatus.PART_FILLED
+
+                        // продаём
+                        if (profit == 0.0 || buyPrice == 0.0) {
+                            status = OrderStatus.ERROR_NEED_WATCH
+                            return@launch
+                        }
+
+                        var profitPrice = buyPrice + buyPrice / 100.0 * profit
+                        profitPrice = Utils.makeNicePrice(profitPrice)
+
+                        // выставить ордер на продажу
+                        while (true) {
+                            try {
+                                val lotsLeft = position.lots - position.blocked.toInt()
+                                status = OrderStatus.ORDER_SELL_PREPARE
+                                sellLimitOrder = ordersService.placeLimitOrder(
+                                    lotsLeft,
+                                    stock.instrument.figi,
+                                    profitPrice,
+                                    OperationType.SELL,
+                                    depositManager.getActiveBrokerAccountId()
+                                )
+                                status = OrderStatus.ORDER_SELL
+                                Utils.showToastAlert("$ticker: заявка на продажу по $profitPrice")
+                                break
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                            delay(DelayFast)
+                        }
+                    }
+                    delay(DelayFast)
                 }
 
                 while (true) {
                     delay(DelayLong)
-
                     position = depositManager.getPositionForFigi(stock.instrument.figi)
                     if (position == null) { // продано!
                         status = OrderStatus.SOLD
-                        Utils.showToastAlert("$ticker: продано!")
+                        Utils.showToastAlert("$ticker: продано!?")
                         break
                     }
                 }
@@ -294,7 +341,7 @@ data class PurchaseStock(
     }
 
     fun buyLimitFromAsk(profit: Double) {
-        if (lots == 0) return
+        if (lots == 0 || profit == 0.0) return
 
         GlobalScope.launch(Dispatchers.Main) {
             try {
@@ -325,7 +372,6 @@ data class PurchaseStock(
                 }
 
                 Utils.showToastAlert("$ticker: покупка по $buyPrice")
-                delay(DelayFast)
 
                 // проверяем появился ли в портфеле тикер
                 var position: PortfolioPosition?
@@ -348,14 +394,9 @@ data class PurchaseStock(
 
                 // продаём
                 position?.let {
-                    if (profit == 0.0) return@launch
-
-                    // вычисляем и округляем до 2 после запятой
-                    if (buyPrice == 0.0) return@launch
-
+                    if (profit == 0.0 || buyPrice == 0.0) return@launch
                     var profitPrice = buyPrice + buyPrice / 100.0 * profit
                     profitPrice = Utils.makeNicePrice(profitPrice)
-                    if (profitPrice == 0.0) return@launch
 
                     // выставить ордер на продажу
                     while (true) {
@@ -438,16 +479,12 @@ data class PurchaseStock(
                 while (true) {
                     try {
                         depositManager.refreshDeposit()
-//                        depositManager.refreshOrders()
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
 
                     position = depositManager.getPositionForFigi(stock.instrument.figi)
-//                    val order = depositManager.getOrderForFigi(stock.marketInstrument.figi)
-
-                    // если позиция появилась и ордер исчез
-                    if (position != null && position.lots >= lots/* && order == null*/) {
+                    if (position != null && position.lots >= lots) {
                         status = OrderStatus.BOUGHT
                         Utils.showToastAlert("$ticker: куплено!")
                         break

@@ -104,6 +104,10 @@ class WorkflowManager() : KoinComponent {
                 return StrategyReports()
             }
 
+            fun provideStrategyShorts(): StrategyShorts {
+                return StrategyShorts()
+            }
+
             fun provideStrategyTelegram(): StrategyTelegram {
                 return StrategyTelegram()
             }
@@ -125,6 +129,7 @@ class WorkflowManager() : KoinComponent {
             single { provideStrategyTazik() }
             single { provideStrategyHour() }
             single { provideStrategyReports() }
+            single { provideStrategyShorts() }
             single { provideStrategyTelegram() }
         }
 
