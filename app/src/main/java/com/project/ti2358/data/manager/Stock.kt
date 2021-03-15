@@ -25,7 +25,6 @@ data class Stock(
     var dayVolumeCash: Double = 0.0
 
     var price1000: Double = 0.0             // цена открытия премаркета РФ
-    var priceNow: Double = 0.0              // текущая цена
     var priceTazik: Double = 0.0            // цена для утреннего тазика
 
     var changeOnStartTimer: Double = 0.0    // сколько % было на старте таймера для 2358
@@ -217,23 +216,17 @@ data class Stock(
             return minuteCandles.last().closingPrice
         }
 
-        candleToday?.let {
-            return it.closingPrice
-        }
+        var value = candleToday?.closingPrice ?: 0.0
+        if (value != 0.0) return value
 
-        closePrices?.let {
-            return it.close_post
-        }
+        value = closePrices?.close_post ?: 0.0
+        if (value != 0.0) return value
 
         return 0.0
     }
 
     fun getPricePostmarketUSDouble(): Double {
-        closePrices?.let {
-            return it.close_post_yahoo ?: 0.0
-        }
-
-        return 0.0
+        return closePrices?.close_post_yahoo ?: 0.0
     }
     fun getPriceString(): String {
         val price = getPriceDouble()
@@ -270,7 +263,6 @@ data class Stock(
             dayVolumeCash = middlePrice * it.volume
 
             price1000 = it.openingPrice
-            priceNow = it.closingPrice
         }
     }
 

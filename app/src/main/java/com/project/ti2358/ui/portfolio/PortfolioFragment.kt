@@ -133,7 +133,7 @@ class PortfolioFragment : Fragment() {
             var percent = item.getProfitPercent()
 
             // инвертировать доходность шорта
-            if (item.lots < 0) percent *= sign(profit)
+            percent *= sign(item.lots.toDouble())
 
             var totalCash = item.balance * avg
             totalCash += profit

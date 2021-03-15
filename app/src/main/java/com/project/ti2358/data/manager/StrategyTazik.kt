@@ -18,7 +18,7 @@ class StrategyTazik : KoinComponent {
     private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
 
-    val keySavedSelectedStock: String = "tazik_selected"
+    private val keySavedSelectedStock: String = "tazik_selected"
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
@@ -137,10 +137,9 @@ class StrategyTazik : KoinComponent {
             val minutes = (allSeconds - hours * 3600) / 60
             val seconds = allSeconds % 60
 
+            fixPrice()
             if (hours + minutes + seconds <= 0) {
                 startStrategy()
-            } else {
-                fixPrice()
             }
 
             return "Старт тазика через %02d:%02d:%02d".format(hours, minutes, seconds)
@@ -164,14 +163,14 @@ class StrategyTazik : KoinComponent {
     }
 
     fun getNotificationTextLong(): String {
-        stocksToPurchase.sortBy { (100 * it.stock.priceNow) / it.stock.priceTazik - 100 }
+        stocksToPurchase.sortBy { (100 * it.stock.getPriceDouble()) / it.stock.priceTazik - 100 }
         stocksToPurchase.sortBy { it.status }
 
         var tickers = ""
         for (stock in stocksToPurchase) {
-            val change = (100 * stock.stock.priceNow) / stock.stock.priceTazik - 100
+            val change = (100 * stock.stock.getPriceDouble()) / stock.stock.priceTazik - 100
             tickers += "${stock.stock.instrument.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
-                    "${stock.stock.priceTazik.toMoney(stock.stock)} ➡ ${stock.stock.priceNow.toMoney(stock.stock)} = " +
+                    "${stock.stock.priceTazik.toMoney(stock.stock)} ➡ ${stock.stock.getPriceDouble().toMoney(stock.stock)} = " +
                     "${change.toPercent()} ${stock.getStatusString()}\n"
 
         }
@@ -231,10 +230,10 @@ class StrategyTazik : KoinComponent {
     }
 
     fun startStrategy() {
+        fixPrice()
+
         started = true
         stocksTickerBuyed.clear()
-
-        fixPrice()
     }
 
     fun stopStrategy() {
@@ -251,7 +250,7 @@ class StrategyTazik : KoinComponent {
     }
 
     fun buyFirstOne() {
-        stocksToPurchase.sortBy { (100 * it.stock.priceNow) / it.stock.priceTazik - 100 }
+        stocksToPurchase.sortBy { (100 * it.stock.getPriceDouble()) / it.stock.priceTazik - 100 }
         for (purchase in stocksToPurchase) {
             if (purchase.stock.instrument.ticker in stocksTickerBuyed) continue
 
@@ -278,10 +277,10 @@ class StrategyTazik : KoinComponent {
             // уже брали бумагу?
             if (ticker in stocksTickerBuyed) return
 
-            val change = (100 * it.closingPrice) / stock.priceTazik - 100
-            if (change >= purchase.percentLimitPriceChange) return
-
-            processBuy(purchase, stock)
+            val change = it.closingPrice / stock.priceTazik * 100.0 - 100.0
+            if (change <= purchase.percentLimitPriceChange) {
+                processBuy(purchase, stock)
+            }
         }
     }
 
@@ -289,7 +288,7 @@ class StrategyTazik : KoinComponent {
         stock.candleToday?.let {
             stocksTickerBuyed.add(stock.instrument.ticker)
 
-            val change = (100 * it.closingPrice) / stock.priceTazik - 100
+            val change = it.closingPrice / stock.priceTazik * 100.0 - 100.0
 
             // просадка < -1%
             log("ПРОСАДКА: ${stock.instrument} ➡ $change ➡ ${it.closingPrice}")
