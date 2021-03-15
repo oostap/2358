@@ -137,6 +137,11 @@
     <string name="stocks_rocket_change_minutes">За сколько минут?</string>
     <string name="stocks_rocket_notify_alive">Время жизни сигнала (мин)</string>
 
+    <string name="action_type">drag_type</string>
+    <string name="order_line">order_line</string>
+    <string name="order_type">order_type</string>
+    <string name="order_item">order_item</string>
+
     <!-- setting keys-->
 
     <!-- tinkoff -->
