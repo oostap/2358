@@ -269,6 +269,10 @@ class StrategyTazik : KoinComponent {
         val sorted = stocksToPurchase.filter { it.stock.instrument.ticker == ticker }
         if (sorted.isEmpty()) return
 
+        // ограничение втарки
+        val parts = SettingsManager.getTazikPurchaseParts()
+        if (stocksTickerBuyed.size >= parts) return
+
         val purchase = sorted.first()
         stock.candleToday?.let {
             // уже брали бумагу?
@@ -283,6 +287,8 @@ class StrategyTazik : KoinComponent {
 
     private fun processBuy(purchase: PurchaseStock, stock: Stock) {
         stock.candleToday?.let {
+            stocksTickerBuyed.add(stock.instrument.ticker)
+
             val change = (100 * it.closingPrice) / stock.priceTazik - 100
 
             // просадка < -1%
@@ -330,7 +336,6 @@ class StrategyTazik : KoinComponent {
 
             // завершение стратегии
             val parts = SettingsManager.getTazikPurchaseParts()
-            stocksTickerBuyed.add(stock.instrument.ticker)
             if (stocksTickerBuyed.size >= parts) {
                 stopStrategy()
             }

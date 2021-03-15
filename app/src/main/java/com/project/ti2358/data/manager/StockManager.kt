@@ -8,9 +8,11 @@ import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.Instrument
+import com.project.ti2358.data.model.dto.OrderbookStream
 import com.project.ti2358.data.model.dto.daager.ClosePrice
 import com.project.ti2358.data.model.dto.daager.Index
 import com.project.ti2358.data.model.dto.daager.ReportStock
+import com.project.ti2358.data.model.dto.daager.StockShort
 import com.project.ti2358.data.service.MarketService
 import com.project.ti2358.data.service.StreamingAlorService
 import com.project.ti2358.data.service.StreamingTinkoffService
@@ -42,7 +44,7 @@ class StockManager : KoinComponent {
 
     private var stockClosePrices: Map<String, ClosePrice> = mutableMapOf()
     private var stockReports: Map<String, ReportStock> = mutableMapOf()
-    private var stockShorts: Map<String, Short> = mutableMapOf()
+    private var stockShorts: Map<String, StockShort> = mutableMapOf()
     // все акции, которые участвуют в расчётах с учётом базовой сортировки из настроек
     var stocksStream: MutableList<Stock> = mutableListOf()
 
@@ -117,6 +119,7 @@ class StockManager : KoinComponent {
             stocksAll.forEach { it.short = stockShorts[it.instrument.ticker] }
             log(stockShorts.toString())
         } catch (e: Exception) {
+            e.printStackTrace()
             log("daager Shorts not reached")
         }
     }
@@ -285,8 +288,33 @@ class StockManager : KoinComponent {
         }
     }
 
+    fun subscribeStockOrderbook(stock: Stock) {
+        streamingTinkoffService
+            .getOrderEventStream(
+                listOf(stock.instrument.figi),
+                20
+            )
+            .subscribeBy(
+                onNext = {
+                    addOrderbook(it)
+                },
+                onError = {
+                    it.printStackTrace()
+                }
+            )
+    }
+
+    fun unsubscribeStockOrderbook(stock: Stock) {
+        streamingTinkoffService.unsubscribeOrderEventsStream(stock.instrument.figi, 20)
+    }
+
     fun unsubscribeStock(stock: Stock, interval: Interval) {
         streamingTinkoffService.getCandleEventStream(listOf(stock.instrument.figi), interval)
+    }
+
+    private fun addOrderbook(orderbookStream: OrderbookStream) {
+        val stock = stocksStream.find { it.instrument.figi == orderbookStream.figi }
+        stock?.processOrderbook(orderbookStream)
     }
 
     private fun addCandle(candle: Candle) {

@@ -61,6 +61,11 @@
 <!--            android:icon="@drawable/ic_stocks"-->
 <!--            android:title="@string/menu_shorts" />-->
 
+<!--        <item-->
+<!--            android:id="@+id/nav_orderbook"-->
+<!--            android:icon="@drawable/ic_stocks"-->
+<!--            android:title="@string/menu_orderbook" />-->
+
         <item
             android:id="@+id/nav_diagnostics"
             android:icon="@drawable/ic_settings"

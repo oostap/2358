@@ -31,6 +31,7 @@
             android:layout_height="wrap_content"
             android:paddingTop="2dp"
             android:text=""
+            android:textSize="12sp"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <TextView
@@ -39,19 +40,21 @@
             android:layout_height="wrap_content"
             android:paddingTop="2dp"
             android:text=""
+            android:textSize="12sp"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="12sp"
             android:text="@string/nav_header_subtitle" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="4"
+        android:layout_weight="5"
         android:gravity="right"
         android:orientation="vertical">
 

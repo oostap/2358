@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_portfolio">
+    app:startDestination="@+id/nav_premarket">
 
     <!-- настройки -->
     <fragment
@@ -44,10 +44,10 @@
         android:label="@string/menu_shorts"
         tools:layout="@layout/fragment_shorts" />
 
-    <!-- шорты -->
+    <!-- стакан -->
     <fragment
         android:id="@+id/nav_orderbook"
-        android:name="com.project.ti2358.ui.orderbook.StrategyOrderbookFragment"
+        android:name="com.project.ti2358.ui.orderbook.OrderbookFragment"
         android:label="@string/menu_orderbook"
         tools:layout="@layout/fragment_orderbook" />
 
@@ -56,7 +56,11 @@
         android:id="@+id/nav_premarket"
         android:name="com.project.ti2358.ui.premarket.PremarketFragment"
         android:label="@string/menu_premarket"
-        tools:layout="@layout/fragment_premarket_item_list" />
+        tools:layout="@layout/fragment_premarket_item_list" >
+        <action
+            android:id="@+id/action_nav_premarket_to_nav_orderbook"
+            app:destination="@id/nav_orderbook" />
+    </fragment>
 
     <!-- постмаркет US -->
     <fragment

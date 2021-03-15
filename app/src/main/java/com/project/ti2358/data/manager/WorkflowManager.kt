@@ -1,15 +1,7 @@
 package com.project.ti2358.data.manager
 
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import com.project.ti2358.BuildConfig
-import com.project.ti2358.TheApplication
 import com.project.ti2358.data.service.*
-import com.project.ti2358.service.Utils
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.component.KoinApiExtension
@@ -38,84 +30,35 @@ class WorkflowManager() : KoinComponent {
     }
 
     companion object {
-
         private val processingModule = module {
-            fun provideWorkflowManager(): WorkflowManager {
-                return WorkflowManager()
-            }
+            fun provideWorkflowManager(): WorkflowManager = WorkflowManager()
+            fun provideStocksManager(): StockManager = StockManager()
+            fun provideDepoManager(): DepositManager = DepositManager()
+            fun provideAlorManager(): AlorManager = AlorManager()
+            fun provideOrderbookManager(): OrderbookManager = OrderbookManager()
 
-            fun provideStocksManager(): StockManager {
-                return StockManager()
-            }
+            fun provideStrategyPremarket(): StrategyPremarket = StrategyPremarket()
+            fun provideStrategyPostmarket(): StrategyPostmarket = StrategyPostmarket()
+            fun provideStrategy1000Sell(): Strategy1000Sell = Strategy1000Sell()
+            fun provideStrategy1000Buy(): Strategy1000Buy = Strategy1000Buy()
+            fun provideStrategy1005(): Strategy1005 = Strategy1005()
+            fun provideStrategy2358(): Strategy2358 = Strategy2358()
+            fun provideStrategy1728(): Strategy1728 = Strategy1728()
+            fun provideStrategyTazik(): StrategyTazik = StrategyTazik()
+            fun provideStrategyHour(): StrategyHour = StrategyHour()
+            fun provideStrategyReports(): StrategyReports = StrategyReports()
 
-            fun provideDepoManager(): DepositManager {
-                return DepositManager()
-            }
-
-            fun provideAlorManager(): AlorManager {
-                return AlorManager()
-            }
-
-            fun provideStrategyPremarket(): StrategyPremarket {
-                return StrategyPremarket()
-            }
-
-            fun provideStrategyPostmarket(): StrategyPostmarket {
-                return StrategyPostmarket()
-            }
-
-            fun provideStrategy1000Sell(): Strategy1000Sell {
-                return Strategy1000Sell()
-            }
-
-            fun provideStrategy1000Buy(): Strategy1000Buy {
-                return Strategy1000Buy()
-            }
-
-            fun provideStrategy1005(): Strategy1005 {
-                return Strategy1005()
-            }
-
-            fun provideStrategy2358(): Strategy2358 {
-                return Strategy2358()
-            }
-
-            fun provideStrategy1728(): Strategy1728 {
-                return Strategy1728()
-            }
-
-            fun provideStrategy1830(): Strategy1830 {
-                return Strategy1830()
-            }
-
-            fun provideStrategyRocket(): StrategyRocket {
-                return StrategyRocket()
-            }
-
-            fun provideStrategyTazik(): StrategyTazik {
-                return StrategyTazik()
-            }
-
-            fun provideStrategyHour(): StrategyHour {
-                return StrategyHour()
-            }
-
-            fun provideStrategyReports(): StrategyReports {
-                return StrategyReports()
-            }
-
-            fun provideStrategyShorts(): StrategyShorts {
-                return StrategyShorts()
-            }
-
-            fun provideStrategyTelegram(): StrategyTelegram {
-                return StrategyTelegram()
-            }
+            // unused yet
+            fun provideStrategy1830(): Strategy1830 = Strategy1830()
+            fun provideStrategyRocket(): StrategyRocket = StrategyRocket()
+            fun provideStrategyShorts(): StrategyShorts = StrategyShorts()
+            fun provideStrategyTelegram(): StrategyTelegram = StrategyTelegram()
 
             single { provideStocksManager() }
             single { provideDepoManager() }
             single { provideWorkflowManager() }
             single { provideAlorManager() }
+            single { provideOrderbookManager() }
 
             single { provideStrategyPremarket() }
             single { provideStrategyPostmarket() }
@@ -134,33 +77,13 @@ class WorkflowManager() : KoinComponent {
         }
 
         private val apiModule = module {
-            fun provideMarketService(retrofit: Retrofit): MarketService {
-                return MarketService(retrofit)
-            }
-
-            fun provideOrdersService(retrofit: Retrofit): OrdersService {
-                return OrdersService(retrofit)
-            }
-
-            fun providePortfolioService(retrofit: Retrofit): PortfolioService {
-                return PortfolioService(retrofit)
-            }
-
-            fun provideOperationsService(retrofit: Retrofit): OperationsService {
-                return OperationsService(retrofit)
-            }
-
-            fun provideStreamingTinkoffService(): StreamingTinkoffService {
-                return StreamingTinkoffService()
-            }
-
-            fun provideStreamingAlorService(): StreamingAlorService {
-                return StreamingAlorService()
-            }
-
-            fun provideThirdPartyService(retrofit: Retrofit): ThirdPartyService {
-                return ThirdPartyService(retrofit)
-            }
+            fun provideMarketService(retrofit: Retrofit): MarketService = MarketService(retrofit)
+            fun provideOrdersService(retrofit: Retrofit): OrdersService = OrdersService(retrofit)
+            fun providePortfolioService(retrofit: Retrofit): PortfolioService = PortfolioService(retrofit)
+            fun provideOperationsService(retrofit: Retrofit): OperationsService = OperationsService(retrofit)
+            fun provideStreamingTinkoffService(): StreamingTinkoffService = StreamingTinkoffService()
+            fun provideStreamingAlorService(): StreamingAlorService = StreamingAlorService()
+            fun provideThirdPartyService(retrofit: Retrofit): ThirdPartyService = ThirdPartyService(retrofit)
 
             single { provideMarketService(get()) }
             single { provideOrdersService(get()) }

@@ -102,8 +102,8 @@ class Utils {
         fun showUpdateAlert(context: Context, from: String, to: String) {
             val alertDialogBuilder = AlertDialog.Builder(context)
             val alertDialog = alertDialogBuilder.create()
-            alertDialog.setTitle("Новая версия!")
-            alertDialog.setMessage("Хотите обновиться? \n$from >>> $to")
+            alertDialog.setTitle("Новая версия! 🔥")
+            alertDialog.setMessage("Обновляемся? \n$from >>> $to")
             alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "ДА!") { dialog, _ ->
                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/oostap/2358/releases/latest"))
                 context.startActivity(browserIntent)

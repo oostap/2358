@@ -1,14 +1,13 @@
 package com.project.ti2358.data.manager
 
-import android.graphics.Color
-import com.project.ti2358.data.model.dto.Candle
+import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.Currency
-import com.project.ti2358.data.model.dto.Interval
-import com.project.ti2358.data.model.dto.Instrument
 import com.project.ti2358.data.model.dto.daager.ClosePrice
 import com.project.ti2358.data.model.dto.daager.Dividend
 import com.project.ti2358.data.model.dto.daager.Report
+import com.project.ti2358.data.model.dto.daager.StockShort
 import com.project.ti2358.service.log
+import org.koin.core.component.KoinApiExtension
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -18,7 +17,9 @@ data class Stock(
     var alterName: String = ""
     var report: Report? = null
     var dividend: Dividend? = null
-    var short: Short? = null
+    var short: StockShort? = null
+
+    var orderbookStream: OrderbookStream? = null
 
     var middlePrice: Double = 0.0
     var dayVolumeCash: Double = 0.0
@@ -97,6 +98,10 @@ data class Stock(
         return info
     }
 
+    fun processOrderbook(orderbook: OrderbookStream) {
+        orderbookStream = orderbook
+    }
+
     fun processCandle(candle: Candle) {
         when (candle.interval) {
             Interval.DAY -> {
@@ -157,6 +162,7 @@ data class Stock(
         changePriceHour2Percent = (100 * candleHour2.closingPrice) / candleHour2.openingPrice - 100
     }
 
+    @KoinApiExtension
     private fun processMinuteCandle(candle: Candle) {
         var exists = false
         for ((index, c) in minuteCandles.withIndex()) {

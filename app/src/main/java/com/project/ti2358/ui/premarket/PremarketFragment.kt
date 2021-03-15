@@ -8,22 +8,23 @@ import android.widget.Button
 import android.widget.SearchView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.manager.StrategyPremarket
+import com.project.ti2358.data.manager.*
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import kotlin.math.roundToInt
 
 @KoinApiExtension
 class PremarketFragment : Fragment() {
-
     val strategyPremarket: StrategyPremarket by inject()
+    val orderbookManager: OrderbookManager by inject()
     var adapterList: ItemStocksRecyclerViewAdapter = ItemStocksRecyclerViewAdapter(emptyList())
     lateinit var stocks: MutableList<Stock>
 
@@ -134,6 +135,11 @@ class PremarketFragment : Fragment() {
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
             }
+
+            holder.buttonOrderbook.setOnClickListener {
+                orderbookManager.start(holder.stock)
+                holder.buttonOrderbook.findNavController().navigate(R.id.action_nav_premarket_to_nav_orderbook)
+            }
         }
 
         override fun getItemCount(): Int = values.size
@@ -149,6 +155,8 @@ class PremarketFragment : Fragment() {
 
             val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
+
+            val buttonOrderbook: Button = view.findViewById(R.id.buttonOrderbook)
         }
     }
 }

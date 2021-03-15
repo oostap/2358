@@ -22,7 +22,7 @@ class Strategy1728() : KoinComponent {
     }
 
     companion object {
-        lateinit var strategyStartTime: Calendar
+        var strategyStartTime: Calendar = Calendar.getInstance()
     }
 
     fun process(): MutableList<Stock> {

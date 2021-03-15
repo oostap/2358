@@ -71,7 +71,7 @@ class PortfolioFragment : Fragment() {
 
         updateData()
         GlobalScope.launch(Dispatchers.Main) {
-            delay(5000)
+            delay(3000)
             val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(TheApplication.application.applicationContext.packageName, 0)
             val currentVersion = pInfo.versionName
 

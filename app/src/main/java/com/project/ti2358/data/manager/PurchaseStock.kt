@@ -239,7 +239,7 @@ data class PurchaseStock(
 
                     val order = depositManager.getOrderForFigi(stock.instrument.figi, OperationType.BUY)
                     position = depositManager.getPositionForFigi(stock.instrument.figi)
-
+                    
                     if (order == null && position != null) { // заявка отменена, продаём всё что куплено
                         status = OrderStatus.BOUGHT
                         Utils.showToastAlert("$ticker: куплено по $buyPrice")
@@ -255,7 +255,11 @@ data class PurchaseStock(
                         // выставить ордер на продажу
                         while (true) {
                             try {
-                                val lotsLeft = position.lots - position.blocked.toInt()
+                                position = depositManager.getPositionForFigi(stock.instrument.figi)
+                                var lotsLeft = 0
+                                if (position != null) lotsLeft = position.lots - position.blocked.toInt()
+                                if (lotsLeft == 0) break
+
                                 status = OrderStatus.ORDER_SELL_PREPARE
                                 sellLimitOrder = ordersService.placeLimitOrder(
                                     lotsLeft,
@@ -270,7 +274,7 @@ data class PurchaseStock(
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
-                            delay(DelayFast)
+                            delay(DelayFast * 2)
                         }
                         break
                     }
@@ -302,7 +306,11 @@ data class PurchaseStock(
                         // выставить ордер на продажу
                         while (true) {
                             try {
-                                val lotsLeft = position.lots - position.blocked.toInt()
+                                position = depositManager.getPositionForFigi(stock.instrument.figi)
+                                var lotsLeft = 0
+                                if (position != null) lotsLeft = position.lots - position.blocked.toInt()
+                                if (lotsLeft == 0) break
+
                                 status = OrderStatus.ORDER_SELL_PREPARE
                                 sellLimitOrder = ordersService.placeLimitOrder(
                                     lotsLeft,
@@ -317,7 +325,7 @@ data class PurchaseStock(
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
-                            delay(DelayFast)
+                            delay(DelayFast * 5)
                         }
                     }
                     delay(DelayFast)

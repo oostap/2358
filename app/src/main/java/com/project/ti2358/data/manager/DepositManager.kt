@@ -196,6 +196,9 @@ class DepositManager : KoinComponent {
             abs(it.lots * it.getAveragePrice() * multiplier)
         }
 
+        // удалить все НЕ акции
+        portfolioPositions.removeAll { it.instrumentType != InstrumentType.STOCK }
+
         // удалить позицию $
         portfolioPositions.removeAll { it.ticker.contains("USD000") }
     }

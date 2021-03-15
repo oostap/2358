@@ -3,8 +3,8 @@ package com.project.ti2358.data.model.dto
 data class Orderbook(
     val figi: String,
     val depth: Int,
-    val bids: Array<BidAsk>,
-    val asks: Array<BidAsk>,
+    val bids: List<BidAsk>,
+    val asks: List<BidAsk>,
 
     val tradeStatus: String,
     val minPriceIncrement: Double,

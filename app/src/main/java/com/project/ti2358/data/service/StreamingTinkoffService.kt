@@ -1,12 +1,11 @@
 package com.project.ti2358.data.service
 
-import android.util.Log
 import com.google.gson.Gson
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.model.streamTinkoff.OrderEventBody
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
-import com.project.ti2358.data.model.dto.OrderEvent
+import com.project.ti2358.data.model.dto.OrderbookStream
 import com.project.ti2358.data.model.streamTinkoff.CandleEventBody
 import com.project.ti2358.service.log
 import io.reactivex.rxjava3.core.Flowable
@@ -94,7 +93,7 @@ class StreamingTinkoffService {
                     publishProcessor.onNext(gson.fromJson(payload, Candle::class.java))
                 }
                 "orderbook" -> {
-                    publishProcessor.onNext(gson.fromJson(payload, OrderEvent::class.java))
+                    publishProcessor.onNext(gson.fromJson(payload, OrderbookStream::class.java))
                 }
             }
         }
@@ -144,7 +143,7 @@ class StreamingTinkoffService {
     fun getOrderEventStream(
         figis: List<String>,
         depth: Int
-    ): Flowable<OrderEvent> {
+    ): Flowable<OrderbookStream> {
         return Single
             .create<Boolean> { emitter ->
                 val excessFigis = activeOrderSubscriptions.keys - figis
@@ -166,8 +165,8 @@ class StreamingTinkoffService {
             .subscribeOn(Schedulers.from(threadPoolExecutor))
             .flatMapPublisher {
                 publishProcessor.filter {
-                    it is OrderEvent && it.depth == depth
-                } as Flowable<OrderEvent>
+                    it is OrderbookStream && it.depth == depth
+                } as Flowable<OrderbookStream>
             }
     }
 
@@ -225,7 +224,7 @@ class StreamingTinkoffService {
         }
     }
 
-    private fun unsubscribeOrderEventsStream(figi: String, depth: Int) {
+    public fun unsubscribeOrderEventsStream(figi: String, depth: Int) {
         webSocket?.send(Gson().toJson(OrderEventBody("orderbook:unsubscribe", figi, depth)))
         activeOrderSubscriptions[figi]?.remove(depth)
     }
@@ -243,7 +242,7 @@ class StreamingTinkoffService {
         }
     }
 
-    private fun unsubscribeCandleEventsStream(figi: String, interval: Interval) {
+    public fun unsubscribeCandleEventsStream(figi: String, interval: Interval) {
 //        Log.d("StreamingService", "unsubscribe from candle events: figi: $figi, interval: $interval")
         webSocket?.send(Gson().toJson(CandleEventBody("candle:unsubscribe", figi, interval)))
         activeCandleSubscriptions[figi]?.remove(interval)
