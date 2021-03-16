@@ -74,9 +74,9 @@ class OrderbookFragment : Fragment() {
             recyclerView = this
         }
 
-        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
-        buttonUpdate.setOnClickListener {
-        }
+//        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
+//        buttonUpdate.setOnClickListener {
+//        }
 
         imageTrash = view.findViewById(R.id.image_trash)
         imageTrash?.setOnDragListener(ChoiceDragListener())
@@ -152,7 +152,7 @@ class OrderbookFragment : Fragment() {
         adapterList.setData(orderbookLines)
 
         val ticker = activeStock?.instrument?.ticker ?: ""
-        var lots = activeStock?.instrument?.ticker ?: ""
+        var lots = ""
         val act = requireActivity() as AppCompatActivity
 
         activeStock?.let {
