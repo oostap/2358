@@ -90,6 +90,11 @@
     <string name="stocks_usd_min">Цена min $</string>
     <string name="stocks_usd_max">Цена max $</string>
 
+    <!-- orderbook -->
+    <string name="orderbook_header">Стакан</string>
+    <string name="orderbook_volumes">Размеры быстрого объёма (через пробел)</string>
+    <string name="orderbook_prices">Размеры скальперских кнопок (через пробел)</string>
+
     <!-- 2358 settings -->
     <string name="stocks_2358_price_change_percent">Изменение от %</string>
     <string name="stocks_2358_volume_min_day">Объём в день от шт.</string>
@@ -156,6 +161,10 @@
     <!-- common settings -->
     <string name="setting_key_stocks_usd_price_min">stocks_usd_price_min</string>
     <string name="setting_key_stocks_usd_price_max">stocks_usd_price_max</string>
+
+    <!-- orderbook -->
+    <string name="setting_key_orderbook_volumes">orderbook_volumes</string>
+    <string name="setting_key_orderbook_prices">orderbook_prices</string>
 
     <!-- 2358 settings -->
     <string name="setting_key_2358_price_change_percent">2358_price_change_percent</string>

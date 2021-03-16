@@ -188,6 +188,10 @@ class DepositManager : KoinComponent {
         return orders.find { it.figi == figi && it.operation == operation }
     }
 
+    public fun getOrderAllOrdersForFigi(figi: String, operation: OperationType): List<Order> {
+        return orders.filter { it.figi == figi && it.operation == operation }
+    }
+
     private fun baseSortPortfolio() {
         portfolioPositions.forEach { it.stock = stocksManager.getStockByFigi(it.figi) }
 

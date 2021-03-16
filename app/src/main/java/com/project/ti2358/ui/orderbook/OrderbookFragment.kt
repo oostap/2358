@@ -11,15 +11,13 @@ import android.view.View.*
 import android.widget.*
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.DepositManager
-import com.project.ti2358.data.manager.OrderbookManager
-import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.manager.StockManager
+import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.model.dto.Order
 import com.project.ti2358.service.Utils
@@ -29,6 +27,7 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.lang.Exception
 import java.lang.StrictMath.min
+import kotlin.math.sign
 
 
 @KoinApiExtension
@@ -37,7 +36,6 @@ class OrderbookFragment : Fragment() {
     val orderbookManager: OrderbookManager by inject()
     val depositManager: DepositManager by inject()
 
-    var imageTrash: ImageView? = null
     var adapterList: ItemOrderbookRecyclerViewAdapter = ItemOrderbookRecyclerViewAdapter(emptyList())
     var activeStock: Stock? = null
     var orderbookLines: MutableList<OrderbookLine> = mutableListOf()
@@ -46,6 +44,16 @@ class OrderbookFragment : Fragment() {
 
     lateinit var localLayoutManager: LinearLayoutManager
     lateinit var recyclerView: RecyclerView
+
+    lateinit var imageTrash: ImageView
+    // скальпер кнопки
+    lateinit var scalperView: RelativeLayout
+    lateinit var volumeEditText: EditText
+    lateinit var volumesView: LinearLayout
+    lateinit var buyPlusView: LinearLayout
+    lateinit var buyMinusView: LinearLayout
+    lateinit var sellPlusView: LinearLayout
+    lateinit var sellMinusView: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,13 +82,73 @@ class OrderbookFragment : Fragment() {
             recyclerView = this
         }
 
-//        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
-//        buttonUpdate.setOnClickListener {
-//        }
+        scalperView = view.findViewById(R.id.scalper_panel)
+        volumeEditText = view.findViewById(R.id.edit_volume)
+        volumesView = view.findViewById(R.id.volumes)
+        buyPlusView = view.findViewById(R.id.buy_plus)
+        buyMinusView = view.findViewById(R.id.buy_minus)
+        sellPlusView = view.findViewById(R.id.sell_plus)
+        sellMinusView = view.findViewById(R.id.sell_minus)
+
+        volumesView.children.forEach { it.visibility = View.GONE }
+        buyPlusView.children.forEach { it.visibility = View.GONE }
+        buyMinusView.children.forEach { it.visibility = View.GONE }
+        sellPlusView.children.forEach { it.visibility = View.GONE }
+        sellMinusView.children.forEach { it.visibility = View.GONE }
+
+        val vols = SettingsManager.getOrderbookVolumes()
+        val volumes = vols.split(" ")
+        var size = min(volumesView.childCount, volumes.size)
+        for (i in 0 until size) {
+            volumesView.getChildAt(i).apply {
+                this as TextView
+
+                text = volumes[i]
+                visibility = VISIBLE
+
+                setOnClickListener {
+                    volumeEditText.setText(this.text)
+                }
+            }
+        }
+
+        val p = SettingsManager.getOrderbookPrices()
+        val changes = p.split(" ")
+        size = min(buyPlusView.childCount, changes.size)
+        for (i in 0 until size) {
+            buyPlusView.getChildAt(i).apply { this as TextView
+                text = "+${changes[i]}"
+                visibility = VISIBLE
+
+                setOnClickListener { changeOrders(it as TextView, OperationType.BUY) }
+            }
+            sellPlusView.getChildAt(i).apply { this as TextView
+                text = "+${changes[i]}"
+                visibility = VISIBLE
+
+                setOnClickListener { changeOrders(it as TextView, OperationType.SELL) }
+            }
+
+            buyMinusView.getChildAt(i).apply { this as TextView
+                text = "-${changes[i]}"
+                visibility = VISIBLE
+
+                setOnClickListener { changeOrders(it as TextView, OperationType.BUY) }
+            }
+            sellMinusView.getChildAt(i).apply { this as TextView
+                text = "-${changes[i]}"
+                visibility = VISIBLE
+
+                setOnClickListener { changeOrders(it as TextView, OperationType.SELL) }
+            }
+        }
 
         imageTrash = view.findViewById(R.id.image_trash)
-        imageTrash?.setOnDragListener(ChoiceDragListener())
-        imageTrash?.setTag(R.string.action_type, "remove")
+        imageTrash.setOnDragListener(ChoiceDragListener())
+        imageTrash.setTag(R.string.action_type, "remove")
+
+        scalperView.visibility = View.VISIBLE
+        imageTrash.visibility = View.GONE
 
         activeStock = orderbookManager.activeStock
 
@@ -105,7 +173,39 @@ class OrderbookFragment : Fragment() {
         return view
     }
 
+    private fun changeOrders(textView: TextView, operationType: OperationType) {
+        try {
+            val text = textView.text.toString().replace("+", "")
+            val change = text.toInt()
+            moveAllBuyOrders(change, operationType)
+        } catch (e: Exception) {
+
+        }
+    }
+
+    private fun moveAllBuyOrders(delta: Int, operationType: OperationType) {
+        val sign = if (delta < 0) 0.0 else 0.1
+        activeStock?.let {
+            val buyOrders = depositManager.getOrderAllOrdersForFigi(it.instrument.figi, operationType)
+            buyOrders.forEach { order ->
+                val newIntPrice = (order.price * 100 + sign).toInt() + delta
+                val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0)
+                orderbookManager.replaceOrder(order, newPrice, operationType)
+            }
+        }
+    }
+
+    private fun getActiveVolume(): Int {
+        try {
+            return volumeEditText.text.toString().toInt()
+        } catch (e: Exception) {
+
+        }
+        return 0
+    }
+
     fun showEditOrder(orderbookLine: OrderbookLine, operationType: OperationType) {
+
         val context: Context = requireContext()
         val layout = LinearLayout(context)
         layout.orientation = LinearLayout.VERTICAL
@@ -117,6 +217,14 @@ class OrderbookFragment : Fragment() {
         } else {
             priceBox.setText("${orderbookLine.askPrice}")
         }
+
+        val volume = getActiveVolume()
+        if (volume != 0) {
+            val price = priceBox.text.toString().toDouble()
+            orderbookManager.createOrder(orderbookLine.stock.instrument.figi, price, volume, operationType)
+            return
+        }
+
         priceBox.hint = "цены"
         layout.addView(priceBox) // Notice this is an add method
 
@@ -178,12 +286,9 @@ class OrderbookFragment : Fragment() {
         override fun onDrag(v: View, event: DragEvent): Boolean {
             log("onDrag")
             when (event.action) {
-                DragEvent.ACTION_DRAG_STARTED -> {
-                }
-                DragEvent.ACTION_DRAG_ENTERED -> {
-                }
-                DragEvent.ACTION_DRAG_EXITED -> {
-                }
+                DragEvent.ACTION_DRAG_STARTED -> { }
+                DragEvent.ACTION_DRAG_ENTERED -> { }
+                DragEvent.ACTION_DRAG_EXITED -> { }
                 DragEvent.ACTION_DROP -> {
                     val view = event.localState as View
 
@@ -208,11 +313,12 @@ class OrderbookFragment : Fragment() {
                         val order = dropped.getTag(R.string.order_item) as Order
                         orderbookManager.removeOrder(order)
                     }
+
+                    scalperView.visibility = View.VISIBLE
+                    imageTrash.visibility = View.GONE
                 }
-                DragEvent.ACTION_DRAG_ENDED -> {
-                }
-                else -> {
-                }
+                DragEvent.ACTION_DRAG_ENDED -> { }
+                else -> { }
             }
             return true
         }
@@ -264,15 +370,12 @@ class OrderbookFragment : Fragment() {
             }
 
             var size = min(item.ordersBuy.size, ordersBuy.size)
-            var i = 0
-            while (i < size) {
-                ordersBuy[i].visibility = View.VISIBLE
+            for (i in 0 until size) {
+                ordersBuy[i].visibility = VISIBLE
                 ordersBuy[i].text = "${item.ordersBuy[i].requestedLots - item.ordersBuy[i].executedLots}"
 
                 ordersBuy[i].setTag(R.string.order_line, item)
                 ordersBuy[i].setTag(R.string.order_item, item.ordersBuy[i])
-
-                i++
             }
 
             // ордера на продажу
@@ -284,15 +387,12 @@ class OrderbookFragment : Fragment() {
             }
 
             size = min(item.ordersSell.size, ordersSell.size)
-            i = 0
-            while (i < size) {
-                ordersSell[i].visibility = View.VISIBLE
+            for (i in 0 until size) {
+                ordersSell[i].visibility = VISIBLE
                 ordersSell[i].text = "${item.ordersSell[i].requestedLots - item.ordersSell[i].executedLots}"
 
                 ordersSell[i].setTag(R.string.order_line, item)
                 ordersSell[i].setTag(R.string.order_item, item.ordersSell[i])
-
-                i++
             }
 
             holder.dragToSellView.setOnClickListener {
@@ -337,6 +437,8 @@ class OrderbookFragment : Fragment() {
                     val data = ClipData.newPlainText("", "")
                     val shadowBuilder = DragShadowBuilder(view)
                     view.startDrag(data, shadowBuilder, view, 0)
+                    scalperView.visibility = View.GONE
+                    imageTrash.visibility = View.VISIBLE
                     true
                 } else {
                     false

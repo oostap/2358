@@ -72,7 +72,7 @@ class OrderbookManager() : KoinComponent {
         }
     }
 
-    fun replaceOrder(from: Order, toLine: OrderbookLine, operationType: OperationType) {
+    fun replaceOrder(from: Order, price: Double, operationType: OperationType) {
         GlobalScope.launch(Dispatchers.Main) {
             try {
                 ordersService.cancel(from.orderId, depositManager.getActiveBrokerAccountId())
@@ -81,12 +81,6 @@ class OrderbookManager() : KoinComponent {
                 depositManager.refreshOrders()
                 process()
                 return@launch
-            }
-
-            val price = if (operationType == OperationType.BUY) {
-                toLine.bidPrice
-            } else {
-                toLine.askPrice
             }
 
             try {
@@ -104,6 +98,15 @@ class OrderbookManager() : KoinComponent {
             depositManager.refreshOrders()
             process()
         }
+    }
+
+    fun replaceOrder(from: Order, toLine: OrderbookLine, operationType: OperationType) {
+        val price = if (operationType == OperationType.BUY) {
+            toLine.bidPrice
+        } else {
+            toLine.askPrice
+        }
+        replaceOrder(from, price, operationType)
     }
 
     fun process(): MutableList<OrderbookLine> {

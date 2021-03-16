@@ -66,6 +66,7 @@
         tools:listitem="@layout/fragment_orderbook_item" />
 
     <RelativeLayout
+        android:id="@+id/scalper_panel"
         android:layout_height="150dp"
         android:layout_weight="1"
         android:layout_width="match_parent"
@@ -85,6 +86,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:layout_gravity="center"
+                android:textAlignment="center"
                 android:ems="10"
                 android:hint="активный объём"
                 android:textSize="14sp"
@@ -383,7 +385,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/buy_minus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -392,6 +393,7 @@
 
 
                 <LinearLayout
+                    android:id="@+id/buy_minus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -552,7 +554,7 @@
     <ImageView
         android:id="@+id/image_trash"
         android:layout_width="120dp"
-        android:layout_height="60dp"
+        android:layout_height="100dp"
         android:scaleType="fitCenter"
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"

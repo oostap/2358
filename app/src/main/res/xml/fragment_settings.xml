@@ -39,6 +39,20 @@
             app:defaultValue="200"/>
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/orderbook_header">
+        <EditTextPreference
+            app:key="@string/setting_key_orderbook_volumes"
+            app:title="@string/orderbook_volumes"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1 5 10 50 100 500 1000 5000"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_orderbook_prices"
+            app:title="@string/orderbook_prices"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1 2 5 10"/>
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/stocks_2358_trailing_take_profit">
         <EditTextPreference
             app:key="@string/setting_key_2358_trailing_take_profit_percent"

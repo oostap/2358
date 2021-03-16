@@ -78,6 +78,20 @@ class SettingsManager {
             }
         }
 
+        /******************** orderbook *************************/
+
+        fun getOrderbookVolumes(): String {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_orderbook_volumes)
+            val value: String? = preferences.getString(key, "")
+            return value ?: "1 5 10 50 100 500 1000 5000"
+        }
+
+        fun getOrderbookPrices(): String {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_orderbook_prices)
+            val value: String? = preferences.getString(key, "")
+            return value ?: "1 5 10 50 100 500 1000 5000"
+        }
+
         /******************** 2358 *************************/
 
         fun get2358ChangePercent(): Double {
