@@ -15,6 +15,9 @@
     <string name="title_hour_1">1 час</string>
     <string name="title_hour_2">2 часа</string>
 
+    <string name="time_closemarket">23:00 - ...</string>
+    <string name="time_premarket">07:00 - ...</string>
+
     <string name="set_1">Набор 1</string>
     <string name="set_2">Набор 2</string>
 
@@ -51,11 +54,10 @@
     <string name="menu_divindens">Дивиденды</string>
     <string name="menu_premarket">Премаркет RU</string>
     <string name="menu_postmarket">Постмаркет US</string>
-    <string name="menu_1000_sell">1000 sell</string>
-    <string name="menu_1000_buy">1000 buy</string>
-    <string name="menu_1005">1005</string>
-    <string name="menu_2358">2358</string>
-    <string name="menu_1728">1728</string>
+    <string name="menu_1000_sell">700/1000 sell</string>
+    <string name="menu_1000_buy">700/1000 buy</string>
+    <string name="menu_2358">2258</string>
+    <string name="menu_1728">1628</string>
     <string name="menu_1830">1830</string>
     <string name="menu_rocket">Ракета</string>
     <string name="menu_tazik">Автотазик</string>

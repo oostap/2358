@@ -55,7 +55,6 @@
             android:text="700$"
             android:textSize="12sp" />
 
-
     </LinearLayout>
 
     <LinearLayout

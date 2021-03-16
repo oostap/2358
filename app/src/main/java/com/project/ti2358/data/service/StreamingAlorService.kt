@@ -184,7 +184,7 @@ class StreamingAlorService {
         val tf = Utils.convertIntervalToAlorTimeframe(interval)
         val timeFrame = Utils.convertIntervalToSeconds(interval)
         val timeName = Utils.convertIntervalToString(interval)
-        val time = Calendar.getInstance().timeInMillis / 1000 // - timeFrame
+        val time = Calendar.getInstance().timeInMillis / 1000 - 2 * timeFrame
 
         val bar = BarGetEventBody(
             AlorManager.TOKEN,

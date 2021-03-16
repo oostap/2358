@@ -65,7 +65,8 @@ data class PurchaseStock(
     var currentTrailingTakeProfit: TrailingTakeProfit? = null
 
     companion object {
-        const val DelayFast: Long = 100
+        const val DelayFast: Long = 150
+        const val DelayMiddle: Long = 400
         const val DelayLong: Long = 2000
     }
 
@@ -239,44 +240,12 @@ data class PurchaseStock(
 
                     val order = depositManager.getOrderForFigi(stock.instrument.figi, OperationType.BUY)
                     position = depositManager.getPositionForFigi(stock.instrument.figi)
-                    
-                    if (order == null && position != null) { // заявка отменена, продаём всё что куплено
-                        status = OrderStatus.BOUGHT
-                        Utils.showToastAlert("$ticker: куплено по $buyPrice")
 
-                        // продаём
-                        if (profit == 0.0 || buyPrice == 0.0) {
-                            status = OrderStatus.ERROR_NEED_WATCH
-                            return@launch
-                        }
-                        var profitPrice = buyPrice + buyPrice / 100.0 * profit
-                        profitPrice = Utils.makeNicePrice(profitPrice)
-
-                        // выставить ордер на продажу
-                        while (true) {
-                            try {
-                                position = depositManager.getPositionForFigi(stock.instrument.figi)
-                                var lotsLeft = 0
-                                if (position != null) lotsLeft = position.lots - position.blocked.toInt()
-                                if (lotsLeft == 0) break
-
-                                status = OrderStatus.ORDER_SELL_PREPARE
-                                sellLimitOrder = ordersService.placeLimitOrder(
-                                    lotsLeft,
-                                    stock.instrument.figi,
-                                    profitPrice,
-                                    OperationType.SELL,
-                                    depositManager.getActiveBrokerAccountId()
-                                )
-                                status = OrderStatus.ORDER_SELL
-                                Utils.showToastAlert("$ticker: заявка на продажу по $profitPrice")
-                                break
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                            delay(DelayFast * 2)
-                        }
-                        break
+                    // заявка стоит, ничего не куплено
+                    if (order != null && position == null) {
+                        status = OrderStatus.ORDER_BUY
+                        delay(DelayMiddle)
+                        continue
                     }
 
                     if (order == null && position == null) { // заявка отменена, ничего не куплено
@@ -285,20 +254,9 @@ data class PurchaseStock(
                         return@launch
                     }
 
-                    if (order != null && position == null) { // заявка стоит, ничего не куплено
-                        status = OrderStatus.ORDER_BUY
-                        delay(DelayFast)
-                        continue
-                    }
-
-                    if (order != null && position != null) { // заявка стоит, частично куплено, можно продавать
-                        status = OrderStatus.PART_FILLED
-
-                        // продаём
-                        if (profit == 0.0 || buyPrice == 0.0) {
-                            status = OrderStatus.ERROR_NEED_WATCH
-                            return@launch
-                        }
+                    if (order == null && position != null) { // заявка отменена или полностью заполнена, продаём всё что куплено
+                        status = OrderStatus.BOUGHT
+                        Utils.showToastAlert("$ticker: куплено по $buyPrice")
 
                         var profitPrice = buyPrice + buyPrice / 100.0 * profit
                         profitPrice = Utils.makeNicePrice(profitPrice)
@@ -325,10 +283,43 @@ data class PurchaseStock(
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
-                            delay(DelayFast * 5)
+                            delay(DelayMiddle)
+                        }
+                        break
+                    }
+
+                    if (order != null && position != null) { // заявка стоит, частично куплено, можно продавать
+                        status = OrderStatus.PART_FILLED
+
+                        var profitPrice = buyPrice + buyPrice / 100.0 * profit
+                        profitPrice = Utils.makeNicePrice(profitPrice)
+
+                        // выставить ордер на продажу
+                        while (true) {
+                            try {
+                                position = depositManager.getPositionForFigi(stock.instrument.figi)
+                                var lotsLeft = 0
+                                if (position != null) lotsLeft = position.lots - position.blocked.toInt()
+                                if (lotsLeft == 0) break
+
+                                status = OrderStatus.ORDER_SELL_PREPARE
+                                sellLimitOrder = ordersService.placeLimitOrder(
+                                    lotsLeft,
+                                    stock.instrument.figi,
+                                    profitPrice,
+                                    OperationType.SELL,
+                                    depositManager.getActiveBrokerAccountId()
+                                )
+                                status = OrderStatus.ORDER_SELL
+                                Utils.showToastAlert("$ticker: заявка на продажу по $profitPrice")
+                                break
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                            delay(DelayMiddle)
                         }
                     }
-                    delay(DelayFast)
+                    delay(DelayMiddle)
                 }
 
                 while (true) {
@@ -355,9 +346,8 @@ data class PurchaseStock(
             try {
                 val ticker = stock.instrument.ticker
 
-                // получить стакан
-                val orderbook = marketService.orderbook(stock.instrument.figi, 5)
-
+                // получить лучший аск из стакана
+                val orderbook = marketService.orderbook(stock.instrument.figi, 10)
                 val buyPrice = orderbook.getBestPriceFromAsk(lots)
                 log("$orderbook")
 

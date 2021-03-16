@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId "com.project.ti2358"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 30
         versionCode 21
         versionName "v1.4.7"

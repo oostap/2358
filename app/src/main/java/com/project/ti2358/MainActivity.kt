@@ -1,5 +1,6 @@
 package com.project.ti2358
 
+import android.content.pm.PackageInfo
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
@@ -73,6 +74,11 @@ class MainActivity : AppCompatActivity() {
         val index2EmojiView: TextView = header.findViewById(R.id.index_2_emoji)
         val index3EmojiView: TextView = header.findViewById(R.id.index_3_emoji)
         val index4EmojiView: TextView = header.findViewById(R.id.index_4_emoji)
+
+        val versionView: TextView = header.findViewById(R.id.version)
+        val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(TheApplication.application.applicationContext.packageName, 0)
+        versionView.text = pInfo.versionName
+
 
         val actionBarDrawerToggle: ActionBarDrawerToggle = object : ActionBarDrawerToggle(
             this,
@@ -150,7 +156,6 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_1000_buy_start,
                 R.id.nav_2358_start,
                 R.id.nav_1728_start,
-                R.id.nav_1830_start,
                 R.id.nav_rocket_start,
                 R.id.nav_hour_start,
                 R.id.nav_reports,

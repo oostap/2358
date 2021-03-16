@@ -29,10 +29,6 @@
             android:icon="@drawable/ic_stocks"
             android:title="@string/menu_premarket" />
         <item
-            android:id="@+id/nav_1005_start"
-            android:icon="@drawable/ic_1000"
-            android:title="@string/menu_1005" />
-        <item
             android:id="@+id/nav_1728_start"
             android:icon="@drawable/ic_1728"
             android:title="@string/menu_1728" />

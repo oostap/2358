@@ -24,7 +24,7 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class StrategyReportsStartFragment : Fragment() {
+class ReportsFragment : Fragment() {
     val stockManager: StockManager by inject()
     val strategyReports: StrategyReports by inject()
     var adapterList: ItemReportsRecyclerViewAdapter = ItemReportsRecyclerViewAdapter(emptyList())

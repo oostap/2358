@@ -41,7 +41,9 @@ class OrderbookFragment : Fragment() {
     var adapterList: ItemOrderbookRecyclerViewAdapter = ItemOrderbookRecyclerViewAdapter(emptyList())
     var activeStock: Stock? = null
     var orderbookLines: MutableList<OrderbookLine> = mutableListOf()
-    var job: Job? = null
+    var job1: Job? = null
+    var job2: Job? = null
+
     lateinit var localLayoutManager: LinearLayoutManager
     lateinit var recyclerView: RecyclerView
 
@@ -50,7 +52,9 @@ class OrderbookFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        job?.cancel()
+        job1?.cancel()
+        job2?.cancel()
+
         orderbookManager.stop()
         super.onDestroy()
     }
@@ -80,8 +84,15 @@ class OrderbookFragment : Fragment() {
 
         activeStock = orderbookManager.activeStock
 
+        job1 = GlobalScope.launch(Dispatchers.Main) {
+            while (true) {
+                delay(5000)
+                depositManager.refreshOrders()
+            }
+        }
+
         // старт апдейта заявок
-        job = GlobalScope.launch(Dispatchers.Main) {
+        job2 = GlobalScope.launch(Dispatchers.Main) {
             depositManager.refreshOrders()
 
             while (true) {
@@ -100,7 +111,7 @@ class OrderbookFragment : Fragment() {
         layout.orientation = LinearLayout.VERTICAL
 
         val priceBox = EditText(context)
-        priceBox.inputType = InputType.TYPE_CLASS_NUMBER
+        priceBox.inputType = InputType.TYPE_CLASS_PHONE
         if (operationType == OperationType.BUY) {
             priceBox.setText("${orderbookLine.bidPrice}")
         } else {
@@ -141,8 +152,16 @@ class OrderbookFragment : Fragment() {
         adapterList.setData(orderbookLines)
 
         val ticker = activeStock?.instrument?.ticker ?: ""
+        var lots = activeStock?.instrument?.ticker ?: ""
         val act = requireActivity() as AppCompatActivity
-        act.supportActionBar?.title = getString(R.string.menu_orderbook) + " $ticker"
+
+        activeStock?.let {
+            depositManager.getPositionForFigi(it.instrument.figi)?.let { p ->
+                lots = " ${p.blocked.toInt()}/${p.lots}"
+            }
+        }
+
+        act.supportActionBar?.title = getString(R.string.menu_orderbook) + " $ticker" + lots
 
 //        val firstVisibleItemPosition: Int = localLayoutManager.findFirstVisibleItemPosition()
 //        val lastVisibleItemPosition: Int = localLayoutManager.findLastVisibleItemPosition()

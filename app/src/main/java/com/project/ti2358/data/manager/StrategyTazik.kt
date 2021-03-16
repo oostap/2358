@@ -42,7 +42,7 @@ class StrategyTazik : KoinComponent {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks = all.filter { it.getPriceDouble() > min && it.getPriceDouble() < max }.toMutableList()
+        stocks = all.filter { (it.getPriceDouble() > min && it.getPriceDouble() < max) || it.getPriceDouble() == 0.0 }.toMutableList()
         stocks.sortBy { it.changePrice2359DayPercent }
         loadSelectedStocks(numberSet)
         return stocks

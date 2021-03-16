@@ -6,7 +6,6 @@ import com.project.ti2358.data.model.dto.daager.ClosePrice
 import com.project.ti2358.data.model.dto.daager.Dividend
 import com.project.ti2358.data.model.dto.daager.Report
 import com.project.ti2358.data.model.dto.daager.StockShort
-import com.project.ti2358.service.log
 import org.koin.core.component.KoinApiExtension
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -18,6 +17,7 @@ data class Stock(
     var report: Report? = null
     var dividend: Dividend? = null
     var short: StockShort? = null
+    var stockIndices: List<String>? = null
 
     var orderbookStream: OrderbookStream? = null
 
@@ -81,13 +81,31 @@ data class Stock(
     }
 
     fun getSectorName(): String {
-        return closePrices?.sector?.eng ?: ""
+        var sector = closePrices?.sector?.eng ?: ""
+        stockIndices?.forEach {
+            sector += " |"
+            if (it == "dj") {
+                sector += " DJ"
+            }
+            if (it == "sp500") {
+                sector += " SP500"
+            }
+            if (it == "nasdaq") {
+                sector += " NSDQ"
+            }
+        }
+        return sector
     }
 
     fun getReportInfo(): String {
         var info = ""
         report?.let {
             info += "О: ${it.date_format} "
+            var tod = if (it.tod == "post") " 🌚" else " 🌞"
+            if (it.actual_eps != null || it.actual_rev_per != null) {
+                tod += "✅"
+            }
+            info += tod
         }
 
         dividend?.let {
@@ -128,13 +146,10 @@ data class Stock(
 //        if (marketInstrument.ticker == "NARI") {
 //            log("ALOR = ${marketInstrument.ticker} = $candle")
 //        }
-//
-//        if (marketInstrument.ticker == "MAC") {
-//            log("ALOR = ${marketInstrument.ticker} = $candle")
-//        }
 
         if (diffInHours > 20) {
-            log(candle.toString() + instrument.ticker)
+//            candleYesterday = candle
+//            log(candle.toString() + instrument.ticker)
             return
         }
 
@@ -216,13 +231,21 @@ data class Stock(
             return minuteCandles.last().closingPrice
         }
 
-        var value = candleToday?.closingPrice ?: 0.0
-        if (value != 0.0) return value
+        var value: Double = 0.0
 
-        value = closePrices?.close_post ?: 0.0
-        if (value != 0.0) return value
+        closePrices?.let {
+            value = it.close_post
+        }
 
-        return 0.0
+//        candleYesterday?.let {
+//            value = it.closingPrice
+//        }
+
+        candleToday?.let {
+            value = it.closingPrice
+        }
+
+        return value
     }
 
     fun getPricePostmarketUSDouble(): Double {

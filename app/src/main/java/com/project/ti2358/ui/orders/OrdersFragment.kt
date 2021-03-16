@@ -17,10 +17,7 @@ import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.model.dto.Order
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -29,9 +26,15 @@ class OrdersFragment : Fragment() {
 
     val depositManager: DepositManager by inject()
     var adapterList: ItemOrdersRecyclerViewAdapter = ItemOrdersRecyclerViewAdapter(emptyList())
+    var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+    }
+
+    override fun onDestroy() {
+        job?.cancel()
+        super.onDestroy()
     }
 
     override fun onCreateView(
@@ -71,13 +74,13 @@ class OrdersFragment : Fragment() {
             }
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        job = GlobalScope.launch(Dispatchers.Main) {
             while (true) {
                 if (depositManager.refreshOrders()) {
                     updateData()
                     break
                 }
-                delay(500)
+                delay(2000)
             }
         }
         return view

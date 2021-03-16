@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.DepositManager
+import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.data.service.ThirdPartyService
 import com.project.ti2358.service.Utils
@@ -32,7 +33,7 @@ import kotlin.math.sign
 
 @KoinApiExtension
 class PortfolioFragment : Fragment() {
-
+    private val orderbookManager: OrderbookManager by inject()
     private val thirdPartyService: ThirdPartyService by inject()
     val depositManager: DepositManager by inject()
     var adapterList: ItemPortfolioRecyclerViewAdapter = ItemPortfolioRecyclerViewAdapter(emptyList())
@@ -45,7 +46,7 @@ class PortfolioFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_portfolio_item_list, container, false)
+        val view = inflater.inflate(R.layout.fragment_portfolio, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
         list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
@@ -104,7 +105,7 @@ class PortfolioFragment : Fragment() {
         act.supportActionBar?.title = "Депозит $percent%"
     }
 
-    class ItemPortfolioRecyclerViewAdapter(
+    inner class ItemPortfolioRecyclerViewAdapter(
         private var values: List<PortfolioPosition>
     ) : RecyclerView.Adapter<ItemPortfolioRecyclerViewAdapter.ViewHolder>() {
 
@@ -121,11 +122,12 @@ class PortfolioFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
+            holder.position = item
             holder.tickerView.text = "${position + 1}) ${item.ticker}"
 
             val avg = item.getAveragePrice()
-            holder.volumePiecesView.text = "${item.lots} шт."
-            holder.priceView.text = "$avg"
+            holder.volumePiecesView.text = "${item.blocked.toInt()}/${item.lots} шт."
+            holder.priceView.text = "${avg.toMoney(item.stock)}"
 
             val profit = item.getProfitAmount()
             holder.changePriceAbsoluteView.text = profit.toMoney(item.stock)
@@ -140,11 +142,13 @@ class PortfolioFragment : Fragment() {
             holder.volumeCashView.text = totalCash.toMoney(item.stock)
 
             val emoji = when {
+                percent <= -10 -> " 🤬"
                 percent <= -5 -> " 😡"
                 percent <= -3 -> " 😱"
                 percent <= -1 -> " 😰"
-                percent >= 5 -> " 💰"
-                percent >= 3 -> " 💸"
+                percent >= 10 -> " 🤩"
+                percent >= 5 -> " 😍"
+                percent >= 3 -> " 🥳"
                 percent >= 1 -> " 🤑"
                 else -> ""
             }
@@ -153,13 +157,29 @@ class PortfolioFragment : Fragment() {
 
             holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(percent))
             holder.changePricePercentView.setTextColor(Utils.getColorForValue(percent))
+
+            holder.buttonOrderbook.setOnClickListener {
+                holder.position.stock?.let {
+                    orderbookManager.start(it)
+                    view?.findNavController()?.navigate(R.id.action_nav_portfolio_to_nav_orderbook)
+                }
+            }
+
+            holder.itemView.setOnClickListener {
+                holder.position.stock?.let {
+                    Utils.openTinkoffForTicker(requireContext(), it.instrument.ticker)
+                }
+            }
         }
 
         override fun getItemCount(): Int = values.size
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            lateinit var position: PortfolioPosition
             val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
             val priceView: TextView = view.findViewById(R.id.stock_item_price)
+
+            val buttonOrderbook: Button = view.findViewById(R.id.button_orderbook)
 
             val volumeCashView: TextView = view.findViewById(R.id.stock_item_volume_cash)
             val volumePiecesView: TextView = view.findViewById(R.id.stock_item_volume_pieces)
