@@ -70,7 +70,7 @@
         android:id="@+id/nav_postmarket"
         android:name="com.project.ti2358.ui.postmarket.PostmarketFragment"
         android:label="@string/menu_postmarket"
-        tools:layout="@layout/fragment_postmarket_item_list" />
+        tools:layout="@layout/fragment_postmarket" />
 
     <!-- 2358 -->
 

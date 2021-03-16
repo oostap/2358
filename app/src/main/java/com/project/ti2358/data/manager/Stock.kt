@@ -80,19 +80,11 @@ data class Stock(
         }
     }
 
+    @KoinApiExtension
     fun getSectorName(): String {
         var sector = closePrices?.sector?.eng ?: ""
         stockIndices?.forEach {
-            sector += " |"
-            if (it == "dj") {
-                sector += " DJ"
-            }
-            if (it == "sp500") {
-                sector += " SP500"
-            }
-            if (it == "nasdaq") {
-                sector += " NSDQ"
-            }
+            sector += " | ${StockManager.stockIndex?.getShortName(it)}"
         }
         return sector
     }

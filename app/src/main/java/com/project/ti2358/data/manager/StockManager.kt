@@ -42,12 +42,15 @@ class StockManager : KoinComponent {
     private var stockClosePrices: Map<String, ClosePrice> = mutableMapOf()
     private var stockReports: Map<String, ReportStock> = mutableMapOf()
     private var stockShorts: Map<String, StockShort> = mutableMapOf()
-    private var stockIndex: StockIndex? = null
 
     // все акции, которые участвуют в расчётах с учётом базовой сортировки из настроек
     var stocksStream: MutableList<Stock> = mutableListOf()
 
     private val gson = Gson()
+
+    companion object {
+        public var stockIndex: StockIndex? = null
+    }
 
     fun loadStocks(force: Boolean = false) {
         val key = "all_instruments"

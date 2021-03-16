@@ -331,21 +331,11 @@ class Utils {
 
         fun convertStringToInterval(interval: String): Interval? {
             when (interval) {
-                "1min" -> {
-                    return Interval.MINUTE
-                }
-                "hour" -> {
-                    return Interval.HOUR
-                }
-                "2hour" -> {
-                    return Interval.TWO_HOURS
-                }
-                "day" -> {
-                    return Interval.DAY
-                }
-                "week" -> {
-                    return Interval.WEEK
-                }
+                "1min" -> { return Interval.MINUTE }
+                "hour" -> { return Interval.HOUR }
+                "2hour" -> { return Interval.TWO_HOURS }
+                "day" -> { return Interval.DAY }
+                "week" -> { return Interval.WEEK }
             }
 
             return null

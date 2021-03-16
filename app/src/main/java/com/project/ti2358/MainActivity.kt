@@ -59,21 +59,29 @@ class MainActivity : AppCompatActivity() {
         val index2NameView: TextView = header.findViewById(R.id.index_2_name)
         val index3NameView: TextView = header.findViewById(R.id.index_3_name)
         val index4NameView: TextView = header.findViewById(R.id.index_4_name)
+        val index5NameView: TextView = header.findViewById(R.id.index_5_name)
+        val index6NameView: TextView = header.findViewById(R.id.index_6_name)
 
         val index1ValueView: TextView = header.findViewById(R.id.index_1_value)
         val index2ValueView: TextView = header.findViewById(R.id.index_2_value)
         val index3ValueView: TextView = header.findViewById(R.id.index_3_value)
         val index4ValueView: TextView = header.findViewById(R.id.index_4_value)
+        val index5ValueView: TextView = header.findViewById(R.id.index_5_value)
+        val index6ValueView: TextView = header.findViewById(R.id.index_6_value)
 
         val index1ChangeView: TextView = header.findViewById(R.id.index_1_change)
         val index2ChangeView: TextView = header.findViewById(R.id.index_2_change)
         val index3ChangeView: TextView = header.findViewById(R.id.index_3_change)
         val index4ChangeView: TextView = header.findViewById(R.id.index_4_change)
+        val index5ChangeView: TextView = header.findViewById(R.id.index_5_change)
+        val index6ChangeView: TextView = header.findViewById(R.id.index_6_change)
 
         val index1EmojiView: TextView = header.findViewById(R.id.index_1_emoji)
         val index2EmojiView: TextView = header.findViewById(R.id.index_2_emoji)
         val index3EmojiView: TextView = header.findViewById(R.id.index_3_emoji)
         val index4EmojiView: TextView = header.findViewById(R.id.index_4_emoji)
+        val index5EmojiView: TextView = header.findViewById(R.id.index_5_emoji)
+        val index6EmojiView: TextView = header.findViewById(R.id.index_6_emoji)
 
         val versionView: TextView = header.findViewById(R.id.version)
         val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(TheApplication.application.applicationContext.packageName, 0)
@@ -108,17 +116,49 @@ class MainActivity : AppCompatActivity() {
 
                 val indices = stockManager.indexAll
 
-                if (indices.size >= 4) {
-                    processIndex(indices[0], index1NameView, index1ValueView, index1ChangeView, index1EmojiView)
-                    processIndex(indices[1], index2NameView, index2ValueView, index2ChangeView, index2EmojiView)
-                    processIndex(indices[2], index3NameView, index3ValueView, index3ChangeView, index3EmojiView)
-                    processIndex(indices[3], index4NameView, index4ValueView, index4ChangeView, index4EmojiView, true)
+                if (indices.size >= 5) {
+                    processIndex(indices[0], index2NameView, index2ValueView, index2ChangeView, index2EmojiView)
+                    processIndex(indices[1], index3NameView, index3ValueView, index3ChangeView, index3EmojiView)
+                    processIndex(indices[2], index4NameView, index4ValueView, index4ChangeView, index4EmojiView)
+                    processIndex(indices[3], index5NameView, index5ValueView, index5ChangeView, index5EmojiView)
+                    processIndex(indices[4], index6NameView, index6ValueView, index6ChangeView, index6EmojiView, true)
+
+                    data class Index (
+                        val name: String,
+                        val short: String,
+                        val value: Double,
+                        val change: Double,
+                        val change_per: Double,
+                        val color: String,
+                    )
+
+                    index1NameView.text = "Super Index"
+                    val superChange = indices[0].change_per + indices[1].change_per + indices[2].change_per + indices[3].change_per
+                    index1ChangeView.text = "%.2f%%".format(superChange)
+                    when {
+                        superChange >= 2.0 -> {
+                            index1EmojiView.text = "😍🤑😇"
+                        }
+                        superChange >= 1.0 -> {
+                            index1EmojiView.text = "😍🤑"
+                        }
+                        abs(superChange) < 0.2 -> {
+                            index1EmojiView.text = "😐"
+                        }
+                        superChange <= -2 -> {
+                            index1EmojiView.text = "😦😨😣"
+                        }
+                        superChange <= -1 -> {
+                            index1EmojiView.text = "😰😭"
+                        }
+                    }
+                    index1ChangeView.setTextColor(Utils.getColorForValue(superChange))
                 }
             }
 
             fun processIndex(index: Index, name: TextView, value: TextView, change: TextView, emoji: TextView, invertedEmoji: Boolean = false) {
                 index.let {
-                    name.text = it.name.replace(" 2000", "")
+                    name.text = it.short
                     value.text = "${it.value}"
                     if (it.change_per < 0) {
                         change.text = "${it.change_per}%"

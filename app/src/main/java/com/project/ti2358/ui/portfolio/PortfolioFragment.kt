@@ -1,6 +1,7 @@
 package com.project.ti2358.ui.portfolio
 
 import android.content.pm.PackageInfo
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -170,6 +171,19 @@ class PortfolioFragment : Fragment() {
                     Utils.openTinkoffForTicker(requireContext(), it.instrument.ticker)
                 }
             }
+
+            item.stock?.let { stock ->
+                holder.sectorView.text = stock.getSectorName()
+                holder.sectorView.setTextColor(stock.closePrices?.sector?.getColor() ?: Color.BLACK)
+
+                if (stock.report != null) {
+                    holder.reportView.text = stock.getReportInfo()
+                    holder.reportView.visibility = View.VISIBLE
+                } else {
+                    holder.reportView.visibility = View.GONE
+                }
+                holder.reportView.setTextColor(Utils.RED)
+            }
         }
 
         override fun getItemCount(): Int = values.size
@@ -186,6 +200,9 @@ class PortfolioFragment : Fragment() {
 
             val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
+
+            val reportView: TextView = view.findViewById(R.id.stock_report_info)
+            val sectorView: TextView = view.findViewById(R.id.stock_sector)
         }
     }
 }

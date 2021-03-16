@@ -242,7 +242,7 @@ class OrderbookFragment : Fragment() {
         alert.setIcon(R.drawable.ic_hammer).setTitle(title).setView(layout).setPositiveButton("ок",
             DialogInterface.OnClickListener { dialog, whichButton ->
                 try {
-                    val price = priceBox.text.toString().toDouble()
+                    val price = Utils.makeNicePrice(priceBox.text.toString().toDouble())
                     val lots = lotsBox.text.toString().toInt()
                     orderbookManager.createOrder(orderbookLine.stock.instrument.figi, price, lots, operationType)
                 } catch (e: Exception) {
