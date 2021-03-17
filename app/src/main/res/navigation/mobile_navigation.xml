@@ -93,26 +93,23 @@
         android:label="@string/menu_2358"
         tools:layout="@layout/fragment_2358_start" />
 
+    <!-- fixprice -->
+
+    <fragment
+        android:id="@+id/nav_fixprice"
+        android:name="com.project.ti2358.ui.strategyFixPrice.StrategyFixPriceFragment"
+        android:label="@string/menu_fixprice"
+        tools:layout="@layout/fragment_fixprice" >
+    </fragment>
+
     <!-- 1728 -->
 
     <fragment
-        android:id="@+id/nav_1728_start"
-        android:name="com.project.ti2358.ui.strategy1728.Strategy1728StartFragment"
+        android:id="@+id/nav_1728"
+        android:name="com.project.ti2358.ui.strategy1728.Strategy1728Fragment"
         android:label="@string/menu_1728"
-        tools:layout="@layout/fragment_1728_start" >
-        <action
-            android:id="@+id/action_nav_1728_start_to_nav_1728_finish"
-            app:destination="@id/nav_1728_finish"
-            app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left"
-            />
+        tools:layout="@layout/fragment_1728" >
     </fragment>
-
-    <fragment
-        android:id="@+id/nav_1728_finish"
-        android:name="com.project.ti2358.ui.strategy1728.Strategy1728FinishFragment"
-        android:label="@string/menu_1728"
-        tools:layout="@layout/fragment_1728_start" />
 
     <!-- Rockets -->
 
@@ -199,13 +196,6 @@
         android:name="com.project.ti2358.ui.strategyTazik.StrategyTazikFinishFragment"
         android:label="@string/menu_tazik"
         tools:layout="@layout/fragment_tazik_start" />
-
-    <!-- hours -->
-    <fragment
-        android:id="@+id/nav_hour_start"
-        android:name="com.project.ti2358.ui.strategyHour.StrategyHourStartFragment"
-        android:label="@string/menu_hour"
-        tools:layout="@layout/fragment_hour_start" />
 
     <!-- diagnostics -->
     <fragment

@@ -1,4 +1,4 @@
-package com.project.ti2358.ui.strategy1728
+package com.project.ti2358.ui.strategyFixPrice
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,20 +12,17 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.PurchaseStock
-import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.manager.Strategy1728
-import com.project.ti2358.data.manager.SettingsManager
+import com.project.ti2358.data.manager.*
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import kotlin.math.roundToInt
 
 @KoinApiExtension
-class Strategy1728StartFragment : Fragment() {
+class StrategyFixPriceFragment : Fragment() {
 
-    val strategy1728: Strategy1728 by inject()
-    var adapterList: Item1728RecyclerViewAdapter = Item1728RecyclerViewAdapter(emptyList())
+    val strategyFixPrice: StrategyFixPrice by inject()
+    var adapterList: ItemFixPriceRecyclerViewAdapter = ItemFixPriceRecyclerViewAdapter(emptyList())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +32,7 @@ class Strategy1728StartFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_1728_start, container, false)
+        val view = inflater.inflate(R.layout.fragment_fixprice, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
         list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
@@ -49,7 +46,7 @@ class Strategy1728StartFragment : Fragment() {
 
         val buttonReset = view.findViewById<Button>(R.id.buttonReset)
         buttonReset.setOnClickListener { // сброс времени отслеживания
-            strategy1728.resetStrategy()
+            strategyFixPrice.resetStrategy()
             updateTime()
             updateData()
         }
@@ -66,19 +63,19 @@ class Strategy1728StartFragment : Fragment() {
     }
 
     private fun updateData() {
-        strategy1728.process()
-        adapterList.setData(strategy1728.resort())
+        strategyFixPrice.process()
+        adapterList.setData(strategyFixPrice.resort())
     }
 
     private fun updateTime() {
-        val time = Strategy1728.strategyStartTime.time.toString("HH:mm:ss")
+        val time = StrategyFixPrice.strategyStartTime.time.toString("HH:mm:ss")
         val act = requireActivity() as AppCompatActivity
         act.supportActionBar?.title = time
     }
 
-    inner class Item1728RecyclerViewAdapter(
+    inner class ItemFixPriceRecyclerViewAdapter(
         private var values: List<Stock>
-    ) : RecyclerView.Adapter<Item1728RecyclerViewAdapter.ViewHolder>() {
+    ) : RecyclerView.Adapter<ItemFixPriceRecyclerViewAdapter.ViewHolder>() {
 
         fun setData(newValues: List<Stock>) {
             values = newValues
@@ -87,7 +84,7 @@ class Strategy1728StartFragment : Fragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(
-                R.layout.fragment_1728_start_item,
+                R.layout.fragment_fixprice_item,
                 parent,
                 false
             )
@@ -100,16 +97,16 @@ class Strategy1728StartFragment : Fragment() {
             holder.stock = item
 
             holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
-            holder.priceView.text = item.getPrice1728String()
+            holder.priceView.text = item.getPriceFixPriceString()
 
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
 
-            holder.changePriceAbsoluteView.text = item.changePrice1728DayAbsolute.toMoney(item)
-            holder.changePricePercentView.text = item.changePrice1728DayPercent.toPercent()
+            holder.changePriceAbsoluteView.text = item.changePriceFixDayAbsolute.toMoney(item)
+            holder.changePricePercentView.text = item.changePriceFixDayPercent.toPercent()
 
-            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice1728DayAbsolute))
-            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice1728DayAbsolute))
+            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePriceFixDayAbsolute))
+            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePriceFixDayAbsolute))
 
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)

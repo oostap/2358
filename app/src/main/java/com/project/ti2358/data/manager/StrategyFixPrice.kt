@@ -4,30 +4,40 @@ import com.project.ti2358.service.Sorting
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.math.abs
-import kotlin.math.roundToInt
+import java.util.*
 
 @KoinApiExtension
-class Strategy1728() : KoinComponent {
+class StrategyFixPrice() : KoinComponent {
     private val stockManager: StockManager by inject()
     var stocks: MutableList<Stock> = mutableListOf()
+    var stocksSelected: MutableList<Stock> = mutableListOf()
+    var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
+
     var currentSort: Sorting = Sorting.DESCENDING
+
+    init {
+        resetStrategy()
+    }
+
+    companion object {
+        var strategyStartTime: Calendar = Calendar.getInstance()
+    }
 
     fun process(): MutableList<Stock> {
         val all = stockManager.stocksStream
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
-        val change = SettingsManager.get1728ChangePercent()
-        val volume = SettingsManager.get1728Volume()
-
-        stocks = all.filter { stock ->
-                    stock.getPriceDouble() > min &&
-                    stock.getPriceDouble() < max &&
-                    stock.getTodayVolume() >= volume &&
-                    abs(stock.changePriceFixDayPercent) >= abs(change)
-        }.toMutableList()
-
+        stocks = all.filter { stock -> stock.getPriceDouble() > min && stock.getPriceDouble() < max }.toMutableList()
         return stocks
+    }
+
+    fun resetStrategy() {
+        strategyStartTime = Calendar.getInstance()
+        strategyStartTime.set(Calendar.SECOND, 0)
+
+        stockManager.stocksStream.forEach {
+            it.resetFixPrice()
+        }
     }
 
     fun resort(): MutableList<Stock> {

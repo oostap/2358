@@ -58,10 +58,10 @@
     <string name="menu_1000_buy">700/1000 buy</string>
     <string name="menu_2358">2258</string>
     <string name="menu_1728">1628</string>
+    <string name="menu_fixprice">Fix Price</string>
     <string name="menu_1830">1830</string>
     <string name="menu_rocket">Ракета</string>
     <string name="menu_tazik">Автотазик</string>
-    <string name="menu_hour">Часовики</string>
 
     <string name="reports">ОТЧЁТЫ</string>
     <string name="dividends">ДИВЫ</string>
@@ -192,8 +192,7 @@
     <string name="setting_key_1005_volume_min_day">1005_volume_min_day</string>
 
     <!-- 1728 settings -->
-    <string name="setting_key_1728_volume_before_start">1728_volume_before_start</string>
-    <string name="setting_key_1728_volume_after_start">1728_volume_after_start</string>
+    <string name="setting_key_1728_volume_min_day">1728_volume_min_day</string>
     <string name="setting_key_1728_price_change">1728_price_change</string>
     <string name="setting_key_1728_purchase_volume">1728_purchase_volume</string>
     <string name="setting_key_1728_take_profit">1728_take_profit</string>

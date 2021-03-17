@@ -5,24 +5,17 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.widget.Toast
-import androidx.annotation.RequiresApi
-import com.project.ti2358.R
 import com.project.ti2358.data.manager.StrategyTazik
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import okhttp3.internal.notify
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
 class StrategyTazikService : Service() {
-
     companion object {
         private const val NOTIFICATION_ACTION_FILTER = "event.tazik"
         private const val NOTIFICATION_ACTION_PLUS = "event.tazik.plus"
@@ -40,6 +33,7 @@ class StrategyTazikService : Service() {
     private var isServiceRunning = false
     private var notificationButtonReceiver: BroadcastReceiver? = null
 
+    var job: Job? = null
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
@@ -90,7 +84,7 @@ class StrategyTazikService : Service() {
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
-
+        job?.cancel()
         super.onDestroy()
     }
 
@@ -104,10 +98,11 @@ class StrategyTazikService : Service() {
             }
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        job?.cancel()
+        job = GlobalScope.launch(Dispatchers.Main) {
             while (isServiceRunning) {
                 val seconds = updateNotification()
-                delay(1 * 500 * seconds)
+                delay(1 * 250 * seconds)
             }
         }
     }
@@ -121,19 +116,27 @@ class StrategyTazikService : Service() {
 
         val cancelIntent = Intent(NOTIFICATION_ACTION_FILTER).apply { putExtra("type", NOTIFICATION_ACTION_CANCEL) }
         val pendingCancelIntent = PendingIntent.getBroadcast(this, 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val actionCancel: Notification.Action = Notification.Action.Builder(null, "СТОП", pendingCancelIntent).build()
+        val actionCancel: Notification.Action = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            Notification.Action.Builder(null, "СТОП", pendingCancelIntent).build()
+        } else {
+            Notification.Action.Builder(0, "СТОП", pendingCancelIntent).build()
+        }
 
         val plusIntent = Intent(NOTIFICATION_ACTION_FILTER).apply { putExtra("type", NOTIFICATION_ACTION_PLUS) }
         val pendingPlusIntent = PendingIntent.getBroadcast(this, 2, plusIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val actionPlus: Notification.Action = Notification.Action.Builder(null, "  +${StrategyTazik.PercentLimitChangeDelta}  ", pendingPlusIntent).build()
-
-        val minusIntent = Intent(NOTIFICATION_ACTION_FILTER).apply { putExtra("type", NOTIFICATION_ACTION_MINUS) }
-        val pendingMinusIntent = PendingIntent.getBroadcast(this, 3, minusIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val actionMinus: Notification.Action = Notification.Action.Builder(null, "  -${StrategyTazik.PercentLimitChangeDelta}  ", pendingMinusIntent).build()
+        val actionPlus: Notification.Action = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            Notification.Action.Builder(null, "  +${StrategyTazik.PercentLimitChangeDelta}  ", pendingPlusIntent).build()
+        } else {
+            Notification.Action.Builder(0, "  +${StrategyTazik.PercentLimitChangeDelta}  ", pendingPlusIntent).build()
+        }
 
         val buyIntent = Intent(NOTIFICATION_ACTION_FILTER).apply { putExtra("type", NOTIFICATION_ACTION_BUY) }
         val pendingBuyIntent = PendingIntent.getBroadcast(this, 4, buyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        var actionBuy: Notification.Action? = Notification.Action.Builder(null, "ТАРИМ ПЕРВУЮ", pendingBuyIntent).build()
+        var actionBuy: Notification.Action? = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            Notification.Action.Builder(null, "ТАРИМ ПЕРВУЮ", pendingBuyIntent).build()
+        } else {
+            Notification.Action.Builder(0, "ТАРИМ ПЕРВУЮ", pendingBuyIntent).build()
+        }
 
         if (!strategyTazik.started) {
             actionBuy = null

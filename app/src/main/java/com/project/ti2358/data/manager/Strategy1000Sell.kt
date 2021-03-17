@@ -111,16 +111,16 @@ class Strategy1000Sell() : KoinComponent {
     fun startStrategy700Sell() {
         if (started700) return
         started700 = true
-        for (position in positionsToSell700) {
-            position.sell()
+        positionsToSell700.forEach {
+            it.sell()
         }
     }
 
     fun startStrategy1000Sell() {
         if (started1000) return
         started1000 = true
-        for (position in positionsToSell1000) {
-            position.sell()
+        positionsToSell1000.forEach {
+            it.sell()
         }
     }
 }

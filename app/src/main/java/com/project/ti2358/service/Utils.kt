@@ -121,6 +121,18 @@ class Utils {
             return Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow"))
         }
 
+        fun getTimeUTC(): Calendar {
+            return Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        }
+
+        fun getTimeDiffBetweenMSK_UTC(): Int {
+            val now = getTimeMSK()
+            val utc = getTimeUTC()
+            val nowOffs = now.timeZone.rawOffset
+            val utcOffs = utc.timeZone.rawOffset
+            return ((nowOffs - utcOffs) / 1000 / 3600.0).toInt()
+        }
+
         fun getTimeDiffBetweenMSK(): Int {
             val now = Calendar.getInstance(TimeZone.getDefault())
             val msk = getTimeMSK()

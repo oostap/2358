@@ -82,14 +82,14 @@ class SettingsManager {
 
         fun getOrderbookVolumes(): String {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_orderbook_volumes)
-            val value: String? = preferences.getString(key, "")
+            val value: String? = preferences.getString(key, "1 5 10 50 100 500 1000 5000")
             return value ?: "1 5 10 50 100 500 1000 5000"
         }
 
         fun getOrderbookPrices(): String {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_orderbook_prices)
-            val value: String? = preferences.getString(key, "")
-            return value ?: "1 5 10 50 100 500 1000 5000"
+            val value: String? = preferences.getString(key, "1 2 5 10")
+            return value ?: "1 2 5 10"
         }
 
         /******************** 2358 *************************/
@@ -250,11 +250,11 @@ class SettingsManager {
 
         fun get1728ChangePercent(): Double {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_price_change)
-            val value: String? = preferences.getString(key, "-1")
+            val value: String? = preferences.getString(key, "1")
             return try {
-                (value ?: "-1").toDouble()
+                (value ?: "1").toDouble()
             } catch (e: Exception) {
-                -1.0
+                1.0
             }
         }
 
@@ -278,23 +278,13 @@ class SettingsManager {
             }
         }
 
-        fun get1728VolumeBeforeStart(): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_volume_before_start)
-            val value: String? = preferences.getString(key, "10000")
+        fun get1728Volume(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_volume_min_day)
+            val value: String? = preferences.getString(key, "1000")
             return try {
-                parseInt(value ?: "10000")
+                parseInt(value ?: "1000")
             } catch (e: Exception) {
-                10000
-            }
-        }
-
-        fun get1728VolumeAfterStart(): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_volume_after_start)
-            val value: String? = preferences.getString(key, "10000")
-            return try {
-                parseInt(value ?: "10000")
-            } catch (e: Exception) {
-                10000
+                1000
             }
         }
 
@@ -303,7 +293,7 @@ class SettingsManager {
             return preferences.getBoolean(key, false)
         }
 
-        /******************** TAZIK *************************/
+        /******************** THE TAZIK *************************/
 
         fun getTazikChangePercent(): Double {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_min_percent_to_buy)

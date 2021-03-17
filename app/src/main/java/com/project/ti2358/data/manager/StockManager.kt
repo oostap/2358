@@ -195,6 +195,7 @@ class StockManager : KoinComponent {
             while (true) {
                 try {
                     stockClosePrices = synchronizedMap(thirdPartyService.daagerClosePrices() as MutableMap<String, ClosePrice>)
+                    log(stockClosePrices.toString())
                     reloadReports()
                     reloadShortInfo()
                     reloadStockIndices()
@@ -272,34 +273,6 @@ class StockManager : KoinComponent {
                         }
                     )
             }
-
-            streamingTinkoffService
-                .getCandleEventStream(
-                    stocks.map { it.instrument.figi },
-                    Interval.HOUR
-                )
-                .subscribeBy(
-                    onNext = {
-                        addCandle(it)
-                    },
-                    onError = {
-                        it.printStackTrace()
-                    }
-                )
-
-            streamingTinkoffService
-                .getCandleEventStream(
-                    stocks.map { it.instrument.figi },
-                    Interval.TWO_HOURS
-                )
-                .subscribeBy(
-                    onNext = {
-                        addCandle(it)
-                    },
-                    onError = {
-                        it.printStackTrace()
-                    }
-                )
         }
     }
 

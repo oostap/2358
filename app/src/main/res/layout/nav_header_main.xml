@@ -82,15 +82,6 @@
                 android:textSize="12sp" />
 
             <TextView
-                android:id="@+id/index_1_value"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:padding="2dp"
-                android:text=""
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
                 android:id="@+id/index_1_change"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"

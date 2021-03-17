@@ -31,11 +31,8 @@ data class Stock(
 
     var closePrices: ClosePrice? = null
     var candleToday: Candle? = null                               // реалтайм, дневная свеча
-    var minute1728Candles: MutableList<Candle> = mutableListOf() // все свечи после 1728
+    var minuteFixPriceCandles: MutableList<Candle> = mutableListOf() // все свечи после 1728
 
-    lateinit var candleHour1: Candle                             // текущая часовая свеча
-    lateinit var candleHour2: Candle                             // текущая двухчасовая свеча
-    
     // разница с ценой открытия премаркета
     var changePriceDayAbsolute: Double = 0.0
     var changePriceDayPercent: Double = 0.0
@@ -49,18 +46,8 @@ data class Stock(
     var changePrice2359DayPercent: Double = 0.0
 
     // разница со старта таймера
-    var changePrice1728DayAbsolute: Double = 0.0
-    var changePrice1728DayPercent: Double = 0.0
-
-    // разница по 1 часовой свече
-    var changePriceHour1Start: Double = 0.0
-    var changePriceHour1Absolute: Double = 0.0
-    var changePriceHour1Percent: Double = 0.0
-
-    // разница по 2 часовой свече
-    var changePriceHour2Start: Double = 0.0
-    var changePriceHour2Absolute: Double = 0.0
-    var changePriceHour2Percent: Double = 0.0
+    var changePriceFixDayAbsolute: Double = 0.0
+    var changePriceFixDayPercent: Double = 0.0
 
     // все минутные свечи с момента запуска приложения
     var minuteCandles: MutableList<Candle> = mutableListOf()
@@ -113,21 +100,11 @@ data class Stock(
 
     fun processCandle(candle: Candle) {
         when (candle.interval) {
-            Interval.DAY -> {
-                processDayCandle(candle)
-            }
-            Interval.MINUTE -> {
-                processMinuteCandle(candle)
-            }
-            Interval.HOUR -> {
-                processHour1Candle(candle)
-            }
-            Interval.TWO_HOURS -> {
-                processHour2Candle(candle)
-            }
-            else -> {
-
-            }
+            Interval.DAY -> { processDayCandle(candle) }
+            Interval.MINUTE -> { processMinuteCandle(candle) }
+            Interval.HOUR -> { processHour1Candle(candle) }
+            Interval.TWO_HOURS -> { processHour2Candle(candle) }
+            else -> { }
         }
     }
 
@@ -140,8 +117,6 @@ data class Stock(
 //        }
 
         if (diffInHours > 20) {
-//            candleYesterday = candle
-//            log(candle.toString() + instrument.ticker)
             return
         }
 
@@ -153,19 +128,11 @@ data class Stock(
     }
 
     private fun processHour1Candle(candle: Candle) {
-        candleHour1 = candle
-
-        changePriceHour1Start = candleHour1.openingPrice
-        changePriceHour1Absolute = candleHour1.closingPrice - candleHour1.openingPrice
-        changePriceHour1Percent = (100 * candleHour1.closingPrice) / candleHour1.openingPrice - 100
+        // do nothing
     }
 
     private fun processHour2Candle(candle: Candle) {
-        candleHour2 = candle
-
-        changePriceHour2Start = candleHour2.openingPrice
-        changePriceHour2Absolute = candleHour2.closingPrice - candleHour2.openingPrice
-        changePriceHour2Percent = (100 * candleHour2.closingPrice) / candleHour2.openingPrice - 100
+        // do nothing
     }
 
     @KoinApiExtension
@@ -181,34 +148,46 @@ data class Stock(
             minuteCandles.add(candle)
         }
 
-        // проверка на стратегию 1728
+        minuteCandles.sortBy { it.time }
+
+//        if (instrument.ticker in listOf<String>("CNK", "MAC", "OIS")) {
+//            log("${instrument.ticker}: candles(${minuteCandles.size}), date: ${candle.time}")
+//            log("${instrument.ticker}: candles(${minuteCandles.size}), date: ${minuteCandles.first().time}")
+//        }
+
+        // проверка на стратегию FixPrice
         val timeCandle = Calendar.getInstance()
         timeCandle.time = candle.time
-        val timeTrackStart = Strategy1728.strategyStartTime
+        val timeTrackStart = StrategyFixPrice.strategyStartTime
 
         if (timeCandle.time >= timeTrackStart.time) {
             exists = false
-            for ((index, c) in minute1728Candles.withIndex()) {
+            for ((index, c) in minuteFixPriceCandles.withIndex()) {
                 if (c.time == candle.time) {
-                    minute1728Candles[index] = candle
+                    minuteFixPriceCandles[index] = candle
                     exists = true
                 }
             }
             if (!exists) {
-                minute1728Candles.add(candle)
+                minuteFixPriceCandles.add(candle)
             }
         }
 
-        updateChange1728()
+        updateChangeFixPrice()
     }
 
-    fun getVolume1728BeforeStart(): Int {
-        return getTodayVolume() - getVolume1728AfterStart()
+    fun process2359() {
+        updateChange2359()
+        updateChangePostmarket()
     }
 
-    fun getVolume1728AfterStart(): Int {
+    fun getVolumeFixPriceBeforeStart(): Int {
+        return getTodayVolume() - getVolumeFixPriceAfterStart()
+    }
+
+    fun getVolumeFixPriceAfterStart(): Int {
         var volume = 0
-        for (candle in minute1728Candles) {
+        for (candle in minuteFixPriceCandles) {
             volume += candle.volume
         }
         return volume
@@ -219,19 +198,11 @@ data class Stock(
     }
 
     fun getPriceDouble(): Double {
-        if (minuteCandles.isNotEmpty()) {
-            return minuteCandles.last().closingPrice
-        }
-
         var value: Double = 0.0
 
         closePrices?.let {
             value = it.close_post
         }
-
-//        candleYesterday?.let {
-//            value = it.closingPrice
-//        }
 
         candleToday?.let {
             value = it.closingPrice
@@ -243,6 +214,7 @@ data class Stock(
     fun getPricePostmarketUSDouble(): Double {
         return closePrices?.close_post_yahoo ?: 0.0
     }
+
     fun getPriceString(): String {
         val price = getPriceDouble()
         return "$price$"
@@ -262,9 +234,9 @@ data class Stock(
         return "0$"
     }
 
-    fun getPrice1728String(): String {
-        if (minute1728Candles.isNotEmpty()) {
-            return "${minute1728Candles.first().closingPrice}$"
+    fun getPriceFixPriceString(): String {
+        if (minuteFixPriceCandles.isNotEmpty()) {
+            return "${minuteFixPriceCandles.first().closingPrice}$"
         }
         return "0$"
     }
@@ -307,23 +279,18 @@ data class Stock(
         }
     }
 
-    private fun updateChange1728() {
-        if (minute1728Candles.isNotEmpty()) {
+    private fun updateChangeFixPrice() {
+        if (minuteFixPriceCandles.isNotEmpty()) {
             candleToday?.let { week ->
-                changePrice1728DayAbsolute = week.closingPrice - minute1728Candles.first().openingPrice
-                changePrice1728DayPercent = (100 * week.closingPrice) / minute1728Candles.first().openingPrice - 100
+                changePriceFixDayAbsolute = week.closingPrice - minuteFixPriceCandles.first().openingPrice
+                changePriceFixDayPercent = (100 * week.closingPrice) / minuteFixPriceCandles.first().openingPrice - 100
             }
         }
     }
 
-    fun reset1728() {
-        changePrice1728DayAbsolute = 0.0
-        changePrice1728DayPercent = 0.0
-        minute1728Candles.clear()
-    }
-
-    fun process2359() {
-        updateChange2359()
-        updateChangePostmarket()
+    fun resetFixPrice() {
+        changePriceFixDayAbsolute = 0.0
+        changePriceFixDayPercent = 0.0
+        minuteFixPriceCandles.clear()
     }
 }

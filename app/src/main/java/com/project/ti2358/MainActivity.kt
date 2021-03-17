@@ -62,7 +62,6 @@ class MainActivity : AppCompatActivity() {
         val index5NameView: TextView = header.findViewById(R.id.index_5_name)
         val index6NameView: TextView = header.findViewById(R.id.index_6_name)
 
-        val index1ValueView: TextView = header.findViewById(R.id.index_1_value)
         val index2ValueView: TextView = header.findViewById(R.id.index_2_value)
         val index3ValueView: TextView = header.findViewById(R.id.index_3_value)
         val index4ValueView: TextView = header.findViewById(R.id.index_4_value)
@@ -132,25 +131,19 @@ class MainActivity : AppCompatActivity() {
                         val color: String,
                     )
 
-                    index1NameView.text = "Super Index"
+                    index1NameView.text = "SUPER INDEX"
                     val superChange = indices[0].change_per + indices[1].change_per + indices[2].change_per + indices[3].change_per
                     index1ChangeView.text = "%.2f%%".format(superChange)
-                    when {
-                        superChange >= 2.0 -> {
-                            index1EmojiView.text = "😍🤑😇"
-                        }
-                        superChange >= 1.0 -> {
-                            index1EmojiView.text = "😍🤑"
-                        }
-                        abs(superChange) < 0.2 -> {
-                            index1EmojiView.text = "😐"
-                        }
-                        superChange <= -2 -> {
-                            index1EmojiView.text = "😦😨😣"
-                        }
-                        superChange <= -1 -> {
-                            index1EmojiView.text = "😰😭"
-                        }
+
+                    index1EmojiView.text = when {
+                        superChange >= 2.0 -> "😍🤑😇"
+                        superChange >= 1.0 -> "😍🤑"
+                        superChange >= 0.2 -> "🥰"
+                        abs(superChange) < 0.2 -> "😐"
+                        superChange <= -2 -> "😦😨😣"
+                        superChange <= -1 -> "😰😭"
+                        superChange <= -0.2 -> "😧"
+                        else -> ""
                     }
                     index1ChangeView.setTextColor(Utils.getColorForValue(superChange))
                 }
@@ -195,9 +188,9 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_1000_sell_start,
                 R.id.nav_1000_buy_start,
                 R.id.nav_2358_start,
-                R.id.nav_1728_start,
+                R.id.nav_1728,
                 R.id.nav_rocket_start,
-                R.id.nav_hour_start,
+                R.id.nav_fixprice,
                 R.id.nav_reports,
                 R.id.nav_shorts,
                 R.id.nav_orderbook,

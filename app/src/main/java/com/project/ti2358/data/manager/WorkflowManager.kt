@@ -44,12 +44,11 @@ class WorkflowManager() : KoinComponent {
             fun provideStrategy1005(): Strategy1005 = Strategy1005()
             fun provideStrategy2358(): Strategy2358 = Strategy2358()
             fun provideStrategy1728(): Strategy1728 = Strategy1728()
+            fun provideStrategyFixPrice(): StrategyFixPrice = StrategyFixPrice()
             fun provideStrategyTazik(): StrategyTazik = StrategyTazik()
-            fun provideStrategyHour(): StrategyHour = StrategyHour()
             fun provideStrategyReports(): StrategyReports = StrategyReports()
 
             // unused yet
-            fun provideStrategy1830(): Strategy1830 = Strategy1830()
             fun provideStrategyRocket(): StrategyRocket = StrategyRocket()
             fun provideStrategyShorts(): StrategyShorts = StrategyShorts()
             fun provideStrategyTelegram(): StrategyTelegram = StrategyTelegram()
@@ -67,10 +66,10 @@ class WorkflowManager() : KoinComponent {
             single { provideStrategy1005() }
             single { provideStrategy2358() }
             single { provideStrategy1728() }
-            single { provideStrategy1830() }
+            single { provideStrategyFixPrice() }
+
             single { provideStrategyRocket() }
             single { provideStrategyTazik() }
-            single { provideStrategyHour() }
             single { provideStrategyReports() }
             single { provideStrategyShorts() }
             single { provideStrategyTelegram() }

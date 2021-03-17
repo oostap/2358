@@ -8,7 +8,6 @@ import android.content.IntentFilter
 import android.os.IBinder
 import android.os.PowerManager
 import android.widget.Toast
-import com.project.ti2358.R
 import com.project.ti2358.data.manager.Strategy1000Buy
 import com.project.ti2358.data.manager.SettingsManager
 import kotlinx.coroutines.*
@@ -174,7 +173,11 @@ class Strategy1000BuyService : Service() {
 
         val cancelIntent = Intent(NOTIFICATION_ACTION_FILTER).apply { putExtra("type", NOTIFICATION_ACTION_CANCEL) }
         val pendingCancelIntent = PendingIntent.getBroadcast(this, 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val actionCancel: Notification.Action = Notification.Action.Builder(null, "СТОП", pendingCancelIntent).build()
+        val actionCancel: Notification.Action = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            Notification.Action.Builder(null, "СТОП", pendingCancelIntent).build()
+        } else {
+            Notification.Action.Builder(0, "СТОП", pendingCancelIntent).build()
+        }
 
         val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, title, shortText, longText, longTitleText, actionCancel)
 
@@ -184,21 +187,12 @@ class Strategy1000BuyService : Service() {
             manager.notify(NOTIFICATION_ID, notification)
         }
 
-        when {
-            hours > 1 -> {
-                return 100
-            }
-            minutes > 10 -> {
-                return 50
-            }
-            minutes > 1 -> {
-                return 20
-            }
-            minutes < 1 -> {
-                return 1
-            }
+        return when {
+            hours > 1 -> 100
+            minutes > 10 -> 50
+            minutes > 1 -> 20
+            minutes < 1 -> 1
+            else -> 50
         }
-
-        return 50
     }
 }

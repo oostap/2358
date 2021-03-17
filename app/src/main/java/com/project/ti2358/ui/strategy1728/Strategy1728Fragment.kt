@@ -1,4 +1,4 @@
-package com.project.ti2358.ui.strategyHour
+package com.project.ti2358.ui.strategy1728
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,25 +6,23 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.manager.StrategyHour
-import com.project.ti2358.data.model.dto.Interval
+import com.project.ti2358.data.manager.*
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import kotlin.math.roundToInt
 
 @KoinApiExtension
-class StrategyHourStartFragment : Fragment() {
+class Strategy1728Fragment : Fragment() {
 
-    val strategyHour: StrategyHour by inject()
-    var adapterList: Item1005RecyclerViewAdapter = Item1005RecyclerViewAdapter(emptyList())
-
-    var interval: Interval = Interval.HOUR
+    val strategy1728: Strategy1728 by inject()
+    var adapterList: Item1728RecyclerViewAdapter = Item1728RecyclerViewAdapter(emptyList())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,15 +32,10 @@ class StrategyHourStartFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_hour_start, container, false)
+        val view = inflater.inflate(R.layout.fragment_fixprice, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
-        list.addItemDecoration(
-            DividerItemDecoration(
-                list.context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
+        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
 
         if (list is RecyclerView) {
             with(list) {
@@ -51,30 +44,38 @@ class StrategyHourStartFragment : Fragment() {
             }
         }
 
-        val buttonHour1 = view.findViewById<Button>(R.id.buttonHour1)
-        buttonHour1.setOnClickListener {
-            interval = Interval.HOUR
+        val buttonReset = view.findViewById<Button>(R.id.buttonReset)
+        buttonReset.setOnClickListener { // сброс времени отслеживания
+            strategy1728.resetStrategy()
+            updateTime()
             updateData()
-
         }
-        val buttonHour2 = view.findViewById<Button>(R.id.buttonHour2)
-        buttonHour2.setOnClickListener {
-            interval = Interval.TWO_HOURS
+
+        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
+        buttonUpdate.setOnClickListener {
             updateData()
         }
 
         updateData()
+
+        updateTime()
         return view
     }
 
     private fun updateData() {
-        strategyHour.process()
-        adapterList.setData(strategyHour.resort(interval))
+        strategy1728.process()
+        adapterList.setData(strategy1728.resort())
     }
 
-    inner class Item1005RecyclerViewAdapter(
+    private fun updateTime() {
+        val time = StrategyFixPrice.strategyStartTime.time.toString("HH:mm:ss")
+        val act = requireActivity() as AppCompatActivity
+        act.supportActionBar?.title = time
+    }
+
+    inner class Item1728RecyclerViewAdapter(
         private var values: List<Stock>
-    ) : RecyclerView.Adapter<Item1005RecyclerViewAdapter.ViewHolder>() {
+    ) : RecyclerView.Adapter<Item1728RecyclerViewAdapter.ViewHolder>() {
 
         fun setData(newValues: List<Stock>) {
             values = newValues
@@ -83,7 +84,7 @@ class StrategyHourStartFragment : Fragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(
-                R.layout.fragment_hour_start_item,
+                R.layout.fragment_fixprice_item,
                 parent,
                 false
             )
@@ -95,38 +96,39 @@ class StrategyHourStartFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            var changeAbsolute = 0.0
-            var changePercent = 0.0
-            var startPrice = 0.0
-
-            if (interval == Interval.HOUR) {
-                changeAbsolute = item.changePriceHour1Absolute
-                changePercent = item.changePriceHour1Percent
-                startPrice = item.changePriceHour1Start
-            } else if (interval == Interval.TWO_HOURS) {
-                changeAbsolute = item.changePriceHour2Absolute
-                changePercent = item.changePriceHour2Percent
-                startPrice = item.changePriceHour2Start
-            }
-
             holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
-            holder.priceView.text = "${startPrice.toMoney(item)} ➡ ${item.getPriceString()}"
+            holder.priceView.text = item.getPriceFixPriceString()
 
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
 
-            val volumeCash = item.dayVolumeCash / 1000f / 1000f
-            holder.volumeTodayCashView.text = "%.2fB$".format(volumeCash)
+            holder.changePriceAbsoluteView.text = item.changePriceFixDayAbsolute.toMoney(item)
+            holder.changePricePercentView.text = item.changePriceFixDayPercent.toPercent()
 
-
-            holder.changePriceAbsoluteView.text = changeAbsolute.toMoney(item)
-            holder.changePricePercentView.text = changePercent.toPercent()
-
-            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(changeAbsolute))
-            holder.changePricePercentView.setTextColor(Utils.getColorForValue(changeAbsolute))
+            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePriceFixDayAbsolute))
+            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePriceFixDayAbsolute))
 
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
+            }
+
+            holder.buttonBuy.setOnClickListener {
+                if (SettingsManager.get1728PurchaseVolume() <= 0) {
+                    Utils.showMessageAlert(requireContext(),"В настройках не задана сумма покупки для позиции, раздел 1728.")
+                } else {
+                    val purchase = PurchaseStock(holder.stock)
+
+                    // считаем лоты
+                    purchase.lots = (SettingsManager.get1728PurchaseVolume() / purchase.stock.getPriceDouble()).roundToInt()
+
+                    purchase.buyLimitFromAsk(SettingsManager.get1728TakeProfit())
+                }
+            }
+
+            if (SettingsManager.get1728QuickBuy()) {
+                holder.buttonBuy.visibility = View.VISIBLE
+            } else {
+                holder.buttonBuy.visibility = View.GONE
             }
         }
 
@@ -139,10 +141,11 @@ class StrategyHourStartFragment : Fragment() {
             val priceView: TextView = view.findViewById(R.id.stock_item_price)
 
             val volumeTodayView: TextView = view.findViewById(R.id.stock_item_volume_today)
-            val volumeTodayCashView: TextView = view.findViewById(R.id.stock_item_volume_today_cash)
 
             val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
+
+            val buttonBuy: Button = view.findViewById(R.id.buttonBuy)
         }
     }
 }

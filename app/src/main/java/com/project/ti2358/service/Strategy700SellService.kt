@@ -1,18 +1,13 @@
 package com.project.ti2358.service
 
 import android.app.*
-import android.app.NotificationManager.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
-import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.widget.Toast
-import com.project.ti2358.MainActivity
-import com.project.ti2358.R
 import com.project.ti2358.data.manager.Strategy1000Sell
 import kotlinx.coroutines.*
 import okhttp3.internal.notify
@@ -96,7 +91,7 @@ class Strategy700SellService : Service() {
         val hours = 7
         val minutes = 0
         val seconds = 0
-        val milliseconds = 100
+        val milliseconds = 150
 
         schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
         schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
@@ -168,7 +163,11 @@ class Strategy700SellService : Service() {
 
         val cancelIntent = Intent(NOTIFICATION_ACTION).apply { putExtra("type", NOTIFICATION_CANCEL_ACTION) }
         val pendingCancelIntent = PendingIntent.getBroadcast(this, 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val actionCancel: Notification.Action = Notification.Action.Builder(null, "СТОП", pendingCancelIntent).build()
+        val actionCancel: Notification.Action = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            Notification.Action.Builder(null, "СТОП", pendingCancelIntent).build()
+        } else {
+            Notification.Action.Builder(0, "СТОП", pendingCancelIntent).build()
+        }
 
         val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, title, shortText, longText, longTitleText, actionCancel)
 
@@ -178,21 +177,12 @@ class Strategy700SellService : Service() {
             manager.notify(NOTIFICATION_ID, notification)
         }
 
-        when {
-            hours > 1 -> {
-                return 100
-            }
-            minutes > 10 -> {
-                return 50
-            }
-            minutes > 1 -> {
-                return 20
-            }
-            minutes < 1 -> {
-                return 1
-            }
+        return when {
+            hours > 1 -> 100
+            minutes > 10 -> 50
+            minutes > 1 -> 20
+            minutes < 1 -> 1
+            else -> 50
         }
-
-        return 50
     }
 }

@@ -680,6 +680,11 @@ data class PurchaseStock(
                             OperationType.SELL,
                             depositManager.getActiveBrokerAccountId()
                         )
+                        delay(DelayMiddle)
+                        depositManager.refreshOrders()
+                        if (depositManager.getOrderAllOrdersForFigi(figi, OperationType.SELL).isEmpty()) {
+                            continue
+                        }
                         status = OrderStatus.ORDER_SELL
                         break
                     } catch (e: Exception) {
@@ -727,12 +732,7 @@ data class PurchaseStock(
         val totalCash = position.balance * position.getAveragePrice()
         val currentProfit = (100.0 * change) / totalCash
 
-        percentProfitSellFrom = if (currentProfit > futureProfit) {
-            currentProfit
-        } else {
-            futureProfit
-        }
-
+        percentProfitSellFrom = if (currentProfit > futureProfit) currentProfit else futureProfit
         status = OrderStatus.WAITING
     }
 }

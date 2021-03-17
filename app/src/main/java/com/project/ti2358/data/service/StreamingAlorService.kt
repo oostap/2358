@@ -101,8 +101,10 @@ class StreamingAlorService {
                     val data = jsonObject.getJSONObject("data")
                     val time = data.getLong("time") * 1000
 
-                    val candle = Candle(data.getDouble("open"), data.getDouble("close"), data.getDouble("high"),
-                        data.getDouble("low"), data.getInt("volume"), Date(time), interval, ticker)
+                    val candle = Candle(
+                        data.getDouble("open"), data.getDouble("close"), data.getDouble("high"),
+                        data.getDouble("low"), data.getInt("volume"), Date(time), interval, ticker
+                    )
                     publishProcessor.onNext(candle)
                 }
             }
@@ -184,7 +186,15 @@ class StreamingAlorService {
         val tf = Utils.convertIntervalToAlorTimeframe(interval)
         val timeFrame = Utils.convertIntervalToSeconds(interval)
         val timeName = Utils.convertIntervalToString(interval)
-        val time = Calendar.getInstance().timeInMillis / 1000 - 2 * timeFrame
+
+        val differenceHours = Utils.getTimeDiffBetweenMSK_UTC()
+        val current = Utils.getTimeMSK()
+        current.set(Calendar.HOUR_OF_DAY, 7)
+        current.set(Calendar.MINUTE, 0)
+        current.set(Calendar.SECOND, 0)
+        current.set(Calendar.MILLISECOND, 0)
+        current.add(Calendar.HOUR_OF_DAY, differenceHours)
+        val time = (current.timeInMillis - current.timeZone.rawOffset) / 1000 - 2 * 60 * 60// Calendar.getInstance().timeInMillis / 1000 - 60 * 60 * 24 // сутки, все минутные свечи за сегодня
 
         val bar = BarGetEventBody(
             AlorManager.TOKEN,

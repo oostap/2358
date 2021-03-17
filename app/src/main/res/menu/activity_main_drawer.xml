@@ -29,9 +29,13 @@
             android:icon="@drawable/ic_stocks"
             android:title="@string/menu_premarket" />
         <item
-            android:id="@+id/nav_1728_start"
+            android:id="@+id/nav_1728"
             android:icon="@drawable/ic_1728"
             android:title="@string/menu_1728" />
+        <item
+            android:id="@+id/nav_fixprice"
+            android:icon="@drawable/ic_1728"
+            android:title="@string/menu_fixprice" />
         <item
             android:id="@+id/nav_2358_start"
             android:icon="@drawable/ic_2358"
@@ -41,11 +45,6 @@
             android:id="@+id/nav_postmarket"
             android:icon="@drawable/ic_stocks"
             android:title="@string/menu_postmarket" />
-
-        <item
-            android:id="@+id/nav_hour_start"
-            android:icon="@drawable/ic_1000"
-            android:title="@string/menu_hour" />
 
         <item
             android:id="@+id/nav_reports"

@@ -8,9 +8,8 @@ import android.content.IntentFilter
 import android.os.IBinder
 import android.os.PowerManager
 import android.widget.Toast
-import com.project.ti2358.R
-import com.project.ti2358.data.manager.Strategy2358
 import com.project.ti2358.data.manager.SettingsManager
+import com.project.ti2358.data.manager.Strategy2358
 import kotlinx.coroutines.*
 import okhttp3.internal.notify
 import org.koin.android.ext.android.inject
@@ -60,7 +59,7 @@ class Strategy2358Service : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "2358","",  "", "")
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "2358", "", "", "")
         startForeground(NOTIFICATION_ID, notification)
 
         schedulePurchase()
@@ -119,6 +118,7 @@ class Strategy2358Service : Service() {
         }
 
         updateTitle = true
+        job?.cancel()
         job = GlobalScope.launch(Dispatchers.Main) {
             while (isServiceRunning) {
                 val delaySeconds = updateNotification()
@@ -168,7 +168,11 @@ class Strategy2358Service : Service() {
 
         val cancelIntent = Intent(NOTIFICATION_ACTION).apply { putExtra("type", NOTIFICATION_CANCEL_ACTION) }
         val pendingCancelIntent = PendingIntent.getBroadcast(this, 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val actionCancel: Notification.Action = Notification.Action.Builder(null, "СТОП", pendingCancelIntent).build()
+        val actionCancel: Notification.Action = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            Notification.Action.Builder(null, "СТОП", pendingCancelIntent).build()
+        } else {
+            Notification.Action.Builder(0, "СТОП", pendingCancelIntent).build()
+        }
 
         val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, title, shortText, longText, longTitleText, actionCancel)
 
@@ -178,21 +182,12 @@ class Strategy2358Service : Service() {
             manager.notify(NOTIFICATION_ID, notification)
         }
 
-        when {
-            hours > 1 -> {
-                return 10
-            }
-            minutes > 10 -> {
-                return 5
-            }
-            minutes > 1 -> {
-                return 2
-            }
-            minutes < 1 -> {
-                return 1
-            }
+        return when {
+            hours > 1 -> 10
+            minutes > 10 -> 5
+            minutes > 1 -> 2
+            minutes < 1 -> 1
+            else -> 5
         }
-
-        return 5
     }
 }

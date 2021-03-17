@@ -8,7 +8,6 @@ import android.content.IntentFilter
 import android.os.IBinder
 import android.os.PowerManager
 import android.widget.Toast
-import com.project.ti2358.R
 import com.project.ti2358.data.manager.Strategy1000Buy
 import com.project.ti2358.data.manager.SettingsManager
 import kotlinx.coroutines.*
@@ -172,8 +171,11 @@ class Strategy700BuyService : Service() {
 
         val cancelIntent = Intent(NOTIFICATION_ACTION).apply { putExtra("type", NOTIFICATION_CANCEL_ACTION) }
         val pendingCancelIntent = PendingIntent.getBroadcast(this, 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val actionCancel: Notification.Action = Notification.Action.Builder(null, "СТОП", pendingCancelIntent).build()
-
+        val actionCancel: Notification.Action = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            Notification.Action.Builder(null, "СТОП", pendingCancelIntent).build()
+        } else {
+            Notification.Action.Builder(0, "СТОП", pendingCancelIntent).build()
+        }
 
         val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, title, shortText, longText, longTitleText, actionCancel)
 
