@@ -157,16 +157,10 @@
 
     <PreferenceCategory app:title="@string/stocks_header_1728">
         <EditTextPreference
-            app:key="@string/setting_key_1728_volume_before_start"
-            app:title="@string/stocks_1728_volume_before_start"
+            app:key="@string/setting_key_1728_volume_min_steps"
+            app:title="@string/stocks_1728_volume_min_day"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="1000"/>
-
-        <EditTextPreference
-            app:key="@string/setting_key_1728_volume_after_start"
-            app:title="@string/stocks_1728_volume_after_start"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="10000"/>
+            app:defaultValue="1000 2000 3000"/>
 
         <EditTextPreference
             app:key="@string/setting_key_1728_price_change"
@@ -185,11 +179,6 @@
             app:title="@string/stocks_1728_take_profit"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="1.0"/>
-
-        <SwitchPreferenceCompat
-            app:key="@string/setting_key_1728_quick_buy"
-            app:title="@string/stocks_1728_quick_buy"
-            app:defaultValue="false" />
 
     </PreferenceCategory>
 
@@ -237,37 +226,41 @@
             app:key="@string/setting_key_tazik_times2"
             app:title="@string/stocks_tazik_times"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="06:59:55,09:59:55,11:59:55,15:29:55"/>
+            app:defaultValue="06:59:55,09:59:55,10:59:55,15:29:55"/>
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/stocks_header_postmarket">
-        <EditTextPreference
-            app:key="@string/setting_key_rocket_change_percent"
-            app:title="@string/stocks_rocket_change_percent"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="2.0"/>
+    <SwitchPreferenceCompat
+        app:key="@string/setting_key_dark_theme"
+        app:title="@string/dark_theme"
+        app:useSimpleSummaryProvider="false" />
 
-    </PreferenceCategory>
+<!--    <PreferenceCategory app:title="@string/stocks_header_postmarket">-->
+<!--        <EditTextPreference-->
+<!--            app:key="@string/setting_key_rocket_change_percent"-->
+<!--            app:title="@string/stocks_rocket_change_percent"-->
+<!--            app:useSimpleSummaryProvider="true"-->
+<!--            app:defaultValue="2.0"/>-->
+<!--    </PreferenceCategory>-->
 
-    <PreferenceCategory app:title="@string/stocks_header_rocket">
-        <EditTextPreference
-            app:key="@string/setting_key_rocket_change_percent"
-            app:title="@string/stocks_rocket_change_percent"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="2.0"/>
+<!--    <PreferenceCategory app:title="@string/stocks_header_rocket">-->
+<!--        <EditTextPreference-->
+<!--            app:key="@string/setting_key_rocket_change_percent"-->
+<!--            app:title="@string/stocks_rocket_change_percent"-->
+<!--            app:useSimpleSummaryProvider="true"-->
+<!--            app:defaultValue="2.0"/>-->
 
-        <EditTextPreference
-            app:key="@string/setting_key_rocket_change_minutes"
-            app:title="@string/stocks_rocket_change_minutes"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="5"/>
+<!--        <EditTextPreference-->
+<!--            app:key="@string/setting_key_rocket_change_minutes"-->
+<!--            app:title="@string/stocks_rocket_change_minutes"-->
+<!--            app:useSimpleSummaryProvider="true"-->
+<!--            app:defaultValue="5"/>-->
 
-        <EditTextPreference
-            app:key="@string/setting_key_rocket_notify_alive"
-            app:title="@string/stocks_rocket_notify_alive"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="5"/>
+<!--        <EditTextPreference-->
+<!--            app:key="@string/setting_key_rocket_notify_alive"-->
+<!--            app:title="@string/stocks_rocket_notify_alive"-->
+<!--            app:useSimpleSummaryProvider="true"-->
+<!--            app:defaultValue="5"/>-->
+<!--    </PreferenceCategory>-->
 
-    </PreferenceCategory>
 </PreferenceScreen>

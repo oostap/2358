@@ -23,26 +23,43 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_alignParentBottom="true"
-        android:weightSum="2" >
+        android:weightSum="4" >
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/buttonReset"
+            android:id="@+id/button_step_1"
             android:layout_marginRight="5dp"
-            android:text="@string/service_1728_reset"
+            android:text="1"
             android:layout_weight="1"
-            android:textSize="16dp"
+            android:textSize="18dp"
             android:layout_width="0dp" />
 
         <Button
             android:layout_height="70dp"
-            android:layout_width="0dp"
-            android:id="@+id/buttonUpdate"
-            android:layout_marginLeft="5dp"
-            android:text="@string/update"
+            android:id="@+id/button_step_2"
+            android:layout_marginRight="5dp"
+            android:text="2"
             android:layout_weight="1"
-            android:textSize="16dp" />
+            android:textSize="18dp"
+            android:layout_width="0dp" />
 
+        <Button
+            android:layout_height="70dp"
+            android:id="@+id/button_step_3"
+            android:layout_marginRight="5dp"
+            android:text="3"
+            android:layout_weight="1"
+            android:textSize="18dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="70dp"
+            android:id="@+id/button_step_go"
+            android:layout_marginRight="0dp"
+            android:text="🚀"
+            android:layout_weight="1"
+            android:textSize="18dp"
+            android:layout_width="0dp" />
     </LinearLayout>
 
 </RelativeLayout>

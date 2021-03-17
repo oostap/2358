@@ -1,6 +1,7 @@
 package com.project.ti2358
 
 import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
 import com.project.ti2358.data.manager.SettingsManager
@@ -24,6 +25,13 @@ class TheApplication : MultiDexApplication() {
 
         application = this
         SettingsManager.setSettingsContext(applicationContext)
+
+        if (SettingsManager.getDarkTheme()) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+
         WorkflowManager.startKoin()
     }
 }

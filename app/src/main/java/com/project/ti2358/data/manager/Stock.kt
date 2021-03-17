@@ -6,6 +6,7 @@ import com.project.ti2358.data.model.dto.daager.ClosePrice
 import com.project.ti2358.data.model.dto.daager.Dividend
 import com.project.ti2358.data.model.dto.daager.Report
 import com.project.ti2358.data.model.dto.daager.StockShort
+import com.project.ti2358.service.toMoney
 import org.koin.core.component.KoinApiExtension
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -48,6 +49,20 @@ data class Stock(
     // разница со старта таймера
     var changePriceFixDayAbsolute: Double = 0.0
     var changePriceFixDayPercent: Double = 0.0
+
+    // стратегия 1728
+    // изменение с 7 до 12
+    var changePrice700to1200Absolute: Double = 0.0
+    var changePrice700to1200Percent: Double = 0.0
+    var volume700to1200 = 0
+    // изменение с 7 до 1600
+    var changePrice700to1600Absolute: Double = 0.0
+    var changePrice700to1600Percent: Double = 0.0
+    var volume700to1600 = 0
+    // изменение с 1630 до 1635
+    var changePrice1630to1635Absolute: Double = 0.0
+    var changePrice1630to1635Percent: Double = 0.0
+    var volume1630to1635 = 0
 
     // все минутные свечи с момента запуска приложения
     var minuteCandles: MutableList<Candle> = mutableListOf()
@@ -138,17 +153,19 @@ data class Stock(
     @KoinApiExtension
     private fun processMinuteCandle(candle: Candle) {
         var exists = false
-        for ((index, c) in minuteCandles.withIndex()) {
-            if (c.time == candle.time) {
-                minuteCandles[index] = candle
-                exists = true
+        synchronized(minuteCandles) {
+            for ((index, c) in minuteCandles.withIndex()) {
+                if (c.time == candle.time) {
+                    minuteCandles[index] = candle
+                    exists = true
+                }
             }
-        }
-        if (!exists) {
-            minuteCandles.add(candle)
-        }
+            if (!exists) {
+                minuteCandles.add(candle)
+            }
 
-        minuteCandles.sortBy { it.time }
+            minuteCandles.sortBy { it.time }
+        }
 
 //        if (instrument.ticker in listOf<String>("CNK", "MAC", "OIS")) {
 //            log("${instrument.ticker}: candles(${minuteCandles.size}), date: ${candle.time}")
@@ -236,8 +253,12 @@ data class Stock(
 
     fun getPriceFixPriceString(): String {
         if (minuteFixPriceCandles.isNotEmpty()) {
-            return "${minuteFixPriceCandles.first().closingPrice}$"
+            return minuteFixPriceCandles.first().closingPrice.toMoney(this)
         }
+        if (minuteCandles.isNotEmpty()) {
+            return minuteCandles.last().closingPrice.toMoney(this)
+        }
+
         return "0$"
     }
 

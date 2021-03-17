@@ -18,11 +18,21 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import kotlin.math.roundToInt
 
+enum class Step1728 {
+    step700to1200,
+    step700to1530,
+    step1630to1635,
+    stepFinal,
+}
+
 @KoinApiExtension
 class Strategy1728Fragment : Fragment() {
 
     val strategy1728: Strategy1728 by inject()
     var adapterList: Item1728RecyclerViewAdapter = Item1728RecyclerViewAdapter(emptyList())
+
+    var step1728: Step1728 = Step1728.step700to1200
+    var stocks: MutableList<Stock> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +42,7 @@ class Strategy1728Fragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_fixprice, container, false)
+        val view = inflater.inflate(R.layout.fragment_1728, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
         list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
@@ -44,33 +54,51 @@ class Strategy1728Fragment : Fragment() {
             }
         }
 
-        val buttonReset = view.findViewById<Button>(R.id.buttonReset)
-        buttonReset.setOnClickListener { // сброс времени отслеживания
-            strategy1728.resetStrategy()
-            updateTime()
-            updateData()
+        val buttonStep1 = view.findViewById<Button>(R.id.button_step_1)
+        buttonStep1.setOnClickListener {
+            updateData(Step1728.step700to1200)
         }
 
-        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
-        buttonUpdate.setOnClickListener {
-            updateData()
+        val buttonStep2 = view.findViewById<Button>(R.id.button_step_2)
+        buttonStep2.setOnClickListener {
+            updateData(Step1728.step700to1530)
         }
 
-        updateData()
+        val buttonStep3 = view.findViewById<Button>(R.id.button_step_3)
+        buttonStep3.setOnClickListener {
+            updateData(Step1728.step1630to1635)
+        }
 
-        updateTime()
+        val buttonStepGo = view.findViewById<Button>(R.id.button_step_go)
+        buttonStepGo.setOnClickListener {
+            updateData(Step1728.stepFinal)
+        }
+
+        updateData(Step1728.step700to1200)
         return view
     }
 
-    private fun updateData() {
-        strategy1728.process()
-        adapterList.setData(strategy1728.resort())
+    private fun updateData(localStep1728: Step1728) {
+        step1728 = localStep1728
+        stocks = when (step1728) {
+            Step1728.step700to1200 -> strategy1728.process700to1200()
+            Step1728.step700to1530 -> strategy1728.process700to1600()
+            Step1728.step1630to1635 -> strategy1728.process1630to1635()
+            Step1728.stepFinal -> strategy1728.processFinal()
+        }
+        adapterList.setData(stocks)
+        updateTitle()
     }
 
-    private fun updateTime() {
-        val time = StrategyFixPrice.strategyStartTime.time.toString("HH:mm:ss")
+    private fun updateTitle() {
+        val title = when (step1728) {
+            Step1728.step700to1200 -> "1: 10:00 - 12:00, объём ${SettingsManager.get1728Volume(0)}"
+            Step1728.step700to1530 -> "2: 10:00 - 16:00, объём ${SettingsManager.get1728Volume(1)}"
+            Step1728.step1630to1635 -> "3: 16:30 - 16:35, объём ${SettingsManager.get1728Volume(2)}"
+            Step1728.stepFinal -> "1 - 2 - 3 - 🚀"
+        }
         val act = requireActivity() as AppCompatActivity
-        act.supportActionBar?.title = time
+        act.supportActionBar?.title = title
     }
 
     inner class Item1728RecyclerViewAdapter(
@@ -83,12 +111,7 @@ class Strategy1728Fragment : Fragment() {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(
-                R.layout.fragment_fixprice_item,
-                parent,
-                false
-            )
-
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_1728_item, parent, false)
             return ViewHolder(view)
         }
 
@@ -97,16 +120,36 @@ class Strategy1728Fragment : Fragment() {
             holder.stock = item
 
             holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
-            holder.priceView.text = item.getPriceFixPriceString()
+            holder.priceView.text = item.getPriceDouble().toMoney(item)
 
-            val volume = item.getTodayVolume() / 1000f
+            val changePercent = when (step1728) {
+                Step1728.step700to1200 -> item.changePrice700to1200Percent
+                Step1728.step700to1530 -> item.changePrice700to1600Percent
+                Step1728.step1630to1635 -> item.changePrice1630to1635Percent
+                Step1728.stepFinal -> item.changePrice1630to1635Percent
+            }
+
+            val changeAbsolute = when (step1728) {
+                Step1728.step700to1200 -> item.changePrice700to1200Absolute
+                Step1728.step700to1530 -> item.changePrice700to1600Absolute
+                Step1728.step1630to1635 -> item.changePrice1630to1635Absolute
+                Step1728.stepFinal -> item.changePrice1630to1635Absolute
+            }
+
+            val volume = when (step1728) {
+                Step1728.step700to1200 -> item.volume700to1200
+                Step1728.step700to1530 -> item.volume700to1600
+                Step1728.step1630to1635 -> item.volume1630to1635
+                Step1728.stepFinal -> item.getTodayVolume()
+            } / 1000f
+
             holder.volumeTodayView.text = "%.1fk".format(volume)
 
-            holder.changePriceAbsoluteView.text = item.changePriceFixDayAbsolute.toMoney(item)
-            holder.changePricePercentView.text = item.changePriceFixDayPercent.toPercent()
+            holder.changePriceAbsoluteView.text = changeAbsolute.toMoney(item)
+            holder.changePricePercentView.text = changePercent.toPercent()
 
-            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePriceFixDayAbsolute))
-            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePriceFixDayAbsolute))
+            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(changePercent))
+            holder.changePricePercentView.setTextColor(Utils.getColorForValue(changePercent))
 
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
@@ -120,12 +163,11 @@ class Strategy1728Fragment : Fragment() {
 
                     // считаем лоты
                     purchase.lots = (SettingsManager.get1728PurchaseVolume() / purchase.stock.getPriceDouble()).roundToInt()
-
                     purchase.buyLimitFromAsk(SettingsManager.get1728TakeProfit())
                 }
             }
 
-            if (SettingsManager.get1728QuickBuy()) {
+            if (step1728 == Step1728.stepFinal) {
                 holder.buttonBuy.visibility = View.VISIBLE
             } else {
                 holder.buttonBuy.visibility = View.GONE

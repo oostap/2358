@@ -69,7 +69,7 @@
     <!-- Preference Titles -->
 
     <string name="stocks_header_2358">Стратегия 2358</string>
-    <string name="stocks_header_1728">Стратегия 1728</string>
+    <string name="stocks_header_1728">Стратегия 1728 (только ALOR)</string>
     <string name="stocks_header_1000_sell">Стратегия 10:00:01 sell</string>
     <string name="stocks_header_1000_buy">Стратегия 10:00:01 buy</string>
     <string name="stocks_header_1005">Стратегия 1005</string>
@@ -77,11 +77,13 @@
     <string name="stocks_header_rocket">Стратегия ракеты</string>
     <string name="stocks_header_postmarket">Постмаркет US</string>
 
+    <string name="dark_theme">Ночная тема</string>
+
     <!-- tinkoff settings -->
     <string name="token_header">Торговые токены</string>
-    <string name="tinkoff_token_title">Tinkoff OpenApi токен</string>
-    <string name="alor_token_title">Alor OpenApi токен</string>
-    <string name="alor_qoutes_title">Котировки из Alor</string>
+    <string name="tinkoff_token_title">Tinkoff OpenAPI токен</string>
+    <string name="alor_token_title">ALOR OpenAPI токен</string>
+    <string name="alor_qoutes_title">Котировки из ALOR</string>
 
     <string name="tinkoff_iis_title">У меня ИИС в ТИ</string>
 
@@ -98,7 +100,7 @@
     <!-- 2358 settings -->
     <string name="stocks_2358_price_change_percent">Изменение от %</string>
     <string name="stocks_2358_volume_min_day">Объём в день от шт.</string>
-    <string name="stocks_2358_volume_min_cash">Объём в день от млрд. $</string>
+    <string name="stocks_2358_volume_min_cash">Объём в день от млн. $</string>
     <string name="stocks_2358_purchase_volume">Общая сумма покупки в $</string>
     <string name="stocks_2358_purchase_time">Во сколько тарим? МСК</string>
 
@@ -122,12 +124,10 @@
     <string name="stocks_1005_volume_min_day">Объём за день от шт.</string>
 
     <!-- 1728 settings -->
-    <string name="stocks_1728_volume_before_start">Объём до старта шт.</string>
-    <string name="stocks_1728_volume_after_start">Объём от старта шт.</string>
-    <string name="stocks_1728_price_change">Изменение цены со старта в %</string>
-    <string name="stocks_1728_purchase_volume">Сумма одной позиции в $</string>
+    <string name="stocks_1728_volume_min_day">Объём каждого шага отсева от шт. (через пробел)</string>
+    <string name="stocks_1728_price_change">Изменение цены от в %</string>
+    <string name="stocks_1728_purchase_volume">Сумма покупки одной позиции в $</string>
     <string name="stocks_1728_take_profit">Заявка на продажу в % (0 = не создавать)</string>
-    <string name="stocks_1728_quick_buy">Быстрая покупка</string>
 
     <!-- tazik settings -->
     <string name="stocks_tazik_min_percent_to_buy">Минимальная просадка в %</string>
@@ -150,6 +150,8 @@
     <string name="order_item">order_item</string>
 
     <!-- setting keys-->
+
+    <string name="setting_key_dark_theme">dark_theme</string>
 
     <!-- tinkoff -->
     <string name="setting_key_token_market">token_market</string>
@@ -192,11 +194,10 @@
     <string name="setting_key_1005_volume_min_day">1005_volume_min_day</string>
 
     <!-- 1728 settings -->
-    <string name="setting_key_1728_volume_min_day">1728_volume_min_day</string>
+    <string name="setting_key_1728_volume_min_steps">1728_volume_min_each_steps</string>
     <string name="setting_key_1728_price_change">1728_price_change</string>
     <string name="setting_key_1728_purchase_volume">1728_purchase_volume</string>
     <string name="setting_key_1728_take_profit">1728_take_profit</string>
-    <string name="setting_key_1728_quick_buy">1728_quick_buy</string>
 
     <!-- tazik settings -->
     <string name="setting_key_tazik_min_percent_to_buy">tazik_min_percent_to_buy</string>

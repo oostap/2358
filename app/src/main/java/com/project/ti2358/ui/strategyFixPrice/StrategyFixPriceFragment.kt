@@ -125,11 +125,11 @@ class StrategyFixPriceFragment : Fragment() {
                 }
             }
 
-            if (SettingsManager.get1728QuickBuy()) {
-                holder.buttonBuy.visibility = View.VISIBLE
-            } else {
+//            if (SettingsManager.get1728QuickBuy()) {
+//                holder.buttonBuy.visibility = View.VISIBLE
+//            } else {
                 holder.buttonBuy.visibility = View.GONE
-            }
+//            }
         }
 
         override fun getItemCount(): Int = values.size

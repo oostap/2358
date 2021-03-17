@@ -93,7 +93,7 @@ class StrategyShortsFragment : Fragment() {
             holder.volumeTodayView.text = "%.1fk".format(volume)
 
             val volumeCash = item.dayVolumeCash / 1000f / 1000f
-            holder.volumeTodayCashView.text = "%.2fB$".format(volumeCash)
+            holder.volumeTodayCashView.text = "%.2fM$".format(volumeCash)
 
             holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
             holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()

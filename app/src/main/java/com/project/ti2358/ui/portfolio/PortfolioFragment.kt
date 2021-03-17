@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -18,6 +19,7 @@ import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.manager.OrderbookManager
+import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.data.service.ThirdPartyService
 import com.project.ti2358.service.Utils

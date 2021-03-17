@@ -8,6 +8,7 @@ import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
@@ -17,6 +18,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.project.ti2358.data.manager.DepositManager
+import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.WorkflowManager
 import com.project.ti2358.data.model.dto.daager.Index
@@ -86,7 +88,6 @@ class MainActivity : AppCompatActivity() {
         val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(TheApplication.application.applicationContext.packageName, 0)
         versionView.text = pInfo.versionName
 
-
         val actionBarDrawerToggle: ActionBarDrawerToggle = object : ActionBarDrawerToggle(
             this,
             drawerLayout,
@@ -122,15 +123,6 @@ class MainActivity : AppCompatActivity() {
                     processIndex(indices[3], index5NameView, index5ValueView, index5ChangeView, index5EmojiView)
                     processIndex(indices[4], index6NameView, index6ValueView, index6ChangeView, index6EmojiView, true)
 
-                    data class Index (
-                        val name: String,
-                        val short: String,
-                        val value: Double,
-                        val change: Double,
-                        val change_per: Double,
-                        val color: String,
-                    )
-
                     index1NameView.text = "SUPER INDEX"
                     val superChange = indices[0].change_per + indices[1].change_per + indices[2].change_per + indices[3].change_per
                     index1ChangeView.text = "%.2f%%".format(superChange)
@@ -140,6 +132,9 @@ class MainActivity : AppCompatActivity() {
                         superChange >= 1.0 -> "😍🤑"
                         superChange >= 0.2 -> "🥰"
                         abs(superChange) < 0.2 -> "😐"
+                        superChange <= -5 -> "☠️☠️☠️"
+                        superChange <= -4 -> "🥵🤬😡️"
+                        superChange <= -3 -> "👿🤢😤️"
                         superChange <= -2 -> "😦😨😣"
                         superChange <= -1 -> "😰😭"
                         superChange <= -0.2 -> "😧"

@@ -1,6 +1,8 @@
 package com.project.ti2358.ui.settings
 
+import android.content.res.Configuration
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.*
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.AlorManager
@@ -23,6 +25,31 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.fragment_settings, rootKey)
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+        val darkThemeKey = getString(R.string.setting_key_dark_theme)
+        val darkThemePreference: SwitchPreferenceCompat? = findPreference(darkThemeKey)
+
+        when (context?.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
+            Configuration.UI_MODE_NIGHT_YES -> {
+                darkThemePreference?.isChecked = true
+            }
+            Configuration.UI_MODE_NIGHT_NO -> {
+                darkThemePreference?.isChecked = false
+            }
+            Configuration.UI_MODE_NIGHT_UNDEFINED -> {}
+        }
+
+        darkThemePreference?.onPreferenceChangeListener  = Preference.OnPreferenceChangeListener { preference, newValue ->
+            if (newValue as Boolean) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+            true
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+//        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
         val tazikAskKey = getString(R.string.setting_key_tazik_buy_ask)
         tazikAskPreference = findPreference(tazikAskKey)

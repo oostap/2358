@@ -21,6 +21,11 @@ class SettingsManager {
             preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         }
 
+        fun getDarkTheme(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_dark_theme)
+            return preferences.getBoolean(key, false)
+        }
+
         fun getActiveTokenTinkoff(): String {
             val tokenKey = TheApplication.application.applicationContext.getString(R.string.setting_key_token_market)
             val token: String? = preferences.getString(tokenKey, "")?.trim()
@@ -278,19 +283,17 @@ class SettingsManager {
             }
         }
 
-        fun get1728Volume(): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_volume_min_day)
-            val value: String? = preferences.getString(key, "1000")
-            return try {
-                parseInt(value ?: "1000")
-            } catch (e: Exception) {
-                1000
-            }
-        }
+        fun get1728Volume(step: Int): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_volume_min_steps)
+            val value: String? = preferences.getString(key, "1000 2000 3000")
+            val volumes = value?.split(" ") ?: return 2000
+            if (volumes.size < 3) return 2000
 
-        fun get1728QuickBuy(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_quick_buy)
-            return preferences.getBoolean(key, false)
+            return try {
+                parseInt(volumes[step])
+            } catch (e: Exception) {
+                2000
+            }
         }
 
         /******************** THE TAZIK *************************/
