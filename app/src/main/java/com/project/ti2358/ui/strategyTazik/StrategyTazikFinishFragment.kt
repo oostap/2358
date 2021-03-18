@@ -167,6 +167,8 @@ class StrategyTazikFinishFragment : Fragment() {
                 refreshPercent(holder)
                 updateInfoText()
             }
+
+            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 
         fun refreshPercent(holder: ViewHolder) {

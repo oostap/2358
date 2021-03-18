@@ -8,20 +8,20 @@
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         android:layout_marginBottom="70dp"
         android:layout_marginTop="0dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.portfolio.PortfolioFragment"
-        tools:listitem="@layout/fragment_1000_start_item" />
+        tools:listitem="@layout/fragment_1000_sell_start_item" />
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         android:layout_alignParentBottom="true"
         android:weightSum="2" >
         <Button

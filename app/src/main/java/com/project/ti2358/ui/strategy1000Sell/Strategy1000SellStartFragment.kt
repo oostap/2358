@@ -123,6 +123,8 @@ class Strategy1000SellStartFragment : Fragment() {
                     Utils.openTinkoffForTicker(requireContext(), it.instrument.ticker)
                 }
             }
+
+            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 
         override fun getItemCount(): Int = values.size

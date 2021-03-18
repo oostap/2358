@@ -47,29 +47,21 @@ class DiagnosticsFragment : Fragment() {
             updateData()
         }
 
-
-        GlobalScope.launch(Dispatchers.Main) {
-            while (true) {
-                delay(3000)
-                updateData()
-            }
-        }
-
         updateData()
         return view
     }
 
     @SuppressLint("SetTextI18n")
     fun updateData() {
-        val tinkoffREST = if (depositManager.accounts.isNotEmpty()) "ОК" else "НЕ ОК"
-        val tinkoffConnectedStatus = if (streamingTinkoffService.connectedStatus) "ОК" else "НЕ ОК"
-        val tinkoffMessagesStatus = if (streamingTinkoffService.messagesStatus) "ОК" else "НЕ ОК"
-        val alorConnectedStatus = if (streamingAlorService.connectedStatus) "ОК" else "НЕ ОК"
-        val alorMessagesStatus = if (streamingAlorService.messagesStatus) "ОК" else "НЕ ОК"
-        val daagerClosePricesStatus = if (stockManager.stockClosePrices.isNotEmpty()) "ОК" else "НЕ ОК"
-        val daagerReportsStatus = if (stockManager.stockReports.isNotEmpty()) "ОК" else "НЕ ОК"
-        val daagerIndicesStatus = if (stockManager.indices.isNotEmpty()) "ОК" else "НЕ ОК"
-        val daagerShortsStatus = if (stockManager.stockShorts.isNotEmpty()) "ОК" else "НЕ ОК"
+        val tinkoffREST = if (depositManager.accounts.isNotEmpty()) "ОК" else "НЕ ОК 😱"
+        val tinkoffConnectedStatus = if (streamingTinkoffService.connectedStatus) "ОК" else "НЕ ОК 😱"
+        val tinkoffMessagesStatus = if (streamingTinkoffService.messagesStatus) "ОК" else "НЕ ОК 😱"
+        val alorConnectedStatus = if (streamingAlorService.connectedStatus) "ОК" else "НЕ ОК 😱"
+        val alorMessagesStatus = if (streamingAlorService.messagesStatus) "ОК" else "НЕ ОК 😱"
+        val daagerClosePricesStatus = if (stockManager.stockClosePrices.isNotEmpty()) "ОК" else "НЕ ОК 😱"
+        val daagerReportsStatus = if (stockManager.stockReports.isNotEmpty()) "ОК" else "НЕ ОК 😱"
+        val daagerIndicesStatus = if (stockManager.indices.isNotEmpty()) "ОК" else "НЕ ОК 😱"
+        val daagerShortsStatus = if (stockManager.stockShorts.isNotEmpty()) "ОК" else "НЕ ОК 😱"
 
         textView.text =
                     "Tinkoff REST: $tinkoffREST\n\n" +

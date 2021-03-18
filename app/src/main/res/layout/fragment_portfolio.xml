@@ -35,12 +35,12 @@
             android:layout_width="0dp" />
 
         <Button
-            android:layout_height="70dp"
-            android:layout_width="0dp"
             android:id="@+id/buttonOrders"
+            android:layout_width="0dp"
+            android:layout_height="70dp"
             android:layout_marginLeft="5dp"
-            android:text="@string/orders"
             android:layout_weight="1"
+            android:text="@string/orders"
             android:textSize="16dp" />
 
     </LinearLayout>

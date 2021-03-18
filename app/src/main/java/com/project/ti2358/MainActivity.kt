@@ -1,6 +1,11 @@
 package com.project.ti2358
 
 import android.content.pm.PackageInfo
+import android.content.res.ColorStateList
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
@@ -24,6 +29,7 @@ import com.project.ti2358.service.Utils
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import kotlin.math.abs
+
 
 @KoinApiExtension
 class MainActivity : AppCompatActivity() {
@@ -82,7 +88,10 @@ class MainActivity : AppCompatActivity() {
         val index6EmojiView: TextView = header.findViewById(R.id.index_6_emoji)
 
         val versionView: TextView = header.findViewById(R.id.version)
-        val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(TheApplication.application.applicationContext.packageName, 0)
+        val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(
+            TheApplication.application.applicationContext.packageName,
+            0
+        )
         versionView.text = pInfo.versionName
 
         val actionBarDrawerToggle: ActionBarDrawerToggle = object : ActionBarDrawerToggle(

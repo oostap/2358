@@ -155,6 +155,7 @@ class Strategy2358StartFragment : Fragment() {
                 holder.reportView.visibility = View.GONE
             }
             holder.reportView.setTextColor(Utils.RED)
+            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 
         override fun getItemCount(): Int = values.size

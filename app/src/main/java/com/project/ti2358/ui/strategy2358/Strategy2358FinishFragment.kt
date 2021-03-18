@@ -128,6 +128,8 @@ class Strategy2358FinishFragment : Fragment() {
                 holder.purchaseStock.trailingTake = checked
                 refreshPercent(holder, 0.0)
             }
+
+            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 
         private fun refreshPercent(holder: ViewHolder, delta: Double) {

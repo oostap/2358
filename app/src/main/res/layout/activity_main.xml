@@ -21,5 +21,7 @@
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer"
+        app:itemTextColor="@color/orderbook_color"
+        app:itemIconTint="@color/orderbook_color"
         tools:visibility="visible" />
 </androidx.drawerlayout.widget.DrawerLayout>

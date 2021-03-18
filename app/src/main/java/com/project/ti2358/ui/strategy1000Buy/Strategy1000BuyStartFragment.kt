@@ -150,6 +150,8 @@ class Strategy1000BuyStartFragment : Fragment() {
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
             }
+
+            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 
         override fun getItemCount(): Int = values.size

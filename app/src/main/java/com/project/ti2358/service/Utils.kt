@@ -51,9 +51,16 @@ class Utils {
     companion object {
         val GREEN: Int = Color.parseColor("#58D68D")
         val RED: Int = Color.parseColor("#E74C3C")
+        val LIGHT: Int = Color.parseColor("#20888888")
+        val WHITE: Int = Color.parseColor("#05FFFFFF")
+        val EMPTY: Int = Color.parseColor("#00FFFFFF")
 
         fun getColorForValue(value: Double): Int {
             return if (value < 0) RED else GREEN
+        }
+
+        fun getColorForIndex(index: Int): Int {
+            return if (index % 2 == 0) WHITE else EMPTY
         }
 
         fun getColorForSector(sector: String?): Int {

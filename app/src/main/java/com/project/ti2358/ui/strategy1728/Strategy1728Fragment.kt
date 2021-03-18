@@ -172,6 +172,8 @@ class Strategy1728Fragment : Fragment() {
             } else {
                 holder.buttonBuy.visibility = View.GONE
             }
+
+            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 
         override fun getItemCount(): Int = values.size

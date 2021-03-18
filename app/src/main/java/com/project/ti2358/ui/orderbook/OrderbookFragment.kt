@@ -27,6 +27,7 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.lang.Exception
 import java.lang.StrictMath.min
+import kotlin.math.roundToInt
 import kotlin.math.sign
 
 
@@ -55,6 +56,8 @@ class OrderbookFragment : Fragment() {
     lateinit var sellPlusView: LinearLayout
     lateinit var sellMinusView: LinearLayout
 
+    lateinit var pricePanelView: LinearLayout
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -67,6 +70,7 @@ class OrderbookFragment : Fragment() {
         super.onDestroy()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -90,58 +94,104 @@ class OrderbookFragment : Fragment() {
         sellPlusView = view.findViewById(R.id.sell_plus)
         sellMinusView = view.findViewById(R.id.sell_minus)
 
-        volumesView.children.forEach { it.visibility = View.GONE }
-        buyPlusView.children.forEach { it.visibility = View.GONE }
-        buyMinusView.children.forEach { it.visibility = View.GONE }
-        sellPlusView.children.forEach { it.visibility = View.GONE }
-        sellMinusView.children.forEach { it.visibility = View.GONE }
+        pricePanelView = view.findViewById(R.id.price_panel)
+
+        volumesView.children.forEach { it.visibility = GONE }
+        buyPlusView.children.forEach { it.visibility = GONE }
+        buyMinusView.children.forEach { it.visibility = GONE }
+        sellPlusView.children.forEach { it.visibility = GONE }
+        sellMinusView.children.forEach { it.visibility = GONE }
 
         val vols = SettingsManager.getOrderbookVolumes()
         val volumes = vols.split(" ")
         var size = min(volumesView.childCount, volumes.size)
+        var exist = false
         for (i in 0 until size) {
+            if (volumes[i] == "") continue
+
             volumesView.getChildAt(i).apply {
                 this as TextView
 
                 text = volumes[i]
                 visibility = VISIBLE
 
-                setOnClickListener {
-                    volumeEditText.setText(this.text)
+                setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
+                    if (event.action == MotionEvent.ACTION_UP) {
+                        v.alpha = 1.0F
+                        volumeEditText.setText(this.text)
+                    }
+                    true
                 }
             }
+            exist = true
         }
+        volumesView.visibility = if (!exist) GONE else VISIBLE
 
         val p = SettingsManager.getOrderbookPrices()
         val changes = p.split(" ")
         size = min(buyPlusView.childCount, changes.size)
+        exist = false
+
         for (i in 0 until size) {
+            if (changes[i] == "") continue
+
             buyPlusView.getChildAt(i).apply { this as TextView
                 text = "+${changes[i]}"
                 visibility = VISIBLE
 
-                setOnClickListener { changeOrders(it as TextView, OperationType.BUY) }
+                setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
+                    if (event.action == MotionEvent.ACTION_UP) {
+                        v.alpha = 1.0F
+                        changeOrders(this, OperationType.BUY)
+                    }
+                    true
+                }
             }
             sellPlusView.getChildAt(i).apply { this as TextView
                 text = "+${changes[i]}"
                 visibility = VISIBLE
 
-                setOnClickListener { changeOrders(it as TextView, OperationType.SELL) }
+                setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
+                    if (event.action == MotionEvent.ACTION_UP) {
+                        v.alpha = 1.0F
+                        changeOrders(this, OperationType.SELL)
+                    }
+                    true
+                }
             }
 
             buyMinusView.getChildAt(i).apply { this as TextView
                 text = "-${changes[i]}"
                 visibility = VISIBLE
 
-                setOnClickListener { changeOrders(it as TextView, OperationType.BUY) }
+                setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
+                    if (event.action == MotionEvent.ACTION_UP) {
+                        v.alpha = 1.0F
+                        changeOrders(this, OperationType.BUY)
+                    }
+                    true
+                }
             }
             sellMinusView.getChildAt(i).apply { this as TextView
                 text = "-${changes[i]}"
                 visibility = VISIBLE
 
-                setOnClickListener { changeOrders(it as TextView, OperationType.SELL) }
+                setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
+                    if (event.action == MotionEvent.ACTION_UP) {
+                        v.alpha = 1.0F
+                        changeOrders(this, OperationType.SELL)
+                    }
+                    true
+                }
             }
+            exist = true
         }
+        pricePanelView.visibility = if (!exist) GONE else VISIBLE
 
         imageTrash = view.findViewById(R.id.image_trash)
         imageTrash.setOnDragListener(ChoiceDragListener())
@@ -184,11 +234,10 @@ class OrderbookFragment : Fragment() {
     }
 
     private fun moveAllBuyOrders(delta: Int, operationType: OperationType) {
-        val sign = if (delta < 0) 0.0 else 0.1
         activeStock?.let {
             val buyOrders = depositManager.getOrderAllOrdersForFigi(it.instrument.figi, operationType)
             buyOrders.forEach { order ->
-                val newIntPrice = (order.price * 100 + sign).toInt() + delta
+                val newIntPrice = (order.price * 100).roundToInt() + delta
                 val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0)
                 orderbookManager.replaceOrder(order, newPrice, operationType)
             }
@@ -236,7 +285,8 @@ class OrderbookFragment : Fragment() {
         var title = if (operationType == OperationType.BUY) "КУПИТЬ!" else "ПРОДАТЬ!"
         val position = depositManager.getPositionForFigi(orderbookLine.stock.instrument.figi)
         val depoCount = position?.lots ?: 0
-        title += " депо: $depoCount"
+        val avg = position?.getAveragePrice() ?: 0
+        title += " депо: $depoCount, $avg"
 
         val alert: android.app.AlertDialog.Builder = android.app.AlertDialog.Builder(requireContext())
         alert.setIcon(R.drawable.ic_hammer).setTitle(title).setView(layout).setPositiveButton("ок",
@@ -261,15 +311,16 @@ class OrderbookFragment : Fragment() {
 
         val ticker = activeStock?.instrument?.ticker ?: ""
         var lots = ""
+        var avg = ""
         val act = requireActivity() as AppCompatActivity
 
         activeStock?.let {
             depositManager.getPositionForFigi(it.instrument.figi)?.let { p ->
                 lots = " ${p.blocked.toInt()}/${p.lots}"
+                avg = ", ${p.getAveragePrice()}"
             }
         }
-
-        act.supportActionBar?.title = getString(R.string.menu_orderbook) + " $ticker" + lots
+        act.supportActionBar?.title = getString(R.string.menu_orderbook) + " $ticker" + lots + avg
 
 //        val firstVisibleItemPosition: Int = localLayoutManager.findFirstVisibleItemPosition()
 //        val lastVisibleItemPosition: Int = localLayoutManager.findLastVisibleItemPosition()
@@ -287,13 +338,32 @@ class OrderbookFragment : Fragment() {
             log("onDrag")
             when (event.action) {
                 DragEvent.ACTION_DRAG_STARTED -> { }
-                DragEvent.ACTION_DRAG_ENTERED -> { }
-                DragEvent.ACTION_DRAG_EXITED -> { }
+                DragEvent.ACTION_DRAG_ENTERED -> {
+                    val view = event.localState as View
+                    val actionType = v.getTag(R.string.action_type) as String
+                    if (actionType == "replace") {
+                        if (v is LinearLayout) {
+                            val dropTarget = v as LinearLayout          // строка, куда кидаем заявку
+                            val position = dropTarget.getTag(R.string.position_line) as Int
+
+                            dropTarget.setBackgroundColor(Utils.LIGHT)
+                        }
+                    }
+                }
+                DragEvent.ACTION_DRAG_EXITED -> {
+                    val view = event.localState as View
+                    val actionType = v.getTag(R.string.action_type) as String
+                    if (actionType == "replace") {
+                        if (v is LinearLayout) {
+                            val dropTarget = v as LinearLayout          // строка, куда кидаем заявку
+                            val position = dropTarget.getTag(R.string.position_line) as Int
+                            dropTarget.setBackgroundColor(Utils.getColorForIndex(position))
+                        }
+                    }
+                }
                 DragEvent.ACTION_DROP -> {
                     val view = event.localState as View
-
                     val actionType = v.getTag(R.string.action_type) as String
-
                     if (actionType == "replace") {
                         if (v is LinearLayout) {
                             val dropTarget = v as LinearLayout          // строка, куда кидаем заявку
@@ -346,10 +416,12 @@ class OrderbookFragment : Fragment() {
             holder.dragToBuyView.setOnDragListener(ChoiceDragListener())
             holder.dragToSellView.setOnDragListener(ChoiceDragListener())
 
+            holder.dragToBuyView.setTag(R.string.position_line, position)
             holder.dragToBuyView.setTag(R.string.order_line, item)
             holder.dragToBuyView.setTag(R.string.order_type, OperationType.BUY)
             holder.dragToBuyView.setTag(R.string.action_type, "replace")
 
+            holder.dragToSellView.setTag(R.string.position_line, position)
             holder.dragToSellView.setTag(R.string.order_line, item)
             holder.dragToSellView.setTag(R.string.order_type, OperationType.SELL)
             holder.dragToSellView.setTag(R.string.action_type, "replace")
@@ -402,6 +474,9 @@ class OrderbookFragment : Fragment() {
             holder.dragToBuyView.setOnClickListener {
                 showEditOrder(holder.orderbookLine, OperationType.BUY)
             }
+
+            holder.dragToBuyView.setBackgroundColor(Utils.getColorForIndex(position))
+            holder.dragToSellView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 
         override fun getItemCount(): Int = values.size
@@ -430,7 +505,7 @@ class OrderbookFragment : Fragment() {
             val orderSell4View: TextView = view.findViewById(R.id.stock_order_sell_4)
         }
 
-        private inner class ChoiceTouchListener : OnTouchListener {
+        inner class ChoiceTouchListener : OnTouchListener {
             @SuppressLint("ClickableViewAccessibility")
             override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 return if (motionEvent.action == MotionEvent.ACTION_DOWN) {

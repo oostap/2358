@@ -179,6 +179,8 @@ class ReportsFragment : Fragment() {
                 holder.dateView.text = "${it.date_format} $tod"
                 holder.dateView.setTextColor(Utils.RED)
             }
+
+            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 
         override fun getItemCount(): Int = values.size
