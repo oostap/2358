@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -169,7 +170,7 @@ class PortfolioFragment : Fragment() {
             holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(percent))
             holder.changePricePercentView.setTextColor(Utils.getColorForValue(percent))
 
-            holder.buttonOrderbook.setOnClickListener {
+            holder.imageOrderbook.setOnClickListener {
                 holder.position.stock?.let {
                     orderbookManager.start(it)
                     view?.findNavController()?.navigate(R.id.action_nav_portfolio_to_nav_orderbook)
@@ -203,7 +204,7 @@ class PortfolioFragment : Fragment() {
             val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
             val priceView: TextView = view.findViewById(R.id.stock_item_price)
 
-            val buttonOrderbook: Button = view.findViewById(R.id.button_orderbook)
+            val imageOrderbook: ImageView = view.findViewById(R.id.orderbook)
 
             val volumeCashView: TextView = view.findViewById(R.id.stock_item_volume_cash)
             val volumePiecesView: TextView = view.findViewById(R.id.stock_item_volume_pieces)

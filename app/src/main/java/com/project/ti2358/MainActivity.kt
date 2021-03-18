@@ -8,7 +8,6 @@ import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
@@ -18,12 +17,10 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.project.ti2358.data.manager.DepositManager
-import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.WorkflowManager
 import com.project.ti2358.data.model.dto.daager.Index
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.toMoney
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import kotlin.math.abs
@@ -114,7 +111,7 @@ class MainActivity : AppCompatActivity() {
                 cashUSDView.text = depositManager.getFreeCashUSD()
                 cashRUBView.text = depositManager.getFreeCashRUB()
 
-                val indices = stockManager.indexAll
+                val indices = stockManager.indices
 
                 if (indices.size >= 5) {
                     processIndex(indices[0], index2NameView, index2ValueView, index2ChangeView, index2EmojiView)

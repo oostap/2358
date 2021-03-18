@@ -244,8 +244,9 @@ class StrategyTazik : KoinComponent {
     fun addBasicPercentLimitPriceChange(sign: Int) {
         basicPercentLimitPriceChange += sign * PercentLimitChangeDelta
 
-        for (stock in stocksToPurchase) {
-            stock.percentLimitPriceChange += sign * PercentLimitChangeDelta
+        for (purchase in stocksToPurchase) {
+            purchase.percentLimitPriceChange += sign * PercentLimitChangeDelta
+            processStrategy(purchase.stock)
         }
     }
 
@@ -314,7 +315,7 @@ class StrategyTazik : KoinComponent {
                     var delta = abs(change) - abs(purchase.percentLimitPriceChange)
 
                     // 0.80 коэф приближения к нижней точке, в самом низу могут не налить
-                    delta *= 0.70
+                    delta *= 0.65
 
                     // корректируем % падения для покупки
                     val percent = abs(purchase.percentLimitPriceChange) + delta
@@ -325,7 +326,7 @@ class StrategyTazik : KoinComponent {
                     // вычисляем процент профита после сдвига лимитки ниже
 
                     // финальный профит
-                    delta *= 0.70
+                    delta *= 0.65
                     var finalProfit = baseProfit + abs(delta)
 
                     if (baseProfit == 0.0) finalProfit = 0.0

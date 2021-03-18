@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.SearchView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -133,7 +134,6 @@ class PremarketFragment : Fragment() {
             holder.stock = item
 
             holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
-            holder.priceView.text = "${item.getPrice1000String()} ➡ ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
@@ -142,12 +142,16 @@ class PremarketFragment : Fragment() {
             holder.volumeTodayCashView.text = "%.2fM$".format(volumeCash)
 
             if (closemarket) {
+                holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
+
                 holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
                 holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
 
                 holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
                 holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
             } else {
+                holder.priceView.text = "${item.getPrice1000String()} ➡ ${item.getPriceString()}"
+
                 holder.changePriceAbsoluteView.text = item.changePriceDayAbsolute.toMoney(item)
                 holder.changePricePercentView.text = item.changePriceDayPercent.toPercent()
 
@@ -159,9 +163,9 @@ class PremarketFragment : Fragment() {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
             }
 
-            holder.buttonOrderbook.setOnClickListener {
+            holder.imageOrderbook.setOnClickListener {
                 orderbookManager.start(holder.stock)
-                holder.buttonOrderbook.findNavController().navigate(R.id.action_nav_premarket_to_nav_orderbook)
+                holder.imageOrderbook.findNavController().navigate(R.id.action_nav_premarket_to_nav_orderbook)
             }
 
             holder.sectorView.text = item.getSectorName()
@@ -194,7 +198,7 @@ class PremarketFragment : Fragment() {
             val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
 
-            val buttonOrderbook: Button = view.findViewById(R.id.button_orderbook)
+            val imageOrderbook: ImageView = view.findViewById(R.id.orderbook)
 
             val reportView: TextView = view.findViewById(R.id.stock_report_info)
             val sectorView: TextView = view.findViewById(R.id.stock_sector)

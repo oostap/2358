@@ -37,14 +37,15 @@ class StockManager : KoinComponent {
 
     private var instrumentsAll: MutableList<Instrument> = mutableListOf()
     private var stocksAll: MutableList<Stock> = mutableListOf()
-    var indexAll: MutableList<Index> = mutableListOf()
 
-    private var stockClosePrices: Map<String, ClosePrice> = mutableMapOf()
-    private var stockReports: Map<String, ReportStock> = mutableMapOf()
-    private var stockShorts: Map<String, StockShort> = mutableMapOf()
-
-    // все акции, которые участвуют в расчётах с учётом базовой сортировки из настроек
+    // все акции, которые участвуют в расчётах с учётом базовой сортировки по валюте $
     var stocksStream: MutableList<Stock> = mutableListOf()
+
+    var indices: MutableList<Index> = mutableListOf()
+    var stockClosePrices: Map<String, ClosePrice> = mutableMapOf()
+    var stockReports: Map<String, ReportStock> = mutableMapOf()
+    var stockShorts: Map<String, StockShort> = mutableMapOf()
+
 
     private val gson = Gson()
 
@@ -90,7 +91,7 @@ class StockManager : KoinComponent {
         GlobalScope.launch(Dispatchers.Main) {
             while (true) {
                 try {
-                    indexAll = synchronizedList(thirdPartyService.daagerIndices() as MutableList<Index>)
+                    indices = synchronizedList(thirdPartyService.daagerIndices() as MutableList<Index>)
                 } catch (e: Exception) {
                     log("daager Indices not reached")
                     delay(5000)
@@ -102,7 +103,20 @@ class StockManager : KoinComponent {
         }
     }
 
-    suspend fun reloadStockIndices() {
+    private suspend fun reloadClosePrices() {
+        try {
+            stockClosePrices = synchronizedMap(thirdPartyService.daagerClosePrices() as MutableMap<String, ClosePrice>)
+            stocksAll.forEach { it.apply {
+                it.closePrices = stockClosePrices[it.instrument.ticker]
+            }}
+            log(stockReports.toString())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            log("daager ClosePrices not reached")
+        }
+    }
+
+    private suspend fun reloadStockIndices() {
         try {
             stockIndex = thirdPartyService.daagerStockIndices()
             stocksAll.forEach { it.apply {
@@ -194,8 +208,7 @@ class StockManager : KoinComponent {
         GlobalScope.launch(Dispatchers.Main) {
             while (true) {
                 try {
-                    stockClosePrices = synchronizedMap(thirdPartyService.daagerClosePrices() as MutableMap<String, ClosePrice>)
-                    log(stockClosePrices.toString())
+                    reloadClosePrices()
                     reloadReports()
                     reloadShortInfo()
                     reloadStockIndices()
@@ -208,7 +221,6 @@ class StockManager : KoinComponent {
             }
 
             stocksStream.forEach {
-                it.closePrices = stockClosePrices[it.instrument.ticker]
                 it.process2359()
             }
         }

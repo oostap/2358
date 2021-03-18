@@ -562,5 +562,4 @@
         app:tint="@color/main_bg"
         android:visibility="gone"/>
 
-
 </RelativeLayout>

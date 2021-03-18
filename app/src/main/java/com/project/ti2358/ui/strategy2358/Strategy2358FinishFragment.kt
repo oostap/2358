@@ -131,6 +131,8 @@ class Strategy2358FinishFragment : Fragment() {
         }
 
         private fun refreshPercent(holder: ViewHolder, delta: Double) {
+            holder.checkBoxView.isChecked = holder.purchaseStock.trailingTake
+
             if (holder.purchaseStock.trailingTake) {
                 holder.purchaseStock.addPriceProfit2358TrailingTakeProfit(delta)
                 holder.profitPriceFromView.text = holder.purchaseStock.trailingTakeActivationPercent.toPercent()

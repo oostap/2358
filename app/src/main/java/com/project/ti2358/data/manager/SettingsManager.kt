@@ -371,14 +371,19 @@ class SettingsManager {
 
                 for (t in times) {
                     val dayTime = t.split(":").toTypedArray()
-                    if (dayTime.size < 3) {
+                    if (dayTime.size < 3) continue
+
+                    val hours: Int
+                    val minutes: Int
+                    val seconds: Int
+                    try {
+                        hours = parseInt(dayTime[0])
+                        minutes = parseInt(dayTime[1])
+                        seconds = parseInt(dayTime[2])
+                    } catch (e: Exception) {
+                        Utils.showToastAlert("Неверный формат времени в настройках!")
                         continue
                     }
-
-                    val hours = parseInt(dayTime[0])
-                    val minutes = parseInt(dayTime[1])
-                    val seconds = parseInt(dayTime[2])
-
                     val currentMskTime = Utils.getTimeMSK()
 
                     val hoursMsk = currentMskTime.get(Calendar.HOUR_OF_DAY)
