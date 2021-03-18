@@ -25,10 +25,7 @@ import com.project.ti2358.data.service.ThirdPartyService
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.lang.Exception
@@ -41,8 +38,18 @@ class PortfolioFragment : Fragment() {
     val depositManager: DepositManager by inject()
     var adapterList: ItemPortfolioRecyclerViewAdapter = ItemPortfolioRecyclerViewAdapter(emptyList())
 
+    var jobUpdate: Job? = null
+    var jobVersion: Job? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+    }
+
+    override fun onDestroy() {
+        jobUpdate?.cancel()
+        jobVersion?.cancel()
+
+        super.onDestroy()
     }
 
     override fun onCreateView(
@@ -63,9 +70,7 @@ class PortfolioFragment : Fragment() {
 
         val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
         buttonUpdate.setOnClickListener {
-            GlobalScope.launch(Dispatchers.Main) {
-                updateData()
-            }
+            updateData()
         }
 
         val buttonOrder = view.findViewById<Button>(R.id.buttonOrders)
@@ -74,7 +79,9 @@ class PortfolioFragment : Fragment() {
         }
 
         updateData()
-        GlobalScope.launch(Dispatchers.Main) {
+
+        jobVersion?.cancel()
+        jobVersion = GlobalScope.launch(Dispatchers.Main) {
             delay(3000)
             val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(TheApplication.application.applicationContext.packageName, 0)
             val currentVersion = pInfo.versionName
@@ -93,7 +100,8 @@ class PortfolioFragment : Fragment() {
     }
 
     fun updateData() {
-        GlobalScope.launch(Dispatchers.Main) {
+        jobUpdate?.cancel()
+        jobUpdate = GlobalScope.launch(Dispatchers.Main) {
             depositManager.refreshDeposit()
             depositManager.refreshKotleta()
             adapterList.setData(depositManager.portfolioPositions)
@@ -176,7 +184,7 @@ class PortfolioFragment : Fragment() {
 
             item.stock?.let { stock ->
                 holder.sectorView.text = stock.getSectorName()
-                holder.sectorView.setTextColor(stock.closePrices?.sector?.getColor() ?: Color.BLACK)
+                holder.sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))
 
                 if (stock.report != null) {
                     holder.reportView.text = stock.getReportInfo()

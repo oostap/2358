@@ -84,7 +84,7 @@ data class Stock(
 
     @KoinApiExtension
     fun getSectorName(): String {
-        var sector = closePrices?.sector?.eng ?: ""
+        var sector = closePrices?.sector ?: ""
         stockIndices?.forEach {
             sector += " | ${StockManager.stockIndex?.getShortName(it)}"
         }
@@ -218,7 +218,7 @@ data class Stock(
         var value: Double = 0.0
 
         closePrices?.let {
-            value = it.close_post
+            value = it.post
         }
 
         candleToday?.let {
@@ -229,7 +229,7 @@ data class Stock(
     }
 
     fun getPricePostmarketUSDouble(): Double {
-        return closePrices?.close_post_yahoo ?: 0.0
+        return closePrices?.yahoo ?: 0.0
     }
 
     fun getPriceString(): String {
@@ -246,7 +246,7 @@ data class Stock(
 
     fun getPrice2359String(): String {
         closePrices?.let {
-            return "${it.close_os}$"
+            return "${it.os}$"
         }
         return "0$"
     }
@@ -276,13 +276,13 @@ data class Stock(
 
     private fun updateChangePostmarket() {
         closePrices?.let { close ->
-            close.close_post_yahoo?.let {
-                changePricePostmarketAbsolute = close.close_post_yahoo - close.close_os
-                changePricePostmarketPercent = (100 * close.close_post_yahoo) / close.close_os - 100
+            close.yahoo?.let {
+                changePricePostmarketAbsolute = close.yahoo - close.os
+                changePricePostmarketPercent = (100 * close.yahoo) / close.os - 100
 
                 candleToday?.let { today ->
-                    changePricePostmarketAbsolute = close.close_post_yahoo - today.closingPrice
-                    changePricePostmarketPercent = (100 * close.close_post_yahoo) / today.closingPrice - 100
+                    changePricePostmarketAbsolute = close.yahoo - today.closingPrice
+                    changePricePostmarketPercent = (100 * close.yahoo) / today.closingPrice - 100
                 }
             }
         }
@@ -290,12 +290,12 @@ data class Stock(
 
     private fun updateChange2359() {
         closePrices?.let {
-            changePrice2359DayAbsolute = it.close_post - it.close_os
-            changePrice2359DayPercent = (100 * it.close_post) / it.close_os - 100
+            changePrice2359DayAbsolute = it.post - it.os
+            changePrice2359DayPercent = (100 * it.post) / it.os - 100
 
             candleToday?.let { today ->
-                changePrice2359DayAbsolute = today.closingPrice - it.close_os
-                changePrice2359DayPercent = (100 * today.closingPrice) / it.close_os - 100
+                changePrice2359DayAbsolute = today.closingPrice - it.os
+                changePrice2359DayPercent = (100 * today.closingPrice) / it.os - 100
             }
         }
     }

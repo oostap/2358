@@ -135,7 +135,7 @@ class Strategy2358StartFragment : Fragment() {
             holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
 
             holder.sectorView.text = item.getSectorName()
-            holder.sectorView.setTextColor(item.closePrices?.sector?.getColor() ?: Color.BLACK)
+            holder.sectorView.setTextColor(Utils.getColorForSector(item.closePrices?.sector))
 
             holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
             holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))

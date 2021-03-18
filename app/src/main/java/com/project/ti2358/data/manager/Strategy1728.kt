@@ -128,8 +128,8 @@ class Strategy1728() : KoinComponent {
             // вычисляем change
             lastCandle?.let { last ->
                 stock.closePrices?.let { close ->
-                    stock.changePrice700to1200Absolute = last.closingPrice - close.close_post
-                    stock.changePrice700to1200Percent = (100 * last.closingPrice) / close.close_post - 100
+                    stock.changePrice700to1200Absolute = last.closingPrice - close.post
+                    stock.changePrice700to1200Percent = (100 * last.closingPrice) / close.post - 100
                 }
             }
         }
@@ -169,8 +169,8 @@ class Strategy1728() : KoinComponent {
             // вычисляем change
             lastCandle?.let { last ->
                 stock.closePrices?.let { close ->
-                    stock.changePrice700to1600Absolute = last.closingPrice - close.close_post
-                    stock.changePrice700to1600Percent = (100 * last.closingPrice) / close.close_post - 100
+                    stock.changePrice700to1600Absolute = last.closingPrice - close.post
+                    stock.changePrice700to1600Percent = (100 * last.closingPrice) / close.post - 100
                 }
             }
         }

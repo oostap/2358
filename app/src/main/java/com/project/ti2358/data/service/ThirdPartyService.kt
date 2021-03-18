@@ -24,7 +24,7 @@ class ThirdPartyService(
 
     suspend fun daagerIndices(): List<Index> = thirdPartyApi.daagerIndices("https://tinvest.daager.ru/ostap-api/indices.php")
 
-    suspend fun daagerClosePrices(): Map<String, ClosePrice> = thirdPartyApi.daagerClosePrice("https://tinvest.daager.ru/ostap-api/close.json")
+    suspend fun daagerClosePrices(): Map<String, ClosePrice> = thirdPartyApi.daagerClosePrice("https://tinvest.daager.ru/ostap-api/close_alor2.json")
 
     suspend fun daagerShortInfo(): Map<String, StockShort> = thirdPartyApi.daagerShortInfo("https://tinvest.daager.ru/ostap-api/short.json")
 

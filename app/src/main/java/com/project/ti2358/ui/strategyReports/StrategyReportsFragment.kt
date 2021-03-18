@@ -123,7 +123,7 @@ class ReportsFragment : Fragment() {
             }
 
             holder.sectorView.text = item.getSectorName()
-            holder.sectorView.setTextColor(item.closePrices?.sector?.getColor() ?: Color.BLACK)
+            holder.sectorView.setTextColor(Utils.getColorForSector(item.closePrices?.sector))
 
             item.dividend?.let {
                 val emoji = if (it.profit > 1.0) " 🤑" else ""

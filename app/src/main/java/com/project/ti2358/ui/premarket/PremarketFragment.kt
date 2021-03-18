@@ -165,7 +165,7 @@ class PremarketFragment : Fragment() {
             }
 
             holder.sectorView.text = item.getSectorName()
-            holder.sectorView.setTextColor(item.closePrices?.sector?.getColor() ?: Color.BLACK)
+            holder.sectorView.setTextColor(Utils.getColorForSector(item.closePrices?.sector))
 
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)

@@ -56,6 +56,21 @@ class Utils {
             return if (value < 0) RED else GREEN
         }
 
+        fun getColorForSector(sector: String?): Int {
+            return when (sector) {
+                "HealthCare" -> Color.parseColor("#d9bc3f")
+                "Consumer" -> Color.parseColor("#9d5451")
+                "IT" -> Color.parseColor("#19cabf")
+                "Industrials" -> Color.parseColor("#af824f")
+                "Telecom" -> Color.parseColor("#d1916a")
+                "Materials" -> Color.parseColor("#a469af")
+                "Financial" -> Color.parseColor("#3ca4f5")
+                "Energy" -> Color.parseColor("#bc8fc0")
+                "Utilities" -> Color.parseColor("#52a35e")
+                else -> Color.parseColor("#E74C3C")
+            }
+        }
+
         fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
             val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?
             manager?.let {

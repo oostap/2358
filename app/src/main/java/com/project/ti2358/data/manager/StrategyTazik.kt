@@ -219,7 +219,7 @@ class StrategyTazik : KoinComponent {
         for (stock in stocks) {
             // вчерашняя, если стартуем до сессии
             stock.closePrices?.let {
-                stock.priceTazik = it.close_post
+                stock.priceTazik = it.post
             }
 
             // сегодняшняя, если внутри дня
