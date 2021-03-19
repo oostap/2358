@@ -453,30 +453,28 @@ data class PurchaseStock(
                 val ticker = stock.instrument.ticker
                 val figi = stock.instrument.figi
 
-                var buyPrice: Double
-                while (true) {
-                    try {
-                        status = OrderStatus.ORDER_BUY_PREPARE
-                        // получить стакан
-                        val orderbook = marketService.orderbook(stock.instrument.figi, 5)
-                        log("$orderbook")
+                var buyPrice: Double = 0.0
+                try {
+                    status = OrderStatus.ORDER_BUY_PREPARE
+                    // получить стакан
+                    val orderbook = marketService.orderbook(stock.instrument.figi, 5)
+                    log("$orderbook")
 
-                        buyPrice = orderbook.getBestPriceFromAsk(lots)
-                        if (buyPrice == 0.0) return@launch
+                    buyPrice = orderbook.getBestPriceFromAsk(lots)
+                    if (buyPrice == 0.0) return@launch
 
-                        buyLimitOrder = ordersService.placeLimitOrder(
-                            lots,
-                            figi,
-                            buyPrice,
-                            OperationType.BUY,
-                            depositManager.getActiveBrokerAccountId()
-                        )
-                        status = OrderStatus.ORDER_BUY
-                        break
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                    delay(DelayFast)
+                    buyLimitOrder = ordersService.placeLimitOrder(
+                        lots,
+                        figi,
+                        buyPrice,
+                        OperationType.BUY,
+                        depositManager.getActiveBrokerAccountId()
+                    )
+                    status = OrderStatus.ORDER_BUY
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Utils.showToastAlert("$ticker: недостаточно средств для покупки по цене $buyPrice")
+                    return@launch
                 }
 
                 Utils.showToastAlert("$ticker: ордер на покупку по $buyPrice")

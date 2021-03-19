@@ -38,7 +38,7 @@ data class TrailingStop(
                 } else { // проверка на стоп-лосс
                     if (trailingStopStopLoss != 0.0) { // проверка для: "0 == не создавать стоп-лосс"
                         if (currentDeltaPercent <= trailingStopStopLoss) { // если пролили, продаём по цене стоп-лосса
-                            profitSellPrice = buyPrice - buyPrice / 100.0 * abs(trailingStopStopLoss)
+                            profitSellPrice = buyPrice - buyPrice / 100.0 * abs(currentDeltaPercent)
                             log("TRAILING_STOP активация стоп-лосса, продаём по цене = $profitSellPrice")
                             break
                         }

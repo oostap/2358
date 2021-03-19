@@ -20,16 +20,22 @@ class Strategy1005 : KoinComponent {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
         val change = SettingsManager.getPremarketChangePercent()
-        var volume = SettingsManager.getPremarketVolume()
+        var volumeMin = SettingsManager.getPremarketVolumeMin()
+        var volumeMax = SettingsManager.getPremarketVolumeMax()
 
         if (!Utils.isActiveSession()) { // если биржа закрыта, то показать всё
-            volume = 0
+            volumeMin = 0
+        }
+
+        if (!Utils.isActiveSession()) { // если биржа закрыта, то показать всё
+            volumeMax = 10000000
         }
 
         stocks = all.filter { stock ->
             stock.getPriceDouble() > min && stock.getPriceDouble() < max &&
             abs(stock.changePrice2359DayPercent) >= abs(change) &&
-            stock.getTodayVolume() >= volume
+            stock.getTodayVolume() >= volumeMin &&
+            stock.getTodayVolume() <= volumeMax
         }.toMutableList()
 
         return stocks

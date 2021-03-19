@@ -70,7 +70,7 @@
     <!-- Preference Titles -->
 
     <string name="stocks_header_2358">Стратегия 2358</string>
-    <string name="stocks_header_1728">Стратегия 1728 (только ALOR)</string>
+    <string name="stocks_header_1728">Стратегия 1728</string>
     <string name="stocks_header_1000_sell">Стратегия 10:00:01 sell</string>
     <string name="stocks_header_1000_buy">Стратегия 10:00:01 buy</string>
     <string name="stocks_header_1005">Фильтр Премаркета RU</string>
@@ -89,7 +89,7 @@
     <string name="tinkoff_iis_title">У меня ИИС в ТИ</string>
 
     <!-- common settings -->
-    <string name="stocks_header">Общие настройки</string>
+    <string name="stocks_header">Общий фильтр цен на все экраны</string>
     <string name="stocks_usd_min">Цена min $</string>
     <string name="stocks_usd_max">Цена max $</string>
 
@@ -123,8 +123,9 @@
     <string name="stocks_1000_buy_purchase_volume">Общая сумма покупки в $</string>
 
     <!-- 1005 settings -->
-    <string name="stocks_1005_price_change_percent">Падение от %</string>
-    <string name="stocks_1005_volume_min_day">Объём за день от шт.</string>
+    <string name="stocks_premarket_price_change_percent">Падение от %</string>
+    <string name="stocks_premarket_volume_min_day">Объём за день ОТ шт.</string>
+    <string name="stocks_premarket_volume_max_day">Объём за день ДО шт.</string>
 
     <!-- 1728 settings -->
     <string name="stocks_1728_volume_min_day">Объём каждого шага отсева от шт. (через пробел)</string>
@@ -132,6 +133,7 @@
     <string name="stocks_1728_purchase_volume">Сумма покупки одной позиции в $</string>
     <string name="stocks_1728_take_profit">Заявка на продажу в % (0 = не создавать)</string>
     <string name="stocks_1728_trailing_stop">Трейлинг тейк</string>
+    <string name="stocks_1728_calc_from_os">Отсчёт с конца ОС</string>
 
     <!-- tazik settings -->
     <string name="stocks_tazik_min_percent_to_buy">Минимальная просадка в %</string>
@@ -197,9 +199,10 @@
     <string name="setting_key_1000_buy_take_profit">1000_buy_take_profit</string>
     <string name="setting_key_1000_buy_purchase_volume">1000_buy_purchase_volume</string>
 
-    <!-- 1005 settings -->
-    <string name="setting_key_1005_price_change_percent">1005_price_change_percent</string>
-    <string name="setting_key_1005_volume_min_day">1005_volume_min_day</string>
+    <!-- premarket settings -->
+    <string name="setting_key_premarket_price_change_percent">premarket_price_change_percent</string>
+    <string name="setting_key_premarket_volume_min_day">premarket_volume_min_day</string>
+    <string name="setting_key_premarket_volume_max_day">premarket_volume_max_day</string>
 
     <!-- 1728 settings -->
     <string name="setting_key_1728_volume_min_steps">1728_volume_min_each_steps</string>
@@ -207,6 +210,7 @@
     <string name="setting_key_1728_purchase_volume">1728_purchase_volume</string>
     <string name="setting_key_1728_take_profit">1728_take_profit</string>
     <string name="setting_key_1728_trailing_stop">1728_trailing_stop</string>
+    <string name="setting_key_1728_calc_from_os">1728_calc_from_os</string>
 
     <!-- tazik settings -->
     <string name="setting_key_tazik_min_percent_to_buy">tazik_min_percent_to_buy</string>

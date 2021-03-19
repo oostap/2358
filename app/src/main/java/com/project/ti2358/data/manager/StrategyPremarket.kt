@@ -19,15 +19,23 @@ class StrategyPremarket : KoinComponent {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
         val change = SettingsManager.getPremarketChangePercent()
-        var volume = SettingsManager.getPremarketVolume()
+        var volumeMin = SettingsManager.getPremarketVolumeMin()
+        var volumeMax = SettingsManager.getPremarketVolumeMax()
 
         if (!Utils.isActiveSession()) { // если биржа закрыта, то показать всё
-            volume = 0
+            volumeMin = 0
         }
 
-        stocks = all.filter { it.getPriceDouble() > min && it.getPriceDouble() < max &&
-                    abs(it.changePriceDayPercent) >= abs(change) &&
-                    it.getTodayVolume() >= volume}.toMutableList()
+        if (!Utils.isActiveSession()) { // если биржа закрыта, то показать всё
+            volumeMax = 10000000
+        }
+
+        stocks = all.filter {
+            it.getPriceDouble() > min && it.getPriceDouble() < max &&
+            abs(it.changePriceDayPercent) >= abs(change) &&
+            it.getTodayVolume() >= volumeMin &&
+            it.getTodayVolume() <= volumeMax
+        }.toMutableList()
 
         return stocks
     }

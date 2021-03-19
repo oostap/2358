@@ -65,21 +65,21 @@ class SettingsManager {
 
         fun getCommonPriceMin(): Int {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_stocks_usd_price_min)
-            val value: String? = preferences.getString(key, "5")
+            val value: String? = preferences.getString(key, "0")
             return try {
-                parseInt(value ?: "5")
+                parseInt(value ?: "0")
             } catch (e: Exception) {
-                5
+                0
             }
         }
 
         fun getCommonPriceMax(): Int {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_stocks_usd_price_max)
-            val value: String? = preferences.getString(key, "200")
+            val value: String? = preferences.getString(key, "5000")
             return try {
-                parseInt(value ?: "200")
+                parseInt(value ?: "5000")
             } catch (e: Exception) {
-                200
+                5000
             }
         }
 
@@ -209,7 +209,7 @@ class SettingsManager {
         /******************** Premarket *************************/
 
         fun getPremarketChangePercent(): Double {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1005_price_change_percent)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_premarket_price_change_percent)
             val value: String? = preferences.getString(key, "0")
             return try {
                 (value ?: "0").toDouble()
@@ -218,13 +218,23 @@ class SettingsManager {
             }
         }
 
-        fun getPremarketVolume(): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1005_volume_min_day)
+        fun getPremarketVolumeMin(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_premarket_volume_min_day)
             val value: String? = preferences.getString(key, "0")
             return try {
                 parseInt(value ?: "0")
             } catch (e: Exception) {
                 0
+            }
+        }
+
+        fun getPremarketVolumeMax(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_premarket_volume_max_day)
+            val value: String? = preferences.getString(key, "10000000")
+            return try {
+                parseInt(value ?: "10000000")
+            } catch (e: Exception) {
+                10000000
             }
         }
 
@@ -296,6 +306,11 @@ class SettingsManager {
 
         fun get1728TrailingStop(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_trailing_stop)
+            return preferences.getBoolean(key, false)
+        }
+
+        fun get1728CalcFromOS(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_calc_from_os)
             return preferences.getBoolean(key, false)
         }
 

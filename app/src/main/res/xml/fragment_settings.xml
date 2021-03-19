@@ -30,13 +30,13 @@
             app:key="@string/setting_key_stocks_usd_price_min"
             app:title="@string/stocks_usd_min"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="5"/>
+            app:defaultValue="0"/>
 
         <EditTextPreference
             app:key="@string/setting_key_stocks_usd_price_max"
             app:title="@string/stocks_usd_max"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="200"/>
+            app:defaultValue="5000"/>
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/orderbook_header">
@@ -76,16 +76,22 @@
 
     <PreferenceCategory app:title="@string/stocks_header_1005">
         <EditTextPreference
-            app:key="@string/setting_key_1005_price_change_percent"
-            app:title="@string/stocks_1005_price_change_percent"
+            app:key="@string/setting_key_premarket_price_change_percent"
+            app:title="@string/stocks_premarket_price_change_percent"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="0.0"/>
 
         <EditTextPreference
-            app:key="@string/setting_key_1005_volume_min_day"
-            app:title="@string/stocks_1005_volume_min_day"
+            app:key="@string/setting_key_premarket_volume_min_day"
+            app:title="@string/stocks_premarket_volume_min_day"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_premarket_volume_max_day"
+            app:title="@string/stocks_premarket_volume_max_day"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="10000000"/>
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/stocks_header_2358">
@@ -190,6 +196,11 @@
         <SwitchPreferenceCompat
             app:key="@string/setting_key_1728_trailing_stop"
             app:title="@string/stocks_1728_trailing_stop"
+            app:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_1728_calc_from_os"
+            app:title="@string/stocks_1728_calc_from_os"
             app:defaultValue="false" />
 
     </PreferenceCategory>

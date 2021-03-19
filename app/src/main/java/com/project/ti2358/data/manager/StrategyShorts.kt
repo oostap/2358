@@ -20,7 +20,7 @@ class StrategyShorts : KoinComponent {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
         val change = SettingsManager.getPremarketChangePercent()
-        var volumeDayPieces = SettingsManager.getPremarketVolume()
+        var volumeDayPieces = SettingsManager.getPremarketVolumeMin()
 
         if (!Utils.isActiveSession()) { // если биржа закрыта, то показать всё
             volumeDayPieces = 0

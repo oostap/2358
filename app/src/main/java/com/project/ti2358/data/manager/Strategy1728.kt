@@ -20,7 +20,6 @@ class Strategy1728() : KoinComponent {
 
     var time1630: Calendar
     var time1635: Calendar
-//    var time1645: Calendar
 
     init {
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
@@ -46,17 +45,6 @@ class Strategy1728() : KoinComponent {
             set(Calendar.MILLISECOND, 0)
             add(Calendar.HOUR_OF_DAY, differenceHours)
         }
-
-        // 16:45:00.000
-//        time1645 = Calendar.getInstance(TimeZone.getDefault())
-//        time1645.apply {
-//            add(Calendar.HOUR_OF_DAY, -differenceHours)
-//            set(Calendar.HOUR_OF_DAY, 16)
-//            set(Calendar.MINUTE, 45)
-//            set(Calendar.SECOND, 0)
-//            set(Calendar.MILLISECOND, 0)
-//            add(Calendar.HOUR_OF_DAY, differenceHours)
-//        }
     }
 
     fun processFinal(): MutableList<Stock> {
@@ -78,6 +66,7 @@ class Strategy1728() : KoinComponent {
     fun process700to1200(): MutableList<Stock> {
         stocks700_1200 = process()
 
+        val fromCloseOS = SettingsManager.get1728CalcFromOS()
         val change = SettingsManager.get1728ChangePercent()
         val volume = SettingsManager.get1728Volume(0)
         stocks700_1200 = stocks700_1200.filter { it.getTodayVolume() >= volume }.toMutableList()
@@ -90,8 +79,9 @@ class Strategy1728() : KoinComponent {
             stock.closePrices?.let { close ->
                 stock.priceSteps1728?.let { close1728 ->
                     close1728.from700to1200?.let { from700to1200 ->
-                        stock.changePrice700to1200Absolute = from700to1200.closePrice - close.post
-                        stock.changePrice700to1200Percent = (100 * from700to1200.closePrice) / close.post - 100
+                        val closePrice = if (fromCloseOS) close.os else close.post
+                        stock.changePrice700to1200Absolute = from700to1200.closePrice - closePrice
+                        stock.changePrice700to1200Percent = (100 * from700to1200.closePrice) / closePrice - 100
                         stock.volume700to1200 = from700to1200.volume
                     }
                 }
@@ -108,6 +98,7 @@ class Strategy1728() : KoinComponent {
     fun process700to1600(): MutableList<Stock> {
         stocks700_1600 = process()
 
+        val fromCloseOS = SettingsManager.get1728CalcFromOS()
         val change = SettingsManager.get1728ChangePercent()
         val volume = SettingsManager.get1728Volume(1)
         stocks700_1600 = stocks700_1600.filter { it.getTodayVolume() >= volume }.toMutableList()
@@ -120,8 +111,9 @@ class Strategy1728() : KoinComponent {
             stock.closePrices?.let { close ->
                 stock.priceSteps1728?.let { close1728 ->
                     close1728.from700to1600?.let { from700to1600 ->
-                        stock.changePrice700to1600Absolute = from700to1600.closePrice - close.post
-                        stock.changePrice700to1600Percent = (100 * from700to1600.closePrice) / close.post - 100
+                        val closePrice = if (fromCloseOS) close.os else close.post
+                        stock.changePrice700to1600Absolute = from700to1600.closePrice - closePrice
+                        stock.changePrice700to1600Percent = (100 * from700to1600.closePrice) / closePrice - 100
                         stock.volume700to1600 = from700to1600.volume
                     }
                 }
@@ -164,7 +156,7 @@ class Strategy1728() : KoinComponent {
                 synchronized(stock.minuteCandles) {
                     val candles = stock.minuteCandles
                     for (candle in candles) {
-                        if (candle.time >= time1630.time && candle.time <= time1635.time) {
+                        if (candle.time >= time1630.time && candle.time < time1635.time) {
                             processingCandles.add(candle)
                             stock.volume1630to1635 += candle.volume
                         }
