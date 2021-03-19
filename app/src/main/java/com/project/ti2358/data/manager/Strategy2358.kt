@@ -34,7 +34,7 @@ class Strategy2358() : KoinComponent {
         }.toMutableList()
 
         stocks.sortBy {
-            val multiplier = if (stocksSelected.contains(it)) 100 else 1
+            val multiplier = if (it in stocksSelected) 100 else 1
             it.changePrice2359DayPercent * multiplier
         }
 
@@ -61,7 +61,7 @@ class Strategy2358() : KoinComponent {
         if (reset) started = false
 
         // удалить бумаги, которые перестали удовлетворять условию 2358
-        stocksSelected.removeAll { !stocks.contains(it) }
+        stocksSelected.removeAll { it !in stocks }
 
         // проверить и удалить бумаги, которые сильно отросли с момента старта таймера
         if (!reset) {
@@ -77,7 +77,7 @@ class Strategy2358() : KoinComponent {
                 }
             }
 
-            stocksSelected.removeAll { stocksToDelete.contains(it) }
+            stocksSelected.removeAll { it in stocksToDelete }
         }
 
         // удалить бумаги, которые уже есть в депо, иначе среднюю невозможно узнать
@@ -96,9 +96,9 @@ class Strategy2358() : KoinComponent {
                         percentProfitSellFrom = p.percentProfitSellFrom
                         percentProfitSellTo = p.percentProfitSellTo
 
-                        trailingTake = p.trailingTake
-                        trailingTakeActivationPercent = p.trailingTakeActivationPercent
-                        trailingTakeStopDelta = p.trailingTakeStopDelta
+                        trailingStop = p.trailingStop
+                        trailingStopTakeProfitPercentActivation = p.trailingStopTakeProfitPercentActivation
+                        trailingStopTakeProfitPercentDelta = p.trailingStopTakeProfitPercentDelta
                     }
                     exists = true
                     break
@@ -110,8 +110,9 @@ class Strategy2358() : KoinComponent {
                     percentProfitSellFrom = SettingsManager.get2358TakeProfitFrom()
                     percentProfitSellTo = SettingsManager.get2358TakeProfitTo()
 
-                    trailingTakeActivationPercent = SettingsManager.get2358TrailingTakeProfitPercent()
-                    trailingTakeStopDelta = SettingsManager.get2358TrailingTakeProfitPercentDelta()
+                    trailingStopTakeProfitPercentActivation = SettingsManager.getTrailingStopTakeProfitPercentActivation()
+                    trailingStopTakeProfitPercentDelta = SettingsManager.getTrailingStopTakeProfitPercentDelta()
+                    trailingStopStopLossPercent = 0.0 // TODO: ?!
                 }
             }
 
@@ -157,8 +158,8 @@ class Strategy2358() : KoinComponent {
         for (purchase in stocksToPurchase) {
             val p = "%.1f$".format(purchase.lots * purchase.stock.getPriceDouble())
             tickers += "${purchase.stock.instrument.ticker}*${purchase.lots} = ${p}, "
-            tickers += if (purchase.trailingTake) {
-                "ТТ:${purchase.trailingTakeActivationPercent.toPercent()}/${purchase.trailingTakeStopDelta.toPercent()}, ${purchase.getStatusString()} ${purchase.currentTrailingTakeProfit?.currentTakeProfitValue ?: ""}\n"
+            tickers += if (purchase.trailingStop) {
+                "ТТ:${purchase.trailingStopTakeProfitPercentActivation.toPercent()}/${purchase.trailingStopTakeProfitPercentDelta.toPercent()}, ${purchase.getStatusString()} ${purchase.currentTrailingStop?.currentTakeProfitValue ?: ""}\n"
             } else {
                 "Л:${purchase.percentProfitSellFrom.toPercent()}/${purchase.percentProfitSellTo.toPercent()}, ${purchase.getStatusString()}\n"
             }

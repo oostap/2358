@@ -2,10 +2,7 @@ package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.Currency
-import com.project.ti2358.data.model.dto.daager.ClosePrice
-import com.project.ti2358.data.model.dto.daager.Dividend
-import com.project.ti2358.data.model.dto.daager.Report
-import com.project.ti2358.data.model.dto.daager.StockShort
+import com.project.ti2358.data.model.dto.daager.*
 import com.project.ti2358.service.toMoney
 import org.koin.core.component.KoinApiExtension
 import java.util.*
@@ -51,6 +48,8 @@ data class Stock(
     var changePriceFixDayPercent: Double = 0.0
 
     // стратегия 1728
+    var priceSteps1728: StockPrice1728? = null
+
     // изменение с 7 до 12
     var changePrice700to1200Absolute: Double = 0.0
     var changePrice700to1200Percent: Double = 0.0
@@ -113,6 +112,7 @@ data class Stock(
         orderbookStream = orderbook
     }
 
+    @KoinApiExtension
     fun processCandle(candle: Candle) {
         when (candle.interval) {
             Interval.DAY -> { processDayCandle(candle) }

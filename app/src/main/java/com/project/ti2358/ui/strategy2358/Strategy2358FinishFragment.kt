@@ -125,7 +125,7 @@ class Strategy2358FinishFragment : Fragment() {
             }
 
             holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
-                holder.purchaseStock.trailingTake = checked
+                holder.purchaseStock.trailingStop = checked
                 refreshPercent(holder, 0.0)
             }
 
@@ -133,12 +133,12 @@ class Strategy2358FinishFragment : Fragment() {
         }
 
         private fun refreshPercent(holder: ViewHolder, delta: Double) {
-            holder.checkBoxView.isChecked = holder.purchaseStock.trailingTake
+            holder.checkBoxView.isChecked = holder.purchaseStock.trailingStop
 
-            if (holder.purchaseStock.trailingTake) {
+            if (holder.purchaseStock.trailingStop) {
                 holder.purchaseStock.addPriceProfit2358TrailingTakeProfit(delta)
-                holder.profitPriceFromView.text = holder.purchaseStock.trailingTakeActivationPercent.toPercent()
-                holder.profitPriceToView.text = holder.purchaseStock.trailingTakeStopDelta.toPercent()
+                holder.profitPriceFromView.text = holder.purchaseStock.trailingStopTakeProfitPercentActivation.toPercent()
+                holder.profitPriceToView.text = holder.purchaseStock.trailingStopTakeProfitPercentDelta.toPercent()
             } else {
                 holder.purchaseStock.addPriceProfit2358Percent(delta)
                 holder.profitPriceFromView.text = holder.purchaseStock.percentProfitSellFrom.toPercent()

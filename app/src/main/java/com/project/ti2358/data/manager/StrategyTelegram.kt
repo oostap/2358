@@ -24,8 +24,8 @@ class StrategyTelegram : KoinComponent {
         val all = stockManager.stocksStream
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
-        val change = SettingsManager.get1005ChangePercent()
-        var volumeDayPieces = SettingsManager.get1005VolumeDayPieces()
+        val change = SettingsManager.getPremarketChangePercent()
+        var volumeDayPieces = SettingsManager.getPremarketVolume()
 
         if (!Utils.isActiveSession()) { // если биржа закрыта, то показать всё
             volumeDayPieces = 0

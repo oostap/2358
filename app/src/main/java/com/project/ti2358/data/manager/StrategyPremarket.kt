@@ -1,9 +1,11 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.service.Sorting
+import com.project.ti2358.service.Utils
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.math.abs
 
 @KoinApiExtension
 class StrategyPremarket : KoinComponent {
@@ -16,8 +18,17 @@ class StrategyPremarket : KoinComponent {
         val all = stockManager.stocksStream
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
+        val change = SettingsManager.getPremarketChangePercent()
+        var volume = SettingsManager.getPremarketVolume()
 
-        stocks = all.filter { it.getPriceDouble() > min && it.getPriceDouble() < max }.toMutableList()
+        if (!Utils.isActiveSession()) { // если биржа закрыта, то показать всё
+            volume = 0
+        }
+
+        stocks = all.filter { it.getPriceDouble() > min && it.getPriceDouble() < max &&
+                    abs(it.changePriceDayPercent) >= abs(change) &&
+                    it.getTodayVolume() >= volume}.toMutableList()
+
         return stocks
     }
 

@@ -1,6 +1,5 @@
 package com.project.ti2358.ui.premarket
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,11 +18,16 @@ import com.project.ti2358.data.manager.*
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
 class PremarketFragment : Fragment() {
+    val stockManager: StockManager by inject()
     val strategyPremarket: StrategyPremarket by inject()
     val strategy1005: Strategy1005 by inject()
 
@@ -32,9 +36,15 @@ class PremarketFragment : Fragment() {
     lateinit var stocks: MutableList<Stock>
 
     var closemarket: Boolean = true
+    var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+    }
+
+    override fun onDestroy() {
+        job?.cancel()
+        super.onDestroy()
     }
 
     override fun onCreateView(
@@ -44,12 +54,7 @@ class PremarketFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_premarket, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
-        list.addItemDecoration(
-            DividerItemDecoration(
-                list.context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
+        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
 
         if (list is RecyclerView) {
             with(list) {
@@ -93,6 +98,12 @@ class PremarketFragment : Fragment() {
         searchView.setOnCloseListener {
             updateData()
             false
+        }
+
+        job?.cancel()
+        job = GlobalScope.launch(Dispatchers.Main) {
+            stockManager.reloadReports()
+            updateData()
         }
 
         updateData()

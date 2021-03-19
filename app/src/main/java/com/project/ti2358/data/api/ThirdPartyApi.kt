@@ -3,6 +3,7 @@ package com.project.ti2358.data.api
 import com.google.gson.JsonObject
 import com.project.ti2358.data.model.dto.Instrument
 import com.project.ti2358.data.model.dto.daager.*
+import com.project.ti2358.data.model.response.Response
 
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -26,6 +27,9 @@ interface ThirdPartyApi {
 
     @GET
     suspend fun daagerStockIndices(@Url url: String): StockIndex
+
+    @GET
+    suspend fun daagerStock1728(@Url url: String): Response<Map<String, StockPrice1728>>
 
     @GET
     suspend fun daagerStocks(@Url url: String): Map<String, Instrument>

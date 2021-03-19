@@ -83,6 +83,37 @@ class SettingsManager {
             }
         }
 
+        /******************** Trailing take *************************/
+
+        fun getTrailingStopTakeProfitPercentActivation(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_trailing_stop_take_profit_percent_activation)
+            val value: String? = preferences.getString(key, "1.0")
+            return try {
+                (value ?: "1.0").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun getTrailingStopTakeProfitPercentDelta(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_trailing_stop_take_profit_percent_delta)
+            val value: String? = preferences.getString(key, "0.25")
+            return try {
+                (value ?: "0.25").toDouble()
+            } catch (e: Exception) {
+                0.25
+            }
+        }
+
+        fun getTrailingStopStopLossPercent(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_trailing_stop_stop_loss_percent)
+            val value: String? = preferences.getString(key, "0.0")
+            return try {
+                (value ?: "0.0").toDouble()
+            } catch (e: Exception) {
+                0.0
+            }
+        }
         /******************** orderbook *************************/
 
         fun getOrderbookVolumes(): String {
@@ -155,26 +186,6 @@ class SettingsManager {
             }
         }
 
-        fun get2358TrailingTakeProfitPercent(): Double {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_trailing_take_profit_percent)
-            val value: String? = preferences.getString(key, "1.0")
-            return try {
-                (value ?: "1.0").toDouble()
-            } catch (e: Exception) {
-                1.0
-            }
-        }
-
-        fun get2358TrailingTakeProfitPercentDelta(): Double {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_trailing_take_profit_percent_delta)
-            val value: String? = preferences.getString(key, "0.25")
-            return try {
-                (value ?: "0.25").toDouble()
-            } catch (e: Exception) {
-                0.25
-            }
-        }
-
         fun get2358VolumeDayPieces(): Int {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_volume_min_day)
             val value: String? = preferences.getString(key, "10000")
@@ -195,25 +206,25 @@ class SettingsManager {
             }
         }
 
-        /******************** 1005 *************************/
+        /******************** Premarket *************************/
 
-        fun get1005ChangePercent(): Double {
+        fun getPremarketChangePercent(): Double {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1005_price_change_percent)
-            val value: String? = preferences.getString(key, "2")
+            val value: String? = preferences.getString(key, "0")
             return try {
-                (value ?: "2").toDouble()
+                (value ?: "0").toDouble()
             } catch (e: Exception) {
-                2.0
+                0.0
             }
         }
 
-        fun get1005VolumeDayPieces(): Int {
+        fun getPremarketVolume(): Int {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1005_volume_min_day)
-            val value: String? = preferences.getString(key, "5000")
+            val value: String? = preferences.getString(key, "0")
             return try {
-                parseInt(value ?: "5000")
+                parseInt(value ?: "0")
             } catch (e: Exception) {
-                10000
+                0
             }
         }
 
@@ -283,6 +294,11 @@ class SettingsManager {
             }
         }
 
+        fun get1728TrailingStop(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_trailing_stop)
+            return preferences.getBoolean(key, false)
+        }
+
         fun get1728Volume(step: Int): Int {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_volume_min_steps)
             val value: String? = preferences.getString(key, "1000 2000 3000")
@@ -350,6 +366,11 @@ class SettingsManager {
 
         fun getTazikBuyBid(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_buy_bid)
+            return preferences.getBoolean(key, false)
+        }
+
+        fun getTazikAllowAveraging(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_allow_averaging)
             return preferences.getBoolean(key, false)
         }
 

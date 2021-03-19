@@ -53,18 +53,39 @@
             app:defaultValue="1 2 5 10"/>
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/stocks_2358_trailing_take_profit">
+    <PreferenceCategory app:title="@string/stocks_trailing_stop">
         <EditTextPreference
-            app:key="@string/setting_key_2358_trailing_take_profit_percent"
-            app:title="@string/stocks_2358_trailing_take_profit_percent"
+            app:key="@string/setting_key_trailing_stop_take_profit_percent_activation"
+            app:title="@string/stocks_trailing_stop_take_profit_percent_activation"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="1.0"/>
 
         <EditTextPreference
-            app:key="@string/setting_key_2358_trailing_take_profit_percent_delta"
-            app:title="@string/stocks_2358_trailing_take_profit_percent_delta"
+            app:key="@string/setting_key_trailing_stop_take_profit_percent_delta"
+            app:title="@string/stocks_trailing_stop_take_profit_percent_delta"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="0.25"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_trailing_stop_stop_loss_percent"
+            app:title="@string/stocks_trailing_stop_stop_loss_percent"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0.0"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/stocks_header_1005">
+        <EditTextPreference
+            app:key="@string/setting_key_1005_price_change_percent"
+            app:title="@string/stocks_1005_price_change_percent"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1005_volume_min_day"
+            app:title="@string/stocks_1005_volume_min_day"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0"/>
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/stocks_header_2358">
@@ -141,20 +162,6 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/stocks_header_1005">
-        <EditTextPreference
-            app:key="@string/setting_key_1005_price_change_percent"
-            app:title="@string/stocks_1005_price_change_percent"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="-2.0"/>
-
-        <EditTextPreference
-            app:key="@string/setting_key_1005_volume_min_day"
-            app:title="@string/stocks_1005_volume_min_day"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="500"/>
-    </PreferenceCategory>
-
     <PreferenceCategory app:title="@string/stocks_header_1728">
         <EditTextPreference
             app:key="@string/setting_key_1728_volume_min_steps"
@@ -179,6 +186,11 @@
             app:title="@string/stocks_1728_take_profit"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="1.0"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_1728_trailing_stop"
+            app:title="@string/stocks_1728_trailing_stop"
+            app:defaultValue="false" />
 
     </PreferenceCategory>
 
@@ -220,6 +232,11 @@
         <SwitchPreferenceCompat
             app:key="@string/setting_key_tazik_buy_market"
             app:title="@string/stocks_tazik_buy_market"
+            app:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_allow_averaging"
+            app:title="@string/stocks_tazik_allow_averaging"
             app:defaultValue="false" />
 
         <EditTextPreference

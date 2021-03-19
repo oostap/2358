@@ -204,7 +204,7 @@ class DepositManager : KoinComponent {
         portfolioPositions.removeAll { it.instrumentType != InstrumentType.STOCK }
 
         // удалить позицию $
-        portfolioPositions.removeAll { it.ticker.contains("USD000") }
+        portfolioPositions.removeAll { "USD000" in it.ticker }
     }
 
     private fun baseSortOrders() {

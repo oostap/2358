@@ -4,6 +4,7 @@ import android.app.*
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
@@ -52,7 +53,8 @@ class Utils {
         val GREEN: Int = Color.parseColor("#58D68D")
         val RED: Int = Color.parseColor("#E74C3C")
         val LIGHT: Int = Color.parseColor("#20888888")
-        val WHITE: Int = Color.parseColor("#05FFFFFF")
+        val WHITE_NIGHT: Int = Color.parseColor("#05FFFFFF")
+        val WHITE_DAY: Int = Color.parseColor("#15888888")
         val EMPTY: Int = Color.parseColor("#00FFFFFF")
 
         fun getColorForValue(value: Double): Int {
@@ -60,7 +62,16 @@ class Utils {
         }
 
         fun getColorForIndex(index: Int): Int {
-            return if (index % 2 == 0) WHITE else EMPTY
+            when (TheApplication.application.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    return if (index % 2 == 0) WHITE_NIGHT else EMPTY
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    return if (index % 2 == 0) WHITE_DAY else EMPTY
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {}
+            }
+            return EMPTY
         }
 
         fun getColorForSector(sector: String?): Int {

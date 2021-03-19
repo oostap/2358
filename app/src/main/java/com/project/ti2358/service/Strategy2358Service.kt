@@ -87,6 +87,7 @@ class Strategy2358Service : Service() {
         val time = SettingsManager.get2358PurchaseTime()
         val dayTime = time.split(":").toTypedArray()
         if (dayTime.size < 3) {
+            Utils.showToastAlert("Неверный формат времени! пример: 22:58:00")
             stopService()
             return
         }

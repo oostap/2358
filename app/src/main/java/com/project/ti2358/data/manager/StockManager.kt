@@ -45,7 +45,7 @@ class StockManager : KoinComponent {
     var stockClosePrices: Map<String, ClosePrice> = mutableMapOf()
     var stockReports: Map<String, ReportStock> = mutableMapOf()
     var stockShorts: Map<String, StockShort> = mutableMapOf()
-
+    var stockPrice1728: Map<String, StockPrice1728> = mutableMapOf()
 
     private val gson = Gson()
 
@@ -131,10 +131,10 @@ class StockManager : KoinComponent {
     suspend fun reloadReports() {
         try {
             stockReports = thirdPartyService.daagerReports()
-            stocksAll.forEach { it.apply {
-                report = stockReports[it.instrument.ticker]?.report
-                dividend = stockReports[it.instrument.ticker]?.dividend
-            }}
+            stocksAll.forEach {
+                it.report = stockReports[it.instrument.ticker]?.report
+                it.dividend = stockReports[it.instrument.ticker]?.dividend
+            }
             log(stockReports.toString())
         } catch (e: Exception) {
             log("daager Reports not reached")
@@ -144,11 +144,26 @@ class StockManager : KoinComponent {
     suspend fun reloadShortInfo() {
         try {
             stockShorts = thirdPartyService.daagerShortInfo()
-            stocksAll.forEach { it.short = stockShorts[it.instrument.ticker] }
+            stocksAll.forEach {
+                it.short = stockShorts[it.instrument.ticker]
+            }
             log(stockShorts.toString())
         } catch (e: Exception) {
             e.printStackTrace()
             log("daager Shorts not reached")
+        }
+    }
+
+    private suspend fun reloadStockPrice1728() {
+        try {
+            stockPrice1728 = thirdPartyService.daagerStock1728()
+            stocksAll.forEach {
+                it.priceSteps1728 = stockPrice1728[it.instrument.ticker]
+            }
+            log(stockPrice1728.toString())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            log("daager StockPrice1728 not reached")
         }
     }
 
@@ -212,6 +227,7 @@ class StockManager : KoinComponent {
                     reloadReports()
                     reloadShortInfo()
                     reloadStockIndices()
+                    reloadStockPrice1728()
                     break
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -317,20 +333,21 @@ class StockManager : KoinComponent {
         stock?.processOrderbook(orderbookStream)
     }
 
+    @Synchronized
     private fun addCandle(candle: Candle) {
+        val stock: Stock?
         if (SettingsManager.isAlorQoutes() && (candle.interval == Interval.MINUTE || candle.interval == Interval.DAY)) {
-            val stock = stocksStream.find { it.instrument.ticker == candle.figi }
+            stock = stocksStream.find { it.instrument.ticker == candle.figi }
             stock?.processCandle(candle)
         } else {
-            val stock = stocksStream.find { it.instrument.figi == candle.figi }
+            stock = stocksStream.find { it.instrument.figi == candle.figi }
             stock?.processCandle(candle)
         }
 
-        if (candle.interval == Interval.DAY) {
-            val stock = stocksStream.find { it.instrument.figi == candle.figi || it.instrument.ticker == candle.figi }
-            stock?.let {
-                strategyTazik.processStrategy(stock)
-                strategyRocket.processStrategy(stock)
+        stock?.let {
+            if (candle.interval == Interval.DAY) {
+                strategyTazik.processStrategy(stock, candle)
+            //                strategyRocket.processStrategy(stock)
             }
         }
     }

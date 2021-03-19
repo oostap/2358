@@ -10,10 +10,10 @@ android {
 
     defaultConfig {
         applicationId "com.project.ti2358"
-        minSdkVersion 19
+        minSdkVersion 20
         targetSdkVersion 30
-        versionCode 25
-        versionName "v1.5.1"
+        versionCode 26
+        versionName "v1.5.2"
         multiDexEnabled true
     }
 

@@ -30,6 +30,8 @@ class ThirdPartyService(
 
     suspend fun daagerStockIndices(): StockIndex = thirdPartyApi.daagerStockIndices("https://tinvest.daager.ru/ostap-api/indices_components2.json")
 
+    suspend fun daagerStock1728(): Map<String, StockPrice1728> = thirdPartyApi.daagerStock1728("https://tinvest.daager.ru/ostap-api/1600.json").payload
+
 //    suspend fun daagerStocks(): Map<String, Instrument> = thirdPartyApi.daagerStocks("https://tinvest.daager.ru/tinkoff_stocks.json")
 
     suspend fun githubVersion(): String {

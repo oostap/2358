@@ -1,11 +1,6 @@
 package com.project.ti2358
 
 import android.content.pm.PackageInfo
-import android.content.res.ColorStateList
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.LayerDrawable
-import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
@@ -112,7 +107,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onDrawerStateChanged(newState: Int) {
-                updateInfo()
+                if (newState == DrawerLayout.STATE_DRAGGING || newState == DrawerLayout.STATE_IDLE)
+                    updateInfo()
                 super.onDrawerStateChanged(newState)
             }
 
@@ -129,7 +125,7 @@ class MainActivity : AppCompatActivity() {
                     processIndex(indices[3], index5NameView, index5ValueView, index5ChangeView, index5EmojiView)
                     processIndex(indices[4], index6NameView, index6ValueView, index6ChangeView, index6EmojiView, true)
 
-                    index1NameView.text = "SUPER INDEX"
+                    index1NameView.text = "SUPER"
                     val superChange = indices[0].change_per + indices[1].change_per + indices[2].change_per + indices[3].change_per
                     index1ChangeView.text = "%.2f%%".format(superChange)
 

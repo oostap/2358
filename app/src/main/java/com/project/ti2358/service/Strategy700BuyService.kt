@@ -88,13 +88,6 @@ class Strategy700BuyService : Service() {
 
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
 
-        val time = SettingsManager.get2358PurchaseTime()
-        val dayTime = time.split(":").toTypedArray()
-        if (dayTime.size < 3) {
-            stopService()
-            return
-        }
-
         // 07:00:00.100
         val hours = 7
         val minutes = 0

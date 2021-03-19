@@ -92,8 +92,8 @@ class Strategy1728Fragment : Fragment() {
 
     private fun updateTitle() {
         val title = when (step1728) {
-            Step1728.step700to1200 -> "1: 10:00 - 12:00, объём ${SettingsManager.get1728Volume(0)}"
-            Step1728.step700to1530 -> "2: 10:00 - 16:00, объём ${SettingsManager.get1728Volume(1)}"
+            Step1728.step700to1200 -> "1: 07:00 - 12:00, объём ${SettingsManager.get1728Volume(0)}"
+            Step1728.step700to1530 -> "2: 07:00 - 16:00, объём ${SettingsManager.get1728Volume(1)}"
             Step1728.step1630to1635 -> "3: 16:30 - 16:35, объём ${SettingsManager.get1728Volume(2)}"
             Step1728.stepFinal -> "1 - 2 - 3 - 🚀"
         }
@@ -163,16 +163,20 @@ class Strategy1728Fragment : Fragment() {
 
                     // считаем лоты
                     purchase.lots = (SettingsManager.get1728PurchaseVolume() / purchase.stock.getPriceDouble()).roundToInt()
-                    purchase.buyLimitFromAsk(SettingsManager.get1728TakeProfit())
+
+                    // включаем трейлинг тейк
+                    if (SettingsManager.get1728TrailingStop()) {
+                        purchase.trailingStop = true
+                        purchase.trailingStopTakeProfitPercentActivation = SettingsManager.getTrailingStopTakeProfitPercentActivation()
+                        purchase.trailingStopTakeProfitPercentDelta = SettingsManager.getTrailingStopTakeProfitPercentDelta()
+                        purchase.trailingStopStopLossPercent = SettingsManager.getTrailingStopStopLossPercent()
+                    }
+
+                    purchase.buyFromAsk1728()
                 }
             }
 
-            if (step1728 == Step1728.stepFinal) {
-                holder.buttonBuy.visibility = View.VISIBLE
-            } else {
-                holder.buttonBuy.visibility = View.GONE
-            }
-
+            holder.buttonBuy.visibility = if (step1728 == Step1728.stepFinal) View.VISIBLE else View.GONE
             holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 

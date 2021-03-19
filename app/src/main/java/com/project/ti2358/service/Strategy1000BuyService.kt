@@ -9,7 +9,6 @@ import android.os.IBinder
 import android.os.PowerManager
 import android.widget.Toast
 import com.project.ti2358.data.manager.Strategy1000Buy
-import com.project.ti2358.data.manager.SettingsManager
 import kotlinx.coroutines.*
 import okhttp3.internal.notify
 import org.koin.android.ext.android.inject
@@ -89,13 +88,6 @@ class Strategy1000BuyService : Service() {
         }
 
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
-
-        val time = SettingsManager.get2358PurchaseTime()
-        val dayTime = time.split(":").toTypedArray()
-        if (dayTime.size < 3) {
-            stopService()
-            return
-        }
 
         // 10:00:00.100
         val hours = 10

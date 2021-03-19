@@ -72,7 +72,7 @@
     <string name="stocks_header_1728">Стратегия 1728 (только ALOR)</string>
     <string name="stocks_header_1000_sell">Стратегия 10:00:01 sell</string>
     <string name="stocks_header_1000_buy">Стратегия 10:00:01 buy</string>
-    <string name="stocks_header_1005">Стратегия 1005</string>
+    <string name="stocks_header_1005">Фильтр Премаркета RU</string>
     <string name="stocks_header_tazik">Стратегия автотазик</string>
     <string name="stocks_header_rocket">Стратегия ракеты</string>
     <string name="stocks_header_postmarket">Постмаркет US</string>
@@ -92,6 +92,12 @@
     <string name="stocks_usd_min">Цена min $</string>
     <string name="stocks_usd_max">Цена max $</string>
 
+    <!-- trailing stop-->
+    <string name="stocks_trailing_stop">Трейлинг тейк/стоп</string>
+    <string name="stocks_trailing_stop_take_profit_percent_activation">Тейк-профит в %</string>
+    <string name="stocks_trailing_stop_take_profit_percent_delta">Отклонение в %</string>
+    <string name="stocks_trailing_stop_stop_loss_percent">Стоп-лосс в % (0.0 = без стоп-лосса)</string>
+
     <!-- orderbook -->
     <string name="orderbook_header">Стакан</string>
     <string name="orderbook_volumes">Размеры быстрого объёма (через пробел)</string>
@@ -107,10 +113,6 @@
     <string name="stocks_2358_take_profit_from">Заявка на продажу от в % (0 = не создавать)</string>
     <string name="stocks_2358_take_profit_to">Заявка на продажу до в % (0 = не создавать)</string>
     <string name="stocks_2358_take_profit_step">Количество заявок в равных долях</string>
-
-    <string name="stocks_2358_trailing_take_profit">Трейлинг тейк профит</string>
-    <string name="stocks_2358_trailing_take_profit_percent">Тейк профит в %</string>
-    <string name="stocks_2358_trailing_take_profit_percent_delta">Отклонение в %</string>
 
     <!-- 1000 sell settings -->
     <string name="stocks_1000_sell_take_profit">Базовый % заявки на продажу</string>
@@ -128,6 +130,7 @@
     <string name="stocks_1728_price_change">Изменение цены от в %</string>
     <string name="stocks_1728_purchase_volume">Сумма покупки одной позиции в $</string>
     <string name="stocks_1728_take_profit">Заявка на продажу в % (0 = не создавать)</string>
+    <string name="stocks_1728_trailing_stop">Трейлинг тейк</string>
 
     <!-- tazik settings -->
     <string name="stocks_tazik_min_percent_to_buy">Минимальная просадка в %</string>
@@ -137,6 +140,7 @@
     <string name="stocks_tazik_buy_market">Покупка по рынку</string>
     <string name="stocks_tazik_buy_ask">Покупка из аска</string>
     <string name="stocks_tazik_buy_bid">Покупка из бида</string>
+    <string name="stocks_tazik_allow_averaging">Разрешить усреднение</string>
     <string name="stocks_tazik_times">Время старта тазиков МСК (через ",")</string>
 
     <!-- rocket settings -->
@@ -165,6 +169,11 @@
     <string name="setting_key_stocks_usd_price_min">stocks_usd_price_min</string>
     <string name="setting_key_stocks_usd_price_max">stocks_usd_price_max</string>
 
+    <!-- trailing stop -->
+    <string name="setting_key_trailing_stop_take_profit_percent_activation">trailing_stop_take_profit_percent_activation</string>
+    <string name="setting_key_trailing_stop_take_profit_percent_delta">trailing_stop_take_profit_percent_delta</string>
+    <string name="setting_key_trailing_stop_stop_loss_percent">trailing_stop_stop_loss_percent</string>
+
     <!-- orderbook -->
     <string name="setting_key_orderbook_volumes">orderbook_volumes</string>
     <string name="setting_key_orderbook_prices">orderbook_prices</string>
@@ -179,9 +188,6 @@
     <string name="setting_key_2358_take_profit_from">2358_take_profit_from</string>
     <string name="setting_key_2358_take_profit_to">2358_take_profit_to</string>
     <string name="setting_key_2358_take_profit_step">2358_take_profit_step</string>
-
-    <string name="setting_key_2358_trailing_take_profit_percent">2358_trailing_take_profit_percent</string>
-    <string name="setting_key_2358_trailing_take_profit_percent_delta">2358_trailing_take_profit_percent_delta</string>
 
     <!-- 1000 sell settings -->
     <string name="setting_key_1000_sell_take_profit">1000_take_sell_profit</string>
@@ -199,6 +205,7 @@
     <string name="setting_key_1728_price_change">1728_price_change</string>
     <string name="setting_key_1728_purchase_volume">1728_purchase_volume</string>
     <string name="setting_key_1728_take_profit">1728_take_profit</string>
+    <string name="setting_key_1728_trailing_stop">1728_trailing_stop</string>
 
     <!-- tazik settings -->
     <string name="setting_key_tazik_min_percent_to_buy">tazik_min_percent_to_buy</string>
@@ -209,6 +216,7 @@
     <string name="setting_key_tazik_buy_bid">tazik_buy_bid</string>
     <string name="setting_key_tazik_buy_market">tazik_buy_market</string>
     <string name="setting_key_tazik_times2">tazik_times2</string>
+    <string name="setting_key_tazik_allow_averaging">tazik_allow_averaging</string>
 
     <!-- rocket settings -->
     <string name="setting_key_rocket_change_percent">rocket_change_percent</string>
