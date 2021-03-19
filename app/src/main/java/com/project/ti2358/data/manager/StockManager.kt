@@ -58,9 +58,11 @@ class StockManager : KoinComponent {
         return stocksStream
     }
 
+    @Synchronized
     fun getWhiteStocks(): MutableList<Stock> {
         val blacklist = strategyBlacklist.getBlacklistStocks()
-        return stocksStream.filter { it !in blacklist }.toMutableList()
+        val all = stocksStream
+        return all.filter { it !in blacklist }.toMutableList()
     }
 
     fun loadStocks(force: Boolean = false) {

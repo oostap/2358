@@ -181,8 +181,8 @@ class Strategy1728() : KoinComponent {
             }
         }
 
-        stocks1630_1635.removeAll { it.volume700to1600 == 0 }
-        stocks1630_1635.removeAll { it.volume700to1600 < volume }
+        stocks1630_1635.removeAll { it.volume1630to1635 == 0 }
+        stocks1630_1635.removeAll { it.volume1630to1635 < volume }
         stocks1630_1635.removeAll { it.changePrice1630to1635Percent < change }
         stocks1630_1635.sortByDescending { it.changePrice1630to1635Percent }
 
