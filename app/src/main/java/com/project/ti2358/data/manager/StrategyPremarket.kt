@@ -15,7 +15,7 @@ class StrategyPremarket : KoinComponent {
     private var currentSort: Sorting = Sorting.DESCENDING
 
     fun process(): MutableList<Stock> {
-        val all = stockManager.stocksStream
+        val all = stockManager.getWhiteStocks()
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
         val change = SettingsManager.getPremarketChangePercent()

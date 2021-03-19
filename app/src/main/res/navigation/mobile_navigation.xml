@@ -40,6 +40,13 @@
         android:label="@string/menu_reports"
         tools:layout="@layout/fragment_reports" />
 
+    <!-- чёрный список -->
+    <fragment
+        android:id="@+id/nav_blacklist"
+        android:name="com.project.ti2358.ui.blacklist.BlacklistFragment"
+        android:label="@string/menu_blacklist"
+        tools:layout="@layout/fragment_blacklist" />
+
     <!-- шорты -->
     <fragment
         android:id="@+id/nav_shorts"

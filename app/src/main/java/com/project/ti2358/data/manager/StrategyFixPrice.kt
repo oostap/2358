@@ -24,7 +24,7 @@ class StrategyFixPrice() : KoinComponent {
     }
 
     fun process(): MutableList<Stock> {
-        val all = stockManager.stocksStream
+        val all = stockManager.getWhiteStocks()
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
         stocks = all.filter { stock -> stock.getPriceDouble() > min && stock.getPriceDouble() < max }.toMutableList()
@@ -35,7 +35,8 @@ class StrategyFixPrice() : KoinComponent {
         strategyStartTime = Calendar.getInstance()
         strategyStartTime.set(Calendar.SECOND, 0)
 
-        stockManager.stocksStream.forEach {
+        val all = stockManager.getWhiteStocks()
+        all.forEach {
             it.resetFixPrice()
         }
     }

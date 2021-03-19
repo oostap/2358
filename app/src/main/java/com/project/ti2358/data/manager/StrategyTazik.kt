@@ -7,7 +7,6 @@ import com.google.gson.reflect.TypeToken
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.service.*
-import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.Job
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -43,7 +42,7 @@ class StrategyTazik : KoinComponent {
     }
 
     fun process(numberSet: Int): MutableList<Stock> {
-        val all = stockManager.stocksStream
+        val all = stockManager.getWhiteStocks()
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 

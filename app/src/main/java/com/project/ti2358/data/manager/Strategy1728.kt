@@ -20,7 +20,7 @@ class Strategy1728() : KoinComponent {
 
     var time1630: Calendar
     var time1635: Calendar
-    var time1645: Calendar
+//    var time1645: Calendar
 
     init {
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
@@ -48,15 +48,15 @@ class Strategy1728() : KoinComponent {
         }
 
         // 16:45:00.000
-        time1645 = Calendar.getInstance(TimeZone.getDefault())
-        time1645.apply {
-            add(Calendar.HOUR_OF_DAY, -differenceHours)
-            set(Calendar.HOUR_OF_DAY, 16)
-            set(Calendar.MINUTE, 45)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-            add(Calendar.HOUR_OF_DAY, differenceHours)
-        }
+//        time1645 = Calendar.getInstance(TimeZone.getDefault())
+//        time1645.apply {
+//            add(Calendar.HOUR_OF_DAY, -differenceHours)
+//            set(Calendar.HOUR_OF_DAY, 16)
+//            set(Calendar.MINUTE, 45)
+//            set(Calendar.SECOND, 0)
+//            set(Calendar.MILLISECOND, 0)
+//            add(Calendar.HOUR_OF_DAY, differenceHours)
+//        }
     }
 
     fun processFinal(): MutableList<Stock> {
@@ -68,7 +68,7 @@ class Strategy1728() : KoinComponent {
     }
 
     private fun process(): MutableList<Stock> {
-        val all = stockManager.stocksStream
+        val all = stockManager.getWhiteStocks()
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
         stocks = all.filter { it.getPriceDouble() > min && it.getPriceDouble() < max }.toMutableList()
@@ -139,36 +139,28 @@ class Strategy1728() : KoinComponent {
     fun process1630to1635(): MutableList<Stock> {
         stocks1630_1635 = process()
 
+        log("1728 FROM ${time1630.time}")
+        log("1728 TO ${time1635.time}")
+
         val volume = SettingsManager.get1728Volume(2)
         val change = SettingsManager.get1728ChangePercent()
         stocks1630_1635 = stocks1630_1635.filter { it.getTodayVolume() >= volume }.toMutableList()
 
-        log("1728 FROM ${time1630.time}")
-        log("1728 TO ${time1635.time}")
+        stocks1630_1635.forEach { stock ->
+            stock.volume1630to1635 = 0
+            stock.changePrice1630to1635Absolute = 0.0
+            stock.changePrice1630to1635Percent = 0.0
 
-        val msk = Utils.getTimeMSK()
-        if (msk.time >= time1645.time) {
-            stocks700_1600.forEach { stock ->
-                stock.volume1630to1635 = 0
-                stock.changePrice1630to1635Absolute = 0.0
-                stock.changePrice1630to1635Percent = 0.0
-
-                stock.priceSteps1728?.let { close1728 ->
-                    close1728.from1630to1635?.let { from1630to1635 ->
-                        from1630to1635.openPrice?.let { open ->
-                            stock.changePrice1630to1635Absolute = from1630to1635.closePrice - open
-                            stock.changePrice1630to1635Percent = (100 * from1630to1635.closePrice) / open - 100
-                            stock.volume1630to1635 = from1630to1635.volume
-                        }
+            if (stock.priceSteps1728?.from1630to1635 != null) { // на готовых данных
+                stock.priceSteps1728?.from1630to1635?.let { from1630to1635 ->
+                    from1630to1635.openPrice?.let { open ->
+                        stock.changePrice1630to1635Absolute = from1630to1635.closePrice - open
+                        stock.changePrice1630to1635Percent = (100 * from1630to1635.closePrice) / open - 100
+                        stock.volume1630to1635 = from1630to1635.volume
                     }
                 }
-            }
-        } else {
-            stocks1630_1635.forEach { stock ->
+            } else { // на реалтайме с 1630 до 1635
                 val processingCandles = mutableListOf<Candle>()
-                stock.volume1630to1635 = 0
-                stock.changePrice1630to1635Absolute = 0.0
-                stock.changePrice1630to1635Percent = 0.0
                 synchronized(stock.minuteCandles) {
                     val candles = stock.minuteCandles
                     for (candle in candles) {
@@ -178,8 +170,6 @@ class Strategy1728() : KoinComponent {
                         }
                     }
                 }
-
-                if (stock.volume1630to1635 < volume) processingCandles.clear()
 
                 // вычисляем change
                 if (processingCandles.isNotEmpty()) {
@@ -191,6 +181,8 @@ class Strategy1728() : KoinComponent {
             }
         }
 
+        stocks1630_1635.removeAll { it.volume700to1600 == 0 }
+        stocks1630_1635.removeAll { it.volume700to1600 < volume }
         stocks1630_1635.removeAll { it.changePrice1630to1635Percent < change }
         stocks1630_1635.sortByDescending { it.changePrice1630to1635Percent }
 

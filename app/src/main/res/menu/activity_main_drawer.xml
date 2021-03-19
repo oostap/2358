@@ -25,11 +25,11 @@
             android:title="@string/menu_1000_buy" />
         <item
             android:id="@+id/nav_tazik_start"
-            android:icon="@drawable/ic_1000"
+            android:icon="@drawable/ic_tazik"
             android:title="@string/menu_tazik" />
         <item
             android:id="@+id/nav_premarket"
-            android:icon="@drawable/ic_stocks"
+            android:icon="@drawable/ic_glass"
             android:title="@string/menu_premarket" />
         <item
             android:id="@+id/nav_1728"
@@ -51,7 +51,7 @@
 
         <item
             android:id="@+id/nav_reports"
-            android:icon="@drawable/ic_stocks"
+            android:icon="@drawable/ic_reports"
             android:title="@string/menu_reports" />
 
 <!--        <item-->
@@ -63,6 +63,11 @@
 <!--            android:id="@+id/nav_orderbook"-->
 <!--            android:icon="@drawable/ic_stocks"-->
 <!--            android:title="@string/menu_orderbook" />-->
+
+        <item
+            android:id="@+id/nav_blacklist"
+            android:icon="@drawable/ic_trash"
+            android:title="@string/menu_blacklist" />
 
         <item
             android:id="@+id/nav_diagnostics"

@@ -33,13 +33,14 @@ class StockManager : KoinComponent {
     private val streamingTinkoffService: StreamingTinkoffService by inject()
     private val streamingAlorService: StreamingAlorService by inject()
     private val strategyTazik: StrategyTazik by inject()
+    private val strategyBlacklist: StrategyBlacklist by inject()
     private val strategyRocket: StrategyRocket by inject()
 
     private var instrumentsAll: MutableList<Instrument> = mutableListOf()
     private var stocksAll: MutableList<Stock> = mutableListOf()
 
     // все акции, которые участвуют в расчётах с учётом базовой сортировки по валюте $
-    var stocksStream: MutableList<Stock> = mutableListOf()
+    private var stocksStream: MutableList<Stock> = mutableListOf()
 
     var indices: MutableList<Index> = mutableListOf()
     var stockClosePrices: Map<String, ClosePrice> = mutableMapOf()
@@ -50,7 +51,16 @@ class StockManager : KoinComponent {
     private val gson = Gson()
 
     companion object {
-        public var stockIndex: StockIndex? = null
+        var stockIndex: StockIndex? = null
+    }
+
+    fun getAllStocks(): MutableList<Stock> {
+        return stocksStream
+    }
+
+    fun getWhiteStocks(): MutableList<Stock> {
+        val blacklist = strategyBlacklist.getBlacklistStocks()
+        return stocksStream.filter { it !in blacklist }.toMutableList()
     }
 
     fun loadStocks(force: Boolean = false) {
@@ -160,7 +170,7 @@ class StockManager : KoinComponent {
             stocksAll.forEach {
                 it.priceSteps1728 = stockPrice1728[it.instrument.ticker]
             }
-            log(stockPrice1728.toString())
+            log("daager StockPrice1728: $stockPrice1728")
         } catch (e: Exception) {
             e.printStackTrace()
             log("daager StockPrice1728 not reached")
@@ -217,7 +227,8 @@ class StockManager : KoinComponent {
     }
 
     private fun baseSortStocks() {
-        stocksStream = stocksAll.filter { SettingsManager.isAllowCurrency(it.instrument.currency) }.toMutableList()
+        val blacklist = strategyBlacklist.getBlacklistStocks()
+        stocksStream = stocksAll.filter { SettingsManager.isAllowCurrency(it.instrument.currency) && it !in blacklist }.toMutableList()
 
         // загрузить цену закрытия
         GlobalScope.launch(Dispatchers.Main) {

@@ -1,11 +1,9 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.service.Sorting
-import com.project.ti2358.service.Utils
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.math.abs
 
 @KoinApiExtension
 class StrategyReports : KoinComponent {
@@ -17,7 +15,7 @@ class StrategyReports : KoinComponent {
     var currentSort: Sorting = Sorting.DESCENDING
 
     fun process(): MutableList<Stock> {
-        val all = stockManager.stocksStream
+        val all = stockManager.getWhiteStocks()
 
         stocksDividend = all.filter { it.dividend != null }.toMutableList()
         stocksReport = all.filter { it.report != null }.toMutableList()

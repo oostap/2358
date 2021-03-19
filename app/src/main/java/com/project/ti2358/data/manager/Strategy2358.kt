@@ -18,7 +18,7 @@ class Strategy2358() : KoinComponent {
     var started: Boolean = false
 
     fun process(): MutableList<Stock> {
-        val all = stockManager.stocksStream
+        val all = stockManager.getWhiteStocks()
         val change = SettingsManager.get2358ChangePercent()
         val volumeDayPieces = SettingsManager.get2358VolumeDayPieces()
         val volumeDayCash = SettingsManager.get2358VolumeDayCash() * 1000 * 1000

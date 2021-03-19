@@ -13,7 +13,7 @@ class StrategyPostmarket : KoinComponent {
     var currentSort: Sorting = Sorting.ASCENDING
 
     fun process(): MutableList<Stock> {
-        val all = stockManager.stocksStream
+        val all = stockManager.getWhiteStocks()
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 

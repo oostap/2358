@@ -23,7 +23,7 @@ class StrategyRocket() : KoinComponent {
     private var started: Boolean = false
 
     fun process(): MutableList<Stock> {
-        val all = stockManager.stocksStream
+        val all = stockManager.getWhiteStocks()
 
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
