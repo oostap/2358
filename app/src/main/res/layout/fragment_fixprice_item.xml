@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:divider="?android:dividerHorizontal"
-        android:dividerPadding="10dp"
-        android:showDividers="middle"
-        android:paddingStart="10dp"
-        android:weightSum="40" >
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:divider="?android:dividerHorizontal"
+    android:dividerPadding="10dp"
+    android:showDividers="middle"
+    android:paddingStart="10dp"
+    android:weightSum="40">
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="10"
+        android:layout_weight="12"
         android:orientation="vertical">
 
         <TextView
@@ -20,8 +21,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
             android:text="1. TSLA"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -30,49 +31,67 @@
             android:id="@+id/stock_item_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
+            android:paddingTop="4dp"
             android:gravity="center_vertical"
             android:text="700$"
-            android:textSize="14sp" />
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/stock_sector"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="4dp"
+            android:gravity="center_vertical"
+            android:text="700$"
+            android:textSize="10sp" />
+
+        <TextView
+            android:id="@+id/stock_report_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="4dp"
+            android:gravity="center_vertical"
+            android:text="700$"
+            android:textSize="12sp" />
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="10"
+        android:layout_weight="9"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/stock_item_volume_today"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:padding="4dp"
             android:gravity="center_vertical"
             android:text="80k"
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/stock_item_volume_yesterday"
+            android:id="@+id/stock_item_volume_from_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:padding="4dp"
             android:gravity="center_vertical"
-            android:text=""
+            android:text="5k"
             android:textSize="14sp" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="10"
+        android:layout_weight="9"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/stock_item_price_change_percent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:padding="4dp"
             android:gravity="center_vertical"
             android:text="+5%"
             android:textSize="14sp" />
@@ -81,7 +100,7 @@
             android:id="@+id/stock_item_price_change_absolute"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:padding="4dp"
             android:gravity="center_vertical"
             android:text="+20$"
             android:textSize="14sp" />
@@ -90,15 +109,20 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="9.7"
+        android:layout_weight="10"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/buttonBuy"
+        <ImageView
+            android:id="@+id/orderbook"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textSize="20dp"
-            android:text="BUY" />
+            android:layout_height="wrap_content"
+            android:scaleType="fitCenter"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_centerInParent="true"
+            app:srcCompat="@drawable/ic_glass"
+            app:tint="@color/orderbook_color"/>
+
     </LinearLayout>
 
 </LinearLayout>

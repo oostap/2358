@@ -7,63 +7,162 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:divider="?android:dividerHorizontal"
-        android:dividerPadding="0dp"
-        android:weightSum="4" >
+        android:orientation="vertical"
+        android:layout_marginBottom="150dp">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/stock_item_position"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:text="покупка"
-            android:layout_weight="1"
-            android:textSize="10dp"
-            android:gravity="right"
-            android:textAlignment="gravity"/>
+            android:orientation="horizontal"
+            android:divider="?android:dividerHorizontal"
+            android:dividerPadding="2dp"
+            android:showDividers="middle"
+            android:weightSum="6"
+            android:background="@color/light">
 
-        <TextView
-            android:layout_width="wrap_content"
+            <TextView
+                android:layout_weight="1"
+                android:id="@+id/stock_item_cash"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:gravity="center_vertical"
+                android:text="1233$"
+                android:textSize="12dp"
+                android:textAlignment="center"
+                tools:ignore="RtlCompat" />
+
+            <TextView
+                android:layout_weight="1"
+                android:id="@+id/stock_item_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="4dp"
+                android:paddingTop="2dp"
+                android:gravity="center_vertical"
+                android:text="123$ = 145$"
+                android:textSize="12dp"
+                android:textAlignment="center"
+                tools:ignore="RtlCompat" />
+
+            <TextView
+                android:layout_weight="1"
+                android:id="@+id/stock_item_lots"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:paddingStart="2dp"
+                android:gravity="center_vertical"
+                android:text="250"
+                android:textSize="12dp"
+                android:textAlignment="center"
+                tools:ignore="RtlCompat" />
+
+            <TextView
+                android:layout_weight="1"
+                android:id="@+id/stock_item_lots_blocked"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="2dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:gravity="center_vertical"
+                android:textAlignment="center"
+                android:text="125🔒"
+                android:textSize="12dp"
+                tools:ignore="RtlCompat" />
+
+            <TextView
+                android:layout_weight="1"
+                android:id="@+id/stock_item_price_change_percent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:gravity="center_vertical"
+                android:text="+5%"
+                android:textSize="12sp"
+                android:textAlignment="center"
+                tools:ignore="RtlCompat" />
+
+            <TextView
+                android:layout_weight="1"
+                android:id="@+id/stock_item_price_change_absolute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:gravity="center_vertical"
+                android:text="+20$"
+                android:textSize="12sp"
+                android:textAlignment="center"
+                tools:ignore="RtlCompat" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:text="BID"
-            android:layout_weight="1"
-            android:textSize="10dp"
-            android:gravity="right"
-            android:textAlignment="gravity"/>
+            android:orientation="horizontal"
+            android:divider="?android:dividerHorizontal"
+            android:dividerPadding="0dp"
+            android:layout_marginTop="0dp"
+            android:weightSum="4" >
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:gravity="center_vertical"
-            android:text="ASK"
-            android:layout_weight="1"
-            android:textSize="10dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:text="покупка"
+                android:layout_weight="1"
+                android:textSize="10dp"
+                android:gravity="right"
+                android:textAlignment="gravity"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:gravity="center_vertical"
-            android:text="продажа"
-            android:layout_weight="1"
-            android:textSize="10dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:text="BID"
+                android:layout_weight="1"
+                android:textSize="10dp"
+                android:gravity="right"
+                android:textAlignment="gravity"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:gravity="center_vertical"
+                android:text="ASK"
+                android:layout_weight="1"
+                android:textSize="10dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:gravity="center_vertical"
+                android:text="продажа"
+                android:layout_weight="1"
+                android:textSize="10dp" />
+
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="0dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginBottom="0dp"
+            android:background="#00DF1919"
+            app:layoutManager="LinearLayoutManager"
+            tools:context=".ui.orderbook.OrderbookFragment"
+            tools:listitem="@layout/fragment_orderbook_item"
+            android:backgroundTint="@color/gray" />
     </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="0dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginBottom="150dp"
-        android:background="#00DF1919"
-        app:layoutManager="LinearLayoutManager"
-        tools:context=".ui.orderbook.OrderbookFragment"
-        tools:listitem="@layout/fragment_orderbook_item" />
 
     <RelativeLayout
         android:id="@+id/scalper_panel"

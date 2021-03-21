@@ -22,12 +22,15 @@ import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.model.dto.Order
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
+import com.project.ti2358.service.toMoney
+import com.project.ti2358.service.toPercent
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.lang.Exception
 import java.lang.StrictMath.min
 import kotlin.math.roundToInt
+import kotlin.math.sign
 
 
 @KoinApiExtension
@@ -57,6 +60,14 @@ class OrderbookFragment : Fragment() {
 
     lateinit var pricePanelView: LinearLayout
 
+    lateinit var positionView: LinearLayout
+    lateinit var positionPriceView: TextView
+    lateinit var positionCashView: TextView
+    lateinit var positionLotsView: TextView
+    lateinit var positionLotsBlockedView: TextView
+    lateinit var positionChangePriceAbsoluteView: TextView
+    lateinit var positionChangePricePercentView: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -84,6 +95,14 @@ class OrderbookFragment : Fragment() {
             localLayoutManager = layoutManager as LinearLayoutManager
             recyclerView = this
         }
+
+        positionView = view.findViewById(R.id.stock_item_position)
+        positionPriceView = view.findViewById(R.id.stock_item_price)
+        positionCashView = view.findViewById(R.id.stock_item_cash)
+        positionLotsView = view.findViewById(R.id.stock_item_lots)
+        positionLotsBlockedView = view.findViewById(R.id.stock_item_lots_blocked)
+        positionChangePriceAbsoluteView = view.findViewById(R.id.stock_item_price_change_absolute)
+        positionChangePricePercentView = view.findViewById(R.id.stock_item_price_change_percent)
 
         scalperView = view.findViewById(R.id.scalper_panel)
         volumeEditText = view.findViewById(R.id.edit_volume)
@@ -216,11 +235,46 @@ class OrderbookFragment : Fragment() {
             while (true) {
                 delay(1000)
                 updateData()
+                updatePosition()
             }
         }
 
         updateData()
+        updatePosition()
         return view
+    }
+
+    private fun updatePosition() {
+        activeStock?.let {
+            val pos = depositManager.getPositionForFigi(it.instrument.figi)?.let { p ->
+                val avg = p.getAveragePrice()
+                positionPriceView.text = "${avg.toMoney(it)} ➡ ${it.getPriceString()}"
+
+                val profit = p.getProfitAmount()
+                positionChangePriceAbsoluteView.text = profit.toMoney(it)
+
+                var percent = p.getProfitPercent()
+                percent *= sign(p.lots.toDouble())   // инвертировать доходность шорта
+                var totalCash = p.balance * avg
+                totalCash += profit
+                positionCashView.text = totalCash.toMoney(it)
+
+                positionLotsView.text = "${p.lots}"
+                positionLotsBlockedView.text = "${p.blocked.toInt()}🔒"
+
+                positionChangePricePercentView.text = percent.toPercent()
+
+                positionPriceView.setTextColor(Utils.getColorForValue(percent))
+                positionChangePriceAbsoluteView.setTextColor(Utils.getColorForValue(percent))
+                positionChangePricePercentView.setTextColor(Utils.getColorForValue(percent))
+            }
+
+            if (pos == null) {
+                positionView.visibility = GONE
+            } else {
+                positionView.visibility = VISIBLE
+            }
+        }
     }
 
     private fun changeOrders(textView: TextView, operationType: OperationType) {
@@ -310,17 +364,8 @@ class OrderbookFragment : Fragment() {
         adapterList.setData(orderbookLines)
 
         val ticker = activeStock?.instrument?.ticker ?: ""
-        var lots = ""
-        var avg = ""
         val act = requireActivity() as AppCompatActivity
-
-        activeStock?.let {
-            depositManager.getPositionForFigi(it.instrument.figi)?.let { p ->
-                lots = " ${p.blocked.toInt()}/${p.lots}"
-                avg = ", ${p.getAveragePrice()}"
-            }
-        }
-        act.supportActionBar?.title = getString(R.string.menu_orderbook) + " $ticker" + lots + avg
+        act.supportActionBar?.title = getString(R.string.menu_orderbook) + " $ticker"
 
 //        val firstVisibleItemPosition: Int = localLayoutManager.findFirstVisibleItemPosition()
 //        val lastVisibleItemPosition: Int = localLayoutManager.findLastVisibleItemPosition()
@@ -331,7 +376,6 @@ class OrderbookFragment : Fragment() {
 //            }
 //        }
     }
-
 
     inner class ChoiceDragListener : OnDragListener {
         override fun onDrag(v: View, event: DragEvent): Boolean {

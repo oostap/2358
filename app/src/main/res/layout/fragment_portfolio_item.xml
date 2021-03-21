@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -11,10 +12,9 @@
     android:weightSum="4">
 
     <LinearLayout
-        android:id="@+id/orderbook_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="0.95"
+        android:layout_weight="1.25"
         android:orientation="vertical">
 
         <TextView
@@ -35,8 +35,8 @@
             android:paddingBottom="4dp"
             android:paddingTop="2dp"
             android:gravity="center_vertical"
-            android:text="700$"
-            android:textSize="14sp" />
+            android:text="700$ = 111$"
+            android:textSize="11sp" />
 
         <TextView
             android:id="@+id/stock_sector"
@@ -54,39 +54,58 @@
             android:paddingTop="4dp"
             android:gravity="center_vertical"
             android:text="700$"
-            android:textSize="12sp" />
+            android:textSize="11sp" />
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1.25"
+        android:layout_weight="1.0"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/stock_item_volume_pieces"
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:gravity="center_vertical"
-            android:text="800$"
-            android:textSize="14sp" />
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/stock_item_lots"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:paddingStart="8dp"
+                android:gravity="center_vertical"
+                android:text="250"
+                android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/stock_item_lots_blocked"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="2dp"
+                android:gravity="center_vertical"
+                android:textAlignment="center"
+                android:text="(125🔒)"
+                android:textSize="10dp"
+                tools:ignore="RtlCompat" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/stock_item_volume_cash"
+            android:id="@+id/stock_item_cash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
             android:gravity="center_vertical"
-            android:text="123 шт."
+            android:text="123$"
             android:textSize="14sp" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_weight="0.95"
         android:orientation="vertical">
 
         <TextView

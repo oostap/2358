@@ -11,12 +11,11 @@ class StrategyFixPrice() : KoinComponent {
     private val stockManager: StockManager by inject()
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
-    var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
 
     var currentSort: Sorting = Sorting.DESCENDING
 
     init {
-        resetStrategy()
+        restartStrategy()
     }
 
     companion object {
@@ -31,7 +30,7 @@ class StrategyFixPrice() : KoinComponent {
         return stocks
     }
 
-    fun resetStrategy() {
+    fun restartStrategy() {
         strategyStartTime = Calendar.getInstance()
         strategyStartTime.set(Calendar.SECOND, 0)
 

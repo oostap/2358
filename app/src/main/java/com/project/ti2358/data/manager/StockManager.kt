@@ -116,15 +116,24 @@ class StockManager : KoinComponent {
     }
 
     suspend fun reloadClosePrices() {
-        try {
-            stockClosePrices = synchronizedMap(thirdPartyService.daagerClosePrices() as MutableMap<String, ClosePrice>)
-            stocksAll.forEach { it.apply {
-                it.closePrices = stockClosePrices[it.instrument.ticker]
-            }}
-            log(stockReports.toString())
-        } catch (e: Exception) {
-            e.printStackTrace()
-            log("daager ClosePrices not reached")
+        GlobalScope.launch(Dispatchers.Main) {
+            while (true) {
+                try {
+                    stockClosePrices = synchronizedMap(thirdPartyService.daagerClosePrices() as MutableMap<String, ClosePrice>)
+                    stocksAll.forEach {
+                        it.apply {
+                            it.closePrices = stockClosePrices[it.instrument.ticker]
+                            it.process2359()
+                        }
+                    }
+                    log(stockReports.toString())
+                    break
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    log("daager ClosePrices not reached")
+                }
+                delay(1000)
+            }
         }
     }
 
@@ -244,13 +253,9 @@ class StockManager : KoinComponent {
                     break
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    log("daager ClosePrices not reached")
+                    log("daager OpenAPI not reached")
                 }
                 delay(1000)
-            }
-
-            stocksStream.forEach {
-                it.process2359()
             }
         }
     }

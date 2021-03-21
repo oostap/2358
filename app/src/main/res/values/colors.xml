@@ -9,6 +9,8 @@
     <color name="main_text">#41FFFF</color>
     <color name="gray">#AAAAAA</color>
 
+    <color name="light">#30888888</color>
+
     <color name="red">#e16f8e</color>
     <color name="order_red">#e0174d</color>
 

@@ -29,7 +29,7 @@ data class Stock(
 
     var closePrices: ClosePrice? = null
     var candleToday: Candle? = null                               // реалтайм, дневная свеча
-    var minuteFixPriceCandles: MutableList<Candle> = mutableListOf() // все свечи после 1728
+
 
     // разница с ценой открытия премаркета
     var changePriceDayAbsolute: Double = 0.0
@@ -44,6 +44,8 @@ data class Stock(
     var changePrice2359DayPercent: Double = 0.0
 
     // разница со старта таймера
+    var minuteCandleFixed: Candle? = null
+    var priceFixed: Double = 0.0
     var changePriceFixDayAbsolute: Double = 0.0
     var changePriceFixDayPercent: Double = 0.0
 
@@ -140,6 +142,7 @@ data class Stock(
         updateChangeToday()
         updateChange2359()
         updateChangePostmarket()
+        updateChangeFixPrice()
     }
 
     private fun processHour1Candle(candle: Candle) {
@@ -170,25 +173,25 @@ data class Stock(
 //        if (instrument.ticker in listOf<String>("CNK", "MAC", "OIS")) {
 //            log("${instrument.ticker}: candles(${minuteCandles.size}), date: ${candle.time}")
 //            log("${instrument.ticker}: candles(${minuteCandles.size}), date: ${minuteCandles.first().time}")
+////        }
+//
+//        // проверка на стратегию FixPrice
+//        val timeCandle = Calendar.getInstance()
+//        timeCandle.time = candle.time
+//        val timeTrackStart = StrategyFixPrice.strategyStartTime
+//
+//        if (timeCandle.time >= timeTrackStart.time) {
+//            exists = false
+//            for ((index, c) in minuteFixPriceCandles.withIndex()) {
+//                if (c.time == candle.time) {
+//                    minuteFixPriceCandles[index] = candle
+//                    exists = true
+//                }
+//            }
+//            if (!exists) {
+//                minuteFixPriceCandles.add(candle)
+//            }
 //        }
-
-        // проверка на стратегию FixPrice
-        val timeCandle = Calendar.getInstance()
-        timeCandle.time = candle.time
-        val timeTrackStart = StrategyFixPrice.strategyStartTime
-
-        if (timeCandle.time >= timeTrackStart.time) {
-            exists = false
-            for ((index, c) in minuteFixPriceCandles.withIndex()) {
-                if (c.time == candle.time) {
-                    minuteFixPriceCandles[index] = candle
-                    exists = true
-                }
-            }
-            if (!exists) {
-                minuteFixPriceCandles.add(candle)
-            }
-        }
 
         updateChangeFixPrice()
     }
@@ -204,8 +207,10 @@ data class Stock(
 
     fun getVolumeFixPriceAfterStart(): Int {
         var volume = 0
-        for (candle in minuteFixPriceCandles) {
-            volume += candle.volume
+        for (candle in minuteCandles) {
+            if (candle.time >= minuteCandleFixed?.time) {
+                volume += candle.volume
+            }
         }
         return volume
     }
@@ -215,7 +220,7 @@ data class Stock(
     }
 
     fun getPriceDouble(): Double {
-        var value: Double = 0.0
+        var value = 0.0
 
         closePrices?.let {
             value = it.post
@@ -251,14 +256,7 @@ data class Stock(
     }
 
     fun getPriceFixPriceString(): String {
-        if (minuteFixPriceCandles.isNotEmpty()) {
-            return minuteFixPriceCandles.first().closingPrice.toMoney(this)
-        }
-        if (minuteCandles.isNotEmpty()) {
-            return minuteCandles.last().closingPrice.toMoney(this)
-        }
-
-        return "0$"
+        return priceFixed.toMoney(this)
     }
 
     private fun updateChangeToday() {
@@ -300,17 +298,17 @@ data class Stock(
     }
 
     private fun updateChangeFixPrice() {
-        if (minuteFixPriceCandles.isNotEmpty()) {
-            candleToday?.let { week ->
-                changePriceFixDayAbsolute = week.closingPrice - minuteFixPriceCandles.first().openingPrice
-                changePriceFixDayPercent = (100 * week.closingPrice) / minuteFixPriceCandles.first().openingPrice - 100
-            }
-        }
+        val currentPrice = getPriceDouble()
+        changePriceFixDayAbsolute = currentPrice - priceFixed
+        changePriceFixDayPercent = currentPrice / priceFixed * 100.0 - 100.0
     }
 
     fun resetFixPrice() {
         changePriceFixDayAbsolute = 0.0
         changePriceFixDayPercent = 0.0
-        minuteFixPriceCandles.clear()
+        priceFixed = getPriceDouble()
+        if (minuteCandles.isNotEmpty()) {
+            minuteCandleFixed = minuteCandles.last()
+        }
     }
 }

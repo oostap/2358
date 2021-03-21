@@ -39,6 +39,9 @@ class PortfolioFragment : Fragment() {
     var jobUpdate: Job? = null
     var jobVersion: Job? = null
 
+    companion object {
+        var versionUpdateShowed: Boolean = false
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -78,21 +81,27 @@ class PortfolioFragment : Fragment() {
 
         updateData()
 
-        jobVersion?.cancel()
-        jobVersion = GlobalScope.launch(Dispatchers.Main) {
-            delay(3000)
-            val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(TheApplication.application.applicationContext.packageName, 0)
-            val currentVersion = pInfo.versionName
+        if (!versionUpdateShowed) {
+            jobVersion?.cancel()
+            jobVersion = GlobalScope.launch(Dispatchers.Main) {
+                delay(3000)
+                val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(
+                    TheApplication.application.applicationContext.packageName,
+                    0
+                )
+                val currentVersion = pInfo.versionName
 
-            val version = try {
-                thirdPartyService.githubVersion()
-            } catch (e: Exception) {
-                currentVersion
-            }
+                val version = try {
+                    thirdPartyService.githubVersion()
+                } catch (e: Exception) {
+                    currentVersion
+                }
 
-            if (version != currentVersion) { // показать окно обновления
-                Utils.showUpdateAlert(requireContext(), currentVersion, version)
+                if (version != currentVersion) { // показать окно обновления
+                    Utils.showUpdateAlert(requireContext(), currentVersion, version)
+                }
             }
+            versionUpdateShowed = true
         }
         return view
     }
@@ -134,9 +143,16 @@ class PortfolioFragment : Fragment() {
             holder.position = item
             holder.tickerView.text = "${position + 1}) ${item.ticker}"
 
+            if (item.blocked.toInt() > 0) {
+                holder.lotsBlockedView.text = "(${item.blocked.toInt()}🔒)"
+            } else {
+                holder.lotsBlockedView.text = ""
+            }
+
+            holder.lotsView.text = "${item.lots}"
+
             val avg = item.getAveragePrice()
-            holder.volumePiecesView.text = "${item.blocked.toInt()}/${item.lots} шт."
-            holder.priceView.text = "${avg.toMoney(item.stock)}"
+            holder.priceView.text = "${avg.toMoney(item.stock)} ➡ ${item.stock?.getPriceString()}"
 
             val profit = item.getProfitAmount()
             holder.changePriceAbsoluteView.text = profit.toMoney(item.stock)
@@ -148,7 +164,7 @@ class PortfolioFragment : Fragment() {
 
             var totalCash = item.balance * avg
             totalCash += profit
-            holder.volumeCashView.text = totalCash.toMoney(item.stock)
+            holder.cashView.text = totalCash.toMoney(item.stock)
 
             val emoji = when {
                 percent <= -10 -> " 🤬"
@@ -164,6 +180,7 @@ class PortfolioFragment : Fragment() {
 
             holder.changePricePercentView.text = percent.toPercent() + emoji
 
+            holder.priceView.setTextColor(Utils.getColorForValue(percent))
             holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(percent))
             holder.changePricePercentView.setTextColor(Utils.getColorForValue(percent))
 
@@ -205,8 +222,9 @@ class PortfolioFragment : Fragment() {
 
             val orderbookImage: ImageView = view.findViewById(R.id.orderbook)
 
-            val volumeCashView: TextView = view.findViewById(R.id.stock_item_volume_cash)
-            val volumePiecesView: TextView = view.findViewById(R.id.stock_item_volume_pieces)
+            val cashView: TextView = view.findViewById(R.id.stock_item_cash)
+            val lotsView: TextView = view.findViewById(R.id.stock_item_lots)
+            val lotsBlockedView: TextView = view.findViewById(R.id.stock_item_lots_blocked)
 
             val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)

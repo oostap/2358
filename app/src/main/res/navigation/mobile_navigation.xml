@@ -111,6 +111,9 @@
         android:name="com.project.ti2358.ui.strategyFixPrice.StrategyFixPriceFragment"
         android:label="@string/menu_fixprice"
         tools:layout="@layout/fragment_fixprice" >
+        <action
+            android:id="@+id/action_nav_fixprice_to_nav_orderbook"
+            app:destination="@id/nav_orderbook" />
     </fragment>
 
     <!-- 1728 -->

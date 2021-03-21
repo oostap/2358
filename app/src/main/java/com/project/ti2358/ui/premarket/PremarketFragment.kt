@@ -167,6 +167,7 @@ class PremarketFragment : Fragment() {
 
                 holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
                 holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
+                holder.priceView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
             } else {
                 holder.priceView.text = "${item.getPricePost1000String()} ➡ ${item.getPriceString()}"
 
@@ -175,6 +176,7 @@ class PremarketFragment : Fragment() {
 
                 holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePriceDayAbsolute))
                 holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePriceDayAbsolute))
+                holder.priceView.setTextColor(Utils.getColorForValue(item.changePriceDayAbsolute))
             }
 
             holder.itemView.setOnClickListener {
