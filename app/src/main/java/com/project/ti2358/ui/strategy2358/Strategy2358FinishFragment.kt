@@ -50,7 +50,7 @@ class Strategy2358FinishFragment : Fragment() {
             }
         }
 
-        buttonStart = view.findViewById<Button>(R.id.buttonStart)
+        buttonStart = view.findViewById<Button>(R.id.button_start)
         updateServiceButtonText()
 
         buttonStart?.setOnClickListener {
@@ -90,9 +90,9 @@ class Strategy2358FinishFragment : Fragment() {
 
     private fun updateServiceButtonText() {
         if (Utils.isServiceRunning(requireContext(), Strategy2358Service::class.java)) {
-            buttonStart?.text = getString(R.string.service_2358_stop)
+            buttonStart?.text = getString(R.string.stop)
         } else {
-            buttonStart?.text = getString(R.string.service_2358_start)
+            buttonStart?.text = getString(R.string.start)
         }
     }
 

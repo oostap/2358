@@ -50,7 +50,7 @@ class Strategy1000BuyStartFragment : Fragment() {
             }
         }
 
-        val buttonStart = view.findViewById<Button>(R.id.buttonStart)
+        val buttonStart = view.findViewById<Button>(R.id.button_start)
         buttonStart.setOnClickListener {
             if (strategy1000Buy.stocksSelected.isNotEmpty()) {
                 view.findNavController().navigate(R.id.action_nav_1000_buy_start_to_nav_1000_buy_finish)

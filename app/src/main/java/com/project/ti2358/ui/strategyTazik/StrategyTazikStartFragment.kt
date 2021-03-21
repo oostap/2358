@@ -54,7 +54,7 @@ class StrategyTazikStartFragment : Fragment() {
             }
         }
 
-        val buttonStart = view.findViewById<Button>(R.id.buttonStart)
+        val buttonStart = view.findViewById<Button>(R.id.button_start)
         buttonStart.setOnClickListener {
             if (strategyTazik.stocksSelected.isNotEmpty()) {
                 view.findNavController().navigate(R.id.action_nav_tazik_start_to_nav_tazik_finish)

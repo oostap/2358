@@ -35,7 +35,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/buttonStart"
+            android:id="@+id/button_start"
             android:layout_marginLeft="5dp"
             android:text="@string/service_2358_prepare"
             android:layout_weight="1"

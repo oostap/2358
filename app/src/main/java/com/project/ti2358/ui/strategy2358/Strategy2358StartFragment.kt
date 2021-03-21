@@ -47,7 +47,7 @@ class Strategy2358StartFragment : Fragment() {
             }
         }
 
-        val buttonStart = view.findViewById<Button>(R.id.buttonStart)
+        val buttonStart = view.findViewById<Button>(R.id.button_start)
         buttonStart.setOnClickListener {
             if (strategy2358.stocksSelected.isNotEmpty()) {
                 view.findNavController().navigate(R.id.action_nav_2358_start_to_nav_2358_finish)

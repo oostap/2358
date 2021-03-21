@@ -27,7 +27,6 @@ class StrategyTrailingStopService : Service() {
 
     private var wakeLock: PowerManager.WakeLock? = null
     private var isServiceRunning = false
-    private lateinit var schedulePurchaseTime: Calendar
     private var notificationButtonReceiver: BroadcastReceiver? = null
 
     var job: Job? = null
@@ -59,9 +58,7 @@ class StrategyTrailingStopService : Service() {
         super.onCreate()
         val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "TS","",  "", "")
         startForeground(NOTIFICATION_ID, notification)
-
-//        strategy1000Buy.prepareBuy700()
-//        schedulePurchase()
+        scheduleUpdate()
     }
 
     override fun onDestroy() {
@@ -73,7 +70,7 @@ class StrategyTrailingStopService : Service() {
         super.onDestroy()
     }
 
-    private fun schedulePurchase() {
+    private fun scheduleUpdate() {
         Toast.makeText(this, "Запущен таймер на покупку 700", Toast.LENGTH_LONG).show()
         isServiceRunning = true
 
@@ -81,34 +78,6 @@ class StrategyTrailingStopService : Service() {
             newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "EndlessService::lock").apply {
                 acquire(10*10*1000L /*10 minutes*/)
             }
-        }
-
-        val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
-
-        // 07:00:00.100
-        val hours = 7
-        val minutes = 0
-        val seconds = 0
-        val milliseconds = 100
-
-        schedulePurchaseTime = Calendar.getInstance(TimeZone.getDefault())
-        schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, -differenceHours)
-        schedulePurchaseTime.set(Calendar.HOUR_OF_DAY, hours)
-        schedulePurchaseTime.set(Calendar.MINUTE, minutes)
-        schedulePurchaseTime.set(Calendar.SECOND, seconds)
-        schedulePurchaseTime.set(Calendar.MILLISECOND, milliseconds)
-        schedulePurchaseTime.add(Calendar.HOUR_OF_DAY, differenceHours)
-
-        val now = Calendar.getInstance(TimeZone.getDefault())
-        var scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
-        if (scheduleDelay < 0) {
-            schedulePurchaseTime.add(Calendar.DAY_OF_MONTH, 1)
-            scheduleDelay = schedulePurchaseTime.timeInMillis - now.timeInMillis
-        }
-
-        if (scheduleDelay < 0) {
-            stopService()
-            return
         }
 
         job?.cancel()

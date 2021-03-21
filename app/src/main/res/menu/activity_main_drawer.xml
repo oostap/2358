@@ -49,6 +49,11 @@
             android:title="@string/menu_reports" />
 
         <item
+            android:id="@+id/nav_rocket_start"
+            android:icon="@drawable/ic_1000"
+            android:title="@string/menu_rocket" />
+
+        <item
             android:id="@+id/nav_postmarket"
             android:icon="@drawable/ic_stocks"
             android:title="@string/menu_postmarket" />
@@ -57,7 +62,6 @@
 <!--            android:id="@+id/nav_shorts"-->
 <!--            android:icon="@drawable/ic_stocks"-->
 <!--            android:title="@string/menu_shorts" />-->
-
         <item
             android:id="@+id/nav_blacklist"
             android:icon="@drawable/ic_trash"
@@ -67,11 +71,6 @@
             android:id="@+id/nav_diagnostics"
             android:icon="@drawable/ic_settings"
             android:title="@string/menu_diagnostics" />
-
-<!--        <item-->
-<!--            android:id="@+id/nav_rocket_start"-->
-<!--            android:icon="@drawable/ic_1000"-->
-<!--            android:title="@string/menu_rocket" />-->
 
     </group>
 </menu>

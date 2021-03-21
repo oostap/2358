@@ -258,6 +258,7 @@ class StockManager : KoinComponent {
                 delay(1000)
             }
         }
+        testStartUpdateRockets()
     }
 
     private fun resetSubscription() {
@@ -369,6 +370,19 @@ class StockManager : KoinComponent {
 
             if (candle.interval == Interval.MINUTE) {
                 strategyRocket.processStrategy(stock)
+            }
+        }
+    }
+
+    fun testStartUpdateRockets() {
+        var i = 0
+        GlobalScope.launch(Dispatchers.Main) {
+            while (true) {
+                delay(2000)
+                strategyRocket.processStrategy(stocksAll[i])
+                i++
+                i %= stocksAll.size
+                delay(2000)
             }
         }
     }

@@ -450,22 +450,37 @@ class SettingsManager {
 
         fun getRocketChangeMinutes(): Int {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_rocket_change_minutes)
-            val value: String? = preferences.getString(key, "5")
+            val value: String? = preferences.getString(key, "10")
             return try {
-                (value ?: "5").toInt()
+                (value ?: "10").toInt()
             } catch (e: Exception) {
-                5
+                10
+            }
+        }
+
+        fun getRocketChangeVolume(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_rocket_change_volume)
+            val value: String? = preferences.getString(key, "0")
+            return try {
+                (value ?: "0").toInt()
+            } catch (e: Exception) {
+                0
             }
         }
 
         fun getRocketNotifyAlive(): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_rocket_notify_alive)
-            val value: String? = preferences.getString(key, "5")
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_rocket_notify_alive_seconds)
+            val value: String? = preferences.getString(key, "60")
             return try {
-                (value ?: "5").toInt()
+                (value ?: "60").toInt()
             } catch (e: Exception) {
-                5
+                60
             }
+        }
+
+        fun getRocketVoice(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_rocket_voice)
+            return preferences.getBoolean(key, true)
         }
     }
 }

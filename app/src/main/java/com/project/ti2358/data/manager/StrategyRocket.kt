@@ -4,23 +4,34 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.media.AudioAttributes
-import android.media.RingtoneManager
-import android.net.Uri
 import android.os.Build
+import android.speech.tts.TextToSpeech
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.model.dto.Candle
+import com.project.ti2358.service.toMoney
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.util.*
+import kotlin.math.abs
+
 
 @KoinApiExtension
-class StrategyRocket() : KoinComponent {
+class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
     private val stockManager: StockManager by inject()
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
+    var rocketStocks: MutableList<RocketStock> = mutableListOf()
+    var cometStocks: MutableList<RocketStock> = mutableListOf()
+
     private var started: Boolean = false
+    private var textToSpeech: TextToSpeech? = null
 
     fun process(): MutableList<Stock> {
         val all = stockManager.getWhiteStocks()
@@ -34,58 +45,93 @@ class StrategyRocket() : KoinComponent {
         return stocks
     }
 
+    override fun onInit(i: Int) {
+        if (i == TextToSpeech.SUCCESS) {
+            textToSpeech?.let {
+                val locale = Locale.getDefault()
+                val result = it.setLanguage(locale)
+                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+//                    Utils.showToastAlert("TTS не запущен 1")
+                }
+            }
+        }
+    }
+
+    fun speak(text: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            textToSpeech?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+        } else {
+            textToSpeech?.speak(text, TextToSpeech.QUEUE_FLUSH, null)
+        }
+    }
 
     fun startStrategy() {
+        if (textToSpeech == null) {
+            textToSpeech = TextToSpeech(TheApplication.application.applicationContext, this)
+        }
+        rocketStocks.clear()
+        cometStocks.clear()
         started = true
-
     }
 
     fun stopStrategy() {
         started = false
     }
 
-    var counter: Int = 5
+    @Synchronized
     fun processStrategy(stock: Stock) {
         if (!started) return
 
-        var percent = SettingsManager.getRocketChangePercent()
-        var minutes = SettingsManager.getRocketChangeMinutes()
-        var alive = SettingsManager.getRocketNotifyAlive()
+        val percentRocket = SettingsManager.getRocketChangePercent()
+        val minutesRocket = SettingsManager.getRocketChangeMinutes()
+        val volumeRocket = SettingsManager.getRocketChangeVolume()
 
-        if (counter > 0) {
-            updateNotification(stock.instrument.ticker)
-            counter--
+        if (stock.minuteCandles.isNotEmpty()) {
+            val firstCandle: Candle?
+            val lastCandle = stock.minuteCandles.last()
+
+            if (stock.minuteCandles.size >= minutesRocket) {
+                val from = stock.minuteCandles.size - minutesRocket
+                firstCandle = stock.minuteCandles[from]
+
+                var volume = 0
+                for (i in from until stock.minuteCandles.size) {
+                    volume += stock.minuteCandles[i].volume
+                }
+
+                val changePercent = lastCandle.closingPrice / firstCandle.openingPrice * 100.0 - 100.0
+                if (volume >= volumeRocket && abs(changePercent) >= percentRocket) {
+                    val rocketStock = RocketStock(stock, firstCandle.openingPrice, lastCandle.closingPrice, minutesRocket, volumeRocket, changePercent)
+                    rocketStock.process()
+                    if (changePercent > 0) {
+                        rocketStocks.add(0, rocketStock)
+                    } else {
+                        cometStocks.add(0, rocketStock)
+                    }
+                    createRocket(rocketStock)
+                }
+            }
         }
     }
 
-    private fun updateNotification(title: String) {
-        val notification = createNotification(TheApplication.application.applicationContext, title)
-//        notification.notify()
-        val manager = TheApplication.application.applicationContext.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
-        manager.notify("text", kotlin.random.Random.Default.nextInt(0, 6000), notification)
-    }
+    private fun createRocket(rocketStock: RocketStock) {
+        val context: Context = TheApplication.application.applicationContext
 
-    private fun createNotification(context: Context, title: String): Notification {
-        val notificationChannelId = title
-
-        val alarmSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-//        val audioAttributes = AudioAttributes.Builder()
-//            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-//            .setUsage(AudioAttributes.USAGE_ALARM)
-//            .build()
+        val ticker = rocketStock.stock.instrument.ticker
+        val notificationChannelId = ticker
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = TheApplication.application.applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val channel = NotificationChannel(
                 notificationChannelId,
-                "Rocket notifications channel $title",
+                "Rocket notifications channel $ticker",
                 NotificationManager.IMPORTANCE_HIGH
             ).let {
                 it.description = notificationChannelId
                 it.lightColor = Color.RED
                 it.enableVibration(true)
                 it.enableLights(true)
-//                it.setSound(alarmSound, audioAttributes)
                 it
             }
             notificationManager.createNotificationChannel(channel)
@@ -95,31 +141,48 @@ class StrategyRocket() : KoinComponent {
             PendingIntent.getActivity(context, 0, notificationIntent, 0)
         }
 
-        val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(
-            context,
-            notificationChannelId
-        ) else Notification.Builder(context)
+        val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(context, notificationChannelId) else Notification.Builder(context)
 
-        val cancelIntent = Intent("event.rocket")
-        cancelIntent.putExtra("type", "cancel")
-        val pendingCancelIntent = PendingIntent.getBroadcast(
-            context,
-            1,
-            cancelIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        var name = rocketStock.stock.instrument.name
+        if (rocketStock.stock.alterName != "") {
+            name = ticker
+        }
 
-        return builder
+        val changePercent: String
+        if (rocketStock.changePercent > 0) {
+            changePercent = "+%.2f%%".format(rocketStock.changePercent)
+        } else {
+            changePercent = "%.2f%%".format(rocketStock.changePercent)
+        }
+
+        if (SettingsManager.getRocketVoice()) {
+            if (rocketStock.changePercent > 0) {
+                speak("Ракета в $name! $changePercent за ${rocketStock.time} минут")
+            } else {
+                speak("Комета в $name! $changePercent за ${rocketStock.time} минут")
+            }
+        }
+
+        val title = "${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин"
+
+        val notification = builder
+            .setSubText("$$ticker $changePercent")
+            .setContentTitle(title)
             .setShowWhen(true)
-            .setTicker(title + "1")
-            .setContentTitle(title + "2")
-            .setContentText(title + title + "3")
-            .setStyle(Notification.BigTextStyle().setSummaryText(title + "4"))
             .setContentIntent(pendingIntent)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setOnlyAlertOnce(true)
             .setOngoing(false)
-            .addAction(R.mipmap.ic_launcher, "СТОП", pendingCancelIntent)
             .build()
+
+        val manager = context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
+        val uid = kotlin.random.Random.Default.nextInt(0, 100000)
+        manager.notify(ticker, uid, notification)
+
+        val alive: Long = SettingsManager.getRocketNotifyAlive().toLong()
+        GlobalScope.launch(Dispatchers.Main) {
+            delay(1000 * alive)
+            manager.cancel(ticker, uid)
+        }
     }
 }

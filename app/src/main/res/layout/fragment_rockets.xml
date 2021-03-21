@@ -2,17 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent" android:layout_height="fill_parent">
 
-    <SearchView
-        android:id="@+id/searchView"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="0dp"
-        android:layout_alignParentTop="true"
-        android:queryHint="Поиск $"
-        android:iconifiedByDefault="false"/>
-
     <androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -22,10 +11,10 @@
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp"
         android:layout_marginBottom="65dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="0dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.strategy2358.Strategy2358StartFragment"
-        tools:listitem="@layout/fragment_1000_buy_start_item" />
+        tools:listitem="@layout/fragment_rockets_item" />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -34,24 +23,37 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_alignParentBottom="true"
-        android:weightSum="2" >
-        <Button
-            android:layout_height="70dp"
-            android:id="@+id/button_update"
-            android:layout_marginRight="5dp"
-            android:text="@string/update"
-            android:layout_weight="1"
-            android:textSize="16dp"
-            android:layout_width="0dp" />
+        android:weightSum="4" >
 
         <Button
             android:layout_height="70dp"
             android:id="@+id/button_start"
-            android:layout_marginLeft="5dp"
-            android:text="@string/service_2358_prepare"
-            android:layout_weight="1"
-            android:textSize="16dp"
+            android:text="@string/start"
+            android:layout_marginRight="5dp"
+            android:padding="0dp"
+            android:layout_weight="2"
+            android:textSize="20dp"
             android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="70dp"
+            android:id="@+id/button_rocket"
+            android:layout_marginRight="5dp"
+            android:text="🚀"
+            android:layout_weight="1"
+            android:padding="0dp"
+            android:textSize="20dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="70dp"
+            android:id="@+id/button_comet"
+            android:padding="0dp"
+            android:text="☄️"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:layout_width="0dp" />
+
     </LinearLayout>
 
 </RelativeLayout>

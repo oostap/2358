@@ -1,7 +1,6 @@
 package com.project.ti2358.service
 
 import android.app.*
-import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -14,10 +13,7 @@ import android.widget.Toast
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.StrategyRocket
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import okhttp3.internal.notify
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -25,8 +21,10 @@ import org.koin.core.component.KoinApiExtension
 @KoinApiExtension
 class StrategyRocketService : Service() {
 
+    private val NOTIFICATION_ACTION = "event.rocket"
+    private val NOTIFICATION_CANCEL_ACTION = "event.rocket.cancel"
     private val NOTIFICATION_CHANNEL_ID = "ROCKET CHANNEL NOTIFICATION"
-    private val NOTIFICATION_ID = 1000111
+    private val NOTIFICATION_ID = 1700113
 
     private val strategyRocket: StrategyRocket by inject()
 
@@ -41,17 +39,16 @@ class StrategyRocketService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val intentFilter = IntentFilter("event.rocket")
+        val intentFilter = IntentFilter(NOTIFICATION_ACTION)
         notificationButtonReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val type = intent.getStringExtra("type")
-                if (type == "cancel") {
+                if (type == NOTIFICATION_CANCEL_ACTION) {
                     if (notificationButtonReceiver != null) unregisterReceiver(
                         notificationButtonReceiver
                     )
                     notificationButtonReceiver = null
                     context.stopService(Intent(context, StrategyRocketService::class.java))
-                    strategyRocket.stopStrategy()
                 }
             }
         }
@@ -62,36 +59,38 @@ class StrategyRocketService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notification = createNotification("Rocket")
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "ROCKET","",  "", "")
         startForeground(NOTIFICATION_ID, notification)
-
+        strategyRocket.startStrategy()
         scheduleUpdate()
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Ракеты выключены", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Ракеты отменены", Toast.LENGTH_LONG).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
-
         job?.cancel()
-
+        strategyRocket.stopStrategy()
         super.onDestroy()
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Ракета запущена", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Ракеты запущены", Toast.LENGTH_LONG).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
             newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "EndlessService::lock").apply {
-                acquire()
+                acquire(10*10*1000L /*10 minutes*/)
             }
         }
 
         job?.cancel()
         job = GlobalScope.launch(Dispatchers.Main) {
-            updateNotification()
+            while (isServiceRunning) {
+                updateNotification()
+                delay(1000)
+            }
         }
     }
 
@@ -111,30 +110,28 @@ class StrategyRocketService : Service() {
         isServiceRunning = false
     }
 
-    private fun updateNotification(): Long {
-        val title = "Внимание! Работают ракеты!"
+    private fun updateNotification() {
+        val title = "Внимание! Работают ракеты!"//strategyTrailingStop.getNotificationTitleShort()
+//        val shortText: String = "shortText"//strategyTrailingStop.getNotificationTextShort()
+//        val longText: String = strategyTrailingStop.getNotificationTextLong()
+//        val longTitleText: String = strategyTrailingStop.getNotificationTitleLong()
 
-        val notification = createNotification(title)
-        synchronized(notification) {
-            notification.notify()
-            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            manager.notify(NOTIFICATION_ID, notification)
+        val cancelIntent = Intent(NOTIFICATION_ACTION).apply { putExtra("type", NOTIFICATION_CANCEL_ACTION) }
+        val pendingCancelIntent = PendingIntent.getBroadcast(this, 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val actionCancel: Notification.Action = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            Notification.Action.Builder(null, "СТОП", pendingCancelIntent).build()
+        } else {
+            Notification.Action.Builder(0, "СТОП", pendingCancelIntent).build()
         }
 
-        return 5
-    }
-
-    private fun createNotification(title: String): Notification {
-        val notificationChannelId = NOTIFICATION_CHANNEL_ID
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val channel = NotificationChannel(
-                notificationChannelId,
-                "Rocket notifications channel",
-                IMPORTANCE_DEFAULT
+                NOTIFICATION_CHANNEL_ID,
+                "2358 notifications channel",
+                NotificationManager.IMPORTANCE_HIGH
             ).let {
-                it.description = notificationChannelId
+                it.description = NOTIFICATION_CHANNEL_ID
                 it.lightColor = Color.RED
                 it.enableVibration(false)
                 it
@@ -146,35 +143,21 @@ class StrategyRocketService : Service() {
             PendingIntent.getActivity(this, 0, notificationIntent, 0)
         }
 
-        val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(
-            this,
-            notificationChannelId
-        ) else Notification.Builder(this)
+        val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(this, NOTIFICATION_CHANNEL_ID) else Notification.Builder(this)
 
-        val cancelIntent = Intent("event.rocket")
-        cancelIntent.putExtra("type", "cancel")
-        val pendingCancelIntent = PendingIntent.getBroadcast(
-            this,
-            1,
-            cancelIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-//        val longText: String = strategyTazik.getNotificationTextLong()
-//        val shortText: String = strategyTazik.getNotificationTextShort()
-//        val priceText: String = strategyTazik.getTotalPurchaseString()
-//        builder.setSound(alarmSound)
-//        builder.setDefaults(Notification.DEFAULT_SOUND);
-
-        return builder
-//            .setContentTitle(title)
-//            .setContentText(shortText)
-            .setStyle(Notification.BigTextStyle().setSummaryText(title))
+        builder
+            .setSubText(title)
             .setContentIntent(pendingIntent)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setOnlyAlertOnce(true)
-            .setOngoing(true)
-            .addAction(R.mipmap.ic_launcher, "СТОП", pendingCancelIntent)
-            .build()
+            .setOngoing(false)
+
+        val notification = builder.build()
+
+        synchronized(notification) {
+            notification.notify()
+            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            manager.notify(NOTIFICATION_ID, notification)
+        }
     }
 }

@@ -117,13 +117,13 @@ class StrategyTazikFinishFragment : Fragment() {
     private fun updateServiceButtonText() {
         if (Utils.isServiceRunning(requireContext(), StrategyTazikService::class.java)) {
             if (scheduledStart) {
-                buttonStartLater?.text = getString(R.string.service_2358_stop)
+                buttonStartLater?.text = getString(R.string.stop)
             } else {
-                buttonStartNow?.text = getString(R.string.service_2358_stop)
+                buttonStartNow?.text = getString(R.string.stop)
             }
         } else {
             if (scheduledStart) {
-                buttonStartLater?.text = getString(R.string.service_2358_stop)
+                buttonStartLater?.text = getString(R.string.stop)
             } else {
                 buttonStartNow?.text = getString(R.string.start_now)
             }

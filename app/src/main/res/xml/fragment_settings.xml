@@ -258,37 +258,41 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/stocks_header_rocket">
+        <EditTextPreference
+            app:key="@string/setting_key_rocket_change_percent"
+            app:title="@string/stocks_rocket_change_percent"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="3.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_rocket_change_volume"
+            app:title="@string/stocks_rocket_change_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_rocket_change_minutes"
+            app:title="@string/stocks_rocket_change_minutes"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="10"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_rocket_notify_alive_seconds"
+            app:title="@string/stocks_rocket_notify_alive_seconds"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="60"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_rocket_voice"
+            app:title="@string/stocks_rocket_rocket_voice"
+            app:defaultValue="true" />
+
+    </PreferenceCategory>
+
     <SwitchPreferenceCompat
         app:key="@string/setting_key_dark_theme"
         app:title="@string/dark_theme"
         app:useSimpleSummaryProvider="false" />
-
-<!--    <PreferenceCategory app:title="@string/stocks_header_postmarket">-->
-<!--        <EditTextPreference-->
-<!--            app:key="@string/setting_key_rocket_change_percent"-->
-<!--            app:title="@string/stocks_rocket_change_percent"-->
-<!--            app:useSimpleSummaryProvider="true"-->
-<!--            app:defaultValue="2.0"/>-->
-<!--    </PreferenceCategory>-->
-
-<!--    <PreferenceCategory app:title="@string/stocks_header_rocket">-->
-<!--        <EditTextPreference-->
-<!--            app:key="@string/setting_key_rocket_change_percent"-->
-<!--            app:title="@string/stocks_rocket_change_percent"-->
-<!--            app:useSimpleSummaryProvider="true"-->
-<!--            app:defaultValue="2.0"/>-->
-
-<!--        <EditTextPreference-->
-<!--            app:key="@string/setting_key_rocket_change_minutes"-->
-<!--            app:title="@string/stocks_rocket_change_minutes"-->
-<!--            app:useSimpleSummaryProvider="true"-->
-<!--            app:defaultValue="5"/>-->
-
-<!--        <EditTextPreference-->
-<!--            app:key="@string/setting_key_rocket_notify_alive"-->
-<!--            app:title="@string/stocks_rocket_notify_alive"-->
-<!--            app:useSimpleSummaryProvider="true"-->
-<!--            app:defaultValue="5"/>-->
-<!--    </PreferenceCategory>-->
 
 </PreferenceScreen>
