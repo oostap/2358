@@ -7,9 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
-import android.media.AudioAttributes
-import android.media.RingtoneManager
-import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
@@ -19,11 +16,11 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.StrategyRocket
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import okhttp3.internal.notify
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-
 
 @KoinApiExtension
 class StrategyRocketService : Service() {
@@ -36,6 +33,8 @@ class StrategyRocketService : Service() {
     private var wakeLock: PowerManager.WakeLock? = null
     private var isServiceRunning = false
     private var notificationButtonReceiver: BroadcastReceiver? = null
+
+    var job: Job? = null
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -51,7 +50,7 @@ class StrategyRocketService : Service() {
                         notificationButtonReceiver
                     )
                     notificationButtonReceiver = null
-                    context.stopService(Intent(context, StrategyTazikService::class.java))
+                    context.stopService(Intent(context, StrategyRocketService::class.java))
                     strategyRocket.stopStrategy()
                 }
             }
@@ -75,6 +74,8 @@ class StrategyRocketService : Service() {
         notificationButtonReceiver = null
         isServiceRunning = false
 
+        job?.cancel()
+
         super.onDestroy()
     }
 
@@ -88,7 +89,8 @@ class StrategyRocketService : Service() {
             }
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        job?.cancel()
+        job = GlobalScope.launch(Dispatchers.Main) {
             updateNotification()
         }
     }

@@ -2,9 +2,11 @@ package com.project.ti2358.data.manager
 
 import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
+import kotlinx.coroutines.Job
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.lang.Exception
 import kotlin.math.roundToInt
 
 @KoinApiExtension
@@ -14,7 +16,8 @@ class Strategy2358() : KoinComponent {
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
-    var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
+    var purchaseToBuy: MutableList<PurchaseStock> = mutableListOf()
+    var jobs: MutableList<Job?> = mutableListOf()
     var started: Boolean = false
 
     fun process(): MutableList<Stock> {
@@ -90,7 +93,7 @@ class Strategy2358() : KoinComponent {
             val purchase = PurchaseStock(stock)
 
             var exists = false
-            for (p in stocksToPurchase) {
+            for (p in purchaseToBuy) {
                 if (p.stock.instrument.ticker == stock.instrument.ticker) {
                     purchase.apply {
                         percentProfitSellFrom = p.percentProfitSellFrom
@@ -99,6 +102,7 @@ class Strategy2358() : KoinComponent {
                         trailingStop = p.trailingStop
                         trailingStopTakeProfitPercentActivation = p.trailingStopTakeProfitPercentActivation
                         trailingStopTakeProfitPercentDelta = p.trailingStopTakeProfitPercentDelta
+                        lots = p.lots
                     }
                     exists = true
                     break
@@ -112,19 +116,21 @@ class Strategy2358() : KoinComponent {
 
                     trailingStopTakeProfitPercentActivation = SettingsManager.getTrailingStopTakeProfitPercentActivation()
                     trailingStopTakeProfitPercentDelta = SettingsManager.getTrailingStopTakeProfitPercentDelta()
-                    trailingStopStopLossPercent = 0.0 // TODO: ?!
+                    trailingStopStopLossPercent = 0.0 // нет стоп-лоссу на 2358!
                 }
             }
 
             purchases.add(purchase)
         }
-        stocksToPurchase = purchases
+        purchaseToBuy = purchases
 
         val totalMoney: Double = SettingsManager.get2358PurchaseVolume().toDouble()
-        val onePiece: Double = totalMoney / stocksToPurchase.size
+        val onePiece: Double = totalMoney / purchaseToBuy.size
 
-        for (purchase in stocksToPurchase) {
-            purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
+        for (purchase in purchaseToBuy) {
+            if (purchase.lots == 0) { // если уже настраивали количество, то не трогаем
+                purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
+            }
             purchase.status = OrderStatus.WAITING
 
             if (reset) { // запоминаем % подготовки, чтобы после проверить изменение
@@ -132,34 +138,34 @@ class Strategy2358() : KoinComponent {
             }
         }
 
-        return stocksToPurchase
+        return purchaseToBuy
     }
 
     fun getTotalPurchaseString(): String {
         var value = 0.0
-        stocksToPurchase.forEach { value += it.lots * it.stock.getPriceDouble() }
+        purchaseToBuy.forEach { value += it.lots * it.stock.getPriceDouble() }
         return value.toMoney(null)
     }
 
     fun getTotalPurchasePieces(): Int {
         var value = 0
-        stocksToPurchase.forEach { value += it.lots }
+        purchaseToBuy.forEach { value += it.lots }
         return value
     }
 
     fun getNotificationTextShort(): String {
         var tickers = ""
-        stocksToPurchase.forEach { tickers += "${it.lots}*${it.stock.instrument.ticker} " }
+        purchaseToBuy.forEach { tickers += "${it.lots}*${it.stock.instrument.ticker} " }
         return "${getTotalPurchaseString()}:\n$tickers"
     }
 
     fun getNotificationTextLong(): String {
         var tickers = ""
-        for (purchase in stocksToPurchase) {
-            val p = "%.1f$".format(purchase.lots * purchase.stock.getPriceDouble())
+        for (purchase in purchaseToBuy) {
+            val p = "%.2f$".format(purchase.lots * purchase.stock.getPriceDouble())
             tickers += "${purchase.stock.instrument.ticker}*${purchase.lots} = ${p}, "
             tickers += if (purchase.trailingStop) {
-                "ТТ:${purchase.trailingStopTakeProfitPercentActivation.toPercent()}/${purchase.trailingStopTakeProfitPercentDelta.toPercent()}, ${purchase.getStatusString()} ${purchase.currentTrailingStop?.currentTakeProfitValue ?: ""}\n"
+                "ТТ:${purchase.trailingStopTakeProfitPercentActivation.toPercent()}/${purchase.trailingStopTakeProfitPercentDelta.toPercent()}, ${purchase.getStatusString()} ${purchase.currentTrailingStop?.currentChangePercent ?: ""}\n"
             } else {
                 "Л:${purchase.percentProfitSellFrom.toPercent()}/${purchase.percentProfitSellTo.toPercent()}, ${purchase.getStatusString()}\n"
             }
@@ -173,6 +179,21 @@ class Strategy2358() : KoinComponent {
         started = true
 
         val localPurchases = getPurchaseStock(false)
-        localPurchases.forEach { it.buyFromAsk2358() }
+        localPurchases.forEach {
+            jobs.add(it.buyFromAsk2358())
+        }
+    }
+
+    fun stopStrategy() {
+        jobs.forEach {
+            try {
+                if (it?.isActive == true) {
+                    it.cancel()
+                }
+            } catch (e: Exception) {
+
+            }
+        }
+        jobs.clear()
     }
 }

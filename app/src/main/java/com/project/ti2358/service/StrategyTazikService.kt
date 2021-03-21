@@ -85,6 +85,7 @@ class StrategyTazikService : Service() {
         notificationButtonReceiver = null
         isServiceRunning = false
         job?.cancel()
+        strategyTazik.stopStrategy()
         super.onDestroy()
     }
 
@@ -108,8 +109,9 @@ class StrategyTazikService : Service() {
     }
 
     private fun updateNotification(): Long {
-        val title = strategyTazik.getNotificationTitle()
+        strategyTazik.processUpdate()
 
+        val title = strategyTazik.getNotificationTitle()
         val longText: String = strategyTazik.getNotificationTextLong()
         val shortText: String = strategyTazik.getNotificationTextShort()
         val longTitleText: String = strategyTazik.getTotalPurchaseString()

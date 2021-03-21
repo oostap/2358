@@ -16,7 +16,7 @@
     <string name="title_hour_2">2 часа</string>
 
     <string name="time_closemarket">23:00 - ...</string>
-    <string name="time_premarket">07:00 - ...</string>
+    <string name="time_premarket">01:45 - ...</string>
 
     <string name="set_1">Набор 1</string>
     <string name="set_2">Набор 2</string>
@@ -59,7 +59,6 @@
     <string name="menu_2358">2258</string>
     <string name="menu_1728">1628</string>
     <string name="menu_fixprice">Fix Price</string>
-    <string name="menu_1830">1830</string>
     <string name="menu_rocket">Ракета</string>
     <string name="menu_tazik">Автотазик</string>
     <string name="menu_blacklist">Чёрный список</string>
@@ -94,7 +93,7 @@
     <string name="stocks_usd_max">Цена max $</string>
 
     <!-- trailing stop-->
-    <string name="stocks_trailing_stop">Трейлинг тейк/стоп</string>
+    <string name="stocks_trailing_stop">Трейлинг тейк-профит/стоп-лосс</string>
     <string name="stocks_trailing_stop_take_profit_percent_activation">Тейк-профит в %</string>
     <string name="stocks_trailing_stop_take_profit_percent_delta">Отклонение в %</string>
     <string name="stocks_trailing_stop_stop_loss_percent">Стоп-лосс в % (0.0 = без стоп-лосса)</string>
@@ -123,7 +122,7 @@
     <string name="stocks_1000_buy_purchase_volume">Общая сумма покупки в $</string>
 
     <!-- 1005 settings -->
-    <string name="stocks_premarket_price_change_percent">Падение от %</string>
+    <string name="stocks_premarket_price_change_percent">Изменение от %</string>
     <string name="stocks_premarket_volume_min_day">Объём за день ОТ шт.</string>
     <string name="stocks_premarket_volume_max_day">Объём за день ДО шт.</string>
 

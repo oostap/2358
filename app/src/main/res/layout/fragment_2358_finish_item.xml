@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:divider="?android:dividerHorizontal"
@@ -12,26 +13,37 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="10"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_gravity="center">
 
         <TextView
             android:id="@+id/stock_item_ticker"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:padding="8dp"
+            android:paddingStart="8dp"
             android:text="1. TSLA"
-            android:textSize="14sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/stock_item_price"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp"
+            android:paddingStart="8dp"
             android:gravity="center_vertical"
             android:text="700$"
-            android:textSize="14sp" />
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/stock_purchase_price"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="8dp"
+            android:gravity="center_vertical"
+            android:text="7000$"
+            android:layout_weight="1"
+            android:textSize="13sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -39,26 +51,50 @@
         android:layout_height="wrap_content"
         android:layout_weight="9.5"
         android:orientation="vertical">
+
         <TextView
             android:id="@+id/stock_purchase_lots"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp"
+            android:paddingStart="8dp"
             android:gravity="center_vertical"
+            android:textAlignment="center"
             android:text="1 шт."
             android:layout_weight="1"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:ignore="RtlCompat" />
 
-
-        <TextView
-            android:id="@+id/stock_purchase_price"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="8dp"
-            android:gravity="center_vertical"
-            android:text="+5%"
-            android:layout_weight="1"
-            android:textSize="14sp" />
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <Button
+                android:layout_weight="1"
+                android:id="@+id/button_lots_minus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="1dp"
+                android:padding="0dp"
+                android:textSize="20dp"
+                android:text="-" />
+
+            <Button
+                android:layout_weight="1"
+                android:id="@+id/button_lots_plus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="2dp"
+                android:layout_marginLeft="1dp"
+                android:textSize="20dp"
+                android:padding="0dp"
+                android:text="+" />
+        </LinearLayout>
+
     </LinearLayout>
 
 
@@ -66,26 +102,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="10.4"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_gravity="center">
 
         <TextView
             android:id="@+id/stock_price_profit_percent_from"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:padding="8dp"
-            android:text="-0.2%"
+            android:padding="4dp"
+            android:text="0.5%"
             android:textSize="14sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textAlignment="center"
+            tools:ignore="RtlCompat" />
 
         <TextView
             android:id="@+id/stock_price_profit_percent_to"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp"
+            android:padding="4dp"
             android:gravity="center_vertical"
-            android:text="-10$"
-            android:textSize="14sp" />
+            android:text="2.0%"
+            android:textSize="14sp"
+            android:textAlignment="center"
+            tools:ignore="RtlCompat" />
 
     </LinearLayout>
 
@@ -97,7 +138,7 @@
 
         <Button
             android:layout_weight="2"
-            android:id="@+id/buttonMinus"
+            android:id="@+id/button_price_minus"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginLeft="3dp"
@@ -107,7 +148,7 @@
 
         <Button
             android:layout_weight="2"
-            android:id="@+id/buttonPlus"
+            android:id="@+id/button_price_plus"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginRight="3dp"

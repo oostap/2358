@@ -71,6 +71,7 @@ class Strategy2358Service : Service() {
         notificationButtonReceiver = null
         isServiceRunning = false
         job?.cancel()
+        strategy2358.stopStrategy()
         super.onDestroy()
     }
 

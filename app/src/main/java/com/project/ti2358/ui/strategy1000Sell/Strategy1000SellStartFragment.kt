@@ -63,7 +63,7 @@ class Strategy1000SellStartFragment : Fragment() {
             }
         }
 
-        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
+        val buttonUpdate = view.findViewById<Button>(R.id.button_update)
         buttonUpdate.setOnClickListener {
             adapterList.setData(depositManager.portfolioPositions)
         }

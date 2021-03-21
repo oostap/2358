@@ -115,7 +115,7 @@ class StockManager : KoinComponent {
         }
     }
 
-    private suspend fun reloadClosePrices() {
+    suspend fun reloadClosePrices() {
         try {
             stockClosePrices = synchronizedMap(thirdPartyService.daagerClosePrices() as MutableMap<String, ClosePrice>)
             stocksAll.forEach { it.apply {
@@ -360,7 +360,10 @@ class StockManager : KoinComponent {
         stock?.let {
             if (candle.interval == Interval.DAY) {
                 strategyTazik.processStrategy(stock, candle)
-            //                strategyRocket.processStrategy(stock)
+            }
+
+            if (candle.interval == Interval.MINUTE) {
+                strategyRocket.processStrategy(stock)
             }
         }
     }

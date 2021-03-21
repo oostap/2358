@@ -45,7 +45,7 @@ class BlacklistFragment : Fragment() {
             }
         }
 
-        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
+        val buttonUpdate = view.findViewById<Button>(R.id.button_update)
         buttonUpdate.setOnClickListener {
             updateData()
         }

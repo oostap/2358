@@ -2,9 +2,11 @@ package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.service.toMoney
+import kotlinx.coroutines.Job
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.lang.Exception
 import kotlin.math.abs
 
 @KoinApiExtension
@@ -13,10 +15,13 @@ class Strategy1000Sell() : KoinComponent {
 
     var positions: MutableList<PortfolioPosition> = mutableListOf()
     var positionsSelected: MutableList<PortfolioPosition> = mutableListOf()
-    private var positionsToSell: MutableList<PurchaseStock> = mutableListOf()
+    private var purchaseToSell: MutableList<PurchaseStock> = mutableListOf()
 
     var positionsToSell700: MutableList<PurchaseStock> = mutableListOf()
     var positionsToSell1000: MutableList<PurchaseStock> = mutableListOf()
+
+    var job1000: MutableList<Job?> = mutableListOf()
+    var job700: MutableList<Job?> = mutableListOf()
 
     var started700: Boolean = false
     var started1000: Boolean = false
@@ -42,21 +47,46 @@ class Strategy1000Sell() : KoinComponent {
     }
 
     fun processSellPosition(): MutableList<PurchaseStock> {
-        positionsToSell.clear()
+        val purchases: MutableList<PurchaseStock> = mutableListOf()
         for (pos in positionsSelected) {
-            pos.stock?.let {
-                positionsToSell.add(PurchaseStock(it).apply {
-                    position = pos
-                    processInitialProfit()
-                })
+            pos.stock?.let { stock ->
+                val purchase = PurchaseStock(stock)
+
+                var exists = false
+                for (p in purchaseToSell) {
+                    if (p.stock.instrument.ticker == stock.instrument.ticker) {
+                        purchase.apply {
+                            position = pos
+                            percentProfitSellFrom = p.percentProfitSellFrom
+                        }
+                        exists = true
+                        break
+                    }
+                }
+
+                if (!exists) {
+                    purchase.apply {
+                        position = pos
+                        percentLimitPriceChange = -1.0
+                    }
+                }
+
+                purchases.add(purchase)
             }
         }
-        return positionsToSell
+        purchaseToSell = purchases
+
+        purchaseToSell.forEach {
+            if (it.percentProfitSellFrom == 0.0) {
+                it.processInitialProfit()
+            }
+        }
+        return purchaseToSell
     }
 
     fun getTotalPurchasePieces(): Int {
         var value = 0
-        for (position in positionsToSell) {
+        for (position in purchaseToSell) {
             value += position.position.lots
         }
         return value
@@ -64,7 +94,7 @@ class Strategy1000Sell() : KoinComponent {
 
     fun getTotalSellString(): String {
         var value = 0.0
-        for (position in positionsToSell) {
+        for (position in purchaseToSell) {
             value += position.getProfitPriceForSell() * position.position.balance
         }
         return value.toMoney(null)
@@ -100,19 +130,19 @@ class Strategy1000Sell() : KoinComponent {
 
     fun prepareSell700() {
         started700 = false
-        positionsToSell700 = positionsToSell
+        positionsToSell700 = purchaseToSell
     }
 
     fun prepareSell1000() {
         started1000 = false
-        positionsToSell1000 = positionsToSell
+        positionsToSell1000 = purchaseToSell
     }
 
     fun startStrategy700Sell() {
         if (started700) return
         started700 = true
         positionsToSell700.forEach {
-            it.sell()
+            job700.add(it.sell())
         }
     }
 
@@ -120,7 +150,33 @@ class Strategy1000Sell() : KoinComponent {
         if (started1000) return
         started1000 = true
         positionsToSell1000.forEach {
-            it.sell()
+            job1000.add(it.sell())
         }
+    }
+
+    fun stopStrategy700() {
+        job700.forEach {
+            try {
+                if (it?.isActive == true) {
+                    it.cancel()
+                }
+            } catch (e: Exception) {
+
+            }
+        }
+        job700.clear()
+    }
+
+    fun stopStrategy1000() {
+        job1000.forEach {
+            try {
+                if (it?.isActive == true) {
+                    it.cancel()
+                }
+            } catch (e: Exception) {
+
+            }
+        }
+        job1000.clear()
     }
 }

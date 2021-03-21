@@ -11,7 +11,6 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-
 @KoinApiExtension
 class WorkflowManager() : KoinComponent {
     private val alorManager: AlorManager by inject()
@@ -45,11 +44,12 @@ class WorkflowManager() : KoinComponent {
             fun provideStrategy1005(): Strategy1005 = Strategy1005()
             fun provideStrategy2358(): Strategy2358 = Strategy2358()
             fun provideStrategy1728(): Strategy1728 = Strategy1728()
-            fun provideStrategyFixPrice(): StrategyFixPrice = StrategyFixPrice()
             fun provideStrategyTazik(): StrategyTazik = StrategyTazik()
             fun provideStrategyReports(): StrategyReports = StrategyReports()
+            fun provideStrategyTralingStop(): StrategyTrailingStop = StrategyTrailingStop()
 
             // unused yet
+            fun provideStrategyFixPrice(): StrategyFixPrice = StrategyFixPrice()
             fun provideStrategyRocket(): StrategyRocket = StrategyRocket()
             fun provideStrategyShorts(): StrategyShorts = StrategyShorts()
             fun provideStrategyTelegram(): StrategyTelegram = StrategyTelegram()
@@ -68,11 +68,13 @@ class WorkflowManager() : KoinComponent {
             single { provideStrategy1005() }
             single { provideStrategy2358() }
             single { provideStrategy1728() }
-            single { provideStrategyFixPrice() }
-
-            single { provideStrategyRocket() }
             single { provideStrategyTazik() }
             single { provideStrategyReports() }
+            single { provideStrategyTralingStop() }
+
+            // unused yet
+            single { provideStrategyFixPrice() }
+            single { provideStrategyRocket() }
             single { provideStrategyShorts() }
             single { provideStrategyTelegram() }
         }

@@ -63,18 +63,6 @@ class PremarketFragment : Fragment() {
             }
         }
 
-        val buttonPremarket = view.findViewById<Button>(R.id.button_premarket)
-        buttonPremarket.setOnClickListener {
-            closemarket = false
-            updateData()
-        }
-
-        val buttonClosemarket = view.findViewById<Button>(R.id.button_closemarket)
-        buttonClosemarket.setOnClickListener {
-            closemarket = true
-            updateData()
-        }
-
         val searchView: SearchView = view.findViewById(R.id.searchView)
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
@@ -88,7 +76,7 @@ class PremarketFragment : Fragment() {
             }
 
             fun processText(text: String) {
-                updateData()
+                updateData(false)
 
                 stocks = Utils.search(stocks, text)
                 adapterList.setData(stocks)
@@ -100,9 +88,27 @@ class PremarketFragment : Fragment() {
             false
         }
 
+        val buttonPremarket = view.findViewById<Button>(R.id.button_premarket)
+        buttonPremarket.setOnClickListener {
+            closemarket = false
+            updateData(false)
+
+            stocks = Utils.search(stocks, searchView.query.toString())
+            adapterList.setData(stocks)
+        }
+
+        val buttonClosemarket = view.findViewById<Button>(R.id.button_closemarket)
+        buttonClosemarket.setOnClickListener {
+            closemarket = true
+            updateData(false)
+
+            stocks = Utils.search(stocks, searchView.query.toString())
+            adapterList.setData(stocks)
+        }
+
         job?.cancel()
         job = GlobalScope.launch(Dispatchers.Main) {
-            stockManager.reloadReports()
+            stockManager.reloadClosePrices()
             updateData()
         }
 
@@ -110,7 +116,7 @@ class PremarketFragment : Fragment() {
         return view
     }
 
-    fun updateData() {
+    fun updateData(update: Boolean = true) {
         if (closemarket) {
             stocks = strategy1005.process()
             stocks = strategy1005.resort()
@@ -118,7 +124,8 @@ class PremarketFragment : Fragment() {
             stocks = strategyPremarket.process()
             stocks = strategyPremarket.resort()
         }
-        adapterList.setData(stocks)
+
+        if (update) adapterList.setData(stocks)
     }
 
     inner class ItemStocksRecyclerViewAdapter(
@@ -161,7 +168,7 @@ class PremarketFragment : Fragment() {
                 holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
                 holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
             } else {
-                holder.priceView.text = "${item.getPrice1000String()} ➡ ${item.getPriceString()}"
+                holder.priceView.text = "${item.getPricePost1000String()} ➡ ${item.getPriceString()}"
 
                 holder.changePriceAbsoluteView.text = item.changePriceDayAbsolute.toMoney(item)
                 holder.changePricePercentView.text = item.changePriceDayPercent.toPercent()

@@ -7,17 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.service.StreamingAlorService
 import com.project.ti2358.data.service.StreamingTinkoffService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -42,7 +37,7 @@ class DiagnosticsFragment : Fragment() {
 
         textView = view.findViewById(R.id.textInfo)
 
-        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
+        val buttonUpdate = view.findViewById<Button>(R.id.button_update)
         buttonUpdate.setOnClickListener {
             updateData()
         }

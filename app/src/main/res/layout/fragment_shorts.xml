@@ -69,7 +69,7 @@
         android:weightSum="1" >
         <Button android:layout_width="fill_parent"
             android:layout_height="70dp"
-            android:id="@+id/buttonUpdate"
+            android:id="@+id/button_update"
             android:text="@string/sort"
             android:textSize="20sp" />
     </LinearLayout>

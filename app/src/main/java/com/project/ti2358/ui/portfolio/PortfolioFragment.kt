@@ -1,7 +1,6 @@
 package com.project.ti2358.ui.portfolio
 
 import android.content.pm.PackageInfo
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +9,6 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -20,7 +18,6 @@ import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.manager.OrderbookManager
-import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.data.service.ThirdPartyService
 import com.project.ti2358.service.Utils
@@ -69,7 +66,7 @@ class PortfolioFragment : Fragment() {
             }
         }
 
-        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
+        val buttonUpdate = view.findViewById<Button>(R.id.button_update)
         buttonUpdate.setOnClickListener {
             updateData()
         }
@@ -170,7 +167,7 @@ class PortfolioFragment : Fragment() {
             holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(percent))
             holder.changePricePercentView.setTextColor(Utils.getColorForValue(percent))
 
-            holder.imageOrderbook.setOnClickListener {
+            holder.orderbookImage.setOnClickListener {
                 holder.position.stock?.let {
                     orderbookManager.start(it)
                     view?.findNavController()?.navigate(R.id.action_nav_portfolio_to_nav_orderbook)
@@ -206,7 +203,7 @@ class PortfolioFragment : Fragment() {
             val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
             val priceView: TextView = view.findViewById(R.id.stock_item_price)
 
-            val imageOrderbook: ImageView = view.findViewById(R.id.orderbook)
+            val orderbookImage: ImageView = view.findViewById(R.id.orderbook)
 
             val volumeCashView: TextView = view.findViewById(R.id.stock_item_volume_cash)
             val volumePiecesView: TextView = view.findViewById(R.id.stock_item_volume_pieces)

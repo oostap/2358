@@ -19,6 +19,7 @@ import com.project.ti2358.data.manager.StrategyReports
 import com.project.ti2358.service.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -30,10 +31,15 @@ class ReportsFragment : Fragment() {
     var adapterList: ItemReportsRecyclerViewAdapter = ItemReportsRecyclerViewAdapter(emptyList())
     lateinit var stocks: MutableList<Stock>
 
+    var job : Job? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
 
+    override fun onDestroy() {
+        job?.cancel()
+        super.onDestroy()
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -61,7 +67,8 @@ class ReportsFragment : Fragment() {
 
         updateDataReport()
 
-        GlobalScope.launch(Dispatchers.Main) {
+        job?.cancel()
+        job = GlobalScope.launch(Dispatchers.Main) {
             stockManager.reloadReports()
             updateDataReport()
         }

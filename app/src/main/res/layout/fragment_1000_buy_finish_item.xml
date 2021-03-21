@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -11,39 +12,42 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="9.5"
-        android:orientation="vertical">
+        android:layout_weight="9.4"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical"
+        android:weightSum="3">
 
         <TextView
+            android:layout_weight="1"
             android:id="@+id/stock_item_ticker"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:paddingStart="8dp"
-            android:paddingTop="4dp"
             android:text="1. TSLA 10 шт."
             android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
+            android:layout_weight="1"
             android:id="@+id/stock_item_price"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingStart="8dp"
-            android:paddingTop="4dp"
             android:gravity="center_vertical"
             android:text="700$ -> 650$"
-            android:textSize="13sp" />
+            android:textSize="11sp" />
 
         <TextView
-            android:id="@+id/stock_total_price"
+            android:layout_weight="1"
+            android:id="@+id/stock_item_price_buy"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingStart="8dp"
-            android:paddingTop="4dp"
             android:gravity="center_vertical"
-            android:text="6500$"
-            android:textSize="14sp" />
+            android:text="640$"
+            android:textSize="11sp" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -53,99 +57,118 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/unused"
+            android:id="@+id/stock_lots"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:paddingStart="8dp"
-            android:paddingTop="4dp"
-            android:text=""
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:paddingTop="2dp"
+            android:text="123 шт."
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            tools:ignore="RtlCompat" />
 
-        <TextView
-            android:id="@+id/stock_item_price_buy"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingStart="8dp"
-            android:paddingTop="4dp"
-            android:gravity="center_vertical"
-            android:text="640$"
-            android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/stock_item_price_total_buy"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingStart="8dp"
-            android:paddingTop="4dp"
-            android:gravity="center_vertical"
-            android:text="6400$"
-            android:textSize="14sp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="10.9"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/stock_price_change_percent"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:paddingStart="8dp"
-            android:paddingTop="4dp"
-            android:text="-0.2%"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:layout_weight="2"
+            android:orientation="horizontal"
+            android:weightSum="2">
 
-        <TextView
-            android:id="@+id/stock_price_absolute_change"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingStart="8dp"
-            android:paddingTop="4dp"
-            android:gravity="center_vertical"
-            android:text="-10$"
-            android:textSize="14sp" />
+            <Button
+                android:layout_weight="1"
+                android:id="@+id/button_lots_minus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="1dp"
+                android:padding="0dp"
+                android:textSize="20dp"
+                android:text="-" />
 
-        <TextView
-            android:id="@+id/stock_price_absolute_total_change"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingStart="8dp"
-            android:paddingTop="4dp"
-            android:gravity="center_vertical"
-            android:text="-100$"
-            android:textSize="14sp" />
+            <Button
+                android:layout_weight="1"
+                android:id="@+id/button_lots_plus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="2dp"
+                android:layout_marginLeft="1dp"
+                android:textSize="20dp"
+                android:padding="0dp"
+                android:text="+" />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="9"
+        android:layout_weight="10.9"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical"
+        android:weightSum="3">
+
+        <TextView
+            android:layout_weight="1"
+            android:id="@+id/stock_price_change_percent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingTop="2dp"
+            android:text="-0.2%"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_weight="1"
+            android:id="@+id/stock_price_absolute_change"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingTop="2dp"
+            android:gravity="center_vertical"
+            android:text="-10$"
+            android:textSize="13sp" />
+
+        <TextView
+            android:layout_weight="1"
+            android:id="@+id/stock_price_absolute_total_change"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingTop="2dp"
+            android:gravity="center_vertical"
+            android:text="-100$"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="9.1"
         android:orientation="horizontal">
 
         <Button
-            android:layout_weight="2"
-            android:id="@+id/buttonMinus"
+            android:layout_weight="1"
+            android:id="@+id/button_price_minus"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginLeft="3dp"
-            android:layout_marginRight="3dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="1dp"
+            android:padding="0dp"
             android:textSize="30dp"
+            android:textAlignment="center"
             android:text="-" />
 
         <Button
-            android:layout_weight="2"
-            android:id="@+id/buttonPlus"
+            android:layout_weight="1"
+            android:id="@+id/button_price_plus"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginRight="3dp"
-            android:layout_marginLeft="3dp"
+            android:layout_marginRight="2dp"
+            android:layout_marginLeft="1dp"
+            android:padding="0dp"
             android:textSize="30dp"
             android:text="+" />
     </LinearLayout>

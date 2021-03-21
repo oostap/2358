@@ -41,12 +41,7 @@ class Strategy1000SellFinishFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_1000_sell_finish, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
-        list.addItemDecoration(
-            DividerItemDecoration(
-                list.context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
+        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
 
         if (list is RecyclerView) {
             with(list) {
@@ -140,7 +135,7 @@ class Strategy1000SellFinishFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
-            holder.stock = item
+            holder.purchase = item
 
             val avg = item.position.getAveragePrice()
             holder.tickerView.text = "${item.position.ticker} x ${item.position.lots}"
@@ -156,6 +151,7 @@ class Strategy1000SellFinishFragment : Fragment() {
             holder.totalPriceProfitView.text = profit.toMoney(item.stock)
             holder.priceProfitView.text = (profit / item.position.lots).toMoney(item.stock)
 
+            holder.currentPriceView.setTextColor(Utils.getColorForValue(percent))
             holder.currentProfitView.setTextColor(Utils.getColorForValue(percent))
             holder.priceProfitView.setTextColor(Utils.getColorForValue(percent))
             holder.totalPriceProfitView.setTextColor(Utils.getColorForValue(percent))
@@ -173,10 +169,12 @@ class Strategy1000SellFinishFragment : Fragment() {
                 refreshFuturePercent(holder)
                 updateInfoText()
             }
+
+            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 
         fun refreshFuturePercent(holder: ViewHolder) {
-            val item = holder.stock
+            val item = holder.purchase
             val futurePercent = item.percentProfitSellFrom
             holder.futureProfitView.text = futurePercent.toPercent()
 
@@ -185,8 +183,11 @@ class Strategy1000SellFinishFragment : Fragment() {
             holder.futureProfitPriceView.text = futureProfitPrice.toMoney(item.stock)
             holder.totalFutureProfitPriceView.text = (futureProfitPrice * item.position.balance).toMoney(item.stock)
 
-            holder.totalPriceView.text = item.getProfitPriceForSell().toMoney(item.stock)
+            val sellPrice = item.getProfitPriceForSell()
+            val totalSellPrice = item.getProfitPriceForSell() * item.position.balance
+            holder.totalPriceView.text = "${sellPrice.toMoney(item.stock)} ➡ ${totalSellPrice.toMoney(item.stock)}"
 
+            holder.totalPriceView.setTextColor(Utils.getColorForValue(futureProfitPrice))
             holder.futureProfitView.setTextColor(Utils.getColorForValue(futureProfitPrice))
             holder.futureProfitPriceView.setTextColor(Utils.getColorForValue(futureProfitPrice))
             holder.totalFutureProfitPriceView.setTextColor(Utils.getColorForValue(futureProfitPrice))
@@ -195,7 +196,7 @@ class Strategy1000SellFinishFragment : Fragment() {
         override fun getItemCount(): Int = values.size
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            lateinit var stock: PurchaseStock
+            lateinit var purchase: PurchaseStock
 
             val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
             val currentPriceView: TextView = view.findViewById(R.id.stock_item_price)

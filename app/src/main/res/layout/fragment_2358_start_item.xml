@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:divider="?android:dividerHorizontal"
-        android:dividerPadding="5dp"
+        android:dividerPadding="10dp"
         android:showDividers="middle"
+        android:paddingStart="10dp"
         android:weightSum="4" >
 
     <LinearLayout
@@ -19,7 +21,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:paddingStart="8dp"
             android:paddingTop="4dp"
             android:text="1. TSLA"
             android:textSize="14sp"
@@ -29,7 +30,6 @@
             android:id="@+id/stock_item_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="6dp"
             android:paddingTop="4dp"
             android:gravity="center_vertical"
             android:text="700$"
@@ -39,7 +39,6 @@
             android:id="@+id/stock_sector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="6dp"
             android:paddingTop="2dp"
             android:gravity="center_vertical"
             android:text="700$"
@@ -49,11 +48,10 @@
             android:id="@+id/stock_report_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="8dp"
             android:paddingTop="4dp"
             android:gravity="center_vertical"
-            android:text="700$"
-            android:textSize="12sp" />
+            android:text="70"
+            android:textSize="12sp"/>
 
     </LinearLayout>
 
@@ -109,8 +107,8 @@
 
     <CheckBox
         android:id="@+id/check_box"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="0.5"
-        android:layout_gravity="center"
-        android:layout_width="0dp" />
+        android:layout_weight="0.49"
+        android:textSize="8sp" />
 </LinearLayout>

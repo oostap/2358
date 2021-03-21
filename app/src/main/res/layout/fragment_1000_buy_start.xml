@@ -2,15 +2,26 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent" android:layout_height="fill_parent">
 
+    <SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="0dp"
+        android:layout_alignParentTop="true"
+        android:queryHint="Поиск $"
+        android:iconifiedByDefault="false"/>
+
     <androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginBottom="75dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginBottom="65dp"
         android:layout_marginTop="50dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.strategy2358.Strategy2358StartFragment"
@@ -26,7 +37,7 @@
         android:weightSum="2" >
         <Button
             android:layout_height="70dp"
-            android:id="@+id/buttonUpdate"
+            android:id="@+id/button_update"
             android:layout_marginRight="5dp"
             android:text="@string/update"
             android:layout_weight="1"
@@ -42,16 +53,5 @@
             android:textSize="16dp"
             android:layout_width="0dp" />
     </LinearLayout>
-
-    <SearchView
-        android:id="@+id/searchView"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="0dp"
-        android:layout_alignParentTop="true"
-        android:queryHint="Поиск $"
-        android:iconifiedByDefault="false"/>
 
 </RelativeLayout>

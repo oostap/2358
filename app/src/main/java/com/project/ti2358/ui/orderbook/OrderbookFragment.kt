@@ -28,7 +28,6 @@ import org.koin.core.component.KoinApiExtension
 import java.lang.Exception
 import java.lang.StrictMath.min
 import kotlin.math.roundToInt
-import kotlin.math.sign
 
 
 @KoinApiExtension
@@ -40,8 +39,8 @@ class OrderbookFragment : Fragment() {
     var adapterList: ItemOrderbookRecyclerViewAdapter = ItemOrderbookRecyclerViewAdapter(emptyList())
     var activeStock: Stock? = null
     var orderbookLines: MutableList<OrderbookLine> = mutableListOf()
-    var job1: Job? = null
-    var job2: Job? = null
+    var jobRefreshOrders: Job? = null
+    var jobRefreshOrderbook: Job? = null
 
     lateinit var localLayoutManager: LinearLayoutManager
     lateinit var recyclerView: RecyclerView
@@ -63,8 +62,8 @@ class OrderbookFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        job1?.cancel()
-        job2?.cancel()
+        jobRefreshOrders?.cancel()
+        jobRefreshOrderbook?.cancel()
 
         orderbookManager.stop()
         super.onDestroy()
@@ -202,15 +201,16 @@ class OrderbookFragment : Fragment() {
 
         activeStock = orderbookManager.activeStock
 
-        job1 = GlobalScope.launch(Dispatchers.Main) {
+        jobRefreshOrders?.cancel()
+        jobRefreshOrders = GlobalScope.launch(Dispatchers.Main) {
             while (true) {
                 delay(5000)
                 depositManager.refreshOrders()
             }
         }
 
-        // старт апдейта заявок
-        job2 = GlobalScope.launch(Dispatchers.Main) {
+        jobRefreshOrderbook?.cancel()
+        jobRefreshOrderbook = GlobalScope.launch(Dispatchers.Main) {
             depositManager.refreshOrders()
 
             while (true) {
@@ -467,12 +467,26 @@ class OrderbookFragment : Fragment() {
                 ordersSell[i].setTag(R.string.order_item, item.ordersSell[i])
             }
 
-            holder.dragToSellView.setOnClickListener {
-                showEditOrder(holder.orderbookLine, OperationType.SELL)
+            holder.dragToSellView.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    v.setBackgroundColor(Utils.LIGHT)
+                }
+                if (event.action == MotionEvent.ACTION_UP) {
+                    holder.dragToSellView.setBackgroundColor(Utils.getColorForIndex(position))
+                    showEditOrder(holder.orderbookLine, OperationType.SELL)
+                }
+                true
             }
 
-            holder.dragToBuyView.setOnClickListener {
-                showEditOrder(holder.orderbookLine, OperationType.BUY)
+            holder.dragToBuyView.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    v.setBackgroundColor(Utils.LIGHT)
+                }
+                if (event.action == MotionEvent.ACTION_UP) {
+                    holder.dragToSellView.setBackgroundColor(Utils.getColorForIndex(position))
+                    showEditOrder(holder.orderbookLine, OperationType.BUY)
+                }
+                true
             }
 
             holder.dragToBuyView.setBackgroundColor(Utils.getColorForIndex(position))

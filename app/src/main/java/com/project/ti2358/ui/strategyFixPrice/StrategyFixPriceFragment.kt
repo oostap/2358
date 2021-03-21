@@ -51,7 +51,7 @@ class StrategyFixPriceFragment : Fragment() {
             updateData()
         }
 
-        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
+        val buttonUpdate = view.findViewById<Button>(R.id.button_update)
         buttonUpdate.setOnClickListener {
             updateData()
         }
@@ -125,11 +125,8 @@ class StrategyFixPriceFragment : Fragment() {
                 }
             }
 
-//            if (SettingsManager.get1728QuickBuy()) {
-//                holder.buttonBuy.visibility = View.VISIBLE
-//            } else {
-                holder.buttonBuy.visibility = View.GONE
-//            }
+            holder.buttonBuy.visibility = View.VISIBLE
+            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 
         override fun getItemCount(): Int = values.size

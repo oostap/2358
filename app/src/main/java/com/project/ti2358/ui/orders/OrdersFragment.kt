@@ -5,14 +5,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.DepositManager
+import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.model.dto.Order
 import com.project.ti2358.service.Utils
@@ -23,17 +26,24 @@ import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
 class OrdersFragment : Fragment() {
-
+    private val orderbookManager: OrderbookManager by inject()
     val depositManager: DepositManager by inject()
     var adapterList: ItemOrdersRecyclerViewAdapter = ItemOrdersRecyclerViewAdapter(emptyList())
-    var job: Job? = null
+    var jobRefreshEndless: Job? = null
+    var jobCancelAll: Job? = null
+
+    var jobCancel: Job? = null
+    var jobRefresh: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
 
     override fun onDestroy() {
-        job?.cancel()
+        jobCancelAll?.cancel()
+        jobRefreshEndless?.cancel()
+        jobRefresh?.cancel()
+        jobCancel?.cancel()
         super.onDestroy()
     }
 
@@ -44,12 +54,7 @@ class OrdersFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_orders_item_list, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
-        list.addItemDecoration(
-            DividerItemDecoration(
-                list.context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
+        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
 
         if (list is RecyclerView) {
             with(list) {
@@ -58,23 +63,26 @@ class OrdersFragment : Fragment() {
             }
         }
 
-        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
+        val buttonUpdate = view.findViewById<Button>(R.id.button_update)
         buttonUpdate.setOnClickListener {
-            GlobalScope.launch(Dispatchers.Main) {
+            jobRefresh?.cancel()
+            jobRefresh = GlobalScope.launch(Dispatchers.Main) {
                 depositManager.refreshOrders()
                 updateData()
             }
         }
 
-        val buttonCancel = view.findViewById<Button>(R.id.buttonCancel)
+        val buttonCancel = view.findViewById<Button>(R.id.button_cancel)
         buttonCancel.setOnClickListener {
-            GlobalScope.launch(Dispatchers.Main) {
+            jobCancelAll?.cancel()
+            jobCancelAll = GlobalScope.launch(Dispatchers.Main) {
                 depositManager.cancelAllOrders()
                 updateData()
             }
         }
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        jobRefreshEndless?.cancel()
+        jobRefreshEndless = GlobalScope.launch(Dispatchers.Main) {
             while (true) {
                 if (depositManager.refreshOrders()) {
                     updateData()
@@ -127,10 +135,18 @@ class OrdersFragment : Fragment() {
             }
 
             holder.buttonCancel.setOnClickListener {
-                GlobalScope.launch(Dispatchers.Main) {
+                jobCancel?.cancel()
+                jobCancel = GlobalScope.launch(Dispatchers.Main) {
                     depositManager.cancelOrder(holder.order)
                     depositManager.refreshOrders()
                     updateData()
+                }
+            }
+
+            holder.orderbookImage.setOnClickListener {
+                holder.order.stock?.let {
+                    orderbookManager.start(it)
+                    view?.findNavController()?.navigate(R.id.action_nav_orders_to_nav_orderbook)
                 }
             }
         }
@@ -145,7 +161,9 @@ class OrdersFragment : Fragment() {
             val lotsView: TextView = view.findViewById(R.id.stock_count)
             val priceView: TextView = view.findViewById(R.id.stock_price)
 
-            val buttonCancel: Button = view.findViewById(R.id.buttonCancel)
+            val buttonCancel: Button = view.findViewById(R.id.button_cancel)
+
+            val orderbookImage: ImageView = view.findViewById(R.id.orderbook)
         }
     }
 }

@@ -6,6 +6,7 @@
         android:divider="?android:dividerHorizontal"
         android:dividerPadding="10dp"
         android:showDividers="middle"
+        android:paddingStart="10dp"
         android:weightSum="40" >
 
     <LinearLayout
@@ -19,19 +20,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:padding="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             android:text="1. TSLA"
             android:textSize="14sp"
             android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/stock_item_price"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:gravity="center_vertical"
-        android:text="700$"
-        android:textSize="14sp" />
+        <TextView
+            android:id="@+id/stock_item_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:gravity="center_vertical"
+            android:text="700$"
+            android:textSize="14sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -87,7 +90,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="10"
+        android:layout_weight="9.7"
         android:orientation="vertical">
 
         <Button

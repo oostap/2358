@@ -69,10 +69,10 @@ class StrategyRocket() : KoinComponent {
         val notificationChannelId = title
 
         val alarmSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        val audioAttributes = AudioAttributes.Builder()
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .setUsage(AudioAttributes.USAGE_ALARM)
-            .build()
+//        val audioAttributes = AudioAttributes.Builder()
+//            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+//            .setUsage(AudioAttributes.USAGE_ALARM)
+//            .build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = TheApplication.application.applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -85,7 +85,7 @@ class StrategyRocket() : KoinComponent {
                 it.lightColor = Color.RED
                 it.enableVibration(true)
                 it.enableLights(true)
-                it.setSound(alarmSound, audioAttributes)
+//                it.setSound(alarmSound, audioAttributes)
                 it
             }
             notificationManager.createNotificationChannel(channel)

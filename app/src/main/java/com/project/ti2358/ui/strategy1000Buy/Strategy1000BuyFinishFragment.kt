@@ -41,12 +41,7 @@ class Strategy1000BuyFinishFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_1000_buy_finish, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
-        list.addItemDecoration(
-            DividerItemDecoration(
-                list.context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
+        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
 
         if (list is RecyclerView) {
             with(list) {
@@ -72,7 +67,6 @@ class Strategy1000BuyFinishFragment : Fragment() {
             updateServiceButtonText700()
         }
         updateServiceButtonText700()
-        ///////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////
         buttonStart1000 = view.findViewById(R.id.buttonStart1000)
         buttonStart1000?.setOnClickListener {
@@ -109,7 +103,7 @@ class Strategy1000BuyFinishFragment : Fragment() {
             prepareText,
             time,
             positions.size,
-            strategy1000Buy.getTotalPurchaseString(strategy1000Buy.stocksToBuy)
+            strategy1000Buy.getTotalPurchaseString(strategy1000Buy.purchaseToBuy)
         )
     }
 
@@ -139,8 +133,7 @@ class Strategy1000BuyFinishFragment : Fragment() {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.fragment_1000_buy_finish_item, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_1000_buy_finish_item, parent, false)
             return ViewHolder(view)
         }
 
@@ -148,40 +141,52 @@ class Strategy1000BuyFinishFragment : Fragment() {
             val item = values[position]
             holder.position = item
 
-            val avg = item.stock.getPriceDouble()
-            holder.tickerView.text = "${item.stock.instrument.ticker} x ${item.lots}"
-            holder.currentPriceView.text = "${item.stock.getPrice2359String()} ➡ ${avg}$"
-            holder.totalPriceView.text = (item.stock.getPriceDouble() * item.lots).toMoney(item.stock)
+            holder.tickerView.text = "${position + 1}) ${item.stock.instrument.ticker}"
+            holder.currentPriceView.text = "${item.stock.getPrice2359String()} ➡ ${item.stock.getPriceDouble().toMoney(item.stock)}"
+            holder.currentPriceView.setTextColor(Utils.getColorForValue(item.stock.changePrice2359DayPercent))
 
             refreshPercent(holder)
 
-            holder.buttonPlus.setOnClickListener {
+            holder.pricePlusButton.setOnClickListener {
                 item.addPriceLimitPercent(0.05)
                 refreshPercent(holder)
-                updateInfoText()
             }
 
-            holder.buttonMinus.setOnClickListener {
+            holder.priceMinusButton.setOnClickListener {
                 item.addPriceLimitPercent(-0.05)
                 refreshPercent(holder)
-                updateInfoText()
             }
+
+            holder.lotsPlusButton.setOnClickListener {
+                item.addLots(1)
+                refreshPercent(holder)
+            }
+
+            holder.lotsMinusButton.setOnClickListener {
+                item.addLots(-1)
+                refreshPercent(holder)
+            }
+
+            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 
         fun refreshPercent(holder: ViewHolder) {
             val item = holder.position
             val percent = item.percentLimitPriceChange
 
+            holder.lotsView.text = "${item.lots} шт."
+
             holder.priceChangePercentView.text = percent.toPercent()
             holder.priceChangeAbsoluteView.text = item.absoluteLimitPriceChange.toMoney(item.stock)
             holder.priceChangeAbsoluteTotalView.text = (item.absoluteLimitPriceChange * item.lots).toMoney(item.stock)
 
-            holder.priceBuyView.text = item.getLimitPriceDouble().toMoney(item.stock)
-            holder.priceBuyTotalView.text = (item.getLimitPriceDouble() * item.lots).toMoney(item.stock)
+            holder.priceBuyView.text = "${item.getLimitPriceDouble().toMoney(item.stock)} > ${(item.getLimitPriceDouble() * item.lots).toMoney(item.stock)}"
 
             holder.priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
             holder.priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
             holder.priceChangeAbsoluteTotalView.setTextColor(Utils.getColorForValue(percent))
+
+            updateInfoText()
         }
 
         override fun getItemCount(): Int = values.size
@@ -191,17 +196,19 @@ class Strategy1000BuyFinishFragment : Fragment() {
 
             val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
             val currentPriceView: TextView = view.findViewById(R.id.stock_item_price)
-            val totalPriceView: TextView = view.findViewById(R.id.stock_total_price)
+            val lotsView: TextView = view.findViewById(R.id.stock_lots)
 
             val priceBuyView: TextView = view.findViewById(R.id.stock_item_price_buy)
-            val priceBuyTotalView: TextView = view.findViewById(R.id.stock_item_price_total_buy)
 
             val priceChangePercentView: TextView = view.findViewById(R.id.stock_price_change_percent)
             val priceChangeAbsoluteView: TextView = view.findViewById(R.id.stock_price_absolute_change)
             val priceChangeAbsoluteTotalView: TextView = view.findViewById(R.id.stock_price_absolute_total_change)
 
-            val buttonPlus: Button = view.findViewById(R.id.buttonPlus)
-            val buttonMinus: Button = view.findViewById(R.id.buttonMinus)
+            val pricePlusButton: Button = view.findViewById(R.id.button_price_plus)
+            val priceMinusButton: Button = view.findViewById(R.id.button_price_minus)
+
+            val lotsPlusButton: Button = view.findViewById(R.id.button_lots_plus)
+            val lotsMinusButton: Button = view.findViewById(R.id.button_lots_minus)
         }
     }
 }

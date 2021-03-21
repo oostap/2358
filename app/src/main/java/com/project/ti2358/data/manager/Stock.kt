@@ -233,20 +233,19 @@ data class Stock(
     }
 
     fun getPriceString(): String {
-        val price = getPriceDouble()
-        return "$price$"
+        return getPriceDouble().toMoney(this)
     }
 
-    fun getPrice1000String(): String {
-        candleToday?.let {
-            return "${it.openingPrice}$"
+    fun getPricePost1000String(): String {
+        closePrices?.let {
+            return it.post.toMoney(this)
         }
         return "0$"
     }
 
     fun getPrice2359String(): String {
         closePrices?.let {
-            return "${it.os}$"
+            return it.os.toMoney(this)
         }
         return "0$"
     }

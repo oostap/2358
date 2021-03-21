@@ -31,7 +31,11 @@
         android:id="@+id/nav_orders"
         android:name="com.project.ti2358.ui.orders.OrdersFragment"
         android:label="@string/menu_orders"
-        tools:layout="@layout/fragment_orders_item_list" />
+        tools:layout="@layout/fragment_orders_item_list" >
+        <action
+            android:id="@+id/action_nav_orders_to_nav_orderbook"
+            app:destination="@id/nav_orderbook" />
+    </fragment>
 
     <!-- отчёты -->
     <fragment

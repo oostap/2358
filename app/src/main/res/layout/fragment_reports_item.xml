@@ -6,7 +6,8 @@
         android:divider="?android:dividerHorizontal"
         android:dividerPadding="5dp"
         android:showDividers="middle"
-        android:weightSum="3.6">
+        android:weightSum="3.6"
+        android:paddingStart="10dp">
 
     <LinearLayout
         android:layout_width="0dp"

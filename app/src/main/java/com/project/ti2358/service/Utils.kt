@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import android.widget.Toast.LENGTH_LONG
 import android.widget.Toast.LENGTH_SHORT
 import com.project.ti2358.BuildConfig
 import com.project.ti2358.MainActivity
@@ -52,13 +53,18 @@ class Utils {
     companion object {
         val GREEN: Int = Color.parseColor("#58D68D")
         val RED: Int = Color.parseColor("#E74C3C")
-        val LIGHT: Int = Color.parseColor("#20888888")
+        val BLACK: Int = Color.parseColor("#000000")
+
+        val LIGHT: Int = Color.parseColor("#35888888")
         val WHITE_NIGHT: Int = Color.parseColor("#05FFFFFF")
         val WHITE_DAY: Int = Color.parseColor("#15888888")
         val EMPTY: Int = Color.parseColor("#00FFFFFF")
+        val PURPLE: Int = Color.parseColor("#C400AB")
 
         fun getColorForValue(value: Double): Int {
-            return if (value < 0) RED else GREEN
+            if (value > 0) return GREEN
+            if (value < 0) return RED
+            return BLACK
         }
 
         fun getColorForIndex(index: Int): Int {
@@ -112,7 +118,7 @@ class Utils {
         }
 
         fun showToastAlert(text: String) {
-            Toast.makeText(TheApplication.application.applicationContext, text, LENGTH_SHORT).show()
+            Toast.makeText(TheApplication.application.applicationContext, text, LENGTH_LONG).show()
         }
 
         fun showMessageAlert(context: Context, text: String) {

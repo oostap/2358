@@ -1,9 +1,11 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.service.Sorting
+import kotlinx.coroutines.Job
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.lang.Exception
 import kotlin.math.roundToInt
 
 @KoinApiExtension
@@ -12,7 +14,7 @@ class Strategy1000Buy : KoinComponent {
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
-    var stocksToBuy: MutableList<PurchaseStock> = mutableListOf()
+    var purchaseToBuy: MutableList<PurchaseStock> = mutableListOf()
     var currentSort: Sorting = Sorting.DESCENDING
 
     var stocksToBuy700: MutableList<PurchaseStock> = mutableListOf()
@@ -20,6 +22,9 @@ class Strategy1000Buy : KoinComponent {
 
     var started700: Boolean = false
     var started1000: Boolean = false
+
+    var job1000: MutableList<Job?> = mutableListOf()
+    var job700: MutableList<Job?> = mutableListOf()
 
     fun process(): MutableList<Stock> {
         val all = stockManager.getWhiteStocks()
@@ -58,16 +63,41 @@ class Strategy1000Buy : KoinComponent {
         val totalMoney: Double = SettingsManager.get1000BuyPurchaseVolume().toDouble()
         val onePiece: Double = totalMoney / stocksSelected.size
 
-        stocksToBuy = stocksSelected.map { stock ->
-            PurchaseStock(stock).apply {
-                lots = (onePiece / stock.getPriceDouble()).roundToInt()
-                status = OrderStatus.WAITING
-                percentLimitPriceChange = -1.0 // TODO в настройки
-                updateAbsolutePrice()
-            }
-        }.toMutableList()
+        val purchases: MutableList<PurchaseStock> = mutableListOf()
+        for (stock in stocksSelected) {
+            val purchase = PurchaseStock(stock)
 
-        return stocksToBuy
+            var exists = false
+            for (p in purchaseToBuy) {
+                if (p.stock.instrument.ticker == stock.instrument.ticker) {
+                    purchase.apply {
+                        percentLimitPriceChange = p.percentLimitPriceChange
+                        lots = p.lots
+                    }
+                    exists = true
+                    break
+                }
+            }
+
+            if (!exists) {
+                purchase.apply {
+                    percentLimitPriceChange = -1.0
+                }
+            }
+
+            purchases.add(purchase)
+        }
+        purchaseToBuy = purchases
+
+        purchaseToBuy.forEach {
+            if (it.lots == 0) { // если уже настраивали количество, то не трогаем
+                it.lots = (onePiece / it.stock.getPriceDouble()).roundToInt()
+            }
+            it.status = OrderStatus.WAITING
+            it.updateAbsolutePrice()
+        }
+
+        return purchaseToBuy
     }
 
     fun getTotalPurchaseString(stocks: MutableList<PurchaseStock>): String {
@@ -80,7 +110,7 @@ class Strategy1000Buy : KoinComponent {
 
     fun getTotalPurchasePieces(): Int {
         var value = 0
-        for (stock in stocksToBuy) {
+        for (stock in purchaseToBuy) {
             value += stock.lots
         }
         return value
@@ -112,12 +142,12 @@ class Strategy1000Buy : KoinComponent {
 
     fun prepareBuy700() {
         started700 = false
-        stocksToBuy700 = stocksToBuy
+        stocksToBuy700 = purchaseToBuy
     }
 
     fun prepareBuy1000() {
         started1000 = false
-        stocksToBuy1000 = stocksToBuy
+        stocksToBuy1000 = purchaseToBuy
     }
 
     fun startStrategy700Buy() {
@@ -125,7 +155,7 @@ class Strategy1000Buy : KoinComponent {
         started700 = true
 
         for (purchase in stocksToBuy700) {
-            purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), SettingsManager.get1000BuyTakeProfit())
+            job700.add(purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), SettingsManager.get1000BuyTakeProfit()))
         }
     }
 
@@ -134,7 +164,33 @@ class Strategy1000Buy : KoinComponent {
         started1000 = true
 
         for (purchase in stocksToBuy1000) {
-            purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), SettingsManager.get1000BuyTakeProfit())
+            job1000.add(purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), SettingsManager.get1000BuyTakeProfit()))
         }
+    }
+
+    fun stopStrategy700() {
+        job700.forEach {
+            try {
+                if (it?.isActive == true) {
+                    it.cancel()
+                }
+            } catch (e: Exception) {
+
+            }
+        }
+        job700.clear()
+    }
+
+    fun stopStrategy1000() {
+        job1000.forEach {
+            try {
+                if (it?.isActive == true) {
+                    it.cancel()
+                }
+            } catch (e: Exception) {
+
+            }
+        }
+        job1000.clear()
     }
 }

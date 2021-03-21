@@ -61,7 +61,7 @@ class StrategyRocketStartFragment : Fragment() {
             }
         }
 
-        val buttonUpdate = view.findViewById<Button>(R.id.buttonUpdate)
+        val buttonUpdate = view.findViewById<Button>(R.id.button_update)
         buttonUpdate.setOnClickListener { _ ->
 //            adapterList.setData(strategyRocket.process())
         }

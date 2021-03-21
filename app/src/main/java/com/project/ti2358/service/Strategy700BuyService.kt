@@ -73,6 +73,7 @@ class Strategy700BuyService : Service() {
         notificationButtonReceiver = null
         isServiceRunning = false
         job?.cancel()
+        strategy1000Buy.stopStrategy700()
         super.onDestroy()
     }
 

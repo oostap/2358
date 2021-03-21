@@ -11,6 +11,7 @@ import kotlinx.coroutines.Job
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.lang.Exception
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -150,10 +151,11 @@ class StrategyTazik : KoinComponent {
         }
     }
 
+    @Synchronized
     fun getTotalPurchaseString(): String {
         val volume = SettingsManager.getTazikPurchaseVolume().toDouble()
         val p = SettingsManager.getTazikPurchaseParts()
-        return String.format("%d/%d по %.2f$, просадка %.2f", activeJobs.size, p, volume / p, basicPercentLimitPriceChange)
+        return String.format("осталось %d из %d по %.2f$, просадка %.2f", activeJobs.size, p, volume / p, basicPercentLimitPriceChange)
     }
 
     fun getNotificationTextShort(): String {
@@ -236,19 +238,37 @@ class StrategyTazik : KoinComponent {
         }
     }
 
+    @Synchronized
     private fun startStrategy() {
         fixPrice()
 
-        started = true
-        activeJobs.forEach { it?.cancel() }
+        activeJobs.forEach {
+            try {
+                if (it?.isActive == true) {
+                    it.cancel()
+                }
+            } catch (e: Exception) {
+
+            }
+        }
         activeJobs.clear()
         stocksTickerBuyed.clear()
+        started = true
     }
 
+    @Synchronized
     fun stopStrategy() {
-        activeJobs.forEach { it?.cancel() }
-        activeJobs.clear()
         started = false
+        activeJobs.forEach {
+            try {
+                if (it?.isActive == true) {
+                    it.cancel()
+                }
+            } catch (e: Exception) {
+
+            }
+        }
+        activeJobs.clear()
     }
 
     fun addBasicPercentLimitPriceChange(sign: Int) {
@@ -296,6 +316,19 @@ class StrategyTazik : KoinComponent {
                 purchase.stock.candleToday?.let {
                     processBuy(purchase, purchase.stock, it)
                 }
+                break
+            }
+        }
+    }
+
+    @Synchronized
+    fun processUpdate() {
+        if (!started) return
+
+        // если стратегия стартанула и какие-то корутины уже завершились, то убрать их, чтобы появился доступ для новых покупок
+        for (job in activeJobs) {
+            if (job?.isActive == false) {
+                activeJobs.remove(job)
                 break
             }
         }
