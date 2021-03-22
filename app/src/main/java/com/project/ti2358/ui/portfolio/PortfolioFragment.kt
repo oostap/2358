@@ -18,6 +18,8 @@ import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.manager.OrderbookManager
+import com.project.ti2358.data.manager.PurchaseStock
+import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.data.service.ThirdPartyService
 import com.project.ti2358.service.Utils
@@ -185,6 +187,17 @@ class PortfolioFragment : Fragment() {
             holder.changePricePercentView.setTextColor(Utils.getColorForValue(percent))
 
             holder.orderbookImage.setOnClickListener {
+                // TODO: тест трейлинг стопа для позы
+//                holder.position.stock?.let {
+//                    var purchase = PurchaseStock(it)
+//                    purchase.position = holder.position
+//                    purchase.trailingStop = true
+//                    purchase.trailingStopTakeProfitPercentActivation = SettingsManager.getTrailingStopTakeProfitPercentActivation()
+//                    purchase.trailingStopTakeProfitPercentDelta = SettingsManager.getTrailingStopTakeProfitPercentDelta()
+//                    purchase.trailingStopStopLossPercent = SettingsManager.getTrailingStopStopLossPercent()
+//                    purchase.processInitialProfit()
+//                    purchase.sellWithTrailing()
+
                 holder.position.stock?.let {
                     orderbookManager.start(it)
                     view?.findNavController()?.navigate(R.id.action_nav_portfolio_to_nav_orderbook)

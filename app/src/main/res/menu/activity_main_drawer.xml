@@ -49,7 +49,7 @@
             android:title="@string/menu_reports" />
 
         <item
-            android:id="@+id/nav_rocket_start"
+            android:id="@+id/nav_rockets"
             android:icon="@drawable/ic_1000"
             android:title="@string/menu_rocket" />
 

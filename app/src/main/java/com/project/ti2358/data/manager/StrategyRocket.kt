@@ -10,6 +10,7 @@ import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
+import com.project.ti2358.service.log
 import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -83,34 +84,45 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
         if (!started) return
 
         val percentRocket = SettingsManager.getRocketChangePercent()
-        val minutesRocket = SettingsManager.getRocketChangeMinutes()
+        var minutesRocket = SettingsManager.getRocketChangeMinutes()
         val volumeRocket = SettingsManager.getRocketChangeVolume()
 
         if (stock.minuteCandles.isNotEmpty()) {
             val firstCandle: Candle?
             val lastCandle = stock.minuteCandles.last()
-
+            var fromIndex: Int = 0
             if (stock.minuteCandles.size >= minutesRocket) {
-                val from = stock.minuteCandles.size - minutesRocket
-                firstCandle = stock.minuteCandles[from]
-
-                var volume = 0
-                for (i in from until stock.minuteCandles.size) {
-                    volume += stock.minuteCandles[i].volume
-                }
-
-                val changePercent = lastCandle.closingPrice / firstCandle.openingPrice * 100.0 - 100.0
-                if (volume >= volumeRocket && abs(changePercent) >= percentRocket) {
-                    val rocketStock = RocketStock(stock, firstCandle.openingPrice, lastCandle.closingPrice, minutesRocket, volumeRocket, changePercent)
-                    rocketStock.process()
-                    if (changePercent > 0) {
-                        rocketStocks.add(0, rocketStock)
-                    } else {
-                        cometStocks.add(0, rocketStock)
-                    }
-                    createRocket(rocketStock)
-                }
+                fromIndex = stock.minuteCandles.size - minutesRocket
+                firstCandle = stock.minuteCandles[fromIndex]
+            } else {
+                fromIndex = 0
+                firstCandle = stock.minuteCandles.first()
             }
+
+            var volume = 0
+            for (i in fromIndex until stock.minuteCandles.size) {
+                volume += stock.minuteCandles[i].volume
+            }
+
+            minutesRocket = stock.minuteCandles.size - fromIndex
+            val changePercent = lastCandle.closingPrice / firstCandle.openingPrice * 100.0 - 100.0
+            if (volume >= volumeRocket && abs(changePercent) >= percentRocket) {
+
+                if ((rocketStocks.isNotEmpty() && rocketStocks.first().stock == stock) ||
+                    (cometStocks.isNotEmpty() && cometStocks.first().stock == stock)) {
+                    return
+                }
+
+                val rocketStock = RocketStock(stock, firstCandle.openingPrice, lastCandle.closingPrice, minutesRocket, volumeRocket, changePercent)
+                rocketStock.process()
+                if (changePercent > 0) {
+                    rocketStocks.add(0, rocketStock)
+                } else {
+                    cometStocks.add(0, rocketStock)
+                }
+                createRocket(rocketStock)
+            }
+            log("ROCKET: ${stock.instrument.ticker}, $percentRocket > $changePercent")
         }
     }
 
@@ -157,9 +169,9 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
 
         if (SettingsManager.getRocketVoice()) {
             if (rocketStock.changePercent > 0) {
-                speak("Ракета в $name! $changePercent за ${rocketStock.time} минут")
+                speak("Ракета в $name! $changePercent за ${rocketStock.time} мин")
             } else {
-                speak("Комета в $name! $changePercent за ${rocketStock.time} минут")
+                speak("Комета в $name! $changePercent за ${rocketStock.time} мин")
             }
         }
 

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_rocket_start">
+    app:startDestination="@+id/nav_portfolio">
 
     <!-- настройки -->
     <fragment
@@ -35,7 +35,7 @@
         android:id="@+id/nav_orders"
         android:name="com.project.ti2358.ui.orders.OrdersFragment"
         android:label="@string/menu_orders"
-        tools:layout="@layout/fragment_orders_item_list" >
+        tools:layout="@layout/fragment_orders" >
         <action
             android:id="@+id/action_nav_orders_to_nav_orderbook"
             app:destination="@id/nav_orderbook"
@@ -138,7 +138,7 @@
     <!-- Rockets -->
 
     <fragment
-        android:id="@+id/nav_rocket_start"
+        android:id="@+id/nav_rockets"
         android:name="com.project.ti2358.ui.rockets.RocketsFragment"
         android:label="@string/menu_rocket"
         tools:layout="@layout/fragment_rockets" >

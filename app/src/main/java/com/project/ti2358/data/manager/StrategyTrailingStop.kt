@@ -2,6 +2,7 @@ package com.project.ti2358.data.manager
 
 import android.content.Intent
 import com.project.ti2358.TheApplication
+import com.project.ti2358.service.StrategyTrailingStopService
 import com.project.ti2358.service.Utils
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -14,8 +15,8 @@ class StrategyTrailingStop : KoinComponent {
     fun addTrailingStop(trailingStop: TrailingStop) {
         activeTrailingStops.add(trailingStop)
 
-        if (!Utils.isServiceRunning(TheApplication.application.applicationContext, StrategyTrailingStop::class.java)) {
-            Utils.startService(TheApplication.application.applicationContext, StrategyTrailingStop::class.java)
+        if (!Utils.isServiceRunning(TheApplication.application.applicationContext, StrategyTrailingStopService::class.java)) {
+            Utils.startService(TheApplication.application.applicationContext, StrategyTrailingStopService::class.java)
         }
     }
 
@@ -24,10 +25,17 @@ class StrategyTrailingStop : KoinComponent {
         activeTrailingStops.remove(trailingStop)
 
         if (activeTrailingStops.isEmpty()) {
-            if (Utils.isServiceRunning(TheApplication.application.applicationContext, StrategyTrailingStop::class.java)) {
-                TheApplication.application.applicationContext.stopService(Intent(TheApplication.application.applicationContext, StrategyTrailingStop::class.java))
+            if (Utils.isServiceRunning(TheApplication.application.applicationContext, StrategyTrailingStopService::class.java)) {
+                TheApplication.application.applicationContext.stopService(Intent(TheApplication.application.applicationContext, StrategyTrailingStopService::class.java))
             }
         }
+    }
+
+    fun stopStrategy() {
+        activeTrailingStops.forEach {
+            it.stop()
+        }
+        activeTrailingStops.clear()
     }
 
     fun getNotificationTitleShort(): String {

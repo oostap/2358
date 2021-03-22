@@ -67,7 +67,6 @@ class Strategy1000Sell() : KoinComponent {
                 if (!exists) {
                     purchase.apply {
                         position = pos
-                        percentLimitPriceChange = -1.0
                     }
                 }
 

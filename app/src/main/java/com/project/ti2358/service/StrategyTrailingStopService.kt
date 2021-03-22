@@ -45,7 +45,7 @@ class StrategyTrailingStopService : Service() {
                         notificationButtonReceiver
                     )
                     notificationButtonReceiver = null
-                    context.stopService(Intent(context, Strategy700BuyService::class.java))
+                    context.stopService(Intent(context, StrategyTrailingStopService::class.java))
                 }
             }
         }
@@ -62,16 +62,17 @@ class StrategyTrailingStopService : Service() {
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Покупка 700 Buy отменена", Toast.LENGTH_LONG).show()
+        job?.cancel()
+        strategyTrailingStop.stopStrategy()
+        Toast.makeText(this, "Трейлинг стоп отменён", Toast.LENGTH_LONG).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
-        job?.cancel()
         super.onDestroy()
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Запущен таймер на покупку 700", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Трейлинг стоп активирован", Toast.LENGTH_LONG).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {

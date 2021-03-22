@@ -21,23 +21,31 @@ data class TrailingStop(
     var takeProfitDelta: Double,
     var stopLossPercent: Double,
 ) {
+    var started: Boolean = false
     var status: TrailingStopStatus = TrailingStopStatus.NONE
     var currentPrice = 0.0
     var currentTakeProfitPrice = 0.0
     var currentTakeProfitPercent = 0.0
     var currentChangePercent = 0.0
+    var takeProfitActivationPrice: Double = 0.0
 
     var stopLossPrice = 0.0
 
+    fun stop() {
+        started = false
+    }
+
     suspend fun process(): Double {
+        started = true
         currentTakeProfitPrice = 0.0
-        val profitSellPrice: Double
+        var profitSellPrice: Double = 0.0
         log("TRAILING_STOP покупка по $buyPrice, активация на $takeProfitActivationPercent%, стоп $takeProfitDelta%")
 
         status = TrailingStopStatus.IDLE
         stopLossPrice = buyPrice - buyPrice / 100.0 * abs(stopLossPercent)
+        takeProfitActivationPrice = buyPrice + buyPrice / 100.0 * abs(takeProfitActivationPercent)
 
-        while (true) {
+        while (started) {
             delay(200)
             currentPrice = stock.getPriceDouble()
 
@@ -99,12 +107,14 @@ data class TrailingStop(
     fun getDescriptionLong(): String {
         val currentChange = "%.2f\$ -> %.2f\$ = %.2f%%".format(buyPrice, currentPrice, currentChangePercent)
 
-        val takeProfit = "%.2f$/%.2f%%".format(currentTakeProfitPrice, currentTakeProfitPercent)
+        val takeProfit = "%.2f$/%.2f%%".format(takeProfitActivationPrice, takeProfitActivationPercent)
 
         var stopLoss = "%.2f$/%.2f%%".format(stopLossPrice, stopLossPercent)
         if (stopLossPercent == 0.0) stopLoss = "НЕТ"
 
-        return "%s: %s, ТП=%s, СЛ=%s, - %s".format(stock.instrument.ticker, currentChange, takeProfit, stopLoss, getStatusString())
+        val takeProfitRealtime = "%.2f$/%.2f%%".format(currentTakeProfitPercent, currentTakeProfitPrice)
+
+        return "%s: %s, ТП=%s, СЛ=%s, REALTIME=%s - %s".format(stock.instrument.ticker, currentChange, takeProfit, stopLoss, takeProfitRealtime, getStatusString())
     }
 
     private fun getStatusString(): String =

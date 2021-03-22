@@ -880,6 +880,71 @@ data class PurchaseStock(
         }
     }
 
+    fun sellWithTrailing(): Job? {
+        val figi = stock.instrument.figi
+        val pos = depositManager.getPositionForFigi(figi)
+        if (pos == null) {
+            status = OrderStatus.WTF_2
+            return null
+        }
+
+        return GlobalScope.launch(Dispatchers.Main) {
+            try {
+                position = pos
+                if (pos.lots == 0 || percentProfitSellFrom == 0.0) {
+                    status = OrderStatus.WTF_3
+                    return@launch
+                }
+
+                currentTrailingStop = TrailingStop(stock, position.getAveragePrice(), trailingStopTakeProfitPercentActivation, trailingStopTakeProfitPercentDelta, trailingStopStopLossPercent)
+                currentTrailingStop?.let {
+                    strategyTrailingStop.addTrailingStop(it)
+                    status = OrderStatus.ORDER_SELL_TRAILING
+
+                    // вся логика ТС тут, очень долгий процесс
+                    var profitSellPrice = it.process()
+                    strategyTrailingStop.removeTrailingStop(it)
+
+                    status = OrderStatus.ORDER_SELL_PREPARE
+                    if (profitSellPrice == 0.0) return@launch
+
+                    // выставить ордер на продажу
+                    while (true) {
+                        try {
+                            profitSellPrice = Utils.makeNicePrice(profitSellPrice)
+                            sellLimitOrder = ordersService.placeLimitOrder(
+                                1, // TODO: сделать нормально количество
+                                stock.instrument.figi,
+                                profitSellPrice,
+                                OperationType.SELL,
+                                depositManager.getActiveBrokerAccountId()
+                            )
+                            break
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                        delay(DelayFast)
+                    }
+                    status = OrderStatus.ORDER_SELL
+                }
+
+                // проверяем продалось или нет
+                while (true) {
+                    delay(DelayLong)
+
+                    val p = depositManager.getPositionForFigi(figi)
+                    if (p == null) { // продано!
+                        status = OrderStatus.SOLD
+                        break
+                    }
+                }
+            } catch (e: Exception) {
+                status = OrderStatus.CANCELED
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun getProfitPriceForSell(): Double {
         if (percentProfitSellFrom == 0.0) return 0.0
 

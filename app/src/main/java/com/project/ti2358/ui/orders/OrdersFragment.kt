@@ -51,7 +51,7 @@ class OrdersFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_orders_item_list, container, false)
+        val view = inflater.inflate(R.layout.fragment_orders, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
         list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))

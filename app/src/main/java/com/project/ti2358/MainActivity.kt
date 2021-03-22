@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_1000_buy_start,
                 R.id.nav_2358_start,
                 R.id.nav_1728,
-                R.id.nav_rocket_start,
+                R.id.nav_rockets,
                 R.id.nav_fixprice,
                 R.id.nav_reports,
                 R.id.nav_shorts,

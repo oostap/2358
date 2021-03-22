@@ -58,6 +58,24 @@ class DiagnosticsFragment : Fragment() {
         val daagerIndicesStatus = if (stockManager.indices.isNotEmpty()) "ОК" else "НЕ ОК 😱"
         val daagerShortsStatus = if (stockManager.stockShorts.isNotEmpty()) "ОК" else "НЕ ОК 😱"
 
+        val daager1728 = if (stockManager.stockPrice1728.isNotEmpty()) "ОК" else "НЕ ОК 😱"
+        var daager1728Step1 = "НЕ ОК 😱"
+        var daager1728Step2 = "НЕ ОК 😱"
+        var daager1728Step3 = "НЕ ОК 😱"
+        if (stockManager.stockPrice1728.isNotEmpty() && stockManager.stockPrice1728["M"] != null) {
+            if (stockManager.stockPrice1728["M"]?.from700to1200 != null) {
+                daager1728Step1 = "OK"
+            }
+
+            if (stockManager.stockPrice1728["M"]?.from700to1600 != null) {
+                daager1728Step2 = "OK"
+            }
+
+            if (stockManager.stockPrice1728["M"]?.from1630to1635 != null) {
+                daager1728Step3 = "OK"
+            }
+        }
+
         textView.text =
                     "Tinkoff REST: $tinkoffREST\n\n" +
                     "Tinkoff OpenAPI коннект: $tinkoffConnectedStatus\n\n" +
@@ -69,7 +87,11 @@ class DiagnosticsFragment : Fragment() {
                     "daager OpenAPI цены закрытия: $daagerClosePricesStatus\n\n" +
                     "daager OpenAPI отчёты и дивы: $daagerReportsStatus\n\n" +
                     "daager OpenAPI индексы: $daagerIndicesStatus\n\n" +
-                    "daager OpenAPI шорты: $daagerShortsStatus\n\n"
+                    "daager OpenAPI шорты: $daagerShortsStatus\n\n" +
+                    "daager OpenAPI 1728: $daager1728\n\n" +
+                    "daager OpenAPI 1728 Шаг 1: $daager1728Step1\n\n" +
+                    "daager OpenAPI 1728 Шаг 2: $daager1728Step2\n\n" +
+                    "daager OpenAPI 1728 Шаг 3: $daager1728Step3\n\n"
 
 
     }

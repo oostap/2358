@@ -16,6 +16,7 @@ import com.project.ti2358.BuildConfig
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.model.dto.Interval
 import org.koin.core.component.KoinApiExtension
@@ -53,7 +54,9 @@ class Utils {
     companion object {
         val GREEN: Int = Color.parseColor("#58D68D")
         val RED: Int = Color.parseColor("#E74C3C")
+
         val BLACK: Int = Color.parseColor("#000000")
+        val WHITE: Int = Color.parseColor("#FFFFFF")
 
         val LIGHT: Int = Color.parseColor("#35888888")
         val WHITE_NIGHT: Int = Color.parseColor("#05FFFFFF")
@@ -61,10 +64,20 @@ class Utils {
         val EMPTY: Int = Color.parseColor("#00FFFFFF")
         val PURPLE: Int = Color.parseColor("#C400AB")
 
+        fun isNightTheme(): Boolean {
+            when (TheApplication.application.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    return true
+                }
+            }
+            return false
+        }
+
+        @KoinApiExtension
         fun getColorForValue(value: Double): Int {
             if (value > 0) return GREEN
             if (value < 0) return RED
-            return BLACK
+            return if (SettingsManager.getDarkTheme()) WHITE else BLACK
         }
 
         fun getColorForIndex(index: Int): Int {
