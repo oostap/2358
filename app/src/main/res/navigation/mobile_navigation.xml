@@ -69,7 +69,11 @@
         android:id="@+id/nav_orderbook"
         android:name="com.project.ti2358.ui.orderbook.OrderbookFragment"
         android:label="@string/menu_orderbook"
-        tools:layout="@layout/fragment_orderbook" />
+        tools:layout="@layout/fragment_orderbook" >
+        <action
+            android:id="@+id/action_nav_orderbook_to_nav_chart"
+            app:destination="@id/nav_chart" />
+    </fragment>
 
     <!-- премаркет РФ -->
     <fragment
@@ -220,4 +224,14 @@
         android:name="com.project.ti2358.ui.diagnostics.DiagnosticsFragment"
         android:label="@string/menu_diagnostics"
         tools:layout="@layout/fragment_diagnostics" />
+
+    <!-- Chart -->
+
+    <fragment
+        android:id="@+id/nav_chart"
+        android:name="com.project.ti2358.ui.chart.ChartFragment"
+        android:label="@string/menu_chart"
+        tools:layout="@layout/fragment_chart" >
+    </fragment>
+
 </navigation>

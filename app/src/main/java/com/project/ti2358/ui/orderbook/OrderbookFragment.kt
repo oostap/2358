@@ -13,6 +13,7 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,12 +30,14 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.lang.Exception
 import java.lang.StrictMath.min
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
 
 @KoinApiExtension
 class OrderbookFragment : Fragment() {
+    val chartManager: ChartManager by inject()
     val stockManager: StockManager by inject()
     val orderbookManager: OrderbookManager by inject()
     val depositManager: DepositManager by inject()
@@ -67,6 +70,8 @@ class OrderbookFragment : Fragment() {
     lateinit var positionLotsBlockedView: TextView
     lateinit var positionChangePriceAbsoluteView: TextView
     lateinit var positionChangePricePercentView: TextView
+
+    lateinit var chartView: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -220,6 +225,22 @@ class OrderbookFragment : Fragment() {
 
         activeStock = orderbookManager.activeStock
 
+        chartView = view.findViewById(R.id.chart)
+        chartView.setOnClickListener {
+            activeStock?.let {
+                chartManager.start(it)
+                view?.findNavController()?.navigate(R.id.action_nav_orderbook_to_nav_chart)
+            }
+        }
+
+        positionView.setOnClickListener {
+            activeStock?.let {
+                depositManager.getPositionForFigi(it.instrument.figi)?.let { p ->
+                    volumeEditText.setText(abs(p.lots).toString())
+                }
+            }
+        }
+
         jobRefreshOrders?.cancel()
         jobRefreshOrders = GlobalScope.launch(Dispatchers.Main) {
             while (true) {
@@ -360,6 +381,7 @@ class OrderbookFragment : Fragment() {
     }
 
     private fun updateData() {
+        if (!isVisible) return
         orderbookLines = orderbookManager.process()
         adapterList.setData(orderbookLines)
 

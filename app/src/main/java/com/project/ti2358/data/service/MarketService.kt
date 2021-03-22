@@ -1,7 +1,6 @@
 package com.project.ti2358.data.service
 
 import com.project.ti2358.data.api.MarketApi
-import com.project.ti2358.data.model.dto.Interval
 import retrofit2.Retrofit
 
 class MarketService(retrofit: Retrofit) : BaseService(retrofit) {

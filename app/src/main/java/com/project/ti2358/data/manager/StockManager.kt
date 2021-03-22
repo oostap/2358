@@ -175,7 +175,7 @@ class StockManager : KoinComponent {
         }
     }
 
-    private suspend fun reloadStockPrice1728() {
+    suspend fun reloadStockPrice1728() {
         try {
             stockPrice1728 = thirdPartyService.daagerStock1728()
             stocksAll.forEach {

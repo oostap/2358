@@ -62,6 +62,7 @@
     <string name="menu_rocket">Ракета</string>
     <string name="menu_tazik">Автотазик</string>
     <string name="menu_blacklist">Чёрный список</string>
+    <string name="menu_chart">График</string>
 
     <string name="reports">ОТЧЁТЫ</string>
     <string name="dividends">ДИВЫ</string>

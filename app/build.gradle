@@ -10,10 +10,10 @@ android {
 
     defaultConfig {
         applicationId "com.project.ti2358"
-        minSdkVersion 20
+        minSdkVersion 21
         targetSdkVersion 30
-        versionCode 28
-        versionName "v1.5.4"
+        versionCode 30
+        versionName "v1.5.5"
         multiDexEnabled true
     }
 
@@ -93,4 +93,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
+    // charts
+    implementation 'com.tradingview:lightweightcharts:3.3.1'
 }

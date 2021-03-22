@@ -82,6 +82,8 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
     @Synchronized
     fun processStrategy(stock: Stock) {
         if (!started) return
+        process()
+        if (stock !in stocks) return
 
         val percentRocket = SettingsManager.getRocketChangePercent()
         var minutesRocket = SettingsManager.getRocketChangeMinutes()

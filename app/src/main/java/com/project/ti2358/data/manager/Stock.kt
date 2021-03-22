@@ -208,7 +208,11 @@ data class Stock(
     fun getVolumeFixPriceAfterStart(): Int {
         var volume = 0
         for (candle in minuteCandles) {
-            if (candle.time >= minuteCandleFixed?.time) {
+            if (minuteCandleFixed != null) {
+                if (candle.time >= minuteCandleFixed?.time) {
+                    volume += candle.volume
+                }
+            } else {
                 volume += candle.volume
             }
         }
@@ -260,14 +264,16 @@ data class Stock(
     }
 
     private fun updateChangeToday() {
-        candleToday?.let {
-            changePriceDayAbsolute = it.closingPrice - it.openingPrice
-            changePriceDayPercent = (100 * it.closingPrice) / it.openingPrice - 100
+        candleToday?.let { candle ->
+            closePrices?.let { close ->
+                changePriceDayAbsolute = candle.closingPrice - close.post
+                changePriceDayPercent = candle.closingPrice / close.post * 100.0 - 100
 
-            middlePrice = (it.highestPrice + it.lowestPrice ) / 2.0
-            dayVolumeCash = middlePrice * it.volume
+                middlePrice = (candle.highestPrice + candle.lowestPrice) / 2.0
+                dayVolumeCash = middlePrice * candle.volume
 
-            price1000 = it.openingPrice
+                price1000 = candle.openingPrice
+            }
         }
     }
 

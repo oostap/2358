@@ -14,6 +14,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.service.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import kotlin.math.roundToInt
@@ -27,17 +31,23 @@ enum class Step1728 {
 
 @KoinApiExtension
 class Strategy1728Fragment : Fragment() {
-
+    val stockManager: StockManager by inject()
     val strategy1728: Strategy1728 by inject()
     var adapterList: Item1728RecyclerViewAdapter = Item1728RecyclerViewAdapter(emptyList())
 
     var step1728: Step1728 = Step1728.step700to1200
     var stocks: MutableList<Stock> = mutableListOf()
 
+    var job: Job? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
 
+    override fun onDestroy() {
+        job?.cancel()
+        super.onDestroy()
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -72,6 +82,12 @@ class Strategy1728Fragment : Fragment() {
         val buttonStepGo = view.findViewById<Button>(R.id.button_step_go)
         buttonStepGo.setOnClickListener {
             updateData(Step1728.stepFinal)
+        }
+
+        job?.cancel()
+        job = GlobalScope.launch(Dispatchers.Main) {
+            stockManager.reloadStockPrice1728()
+            updateData(step1728)
         }
 
         updateData(Step1728.step700to1200)
@@ -176,7 +192,11 @@ class Strategy1728Fragment : Fragment() {
                 }
             }
 
-            holder.buttonBuy.visibility = if (step1728 == Step1728.stepFinal) View.VISIBLE else View.GONE
+            if (step1728 == Step1728.stepFinal || step1728 == Step1728.step1630to1635) {
+                holder.buttonBuy.visibility = View.VISIBLE
+            } else {
+                holder.buttonBuy.visibility = View.GONE
+            }
             holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 

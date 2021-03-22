@@ -104,8 +104,8 @@ class RocketsFragment : Fragment() {
             val volume = item.stock.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
 
-            val volumeRocket = item.volume / 1000f
-            holder.volumeFromStartView.text = "%.1fk".format(volumeRocket)
+            val volumeRocket = item.volume
+            holder.volumeFromStartView.text = "%d".format(volumeRocket)
 
             holder.priceView.text = "${item.priceFrom.toMoney(item.stock)} ➡ ${item.priceTo.toMoney(item.stock)}"
 
