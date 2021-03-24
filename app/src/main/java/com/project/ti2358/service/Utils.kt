@@ -74,10 +74,15 @@ class Utils {
         }
 
         @KoinApiExtension
+        fun getNeutralColor(): Int {
+            return if (SettingsManager.getDarkTheme()) WHITE else BLACK
+        }
+
+        @KoinApiExtension
         fun getColorForValue(value: Double): Int {
             if (value > 0) return GREEN
             if (value < 0) return RED
-            return if (SettingsManager.getDarkTheme()) WHITE else BLACK
+            return getNeutralColor()
         }
 
         fun getColorForIndex(index: Int): Int {

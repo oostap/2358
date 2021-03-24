@@ -7,6 +7,7 @@ plugins {
 
 android {
     compileSdkVersion 30
+    buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId "com.project.ti2358"
@@ -94,5 +95,5 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
     // charts
-    implementation 'com.tradingview:lightweightcharts:3.3.1'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }

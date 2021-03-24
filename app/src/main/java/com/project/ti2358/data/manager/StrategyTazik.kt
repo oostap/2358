@@ -290,14 +290,14 @@ class StrategyTazik : KoinComponent {
 
         // ещё не брали бумагу?
         if (ticker !in stocksTickerBuyed) {
-            log("TAZIK 1: $ticker ${stocksTickerBuyed} ${stocksTickerBuyed[ticker]} $change")
+            log("TAZIK 1: $ticker $stocksTickerBuyed ${stocksTickerBuyed[ticker]} $change")
             return true
         }
 
         // текущий change ниже предыдущего на 1.5x?
         if (SettingsManager.getTazikAllowAveraging()) { // разрешить усреднение?
             if (ticker in stocksTickerBuyed && stocksTickerBuyed[ticker] != 0.0 && change < stocksTickerBuyed[ticker]!! * 1.5) {
-                log("TAZIK 2: $ticker ${stocksTickerBuyed} ${stocksTickerBuyed[ticker]} $change")
+                log("TAZIK 2: $ticker $stocksTickerBuyed ${stocksTickerBuyed[ticker]} $change")
                 return true
             }
         }
