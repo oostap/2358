@@ -130,13 +130,20 @@
             app:exitAnim="@animator/slide_out_left" />
     </fragment>
 
-    <!-- 1728 -->
+    <!-- 1728 up/down -->
 
     <fragment
-        android:id="@+id/nav_1728"
-        android:name="com.project.ti2358.ui.strategy1728.Strategy1728Fragment"
-        android:label="@string/menu_1728"
-        tools:layout="@layout/fragment_1728" >
+        android:id="@+id/nav_1728_up"
+        android:name="com.project.ti2358.ui.strategy1728Up.Strategy1728UpFragment"
+        android:label="@string/menu_1728_up"
+        tools:layout="@layout/fragment_1728_up" >
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_1728_down"
+        android:name="com.project.ti2358.ui.strategy1728Down.Strategy1728DownFragment"
+        android:label="@string/menu_1728_down"
+        tools:layout="@layout/fragment_1728_down" >
     </fragment>
 
     <!-- Rockets -->

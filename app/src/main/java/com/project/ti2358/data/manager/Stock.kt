@@ -44,6 +44,7 @@ data class Stock(
     var changePrice2359DayPercent: Double = 0.0
 
     // разница со старта таймера
+    var needToFixPrice: Boolean = false
     var minuteCandleFixed: Candle? = null
     var priceFixed: Double = 0.0
     var changePriceFixDayAbsolute: Double = 0.0
@@ -64,6 +65,10 @@ data class Stock(
     var changePrice1630to1635Absolute: Double = 0.0
     var changePrice1630to1635Percent: Double = 0.0
     var volume1630to1635 = 0
+    // изменение с 1628 до 1632
+    var changePrice1625to1632Absolute: Double = 0.0
+    var changePrice1625to1632Percent: Double = 0.0
+    var volume1625to1632 = 0
 
     // все минутные свечи с момента запуска приложения
     var minuteCandles: MutableList<Candle> = mutableListOf()
@@ -169,29 +174,6 @@ data class Stock(
 
             minuteCandles.sortBy { it.time }
         }
-
-//        if (instrument.ticker in listOf<String>("CNK", "MAC", "OIS")) {
-//            log("${instrument.ticker}: candles(${minuteCandles.size}), date: ${candle.time}")
-//            log("${instrument.ticker}: candles(${minuteCandles.size}), date: ${minuteCandles.first().time}")
-////        }
-//
-//        // проверка на стратегию FixPrice
-//        val timeCandle = Calendar.getInstance()
-//        timeCandle.time = candle.time
-//        val timeTrackStart = StrategyFixPrice.strategyStartTime
-//
-//        if (timeCandle.time >= timeTrackStart.time) {
-//            exists = false
-//            for ((index, c) in minuteFixPriceCandles.withIndex()) {
-//                if (c.time == candle.time) {
-//                    minuteFixPriceCandles[index] = candle
-//                    exists = true
-//                }
-//            }
-//            if (!exists) {
-//                minuteFixPriceCandles.add(candle)
-//            }
-//        }
 
         updateChangeFixPrice()
     }
@@ -304,12 +286,17 @@ data class Stock(
     }
 
     private fun updateChangeFixPrice() {
+        if (needToFixPrice && priceFixed == 0.0) {
+            priceFixed = getPriceDouble()
+            needToFixPrice = false
+        }
         val currentPrice = getPriceDouble()
         changePriceFixDayAbsolute = currentPrice - priceFixed
         changePriceFixDayPercent = currentPrice / priceFixed * 100.0 - 100.0
     }
 
     fun resetFixPrice() {
+        needToFixPrice = true
         changePriceFixDayAbsolute = 0.0
         changePriceFixDayPercent = 0.0
         priceFixed = getPriceDouble()

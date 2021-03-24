@@ -9,7 +9,7 @@ import org.koin.core.component.inject
 import java.util.*
 
 @KoinApiExtension
-class Strategy1728() : KoinComponent {
+class Strategy1728Up() : KoinComponent {
     private val stockManager: StockManager by inject()
     var stocks: MutableList<Stock> = mutableListOf()
 

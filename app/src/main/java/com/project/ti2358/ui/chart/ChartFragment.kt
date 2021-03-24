@@ -61,16 +61,13 @@ class VolumeFormatter : ValueFormatter() {
     var candles: MutableList<Candle> = mutableListOf()
 
     override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-//        val index = value.toInt()
-//        if (index >= candles.size) return ""
-//        val candle = candles[value.toInt()]
         return "%.1fk".format(value / 1000f)
     }
 }
 
 @KoinApiExtension
 class ChartFragment : Fragment(), OnChartGestureListener {
-    val chartManager: ChartManager by inject()
+    private val chartManager: ChartManager by inject()
     val depositManager: DepositManager by inject()
     val stockManager: StockManager by inject()
 
@@ -137,9 +134,9 @@ class ChartFragment : Fragment(), OnChartGestureListener {
 //        barChartView.axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
         barChartView.axisLeft.valueFormatter = volumeFormatter
 
-        loadData(Interval.FIVE_MINUTES)
-
         activeStock = chartManager.activeStock
+
+        loadData(Interval.FIVE_MINUTES)
 
         val button1Min = view.findViewById<Button>(R.id.button_1min)
         button1Min.setOnClickListener {
@@ -163,7 +160,7 @@ class ChartFragment : Fragment(), OnChartGestureListener {
         return view
     }
 
-    private fun syncCharts(mainChart: Chart<*>, otherCharts: List<BarChart>) {
+    private fun syncCharts(mainChart: Chart<*>, otherCharts: List<Chart<*>>) {
         val mainVals = FloatArray(9)
         var otherMatrix: Matrix
         val otherVals = FloatArray(9)
@@ -211,7 +208,7 @@ class ChartFragment : Fragment(), OnChartGestureListener {
             else -> "NONE"
         }
 
-        act.supportActionBar?.title = getString(R.string.menu_chart) + " $ticker" + " $min"
+        act.supportActionBar?.title = "$ticker $min"
     }
 
     fun loadData(candles: List<Candle>) {
@@ -282,6 +279,7 @@ class ChartFragment : Fragment(), OnChartGestureListener {
 
     override fun onChartDoubleTapped(me: MotionEvent?) {
 //        log("CHART onChartDoubleTapped")
+        syncCharts(candleChartView, listOf(barChartView))
     }
 
     override fun onChartSingleTapped(me: MotionEvent?) {

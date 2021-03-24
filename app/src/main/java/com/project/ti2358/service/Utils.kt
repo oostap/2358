@@ -36,6 +36,13 @@ enum class Sorting {
     DESCENDING
 }
 
+enum class Step1728 {
+    step700to1200,
+    step700to1530,
+    step1630to1635,
+    stepFinal,
+}
+
 fun Date.toString(format: String, locale: Locale = Locale.getDefault()): String {
     val formatter = SimpleDateFormat(format, locale)
     return formatter.format(this)

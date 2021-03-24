@@ -1,31 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="fill_parent" android:layout_height="fill_parent">
 
-    <LinearLayout
+    <androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_alignParentBottom="true"
-        android:weightSum="6"
-        android:layout_marginBottom="60dp">
-
-            <com.github.mikephil.charting.charts.CandleStickChart
-                android:id="@+id/chart_candle_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="5"/>
-
-            <com.github.mikephil.charting.charts.BarChart
-                android:id="@+id/chart_bar_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"/>
-
-    </LinearLayout>
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="65dp"
+        android:layout_marginTop="0dp"
+        app:layoutManager="LinearLayoutManager"
+        tools:context=".ui.strategy1728Up.Strategy1728UpFragment"
+        tools:listitem="@layout/fragment_1728_item_up" />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -38,44 +27,39 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_1min"
+            android:id="@+id/button_step_1"
             android:layout_marginRight="5dp"
-            android:text="1 min"
+            android:text="1"
             android:layout_weight="1"
             android:textSize="18dp"
-            android:padding="0dp"
             android:layout_width="0dp" />
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_5min"
+            android:id="@+id/button_step_2"
             android:layout_marginRight="5dp"
-            android:text="5 min"
+            android:text="2"
             android:layout_weight="1"
             android:textSize="18dp"
-            android:padding="0dp"
             android:layout_width="0dp" />
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_1hour"
+            android:id="@+id/button_step_3"
             android:layout_marginRight="5dp"
-            android:text="HOUR"
+            android:text="3"
             android:layout_weight="1"
             android:textSize="18dp"
-            android:padding="0dp"
             android:layout_width="0dp" />
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_day"
+            android:id="@+id/button_step_go"
             android:layout_marginRight="0dp"
-            android:text="DAY"
+            android:text="🚀"
             android:layout_weight="1"
             android:textSize="18dp"
-            android:padding="0dp"
             android:layout_width="0dp" />
-
     </LinearLayout>
 
 </RelativeLayout>

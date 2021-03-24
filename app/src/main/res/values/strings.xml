@@ -11,7 +11,7 @@
     <string name="update">Обновить</string>
     <string name="sort">Сортировка</string>
     <string name="orders">Заявки</string>
-    <string name="service_1728_reset">Рестарт</string>
+    <string name="restart">Рестарт</string>
     <string name="title_hour_1">1 час</string>
     <string name="title_hour_2">2 часа</string>
 
@@ -57,7 +57,8 @@
     <string name="menu_1000_sell">700/1000 sell</string>
     <string name="menu_1000_buy">700/1000 buy</string>
     <string name="menu_2358">2258</string>
-    <string name="menu_1728">1628</string>
+    <string name="menu_1728_up">1628 📈</string>
+    <string name="menu_1728_down">1628 📉</string>
     <string name="menu_fixprice">Fix Price</string>
     <string name="menu_rocket">Ракета</string>
     <string name="menu_tazik">Автотазик</string>
@@ -150,7 +151,7 @@
     <string name="stocks_rocket_change_percent">Изменение в %</string>
     <string name="stocks_rocket_change_volume">Объём в шт</string>
     <string name="stocks_rocket_change_minutes">За сколько минут?</string>
-    <string name="stocks_rocket_notify_alive_seconds">Время жизни сигнала (секунды)</string>
+    <string name="stocks_rocket_notify_alive_seconds">Время жизни сигнала в шторке (секунды)</string>
     <string name="stocks_rocket_rocket_voice">Голосовое сопровождение</string>
 
     <string name="position_line">position_line</string>

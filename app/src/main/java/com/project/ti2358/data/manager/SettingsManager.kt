@@ -286,11 +286,11 @@ class SettingsManager {
 
         fun get1728PurchaseVolume(): Int {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_purchase_volume)
-            val value: String? = preferences.getString(key, "1000")
+            val value: String? = preferences.getString(key, "0")
             return try {
-                parseInt(value ?: "1000")
+                parseInt(value ?: "0")
             } catch (e: Exception) {
-                1000
+                0
             }
         }
 

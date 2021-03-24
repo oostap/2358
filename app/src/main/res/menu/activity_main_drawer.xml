@@ -32,9 +32,13 @@
             android:icon="@drawable/ic_glass"
             android:title="@string/menu_premarket" />
         <item
-            android:id="@+id/nav_1728"
+            android:id="@+id/nav_1728_up"
             android:icon="@drawable/ic_1728"
-            android:title="@string/menu_1728" />
+            android:title="@string/menu_1728_up" />
+        <item
+            android:id="@+id/nav_1728_down"
+            android:icon="@drawable/ic_1728"
+            android:title="@string/menu_1728_down" />
         <item
             android:id="@+id/nav_2358_start"
             android:icon="@drawable/ic_2358"

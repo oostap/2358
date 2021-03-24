@@ -1,4 +1,4 @@
-package com.project.ti2358.ui.strategy1728
+package com.project.ti2358.ui.strategy1728Up
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -22,17 +22,10 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import kotlin.math.roundToInt
 
-enum class Step1728 {
-    step700to1200,
-    step700to1530,
-    step1630to1635,
-    stepFinal,
-}
-
 @KoinApiExtension
-class Strategy1728Fragment : Fragment() {
+class Strategy1728UpFragment : Fragment() {
     val stockManager: StockManager by inject()
-    val strategy1728: Strategy1728 by inject()
+    val strategy1728Up: Strategy1728Up by inject()
     var adapterList: Item1728RecyclerViewAdapter = Item1728RecyclerViewAdapter(emptyList())
 
     var step1728: Step1728 = Step1728.step700to1200
@@ -52,7 +45,7 @@ class Strategy1728Fragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_1728, container, false)
+        val view = inflater.inflate(R.layout.fragment_1728_up, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
         list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
@@ -97,10 +90,10 @@ class Strategy1728Fragment : Fragment() {
     private fun updateData(localStep1728: Step1728) {
         step1728 = localStep1728
         stocks = when (step1728) {
-            Step1728.step700to1200 -> strategy1728.process700to1200()
-            Step1728.step700to1530 -> strategy1728.process700to1600()
-            Step1728.step1630to1635 -> strategy1728.process1630to1635()
-            Step1728.stepFinal -> strategy1728.processFinal()
+            Step1728.step700to1200 -> strategy1728Up.process700to1200()
+            Step1728.step700to1530 -> strategy1728Up.process700to1600()
+            Step1728.step1630to1635 -> strategy1728Up.process1630to1635()
+            Step1728.stepFinal -> strategy1728Up.processFinal()
         }
         adapterList.setData(stocks)
         updateTitle()
@@ -127,7 +120,7 @@ class Strategy1728Fragment : Fragment() {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_1728_item, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_1728_item_up, parent, false)
             return ViewHolder(view)
         }
 

@@ -177,7 +177,7 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
             }
         }
 
-        val title = "${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин"
+        val title = "$ticker: ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин"
 
         val notification = builder
             .setSubText("$$ticker $changePercent")
