@@ -106,6 +106,9 @@ class ChartFragment : Fragment(), OnChartGestureListener {
         barChartView.description.isEnabled = false
         barChartView.isHighlightFullBarEnabled = false
 
+        candleChartView.setBackgroundColor(Utils.EMPTY)
+        candleChartView.setGridBackgroundColor(Utils.EMPTY)
+
         candleChartView.legend.form = Legend.LegendForm.NONE
         barChartView.legend.form = Legend.LegendForm.NONE
 
@@ -114,25 +117,29 @@ class ChartFragment : Fragment(), OnChartGestureListener {
 
 //        candleChartView.axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
         candleChartView.axisRight.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
+        candleChartView.axisRight.textColor = Utils.getChartTextColor()
+        candleChartView.axisLeft.textColor = Utils.getChartTextColor()
 
         var xAxis: XAxis = candleChartView.xAxis
         xAxis.position = XAxis.XAxisPosition.TOP
         xAxis.axisMinimum = 0f
         xAxis.granularity = 1f
         xAxis.valueFormatter = candleChartDateFormatter
+        xAxis.textColor = Utils.getChartTextColor()
 
         xAxis = barChartView.xAxis
         xAxis.position = XAxis.XAxisPosition.TOP
         xAxis.axisMinimum = 0f
         xAxis.granularity = 1f
         xAxis.valueFormatter = candleChartDateFormatter
+        xAxis.textColor = Utils.getChartTextColor()
 
         barChartView.axisRight.isEnabled = false
 
         barChartView.axisLeft.axisMinimum = 0f
         barChartView.axisLeft.granularity = 0f
-//        barChartView.axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
         barChartView.axisLeft.valueFormatter = volumeFormatter
+        barChartView.axisLeft.textColor = Utils.getChartTextColor()
 
         activeStock = chartManager.activeStock
 
@@ -229,8 +236,8 @@ class ChartFragment : Fragment(), OnChartGestureListener {
         volumeFormatter.candles = candles.toMutableList()
 
         val cds = CandleDataSet(candleList, "")
-        cds.color = Color.rgb(150, 150, 150)
-        cds.shadowColor = Color.DKGRAY
+//        cds.color = Color.rgb(150, 150, 150)
+//        cds.shadowColor = Color.DKGRAY
         cds.shadowWidth = 0.7f
         cds.decreasingColor = Utils.RED
         cds.decreasingPaintStyle = Paint.Style.FILL

@@ -71,6 +71,8 @@ class Utils {
         val EMPTY: Int = Color.parseColor("#00FFFFFF")
         val PURPLE: Int = Color.parseColor("#C400AB")
 
+        val TEAL: Int = Color.parseColor("#4903DAC5")
+
         fun isNightTheme(): Boolean {
             when (TheApplication.application.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
                 Configuration.UI_MODE_NIGHT_YES -> {
@@ -82,6 +84,11 @@ class Utils {
 
         @KoinApiExtension
         fun getNeutralColor(): Int {
+            return if (SettingsManager.getDarkTheme()) WHITE else BLACK
+        }
+
+        @KoinApiExtension
+        fun getChartTextColor(): Int {
             return if (SettingsManager.getDarkTheme()) WHITE else BLACK
         }
 
@@ -428,6 +435,10 @@ class Utils {
                 return list
             }
             return stocks.toMutableList()
+        }
+
+        fun getPercentFromTo(from: Double, to: Double): Double {
+            return from / to * 100.0 - 100.0
         }
     }
 }

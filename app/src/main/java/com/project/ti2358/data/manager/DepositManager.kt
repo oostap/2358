@@ -4,9 +4,7 @@ import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.data.service.PortfolioService
-import com.project.ti2358.data.service.ThirdPartyService
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -150,7 +148,7 @@ class DepositManager : KoinComponent {
         return "%.2f₽".format(total)
     }
 
-    fun getFreeCash(): Double {
+    private fun getFreeCash(): Double {
         var total = 0.0
         for (currency in currencyPositions) {
             if (currency.currency == Currency.USD) {
@@ -169,11 +167,11 @@ class DepositManager : KoinComponent {
 
         for (position in portfolioPositions) {
             if (position.averagePositionPrice?.currency == Currency.USD) {
-                busy += position.getAveragePrice() * position.balance
+                busy += abs(position.getAveragePrice() * position.balance)
             }
 
             if (position.averagePositionPrice?.currency == Currency.RUB) {
-                busy += position.getAveragePrice() * position.balance / 74.0    // todo: взять реальную цену
+                busy += abs(position.getAveragePrice() * position.balance / 74.0)    // todo: взять реальную цену
             }
         }
 

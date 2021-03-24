@@ -45,6 +45,19 @@
                 android:layout_centerVertical="true"/>
 
             <TextView
+                android:id="@+id/stock_price_bid_percent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:gravity="end"
+                android:padding="4dp"
+                android:layout_marginLeft="40dp"
+                android:text="100 000"
+                android:layout_alignParentLeft="true"
+                android:textSize="10sp"
+                android:layout_centerVertical="true"/>
+
+            <TextView
                 android:id="@+id/stock_count_bid"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -157,6 +170,19 @@
                 android:text="200 000"
                 android:textSize="12sp"
                 android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"/>
+
+            <TextView
+                android:id="@+id/stock_price_ask_percent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:gravity="end"
+                android:padding="4dp"
+                android:layout_marginRight="40dp"
+                android:text="100 000"
+                android:layout_alignParentRight="true"
+                android:textSize="10sp"
                 android:layout_centerVertical="true"/>
 
             <TextView

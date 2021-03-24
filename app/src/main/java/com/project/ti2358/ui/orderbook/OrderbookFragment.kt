@@ -21,6 +21,7 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.model.dto.Order
+import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toMoney
@@ -246,6 +247,8 @@ class OrderbookFragment : Fragment() {
             while (true) {
                 delay(5000)
                 depositManager.refreshOrders()
+                depositManager.refreshDeposit()
+                updatePosition()
             }
         }
 
@@ -479,6 +482,9 @@ class OrderbookFragment : Fragment() {
             val item = values[position]
             holder.orderbookLine = item
 
+            holder.dragToBuyView.setBackgroundColor(Utils.getColorForIndex(position))
+            holder.dragToSellView.setBackgroundColor(Utils.getColorForIndex(position))
+
             holder.dragToBuyView.setOnDragListener(ChoiceDragListener())
             holder.dragToSellView.setOnDragListener(ChoiceDragListener())
 
@@ -496,6 +502,43 @@ class OrderbookFragment : Fragment() {
             holder.bidPriceView.text = "%.2f".format(item.bidPrice)
             holder.askCountView.text = "${item.askCount}"
             holder.askPriceView.text = "%.2f".format(item.askPrice)
+
+            var targetPriceAsk = 0.0
+            var targetPriceBid = 0.0
+            var portfolioPosition: PortfolioPosition? = null
+            activeStock?.let {
+                targetPriceAsk = values.first().askPrice
+                targetPriceBid = values.first().bidPrice
+
+                portfolioPosition = depositManager.getPositionForFigi(it.instrument.figi)
+                portfolioPosition?.let { p ->
+                    targetPriceAsk = p.getAveragePrice()
+                    targetPriceBid = p.getAveragePrice()
+                }
+            }
+
+            val allow = true
+            if (targetPriceAsk != 0.0 && allow) {
+                val percentBid = Utils.getPercentFromTo(item.bidPrice, targetPriceBid)
+                holder.bidPricePercentView.text = "%.2f%%".format(percentBid)
+                holder.bidPricePercentView.setTextColor(Utils.getColorForValue(percentBid))
+
+                val percentAsk = Utils.getPercentFromTo(item.askPrice, targetPriceAsk)
+                holder.askPricePercentView.text = "%.2f%%".format(percentAsk)
+                holder.askPricePercentView.setTextColor(Utils.getColorForValue(percentAsk))
+                holder.askPricePercentView.visibility = VISIBLE
+                holder.bidPricePercentView.visibility = VISIBLE
+
+                if (percentBid == 0.0 && portfolioPosition != null) {
+                    holder.dragToBuyView.setBackgroundColor(Utils.TEAL)
+                }
+                if (percentAsk == 0.0 && portfolioPosition != null) {
+                    holder.dragToSellView.setBackgroundColor(Utils.TEAL)
+                }
+            } else {
+                holder.askPricePercentView.visibility = GONE
+                holder.bidPricePercentView.visibility = GONE
+            }
 
             holder.bidBackgroundView.layoutParams.width = (item.bidPercent * 500).toInt()
             holder.askBackgroundView.layoutParams.width = (item.askPercent * 500).toInt()
@@ -554,9 +597,6 @@ class OrderbookFragment : Fragment() {
                 }
                 true
             }
-
-            holder.dragToBuyView.setBackgroundColor(Utils.getColorForIndex(position))
-            holder.dragToSellView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 
         override fun getItemCount(): Int = values.size
@@ -569,10 +609,12 @@ class OrderbookFragment : Fragment() {
             val bidBackgroundView: RelativeLayout = view.findViewById(R.id.stock_background_bid)
             val bidCountView: TextView = view.findViewById(R.id.stock_count_bid)
             val bidPriceView: TextView = view.findViewById(R.id.stock_price_bid)
+            val bidPricePercentView: TextView = view.findViewById(R.id.stock_price_bid_percent)
 
             val askBackgroundView: RelativeLayout = view.findViewById(R.id.stock_background_ask)
             val askCountView: TextView = view.findViewById(R.id.stock_count_ask)
             val askPriceView: TextView = view.findViewById(R.id.stock_price_ask)
+            val askPricePercentView: TextView = view.findViewById(R.id.stock_price_ask_percent)
 
             val orderBuy1View: TextView = view.findViewById(R.id.stock_order_buy_1)
             val orderBuy2View: TextView = view.findViewById(R.id.stock_order_buy_2)

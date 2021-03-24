@@ -48,7 +48,7 @@ class Strategy1728Down() : KoinComponent {
     }
 
     fun processFinal(): MutableList<Stock> {
-        val candidates = process700to1200() + process700to1600()
+        val candidates = process700to1600() //process700to1200() + process700to1600()
         stocksFinal = process1625to1632()
         stocksFinal.removeAll { it !in candidates }
         stocksFinal.sortByDescending { it.changePrice1630to1635Percent }
