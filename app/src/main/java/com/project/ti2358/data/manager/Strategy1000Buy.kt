@@ -66,44 +66,37 @@ class Strategy1000Buy : KoinComponent {
         val purchases: MutableList<PurchaseStock> = mutableListOf()
         for (stock in stocksSelected) {
             val purchase = PurchaseStock(stock)
-
-            var exists = false
             for (p in purchaseToBuy) {
                 if (p.stock.instrument.ticker == stock.instrument.ticker) {
                     purchase.apply {
                         percentLimitPriceChange = p.percentLimitPriceChange
                         lots = p.lots
                     }
-                    exists = true
                     break
                 }
             }
-
-            if (!exists) {
-                purchase.apply {
-                    percentLimitPriceChange = -1.0
-                }
-            }
-
             purchases.add(purchase)
         }
         purchaseToBuy = purchases
 
         purchaseToBuy.forEach {
+            if (it.percentLimitPriceChange == 0.0) {
+                it.percentLimitPriceChange = -1.0
+            }
+            it.updateAbsolutePrice()
             if (it.lots == 0) { // если уже настраивали количество, то не трогаем
-                it.lots = (onePiece / it.stock.getPriceDouble()).roundToInt()
+                it.lots = (onePiece / it.getLimitPriceDouble()).roundToInt()
             }
             it.status = OrderStatus.WAITING
-            it.updateAbsolutePrice()
         }
 
         return purchaseToBuy
     }
 
-    fun getTotalPurchaseString(stocks: MutableList<PurchaseStock>): String {
+    fun getTotalPurchaseString(purchases: MutableList<PurchaseStock>): String {
         var value = 0.0
-        for (stock in stocks) {
-            value += stock.lots * stock.stock.getPriceDouble()
+        for (p in purchases) {
+            value += p.lots * p.getLimitPriceDouble()
         }
         return "%.1f$".format(value)
     }
@@ -116,25 +109,25 @@ class Strategy1000Buy : KoinComponent {
         return value
     }
 
-    fun getNotificationTextShort(stocks: MutableList<PurchaseStock>): String {
-        val price = getTotalPurchaseString(stocks)
+    fun getNotificationTextShort(purchases: MutableList<PurchaseStock>): String {
+        val price = getTotalPurchaseString(purchases)
         var tickers = ""
-        for (stock in stocks) {
-            tickers += "${stock.lots}*${stock.stock.instrument.ticker} "
+        for (p in purchases) {
+            tickers += "${p.lots}*${p.stock.instrument.ticker} "
         }
 
         return "$price:\n$tickers"
     }
 
-    fun getNotificationTextLong(stocks: MutableList<PurchaseStock>): String {
+    fun getNotificationTextLong(purchases: MutableList<PurchaseStock>): String {
         var tickers = ""
-        for (stock in stocks) {
-            val p = "%.1f$ > %.1f$ > %.1f%%".format(
-                stock.lots * stock.getLimitPriceDouble(),
-                stock.getLimitPriceDouble(),
-                stock.percentLimitPriceChange
+        for (p in purchases) {
+            val text = "%.1f$ > %.2f$ > %.1f%%".format(
+                p.lots * p.getLimitPriceDouble(),
+                p.getLimitPriceDouble(),
+                p.percentLimitPriceChange
             )
-            tickers += "${stock.stock.instrument.ticker} * ${stock.lots} = $p ${stock.getStatusString()}\n"
+            tickers += "${p.stock.instrument.ticker} * ${p.lots} = $text ${p.getStatusString()}\n"
         }
 
         return tickers

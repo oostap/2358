@@ -1,5 +1,7 @@
 package com.project.ti2358.ui.chart
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
@@ -9,19 +11,20 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.CandleStickChart
 import com.github.mikephil.charting.charts.Chart
-import com.github.mikephil.charting.components.AxisBase
-import com.github.mikephil.charting.components.Legend
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.components.*
 import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.formatter.IAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.ChartTouchListener
 import com.github.mikephil.charting.listener.OnChartGestureListener
+import com.github.mikephil.charting.utils.MPPointF
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.ChartManager
 import com.project.ti2358.data.manager.DepositManager
@@ -30,13 +33,16 @@ import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.service.Utils
+import com.project.ti2358.service.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import java.text.DecimalFormat
 import java.util.*
+import kotlin.math.min
 
 class DateFormatter : ValueFormatter() {
     var candles: MutableList<Candle> = mutableListOf()
@@ -52,7 +58,7 @@ class DateFormatter : ValueFormatter() {
         if (candle.interval == Interval.DAY) {
             return "%02d.%02d".format(timeCandle.get(Calendar.MONTH), timeCandle.get(Calendar.DAY_OF_MONTH))
         } else {
-            return "%02d:%02d".format(timeCandle.get(Calendar.HOUR), timeCandle.get(Calendar.MINUTE))
+            return "%02d:%02d".format(timeCandle.get(Calendar.HOUR_OF_DAY), timeCandle.get(Calendar.MINUTE))
         }
     }
 }
@@ -65,6 +71,55 @@ class VolumeFormatter : ValueFormatter() {
     }
 }
 
+@SuppressLint("ViewConstructor")
+class MyMarkerView(context: Context?, layoutResource: Int) : MarkerView(context, layoutResource) {
+    private val tvContent: TextView
+
+    // runs every time the MarkerView is redrawn, can be used to update the
+    // content (user-interface)
+    override fun refreshContent(e: Entry, highlight: Highlight) {
+        if (e is CandleEntry) {
+            tvContent.text = "%.2f".format(e.high)
+        } else {
+            tvContent.text = "%.2f".format(e.y)
+        }
+        super.refreshContent(e, highlight)
+    }
+
+    override fun getOffset(): MPPointF {
+        return MPPointF((-(width / 2)).toFloat(), (-height).toFloat())
+    }
+
+    init {
+        tvContent = findViewById(R.id.tvContent)
+    }
+}
+
+@SuppressLint("ViewConstructor")
+class XYMarkerView(context: Context?, private val xAxisValueFormatter: IAxisValueFormatter) : MarkerView(context, R.layout.chart_marker) {
+    private val tvContent: TextView
+    private val format: DecimalFormat
+
+    // runs every time the MarkerView is redrawn, can be used to update the
+    // content (user-interface)
+    override fun refreshContent(e: Entry, highlight: Highlight) {
+        tvContent.text = e.y.toInt().toString()
+        super.refreshContent(e, highlight)
+    }
+
+    override fun getOffset(): MPPointF {
+        return MPPointF((-(width / 2)).toFloat(), (-height).toFloat())
+    }
+
+    init {
+        tvContent = findViewById(R.id.tvContent)
+        format = DecimalFormat("###.0")
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 @KoinApiExtension
 class ChartFragment : Fragment(), OnChartGestureListener {
     private val chartManager: ChartManager by inject()
@@ -74,6 +129,7 @@ class ChartFragment : Fragment(), OnChartGestureListener {
     var candleChartDateFormatter = DateFormatter()
     var volumeFormatter = VolumeFormatter()
 
+    lateinit var barChartOSView: BarChart
     lateinit var candleChartView: CandleStickChart
     lateinit var barChartView: BarChart
 
@@ -96,10 +152,27 @@ class ChartFragment : Fragment(), OnChartGestureListener {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_chart, container, false)
 
+        barChartOSView = view.findViewById(R.id.chart_bar_os_view)
+        barChartOSView.setTouchEnabled(false)
+        barChartOSView.axisRight.isEnabled = false
+        barChartOSView.axisLeft.isEnabled = false
+        barChartOSView.description.isEnabled = false
+        barChartOSView.setDrawGridBackground(false)
+        barChartOSView.xAxis.isEnabled = false
+
         candleChartView = view.findViewById(R.id.chart_candle_view)
         candleChartView.description.isEnabled = false
         candleChartView.setBackgroundColor(Color.WHITE)
         candleChartView.setDrawGridBackground(true)
+//        candleChartView.visibility = View.GONE
+
+        candleChartView.isDragEnabled = true
+        candleChartView.setScaleEnabled(true)
+        candleChartView.setPinchZoom(true)
+
+        val mv = MyMarkerView(requireContext(), R.layout.chart_marker)
+        mv.chartView = candleChartView
+        candleChartView.marker = mv
 
         barChartView = view.findViewById(R.id.chart_bar_view)
         barChartView.setDrawBarShadow(false)
@@ -111,11 +184,12 @@ class ChartFragment : Fragment(), OnChartGestureListener {
 
         candleChartView.legend.form = Legend.LegendForm.NONE
         barChartView.legend.form = Legend.LegendForm.NONE
+        barChartOSView.legend.form = Legend.LegendForm.NONE
 
         candleChartView.onChartGestureListener = this
         barChartView.onChartGestureListener = this
 
-//        candleChartView.axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
+        candleChartView.axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
         candleChartView.axisRight.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
         candleChartView.axisRight.textColor = Utils.getChartTextColor()
         candleChartView.axisLeft.textColor = Utils.getChartTextColor()
@@ -136,10 +210,15 @@ class ChartFragment : Fragment(), OnChartGestureListener {
 
         barChartView.axisRight.isEnabled = false
 
+        barChartView.axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
         barChartView.axisLeft.axisMinimum = 0f
         barChartView.axisLeft.granularity = 0f
         barChartView.axisLeft.valueFormatter = volumeFormatter
         barChartView.axisLeft.textColor = Utils.getChartTextColor()
+
+        val barMarker = XYMarkerView(requireContext(), volumeFormatter)
+        barMarker.chartView = barChartView
+        barChartView.marker = barMarker
 
         activeStock = chartManager.activeStock
 
@@ -236,8 +315,7 @@ class ChartFragment : Fragment(), OnChartGestureListener {
         volumeFormatter.candles = candles.toMutableList()
 
         val cds = CandleDataSet(candleList, "")
-//        cds.color = Color.rgb(150, 150, 150)
-//        cds.shadowColor = Color.DKGRAY
+        cds.shadowColor = Utils.getChartTextColor()
         cds.shadowWidth = 0.7f
         cds.decreasingColor = Utils.RED
         cds.decreasingPaintStyle = Paint.Style.FILL
@@ -252,16 +330,20 @@ class ChartFragment : Fragment(), OnChartGestureListener {
         candleData.addDataSet(cds)
         candleChartView.data = candleData
         candleChartView.invalidate()
+
         ////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?
         val volumeList = mutableListOf<BarEntry>()
+        val colorList = mutableListOf<Int>()
         i = 0
         for (candle in candles) {
             val bar = BarEntry(i.toFloat(), candle.volume.toFloat())
+            val color = if (candle.openingPrice > candle.closingPrice) Utils.RED else Utils.GREEN
             volumeList.add(bar)
+            colorList.add(color)
             i++
         }
         val set1 = BarDataSet(volumeList, "")
-        set1.color = Color.rgb(60, 220, 78)
+        set1.colors = colorList
         set1.valueTextColor = Color.rgb(60, 220, 78)
         set1.valueTextSize = 10f
         set1.setDrawValues(false)
@@ -270,6 +352,41 @@ class ChartFragment : Fragment(), OnChartGestureListener {
         val barData = BarData(set1)
         barChartView.data = barData
         barChartView.invalidate()
+
+
+        // OS
+        ////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?
+        .let {
+            val volumeList = mutableListOf<BarEntry>()
+            i = 0
+            for (candle in candles) {
+                val c = Utils.getTimeMSK()
+                c.time = candle.time
+                var volume = 0
+                val hour = c.get(Calendar.HOUR_OF_DAY)
+                val minutes = c.get(Calendar.MINUTE)
+                if ((hour == 16 && minutes == 30) ||
+                    (hour == 1 && minutes == 45) ||
+                    (hour == 7 && minutes == 0) ||
+                    (hour == 10 && minutes == 0) ||
+                    (hour == 23 && minutes == 0)) {
+                    volume = 1000000
+                }
+
+                val bar = BarEntry(i.toFloat(), volume.toFloat())
+                volumeList.add(bar)
+                i++
+            }
+            val set = BarDataSet(volumeList, "")
+            set.color = Utils.PURPLE
+            set.valueTextColor = Color.rgb(60, 220, 78)
+            set.valueTextSize = 10f
+            set.setDrawValues(false)
+
+            val barData = BarData(set)
+            barChartOSView.data = barData
+            barChartOSView.invalidate()
+        }
     }
 
     override fun onChartGestureStart(me: MotionEvent?, lastPerformedGesture: ChartTouchListener.ChartGesture?) {
@@ -286,7 +403,7 @@ class ChartFragment : Fragment(), OnChartGestureListener {
 
     override fun onChartDoubleTapped(me: MotionEvent?) {
 //        log("CHART onChartDoubleTapped")
-        syncCharts(candleChartView, listOf(barChartView))
+        syncCharts(candleChartView, listOf(barChartView, barChartOSView))
     }
 
     override fun onChartSingleTapped(me: MotionEvent?) {
@@ -299,12 +416,12 @@ class ChartFragment : Fragment(), OnChartGestureListener {
 
     override fun onChartScale(me: MotionEvent?, scaleX: Float, scaleY: Float) {
 //        log("CHART onChartScale")
-        syncCharts(candleChartView, listOf(barChartView))
+        syncCharts(candleChartView, listOf(barChartView, barChartOSView))
     }
 
     override fun onChartTranslate(me: MotionEvent?, dX: Float, dY: Float) {
 //        log("CHART onChartTranslate")
-        syncCharts(candleChartView, listOf(barChartView))
+        syncCharts(candleChartView, listOf(barChartView, barChartOSView))
     }
 }
 

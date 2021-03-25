@@ -223,7 +223,25 @@
         android:id="@+id/nav_tazik_finish"
         android:name="com.project.ti2358.ui.strategyTazik.StrategyTazikFinishFragment"
         android:label="@string/menu_tazik"
-        tools:layout="@layout/fragment_tazik_start" />
+        tools:layout="@layout/fragment_tazik_finish" />
+
+    <!-- endless tazik -->
+
+    <fragment
+        android:id="@+id/nav_tazik_endless_start"
+        android:name="com.project.ti2358.ui.strategyTazikEndless.StrategyTazikEndlessStartFragment"
+        android:label="@string/menu_tazik_endless"
+        tools:layout="@layout/fragment_tazik_start" >
+        <action
+            android:id="@+id/action_nav_tazik_endless_start_to_nav_tazik_endless_finish"
+            app:destination="@id/nav_tazik_endless_finish" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_tazik_endless_finish"
+        android:name="com.project.ti2358.ui.strategyTazikEndless.StrategyTazikEndlessFinishFragment"
+        android:label="@string/menu_tazik_endless"
+        tools:layout="@layout/fragment_tazik_finish" />
 
     <!-- diagnostics -->
     <fragment

@@ -8,6 +8,7 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG

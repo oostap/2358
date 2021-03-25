@@ -142,8 +142,8 @@ class SettingsManager {
 
         fun get2358PurchaseTime(): String {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_purchase_time)
-            val value: String? = preferences.getString(key, "")
-            return value ?: "23:58:00"
+            val value: String? = preferences.getString(key, "22:58:00")
+            return value ?: "22:58:00"
         }
 
         fun get2358PurchaseVolume(): Int {

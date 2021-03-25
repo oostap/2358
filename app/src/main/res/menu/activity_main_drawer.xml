@@ -57,6 +57,11 @@
             android:icon="@drawable/ic_1000"
             android:title="@string/menu_rocket" />
 
+<!--        <item-->
+<!--            android:id="@+id/nav_tazik_endless_start"-->
+<!--            android:icon="@drawable/ic_tazik"-->
+<!--            android:title="@string/menu_tazik_endless" />-->
+
         <item
             android:id="@+id/nav_postmarket"
             android:icon="@drawable/ic_stocks"

@@ -3,29 +3,33 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_alignParentBottom="true"
-        android:weightSum="6"
-        android:layout_marginBottom="60dp">
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="170dp"
+        android:layout_weight="4">
 
-            <com.github.mikephil.charting.charts.CandleStickChart
-                android:id="@+id/chart_candle_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="5"/>
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/chart_bar_os_view"
+            android:layout_width="match_parent"
+            android:layout_marginTop="-100dp"
+            android:layout_marginBottom="-100dp"
+            android:layout_height="match_parent" />
 
-            <com.github.mikephil.charting.charts.BarChart
-                android:id="@+id/chart_bar_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+        <com.github.mikephil.charting.charts.CandleStickChart
+            android:id="@+id/chart_candle_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-    </LinearLayout>
+    </RelativeLayout>
+
+    <com.github.mikephil.charting.charts.BarChart
+        android:id="@+id/chart_bar_view"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginBottom="60dp"
+        android:layout_alignParentBottom="true"/>
 
     <LinearLayout
         android:layout_width="fill_parent"

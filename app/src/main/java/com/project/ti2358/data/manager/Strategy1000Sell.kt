@@ -51,25 +51,18 @@ class Strategy1000Sell() : KoinComponent {
         for (pos in positionsSelected) {
             pos.stock?.let { stock ->
                 val purchase = PurchaseStock(stock)
-
-                var exists = false
                 for (p in purchaseToSell) {
                     if (p.stock.instrument.ticker == stock.instrument.ticker) {
                         purchase.apply {
-                            position = pos
                             percentProfitSellFrom = p.percentProfitSellFrom
                         }
-                        exists = true
                         break
                     }
                 }
 
-                if (!exists) {
-                    purchase.apply {
-                        position = pos
-                    }
+                purchase.apply {
+                    position = pos
                 }
-
                 purchases.add(purchase)
             }
         }
@@ -79,6 +72,7 @@ class Strategy1000Sell() : KoinComponent {
             if (it.percentProfitSellFrom == 0.0) {
                 it.processInitialProfit()
             }
+            it.status = OrderStatus.WAITING
         }
         return purchaseToSell
     }

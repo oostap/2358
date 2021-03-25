@@ -22,14 +22,10 @@ data class Stock(
     var middlePrice: Double = 0.0
     var dayVolumeCash: Double = 0.0
 
-    var price1000: Double = 0.0             // цена открытия премаркета РФ
-    var priceTazik: Double = 0.0            // цена для утреннего тазика
-
     var changeOnStartTimer: Double = 0.0    // сколько % было на старте таймера для 2358
 
     var closePrices: ClosePrice? = null
     var candleToday: Candle? = null                               // реалтайм, дневная свеча
-
 
     // разница с ценой открытия премаркета
     var changePriceDayAbsolute: Double = 0.0
@@ -120,16 +116,18 @@ data class Stock(
     }
 
     @KoinApiExtension
+    @Synchronized
     fun processCandle(candle: Candle) {
         when (candle.interval) {
-            Interval.DAY -> { processDayCandle(candle) }
-            Interval.MINUTE -> { processMinuteCandle(candle) }
-            Interval.HOUR -> { processHour1Candle(candle) }
-            Interval.TWO_HOURS -> { processHour2Candle(candle) }
+            Interval.DAY -> processDayCandle(candle)
+            Interval.MINUTE -> processMinuteCandle(candle)
+            Interval.HOUR -> processHour1Candle(candle)
+            Interval.TWO_HOURS -> processHour2Candle(candle)
             else -> { }
         }
     }
 
+    @Synchronized
     private fun processDayCandle(candle: Candle) {
         val diffInMilli: Long = Calendar.getInstance().time.time - candle.time.time
         val diffInHours: Long = TimeUnit.MILLISECONDS.toHours(diffInMilli)
@@ -159,6 +157,7 @@ data class Stock(
     }
 
     @KoinApiExtension
+    @Synchronized
     private fun processMinuteCandle(candle: Candle) {
         var exists = false
         synchronized(minuteCandles) {
@@ -253,8 +252,6 @@ data class Stock(
 
                 middlePrice = (candle.highestPrice + candle.lowestPrice) / 2.0
                 dayVolumeCash = middlePrice * candle.volume
-
-                price1000 = candle.openingPrice
             }
         }
     }

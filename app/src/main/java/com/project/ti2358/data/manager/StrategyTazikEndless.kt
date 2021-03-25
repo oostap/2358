@@ -17,11 +17,11 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @KoinApiExtension
-class StrategyTazik : KoinComponent {
+class StrategyTazikEndless : KoinComponent {
     private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
 
-    private val keySavedSelectedStock: String = "tazik_selected"
+    private val keySavedSelectedStock: String = "tazik_endless_selected"
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()

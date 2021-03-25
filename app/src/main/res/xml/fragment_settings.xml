@@ -117,7 +117,7 @@
             app:key="@string/setting_key_2358_purchase_time"
             app:title="@string/stocks_2358_purchase_time"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="23:58:00"/>
+            app:defaultValue="22:58:00"/>
 
         <EditTextPreference
             app:key="@string/setting_key_2358_purchase_volume"

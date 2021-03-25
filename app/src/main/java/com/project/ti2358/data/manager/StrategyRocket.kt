@@ -86,7 +86,7 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
         if (stock !in stocks) return
 
         val percentRocket = SettingsManager.getRocketChangePercent()
-        var minutesRocket = SettingsManager.getRocketChangeMinutes()
+        val minutesRocket = SettingsManager.getRocketChangeMinutes()
         val volumeRocket = SettingsManager.getRocketChangeVolume()
 
         if (stock.minuteCandles.isNotEmpty()) {
@@ -101,12 +101,16 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
                 firstCandle = stock.minuteCandles.first()
             }
 
+            val deltaMinutes: Int = ((lastCandle.time.time - firstCandle.time.time) / 60.0 / 1000.0).toInt()
+            if (deltaMinutes > minutesRocket) { // если дальше настроек, игнорим
+                return
+            }
+
             var volume = 0
             for (i in fromIndex until stock.minuteCandles.size) {
                 volume += stock.minuteCandles[i].volume
             }
 
-            minutesRocket = stock.minuteCandles.size - fromIndex
             val changePercent = lastCandle.closingPrice / firstCandle.openingPrice * 100.0 - 100.0
             if (volume >= volumeRocket && abs(changePercent) >= percentRocket) {
 
@@ -115,7 +119,12 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
                     return
                 }
 
-                val rocketStock = RocketStock(stock, firstCandle.openingPrice, lastCandle.closingPrice, minutesRocket, volumeRocket, changePercent)
+                if ((rocketStocks.size > 1 && rocketStocks[1].stock == stock) ||
+                    (cometStocks.size > 1 && cometStocks[1].stock == stock)) {
+                    return
+                }
+
+                val rocketStock = RocketStock(stock, firstCandle.openingPrice, lastCandle.closingPrice, deltaMinutes, volumeRocket, changePercent)
                 rocketStock.process()
                 if (changePercent > 0) {
                     rocketStocks.add(0, rocketStock)
@@ -124,7 +133,7 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
                 }
                 createRocket(rocketStock)
             }
-            log("ROCKET: ${stock.instrument.ticker}, $percentRocket > $changePercent")
+//            log("ROCKET: ${stock.instrument.ticker}, $percentRocket > $changePercent")
         }
     }
 

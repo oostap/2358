@@ -15,6 +15,7 @@ import com.project.ti2358.data.service.StreamingAlorService
 import com.project.ti2358.data.service.StreamingTinkoffService
 import com.project.ti2358.data.service.ThirdPartyService
 import com.project.ti2358.service.log
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -116,24 +117,24 @@ class StockManager : KoinComponent {
     }
 
     suspend fun reloadClosePrices() {
-        GlobalScope.launch(Dispatchers.Main) {
-            while (true) {
-                try {
-                    stockClosePrices = synchronizedMap(thirdPartyService.daagerClosePrices() as MutableMap<String, ClosePrice>)
-                    stocksAll.forEach {
-                        it.apply {
-                            it.closePrices = stockClosePrices[it.instrument.ticker]
-                            it.process2359()
-                        }
+        var tries = 10
+        while (tries > 0) {
+            try {
+                stockClosePrices = synchronizedMap(thirdPartyService.daagerClosePrices() as MutableMap<String, ClosePrice>)
+                stocksAll.forEach {
+                    it.apply {
+                        it.closePrices = stockClosePrices[it.instrument.ticker]
+                        it.process2359()
                     }
-                    log(stockReports.toString())
-                    break
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    log("daager ClosePrices not reached")
                 }
-                delay(1000)
+                log(stockReports.toString())
+                break
+            } catch (e: Exception) {
+                e.printStackTrace()
+                log("daager ClosePrices not reached")
             }
+            delay(10000)
+            tries--
         }
     }
 
@@ -179,7 +180,8 @@ class StockManager : KoinComponent {
         try {
             stockPrice1728 = thirdPartyService.daagerStock1728()
             stocksAll.forEach {
-                it.priceSteps1728 = stockPrice1728[it.instrument.ticker]
+                if (it.instrument.ticker in stockPrice1728)
+                    it.priceSteps1728 = stockPrice1728[it.instrument.ticker]
             }
             log("daager StockPrice1728: $stockPrice1728")
         } catch (e: Exception) {
@@ -268,6 +270,7 @@ class StockManager : KoinComponent {
                         stocks,
                         Interval.MINUTE
                     )
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onNext = {
                             addCandle(it)
@@ -282,6 +285,7 @@ class StockManager : KoinComponent {
                         stocks,
                         Interval.DAY
                     )
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onNext = {
                             addCandle(it)
@@ -353,6 +357,7 @@ class StockManager : KoinComponent {
 
     @Synchronized
     private fun addCandle(candle: Candle) {
+
         val stock: Stock?
         if (SettingsManager.isAlorQoutes() && (candle.interval == Interval.MINUTE || candle.interval == Interval.DAY)) {
             stock = stocksStream.find { it.instrument.ticker == candle.figi }

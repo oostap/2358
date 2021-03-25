@@ -4,6 +4,8 @@ import com.project.ti2358.service.log
 import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.math.abs
 
 enum class TrailingStopStatus {
@@ -21,6 +23,7 @@ data class TrailingStop(
     var takeProfitDelta: Double,
     var stopLossPercent: Double,
 ) {
+    val mutex = Mutex()
     var started: Boolean = false
     var status: TrailingStopStatus = TrailingStopStatus.NONE
     var currentPrice = 0.0
@@ -46,8 +49,9 @@ data class TrailingStop(
         takeProfitActivationPrice = buyPrice + buyPrice / 100.0 * abs(takeProfitActivationPercent)
 
         while (started) {
-            delay(200)
-            currentPrice = stock.getPriceDouble()
+            mutex.withLock {
+                currentPrice = stock.getPriceDouble()
+            }
 
             currentChangePercent = currentPrice / buyPrice * 100.0 - 100.0
             log("TRAILING_STOP изменение: $buyPrice -> ${currentPrice.toMoney(stock)} = ${currentChangePercent.toPercent()}")
@@ -95,6 +99,7 @@ data class TrailingStop(
                     break
                 }
             }
+            delay(200)
         }
 
         return profitSellPrice
@@ -112,7 +117,7 @@ data class TrailingStop(
         var stopLoss = "%.2f$/%.2f%%".format(stopLossPrice, stopLossPercent)
         if (stopLossPercent == 0.0) stopLoss = "НЕТ"
 
-        val takeProfitRealtime = "%.2f$/%.2f%%".format(currentTakeProfitPercent, currentTakeProfitPrice)
+        val takeProfitRealtime = "%.2f$/%.2f%%".format(currentTakeProfitPrice, currentTakeProfitPercent)
 
         return "%s: %s, ТП=%s, СЛ=%s, REALTIME=%s - %s".format(stock.instrument.ticker, currentChange, takeProfit, stopLoss, takeProfitRealtime, getStatusString())
     }

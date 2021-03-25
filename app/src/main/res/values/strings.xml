@@ -64,6 +64,7 @@
     <string name="menu_tazik">Автотазик</string>
     <string name="menu_blacklist">Чёрный список</string>
     <string name="menu_chart">График</string>
+    <string name="menu_tazik_endless">Бесконечный таз ♾</string>
 
     <string name="reports">ОТЧЁТЫ</string>
     <string name="dividends">ДИВЫ</string>
