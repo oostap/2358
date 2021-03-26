@@ -116,7 +116,7 @@ class ReportsFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.getTickerLove()}"
             holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
 
             holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
@@ -126,7 +126,7 @@ class ReportsFragment : Fragment() {
             holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
             }
 
             holder.sectorView.text = item.getSectorName()

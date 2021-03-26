@@ -121,7 +121,7 @@ class Strategy2358StartFragment : Fragment() {
             holder.checkBoxView.setOnCheckedChangeListener(null)
             holder.checkBoxView.isChecked = strategy2358.isSelected(item)
 
-            holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.getTickerLove()}"
             holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
@@ -144,7 +144,7 @@ class Strategy2358StartFragment : Fragment() {
             }
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
             }
 
             if (item.report != null) {

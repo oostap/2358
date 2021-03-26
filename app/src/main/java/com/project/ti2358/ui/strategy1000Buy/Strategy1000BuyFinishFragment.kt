@@ -141,7 +141,7 @@ class Strategy1000BuyFinishFragment : Fragment() {
             val item = values[position]
             holder.position = item
 
-            holder.tickerView.text = "${position + 1}) ${item.stock.instrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.stock.getTickerLove()}"
             holder.currentPriceView.text = "${item.stock.getPrice2359String()} ➡ ${item.stock.getPriceDouble().toMoney(item.stock)}"
             holder.currentPriceView.setTextColor(Utils.getColorForValue(item.stock.changePrice2359DayPercent))
 

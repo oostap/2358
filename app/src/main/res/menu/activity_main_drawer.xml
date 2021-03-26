@@ -72,6 +72,11 @@
 <!--            android:icon="@drawable/ic_stocks"-->
 <!--            android:title="@string/menu_shorts" />-->
         <item
+            android:id="@+id/nav_favorites"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/menu_favorites" />
+
+        <item
             android:id="@+id/nav_blacklist"
             android:icon="@drawable/ic_trash"
             android:title="@string/menu_blacklist" />

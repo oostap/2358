@@ -154,7 +154,7 @@ class OrderbookManager() : KoinComponent {
                 line.ordersSell.clear()
 
                 for (order in depositManager.orders) {
-                    if (order.figi == line.stock.instrument.figi) {
+                    if (order.figi == line.stock.figi) {
                         if (order.price == line.askPrice || order.price == line.bidPrice) {
                             if (order.operation == OperationType.BUY) {
                                 line.ordersBuy.add(order)

@@ -99,7 +99,7 @@ class RocketsFragment : Fragment() {
             val item = values[position]
             holder.rocketStock = item
 
-            holder.tickerView.text = "${position + 1}) ${item.stock.instrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.stock.getTickerLove()}"
 
             val volume = item.stock.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
@@ -117,7 +117,7 @@ class RocketsFragment : Fragment() {
             holder.priceView.setTextColor(Utils.getColorForValue(item.changePriceRocketPercent))
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.rocketStock.stock.instrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.rocketStock.stock.ticker)
             }
 
             holder.imageOrderbook.setOnClickListener {
@@ -129,7 +129,7 @@ class RocketsFragment : Fragment() {
             holder.sectorView.setTextColor(Utils.getColorForSector(item.stock.closePrices?.sector))
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.rocketStock.stock.instrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.rocketStock.stock.ticker)
             }
 
             if (item.stock.report != null) {

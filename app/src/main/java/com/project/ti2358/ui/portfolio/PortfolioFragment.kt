@@ -140,7 +140,7 @@ class PortfolioFragment : Fragment() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
             holder.position = item
-            holder.tickerView.text = "${position + 1}) ${item.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.stock?.getTickerLove()}"
 
             if (item.blocked.toInt() > 0) {
                 holder.lotsBlockedView.text = "(${item.blocked.toInt()}🔒)"
@@ -166,10 +166,14 @@ class PortfolioFragment : Fragment() {
             holder.cashView.text = totalCash.toMoney(item.stock)
 
             val emoji = when {
+                percent <= -20 -> " 💩"
+                percent <= -15 -> " 🦌"
                 percent <= -10 -> " 🤬"
                 percent <= -5 -> " 😡"
                 percent <= -3 -> " 😱"
                 percent <= -1 -> " 😰"
+                percent >= 20 -> " 🤪️"
+                percent >= 15 -> " ❤️"
                 percent >= 10 -> " 🤩"
                 percent >= 5 -> " 😍"
                 percent >= 3 -> " 🥳"
@@ -203,7 +207,7 @@ class PortfolioFragment : Fragment() {
 
             holder.itemView.setOnClickListener {
                 holder.position.stock?.let {
-                    Utils.openTinkoffForTicker(requireContext(), it.instrument.ticker)
+                    Utils.openTinkoffForTicker(requireContext(), it.ticker)
                 }
             }
 

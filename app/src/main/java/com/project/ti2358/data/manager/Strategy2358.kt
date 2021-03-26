@@ -20,6 +20,8 @@ class Strategy2358() : KoinComponent {
     var jobs: MutableList<Job?> = mutableListOf()
     var started: Boolean = false
 
+    var equalParts = true
+
     fun process(): MutableList<Stock> {
         val all = stockManager.getWhiteStocks()
         val change = SettingsManager.get2358ChangePercent()
@@ -85,7 +87,7 @@ class Strategy2358() : KoinComponent {
 
         // удалить бумаги, которые уже есть в депо, иначе среднюю невозможно узнать
         stocksSelected.removeAll { stock ->
-            depositManager.portfolioPositions.any { it.ticker == stock.instrument.ticker }
+            depositManager.portfolioPositions.any { it.ticker == stock.ticker }
         }
 
         val purchases: MutableList<PurchaseStock> = mutableListOf()
@@ -94,7 +96,7 @@ class Strategy2358() : KoinComponent {
 
             var exists = false
             for (p in purchaseToBuy) {
-                if (p.stock.instrument.ticker == stock.instrument.ticker) {
+                if (p.stock.ticker == stock.ticker) {
                     purchase.apply {
                         percentProfitSellFrom = p.percentProfitSellFrom
                         percentProfitSellTo = p.percentProfitSellTo
@@ -128,7 +130,7 @@ class Strategy2358() : KoinComponent {
         val onePiece: Double = totalMoney / purchaseToBuy.size
 
         for (purchase in purchaseToBuy) {
-            if (purchase.lots == 0) { // если уже настраивали количество, то не трогаем
+            if (purchase.lots == 0 || equalParts) { // если уже настраивали количество, то не трогаем
                 purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
             }
             purchase.status = OrderStatus.WAITING
@@ -155,7 +157,7 @@ class Strategy2358() : KoinComponent {
 
     fun getNotificationTextShort(): String {
         var tickers = ""
-        purchaseToBuy.forEach { tickers += "${it.lots}*${it.stock.instrument.ticker} " }
+        purchaseToBuy.forEach { tickers += "${it.lots}*${it.stock.ticker} " }
         return "${getTotalPurchaseString()}:\n$tickers"
     }
 
@@ -163,9 +165,9 @@ class Strategy2358() : KoinComponent {
         var tickers = ""
         for (purchase in purchaseToBuy) {
             val p = "%.2f$".format(purchase.lots * purchase.stock.getPriceDouble())
-            tickers += "${purchase.stock.instrument.ticker}*${purchase.lots} = ${p}, "
+            tickers += "${purchase.stock.ticker}*${purchase.lots} = ${p}, "
             tickers += if (purchase.trailingStop) {
-                "ТТ:${purchase.trailingStopTakeProfitPercentActivation.toPercent()}/${purchase.trailingStopTakeProfitPercentDelta.toPercent()}, ${purchase.getStatusString()} ${purchase.currentTrailingStop?.currentChangePercent ?: ""}\n"
+                "ТТ:${purchase.trailingStopTakeProfitPercentActivation.toPercent()}/${purchase.trailingStopTakeProfitPercentDelta.toPercent()}, ${purchase.getStatusString()} ${purchase.currentTrailingStop?.currentChangePercent?.toPercent() ?: ""}\n"
             } else {
                 "Л:${purchase.percentProfitSellFrom.toPercent()}/${purchase.percentProfitSellTo.toPercent()}, ${purchase.getStatusString()}\n"
             }

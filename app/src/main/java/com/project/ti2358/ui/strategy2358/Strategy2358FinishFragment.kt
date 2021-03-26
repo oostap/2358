@@ -29,6 +29,7 @@ class Strategy2358FinishFragment : Fragment() {
     var buttonStart: Button? = null
     var stocks: MutableList<PurchaseStock> = mutableListOf()
     var infoTextView: TextView? = null
+    var equalPartsCheckBoxView: CheckBox? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,7 +75,24 @@ class Strategy2358FinishFragment : Fragment() {
         infoTextView = view.findViewById(R.id.info_text)
         updateInfoText()
 
+        equalPartsCheckBoxView = view.findViewById(R.id.check_box)
+        equalPartsCheckBoxView?.setOnCheckedChangeListener { _, checked ->
+            updateEqualParts(checked)
+        }
+        updateEqualParts(strategy2358.equalParts)
+
         return view
+    }
+
+    private fun updateEqualParts(newValue: Boolean) {
+        strategy2358.equalParts = newValue
+        equalPartsCheckBoxView?.isChecked = newValue
+
+        if (newValue) {
+            stocks = strategy2358.getPurchaseStock(true)
+            adapterList.setData(stocks)
+            updateInfoText()
+        }
     }
 
     private fun updateInfoText() {
@@ -114,10 +132,8 @@ class Strategy2358FinishFragment : Fragment() {
             val item = values[position]
             holder.purchase = item
 
-            holder.tickerView.text = "${position + 1}) ${item.stock.instrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.stock.getTickerLove()}"
             holder.priceView.text = item.stock.getPriceString()
-
-            holder.purchasePriceView.text = item.getPriceString()
 
             refreshPercent(holder, 0.0)
             holder.pricePlusButton.setOnClickListener {
@@ -129,11 +145,13 @@ class Strategy2358FinishFragment : Fragment() {
             }
 
             holder.lotsPlusButton.setOnClickListener {
+                updateEqualParts(false)
                 holder.purchase.addLots(1)
                 refreshPercent(holder, 0.0)
             }
 
             holder.lotsMinusButton.setOnClickListener {
+                updateEqualParts(false)
                 holder.purchase.addLots(-1)
                 refreshPercent(holder, 0.0)
             }
@@ -165,6 +183,8 @@ class Strategy2358FinishFragment : Fragment() {
                 holder.profitPriceFromView.setTextColor(Utils.GREEN)
                 holder.profitPriceToView.setTextColor(Utils.GREEN)
             }
+
+            holder.purchasePriceView.text = "%.2f$".format(holder.purchase.stock.getPriceDouble() * holder.purchase.lots)
 
             updateInfoText()
         }

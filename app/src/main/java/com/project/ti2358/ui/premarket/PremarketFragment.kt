@@ -151,7 +151,7 @@ class PremarketFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.getTickerLove()}"
 
             val volume = item.getTodayVolume() / 1000f
             holder.volumeTodayView.text = "%.1fk".format(volume)
@@ -180,7 +180,7 @@ class PremarketFragment : Fragment() {
             }
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
             }
 
             holder.imageOrderbook.setOnClickListener {
@@ -192,7 +192,7 @@ class PremarketFragment : Fragment() {
             holder.sectorView.setTextColor(Utils.getColorForSector(item.closePrices?.sector))
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
             }
 
             if (item.report != null) {

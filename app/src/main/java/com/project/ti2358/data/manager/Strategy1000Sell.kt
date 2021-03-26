@@ -48,11 +48,15 @@ class Strategy1000Sell() : KoinComponent {
 
     fun processSellPosition(): MutableList<PurchaseStock> {
         val purchases: MutableList<PurchaseStock> = mutableListOf()
+
+        // удалить все позиции, которых нет в портфеле
+        positionsSelected.removeAll { p -> p.figi !in depositManager.portfolioPositions.map { it.figi } }
+
         for (pos in positionsSelected) {
             pos.stock?.let { stock ->
                 val purchase = PurchaseStock(stock)
                 for (p in purchaseToSell) {
-                    if (p.stock.instrument.ticker == stock.instrument.ticker) {
+                    if (p.stock.ticker == stock.ticker) {
                         purchase.apply {
                             percentProfitSellFrom = p.percentProfitSellFrom
                         }

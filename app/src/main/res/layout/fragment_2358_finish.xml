@@ -47,4 +47,15 @@
         android:textSize="16sp"
         android:textStyle="bold" />
 
+    <CheckBox
+        android:id="@+id/check_box"
+        android:layout_height="50dp"
+        android:layout_width="150dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:text="Пересчёт в равных долях"
+        android:layoutDirection="rtl"
+        android:textAlignment="center"
+        android:layout_marginBottom="80dp"/>
+
 </RelativeLayout>

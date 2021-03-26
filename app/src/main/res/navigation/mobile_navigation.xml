@@ -57,6 +57,13 @@
         android:label="@string/menu_blacklist"
         tools:layout="@layout/fragment_blacklist" />
 
+    <!-- избранные -->
+    <fragment
+        android:id="@+id/nav_favorites"
+        android:name="com.project.ti2358.ui.favorites.FavoritesFragment"
+        android:label="@string/menu_favorites"
+        tools:layout="@layout/fragment_favorites" />
+
     <!-- шорты -->
     <fragment
         android:id="@+id/nav_shorts"

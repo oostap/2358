@@ -187,25 +187,27 @@ class StreamingAlorService {
         val timeFrame = Utils.convertIntervalToSeconds(interval)
         val timeName = Utils.convertIntervalToString(interval)
 
-        val differenceHours = Utils.getTimeDiffBetweenMSK_UTC()
-        val current = Utils.getTimeMSK()
-        current.set(Calendar.HOUR_OF_DAY, 7)
-        current.set(Calendar.MINUTE, 0)
-        current.set(Calendar.SECOND, 0)
-        current.set(Calendar.MILLISECOND, 0)
-        current.add(Calendar.HOUR_OF_DAY, differenceHours)
-        val time = (current.timeInMillis - current.timeZone.rawOffset) / 1000 - 2 * 60 * 60// Calendar.getInstance().timeInMillis / 1000 - 60 * 60 * 24 // сутки, все минутные свечи за сегодня
+//        val differenceHours = Utils.getTimeDiffBetweenMSK_UTC()
+//        val current = Utils.getTimeMSK()
+//        current.set(Calendar.HOUR_OF_DAY, 7)
+//        current.set(Calendar.MINUTE, 0)
+//        current.set(Calendar.SECOND, 0)
+//        current.set(Calendar.MILLISECOND, 0)
+//        current.add(Calendar.HOUR_OF_DAY, differenceHours)
+//        val time = (current.timeInMillis - current.timeZone.rawOffset) / 1000 - 2 * 60 * 60// Calendar.getInstance().timeInMillis / 1000 - 60 * 60 * 24 // сутки, все минутные свечи за сегодня
+
+        val time = Calendar.getInstance().time.time / 1000
 
         val bar = BarGetEventBody(
             AlorManager.TOKEN,
             "BarsGetAndSubscribe",
-            stock.instrument.ticker,
+            stock.ticker,
             "SPBX",
             tf,
             time,
             "Simple",
             false,
-            "${stock.instrument.ticker}_$timeName"
+            "${stock.ticker}_$timeName"
         )
 
         webSocket?.send(Gson().toJson(bar))
@@ -219,9 +221,9 @@ class StreamingAlorService {
     }
 
     private fun unsubscribeCandleEventsStream(stock: Stock, interval: Interval) {
-        log("StreamingAlorService :: unsubscribe from candle events: ticker: ${stock.instrument.ticker}, interval: $interval")
+        log("StreamingAlorService :: unsubscribe from candle events: ticker: ${stock.ticker}, interval: $interval")
         val timeName = Utils.convertIntervalToString(interval)
-        val cancel = CancelEventBody(SettingsManager.getActiveTokenAlor(), "unsubscribe", "${stock.instrument.ticker}_$timeName")
+        val cancel = CancelEventBody(SettingsManager.getActiveTokenAlor(), "unsubscribe", "${stock.ticker}_$timeName")
         webSocket?.send(Gson().toJson(cancel))
         activeCandleSubscriptions[stock]?.remove(interval)
     }

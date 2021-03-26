@@ -115,7 +115,7 @@ class PostmarketFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            val ticker = "${position + 1} ${item.instrument.ticker}"
+            val ticker = "${position + 1} ${item.getTickerLove()}"
             holder.tickerView.text = ticker
 
             val priceFrom = item.getPriceDouble().toMoney(item)
@@ -135,7 +135,7 @@ class PostmarketFragment : Fragment() {
             holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePricePostmarketAbsolute))
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
             }
 
             holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))

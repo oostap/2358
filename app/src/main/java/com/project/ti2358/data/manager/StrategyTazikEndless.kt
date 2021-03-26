@@ -61,12 +61,12 @@ class StrategyTazikEndless : KoinComponent {
         jsonStocks?.let {
             val itemType = object : TypeToken<List<String>>() {}.type
             val stocksSelectedList: List<String> = gson.fromJson(jsonStocks, itemType)
-            stocksSelected = stocks.filter { it.instrument.ticker in stocksSelectedList }.toMutableList()
+            stocksSelected = stocks.filter { it.ticker in stocksSelectedList }.toMutableList()
         }
     }
 
     private fun saveSelectedStocks(numberSet: Int) {
-        val list = stocksSelected.map { it.instrument.ticker }.toMutableList()
+        val list = stocksSelected.map { it.ticker }.toMutableList()
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
         val editor: SharedPreferences.Editor = preferences.edit()
@@ -121,7 +121,7 @@ class StrategyTazikEndless : KoinComponent {
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         // удалить все бумаги, у которых 0 лотов
         stocksToPurchase.removeAll { p ->
-            p.lots == 0 || depositManager.portfolioPositions.any { it.ticker == p.stock.instrument.ticker }
+            p.lots == 0 || depositManager.portfolioPositions.any { it.ticker == p.stock.ticker }
         }
 
         return stocksToPurchase
@@ -162,7 +162,7 @@ class StrategyTazikEndless : KoinComponent {
         val price = getTotalPurchaseString()
         var tickers = ""
         for (stock in stocksToPurchase) {
-            tickers += "%s*%.2f%%".format(stock.stock.instrument.ticker, stock.percentLimitPriceChange)
+            tickers += "%s*%.2f%%".format(stock.stock.ticker, stock.percentLimitPriceChange)
         }
 
         return "$price:\n$tickers"
@@ -176,7 +176,7 @@ class StrategyTazikEndless : KoinComponent {
         var tickers = ""
         for (stock in stocksToPurchase) {
             val change = (100 * stock.stock.getPriceDouble()) / stock.fixedPrice - 100
-            tickers += "${stock.stock.instrument.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
+            tickers += "${stock.stock.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
                     "${stock.fixedPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceDouble().toMoney(stock.stock)} = " +
                     "${change.toPercent()} ${stock.getStatusString()}\n"
         }
@@ -311,7 +311,7 @@ class StrategyTazikEndless : KoinComponent {
             if (closingPrice == 0.0) continue
 
             val change = closingPrice / purchase.fixedPrice * 100.0 - 100.0
-            if (isAllowToBuy(purchase.stock.instrument.ticker, change)) {
+            if (isAllowToBuy(purchase.stock.ticker, change)) {
                 purchase.stock.candleToday?.let {
                     processBuy(purchase, purchase.stock, it)
                 }
@@ -337,10 +337,10 @@ class StrategyTazikEndless : KoinComponent {
     fun processStrategy(stock: Stock, candle: Candle) {
         if (!started) return
 
-        val ticker = stock.instrument.ticker
+        val ticker = stock.ticker
 
         // если бумага не в списке скана - игнорируем
-        val sorted = stocksToPurchase.find { it.stock.instrument.ticker == ticker }
+        val sorted = stocksToPurchase.find { it.stock.ticker == ticker }
         sorted?.let { purchase ->
             val change = candle.closingPrice / purchase.fixedPrice * 100.0 - 100.0
             if (change <= purchase.percentLimitPriceChange && isAllowToBuy(ticker, change)) {
@@ -359,9 +359,9 @@ class StrategyTazikEndless : KoinComponent {
         }
 
         val change = candle.closingPrice / purchase.fixedPrice * 100.0 - 100.0
-        stocksTickerBuyed[stock.instrument.ticker] = change
+        stocksTickerBuyed[stock.ticker] = change
         // просадка < x%
-        log("ПРОСАДКА, БЕРЁМ! ${stock.instrument.ticker} ➡ $change ➡ ${candle.closingPrice}")
+        log("ПРОСАДКА, БЕРЁМ! ${stock.ticker} ➡ $change ➡ ${candle.closingPrice}")
 
         val baseProfit = SettingsManager.getTazikTakeProfit()
         val job: Job?

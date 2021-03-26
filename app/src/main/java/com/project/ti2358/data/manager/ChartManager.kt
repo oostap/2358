@@ -36,8 +36,8 @@ class ChartManager() : KoinComponent {
 
     suspend fun loadCandlesMinute1(): List<Candle> {
         activeStock?.let {
-            val figi = it.instrument.figi
-            val ticker = it.instrument.ticker
+            val figi = it.figi
+            val ticker = it.ticker
 
             val zone = Utils.getTimezoneCurrent()
             val toDate = Calendar.getInstance()
@@ -53,8 +53,8 @@ class ChartManager() : KoinComponent {
 
     suspend fun loadCandlesMinute5(): List<Candle> {
         activeStock?.let {
-            val figi = it.instrument.figi
-            val ticker = it.instrument.ticker
+            val figi = it.figi
+            val ticker = it.ticker
 
             val zone = Utils.getTimezoneCurrent()
             val toDate = Calendar.getInstance()
@@ -70,8 +70,8 @@ class ChartManager() : KoinComponent {
 
     suspend fun loadCandlesHour1(): List<Candle> {
         activeStock?.let {
-            val figi = it.instrument.figi
-            val ticker = it.instrument.ticker
+            val figi = it.figi
+            val ticker = it.ticker
 
             val zone = Utils.getTimezoneCurrent()
             val toDate = Calendar.getInstance()
@@ -87,8 +87,8 @@ class ChartManager() : KoinComponent {
 
     suspend fun loadCandlesDay(): List<Candle> {
         activeStock?.let {
-            val figi = it.instrument.figi
-            val ticker = it.instrument.ticker
+            val figi = it.figi
+            val ticker = it.ticker
 
             val zone = Utils.getTimezoneCurrent()
             val toDate = Calendar.getInstance()

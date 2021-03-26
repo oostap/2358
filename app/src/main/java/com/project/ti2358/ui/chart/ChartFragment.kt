@@ -166,9 +166,9 @@ class ChartFragment : Fragment(), OnChartGestureListener {
         candleChartView.setDrawGridBackground(true)
 //        candleChartView.visibility = View.GONE
 
-        candleChartView.isDragEnabled = true
-        candleChartView.setScaleEnabled(true)
-        candleChartView.setPinchZoom(true)
+//        candleChartView.isDragEnabled = true
+//        candleChartView.setScaleEnabled(true)
+//        candleChartView.setPinchZoom(true)
 
         val mv = MyMarkerView(requireContext(), R.layout.chart_marker)
         mv.chartView = candleChartView
@@ -298,6 +298,12 @@ class ChartFragment : Fragment(), OnChartGestureListener {
     }
 
     fun loadData(candles: List<Candle>) {
+        if (currentInterval == Interval.MINUTE) {
+            barChartOSView.visibility = View.VISIBLE
+        } else {
+            barChartOSView.visibility = View.GONE
+        }
+
         val candleList = mutableListOf<CandleEntry>()
         var i = 0
         for (candle in candles) {

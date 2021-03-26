@@ -428,11 +428,11 @@ class Utils {
         fun search(stocks: List<Stock>, text: String): MutableList<Stock> {
             if (text.isNotEmpty()) {
                 val list = stocks.filter {
-                            it.instrument.ticker.contains(text, ignoreCase = true) ||
+                            it.ticker.contains(text, ignoreCase = true) ||
                             it.instrument.name.contains(text, ignoreCase = true) ||
                             it.alterName.contains(text, ignoreCase = true)
                 }.toMutableList()
-                list.sortBy { it.instrument.ticker.length }
+                list.sortBy { it.ticker.length }
                 return list
             }
             return stocks.toMutableList()

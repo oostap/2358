@@ -236,7 +236,7 @@ class OrderbookFragment : Fragment() {
 
         positionView.setOnClickListener {
             activeStock?.let {
-                depositManager.getPositionForFigi(it.instrument.figi)?.let { p ->
+                depositManager.getPositionForFigi(it.figi)?.let { p ->
                     volumeEditText.setText(abs(p.lots).toString())
                 }
             }
@@ -270,7 +270,7 @@ class OrderbookFragment : Fragment() {
 
     private fun updatePosition() {
         activeStock?.let {
-            val pos = depositManager.getPositionForFigi(it.instrument.figi)?.let { p ->
+            val pos = depositManager.getPositionForFigi(it.figi)?.let { p ->
                 val avg = p.getAveragePrice()
                 positionPriceView.text = "${avg.toMoney(it)} ➡ ${it.getPriceString()}"
 
@@ -313,7 +313,7 @@ class OrderbookFragment : Fragment() {
 
     private fun moveAllBuyOrders(delta: Int, operationType: OperationType) {
         activeStock?.let {
-            val buyOrders = depositManager.getOrderAllOrdersForFigi(it.instrument.figi, operationType)
+            val buyOrders = depositManager.getOrderAllOrdersForFigi(it.figi, operationType)
             buyOrders.forEach { order ->
                 val newIntPrice = (order.price * 100).roundToInt() + delta
                 val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0)
@@ -348,7 +348,7 @@ class OrderbookFragment : Fragment() {
         val volume = getActiveVolume()
         if (volume != 0) {
             val price = priceBox.text.toString().toDouble()
-            orderbookManager.createOrder(orderbookLine.stock.instrument.figi, price, volume, operationType)
+            orderbookManager.createOrder(orderbookLine.stock.figi, price, volume, operationType)
             return
         }
 
@@ -361,7 +361,7 @@ class OrderbookFragment : Fragment() {
         layout.addView(lotsBox) // Another add method
 
         var title = if (operationType == OperationType.BUY) "КУПИТЬ!" else "ПРОДАТЬ!"
-        val position = depositManager.getPositionForFigi(orderbookLine.stock.instrument.figi)
+        val position = depositManager.getPositionForFigi(orderbookLine.stock.figi)
         val depoCount = position?.lots ?: 0
         val avg = position?.getAveragePrice() ?: 0
         title += " депо: $depoCount, $avg"
@@ -372,7 +372,7 @@ class OrderbookFragment : Fragment() {
                 try {
                     val price = Utils.makeNicePrice(priceBox.text.toString().toDouble())
                     val lots = lotsBox.text.toString().toInt()
-                    orderbookManager.createOrder(orderbookLine.stock.instrument.figi, price, lots, operationType)
+                    orderbookManager.createOrder(orderbookLine.stock.figi, price, lots, operationType)
                 } catch (e: Exception) {
                     Utils.showMessageAlert(requireContext(), "Неверный формат чисел!")
                 }
@@ -510,7 +510,7 @@ class OrderbookFragment : Fragment() {
                 targetPriceAsk = values.first().askPrice
                 targetPriceBid = values.first().bidPrice
 
-                portfolioPosition = depositManager.getPositionForFigi(it.instrument.figi)
+                portfolioPosition = depositManager.getPositionForFigi(it.figi)
                 portfolioPosition?.let { p ->
                     targetPriceAsk = p.getAveragePrice()
                     targetPriceBid = p.getAveragePrice()

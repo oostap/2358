@@ -19,6 +19,10 @@ import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -29,10 +33,15 @@ class Strategy1000SellStartFragment : Fragment() {
     val depositManager: DepositManager by inject()
     var adapterList: ItemPortfolioRecyclerViewAdapter = ItemPortfolioRecyclerViewAdapter(emptyList())
 
+    var jobUpdate: Job? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
 
+    override fun onDestroy() {
+        jobUpdate?.cancel()
+        super.onDestroy()
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -40,12 +49,7 @@ class Strategy1000SellStartFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_1000_sell_start, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
-        list.addItemDecoration(
-            DividerItemDecoration(
-                list.context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
+        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
 
         if (list is RecyclerView) {
             with(list) {
@@ -65,12 +69,20 @@ class Strategy1000SellStartFragment : Fragment() {
 
         val buttonUpdate = view.findViewById<Button>(R.id.button_update)
         buttonUpdate.setOnClickListener {
-            adapterList.setData(depositManager.portfolioPositions)
+            updateData()
         }
 
-        adapterList.setData(depositManager.portfolioPositions)
-
+        jobUpdate?.cancel()
+        jobUpdate = GlobalScope.launch(Dispatchers.Main) {
+            depositManager.refreshDeposit()
+            updateData()
+        }
+        updateData()
         return view
+    }
+
+    fun updateData() {
+        adapterList.setData(depositManager.portfolioPositions)
     }
 
     inner class ItemPortfolioRecyclerViewAdapter(
@@ -83,8 +95,7 @@ class Strategy1000SellStartFragment : Fragment() {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.fragment_1000_sell_start_item, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_1000_sell_start_item, parent, false)
             return ViewHolder(view)
         }
 
@@ -120,7 +131,7 @@ class Strategy1000SellStartFragment : Fragment() {
 
             holder.itemView.setOnClickListener { _ ->
                 holder.position.stock?.let {
-                    Utils.openTinkoffForTicker(requireContext(), it.instrument.ticker)
+                    Utils.openTinkoffForTicker(requireContext(), it.ticker)
                 }
             }
 

@@ -150,7 +150,7 @@ class StrategyTazikEndlessFinishFragment : Fragment() {
             holder.position = item
 
             val avg = item.stock.getPriceDouble()
-            holder.tickerView.text = "${position + 1}) ${item.stock.instrument.ticker} x ${item.lots}"
+            holder.tickerView.text = "${position + 1}) ${item.stock.getTickerLove()} x ${item.lots}"
             holder.currentPriceView.text = "${item.stock.getPrice2359String()} ➡ ${avg.toMoney(item.stock)}"
             holder.totalPriceView.text = (item.stock.getPriceDouble() * item.lots).toMoney(item.stock)
 

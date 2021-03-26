@@ -23,7 +23,6 @@ data class TrailingStop(
     var takeProfitDelta: Double,
     var stopLossPercent: Double,
 ) {
-    val mutex = Mutex()
     var started: Boolean = false
     var status: TrailingStopStatus = TrailingStopStatus.NONE
     var currentPrice = 0.0
@@ -49,9 +48,7 @@ data class TrailingStop(
         takeProfitActivationPrice = buyPrice + buyPrice / 100.0 * abs(takeProfitActivationPercent)
 
         while (started) {
-            mutex.withLock {
-                currentPrice = stock.getPriceDouble()
-            }
+            currentPrice = stock.getPriceDouble()
 
             currentChangePercent = currentPrice / buyPrice * 100.0 - 100.0
             log("TRAILING_STOP изменение: $buyPrice -> ${currentPrice.toMoney(stock)} = ${currentChangePercent.toPercent()}")
@@ -106,7 +103,7 @@ data class TrailingStop(
     }
 
     fun getDescriptionShort(): String {
-        return "%s:%.2f%%".format(stock.instrument.ticker, currentChangePercent)
+        return "%s:%.2f%%".format(stock.ticker, currentChangePercent)
     }
 
     fun getDescriptionLong(): String {
@@ -119,7 +116,7 @@ data class TrailingStop(
 
         val takeProfitRealtime = "%.2f$/%.2f%%".format(currentTakeProfitPrice, currentTakeProfitPercent)
 
-        return "%s: %s, ТП=%s, СЛ=%s, REALTIME=%s - %s".format(stock.instrument.ticker, currentChange, takeProfit, stopLoss, takeProfitRealtime, getStatusString())
+        return "%s: %s, ТП=%s, СЛ=%s, REALTIME=%s - %s".format(stock.ticker, currentChange, takeProfit, stopLoss, takeProfitRealtime, getStatusString())
     }
 
     private fun getStatusString(): String =

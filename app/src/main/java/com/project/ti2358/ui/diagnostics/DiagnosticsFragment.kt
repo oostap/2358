@@ -58,21 +58,23 @@ class DiagnosticsFragment : Fragment() {
         val daagerIndicesStatus = if (stockManager.indices.isNotEmpty()) "ОК" else "НЕ ОК 😱"
         val daagerShortsStatus = if (stockManager.stockShorts.isNotEmpty()) "ОК" else "НЕ ОК 😱"
 
-        val daager1728 = if (stockManager.stockPrice1728.isNotEmpty()) "ОК" else "НЕ ОК 😱"
+        val daager1728 = if (stockManager.stockPrice1728?.isNotEmpty() == true) "ОК" else "НЕ ОК 😱"
         var daager1728Step1 = "НЕ ОК 😱"
         var daager1728Step2 = "НЕ ОК 😱"
         var daager1728Step3 = "НЕ ОК 😱"
-        if (stockManager.stockPrice1728.isNotEmpty() && stockManager.stockPrice1728["M"] != null) {
-            if (stockManager.stockPrice1728["M"]?.from700to1200 != null) {
-                daager1728Step1 = "OK"
-            }
+        stockManager.stockPrice1728?.let {
+            if (it["M"] != null) {
+                if (it["M"]?.from700to1200 != null) {
+                    daager1728Step1 = "OK"
+                }
 
-            if (stockManager.stockPrice1728["M"]?.from700to1600 != null) {
-                daager1728Step2 = "OK"
-            }
+                if (it["M"]?.from700to1600 != null) {
+                    daager1728Step2 = "OK"
+                }
 
-            if (stockManager.stockPrice1728["M"]?.from1630to1635 != null) {
-                daager1728Step3 = "OK"
+                if (it["M"]?.from1630to1635 != null) {
+                    daager1728Step3 = "OK"
+                }
             }
         }
 

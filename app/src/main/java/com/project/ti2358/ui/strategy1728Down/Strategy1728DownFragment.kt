@@ -128,7 +128,7 @@ class Strategy1728DownFragment : Fragment() {
             val item = values[position]
             holder.stock = item
 
-            holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.getTickerLove()}"
             holder.priceView.text = item.getPriceDouble().toMoney(item)
 
             val changePercent = when (step1728) {
@@ -161,7 +161,7 @@ class Strategy1728DownFragment : Fragment() {
             holder.changePricePercentView.setTextColor(Utils.getColorForValue(changePercent))
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
             }
 
             holder.buttonBuy.setOnClickListener {

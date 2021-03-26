@@ -11,15 +11,18 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @KoinApiExtension
-class StrategyBlacklist : KoinComponent {
+class StrategyFavorites : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val keySavedStocks: String = "blacklist"
+    private val keySavedStocks: String = "favorites"
 
     var stocks: MutableList<Stock> = mutableListOf()
-    var stocksSelected: MutableList<Stock> = mutableListOf()
     var currentSort: Sorting = Sorting.DESCENDING
 
     private val gson = Gson()
+
+    companion object {
+        var stocksSelected: MutableList<Stock> = mutableListOf()
+    }
 
     fun process(): MutableList<Stock> {
         val all = stockManager.getAllStocks()
@@ -27,10 +30,6 @@ class StrategyBlacklist : KoinComponent {
         stocks.sortBy { it.changePrice2359DayPercent }
         loadSelectedStocks()
         return stocks
-    }
-
-    fun getBlacklistStocks(): MutableList<Stock> {
-        return stocksSelected
     }
 
     private fun loadSelectedStocks() {

@@ -1,27 +1,29 @@
-package com.project.ti2358.ui.strategyShorts
+package com.project.ti2358.ui.favorites
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.manager.StrategyShorts
+import com.project.ti2358.data.manager.StrategyFavorites
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class StrategyShortsFragment : Fragment() {
+class FavoritesFragment : Fragment() {
 
-    val strategyShorts: StrategyShorts by inject()
-    var adapterList: Item1005RecyclerViewAdapter = Item1005RecyclerViewAdapter(emptyList())
+    val strategyFavorites: StrategyFavorites by inject()
+    var adapterList: ItemBlacklistRecyclerViewAdapter = ItemBlacklistRecyclerViewAdapter(emptyList())
+    lateinit var searchView: SearchView
+    lateinit var stocks: MutableList<Stock>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,15 +33,10 @@ class StrategyShortsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_shorts, container, false)
+        val view = inflater.inflate(R.layout.fragment_favorites, container, false)
         val list = view.findViewById<RecyclerView>(R.id.list)
 
-        list.addItemDecoration(
-            DividerItemDecoration(
-                list.context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
+        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
 
         if (list is RecyclerView) {
             with(list) {
@@ -53,19 +50,51 @@ class StrategyShortsFragment : Fragment() {
             updateData()
         }
 
-        updateData()
+        searchView = view.findViewById(R.id.searchView)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                processText(query)
+                return false
+            }
 
+            override fun onQueryTextChange(newText: String): Boolean {
+                processText(newText)
+                return false
+            }
+
+            fun processText(text: String) {
+                updateData()
+
+                stocks = Utils.search(stocks, text)
+                adapterList.setData(stocks)
+            }
+        })
+
+        searchView.setOnCloseListener {
+            updateData()
+            false
+        }
+
+        updateData()
         return view
     }
 
     private fun updateData() {
-        strategyShorts.process()
-        adapterList.setData(strategyShorts.resort())
+        stocks = strategyFavorites.process()
+        stocks = strategyFavorites.resort()
+        adapterList.setData(stocks)
+
+        updateTitle()
     }
 
-    inner class Item1005RecyclerViewAdapter(
+    private fun updateTitle() {
+        val act = requireActivity() as AppCompatActivity
+        act.supportActionBar?.title = "Избранные (${StrategyFavorites.stocksSelected.size} шт.)"
+    }
+
+    inner class ItemBlacklistRecyclerViewAdapter(
         private var values: List<Stock>
-    ) : RecyclerView.Adapter<Item1005RecyclerViewAdapter.ViewHolder>() {
+    ) : RecyclerView.Adapter<ItemBlacklistRecyclerViewAdapter.ViewHolder>() {
 
         fun setData(newValues: List<Stock>) {
             values = newValues
@@ -73,18 +102,16 @@ class StrategyShortsFragment : Fragment() {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(
-                R.layout.fragment_shorts_item,
-                parent,
-                false
-            )
-
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_favorites_item, parent, false)
             return ViewHolder(view)
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
             holder.stock = item
+
+            holder.checkBoxView.setOnCheckedChangeListener(null)
+            holder.checkBoxView.isChecked = strategyFavorites.isSelected(item)
 
             holder.tickerView.text = "${position + 1}) ${item.getTickerLove()}"
             holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
@@ -101,9 +128,16 @@ class StrategyShortsFragment : Fragment() {
             holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
             holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
 
+            holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
+                strategyFavorites.setSelected(holder.stock, checked)
+                updateTitle()
+            }
+
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
             }
+
+            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 
         override fun getItemCount(): Int = values.size
@@ -119,6 +153,8 @@ class StrategyShortsFragment : Fragment() {
 
             val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
+
+            val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
         }
     }
 }

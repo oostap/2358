@@ -148,7 +148,7 @@ class StrategyTazikStartFragment : Fragment() {
             holder.checkBoxView.setOnCheckedChangeListener(null)
             holder.checkBoxView.isChecked = strategyTazik.isSelected(item)
 
-            holder.tickerView.text = "${position + 1}) ${item.instrument.ticker}"
+            holder.tickerView.text = "${position + 1}) ${item.getTickerLove()}"
             holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
 
             val volume = item.getTodayVolume() / 1000f
@@ -169,7 +169,7 @@ class StrategyTazikStartFragment : Fragment() {
             }
 
             holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.instrument.ticker)
+                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
             }
 
             holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))

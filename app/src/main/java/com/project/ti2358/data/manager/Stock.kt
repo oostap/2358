@@ -11,6 +11,9 @@ import java.util.concurrent.TimeUnit
 data class Stock(
     var instrument: Instrument
 ) {
+    var ticker = instrument.ticker
+    var figi = instrument.figi
+
     var alterName: String = ""
     var report: Report? = null
     var dividend: Dividend? = null
@@ -68,6 +71,15 @@ data class Stock(
 
     // все минутные свечи с момента запуска приложения
     var minuteCandles: MutableList<Candle> = mutableListOf()
+
+    @KoinApiExtension
+    fun getTickerLove(): String {
+        var t = ticker
+        if (StrategyFavorites.stocksSelected.find { it.ticker == t } != null) {
+            t += " ❤️"
+        }
+        return t
+    }
 
     fun getCurrencySymbol(): String {
         return when (instrument.currency) {
