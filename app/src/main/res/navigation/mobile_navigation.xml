@@ -62,7 +62,14 @@
         android:id="@+id/nav_favorites"
         android:name="com.project.ti2358.ui.favorites.FavoritesFragment"
         android:label="@string/menu_favorites"
-        tools:layout="@layout/fragment_favorites" />
+        tools:layout="@layout/fragment_favorites" >
+        <action
+            android:id="@+id/action_nav_favorites_to_nav_orderbook"
+            app:destination="@id/nav_orderbook" />
+        <action
+            android:id="@+id/action_nav_favorites_to_nav_chart"
+            app:destination="@id/nav_chart" />
+    </fragment>
 
     <!-- шорты -->
     <fragment

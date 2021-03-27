@@ -7,10 +7,13 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.ChartManager
+import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StrategyFavorites
 import com.project.ti2358.service.*
@@ -19,7 +22,8 @@ import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
 class FavoritesFragment : Fragment() {
-
+    val orderbookManager: OrderbookManager by inject()
+    val chartManager: ChartManager by inject()
     val strategyFavorites: StrategyFavorites by inject()
     var adapterList: ItemBlacklistRecyclerViewAdapter = ItemBlacklistRecyclerViewAdapter(emptyList())
     lateinit var searchView: SearchView
@@ -116,12 +120,6 @@ class FavoritesFragment : Fragment() {
             holder.tickerView.text = "${position + 1}) ${item.getTickerLove()}"
             holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
 
-            val volume = item.getTodayVolume() / 1000f
-            holder.volumeTodayView.text = "%.1fk".format(volume)
-
-            val volumeCash = item.dayVolumeCash / 1000f / 1000f
-            holder.volumeTodayCashView.text = "%.2fM$".format(volumeCash)
-
             holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
             holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
 
@@ -137,6 +135,16 @@ class FavoritesFragment : Fragment() {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
             }
 
+            holder.orderbookImageView.setOnClickListener {
+                orderbookManager.start(holder.stock)
+                holder.orderbookImageView.findNavController().navigate(R.id.action_nav_favorites_to_nav_orderbook)
+            }
+
+            holder.chartImageView.setOnClickListener {
+                chartManager.start(holder.stock)
+                holder.chartImageView.findNavController().navigate(R.id.action_nav_favorites_to_nav_chart)
+            }
+
             holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
         }
 
@@ -148,13 +156,13 @@ class FavoritesFragment : Fragment() {
             val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
             val priceView: TextView = view.findViewById(R.id.stock_item_price)
 
-            val volumeTodayView: TextView = view.findViewById(R.id.stock_item_volume_today)
-            val volumeTodayCashView: TextView = view.findViewById(R.id.stock_item_volume_today_cash)
-
             val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
             val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
 
             val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
+
+            val orderbookImageView: ImageView = view.findViewById(R.id.orderbook)
+            val chartImageView: ImageView = view.findViewById(R.id.chart)
         }
     }
 }

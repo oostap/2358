@@ -133,7 +133,7 @@ class Strategy2358() : KoinComponent {
             if (purchase.lots == 0 || equalParts) { // если уже настраивали количество, то не трогаем
                 purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
             }
-            purchase.status = OrderStatus.WAITING
+            purchase.status = PurchaseStatus.WAITING
 
             if (reset) { // запоминаем % подготовки, чтобы после проверить изменение
                 purchase.stock.changeOnStartTimer = purchase.stock.changePrice2359DayPercent

@@ -100,8 +100,10 @@ class OrdersFragment : Fragment() {
     }
 
     private fun updateTitle() {
-        val act = requireActivity() as AppCompatActivity
-        act.supportActionBar?.title = "Заявки ${depositManager.orders.size}"
+        if (isAdded) {
+            val act = requireActivity() as AppCompatActivity
+            act.supportActionBar?.title = "Заявки ${depositManager.orders.size}"
+        }
     }
 
     inner class ItemOrdersRecyclerViewAdapter(

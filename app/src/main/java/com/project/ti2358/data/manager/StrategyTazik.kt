@@ -114,7 +114,7 @@ class StrategyTazik : KoinComponent {
                 percentLimitPriceChange = percent
                 lots = (onePiece / stock.getPriceDouble()).roundToInt()
                 updateAbsolutePrice()
-                status = OrderStatus.WAITING
+                status = PurchaseStatus.WAITING
             }
         }.toMutableList()
 

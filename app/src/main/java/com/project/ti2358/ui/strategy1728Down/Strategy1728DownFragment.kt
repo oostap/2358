@@ -106,8 +106,10 @@ class Strategy1728DownFragment : Fragment() {
             Step1728.step1630to1635 -> "3: 16:25 - 16:32, объём ${SettingsManager.get1728Volume(2)}"
             Step1728.stepFinal -> "1 - 2 - 3 - 🚀"
         }
-        val act = requireActivity() as AppCompatActivity
-        act.supportActionBar?.title = title
+        if (isAdded) {
+            val act = requireActivity() as AppCompatActivity
+            act.supportActionBar?.title = title
+        }
     }
 
     inner class Item1728RecyclerViewAdapter(

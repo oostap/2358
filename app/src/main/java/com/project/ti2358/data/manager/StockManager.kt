@@ -195,21 +195,29 @@ class StockManager : KoinComponent {
     }
 
     private val alterNames: Map<String, String> = mapOf(
-        "SPCE" to "галя|вирджин",
+        "SPCE" to "галя вирджин",
         "ZYNE" to "зина",
         "COTY" to "кот",
         "M" to "мася",
         "BABA" to "баба",
         "CCL" to "карнавал",
         "HEAR" to "черепаха",
-        "CNK" to "кино|синька",
+        "CNK" to "кино синька",
         "ENDP" to "эндо",
-        "GTHX" to "перч|тварь",
+        "GTHX" to "перч тварь",
         "AIMT" to "арахис",
         "SAVE" to "спирит жёлтый",
         "SPR" to "спирит синий",
         "SWN" to "свин",
         "SRPT" to "сергей копытов",
+
+        "REGI" to "региша",
+        "NTLA" to "тля",
+        "ZYXI" to "зукся",
+        "ZGNX" to "зугиня",
+        "BBBY" to "бабайка",
+        "ARCT" to "конь скотина",
+        "PBI" to "пибай",
     )
 
     private fun afterLoadInstruments() {

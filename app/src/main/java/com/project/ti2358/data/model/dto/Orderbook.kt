@@ -24,4 +24,15 @@ data class Orderbook(
         }
         return 0.0
     }
+
+    fun getBestPriceFromBid(quantity: Int): Double {
+        var total = 0
+        for (ask in bids) {
+            total += ask.quantity
+            if (total >= quantity) {
+                return ask.price
+            }
+        }
+        return 0.0
+    }
 }

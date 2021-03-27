@@ -16,6 +16,10 @@
             android:icon="@drawable/ic_portfolio"
             android:title="@string/menu_portfolio" />
         <item
+            android:id="@+id/nav_favorites"
+            android:icon="@drawable/ic_heart"
+            android:title="@string/menu_favorites" />
+        <item
             android:id="@+id/nav_1000_sell_start"
             android:icon="@drawable/ic_1000"
             android:title="@string/menu_1000_sell" />
@@ -33,11 +37,11 @@
             android:title="@string/menu_premarket" />
         <item
             android:id="@+id/nav_1728_up"
-            android:icon="@drawable/ic_1728"
+            android:icon="@drawable/ic_chart_up"
             android:title="@string/menu_1728_up" />
         <item
             android:id="@+id/nav_1728_down"
-            android:icon="@drawable/ic_1728"
+            android:icon="@drawable/ic_chart_down"
             android:title="@string/menu_1728_down" />
         <item
             android:id="@+id/nav_2358_start"
@@ -45,7 +49,7 @@
             android:title="@string/menu_2358" />
         <item
             android:id="@+id/nav_fixprice"
-            android:icon="@drawable/ic_1728"
+            android:icon="@drawable/ic_fix_price"
             android:title="@string/menu_fixprice" />
         <item
             android:id="@+id/nav_reports"
@@ -54,7 +58,7 @@
 
         <item
             android:id="@+id/nav_rockets"
-            android:icon="@drawable/ic_1000"
+            android:icon="@drawable/ic_rocket"
             android:title="@string/menu_rocket" />
 
 <!--        <item-->
@@ -71,19 +75,15 @@
 <!--            android:id="@+id/nav_shorts"-->
 <!--            android:icon="@drawable/ic_stocks"-->
 <!--            android:title="@string/menu_shorts" />-->
-        <item
-            android:id="@+id/nav_favorites"
-            android:icon="@drawable/ic_settings"
-            android:title="@string/menu_favorites" />
 
         <item
             android:id="@+id/nav_blacklist"
-            android:icon="@drawable/ic_trash"
+            android:icon="@drawable/ic_blacklist"
             android:title="@string/menu_blacklist" />
 
         <item
             android:id="@+id/nav_diagnostics"
-            android:icon="@drawable/ic_settings"
+            android:icon="@drawable/ic_diagnostics"
             android:title="@string/menu_diagnostics" />
 
     </group>

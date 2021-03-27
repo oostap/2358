@@ -57,8 +57,8 @@
     <string name="menu_1000_sell">700/1000 sell</string>
     <string name="menu_1000_buy">700/1000 buy</string>
     <string name="menu_2358">2258</string>
-    <string name="menu_1728_up">1628 📈</string>
-    <string name="menu_1728_down">1628 📉</string>
+    <string name="menu_1728_up">1628 вверх</string>
+    <string name="menu_1728_down">1628 вниз</string>
     <string name="menu_fixprice">Fix Price</string>
     <string name="menu_rocket">Ракета</string>
     <string name="menu_tazik">Автотазик</string>

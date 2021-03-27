@@ -116,10 +116,11 @@ class PortfolioFragment : Fragment() {
     }
 
     private fun updateTitle() {
-        val act = requireActivity() as AppCompatActivity
-
-        val percent = depositManager.getPercentBusyInStocks()
-        act.supportActionBar?.title = "Депозит $percent%"
+        if (isAdded) {
+            val act = requireActivity() as AppCompatActivity
+            val percent = depositManager.getPercentBusyInStocks()
+            act.supportActionBar?.title = "Депозит $percent%"
+        }
     }
 
     inner class ItemPortfolioRecyclerViewAdapter(
