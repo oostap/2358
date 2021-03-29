@@ -4,9 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
@@ -18,6 +15,8 @@ import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.model.dto.Order
+import com.project.ti2358.databinding.FragmentOrdersBinding
+import com.project.ti2358.databinding.FragmentOrdersItemBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.*
@@ -25,13 +24,15 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class OrdersFragment : Fragment() {
+class OrdersFragment : Fragment(R.layout.fragment_orders) {
     private val orderbookManager: OrderbookManager by inject()
     val depositManager: DepositManager by inject()
+
+    private var fragmentOrdersBinding: FragmentOrdersBinding? = null
+
     var adapterList: ItemOrdersRecyclerViewAdapter = ItemOrdersRecyclerViewAdapter(emptyList())
     var jobRefreshEndless: Job? = null
     var jobCancelAll: Job? = null
-
     var jobCancel: Job? = null
     var jobRefresh: Job? = null
 
@@ -40,6 +41,7 @@ class OrdersFragment : Fragment() {
     }
 
     override fun onDestroy() {
+        fragmentOrdersBinding = null
         jobCancelAll?.cancel()
         jobRefreshEndless?.cancel()
         jobRefresh?.cancel()
@@ -47,24 +49,16 @@ class OrdersFragment : Fragment() {
         super.onDestroy()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_orders, container, false)
-        val list = view.findViewById<RecyclerView>(R.id.list)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = FragmentOrdersBinding.bind(view)
+        fragmentOrdersBinding = binding
 
-        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
+        binding.list.layoutManager = LinearLayoutManager(context)
+        binding.list.adapter = adapterList
 
-        if (list is RecyclerView) {
-            with(list) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = adapterList
-            }
-        }
-
-        val buttonUpdate = view.findViewById<Button>(R.id.button_update)
-        buttonUpdate.setOnClickListener {
+        binding.updateButton.setOnClickListener {
             jobRefresh?.cancel()
             jobRefresh = GlobalScope.launch(Dispatchers.Main) {
                 depositManager.refreshOrders()
@@ -72,8 +66,7 @@ class OrdersFragment : Fragment() {
             }
         }
 
-        val buttonCancel = view.findViewById<Button>(R.id.button_cancel)
-        buttonCancel.setOnClickListener {
+        binding.cancelButton.setOnClickListener {
             jobCancelAll?.cancel()
             jobCancelAll = GlobalScope.launch(Dispatchers.Main) {
                 depositManager.cancelAllOrders()
@@ -88,10 +81,9 @@ class OrdersFragment : Fragment() {
                     updateData()
                     break
                 }
-                delay(2000)
+                delay(5000)
             }
         }
-        return view
     }
 
     fun updateData() {
@@ -106,66 +98,46 @@ class OrdersFragment : Fragment() {
         }
     }
 
-    inner class ItemOrdersRecyclerViewAdapter(
-        private var values: List<Order>
-    ) : RecyclerView.Adapter<ItemOrdersRecyclerViewAdapter.ViewHolder>() {
-
+    inner class ItemOrdersRecyclerViewAdapter(private var values: List<Order>) : RecyclerView.Adapter<ItemOrdersRecyclerViewAdapter.ViewHolder>() {
         fun setData(newValues: List<Order>) {
             values = newValues
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.fragment_orders_item, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.order = item
-            holder.tickerView.text = "${position + 1}) ${item.stock?.instrument?.ticker}"
-            holder.lotsView.text = "${item.executedLots} / ${item.requestedLots} шт."
-            holder.priceView.text = item.price.toMoney(item.stock)
-
-            holder.typeView.text = item.getOperationStatusString()
-
-            if (item.operation == OperationType.BUY) {
-                holder.typeView.setTextColor(Utils.RED)
-            } else {
-                holder.typeView.setTextColor(Utils.GREEN)
-            }
-
-            holder.buttonCancel.setOnClickListener {
-                jobCancel?.cancel()
-                jobCancel = GlobalScope.launch(Dispatchers.Main) {
-                    depositManager.cancelOrder(holder.order)
-                    depositManager.refreshOrders()
-                    updateData()
-                }
-            }
-
-            holder.orderbookImage.setOnClickListener {
-                holder.order.stock?.let {
-                    orderbookManager.start(it)
-                    view?.findNavController()?.navigate(R.id.action_nav_orders_to_nav_orderbook)
-                }
-            }
-        }
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentOrdersItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onBindViewHolder(holder: ItemOrdersRecyclerViewAdapter.ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        inner class ViewHolder(private val binding: FragmentOrdersItemBinding) : RecyclerView.ViewHolder(binding.root) {
             lateinit var order: Order
-            val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
-            val typeView: TextView = view.findViewById(R.id.order_type)
 
-            val lotsView: TextView = view.findViewById(R.id.stock_count)
-            val priceView: TextView = view.findViewById(R.id.stock_price)
+            fun bind(index: Int) {
+                val item = values[index]
+                order = item
 
-            val buttonCancel: Button = view.findViewById(R.id.button_cancel)
+                binding.tickerView.text = "${index + 1}) ${item.stock?.instrument?.ticker}"
+                binding.lotsView.text = "${item.executedLots} / ${item.requestedLots} шт."
+                binding.priceView.text = item.price.toMoney(item.stock)
 
-            val orderbookImage: ImageView = view.findViewById(R.id.orderbook)
+                binding.orderTypeView.text = item.getOperationStatusString()
+                binding.orderTypeView.setTextColor(Utils.getColorForOperation(item.operation))
+
+                binding.cancelButton.setOnClickListener {
+                    jobCancel?.cancel()
+                    jobCancel = GlobalScope.launch(Dispatchers.Main) {
+                        depositManager.cancelOrder(order)
+                        depositManager.refreshOrders()
+                        updateData()
+                    }
+                }
+
+                binding.orderbookButton.setOnClickListener {
+                    order.stock?.let {
+                        orderbookManager.start(it)
+                        binding.orderbookButton.findNavController().navigate(R.id.action_nav_orders_to_nav_orderbook)
+                    }
+                }
+            }
         }
     }
 }

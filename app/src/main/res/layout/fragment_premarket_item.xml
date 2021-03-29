@@ -17,7 +17,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/stock_item_ticker"
+            android:id="@+id/tickerView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -28,7 +28,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/stock_item_price"
+            android:id="@+id/priceView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="4dp"
@@ -37,7 +37,7 @@
             android:textSize="12sp" />
 
         <TextView
-            android:id="@+id/stock_sector"
+            android:id="@+id/sectorView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="4dp"
@@ -46,7 +46,7 @@
             android:textSize="10sp" />
 
         <TextView
-            android:id="@+id/stock_report_info"
+            android:id="@+id/reportInfoView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="4dp"
@@ -63,7 +63,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/stock_item_volume_today"
+            android:id="@+id/volumeSharesView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -72,7 +72,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/stock_item_volume_today_cash"
+            android:id="@+id/volumeCashView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -88,7 +88,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/stock_item_price_change_percent"
+            android:id="@+id/priceChangePercentView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -97,7 +97,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/stock_item_price_change_absolute"
+            android:id="@+id/priceChangeAbsoluteView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -113,7 +113,7 @@
         android:orientation="vertical">
 
         <ImageView
-            android:id="@+id/orderbook"
+            android:id="@+id/orderbookButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scaleType="fitCenter"

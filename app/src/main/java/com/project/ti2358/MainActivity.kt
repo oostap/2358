@@ -3,12 +3,14 @@ package com.project.ti2358
 import android.content.pm.PackageInfo
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -21,6 +23,7 @@ import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.WorkflowManager
 import com.project.ti2358.data.model.dto.daager.Index
 import com.project.ti2358.service.Utils
+import com.project.ti2358.service.log
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import kotlin.math.abs
@@ -38,9 +41,15 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-
+        // add back arrow to toolbar
+        if (supportActionBar != null) {
+            supportActionBar?.setDisplayHomeAsUpEnabled(true);
+            supportActionBar?.setDisplayShowHomeEnabled(true);
+        }
         // угловая круглая кнопка
 //        val fab: FloatingActionButton = findViewById(R.id.fab)
 //        fab.setOnClickListener { view ->
@@ -50,6 +59,18 @@ class MainActivity : AppCompatActivity() {
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
         val navController = findNavController(R.id.nav_host_fragment)
+        toolbar.setNavigationOnClickListener { onSupportNavigateUp() }
+//        navController.set
+//        toolbar.setOnMenuItemClickListener {
+//            navController.navigateUp()
+//            val navController = findNavController(R.id.nav_host_fragment)
+//            when (it.itemId) {
+//                android.R.id.home -> {
+//                    navController.popBackStack()
+//                }
+//            }
+//            navController.popBackStack()
+//        }
 
         val header = navView.getHeaderView(0)
         val cashUSDView: TextView = header.findViewById(R.id.free_cash_usd)
@@ -191,31 +212,58 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_fixprice,
                 R.id.nav_reports,
                 R.id.nav_shorts,
-                R.id.nav_orderbook,
                 R.id.nav_diagnostics,
-            ), drawerLayout
+                R.id.nav_favorites
+            ),
+            drawerLayout
         )
+
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
         workflowManager.startApp()
-        this.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
     override fun onResume() {
         super.onResume()
-        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
-        drawerLayout.requestFocus()
+        val navView: NavigationView = findViewById(R.id.nav_view)
+        navView.requestFocus()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        log("TEST: onCreateOptionsMenu")
+
         // Inflate the menu; this adds items to the action bar if it is present.
 //        menuInflater.inflate(R.menu.main, menu)
         return false
     }
 
     override fun onSupportNavigateUp(): Boolean {
+        log("TEST: onSupportNavigateUp")
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        log("TEST: onOptionsItemSelected")
+//        val navController = findNavController(R.id.nav_host_fragment)
+//        when (item.itemId) {
+//            android.R.id.home -> {
+//                navController.popBackStack()
+//                return true
+//            }
+//        }
+//        return super.onOptionsItemSelected(item)
+//    }
+
+    override fun onBackPressed() {
+//        log("TEST: onBackPressed")
+
+        val drawer = findViewById<View>(R.id.drawer_layout) as DrawerLayout
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+        }
     }
 }

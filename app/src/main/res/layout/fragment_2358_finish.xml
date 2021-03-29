@@ -3,7 +3,7 @@
     android:layout_width="fill_parent" android:layout_height="fill_parent">
 
     <TextView
-        android:id="@+id/stock_item_price_change_percent"
+        android:id="@+id/priceChangePercentView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -48,7 +48,7 @@
         android:textStyle="bold" />
 
     <CheckBox
-        android:id="@+id/check_box"
+        android:id="@+id/chooseView"
         android:layout_height="50dp"
         android:layout_width="150dp"
         android:layout_alignParentRight="true"

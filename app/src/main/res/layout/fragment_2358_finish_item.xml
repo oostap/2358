@@ -17,7 +17,7 @@
         android:layout_gravity="center">
 
         <TextView
-            android:id="@+id/stock_item_ticker"
+            android:id="@+id/tickerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
@@ -27,7 +27,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/stock_item_price"
+            android:id="@+id/priceView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingStart="8dp"
@@ -164,7 +164,7 @@
         android:orientation="horizontal">
 
         <CheckBox
-            android:id="@+id/check_box"
+            android:id="@+id/chooseView"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:layout_gravity="center"/>

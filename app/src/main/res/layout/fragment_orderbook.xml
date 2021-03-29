@@ -23,7 +23,7 @@
 
             <TextView
                 android:layout_weight="1"
-                android:id="@+id/stock_item_cash"
+                android:id="@+id/totalCashView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="2dp"
@@ -35,7 +35,7 @@
 
             <TextView
                 android:layout_weight="1"
-                android:id="@+id/stock_item_price"
+                android:id="@+id/priceView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="4dp"
@@ -48,7 +48,7 @@
 
             <TextView
                 android:layout_weight="1"
-                android:id="@+id/stock_item_lots"
+                android:id="@+id/lotsView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingTop="2dp"
@@ -62,7 +62,7 @@
 
             <TextView
                 android:layout_weight="1"
-                android:id="@+id/stock_item_lots_blocked"
+                android:id="@+id/lotsBlockedView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingStart="2dp"
@@ -76,7 +76,7 @@
 
             <TextView
                 android:layout_weight="1"
-                android:id="@+id/stock_item_price_change_percent"
+                android:id="@+id/priceChangePercentView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="2dp"
@@ -88,7 +88,7 @@
 
             <TextView
                 android:layout_weight="1"
-                android:id="@+id/stock_item_price_change_absolute"
+                android:id="@+id/priceChangeAbsoluteView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="2dp"
@@ -173,7 +173,7 @@
         tools:ignore="NestedWeights">
 
         <ImageView
-            android:id="@+id/chart"
+            android:id="@+id/chartButton"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:scaleType="fitCenter"

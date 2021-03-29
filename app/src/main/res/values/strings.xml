@@ -15,6 +15,11 @@
     <string name="title_hour_1">1 час</string>
     <string name="title_hour_2">2 часа</string>
 
+    <string name="sell_bid">Продать в BID</string>
+    <string name="sell_ask">Продать в ASK</string>
+    <string name="cancel_all2">Отменить всё</string>
+    <string name="sell_tt">Продать с трейлинг-стопом</string>
+
     <string name="time_closemarket">23:00 - ...</string>
     <string name="time_premarket">01:45 - ...</string>
 

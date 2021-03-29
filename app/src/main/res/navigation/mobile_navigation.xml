@@ -28,7 +28,16 @@
             app:destination="@id/nav_orderbook"
             app:enterAnim="@animator/slide_in_right"
             app:exitAnim="@animator/slide_out_left" />
+        <action
+            android:id="@+id/action_nav_portfolio_to_nav_portfolio_position"
+            app:destination="@id/nav_portfolio_position" />
     </fragment>
+
+    <fragment
+        android:id="@+id/nav_portfolio_position"
+        android:name="com.project.ti2358.ui.portfolio.PortfolioPositionFragment"
+        android:label="@string/menu_portfolio"
+        tools:layout="@layout/fragment_portfolio_position" />
 
     <!-- заявки -->
     <fragment
@@ -65,10 +74,16 @@
         tools:layout="@layout/fragment_favorites" >
         <action
             android:id="@+id/action_nav_favorites_to_nav_orderbook"
-            app:destination="@id/nav_orderbook" />
+            app:destination="@id/nav_orderbook"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left"
+            app:popEnterAnim="@animator/slide_in_right"
+            app:popExitAnim="@animator/slide_out_left" />
         <action
             android:id="@+id/action_nav_favorites_to_nav_chart"
-            app:destination="@id/nav_chart" />
+            app:destination="@id/nav_chart"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left" />
     </fragment>
 
     <!-- шорты -->

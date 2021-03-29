@@ -13,45 +13,42 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StrategyBlacklist
+import com.project.ti2358.databinding.FragmentBlacklistBinding
+import com.project.ti2358.databinding.FragmentBlacklistItemBinding
+import com.project.ti2358.databinding.FragmentFavoritesItemBinding
 import com.project.ti2358.service.*
+import com.project.ti2358.ui.favorites.FavoritesFragment
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class BlacklistFragment : Fragment() {
-
+class BlacklistFragment : Fragment(R.layout.fragment_blacklist) {
     val strategyBlacklist: StrategyBlacklist by inject()
+
+    private var fragmentBlacklistBinding: FragmentBlacklistBinding? = null
+
     var adapterList: ItemBlacklistRecyclerViewAdapter = ItemBlacklistRecyclerViewAdapter(emptyList())
-    lateinit var searchView: SearchView
     lateinit var stocks: MutableList<Stock>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onDestroy() {
+        fragmentBlacklistBinding = null
+        super.onDestroy()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_blacklist, container, false)
-        val list = view.findViewById<RecyclerView>(R.id.list)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = FragmentBlacklistBinding.bind(view)
+        fragmentBlacklistBinding = binding
 
-        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
+        binding.list.layoutManager = LinearLayoutManager(context)
+        binding.list.adapter = adapterList
 
-        if (list is RecyclerView) {
-            with(list) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = adapterList
-            }
-        }
-
-        val buttonUpdate = view.findViewById<Button>(R.id.button_update)
-        buttonUpdate.setOnClickListener {
+        binding.buttonUpdate.setOnClickListener {
             updateData()
         }
 
-        searchView = view.findViewById(R.id.searchView)
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 processText(query)
                 return false
@@ -70,13 +67,12 @@ class BlacklistFragment : Fragment() {
             }
         })
 
-        searchView.setOnCloseListener {
+        binding.searchView.setOnCloseListener {
             updateData()
             false
         }
 
         updateData()
-        return view
     }
 
     private fun updateData() {
@@ -92,74 +88,56 @@ class BlacklistFragment : Fragment() {
         act.supportActionBar?.title = "Чёрный список (${strategyBlacklist.stocksSelected.size} шт.)"
     }
 
-    inner class ItemBlacklistRecyclerViewAdapter(
-        private var values: List<Stock>
-    ) : RecyclerView.Adapter<ItemBlacklistRecyclerViewAdapter.ViewHolder>() {
-
+    inner class ItemBlacklistRecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<ItemBlacklistRecyclerViewAdapter.ViewHolder>() {
         fun setData(newValues: List<Stock>) {
             values = newValues
             notifyDataSetChanged()
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(
-                R.layout.fragment_blacklist_item,
-                parent,
-                false
-            )
-
-            return ViewHolder(view)
+            return ViewHolder(FragmentBlacklistItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
         }
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.stock = item
-
-            holder.checkBoxView.setOnCheckedChangeListener(null)
-            holder.checkBoxView.isChecked = strategyBlacklist.isSelected(item)
-
-            holder.tickerView.text = "${position + 1}) ${item.getTickerLove()}"
-            holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
-
-            val volume = item.getTodayVolume() / 1000f
-            holder.volumeTodayView.text = "%.1fk".format(volume)
-
-            val volumeCash = item.dayVolumeCash / 1000f / 1000f
-            holder.volumeTodayCashView.text = "%.2fM$".format(volumeCash)
-
-            holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
-            holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
-
-            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
-            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
-
-            holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
-                strategyBlacklist.setSelected(holder.stock, checked)
-                updateTitle()
-            }
-
-            holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
-            }
-
-            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
-        }
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
 
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        inner class ViewHolder(private val binding: FragmentBlacklistItemBinding) : RecyclerView.ViewHolder(binding.root) {
             lateinit var stock: Stock
 
-            val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
-            val priceView: TextView = view.findViewById(R.id.stock_item_price)
+            fun bind(index: Int) {
+                val item = values[index]
+                stock = item
 
-            val volumeTodayView: TextView = view.findViewById(R.id.stock_item_volume_today)
-            val volumeTodayCashView: TextView = view.findViewById(R.id.stock_item_volume_today_cash)
+                binding.chooseView.setOnCheckedChangeListener(null)
+                binding.chooseView.isChecked = strategyBlacklist.isSelected(item)
 
-            val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
-            val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
+                binding.tickerView.text = "${index + 1}) ${item.getTickerLove()}"
+                binding.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
 
-            val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
+                val volume = item.getTodayVolume() / 1000f
+                binding.volumeSharesView.text = "%.1fk".format(volume)
+
+                val volumeCash = item.dayVolumeCash / 1000f / 1000f
+                binding.volumeCashView.text = "%.2fM$".format(volumeCash)
+
+                binding.priceChangeAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
+                binding.priceChangePercentView.text = item.changePrice2359DayPercent.toPercent()
+
+                binding.priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
+                binding.priceChangePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
+
+                binding.chooseView.setOnCheckedChangeListener { _, checked ->
+                    strategyBlacklist.setSelected(stock, checked)
+                    updateTitle()
+                }
+
+                itemView.setOnClickListener {
+                    Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                }
+
+                itemView.setBackgroundColor(Utils.getColorForIndex(index))
+            }
         }
     }
 }

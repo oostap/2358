@@ -192,8 +192,8 @@ class StrategyTazikEndlessFinishFragment : Fragment() {
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             lateinit var position: PurchaseStock
 
-            val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
-            val currentPriceView: TextView = view.findViewById(R.id.stock_item_price)
+            val tickerView: TextView = view.findViewById(R.id.tickerView)
+            val currentPriceView: TextView = view.findViewById(R.id.priceView)
             val totalPriceView: TextView = view.findViewById(R.id.stock_total_price)
 
             val priceBuyView: TextView = view.findViewById(R.id.stock_item_price_buy)

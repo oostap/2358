@@ -200,13 +200,13 @@ class Strategy1728UpFragment : Fragment() {
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             lateinit var stock: Stock
 
-            val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
-            val priceView: TextView = view.findViewById(R.id.stock_item_price)
+            val tickerView: TextView = view.findViewById(R.id.tickerView)
+            val priceView: TextView = view.findViewById(R.id.priceView)
 
-            val volumeTodayView: TextView = view.findViewById(R.id.stock_item_volume_today)
+            val volumeTodayView: TextView = view.findViewById(R.id.volumeSharesView)
 
-            val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
-            val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
+            val changePriceAbsoluteView: TextView = view.findViewById(R.id.priceChangeAbsoluteView)
+            val changePricePercentView: TextView = view.findViewById(R.id.priceChangePercentView)
 
             val buttonBuy: Button = view.findViewById(R.id.buttonBuy)
         }

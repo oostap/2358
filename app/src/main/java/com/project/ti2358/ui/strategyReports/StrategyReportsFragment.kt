@@ -1,6 +1,5 @@
 package com.project.ti2358.ui.strategyReports
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -195,13 +194,13 @@ class ReportsFragment : Fragment() {
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             lateinit var stock: Stock
 
-            val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
-            val priceView: TextView = view.findViewById(R.id.stock_item_price)
+            val tickerView: TextView = view.findViewById(R.id.tickerView)
+            val priceView: TextView = view.findViewById(R.id.priceView)
 
-            val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
-            val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
+            val changePriceAbsoluteView: TextView = view.findViewById(R.id.priceChangeAbsoluteView)
+            val changePricePercentView: TextView = view.findViewById(R.id.priceChangePercentView)
 
-            val sectorView: TextView = view.findViewById(R.id.stock_sector)
+            val sectorView: TextView = view.findViewById(R.id.sectorView)
             val info1View: TextView = view.findViewById(R.id.stock_info_1)
             val info2View: TextView = view.findViewById(R.id.stock_info_2)
 

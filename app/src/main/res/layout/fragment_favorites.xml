@@ -37,7 +37,7 @@
         android:weightSum="1" >
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_update"
+            android:id="@+id/update_button"
             android:text="@string/update"
             android:layout_weight="1"
             android:textSize="16dp"

@@ -20,6 +20,7 @@ import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.model.dto.Interval
+import com.project.ti2358.data.model.dto.OperationType
 import org.koin.core.component.KoinApiExtension
 import java.text.SimpleDateFormat
 import java.util.*
@@ -97,6 +98,13 @@ class Utils {
         fun getColorForValue(value: Double): Int {
             if (value > 0) return GREEN
             if (value < 0) return RED
+            return getNeutralColor()
+        }
+
+        @KoinApiExtension
+        fun getColorForOperation(value: OperationType): Int {
+            if (value == OperationType.BUY) return RED
+            if (value == OperationType.SELL) return GREEN
             return getNeutralColor()
         }
 

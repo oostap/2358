@@ -148,19 +148,19 @@ class RocketsFragment : Fragment() {
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             lateinit var rocketStock: RocketStock
 
-            val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
-            val priceView: TextView = view.findViewById(R.id.stock_item_price)
+            val tickerView: TextView = view.findViewById(R.id.tickerView)
+            val priceView: TextView = view.findViewById(R.id.priceView)
 
-            val volumeTodayView: TextView = view.findViewById(R.id.stock_item_volume_today)
+            val volumeTodayView: TextView = view.findViewById(R.id.volumeSharesView)
             val volumeFromStartView: TextView = view.findViewById(R.id.stock_item_volume_from_start)
 
-            val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
-            val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
+            val changePriceAbsoluteView: TextView = view.findViewById(R.id.priceChangeAbsoluteView)
+            val changePricePercentView: TextView = view.findViewById(R.id.priceChangePercentView)
 
-            val imageOrderbook: ImageView = view.findViewById(R.id.orderbook)
+            val imageOrderbook: ImageView = view.findViewById(R.id.orderbookButton)
 
-            val reportView: TextView = view.findViewById(R.id.stock_report_info)
-            val sectorView: TextView = view.findViewById(R.id.stock_sector)
+            val reportView: TextView = view.findViewById(R.id.reportInfoView)
+            val sectorView: TextView = view.findViewById(R.id.sectorView)
         }
     }
 }

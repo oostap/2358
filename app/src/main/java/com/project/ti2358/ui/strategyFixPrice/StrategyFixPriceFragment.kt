@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.service.*
+import kotlinx.android.synthetic.main.fragment_fixprice.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -34,8 +34,6 @@ class StrategyFixPriceFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_fixprice, container, false)
-        val list = view.findViewById<RecyclerView>(R.id.list)
-
         list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
 
         if (list is RecyclerView) {
@@ -45,15 +43,13 @@ class StrategyFixPriceFragment : Fragment() {
             }
         }
 
-        val buttonReset = view.findViewById<Button>(R.id.button_restart)
         buttonReset.setOnClickListener { // сброс времени отслеживания
             strategyFixPrice.restartStrategy()
             updateTime()
             updateData()
         }
 
-        val buttonUpdate = view.findViewById<Button>(R.id.button_update)
-        buttonUpdate.setOnClickListener {
+        `@+id/update_button`.setOnClickListener {
             updateData()
         }
 
@@ -142,19 +138,19 @@ class StrategyFixPriceFragment : Fragment() {
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             lateinit var stock: Stock
 
-            val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
-            val priceView: TextView = view.findViewById(R.id.stock_item_price)
+            val tickerView: TextView = view.findViewById(R.id.tickerView)
+            val priceView: TextView = view.findViewById(R.id.priceView)
 
-            val volumeTodayView: TextView = view.findViewById(R.id.stock_item_volume_today)
+            val volumeTodayView: TextView = view.findViewById(R.id.volumeSharesView)
             val volumeFromStartView: TextView = view.findViewById(R.id.stock_item_volume_from_start)
 
-            val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
-            val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
+            val changePriceAbsoluteView: TextView = view.findViewById(R.id.priceChangeAbsoluteView)
+            val changePricePercentView: TextView = view.findViewById(R.id.priceChangePercentView)
 
-            val imageOrderbook: ImageView = view.findViewById(R.id.orderbook)
+            val imageOrderbook: ImageView = view.findViewById(R.id.orderbookButton)
 
-            val reportView: TextView = view.findViewById(R.id.stock_report_info)
-            val sectorView: TextView = view.findViewById(R.id.stock_sector)
+            val reportView: TextView = view.findViewById(R.id.reportInfoView)
+            val sectorView: TextView = view.findViewById(R.id.sectorView)
         }
     }
 }

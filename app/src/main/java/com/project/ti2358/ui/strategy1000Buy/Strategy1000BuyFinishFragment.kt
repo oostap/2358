@@ -194,8 +194,8 @@ class Strategy1000BuyFinishFragment : Fragment() {
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             lateinit var position: PurchaseStock
 
-            val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
-            val currentPriceView: TextView = view.findViewById(R.id.stock_item_price)
+            val tickerView: TextView = view.findViewById(R.id.tickerView)
+            val currentPriceView: TextView = view.findViewById(R.id.priceView)
             val lotsView: TextView = view.findViewById(R.id.stock_lots)
 
             val priceBuyView: TextView = view.findViewById(R.id.stock_item_price_buy)

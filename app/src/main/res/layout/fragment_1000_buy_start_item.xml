@@ -16,7 +16,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/stock_item_ticker"
+            android:id="@+id/tickerView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -27,7 +27,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/stock_item_price"
+            android:id="@+id/priceView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
@@ -44,7 +44,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/stock_item_volume_today"
+            android:id="@+id/volumeSharesView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -53,7 +53,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/stock_item_volume_today_cash"
+            android:id="@+id/volumeCashView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -69,7 +69,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/stock_item_price_change_percent"
+            android:id="@+id/priceChangePercentView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -78,7 +78,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/stock_item_price_change_absolute"
+            android:id="@+id/priceChangeAbsoluteView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -88,7 +88,7 @@
     </LinearLayout>
 
     <CheckBox
-        android:id="@+id/check_box"
+        android:id="@+id/chooseView"
         android:layout_height="match_parent"
         android:layout_weight="0.5"
         android:layout_gravity="center"

@@ -16,7 +16,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/stock_item_ticker"
+            android:id="@+id/tickerView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -27,7 +27,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/stock_item_price"
+            android:id="@+id/priceView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="2dp"
@@ -36,7 +36,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/stock_sector"
+            android:id="@+id/sectorView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="2dp"
@@ -89,7 +89,7 @@
         android:layout_gravity="center">
 
         <TextView
-            android:id="@+id/stock_item_price_change_percent"
+            android:id="@+id/priceChangePercentView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -98,7 +98,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/stock_item_price_change_absolute"
+            android:id="@+id/priceChangeAbsoluteView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"

@@ -103,12 +103,12 @@ class OrderbookFragment : Fragment() {
         }
 
         positionView = view.findViewById(R.id.stock_item_position)
-        positionPriceView = view.findViewById(R.id.stock_item_price)
-        positionCashView = view.findViewById(R.id.stock_item_cash)
-        positionLotsView = view.findViewById(R.id.stock_item_lots)
-        positionLotsBlockedView = view.findViewById(R.id.stock_item_lots_blocked)
-        positionChangePriceAbsoluteView = view.findViewById(R.id.stock_item_price_change_absolute)
-        positionChangePricePercentView = view.findViewById(R.id.stock_item_price_change_percent)
+        positionPriceView = view.findViewById(R.id.priceView)
+        positionCashView = view.findViewById(R.id.totalCashView)
+        positionLotsView = view.findViewById(R.id.lotsView)
+        positionLotsBlockedView = view.findViewById(R.id.lotsBlockedView)
+        positionChangePriceAbsoluteView = view.findViewById(R.id.priceChangeAbsoluteView)
+        positionChangePricePercentView = view.findViewById(R.id.priceChangePercentView)
 
         scalperView = view.findViewById(R.id.scalper_panel)
         volumeEditText = view.findViewById(R.id.edit_volume)
@@ -226,7 +226,7 @@ class OrderbookFragment : Fragment() {
 
         activeStock = orderbookManager.activeStock
 
-        chartView = view.findViewById(R.id.chart)
+        chartView = view.findViewById(R.id.chartButton)
         chartView.setOnClickListener {
             activeStock?.let {
                 chartManager.start(it)
@@ -391,15 +391,6 @@ class OrderbookFragment : Fragment() {
         val ticker = activeStock?.instrument?.ticker ?: ""
         val act = requireActivity() as AppCompatActivity
         act.supportActionBar?.title = getString(R.string.menu_orderbook) + " $ticker"
-
-//        val firstVisibleItemPosition: Int = localLayoutManager.findFirstVisibleItemPosition()
-//        val lastVisibleItemPosition: Int = localLayoutManager.findLastVisibleItemPosition()
-//        if (lastVisibleItemPosition > 0 && firstVisibleItemPosition > 0) {
-//            for (i in firstVisibleItemPosition..lastVisibleItemPosition) {
-//                val holder: ItemOrderbookRecyclerViewAdapter.ViewHolder =
-//                    recyclerView.findViewHolderForAdapterPosition(i) as ItemOrderbookRecyclerViewAdapter.ViewHolder
-//            }
-//        }
     }
 
     inner class ChoiceDragListener : OnDragListener {

@@ -48,7 +48,7 @@ class StrategyShortsFragment : Fragment() {
             }
         }
 
-        val buttonUpdate = view.findViewById<Button>(R.id.button_update)
+        val buttonUpdate = view.findViewById<Button>(R.id.`@+id/update_button`)
         buttonUpdate.setOnClickListener {
             updateData()
         }
@@ -111,14 +111,14 @@ class StrategyShortsFragment : Fragment() {
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             lateinit var stock: Stock
 
-            val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
-            val priceView: TextView = view.findViewById(R.id.stock_item_price)
+            val tickerView: TextView = view.findViewById(R.id.tickerView)
+            val priceView: TextView = view.findViewById(R.id.priceView)
 
-            val volumeTodayView: TextView = view.findViewById(R.id.stock_item_volume_today)
-            val volumeTodayCashView: TextView = view.findViewById(R.id.stock_item_volume_today_cash)
+            val volumeTodayView: TextView = view.findViewById(R.id.volumeSharesView)
+            val volumeTodayCashView: TextView = view.findViewById(R.id.volumeCashView)
 
-            val changePriceAbsoluteView: TextView = view.findViewById(R.id.stock_item_price_change_absolute)
-            val changePricePercentView: TextView = view.findViewById(R.id.stock_item_price_change_percent)
+            val changePriceAbsoluteView: TextView = view.findViewById(R.id.priceChangeAbsoluteView)
+            val changePricePercentView: TextView = view.findViewById(R.id.priceChangePercentView)
         }
     }
 }

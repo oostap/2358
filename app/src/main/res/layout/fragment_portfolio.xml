@@ -27,7 +27,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_update"
+            android:id="@+id/update_button"
             android:layout_marginRight="5dp"
             android:text="@string/update"
             android:layout_weight="1"
@@ -42,6 +42,5 @@
             android:layout_weight="1"
             android:text="@string/orders"
             android:textSize="16dp" />
-
     </LinearLayout>
 </RelativeLayout>

@@ -73,15 +73,14 @@ class VolumeFormatter : ValueFormatter() {
 
 @SuppressLint("ViewConstructor")
 class MyMarkerView(context: Context?, layoutResource: Int) : MarkerView(context, layoutResource) {
-    private val tvContent: TextView
+    private val tvContent: TextView = findViewById(R.id.tvContent)
 
     // runs every time the MarkerView is redrawn, can be used to update the
     // content (user-interface)
     override fun refreshContent(e: Entry, highlight: Highlight) {
         if (e is CandleEntry) {
-            tvContent.text = "%.2f".format(e.high)
-        } else {
-            tvContent.text = "%.2f".format(e.y)
+            val candle = e.data as Candle
+            tvContent.text = ("v:%d\no%.2f\nh:%.2f\nl:%.2f\nc:%.2f").format(candle.volume, e.open, e.high, e.low, e.close)
         }
         super.refreshContent(e, highlight)
     }
@@ -90,9 +89,6 @@ class MyMarkerView(context: Context?, layoutResource: Int) : MarkerView(context,
         return MPPointF((-(width / 2)).toFloat(), (-height).toFloat())
     }
 
-    init {
-        tvContent = findViewById(R.id.tvContent)
-    }
 }
 
 @SuppressLint("ViewConstructor")
@@ -164,11 +160,9 @@ class ChartFragment : Fragment(), OnChartGestureListener {
         candleChartView.description.isEnabled = false
         candleChartView.setBackgroundColor(Color.WHITE)
         candleChartView.setDrawGridBackground(true)
-//        candleChartView.visibility = View.GONE
 
-//        candleChartView.isDragEnabled = true
-//        candleChartView.setScaleEnabled(true)
-//        candleChartView.setPinchZoom(true)
+        candleChartView.isDragEnabled = true
+        candleChartView.isLongClickable = true
 
         val mv = MyMarkerView(requireContext(), R.layout.chart_marker)
         mv.chartView = candleChartView
@@ -298,6 +292,8 @@ class ChartFragment : Fragment(), OnChartGestureListener {
     }
 
     fun loadData(candles: List<Candle>) {
+        if (candles.isEmpty()) return
+
         if (currentInterval == Interval.MINUTE) {
             barChartOSView.visibility = View.VISIBLE
         } else {
@@ -314,6 +310,7 @@ class ChartFragment : Fragment(), OnChartGestureListener {
                 candle.openingPrice.toFloat(),
                 candle.closingPrice.toFloat()
             )
+            bar.data = candle
             candleList.add(bar)
             i++
         }

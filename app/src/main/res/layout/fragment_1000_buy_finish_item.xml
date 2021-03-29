@@ -19,7 +19,7 @@
 
         <TextView
             android:layout_weight="1"
-            android:id="@+id/stock_item_ticker"
+            android:id="@+id/tickerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
@@ -30,7 +30,7 @@
 
         <TextView
             android:layout_weight="1"
-            android:id="@+id/stock_item_price"
+            android:id="@+id/priceView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingStart="8dp"

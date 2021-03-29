@@ -12,6 +12,7 @@ import com.project.ti2358.service.toString
 import com.project.ti2358.ui.orderbook.OrderbookLine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -41,7 +42,13 @@ class ChartManager() : KoinComponent {
 
             val zone = Utils.getTimezoneCurrent()
             val toDate = Calendar.getInstance()
+            var deltaDay = 0
+            if (toDate.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                deltaDay = -1
+            }
+            toDate.add(Calendar.DAY_OF_YEAR, deltaDay)
             val to = convertDateToTinkoffDate(toDate, zone)
+
             toDate.add(Calendar.DAY_OF_YEAR, -1)
             val from = convertDateToTinkoffDate(toDate, zone)
 
@@ -58,9 +65,16 @@ class ChartManager() : KoinComponent {
 
             val zone = Utils.getTimezoneCurrent()
             val toDate = Calendar.getInstance()
+            var deltaDay = 0
+            if (toDate.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                deltaDay = -1
+            }
+            toDate.add(Calendar.DAY_OF_YEAR, deltaDay)
             val to = convertDateToTinkoffDate(toDate, zone)
+
             toDate.add(Calendar.DAY_OF_YEAR, -1)
             val from = convertDateToTinkoffDate(toDate, zone)
+
 
             log("CANDLES: TICKER $ticker FROM $from TO $to")
             return marketService.candles(figi, "5min", from, to).candles

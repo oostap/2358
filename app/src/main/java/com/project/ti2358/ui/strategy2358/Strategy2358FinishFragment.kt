@@ -75,7 +75,7 @@ class Strategy2358FinishFragment : Fragment() {
         infoTextView = view.findViewById(R.id.info_text)
         updateInfoText()
 
-        equalPartsCheckBoxView = view.findViewById(R.id.check_box)
+        equalPartsCheckBoxView = view.findViewById(R.id.chooseView)
         equalPartsCheckBoxView?.setOnCheckedChangeListener { _, checked ->
             updateEqualParts(checked)
         }
@@ -194,8 +194,8 @@ class Strategy2358FinishFragment : Fragment() {
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             lateinit var purchase: PurchaseStock
 
-            val tickerView: TextView = view.findViewById(R.id.stock_item_ticker)
-            val priceView: TextView = view.findViewById(R.id.stock_item_price)
+            val tickerView: TextView = view.findViewById(R.id.tickerView)
+            val priceView: TextView = view.findViewById(R.id.priceView)
 
             val purchaseLotsView: TextView = view.findViewById(R.id.stock_purchase_lots)
             val purchasePriceView: TextView = view.findViewById(R.id.stock_purchase_price)
@@ -209,7 +209,7 @@ class Strategy2358FinishFragment : Fragment() {
             val lotsPlusButton: Button = view.findViewById(R.id.button_lots_plus)
             val lotsMinusButton: Button = view.findViewById(R.id.button_lots_minus)
 
-            val checkBoxView: CheckBox = view.findViewById(R.id.check_box)
+            val checkBoxView: CheckBox = view.findViewById(R.id.chooseView)
         }
     }
 }
