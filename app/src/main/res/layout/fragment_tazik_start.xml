@@ -27,7 +27,7 @@
         android:weightSum="2" >
         <Button
             android:layout_height="70dp"
-            android:id="@+id/buttonSet1"
+            android:id="@+id/set1_button"
             android:layout_marginRight="5dp"
             android:text="@string/set_1"
             android:layout_weight="1"
@@ -36,7 +36,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/buttonSet2"
+            android:id="@+id/set2_button"
             android:layout_marginLeft="5dp"
             android:text="@string/set_2"
             android:layout_weight="1"
@@ -63,7 +63,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_start"
+            android:id="@+id/start_button"
             android:layout_marginLeft="5dp"
             android:text="@string/service_2358_prepare"
             android:layout_weight="1"

@@ -17,7 +17,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tickerView"
+            android:id="@+id/ticker_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -28,7 +28,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/orderTypeView"
+            android:id="@+id/order_type_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
@@ -45,7 +45,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/priceView"
+            android:id="@+id/price_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -54,7 +54,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/lotsView"
+            android:id="@+id/lots_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -70,7 +70,7 @@
         android:orientation="vertical">
 
         <Button
-            android:id="@+id/cancelButton"
+            android:id="@+id/cancel_button"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="0dp"
@@ -85,7 +85,7 @@
         android:orientation="vertical">
 
         <ImageView
-            android:id="@+id/orderbookButton"
+            android:id="@+id/orderbook_button"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitCenter"

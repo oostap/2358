@@ -4,10 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
 import android.widget.SearchView
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -16,39 +13,36 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.Strategy2358
+import com.project.ti2358.databinding.Fragment2358StartBinding
+import com.project.ti2358.databinding.Fragment2358StartItemBinding
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class Strategy2358StartFragment : Fragment() {
-
+class Strategy2358StartFragment : Fragment(R.layout.fragment_2358_start) {
     val strategy2358: Strategy2358 by inject()
+
+    private var fragment2358StartBinding: Fragment2358StartBinding? = null
+
     var adapterList: Item2358RecyclerViewAdapter = Item2358RecyclerViewAdapter(emptyList())
     lateinit var stocks: MutableList<Stock>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onDestroy() {
+        fragment2358StartBinding = null
+        super.onDestroy()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_2358_start, container, false)
-        val list = view.findViewById<RecyclerView>(R.id.list)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = Fragment2358StartBinding.bind(view)
+        fragment2358StartBinding = binding
 
-        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
+        binding.list.layoutManager = LinearLayoutManager(context)
+        binding.list.adapter = adapterList
 
-        if (list is RecyclerView) {
-            with(list) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = adapterList
-            }
-        }
-
-        val buttonStart = view.findViewById<Button>(R.id.button_start)
-        buttonStart.setOnClickListener {
+        binding.startButton.setOnClickListener {
             if (strategy2358.stocksSelected.isNotEmpty()) {
                 view.findNavController().navigate(R.id.action_nav_2358_start_to_nav_2358_finish)
             } else {
@@ -56,8 +50,7 @@ class Strategy2358StartFragment : Fragment() {
             }
         }
 
-        val buttonUpdate = view.findViewById<Button>(R.id.`@+id/update_button`)
-        buttonUpdate.setOnClickListener {
+        binding.updateButton.setOnClickListener {
             stocks = strategy2358.process()
             adapterList.setData(stocks)
         }
@@ -65,8 +58,7 @@ class Strategy2358StartFragment : Fragment() {
         stocks = strategy2358.process()
         adapterList.setData(stocks)
 
-        val searchView: SearchView = view.findViewById(R.id.searchView)
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 processText(query)
                 return false
@@ -84,97 +76,69 @@ class Strategy2358StartFragment : Fragment() {
                 adapterList.setData(stocks)
             }
         })
-        searchView.requestFocus()
+        binding.searchView.requestFocus()
 
-        searchView.setOnCloseListener {
+        binding.searchView.setOnCloseListener {
             stocks = strategy2358.process()
             adapterList.setData(stocks)
             false
         }
-
-        return view
     }
 
-    inner class Item2358RecyclerViewAdapter(
-        private var values: List<Stock>
-    ) : RecyclerView.Adapter<Item2358RecyclerViewAdapter.ViewHolder>() {
-
+    inner class Item2358RecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<Item2358RecyclerViewAdapter.ViewHolder>() {
         fun setData(newValues: List<Stock>) {
             values = newValues
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(
-                R.layout.fragment_2358_start_item,
-                parent,
-                false
-            )
-
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.stock = item
-
-            holder.checkBoxView.setOnCheckedChangeListener(null)
-            holder.checkBoxView.isChecked = strategy2358.isSelected(item)
-
-            holder.tickerView.text = "${position + 1}) ${item.getTickerLove()}"
-            holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
-
-            val volume = item.getTodayVolume() / 1000f
-            holder.volumeTodayView.text = "%.1fk".format(volume)
-
-            val volumeCash = item.dayVolumeCash / 1000f / 1000f
-            holder.volumeTodayCashView.text = "%.2fM$".format(volumeCash)
-
-            holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
-            holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
-
-            holder.sectorView.text = item.getSectorName()
-            holder.sectorView.setTextColor(Utils.getColorForSector(item.closePrices?.sector))
-
-            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
-            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
-
-            holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
-                strategy2358.setSelected(holder.stock, checked)
-            }
-
-            holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
-            }
-
-            if (item.report != null) {
-                holder.reportView.text = item.getReportInfo()
-                holder.reportView.visibility = View.VISIBLE
-            } else {
-                holder.reportView.visibility = View.GONE
-            }
-            holder.reportView.setTextColor(Utils.RED)
-            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
-        }
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(Fragment2358StartItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            lateinit var stock: Stock
+        inner class ViewHolder(private val binding: Fragment2358StartItemBinding) : RecyclerView.ViewHolder(binding.root) {
+            fun bind(index: Int) {
+                val stock = values[index]
 
-            val tickerView: TextView = view.findViewById(R.id.tickerView)
-            val priceView: TextView = view.findViewById(R.id.priceView)
+                with(binding) {
+                    chooseView.setOnCheckedChangeListener(null)
+                    chooseView.isChecked = strategy2358.isSelected(stock)
 
-            val volumeTodayView: TextView = view.findViewById(R.id.volumeSharesView)
-            val volumeTodayCashView: TextView = view.findViewById(R.id.volumeCashView)
+                    tickerView.text = "${index + 1}) ${stock.getTickerLove()}"
+                    priceView.text = "${stock.getPrice2359String()} ➡ ${stock.getPriceString()}"
 
-            val changePriceAbsoluteView: TextView = view.findViewById(R.id.priceChangeAbsoluteView)
-            val changePricePercentView: TextView = view.findViewById(R.id.priceChangePercentView)
+                    val volume = stock.getTodayVolume() / 1000f
+                    volumeSharesView.text = "%.1fk".format(volume)
 
-            val checkBoxView: CheckBox = view.findViewById(R.id.chooseView)
+                    val volumeCash = stock.dayVolumeCash / 1000f / 1000f
+                    volumeCashView.text = "%.2fM$".format(volumeCash)
 
-            val reportView: TextView = view.findViewById(R.id.reportInfoView)
-            val sectorView: TextView = view.findViewById(R.id.sectorView)
+                    priceChangeAbsoluteView.text = stock.changePrice2359DayAbsolute.toMoney(stock)
+                    priceChangePercentView.text = stock.changePrice2359DayPercent.toPercent()
+
+                    sectorView.text = stock.getSectorName()
+                    sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))
+
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+
+                    chooseView.setOnCheckedChangeListener { _, checked ->
+                        strategy2358.setSelected(stock, checked)
+                    }
+
+                    itemView.setOnClickListener {
+                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                    }
+
+                    if (stock.report != null) {
+                        reportInfoView.text = stock.getReportInfo()
+                        reportInfoView.visibility = View.VISIBLE
+                    } else {
+                        reportInfoView.visibility = View.GONE
+                    }
+                    reportInfoView.setTextColor(Utils.RED)
+                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                }
+            }
         }
     }
 }

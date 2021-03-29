@@ -3,7 +3,7 @@
     android:layout_width="fill_parent" android:layout_height="fill_parent">
 
     <SearchView
-        android:id="@+id/searchView"
+        android:id="@+id/search_view"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginLeft="0dp"

@@ -5,9 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -17,39 +14,36 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.RocketStock
 import com.project.ti2358.data.manager.StrategyRocket
+import com.project.ti2358.databinding.FragmentRocketsBinding
+import com.project.ti2358.databinding.FragmentRocketsItemBinding
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class RocketsFragment : Fragment() {
+class RocketsFragment : Fragment(R.layout.fragment_rockets) {
     val orderbookManager: OrderbookManager by inject()
     val strategyRocket: StrategyRocket by inject()
-    var adapterList: ItemRocketRecyclerViewAdapter = ItemRocketRecyclerViewAdapter(emptyList())
-    lateinit var buttonStart: Button
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    private var fragmentRocketsBinding: FragmentRocketsBinding? = null
+
+    var adapterList: ItemRocketRecyclerViewAdapter = ItemRocketRecyclerViewAdapter(emptyList())
+
+    override fun onDestroy() {
+        fragmentRocketsBinding = null
+        super.onDestroy()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_rockets, container, false)
-        val list = view.findViewById<RecyclerView>(R.id.list)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = FragmentRocketsBinding.bind(view)
+        fragmentRocketsBinding = binding
 
-        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
+        binding.list.layoutManager = LinearLayoutManager(context)
+        binding.list.adapter = adapterList
 
-        if (list is RecyclerView) {
-            with(list) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = adapterList
-            }
-        }
-
-        buttonStart = view.findViewById(R.id.button_start)
-        buttonStart.setOnClickListener { _ ->
+        binding.startButton.setOnClickListener {
             if (Utils.isServiceRunning(requireContext(), StrategyRocketService::class.java)) {
                 requireContext().stopService(Intent(context, StrategyRocketService::class.java))
             } else {
@@ -59,108 +53,82 @@ class RocketsFragment : Fragment() {
         }
         updateServiceButtonText()
 
-        val buttonRocket = view.findViewById<Button>(R.id.button_rocket)
-        buttonRocket.setOnClickListener { _ ->
+        binding.rocketButton.setOnClickListener {
             adapterList.setData(strategyRocket.rocketStocks)
         }
 
-        val buttonComet = view.findViewById<Button>(R.id.button_comet)
-        buttonComet.setOnClickListener { _ ->
+        binding.cometButton.setOnClickListener {
             adapterList.setData(strategyRocket.cometStocks)
         }
 
         adapterList.setData(strategyRocket.rocketStocks)
-        return view
     }
 
     private fun updateServiceButtonText() {
         if (Utils.isServiceRunning(requireContext(), StrategyRocketService::class.java)) {
-            buttonStart.text = getString(R.string.stop)
+            fragmentRocketsBinding?.startButton?.text = getString(R.string.stop)
         } else {
-            buttonStart.text = getString(R.string.start)
+            fragmentRocketsBinding?.startButton?.text = getString(R.string.start)
         }
     }
 
-    inner class ItemRocketRecyclerViewAdapter(
-        private var values: List<RocketStock>
-    ) : RecyclerView.Adapter<ItemRocketRecyclerViewAdapter.ViewHolder>() {
-
+    inner class ItemRocketRecyclerViewAdapter(private var values: List<RocketStock>) : RecyclerView.Adapter<ItemRocketRecyclerViewAdapter.ViewHolder>() {
         fun setData(newValues: List<RocketStock>) {
             values = newValues
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_rockets_item, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.rocketStock = item
-
-            holder.tickerView.text = "${position + 1}) ${item.stock.getTickerLove()}"
-
-            val volume = item.stock.getTodayVolume() / 1000f
-            holder.volumeTodayView.text = "%.1fk".format(volume)
-
-            val volumeRocket = item.volume
-            holder.volumeFromStartView.text = "%d".format(volumeRocket)
-
-            holder.priceView.text = "${item.priceFrom.toMoney(item.stock)} ➡ ${item.priceTo.toMoney(item.stock)}"
-
-            holder.changePriceAbsoluteView.text = item.changePriceRocketAbsolute.toMoney(item.stock)
-            holder.changePricePercentView.text = item.changePriceRocketPercent.toPercent()
-
-            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePriceRocketPercent))
-            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePriceRocketPercent))
-            holder.priceView.setTextColor(Utils.getColorForValue(item.changePriceRocketPercent))
-
-            holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.rocketStock.stock.ticker)
-            }
-
-            holder.imageOrderbook.setOnClickListener {
-                orderbookManager.start(holder.rocketStock.stock)
-                holder.imageOrderbook.findNavController().navigate(R.id.action_nav_rocket_to_nav_orderbook)
-            }
-
-            holder.sectorView.text = item.stock.getSectorName()
-            holder.sectorView.setTextColor(Utils.getColorForSector(item.stock.closePrices?.sector))
-
-            holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.rocketStock.stock.ticker)
-            }
-
-            if (item.stock.report != null) {
-                holder.reportView.text = item.stock.getReportInfo()
-                holder.reportView.visibility = View.VISIBLE
-            } else {
-                holder.reportView.visibility = View.GONE
-            }
-            holder.reportView.setTextColor(Utils.RED)
-
-            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
-        }
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemRocketRecyclerViewAdapter.ViewHolder = ViewHolder(FragmentRocketsItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            lateinit var rocketStock: RocketStock
+        inner class ViewHolder(private val binding: FragmentRocketsItemBinding) : RecyclerView.ViewHolder(binding.root) {
+            fun bind(index: Int) {
+                val rocketStock = values[index]
+                with(binding) {
+                    tickerView.text = "${index + 1}) ${rocketStock.stock.getTickerLove()}"
 
-            val tickerView: TextView = view.findViewById(R.id.tickerView)
-            val priceView: TextView = view.findViewById(R.id.priceView)
+                    val volume = rocketStock.stock.getTodayVolume() / 1000f
+                    volumeSharesView.text = "%.1fk".format(volume)
 
-            val volumeTodayView: TextView = view.findViewById(R.id.volumeSharesView)
-            val volumeFromStartView: TextView = view.findViewById(R.id.stock_item_volume_from_start)
+                    val volumeRocket = rocketStock.volume
+                    volumeSharesFromStartView.text = "%d".format(volumeRocket)
 
-            val changePriceAbsoluteView: TextView = view.findViewById(R.id.priceChangeAbsoluteView)
-            val changePricePercentView: TextView = view.findViewById(R.id.priceChangePercentView)
+                    priceView.text = "${rocketStock.priceFrom.toMoney(rocketStock.stock)} ➡ ${rocketStock.priceTo.toMoney(rocketStock.stock)}"
 
-            val imageOrderbook: ImageView = view.findViewById(R.id.orderbookButton)
+                    priceChangeAbsoluteView.text = rocketStock.changePriceRocketAbsolute.toMoney(rocketStock.stock)
+                    priceChangePercentView.text = rocketStock.changePriceRocketPercent.toPercent()
 
-            val reportView: TextView = view.findViewById(R.id.reportInfoView)
-            val sectorView: TextView = view.findViewById(R.id.sectorView)
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(rocketStock.changePriceRocketPercent))
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(rocketStock.changePriceRocketPercent))
+                    priceView.setTextColor(Utils.getColorForValue(rocketStock.changePriceRocketPercent))
+
+                    itemView.setOnClickListener {
+                        Utils.openTinkoffForTicker(requireContext(), rocketStock.stock.ticker)
+                    }
+
+                    orderbookButton.setOnClickListener {
+                        orderbookManager.start(rocketStock.stock)
+                        orderbookButton.findNavController().navigate(R.id.action_nav_rocket_to_nav_orderbook)
+                    }
+
+                    sectorView.text = rocketStock.stock.getSectorName()
+                    sectorView.setTextColor(Utils.getColorForSector(rocketStock.stock.closePrices?.sector))
+
+                    itemView.setOnClickListener {
+                        Utils.openTinkoffForTicker(requireContext(), rocketStock.stock.ticker)
+                    }
+
+                    if (rocketStock.stock.report != null) {
+                        reportInfoView.text = rocketStock.stock.getReportInfo()
+                        reportInfoView.visibility = View.VISIBLE
+                    } else {
+                        reportInfoView.visibility = View.GONE
+                    }
+                    reportInfoView.setTextColor(Utils.RED)
+                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                }
+            }
         }
     }
 }

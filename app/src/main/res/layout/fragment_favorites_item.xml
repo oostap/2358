@@ -18,7 +18,7 @@
         android:layout_gravity="center_vertical">
 
         <TextView
-            android:id="@+id/tickerView"
+            android:id="@+id/ticker_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -28,7 +28,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/priceView"
+            android:id="@+id/price_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
@@ -44,7 +44,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/priceChangePercentView"
+            android:id="@+id/price_change_percent_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
@@ -54,7 +54,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/priceChangeAbsoluteView"
+            android:id="@+id/price_change_absolute_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
@@ -71,7 +71,7 @@
         android:orientation="horizontal">
 
             <ImageView
-                android:id="@+id/chartButton"
+                android:id="@+id/chart_button"
                 android:layout_weight="0.6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -83,7 +83,7 @@
 
             <ImageView
                 android:layout_weight="0.6"
-                android:id="@+id/orderbookButton"
+                android:id="@+id/orderbook_button"
                 android:scaleType="fitCenter"
                 android:padding="5dp"
                 android:layout_width="wrap_content"
@@ -94,7 +94,7 @@
     </LinearLayout>
 
     <CheckBox
-        android:id="@+id/chooseView"
+        android:id="@+id/choose_view"
         android:layout_height="match_parent"
         android:layout_weight="0.5"
         android:layout_gravity="center"

@@ -14,48 +14,38 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StrategyTazik
+import com.project.ti2358.databinding.FragmentTazikStartBinding
+import com.project.ti2358.databinding.FragmentTazikStartItemBinding
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class StrategyTazikStartFragment : Fragment() {
-
+class StrategyTazikStartFragment : Fragment(R.layout.fragment_tazik_start) {
     val strategyTazik: StrategyTazik by inject()
+
+    private var fragmentTazikStartBinding: FragmentTazikStartBinding? = null
+
     var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
-    lateinit var searchView: SearchView
     lateinit var stocks: MutableList<Stock>
 
     var numberSet: Int = 1
-    var sort = Sorting.DESCENDING
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onDestroy() {
+        fragmentTazikStartBinding = null
+        super.onDestroy()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_tazik_start, container, false)
-        val list = view.findViewById<RecyclerView>(R.id.list)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = FragmentTazikStartBinding.bind(view)
+        fragmentTazikStartBinding = binding
 
-        list.addItemDecoration(
-            DividerItemDecoration(
-                list.context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
+        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
+        binding.list.layoutManager = LinearLayoutManager(context)
+        binding.list.adapter = adapterList
 
-        if (list is RecyclerView) {
-            with(list) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = adapterList
-            }
-        }
-
-        val buttonStart = view.findViewById<Button>(R.id.button_start)
-        buttonStart.setOnClickListener {
+        binding.startButton.setOnClickListener {
             if (strategyTazik.stocksSelected.isNotEmpty()) {
                 view.findNavController().navigate(R.id.action_nav_tazik_start_to_nav_tazik_finish)
             } else {
@@ -63,13 +53,11 @@ class StrategyTazikStartFragment : Fragment() {
             }
         }
 
-        val buttonUpdate = view.findViewById<Button>(R.id.`@+id/update_button`)
-        buttonUpdate.setOnClickListener {
+        binding.updateButton.setOnClickListener {
             updateData()
         }
 
-        searchView = view.findViewById(R.id.searchView)
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 processText(query)
                 return false
@@ -88,25 +76,22 @@ class StrategyTazikStartFragment : Fragment() {
             }
         })
 
-        searchView.setOnCloseListener {
+        binding.searchView.setOnCloseListener {
             updateData()
             false
         }
 
-        val buttonSet1 = view.findViewById<Button>(R.id.buttonSet1)
-        buttonSet1.setOnClickListener {
+        binding.set1Button.setOnClickListener {
             numberSet = 1
             updateData()
         }
 
-        val buttonSet2 = view.findViewById<Button>(R.id.buttonSet2)
-        buttonSet2.setOnClickListener {
+        binding.set2Button.setOnClickListener {
             numberSet = 2
             updateData()
         }
 
         updateData()
-        return view
     }
 
     private fun updateData() {
@@ -122,74 +107,51 @@ class StrategyTazikStartFragment : Fragment() {
         act.supportActionBar?.title = "Автотазик - Набор $numberSet (${strategyTazik.stocksSelected.size} шт.)"
     }
 
-    inner class ItemTazikRecyclerViewAdapter(
-        private var values: List<Stock>
-    ) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {
-
+    inner class ItemTazikRecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {
         fun setData(newValues: List<Stock>) {
             values = newValues
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(
-                R.layout.fragment_tazik_start_item,
-                parent,
-                false
-            )
-
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.stock = item
-
-            holder.checkBoxView.setOnCheckedChangeListener(null)
-            holder.checkBoxView.isChecked = strategyTazik.isSelected(item)
-
-            holder.tickerView.text = "${position + 1}) ${item.getTickerLove()}"
-            holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
-
-            val volume = item.getTodayVolume() / 1000f
-            holder.volumeTodayView.text = "%.1fk".format(volume)
-
-            val volumeCash = item.dayVolumeCash / 1000f / 1000f
-            holder.volumeTodayCashView.text = "%.2fM$".format(volumeCash)
-
-            holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
-            holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
-
-            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
-            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
-
-            holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
-                strategyTazik.setSelected(holder.stock, checked, numberSet)
-                updateTitle()
-            }
-
-            holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
-            }
-
-            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
-        }
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentTazikStartItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            lateinit var stock: Stock
+        inner class ViewHolder(private val binding: FragmentTazikStartItemBinding) : RecyclerView.ViewHolder(binding.root) {
+            fun bind(index: Int) {
+                val stock = values[index]
 
-            val tickerView: TextView = view.findViewById(R.id.tickerView)
-            val priceView: TextView = view.findViewById(R.id.priceView)
+                with(binding) {
+                    chooseView.setOnCheckedChangeListener(null)
+                    chooseView.isChecked = strategyTazik.isSelected(stock)
 
-            val volumeTodayView: TextView = view.findViewById(R.id.volumeSharesView)
-            val volumeTodayCashView: TextView = view.findViewById(R.id.volumeCashView)
+                    tickerView.text = "${index + 1}) ${stock.getTickerLove()}"
+                    priceView.text = "${stock.getPrice2359String()} ➡ ${stock.getPriceString()}"
 
-            val changePriceAbsoluteView: TextView = view.findViewById(R.id.priceChangeAbsoluteView)
-            val changePricePercentView: TextView = view.findViewById(R.id.priceChangePercentView)
+                    val volume = stock.getTodayVolume() / 1000f
+                    volumeSharesView.text = "%.1fk".format(volume)
 
-            val checkBoxView: CheckBox = view.findViewById(R.id.chooseView)
+                    val volumeCash = stock.dayVolumeCash / 1000f / 1000f
+                    volumeCashView.text = "%.2fM$".format(volumeCash)
+
+                    priceChangeAbsoluteView.text = stock.changePrice2359DayAbsolute.toMoney(stock)
+                    priceChangePercentView.text = stock.changePrice2359DayPercent.toPercent()
+
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+
+                    chooseView.setOnCheckedChangeListener { _, checked ->
+                        strategyTazik.setSelected(stock, checked, numberSet)
+                        updateTitle()
+                    }
+
+                    itemView.setOnClickListener {
+                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                    }
+
+                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                }
+            }
         }
     }
 }

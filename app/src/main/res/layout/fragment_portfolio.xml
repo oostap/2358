@@ -35,7 +35,7 @@
             android:layout_width="0dp" />
 
         <Button
-            android:id="@+id/buttonOrders"
+            android:id="@+id/orders_button"
             android:layout_width="0dp"
             android:layout_height="70dp"
             android:layout_marginLeft="5dp"

@@ -34,7 +34,6 @@ class StrategyTazikEndless : KoinComponent {
     var basicPercentLimitPriceChange: Double = 0.0
     var started: Boolean = false
 
-    var scheduledStartTime: Calendar? = null
     var currentSort: Sorting = Sorting.DESCENDING
     private val gson = Gson()
 
@@ -42,22 +41,21 @@ class StrategyTazikEndless : KoinComponent {
         const val PercentLimitChangeDelta = 0.05
     }
 
-    fun process(numberSet: Int): MutableList<Stock> {
+    fun process(): MutableList<Stock> {
         val all = stockManager.getWhiteStocks()
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
         stocks = all.filter { (it.getPriceDouble() > min && it.getPriceDouble() < max) || it.getPriceDouble() == 0.0 }.toMutableList()
         stocks.sortBy { it.changePrice2359DayPercent }
-        loadSelectedStocks(numberSet)
+        loadSelectedStocks()
         return stocks
     }
 
-    private fun loadSelectedStocks(numberSet: Int) {
+    private fun loadSelectedStocks() {
         stocksSelected.clear()
 
-        val key = "${keySavedSelectedStock}_$numberSet"
-        val jsonStocks = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext).getString(key, null)
+        val jsonStocks = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext).getString(keySavedSelectedStock, null)
         jsonStocks?.let {
             val itemType = object : TypeToken<List<String>>() {}.type
             val stocksSelectedList: List<String> = gson.fromJson(jsonStocks, itemType)
@@ -65,14 +63,13 @@ class StrategyTazikEndless : KoinComponent {
         }
     }
 
-    private fun saveSelectedStocks(numberSet: Int) {
+    private fun saveSelectedStocks() {
         val list = stocksSelected.map { it.ticker }.toMutableList()
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
         val editor: SharedPreferences.Editor = preferences.edit()
         val data = gson.toJson(list)
-        val key = "${keySavedSelectedStock}_$numberSet"
-        editor.putString(key, data)
+        editor.putString(keySavedSelectedStock, data)
         editor.apply()
     }
 
@@ -86,7 +83,7 @@ class StrategyTazikEndless : KoinComponent {
         return stocks
     }
 
-    fun setSelected(stock: Stock, value: Boolean, numberSet: Int) {
+    fun setSelected(stock: Stock, value: Boolean) {
         if (value) {
             if (stock !in stocksSelected)
                 stocksSelected.add(stock)
@@ -95,7 +92,7 @@ class StrategyTazikEndless : KoinComponent {
         }
         stocksSelected.sortBy { it.changePrice2359DayPercent }
 
-        saveSelectedStocks(numberSet)
+        saveSelectedStocks()
     }
 
     fun isSelected(stock: Stock): Boolean {
@@ -128,27 +125,9 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     fun getNotificationTitle(): String {
-        if (started) return "Внимание! Работает автотазик!"
+        if (started) return "Внимание! Работает бесконечный таз!"
 
-        if (scheduledStartTime == null) {
-            return "Старт тазика через ???"
-        } else {
-            val now = Calendar.getInstance(TimeZone.getDefault())
-            val current = scheduledStartTime?.timeInMillis ?: 0
-            val scheduleDelay = current - now.timeInMillis
-
-            val allSeconds = scheduleDelay / 1000
-            val hours = allSeconds / 3600
-            val minutes = (allSeconds - hours * 3600) / 60
-            val seconds = allSeconds % 60
-
-            fixPrice()
-            if (hours + minutes + seconds <= 0) {
-                startStrategy()
-            }
-
-            return "Старт тазика через %02d:%02d:%02d".format(hours, minutes, seconds)
-        }
+        return "Бесконечный таз приостановлен"
     }
 
     @Synchronized
@@ -184,42 +163,6 @@ class StrategyTazikEndless : KoinComponent {
         return tickers
     }
 
-    fun prepareStrategy(scheduled : Boolean, time: String) {
-        basicPercentLimitPriceChange = SettingsManager.getTazikChangePercent()
-
-        if (!scheduled) {
-            startStrategy()
-            return
-        }
-        started = false
-
-        val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
-        val dayTime = time.split(":").toTypedArray()
-        if (dayTime.size < 3) {
-            Utils.showToastAlert("Неверный формат времени $time")
-            return
-        }
-
-        val hours = Integer.parseInt(dayTime[0])
-        val minutes = Integer.parseInt(dayTime[1])
-        val seconds = Integer.parseInt(dayTime[2])
-
-        scheduledStartTime = Calendar.getInstance(TimeZone.getDefault())
-        scheduledStartTime?.let {
-            it.add(Calendar.HOUR_OF_DAY, -differenceHours)
-            it.set(Calendar.HOUR_OF_DAY, hours)
-            it.set(Calendar.MINUTE, minutes)
-            it.set(Calendar.SECOND, seconds)
-            it.add(Calendar.HOUR_OF_DAY, differenceHours)
-
-            val now = Calendar.getInstance(TimeZone.getDefault())
-            val scheduleDelay = it.timeInMillis - now.timeInMillis
-            if (scheduleDelay < 0) {
-                Utils.showToastAlert("Ошибка! Отрицательное время!? втф = $scheduleDelay")
-            }
-        }
-    }
-
     private fun fixPrice() {
         if (started) return
 
@@ -238,7 +181,9 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     @Synchronized
-    private fun startStrategy() {
+    fun startStrategy() {
+        basicPercentLimitPriceChange = SettingsManager.getTazikChangePercent()
+
         fixPrice()
 
         activeJobs.forEach {

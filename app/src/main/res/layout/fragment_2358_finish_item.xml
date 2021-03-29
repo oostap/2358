@@ -17,7 +17,7 @@
         android:layout_gravity="center">
 
         <TextView
-            android:id="@+id/tickerView"
+            android:id="@+id/ticker_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
@@ -27,7 +27,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/priceView"
+            android:id="@+id/price_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingStart="8dp"
@@ -36,7 +36,7 @@
             android:textSize="13sp" />
 
         <TextView
-            android:id="@+id/stock_purchase_price"
+            android:id="@+id/price_buy_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingStart="8dp"
@@ -53,7 +53,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/stock_purchase_lots"
+            android:id="@+id/lots_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingStart="8dp"
@@ -74,7 +74,7 @@
 
             <Button
                 android:layout_weight="1"
-                android:id="@+id/button_lots_minus"
+                android:id="@+id/lots_minus_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="2dp"
@@ -85,7 +85,7 @@
 
             <Button
                 android:layout_weight="1"
-                android:id="@+id/button_lots_plus"
+                android:id="@+id/lots_plus_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="2dp"
@@ -106,7 +106,7 @@
         android:layout_gravity="center">
 
         <TextView
-            android:id="@+id/stock_price_profit_percent_from"
+            android:id="@+id/profit_percent_from_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -118,7 +118,7 @@
             tools:ignore="RtlCompat" />
 
         <TextView
-            android:id="@+id/stock_price_profit_percent_to"
+            android:id="@+id/profit_percent_to_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="4dp"
@@ -138,7 +138,7 @@
 
         <Button
             android:layout_weight="2"
-            android:id="@+id/button_price_minus"
+            android:id="@+id/price_minus_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginLeft="3dp"
@@ -148,7 +148,7 @@
 
         <Button
             android:layout_weight="2"
-            android:id="@+id/button_price_plus"
+            android:id="@+id/price_plus_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginRight="3dp"
@@ -164,7 +164,7 @@
         android:orientation="horizontal">
 
         <CheckBox
-            android:id="@+id/chooseView"
+            android:id="@+id/choose_view"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:layout_gravity="center"/>

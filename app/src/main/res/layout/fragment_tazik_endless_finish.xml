@@ -10,40 +10,41 @@
         android:layout_height="match_parent"
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp"
-        android:layout_marginBottom="65dp"
+        android:layout_marginBottom="170dp"
         android:layout_marginTop="0dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context=".ui.strategyFixPrice.StrategyFixPriceFragment"
-        tools:listitem="@layout/fragment_fixprice_item" />
+        tools:context=".ui.strategyTazikEndless.StrategyTazikEndlessFinishFragment"
+        tools:listitem="@layout/fragment_tazik_endless_finish_item" />
+
+    <TextView
+        android:id="@+id/info_text_view"
+        android:layout_width="fill_parent"
+        android:layout_height="100dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="70dp"
+        android:text="Запуск таймера на покупку: \nВремя МСК: 2358: \nБумаг: 5\nСумма: ~1000$\nещё строка"
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         android:layout_alignParentBottom="true"
-        android:weightSum="2" >
+        android:weightSum="1" >
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/reset_button"
+            android:id="@+id/start_button"
             android:layout_marginRight="5dp"
-            android:text="FIX"
+            android:text="@string/start"
             android:layout_weight="1"
-            android:textSize="16dp"
-            android:padding="0dp"
+            android:textSize="14dp"
             android:layout_width="0dp" />
-
-        <Button
-            android:layout_height="70dp"
-            android:layout_width="0dp"
-            android:id="@+id/update_button"
-            android:layout_marginLeft="5dp"
-            android:text="@string/update"
-            android:layout_weight="1"
-            android:padding="0dp"
-            android:textSize="16dp" />
 
     </LinearLayout>
 

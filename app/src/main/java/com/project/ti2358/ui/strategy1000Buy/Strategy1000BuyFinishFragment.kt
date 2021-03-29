@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,43 +14,37 @@ import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.manager.Strategy1000Buy
 import com.project.ti2358.data.manager.SettingsManager
+import com.project.ti2358.databinding.Fragment1000BuyFinishBinding
+import com.project.ti2358.databinding.Fragment1000BuyFinishItemBinding
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class Strategy1000BuyFinishFragment : Fragment() {
+class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish) {
+    private val strategy1000Buy: Strategy1000Buy by inject()
 
-    val strategy1000Buy: Strategy1000Buy by inject()
+    private var fragment1000BuyFinishBinding: Fragment1000BuyFinishBinding? = null
+
     var adapterList: Item1005RecyclerViewAdapter = Item1005RecyclerViewAdapter(emptyList())
     var positions: MutableList<PurchaseStock> = mutableListOf()
-    var infoTextView: TextView? = null
-    var buttonStart700: Button? = null
-    var buttonStart1000: Button? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onDestroy() {
+        fragment1000BuyFinishBinding = null
+        super.onDestroy()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_1000_buy_finish, container, false)
-        val list = view.findViewById<RecyclerView>(R.id.list)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = Fragment1000BuyFinishBinding.bind(view)
+        fragment1000BuyFinishBinding = binding
 
-        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
-
-        if (list is RecyclerView) {
-            with(list) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = adapterList
-            }
-        }
+        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
+        binding.list.layoutManager = LinearLayoutManager(context)
+        binding.list.adapter = adapterList
 
         ///////////////////////////////////////////////////////////////
-        buttonStart700 = view.findViewById(R.id.buttonStart700)
-        buttonStart700?.setOnClickListener {
+        binding.start700Button.setOnClickListener {
             if (SettingsManager.get1000BuyPurchaseVolume() <= 0) {
                 Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел 1000 buy.")
             } else {
@@ -68,8 +60,7 @@ class Strategy1000BuyFinishFragment : Fragment() {
         }
         updateServiceButtonText700()
         ///////////////////////////////////////////////////////////////
-        buttonStart1000 = view.findViewById(R.id.buttonStart1000)
-        buttonStart1000?.setOnClickListener {
+        binding.start1000Button.setOnClickListener {
             if (SettingsManager.get1000BuyPurchaseVolume() <= 0) {
                 Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел 1000 buy.")
             } else {
@@ -88,18 +79,14 @@ class Strategy1000BuyFinishFragment : Fragment() {
 
         positions = strategy1000Buy.getPurchaseStock()
         adapterList.setData(positions)
-
-        infoTextView = view.findViewById(R.id.info_text)
         updateInfoText()
-
-        return view
     }
 
     fun updateInfoText() {
         val time = "07:00:00.100ms или 10:00:00.100ms"
 
         val prepareText: String = TheApplication.application.applicationContext.getString(R.string.prepare_start_1000_buy_text)
-        infoTextView?.text = String.format(
+        fragment1000BuyFinishBinding?.infoTextView?.text = String.format(
             prepareText,
             time,
             positions.size,
@@ -109,106 +96,84 @@ class Strategy1000BuyFinishFragment : Fragment() {
 
     private fun updateServiceButtonText700() {
         if (Utils.isServiceRunning(requireContext(), Strategy700BuyService::class.java)) {
-            buttonStart700?.text = getString(R.string.stop_sell_700)
+            fragment1000BuyFinishBinding?.start700Button?.text = getString(R.string.stop_sell_700)
         } else {
-            buttonStart700?.text = getString(R.string.start_sell_700)
+            fragment1000BuyFinishBinding?.start700Button?.text = getString(R.string.start_sell_700)
         }
     }
 
     private fun updateServiceButtonText1000() {
         if (Utils.isServiceRunning(requireContext(), Strategy1000BuyService::class.java)) {
-            buttonStart1000?.text = getString(R.string.stop_sell_1000)
+            fragment1000BuyFinishBinding?.start1000Button?.text = getString(R.string.stop_sell_1000)
         } else {
-            buttonStart1000?.text = getString(R.string.start_sell_1000)
+            fragment1000BuyFinishBinding?.start1000Button?.text = getString(R.string.start_sell_1000)
         }
     }
 
-    inner class Item1005RecyclerViewAdapter(
-        private var values: List<PurchaseStock>
-    ) : RecyclerView.Adapter<Item1005RecyclerViewAdapter.ViewHolder>() {
-
+    inner class Item1005RecyclerViewAdapter(private var values: List<PurchaseStock>) : RecyclerView.Adapter<Item1005RecyclerViewAdapter.ViewHolder>() {
         fun setData(newValues: List<PurchaseStock>) {
             values = newValues
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_1000_buy_finish_item, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.position = item
-
-            holder.tickerView.text = "${position + 1}) ${item.stock.getTickerLove()}"
-            holder.currentPriceView.text = "${item.stock.getPrice2359String()} ➡ ${item.stock.getPriceDouble().toMoney(item.stock)}"
-            holder.currentPriceView.setTextColor(Utils.getColorForValue(item.stock.changePrice2359DayPercent))
-
-            refreshPercent(holder)
-
-            holder.pricePlusButton.setOnClickListener {
-                item.addPriceLimitPercent(0.05)
-                refreshPercent(holder)
-            }
-
-            holder.priceMinusButton.setOnClickListener {
-                item.addPriceLimitPercent(-0.05)
-                refreshPercent(holder)
-            }
-
-            holder.lotsPlusButton.setOnClickListener {
-                item.addLots(1)
-                refreshPercent(holder)
-            }
-
-            holder.lotsMinusButton.setOnClickListener {
-                item.addLots(-1)
-                refreshPercent(holder)
-            }
-
-            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
-        }
-
-        fun refreshPercent(holder: ViewHolder) {
-            val item = holder.position
-            val percent = item.percentLimitPriceChange
-
-            holder.lotsView.text = "${item.lots} шт."
-
-            holder.priceChangePercentView.text = percent.toPercent()
-            holder.priceChangeAbsoluteView.text = item.absoluteLimitPriceChange.toMoney(item.stock)
-            holder.priceChangeAbsoluteTotalView.text = (item.absoluteLimitPriceChange * item.lots).toMoney(item.stock)
-
-            holder.priceBuyView.text = "${item.getLimitPriceDouble().toMoney(item.stock)} > ${(item.getLimitPriceDouble() * item.lots).toMoney(item.stock)}"
-
-            holder.priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
-            holder.priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
-            holder.priceChangeAbsoluteTotalView.setTextColor(Utils.getColorForValue(percent))
-
-            updateInfoText()
-        }
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(Fragment1000BuyFinishItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            lateinit var position: PurchaseStock
+        inner class ViewHolder(private val binding: Fragment1000BuyFinishItemBinding) : RecyclerView.ViewHolder(binding.root) {
+            fun bind(index: Int) {
+                val purchaseStock = values[index]
 
-            val tickerView: TextView = view.findViewById(R.id.tickerView)
-            val currentPriceView: TextView = view.findViewById(R.id.priceView)
-            val lotsView: TextView = view.findViewById(R.id.stock_lots)
+                with (binding) {
+                    tickerView.text = "${index + 1}) ${purchaseStock.stock.getTickerLove()}"
+                    priceView.text = "${purchaseStock.stock.getPrice2359String()} ➡ ${purchaseStock.stock.getPriceDouble().toMoney(purchaseStock.stock)}"
+                    priceView.setTextColor(Utils.getColorForValue(purchaseStock.stock.changePrice2359DayPercent))
 
-            val priceBuyView: TextView = view.findViewById(R.id.stock_item_price_buy)
+                    refreshPercent(purchaseStock)
 
-            val priceChangePercentView: TextView = view.findViewById(R.id.stock_price_change_percent)
-            val priceChangeAbsoluteView: TextView = view.findViewById(R.id.stock_price_absolute_change)
-            val priceChangeAbsoluteTotalView: TextView = view.findViewById(R.id.stock_price_absolute_total_change)
+                    pricePlusButton.setOnClickListener {
+                        purchaseStock.addPriceLimitPercent(0.05)
+                        refreshPercent(purchaseStock)
+                    }
 
-            val pricePlusButton: Button = view.findViewById(R.id.button_price_plus)
-            val priceMinusButton: Button = view.findViewById(R.id.button_price_minus)
+                    priceMinusButton.setOnClickListener {
+                        purchaseStock.addPriceLimitPercent(-0.05)
+                        refreshPercent(purchaseStock)
+                    }
 
-            val lotsPlusButton: Button = view.findViewById(R.id.button_lots_plus)
-            val lotsMinusButton: Button = view.findViewById(R.id.button_lots_minus)
+                    lotsPlusButton.setOnClickListener {
+                        purchaseStock.addLots(1)
+                        refreshPercent(purchaseStock)
+                    }
+
+                    lotsMinusButton.setOnClickListener {
+                        purchaseStock.addLots(-1)
+                        refreshPercent(purchaseStock)
+                    }
+
+                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                }
+            }
+
+            fun refreshPercent(purchaseStock: PurchaseStock) {
+                with (binding) {
+                    val percent = purchaseStock.percentLimitPriceChange
+
+                    lotsView.text = "${purchaseStock.lots} шт."
+
+                    priceChangePercentView.text = percent.toPercent()
+                    priceChangeAbsoluteView.text = purchaseStock.absoluteLimitPriceChange.toMoney(purchaseStock.stock)
+                    priceChangeAbsoluteTotalView.text = (purchaseStock.absoluteLimitPriceChange * purchaseStock.lots).toMoney(purchaseStock.stock)
+
+                    priceBuyView.text = "${purchaseStock.getLimitPriceDouble().toMoney(purchaseStock.stock)} > ${(purchaseStock.getLimitPriceDouble() * purchaseStock.lots).toMoney(purchaseStock.stock)}"
+
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
+                    priceChangeAbsoluteTotalView.setTextColor(Utils.getColorForValue(percent))
+
+                    updateInfoText()
+                }
+            }
         }
     }
 }

@@ -16,7 +16,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tickerView"
+            android:id="@+id/ticker_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -27,7 +27,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/priceView"
+            android:id="@+id/price_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="2dp"
@@ -36,7 +36,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/sectorView"
+            android:id="@+id/sector_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="2dp"
@@ -45,7 +45,7 @@
             android:textSize="10sp" />
 
         <TextView
-            android:id="@+id/stock_date"
+            android:id="@+id/date_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="4dp"
@@ -63,7 +63,7 @@
         android:layout_gravity="center">
 
         <TextView
-            android:id="@+id/stock_info_1"
+            android:id="@+id/rev_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -72,7 +72,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/stock_info_2"
+            android:id="@+id/eps_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -89,7 +89,7 @@
         android:layout_gravity="center">
 
         <TextView
-            android:id="@+id/priceChangePercentView"
+            android:id="@+id/price_change_percent_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -98,7 +98,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/priceChangeAbsoluteView"
+            android:id="@+id/price_change_absolute_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"

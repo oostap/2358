@@ -11,7 +11,7 @@
         android:layout_marginBottom="150dp">
 
         <LinearLayout
-            android:id="@+id/stock_item_position"
+            android:id="@+id/position_view"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -23,7 +23,7 @@
 
             <TextView
                 android:layout_weight="1"
-                android:id="@+id/totalCashView"
+                android:id="@+id/cash_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="2dp"
@@ -35,7 +35,7 @@
 
             <TextView
                 android:layout_weight="1"
-                android:id="@+id/priceView"
+                android:id="@+id/price_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="4dp"
@@ -48,7 +48,7 @@
 
             <TextView
                 android:layout_weight="1"
-                android:id="@+id/lotsView"
+                android:id="@+id/lots_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingTop="2dp"
@@ -62,7 +62,7 @@
 
             <TextView
                 android:layout_weight="1"
-                android:id="@+id/lotsBlockedView"
+                android:id="@+id/lots_blocked_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingStart="2dp"
@@ -76,7 +76,7 @@
 
             <TextView
                 android:layout_weight="1"
-                android:id="@+id/priceChangePercentView"
+                android:id="@+id/price_change_percent_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="2dp"
@@ -88,7 +88,7 @@
 
             <TextView
                 android:layout_weight="1"
-                android:id="@+id/priceChangeAbsoluteView"
+                android:id="@+id/price_change_absolute_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="2dp"
@@ -165,7 +165,7 @@
     </LinearLayout>
 
     <RelativeLayout
-        android:id="@+id/scalper_panel"
+        android:id="@+id/scalper_panel_view"
         android:layout_height="150dp"
         android:layout_weight="1"
         android:layout_width="match_parent"
@@ -173,7 +173,7 @@
         tools:ignore="NestedWeights">
 
         <ImageView
-            android:id="@+id/chartButton"
+            android:id="@+id/chart_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:scaleType="fitCenter"
@@ -193,7 +193,7 @@
             android:layout_gravity="center">
 
             <EditText
-                android:id="@+id/edit_volume"
+                android:id="@+id/volume_edit_text"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:layout_gravity="center"
@@ -204,7 +204,7 @@
                 android:inputType="number" />
 
             <LinearLayout
-                android:id="@+id/volumes"
+                android:id="@+id/volumes_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -333,7 +333,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/price_panel"
+                android:id="@+id/prices_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -341,7 +341,7 @@
                 android:paddingTop="5dp">
 
                 <LinearLayout
-                    android:id="@+id/buy_plus"
+                    android:id="@+id/buy_plus_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -433,7 +433,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/sell_plus"
+                    android:id="@+id/sell_plus_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -534,7 +534,7 @@
                 android:paddingTop="5dp">
 
                 <LinearLayout
-                    android:id="@+id/buy_minus"
+                    android:id="@+id/buy_minus_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -626,7 +626,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/sell_minus"
+                    android:id="@+id/sell_minus_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -723,7 +723,7 @@
     </RelativeLayout>
 
     <ImageView
-        android:id="@+id/image_trash"
+        android:id="@+id/trash_button"
         android:layout_width="120dp"
         android:layout_height="100dp"
         android:scaleType="fitCenter"

@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -15,6 +13,8 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.StrategyReports
+import com.project.ti2358.databinding.FragmentReportsBinding
+import com.project.ti2358.databinding.FragmentReportsItemBinding
 import com.project.ti2358.service.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -24,43 +24,36 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class ReportsFragment : Fragment() {
-    val stockManager: StockManager by inject()
-    val strategyReports: StrategyReports by inject()
+class ReportsFragment : Fragment(R.layout.fragment_reports) {
+    private val stockManager: StockManager by inject()
+    private val strategyReports: StrategyReports by inject()
+
+    private var fragmentReportsBinding: FragmentReportsBinding? = null
+
     var adapterList: ItemReportsRecyclerViewAdapter = ItemReportsRecyclerViewAdapter(emptyList())
     lateinit var stocks: MutableList<Stock>
-
     var job : Job? = null
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onDestroy() {
         job?.cancel()
+        fragmentReportsBinding = null
         super.onDestroy()
     }
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_reports, container, false)
-        val list = view.findViewById<RecyclerView>(R.id.list)
-        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
 
-        if (list is RecyclerView) {
-            with(list) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = adapterList
-            }
-        }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = FragmentReportsBinding.bind(view)
+        fragmentReportsBinding = binding
 
-        val buttonReports = view.findViewById<Button>(R.id.buttonReport)
-        buttonReports.setOnClickListener {
+        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
+        binding.list.layoutManager = LinearLayoutManager(context)
+        binding.list.adapter = adapterList
+
+        binding.reportButton.setOnClickListener {
             updateDataReport()
         }
 
-        val buttonDivs = view.findViewById<Button>(R.id.buttonDiv)
-        buttonDivs.setOnClickListener {
+        binding.divButton.setOnClickListener {
             updateDataDivs()
         }
 
@@ -71,7 +64,6 @@ class ReportsFragment : Fragment() {
             stockManager.reloadReports()
             updateDataReport()
         }
-        return view
     }
 
     private fun updateDataReport() {
@@ -92,119 +84,95 @@ class ReportsFragment : Fragment() {
         act.supportActionBar?.title = getString(R.string.menu_divindens)
     }
 
-    inner class ItemReportsRecyclerViewAdapter(
-        private var values: List<Stock>
-    ) : RecyclerView.Adapter<ItemReportsRecyclerViewAdapter.ViewHolder>() {
-
+    inner class ItemReportsRecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<ItemReportsRecyclerViewAdapter.ViewHolder>() {
         fun setData(newValues: List<Stock>) {
             values = newValues
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(
-                R.layout.fragment_reports_item,
-                parent,
-                false
-            )
-
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.stock = item
-
-            holder.tickerView.text = "${position + 1}) ${item.getTickerLove()}"
-            holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
-
-            holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
-            holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
-
-            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
-            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
-
-            holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
-            }
-
-            holder.sectorView.text = item.getSectorName()
-            holder.sectorView.setTextColor(Utils.getColorForSector(item.closePrices?.sector))
-
-            item.dividend?.let {
-                val emoji = if (it.profit > 1.0) " 🤑" else ""
-                holder.info1View.text = "+${it.profit}%$emoji"
-                holder.info1View.setTextColor(Utils.GREEN)
-                holder.info2View.visibility = View.GONE
-
-                holder.dateView.text = it.date_format
-                holder.dateView.setTextColor(Utils.RED)
-            }
-
-            item.report?.let {
-                if (it.estimate_rev_per != null) {
-                    if (it.estimate_rev_per > 0) {
-                        holder.info1View.text = "REV: +${it.estimate_rev_per}$"
-                    } else {
-                        holder.info1View.text = "REV: ${it.estimate_rev_per}$"
-                    }
-                    holder.info1View.setTextColor(Utils.getColorForValue(it.estimate_rev_per))
-                }
-
-                if (it.estimate_eps != null) {
-                    if (it.estimate_eps > 0) {
-                        holder.info2View.text = "EPS: (+${it.estimate_eps})%"
-                    } else {
-                        holder.info2View.text = "EPS: (${it.estimate_eps})%"
-                    }
-                    holder.info2View.setTextColor(Utils.getColorForValue(it.estimate_eps))
-                }
-
-                if (it.actual_rev_per != null) {
-                    if (it.actual_rev_per > 0) {
-                        holder.info1View.text = "REV: +${it.actual_rev_per}$"
-                    } else {
-                        holder.info1View.text = "REV: ${it.actual_rev_per}$"
-                    }
-                    holder.info1View.setTextColor(Utils.getColorForValue(it.actual_rev_per))
-                }
-
-                if (it.actual_eps != null) {
-                    if (it.actual_eps > 0) {
-                        holder.info2View.text = "EPS: (+${it.actual_eps})%"
-                    } else {
-                        holder.info2View.text = "EPS: (${it.actual_eps})%"
-                    }
-                    holder.info2View.setTextColor(Utils.getColorForValue(it.actual_eps))
-                }
-
-                var tod = if (it.tod == "post") " 🌚" else " 🌞"
-                if (it.actual_eps != null || it.actual_rev_per != null) {
-                    tod += "✅"
-                }
-                holder.dateView.text = "${it.date_format} $tod"
-                holder.dateView.setTextColor(Utils.RED)
-            }
-
-            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
-        }
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentReportsItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            lateinit var stock: Stock
+        inner class ViewHolder(private val binding: FragmentReportsItemBinding) : RecyclerView.ViewHolder(binding.root) {
+            fun bind(index: Int) {
+                val stock = values[index]
 
-            val tickerView: TextView = view.findViewById(R.id.tickerView)
-            val priceView: TextView = view.findViewById(R.id.priceView)
+                with(binding) {
+                    tickerView.text = "${index + 1}) ${stock.getTickerLove()}"
+                    priceView.text = "${stock.getPrice2359String()} ➡ ${stock.getPriceString()}"
 
-            val changePriceAbsoluteView: TextView = view.findViewById(R.id.priceChangeAbsoluteView)
-            val changePricePercentView: TextView = view.findViewById(R.id.priceChangePercentView)
+                    priceChangeAbsoluteView.text = stock.changePrice2359DayAbsolute.toMoney(stock)
+                    priceChangePercentView.text = stock.changePrice2359DayPercent.toPercent()
 
-            val sectorView: TextView = view.findViewById(R.id.sectorView)
-            val info1View: TextView = view.findViewById(R.id.stock_info_1)
-            val info2View: TextView = view.findViewById(R.id.stock_info_2)
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
 
-            val dateView: TextView = view.findViewById(R.id.stock_date)
+                    itemView.setOnClickListener {
+                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                    }
+
+                    sectorView.text = stock.getSectorName()
+                    sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))
+
+                    stock.dividend?.let {
+                        val emoji = if (it.profit > 1.0) " 🤑" else ""
+                        revView.text = "+${it.profit}%$emoji"
+                        revView.setTextColor(Utils.GREEN)
+                        epsView.visibility = View.GONE
+
+                        dateView.text = it.date_format
+                        dateView.setTextColor(Utils.RED)
+                    }
+
+                    stock.report?.let {
+                        if (it.estimate_rev_per != null) {
+                            if (it.estimate_rev_per > 0) {
+                                revView.text = "REV: +${it.estimate_rev_per}$"
+                            } else {
+                                revView.text = "REV: ${it.estimate_rev_per}$"
+                            }
+                            revView.setTextColor(Utils.getColorForValue(it.estimate_rev_per))
+                        }
+
+                        if (it.estimate_eps != null) {
+                            if (it.estimate_eps > 0) {
+                                epsView.text = "EPS: (+${it.estimate_eps})%"
+                            } else {
+                                epsView.text = "EPS: (${it.estimate_eps})%"
+                            }
+                            epsView.setTextColor(Utils.getColorForValue(it.estimate_eps))
+                        }
+
+                        if (it.actual_rev_per != null) {
+                            if (it.actual_rev_per > 0) {
+                                revView.text = "REV: +${it.actual_rev_per}$"
+                            } else {
+                                revView.text = "REV: ${it.actual_rev_per}$"
+                            }
+                            revView.setTextColor(Utils.getColorForValue(it.actual_rev_per))
+                        }
+
+                        if (it.actual_eps != null) {
+                            if (it.actual_eps > 0) {
+                                epsView.text = "EPS: (+${it.actual_eps})%"
+                            } else {
+                                epsView.text = "EPS: (${it.actual_eps})%"
+                            }
+                            epsView.setTextColor(Utils.getColorForValue(it.actual_eps))
+                        }
+
+                        var tod = if (it.tod == "post") " 🌚" else " 🌞"
+                        if (it.actual_eps != null || it.actual_rev_per != null) {
+                            tod += "✅"
+                        }
+                        dateView.text = "${it.date_format} $tod"
+                        dateView.setTextColor(Utils.RED)
+                    }
+
+                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                }
+            }
         }
     }
 }

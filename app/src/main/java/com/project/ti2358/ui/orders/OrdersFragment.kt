@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.manager.OrderbookManager
-import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.model.dto.Order
 import com.project.ti2358.databinding.FragmentOrdersBinding
 import com.project.ti2358.databinding.FragmentOrdersItemBinding
@@ -109,32 +108,30 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
         override fun getItemCount(): Int = values.size
 
         inner class ViewHolder(private val binding: FragmentOrdersItemBinding) : RecyclerView.ViewHolder(binding.root) {
-            lateinit var order: Order
-
             fun bind(index: Int) {
-                val item = values[index]
-                order = item
+                val order = values[index]
+                with(binding) {
+                    tickerView.text = "${index + 1}) ${order.stock?.instrument?.ticker}"
+                    lotsView.text = "${order.executedLots} / ${order.requestedLots} шт."
+                    priceView.text = order.price.toMoney(order.stock)
 
-                binding.tickerView.text = "${index + 1}) ${item.stock?.instrument?.ticker}"
-                binding.lotsView.text = "${item.executedLots} / ${item.requestedLots} шт."
-                binding.priceView.text = item.price.toMoney(item.stock)
+                    orderTypeView.text = order.getOperationStatusString()
+                    orderTypeView.setTextColor(Utils.getColorForOperation(order.operation))
 
-                binding.orderTypeView.text = item.getOperationStatusString()
-                binding.orderTypeView.setTextColor(Utils.getColorForOperation(item.operation))
-
-                binding.cancelButton.setOnClickListener {
-                    jobCancel?.cancel()
-                    jobCancel = GlobalScope.launch(Dispatchers.Main) {
-                        depositManager.cancelOrder(order)
-                        depositManager.refreshOrders()
-                        updateData()
+                    cancelButton.setOnClickListener {
+                        jobCancel?.cancel()
+                        jobCancel = GlobalScope.launch(Dispatchers.Main) {
+                            depositManager.cancelOrder(order)
+                            depositManager.refreshOrders()
+                            updateData()
+                        }
                     }
-                }
 
-                binding.orderbookButton.setOnClickListener {
-                    order.stock?.let {
-                        orderbookManager.start(it)
-                        binding.orderbookButton.findNavController().navigate(R.id.action_nav_orders_to_nav_orderbook)
+                    orderbookButton.setOnClickListener {
+                        order.stock?.let {
+                            orderbookManager.start(it)
+                            orderbookButton.findNavController().navigate(R.id.action_nav_orders_to_nav_orderbook)
+                        }
                     }
                 }
             }

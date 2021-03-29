@@ -4,10 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
 import android.widget.SearchView
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -15,6 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.*
+import com.project.ti2358.databinding.FragmentPremarketBinding
+import com.project.ti2358.databinding.FragmentPremarketItemBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
@@ -26,45 +25,35 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class PremarketFragment : Fragment() {
+class PremarketFragment : Fragment(R.layout.fragment_premarket) {
     val stockManager: StockManager by inject()
     val strategyPremarket: StrategyPremarket by inject()
     val strategy1005: Strategy1005 by inject()
-
     val orderbookManager: OrderbookManager by inject()
-    var adapterList: ItemStocksRecyclerViewAdapter = ItemStocksRecyclerViewAdapter(emptyList())
+
+    private var fragmentPremarketBinding: FragmentPremarketBinding? = null
+
+    var adapterList: ItemPremarketRecyclerViewAdapter = ItemPremarketRecyclerViewAdapter(emptyList())
     lateinit var stocks: MutableList<Stock>
-
-    var closemarket: Boolean = true
+    var postmarket: Boolean = true
     var job: Job? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onDestroy() {
         job?.cancel()
+        fragmentPremarketBinding = null
         super.onDestroy()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_premarket, container, false)
-        val list = view.findViewById<RecyclerView>(R.id.list)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = FragmentPremarketBinding.bind(view)
+        fragmentPremarketBinding = binding
 
-        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
+        binding.list.layoutManager = LinearLayoutManager(context)
+        binding.list.adapter = adapterList
 
-        if (list is RecyclerView) {
-            with(list) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = adapterList
-            }
-        }
-
-        val searchView: SearchView = view.findViewById(R.id.searchView)
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 processText(query)
                 return false
@@ -83,26 +72,24 @@ class PremarketFragment : Fragment() {
             }
         })
 
-        searchView.setOnCloseListener {
+        binding.searchView.setOnCloseListener {
             updateData()
             false
         }
 
-        val buttonPremarket = view.findViewById<Button>(R.id.button_premarket)
-        buttonPremarket.setOnClickListener {
-            closemarket = false
+        binding.premarketButton.setOnClickListener {
+            postmarket = false
             updateData(false)
 
-            stocks = Utils.search(stocks, searchView.query.toString())
+            stocks = Utils.search(stocks, binding.searchView.query.toString())
             adapterList.setData(stocks)
         }
 
-        val buttonClosemarket = view.findViewById<Button>(R.id.button_closemarket)
-        buttonClosemarket.setOnClickListener {
-            closemarket = true
+        binding.postmarketButton.setOnClickListener {
+            postmarket = true
             updateData(false)
 
-            stocks = Utils.search(stocks, searchView.query.toString())
+            stocks = Utils.search(stocks, binding.searchView.query.toString())
             adapterList.setData(stocks)
         }
 
@@ -113,11 +100,10 @@ class PremarketFragment : Fragment() {
         }
 
         updateData()
-        return view
     }
 
     fun updateData(update: Boolean = true) {
-        if (closemarket) {
+        if (postmarket) {
             stocks = strategy1005.process()
             stocks = strategy1005.resort()
         } else {
@@ -128,102 +114,74 @@ class PremarketFragment : Fragment() {
         if (update) adapterList.setData(stocks)
     }
 
-    inner class ItemStocksRecyclerViewAdapter(
-        private var values: List<Stock>
-    ) : RecyclerView.Adapter<ItemStocksRecyclerViewAdapter.ViewHolder>() {
-
+    inner class ItemPremarketRecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<ItemPremarketRecyclerViewAdapter.ViewHolder>() {
         fun setData(newValues: List<Stock>) {
             values = newValues
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(
-                R.layout.fragment_premarket_item,
-                parent,
-                false
-            )
-
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.stock = item
-
-            holder.tickerView.text = "${position + 1}) ${item.getTickerLove()}"
-
-            val volume = item.getTodayVolume() / 1000f
-            holder.volumeTodayView.text = "%.1fk".format(volume)
-
-            val volumeCash = item.dayVolumeCash / 1000f / 1000f
-            holder.volumeTodayCashView.text = "%.2fM$".format(volumeCash)
-
-            if (closemarket) {
-                holder.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
-
-                holder.changePriceAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
-                holder.changePricePercentView.text = item.changePrice2359DayPercent.toPercent()
-
-                holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
-                holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
-                holder.priceView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
-            } else {
-                holder.priceView.text = "${item.getPricePost1000String()} ➡ ${item.getPriceString()}"
-
-                holder.changePriceAbsoluteView.text = item.changePriceDayAbsolute.toMoney(item)
-                holder.changePricePercentView.text = item.changePriceDayPercent.toPercent()
-
-                holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePriceDayAbsolute))
-                holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePriceDayAbsolute))
-                holder.priceView.setTextColor(Utils.getColorForValue(item.changePriceDayAbsolute))
-            }
-
-            holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
-            }
-
-            holder.imageOrderbook.setOnClickListener {
-                orderbookManager.start(holder.stock)
-                holder.imageOrderbook.findNavController().navigate(R.id.action_nav_premarket_to_nav_orderbook)
-            }
-
-            holder.sectorView.text = item.getSectorName()
-            holder.sectorView.setTextColor(Utils.getColorForSector(item.closePrices?.sector))
-
-            holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
-            }
-
-            if (item.report != null) {
-                holder.reportView.text = item.getReportInfo()
-                holder.reportView.visibility = View.VISIBLE
-            } else {
-                holder.reportView.visibility = View.GONE
-            }
-            holder.reportView.setTextColor(Utils.RED)
-
-            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
-        }
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentPremarketItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            lateinit var stock: Stock
+        inner class ViewHolder(private val binding: FragmentPremarketItemBinding) : RecyclerView.ViewHolder(binding.root) {
+            fun bind(index: Int) {
+                val stock = values[index]
+                with(binding) {
+                    tickerView.text = "${index + 1}) ${stock.getTickerLove()}"
 
-            val tickerView: TextView = view.findViewById(R.id.tickerView)
-            val priceView: TextView = view.findViewById(R.id.priceView)
+                    val volume = stock.getTodayVolume() / 1000f
+                    volumeSharesView.text = "%.1fk".format(volume)
 
-            val volumeTodayView: TextView = view.findViewById(R.id.volumeSharesView)
-            val volumeTodayCashView: TextView = view.findViewById(R.id.volumeCashView)
+                    val volumeCash = stock.dayVolumeCash / 1000f / 1000f
+                    volumeCashView.text = "%.2fM$".format(volumeCash)
 
-            val changePriceAbsoluteView: TextView = view.findViewById(R.id.priceChangeAbsoluteView)
-            val changePricePercentView: TextView = view.findViewById(R.id.priceChangePercentView)
+                    if (postmarket) {
+                        priceView.text = "${stock.getPrice2359String()} ➡ ${stock.getPriceString()}"
 
-            val imageOrderbook: ImageView = view.findViewById(R.id.orderbookButton)
+                        priceChangeAbsoluteView.text = stock.changePrice2359DayAbsolute.toMoney(stock)
+                        priceChangePercentView.text = stock.changePrice2359DayPercent.toPercent()
 
-            val reportView: TextView = view.findViewById(R.id.reportInfoView)
-            val sectorView: TextView = view.findViewById(R.id.sectorView)
+                        priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+                        priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+                        priceView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+                    } else {
+                        priceView.text = "${stock.getPricePost1000String()} ➡ ${stock.getPriceString()}"
+
+                        priceChangeAbsoluteView.text = stock.changePriceDayAbsolute.toMoney(stock)
+                        priceChangePercentView.text = stock.changePriceDayPercent.toPercent()
+
+                        priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePriceDayAbsolute))
+                        priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePriceDayAbsolute))
+                        priceView.setTextColor(Utils.getColorForValue(stock.changePriceDayAbsolute))
+                    }
+
+                    itemView.setOnClickListener {
+                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                    }
+
+                    orderbookButton.setOnClickListener {
+                        orderbookManager.start(stock)
+                        orderbookButton.findNavController().navigate(R.id.action_nav_premarket_to_nav_orderbook)
+                    }
+
+                    sectorView.text = stock.getSectorName()
+                    sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))
+
+                    itemView.setOnClickListener {
+                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                    }
+
+                    if (stock.report != null) {
+                        reportInfoView.text = stock.getReportInfo()
+                        reportInfoView.visibility = View.VISIBLE
+                    } else {
+                        reportInfoView.visibility = View.GONE
+                    }
+                    reportInfoView.setTextColor(Utils.RED)
+                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                }
+            }
         }
     }
 }

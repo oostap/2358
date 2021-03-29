@@ -23,7 +23,6 @@ class PortfolioPositionFragment : Fragment() {
     val streamingTinkoffService: StreamingTinkoffService by inject()
     val streamingAlorService: StreamingAlorService by inject()
 
-    private lateinit var textView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,10 +34,9 @@ class PortfolioPositionFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_diagnostics, container, false)
 
-        textView = view.findViewById(R.id.textInfo)
 
-        val buttonUpdate = view.findViewById<Button>(R.id.`@+id/update_button`)
-        buttonUpdate.setOnClickListener {
+        val updateButton = view.findViewById<Button>(R.id.updateButton)
+        updateButton.setOnClickListener {
             updateData()
         }
 
@@ -78,22 +76,22 @@ class PortfolioPositionFragment : Fragment() {
             }
         }
 
-        textView.text =
-                    "Tinkoff REST: $tinkoffREST\n\n" +
-                    "Tinkoff OpenAPI коннект: $tinkoffConnectedStatus\n\n" +
-                    "Tinkoff OpenAPI котировки: $tinkoffMessagesStatus\n\n" +
-
-                    "ALOR OpenAPI коннект: $alorConnectedStatus\n\n" +
-                    "ALOR OpenAPI котировки: $alorMessagesStatus\n\n" +
-
-                    "daager OpenAPI цены закрытия: $daagerClosePricesStatus\n\n" +
-                    "daager OpenAPI отчёты и дивы: $daagerReportsStatus\n\n" +
-                    "daager OpenAPI индексы: $daagerIndicesStatus\n\n" +
-                    "daager OpenAPI шорты: $daagerShortsStatus\n\n" +
-                    "daager OpenAPI 1728: $daager1728\n\n" +
-                    "daager OpenAPI 1728 Шаг 1: $daager1728Step1\n\n" +
-                    "daager OpenAPI 1728 Шаг 2: $daager1728Step2\n\n" +
-                    "daager OpenAPI 1728 Шаг 3: $daager1728Step3\n\n"
+//        textView.text =
+//                    "Tinkoff REST: $tinkoffREST\n\n" +
+//                    "Tinkoff OpenAPI коннект: $tinkoffConnectedStatus\n\n" +
+//                    "Tinkoff OpenAPI котировки: $tinkoffMessagesStatus\n\n" +
+//
+//                    "ALOR OpenAPI коннект: $alorConnectedStatus\n\n" +
+//                    "ALOR OpenAPI котировки: $alorMessagesStatus\n\n" +
+//
+//                    "daager OpenAPI цены закрытия: $daagerClosePricesStatus\n\n" +
+//                    "daager OpenAPI отчёты и дивы: $daagerReportsStatus\n\n" +
+//                    "daager OpenAPI индексы: $daagerIndicesStatus\n\n" +
+//                    "daager OpenAPI шорты: $daagerShortsStatus\n\n" +
+//                    "daager OpenAPI 1728: $daager1728\n\n" +
+//                    "daager OpenAPI 1728 Шаг 1: $daager1728Step1\n\n" +
+//                    "daager OpenAPI 1728 Шаг 2: $daager1728Step2\n\n" +
+//                    "daager OpenAPI 1728 Шаг 3: $daager1728Step3\n\n"
 
 
     }

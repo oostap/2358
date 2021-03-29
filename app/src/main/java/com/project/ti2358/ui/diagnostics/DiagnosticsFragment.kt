@@ -26,12 +26,13 @@ class DiagnosticsFragment : Fragment(R.layout.fragment_diagnostics) {
         fragmentDiagnosticsBinding = null
         super.onDestroy()
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentDiagnosticsBinding.bind(view)
         fragmentDiagnosticsBinding = binding
 
-        binding.buttonUpdate.setOnClickListener {
+        binding.updateButton.setOnClickListener {
             updateData()
         }
         updateData()
@@ -53,23 +54,16 @@ class DiagnosticsFragment : Fragment(R.layout.fragment_diagnostics) {
         var daager1728Step1 = "НЕ ОК 😱"
         var daager1728Step2 = "НЕ ОК 😱"
         var daager1728Step3 = "НЕ ОК 😱"
+
         stockManager.stockPrice1728?.let {
             if (it["M"] != null) {
-                if (it["M"]?.from700to1200 != null) {
-                    daager1728Step1 = "OK"
-                }
-
-                if (it["M"]?.from700to1600 != null) {
-                    daager1728Step2 = "OK"
-                }
-
-                if (it["M"]?.from1630to1635 != null) {
-                    daager1728Step3 = "OK"
-                }
+                if (it["M"]?.from700to1200 != null) daager1728Step1 = "OK"
+                if (it["M"]?.from700to1600 != null) daager1728Step2 = "OK"
+                if (it["M"]?.from1630to1635 != null) daager1728Step3 = "OK"
             }
         }
 
-        fragmentDiagnosticsBinding?.textInfo?.text =
+        fragmentDiagnosticsBinding?.textInfoView?.text =
                     "Tinkoff REST: $tinkoffREST\n" +
                     "Tinkoff OpenAPI коннект: $tinkoffConnectedStatus\n" +
                     "Tinkoff OpenAPI котировки: $tinkoffMessagesStatus\n\n" +

@@ -103,44 +103,42 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
         override fun getItemCount(): Int = values.size
 
         inner class ViewHolder(private val binding: FragmentFavoritesItemBinding) : RecyclerView.ViewHolder(binding.root) {
-            lateinit var stock: Stock
-
             fun bind(index: Int) {
-                val item = values[index]
-                stock = item
+                val stock = values[index]
+                with(binding) {
+                    chooseView.setOnCheckedChangeListener(null)
+                    chooseView.isChecked = strategyFavorites.isSelected(stock)
 
-                binding.chooseView.setOnCheckedChangeListener(null)
-                binding.chooseView.isChecked = strategyFavorites.isSelected(item)
+                    tickerView.text = "${index + 1}) ${stock.getTickerLove()}"
+                    priceView.text = "${stock.getPrice2359String()} ➡ ${stock.getPriceString()}"
 
-                binding.tickerView.text = "${index + 1}) ${item.getTickerLove()}"
-                binding.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
+                    priceChangeAbsoluteView.text = stock.changePrice2359DayAbsolute.toMoney(stock)
+                    priceChangePercentView.text = stock.changePrice2359DayPercent.toPercent()
 
-                binding.priceChangeAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
-                binding.priceChangePercentView.text = item.changePrice2359DayPercent.toPercent()
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
 
-                binding.priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
-                binding.priceChangePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
+                    chooseView.setOnCheckedChangeListener { _, checked ->
+                        strategyFavorites.setSelected(stock, checked)
+                        updateTitle()
+                    }
 
-                binding.chooseView.setOnCheckedChangeListener { _, checked ->
-                    strategyFavorites.setSelected(stock, checked)
-                    updateTitle()
+                    itemView.setOnClickListener {
+                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                    }
+
+                    orderbookButton.setOnClickListener {
+                        orderbookManager.start(stock)
+                        orderbookButton.findNavController().navigate(R.id.action_nav_favorites_to_nav_orderbook)
+                    }
+
+                    chartButton.setOnClickListener {
+                        chartManager.start(stock)
+                        chartButton.findNavController().navigate(R.id.action_nav_favorites_to_nav_chart)
+                    }
+
+                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
                 }
-
-                itemView.setOnClickListener {
-                    Utils.openTinkoffForTicker(requireContext(), stock.ticker)
-                }
-
-                binding.orderbookButton.setOnClickListener {
-                    orderbookManager.start(stock)
-                    binding.orderbookButton.findNavController().navigate(R.id.action_nav_favorites_to_nav_orderbook)
-                }
-
-                binding.chartButton.setOnClickListener {
-                    chartManager.start(stock)
-                    binding.chartButton.findNavController().navigate(R.id.action_nav_favorites_to_nav_chart)
-                }
-
-                itemView.setBackgroundColor(Utils.getColorForIndex(index))
             }
         }
     }

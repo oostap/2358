@@ -19,7 +19,7 @@
 
         <TextView
             android:layout_weight="1"
-            android:id="@+id/tickerView"
+            android:id="@+id/ticker_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
@@ -30,7 +30,7 @@
 
         <TextView
             android:layout_weight="1"
-            android:id="@+id/priceView"
+            android:id="@+id/price_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingStart="8dp"
@@ -40,7 +40,7 @@
 
         <TextView
             android:layout_weight="1"
-            android:id="@+id/stock_item_price_buy"
+            android:id="@+id/price_buy_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingStart="8dp"
@@ -57,7 +57,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/stock_lots"
+            android:id="@+id/lots_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
@@ -78,7 +78,7 @@
 
             <Button
                 android:layout_weight="1"
-                android:id="@+id/button_lots_minus"
+                android:id="@+id/lots_minus_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="2dp"
@@ -89,7 +89,7 @@
 
             <Button
                 android:layout_weight="1"
-                android:id="@+id/button_lots_plus"
+                android:id="@+id/lots_plus_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="2dp"
@@ -110,7 +110,7 @@
 
         <TextView
             android:layout_weight="1"
-            android:id="@+id/stock_price_change_percent"
+            android:id="@+id/price_change_percent_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -122,7 +122,7 @@
 
         <TextView
             android:layout_weight="1"
-            android:id="@+id/stock_price_absolute_change"
+            android:id="@+id/price_change_absolute_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
@@ -133,7 +133,7 @@
 
         <TextView
             android:layout_weight="1"
-            android:id="@+id/stock_price_absolute_total_change"
+            android:id="@+id/price_change_absolute_total_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
@@ -151,7 +151,7 @@
 
         <Button
             android:layout_weight="1"
-            android:id="@+id/button_price_minus"
+            android:id="@+id/price_minus_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginLeft="2dp"
@@ -163,7 +163,7 @@
 
         <Button
             android:layout_weight="1"
-            android:id="@+id/button_price_plus"
+            android:id="@+id/price_plus_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginRight="2dp"

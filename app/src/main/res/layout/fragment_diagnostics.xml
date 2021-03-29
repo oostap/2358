@@ -3,7 +3,7 @@
     android:layout_width="fill_parent" android:layout_height="fill_parent">
 
     <TextView
-        android:id="@+id/textInfo"
+        android:id="@+id/text_info_view"
         android:layout_width="fill_parent"
         android:layout_height="500dp"
         android:layout_alignParentTop="true"
@@ -17,7 +17,7 @@
 
     <Button android:layout_width="fill_parent"
         android:layout_height="70dp"
-        android:id="@+id/update_button"
+        android:id="@+id/updateButton"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:text="@string/update"

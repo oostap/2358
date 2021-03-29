@@ -23,7 +23,7 @@
 
             <Button
                 android:layout_weight="1"
-                android:id="@+id/button_lots_minus"
+                android:id="@+id/lotsMinusButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="0dp"
@@ -41,7 +41,7 @@
 
             <Button
                 android:layout_weight="1"
-                android:id="@+id/button_lots_plus"
+                android:id="@+id/lotsPlusButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="20dp"
@@ -351,7 +351,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/update_button"
+            android:id="@+id/updateButton"
             android:layout_marginRight="5dp"
             android:text="@string/update"
             android:layout_weight="1"

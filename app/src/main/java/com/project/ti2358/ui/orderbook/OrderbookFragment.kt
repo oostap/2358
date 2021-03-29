@@ -22,6 +22,7 @@ import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.model.dto.Order
 import com.project.ti2358.data.model.dto.PortfolioPosition
+import com.project.ti2358.databinding.FragmentOrderbookBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toMoney
@@ -35,13 +36,14 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
-
 @KoinApiExtension
-class OrderbookFragment : Fragment() {
+class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     val chartManager: ChartManager by inject()
     val stockManager: StockManager by inject()
     val orderbookManager: OrderbookManager by inject()
     val depositManager: DepositManager by inject()
+
+    private var fragmentOrderbookBinding: FragmentOrderbookBinding? = null
 
     var adapterList: ItemOrderbookRecyclerViewAdapter = ItemOrderbookRecyclerViewAdapter(emptyList())
     var activeStock: Stock? = null
@@ -49,254 +51,198 @@ class OrderbookFragment : Fragment() {
     var jobRefreshOrders: Job? = null
     var jobRefreshOrderbook: Job? = null
 
-    lateinit var localLayoutManager: LinearLayoutManager
-    lateinit var recyclerView: RecyclerView
-
-    lateinit var imageTrash: ImageView
-    // скальпер кнопки
-    lateinit var scalperView: RelativeLayout
-    lateinit var volumeEditText: EditText
-    lateinit var volumesView: LinearLayout
-    lateinit var buyPlusView: LinearLayout
-    lateinit var buyMinusView: LinearLayout
-    lateinit var sellPlusView: LinearLayout
-    lateinit var sellMinusView: LinearLayout
-
-    lateinit var pricePanelView: LinearLayout
-
-    lateinit var positionView: LinearLayout
-    lateinit var positionPriceView: TextView
-    lateinit var positionCashView: TextView
-    lateinit var positionLotsView: TextView
-    lateinit var positionLotsBlockedView: TextView
-    lateinit var positionChangePriceAbsoluteView: TextView
-    lateinit var positionChangePricePercentView: TextView
-
-    lateinit var chartView: ImageView
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onDestroy() {
         jobRefreshOrders?.cancel()
         jobRefreshOrderbook?.cancel()
-
+        fragmentOrderbookBinding = null
         orderbookManager.stop()
         super.onDestroy()
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_orderbook, container, false)
-        val list = view.findViewById<RecyclerView>(R.id.list)
-        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = FragmentOrderbookBinding.bind(view)
+        fragmentOrderbookBinding = binding
 
-        list.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = adapterList
-            localLayoutManager = layoutManager as LinearLayoutManager
-            recyclerView = this
-        }
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        positionView = view.findViewById(R.id.stock_item_position)
-        positionPriceView = view.findViewById(R.id.priceView)
-        positionCashView = view.findViewById(R.id.totalCashView)
-        positionLotsView = view.findViewById(R.id.lotsView)
-        positionLotsBlockedView = view.findViewById(R.id.lotsBlockedView)
-        positionChangePriceAbsoluteView = view.findViewById(R.id.priceChangeAbsoluteView)
-        positionChangePricePercentView = view.findViewById(R.id.priceChangePercentView)
+            volumesView.children.forEach { it.visibility = GONE }
+            buyPlusView.children.forEach { it.visibility = GONE }
+            buyMinusView.children.forEach { it.visibility = GONE }
+            sellPlusView.children.forEach { it.visibility = GONE }
+            sellMinusView.children.forEach { it.visibility = GONE }
 
-        scalperView = view.findViewById(R.id.scalper_panel)
-        volumeEditText = view.findViewById(R.id.edit_volume)
-        volumesView = view.findViewById(R.id.volumes)
-        buyPlusView = view.findViewById(R.id.buy_plus)
-        buyMinusView = view.findViewById(R.id.buy_minus)
-        sellPlusView = view.findViewById(R.id.sell_plus)
-        sellMinusView = view.findViewById(R.id.sell_minus)
+            val volumes = SettingsManager.getOrderbookVolumes().split(" ")
+            var size = min(volumesView.childCount, volumes.size)
+            volumesView.visibility = GONE
+            for (i in 0 until size) {
+                if (volumes[i] == "") continue
 
-        pricePanelView = view.findViewById(R.id.price_panel)
+                volumesView.getChildAt(i).apply {
+                    this as TextView
 
-        volumesView.children.forEach { it.visibility = GONE }
-        buyPlusView.children.forEach { it.visibility = GONE }
-        buyMinusView.children.forEach { it.visibility = GONE }
-        sellPlusView.children.forEach { it.visibility = GONE }
-        sellMinusView.children.forEach { it.visibility = GONE }
+                    text = volumes[i]
+                    visibility = VISIBLE
 
-        val vols = SettingsManager.getOrderbookVolumes()
-        val volumes = vols.split(" ")
-        var size = min(volumesView.childCount, volumes.size)
-        var exist = false
-        for (i in 0 until size) {
-            if (volumes[i] == "") continue
-
-            volumesView.getChildAt(i).apply {
-                this as TextView
-
-                text = volumes[i]
-                visibility = VISIBLE
-
-                setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
-                    if (event.action == MotionEvent.ACTION_UP) {
-                        v.alpha = 1.0F
-                        volumeEditText.setText(this.text)
+                    setOnTouchListener { v, event ->
+                        if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
+                        if (event.action == MotionEvent.ACTION_UP) {
+                            v.alpha = 1.0F
+                            volumeEditText.setText(this.text)
+                        }
+                        true
                     }
-                    true
                 }
             }
-            exist = true
-        }
-        volumesView.visibility = if (!exist) GONE else VISIBLE
 
-        val p = SettingsManager.getOrderbookPrices()
-        val changes = p.split(" ")
-        size = min(buyPlusView.childCount, changes.size)
-        exist = false
+            val changes = SettingsManager.getOrderbookPrices().split(" ")
+            size = min(buyPlusView.childCount, changes.size)
+            pricesView.visibility = GONE
+            for (i in 0 until size) {
+                if (changes[i] == "") continue
 
-        for (i in 0 until size) {
-            if (changes[i] == "") continue
+                buyPlusView.getChildAt(i).apply {
+                    this as TextView
+                    text = "+${changes[i]}"
+                    visibility = VISIBLE
 
-            buyPlusView.getChildAt(i).apply { this as TextView
-                text = "+${changes[i]}"
-                visibility = VISIBLE
-
-                setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
-                    if (event.action == MotionEvent.ACTION_UP) {
-                        v.alpha = 1.0F
-                        changeOrders(this, OperationType.BUY)
+                    setOnTouchListener { v, event ->
+                        if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
+                        if (event.action == MotionEvent.ACTION_UP) {
+                            v.alpha = 1.0F
+                            changeOrders(this, OperationType.BUY)
+                        }
+                        true
                     }
-                    true
                 }
-            }
-            sellPlusView.getChildAt(i).apply { this as TextView
-                text = "+${changes[i]}"
-                visibility = VISIBLE
+                sellPlusView.getChildAt(i).apply {
+                    this as TextView
+                    text = "+${changes[i]}"
+                    visibility = VISIBLE
 
-                setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
-                    if (event.action == MotionEvent.ACTION_UP) {
-                        v.alpha = 1.0F
-                        changeOrders(this, OperationType.SELL)
+                    setOnTouchListener { v, event ->
+                        if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
+                        if (event.action == MotionEvent.ACTION_UP) {
+                            v.alpha = 1.0F
+                            changeOrders(this, OperationType.SELL)
+                        }
+                        true
                     }
-                    true
                 }
-            }
+                buyMinusView.getChildAt(i).apply {
+                    this as TextView
+                    text = "-${changes[i]}"
+                    visibility = VISIBLE
 
-            buyMinusView.getChildAt(i).apply { this as TextView
-                text = "-${changes[i]}"
-                visibility = VISIBLE
-
-                setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
-                    if (event.action == MotionEvent.ACTION_UP) {
-                        v.alpha = 1.0F
-                        changeOrders(this, OperationType.BUY)
+                    setOnTouchListener { v, event ->
+                        if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
+                        if (event.action == MotionEvent.ACTION_UP) {
+                            v.alpha = 1.0F
+                            changeOrders(this, OperationType.BUY)
+                        }
+                        true
                     }
-                    true
                 }
-            }
-            sellMinusView.getChildAt(i).apply { this as TextView
-                text = "-${changes[i]}"
-                visibility = VISIBLE
+                sellMinusView.getChildAt(i).apply {
+                    this as TextView
+                    text = "-${changes[i]}"
+                    visibility = VISIBLE
 
-                setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
-                    if (event.action == MotionEvent.ACTION_UP) {
-                        v.alpha = 1.0F
-                        changeOrders(this, OperationType.SELL)
+                    setOnTouchListener { v, event ->
+                        if (event.action == MotionEvent.ACTION_DOWN) v.alpha = 0.5F
+                        if (event.action == MotionEvent.ACTION_UP) {
+                            v.alpha = 1.0F
+                            changeOrders(this, OperationType.SELL)
+                        }
+                        true
                     }
-                    true
+                }
+                pricesView.visibility = VISIBLE
+            }
+
+            trashButton.setOnDragListener(ChoiceDragListener())
+            trashButton.setTag(R.string.action_type, "remove")
+
+            scalperPanelView.visibility = VISIBLE
+            trashButton.visibility = GONE
+
+            activeStock = orderbookManager.activeStock
+
+            chartButton.setOnClickListener {
+                activeStock?.let {
+                    chartManager.start(it)
+                    view.findNavController().navigate(R.id.action_nav_orderbook_to_nav_chart)
                 }
             }
-            exist = true
-        }
-        pricePanelView.visibility = if (!exist) GONE else VISIBLE
 
-        imageTrash = view.findViewById(R.id.image_trash)
-        imageTrash.setOnDragListener(ChoiceDragListener())
-        imageTrash.setTag(R.string.action_type, "remove")
-
-        scalperView.visibility = View.VISIBLE
-        imageTrash.visibility = View.GONE
-
-        activeStock = orderbookManager.activeStock
-
-        chartView = view.findViewById(R.id.chartButton)
-        chartView.setOnClickListener {
-            activeStock?.let {
-                chartManager.start(it)
-                view?.findNavController()?.navigate(R.id.action_nav_orderbook_to_nav_chart)
-            }
-        }
-
-        positionView.setOnClickListener {
-            activeStock?.let {
-                depositManager.getPositionForFigi(it.figi)?.let { p ->
-                    volumeEditText.setText(abs(p.lots).toString())
+            positionView.setOnClickListener {
+                activeStock?.let {
+                    depositManager.getPositionForFigi(it.figi)?.let { p ->
+                        volumeEditText.setText(abs(p.lots).toString())
+                    }
                 }
             }
-        }
 
-        jobRefreshOrders?.cancel()
-        jobRefreshOrders = GlobalScope.launch(Dispatchers.Main) {
-            while (true) {
-                delay(5000)
+            jobRefreshOrders?.cancel()
+            jobRefreshOrders = GlobalScope.launch(Dispatchers.Main) {
+                while (true) {
+                    delay(5000)
+                    depositManager.refreshOrders()
+                    depositManager.refreshDeposit()
+                    updatePosition()
+                }
+            }
+
+            jobRefreshOrderbook?.cancel()
+            jobRefreshOrderbook = GlobalScope.launch(Dispatchers.Main) {
                 depositManager.refreshOrders()
-                depositManager.refreshDeposit()
-                updatePosition()
+
+                while (true) {
+                    delay(1000)
+                    updateData()
+                    updatePosition()
+                }
             }
+
+            updateData()
+            updatePosition()
         }
-
-        jobRefreshOrderbook?.cancel()
-        jobRefreshOrderbook = GlobalScope.launch(Dispatchers.Main) {
-            depositManager.refreshOrders()
-
-            while (true) {
-                delay(1000)
-                updateData()
-                updatePosition()
-            }
-        }
-
-        updateData()
-        updatePosition()
-        return view
     }
 
     private fun updatePosition() {
-        activeStock?.let {
-            val pos = depositManager.getPositionForFigi(it.figi)?.let { p ->
-                val avg = p.getAveragePrice()
-                positionPriceView.text = "${avg.toMoney(it)} ➡ ${it.getPriceString()}"
+        fragmentOrderbookBinding?.apply {
+            activeStock?.let { stock ->
+                val pos = depositManager.getPositionForFigi(stock.figi)?.let { p ->
+                    val avg = p.getAveragePrice()
+                    priceView.text = "${avg.toMoney(stock)} ➡ ${stock.getPriceString()}"
 
-                val profit = p.getProfitAmount()
-                positionChangePriceAbsoluteView.text = profit.toMoney(it)
+                    val profit = p.getProfitAmount()
+                    priceChangeAbsoluteView.text = profit.toMoney(stock)
 
-                var percent = p.getProfitPercent()
-                percent *= sign(p.lots.toDouble())   // инвертировать доходность шорта
-                var totalCash = p.balance * avg
-                totalCash += profit
-                positionCashView.text = totalCash.toMoney(it)
+                    val percent = p.getProfitPercent() * sign(p.lots.toDouble())   // инвертировать доходность шорта
+                    var totalCash = p.balance * avg
+                    totalCash += profit
+                    cashView.text = totalCash.toMoney(stock)
 
-                positionLotsView.text = "${p.lots}"
-                positionLotsBlockedView.text = "${p.blocked.toInt()}🔒"
+                    lotsView.text = "${p.lots}"
+                    lotsBlockedView.text = "${p.blocked.toInt()}🔒"
 
-                positionChangePricePercentView.text = percent.toPercent()
+                    priceChangePercentView.text = percent.toPercent()
 
-                positionPriceView.setTextColor(Utils.getColorForValue(percent))
-                positionChangePriceAbsoluteView.setTextColor(Utils.getColorForValue(percent))
-                positionChangePricePercentView.setTextColor(Utils.getColorForValue(percent))
-            }
+                    priceView.setTextColor(Utils.getColorForValue(percent))
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
+                }
 
-            if (pos == null) {
-                positionView.visibility = GONE
-            } else {
-                positionView.visibility = VISIBLE
+                if (pos == null) {
+                    positionView.visibility = GONE
+                } else {
+                    positionView.visibility = VISIBLE
+                }
             }
         }
     }
@@ -324,7 +270,7 @@ class OrderbookFragment : Fragment() {
 
     private fun getActiveVolume(): Int {
         try {
-            return volumeEditText.text.toString().toInt()
+            return fragmentOrderbookBinding?.volumeEditText?.text.toString().toInt()
         } catch (e: Exception) {
 
         }
@@ -444,8 +390,8 @@ class OrderbookFragment : Fragment() {
                         orderbookManager.removeOrder(order)
                     }
 
-                    scalperView.visibility = View.VISIBLE
-                    imageTrash.visibility = View.GONE
+                    fragmentOrderbookBinding?.scalperPanelView?.visibility = View.VISIBLE
+                    fragmentOrderbookBinding?.trashButton?.visibility = View.GONE
                 }
                 DragEvent.ACTION_DRAG_ENDED -> { }
                 else -> { }
@@ -625,8 +571,8 @@ class OrderbookFragment : Fragment() {
                     val data = ClipData.newPlainText("", "")
                     val shadowBuilder = DragShadowBuilder(view)
                     view.startDrag(data, shadowBuilder, view, 0)
-                    scalperView.visibility = View.GONE
-                    imageTrash.visibility = View.VISIBLE
+                    fragmentOrderbookBinding?.scalperPanelView?.visibility = View.GONE
+                    fragmentOrderbookBinding?.trashButton?.visibility = View.VISIBLE
                     true
                 } else {
                     false

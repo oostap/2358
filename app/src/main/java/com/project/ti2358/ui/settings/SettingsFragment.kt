@@ -49,7 +49,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
-//        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
         val tazikAskKey = getString(R.string.setting_key_tazik_buy_ask)
         tazikAskPreference = findPreference(tazikAskKey)

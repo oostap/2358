@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -16,43 +14,37 @@ import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.manager.Strategy1000Sell
+import com.project.ti2358.databinding.Fragment1000SellFinishBinding
+import com.project.ti2358.databinding.Fragment1000SellFinishItemBinding
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class Strategy1000SellFinishFragment : Fragment() {
-
+class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_finish) {
     private val strategy1000Sell: Strategy1000Sell by inject()
-    var adapterList: Item1000RecyclerViewAdapter = Item1000RecyclerViewAdapter(emptyList())
-    var infoTextView: TextView? = null
-    var positions: MutableList<PurchaseStock> = mutableListOf()
-    var buttonStart700: Button? = null
-    var buttonStart1000: Button? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    private var fragment1000SellFinishBinding: Fragment1000SellFinishBinding? = null
+
+    var adapterListSell: Item1000SellRecyclerViewAdapter = Item1000SellRecyclerViewAdapter(emptyList())
+    var positions: MutableList<PurchaseStock> = mutableListOf()
+
+    override fun onDestroy() {
+        fragment1000SellFinishBinding = null
+        super.onDestroy()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_1000_sell_finish, container, false)
-        val list = view.findViewById<RecyclerView>(R.id.list)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = Fragment1000SellFinishBinding.bind(view)
+        fragment1000SellFinishBinding = binding
 
-        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
+        binding.list.layoutManager = LinearLayoutManager(context)
+        binding.list.adapter = adapterListSell
 
-        if (list is RecyclerView) {
-            with(list) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = adapterList
-            }
-        }
-
-        ///////////////////////
-        buttonStart1000 = view.findViewById(R.id.buttonStart1000)
-        buttonStart1000?.setOnClickListener {
+        ///////////////////////////////////////////////////////////////////
+        binding.start1000Button.setOnClickListener {
             if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
                 requireContext().stopService(Intent(context, Strategy1000SellService::class.java))
             } else {
@@ -65,9 +57,8 @@ class Strategy1000SellFinishFragment : Fragment() {
             updateServiceButtonText1000()
         }
         updateServiceButtonText1000()
-        //////////////////////
-        buttonStart700 = view.findViewById(R.id.buttonStart700)
-        buttonStart700?.setOnClickListener {
+        //////////////////////////////////////////////////////////////////
+        binding.start700Button.setOnClickListener {
             if (Utils.isServiceRunning(requireContext(), Strategy700SellService::class.java)) {
                 requireContext().stopService(Intent(context, Strategy700SellService::class.java))
             } else {
@@ -82,27 +73,23 @@ class Strategy1000SellFinishFragment : Fragment() {
         updateServiceButtonText700()
 
         positions = strategy1000Sell.processSellPosition()
-        adapterList.setData(positions)
-
-        infoTextView = view.findViewById(R.id.info_text)
+        adapterListSell.setData(positions)
         updateInfoText()
-
-        return view
     }
 
     private fun updateServiceButtonText1000() {
         if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
-            buttonStart1000?.text = getString(R.string.stop_sell_1000)
+            fragment1000SellFinishBinding?.start1000Button?.text = getString(R.string.stop_sell_1000)
         } else {
-            buttonStart1000?.text = getString(R.string.start_sell_1000)
+            fragment1000SellFinishBinding?.start1000Button?.text = getString(R.string.start_sell_1000)
         }
     }
 
     private fun updateServiceButtonText700() {
         if (Utils.isServiceRunning(requireContext(), Strategy700SellService::class.java)) {
-            buttonStart700?.text = getString(R.string.stop_sell_700)
+            fragment1000SellFinishBinding?.start700Button?.text = getString(R.string.stop_sell_700)
         } else {
-            buttonStart700?.text = getString(R.string.start_sell_700)
+            fragment1000SellFinishBinding?.start700Button?.text = getString(R.string.start_sell_700)
         }
     }
 
@@ -110,7 +97,7 @@ class Strategy1000SellFinishFragment : Fragment() {
         val time = "07:00:00.100ms или 10:00:00.100ms"
         val prepareText: String =
             TheApplication.application.applicationContext.getString(R.string.prepare_start_1000_sell_text)
-        infoTextView?.text = String.format(
+        fragment1000SellFinishBinding?.infoTextView?.text = String.format(
             prepareText,
             time,
             positions.size,
@@ -118,102 +105,78 @@ class Strategy1000SellFinishFragment : Fragment() {
         )
     }
 
-    inner class Item1000RecyclerViewAdapter(
-        private var values: List<PurchaseStock>
-    ) : RecyclerView.Adapter<Item1000RecyclerViewAdapter.ViewHolder>() {
-
+    inner class Item1000SellRecyclerViewAdapter(private var values: List<PurchaseStock>) : RecyclerView.Adapter<Item1000SellRecyclerViewAdapter.ViewHolder>() {
         fun setData(newValues: List<PurchaseStock>) {
             values = newValues
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.fragment_1000_sell_finish_item, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.purchase = item
-
-            val avg = item.position.getAveragePrice()
-            holder.tickerView.text = "${item.position.ticker} x ${item.position.lots}"
-
-            val profit = item.position.getProfitAmount()
-            var totalCash = item.position.balance * avg
-            val percent = item.position.getProfitPercent()
-            holder.currentProfitView.text = percent.toPercent()
-
-            totalCash += profit
-            holder.currentPriceView.text = "${avg.toMoney(item.stock)} ➡ ${totalCash.toMoney(item.stock)}"
-
-            holder.totalPriceProfitView.text = profit.toMoney(item.stock)
-            holder.priceProfitView.text = (profit / item.position.lots).toMoney(item.stock)
-
-            holder.currentPriceView.setTextColor(Utils.getColorForValue(percent))
-            holder.currentProfitView.setTextColor(Utils.getColorForValue(percent))
-            holder.priceProfitView.setTextColor(Utils.getColorForValue(percent))
-            holder.totalPriceProfitView.setTextColor(Utils.getColorForValue(percent))
-
-            refreshFuturePercent(holder)
-
-            holder.buttonPlus.setOnClickListener {
-                item.percentProfitSellFrom += 0.05
-                refreshFuturePercent(holder)
-                updateInfoText()
-            }
-
-            holder.buttonMinus.setOnClickListener {
-                item.percentProfitSellFrom += -0.05
-                refreshFuturePercent(holder)
-                updateInfoText()
-            }
-
-            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
-        }
-
-        fun refreshFuturePercent(holder: ViewHolder) {
-            val item = holder.purchase
-            val futurePercent = item.percentProfitSellFrom
-            holder.futureProfitView.text = futurePercent.toPercent()
-
-            val avg = item.position.getAveragePrice()
-            val futureProfitPrice = item.getProfitPriceForSell() - avg
-            holder.futureProfitPriceView.text = futureProfitPrice.toMoney(item.stock)
-            holder.totalFutureProfitPriceView.text = (futureProfitPrice * item.position.balance).toMoney(item.stock)
-
-            val sellPrice = item.getProfitPriceForSell()
-            val totalSellPrice = item.getProfitPriceForSell() * item.position.balance
-            holder.totalPriceView.text = "${sellPrice.toMoney(item.stock)} ➡ ${totalSellPrice.toMoney(item.stock)}"
-
-            holder.totalPriceView.setTextColor(Utils.getColorForValue(futureProfitPrice))
-            holder.futureProfitView.setTextColor(Utils.getColorForValue(futureProfitPrice))
-            holder.futureProfitPriceView.setTextColor(Utils.getColorForValue(futureProfitPrice))
-            holder.totalFutureProfitPriceView.setTextColor(Utils.getColorForValue(futureProfitPrice))
-        }
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(Fragment1000SellFinishItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            lateinit var purchase: PurchaseStock
+        inner class ViewHolder(private val binding: Fragment1000SellFinishItemBinding) : RecyclerView.ViewHolder(binding.root) {
+            fun bind(index: Int) {
+                val purchaseStock = values[index]
 
-            val tickerView: TextView = view.findViewById(R.id.tickerView)
-            val currentPriceView: TextView = view.findViewById(R.id.priceView)
-            val totalPriceView: TextView = view.findViewById(R.id.stock_total_price)
+                with(binding) {
+                    val avg = purchaseStock.position.getAveragePrice()
+                    tickerView.text = "${purchaseStock.position.ticker} x ${purchaseStock.position.lots}"
 
-            val priceProfitView: TextView = view.findViewById(R.id.stock_item_price_profit)
-            val totalPriceProfitView: TextView = view.findViewById(R.id.stock_total_price_profit)
+                    val profit = purchaseStock.position.getProfitAmount()
+                    var totalCash = purchaseStock.position.balance * avg
+                    val percent = purchaseStock.position.getProfitPercent()
+                    percentProfitView.text = percent.toPercent()
 
-            val currentProfitView: TextView = view.findViewById(R.id.stock_current_change)
+                    totalCash += profit
+                    priceView.text = "${avg.toMoney(purchaseStock.stock)} ➡ ${totalCash.toMoney(purchaseStock.stock)}"
 
-            val futureProfitPriceView: TextView = view.findViewById(R.id.stock_profit_price_change)
-            val totalFutureProfitPriceView: TextView = view.findViewById(R.id.stock_profit_total_price_change)
+                    priceProfitTotalView.text = profit.toMoney(purchaseStock.stock)
+                    priceProfitView.text = (profit / purchaseStock.position.lots).toMoney(purchaseStock.stock)
 
-            val futureProfitView: TextView = view.findViewById(R.id.stock_profit_percent)
+                    priceView.setTextColor(Utils.getColorForValue(percent))
+                    percentProfitView.setTextColor(Utils.getColorForValue(percent))
+                    priceProfitView.setTextColor(Utils.getColorForValue(percent))
+                    priceProfitTotalView.setTextColor(Utils.getColorForValue(percent))
 
-            val buttonPlus: Button = view.findViewById(R.id.buttonPlus)
-            val buttonMinus: Button = view.findViewById(R.id.buttonMinus)
+                    refreshPercent(purchaseStock)
+
+                    percentPlusButton.setOnClickListener {
+                        purchaseStock.percentProfitSellFrom += 0.05
+                        refreshPercent(purchaseStock)
+                        updateInfoText()
+                    }
+
+                    percentMinusButton.setOnClickListener {
+                        purchaseStock.percentProfitSellFrom += -0.05
+                        refreshPercent(purchaseStock)
+                        updateInfoText()
+                    }
+
+                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                }
+            }
+
+            fun refreshPercent(item: PurchaseStock) {
+                with(binding) {
+                    val futurePercent = item.percentProfitSellFrom
+                    percentProfitFutureView.text = futurePercent.toPercent()
+
+                    val avg = item.position.getAveragePrice()
+                    val futureProfitPrice = item.getProfitPriceForSell() - avg
+                    priceProfitFutureView.text = futureProfitPrice.toMoney(item.stock)
+                    percentProfitFutureTotalView.text = (futureProfitPrice * item.position.balance).toMoney(item.stock)
+
+                    val sellPrice = item.getProfitPriceForSell()
+                    val totalSellPrice = item.getProfitPriceForSell() * item.position.balance
+                    priceTotalView.text = "${sellPrice.toMoney(item.stock)} ➡ ${totalSellPrice.toMoney(item.stock)}"
+
+                    priceTotalView.setTextColor(Utils.getColorForValue(futureProfitPrice))
+                    percentProfitFutureView.setTextColor(Utils.getColorForValue(futureProfitPrice))
+                    priceProfitFutureView.setTextColor(Utils.getColorForValue(futureProfitPrice))
+                    percentProfitFutureTotalView.setTextColor(Utils.getColorForValue(futureProfitPrice))
+                }
+            }
         }
     }
 }

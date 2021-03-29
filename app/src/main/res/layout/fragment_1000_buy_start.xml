@@ -3,7 +3,7 @@
     android:layout_width="fill_parent" android:layout_height="fill_parent">
 
     <SearchView
-        android:id="@+id/searchView"
+        android:id="@+id/search_view"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginLeft="16dp"
@@ -46,7 +46,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_start"
+            android:id="@+id/start_button"
             android:layout_marginLeft="5dp"
             android:text="@string/service_2358_prepare"
             android:layout_weight="1"

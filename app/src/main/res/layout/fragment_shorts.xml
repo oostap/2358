@@ -14,7 +14,7 @@
         android:weightSum="4" >
 
         <TextView
-            android:id="@+id/priceView"
+            android:id="@+id/price_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -24,7 +24,7 @@
             android:textSize="14dp" />
 
         <TextView
-            android:id="@+id/volumeSharesView"
+            android:id="@+id/volume_shares_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -34,7 +34,7 @@
             android:textSize="14dp" />
 
         <TextView
-            android:id="@+id/priceChangePercentView"
+            android:id="@+id/price_change_percent_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -57,7 +57,7 @@
         android:layout_marginTop="40dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.strategy2358.Strategy2358StartFragment"
-        tools:listitem="@layout/fragment_1005_start_item" />
+        tools:listitem="@layout/fragment_shorts_item" />
 
     <LinearLayout
         android:layout_width="fill_parent"

@@ -27,7 +27,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_step_1"
+            android:id="@+id/step1_button"
             android:layout_marginRight="5dp"
             android:text="1"
             android:layout_weight="1"
@@ -36,7 +36,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_step_2"
+            android:id="@+id/step2_button"
             android:layout_marginRight="5dp"
             android:text="2"
             android:layout_weight="1"
@@ -45,7 +45,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_step_3"
+            android:id="@+id/step3_button"
             android:layout_marginRight="5dp"
             android:text="3"
             android:layout_weight="1"
@@ -54,7 +54,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_step_go"
+            android:id="@+id/step_final_button"
             android:layout_marginRight="0dp"
             android:text="🚀"
             android:layout_weight="1"

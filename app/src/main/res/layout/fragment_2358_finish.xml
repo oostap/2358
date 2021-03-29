@@ -28,7 +28,7 @@
 
     <Button android:layout_width="fill_parent"
         android:layout_height="70dp"
-        android:id="@+id/button_start"
+        android:id="@+id/start_button"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:text="@string/start"
@@ -36,7 +36,7 @@
         android:layout_alignParentBottom="true" />
 
     <TextView
-        android:id="@+id/info_text"
+        android:id="@+id/info_text_view"
         android:layout_width="fill_parent"
         android:layout_height="80dp"
         android:layout_alignParentBottom="true"
@@ -48,7 +48,7 @@
         android:textStyle="bold" />
 
     <CheckBox
-        android:id="@+id/chooseView"
+        android:id="@+id/choose_view"
         android:layout_height="50dp"
         android:layout_width="150dp"
         android:layout_alignParentRight="true"

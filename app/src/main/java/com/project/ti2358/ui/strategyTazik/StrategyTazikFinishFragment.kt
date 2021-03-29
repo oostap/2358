@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,66 +14,50 @@ import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.manager.StrategyTazik
 import com.project.ti2358.data.manager.SettingsManager
+import com.project.ti2358.databinding.FragmentTazikFinishBinding
+import com.project.ti2358.databinding.FragmentTazikFinishItemBinding
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class StrategyTazikFinishFragment : Fragment() {
-
+class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
     val strategyTazik: StrategyTazik by inject()
+
+    private var fragmentTazikFinishBinding: FragmentTazikFinishBinding? = null
+
     var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
-    var infoTextView: TextView? = null
-    var buttonStartNow: Button? = null
-    var buttonStartLater: Button? = null
     var positions: MutableList<PurchaseStock> = mutableListOf()
     var startTime: String = ""
     var scheduledStart: Boolean = false
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onDestroy() {
+        fragmentTazikFinishBinding = null
+        super.onDestroy()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_tazik_finish, container, false)
-        val list = view.findViewById<RecyclerView>(R.id.list)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = FragmentTazikFinishBinding.bind(view)
+        fragmentTazikFinishBinding = binding
 
-        list.addItemDecoration(
-            DividerItemDecoration(
-                list.context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
+        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
+        binding.list.layoutManager = LinearLayoutManager(context)
+        binding.list.adapter = adapterList
 
-        if (list is RecyclerView) {
-            with(list) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = adapterList
-            }
-        }
-
-        buttonStartNow = view.findViewById(R.id.buttonStartNow)
-        buttonStartNow?.setOnClickListener {
+        binding.startNowButton.setOnClickListener {
             tryStartTazik(false)
         }
 
-        buttonStartLater = view.findViewById(R.id.buttonStartSchedule)
-        buttonStartLater?.setOnClickListener {
+        binding.startLaterButton.setOnClickListener {
             tryStartTazik(true)
         }
 
         positions = strategyTazik.getPurchaseStock()
         adapterList.setData(positions)
 
-        infoTextView = view.findViewById(R.id.info_text)
-
         updateInfoText()
         updateServiceButtonText()
-
-        return view
     }
 
     fun tryStartTazik(scheduled : Boolean) {
@@ -104,7 +86,7 @@ class StrategyTazikFinishFragment : Fragment() {
         startTime = SettingsManager.getTazikNearestTime()
 
         val prepareText: String = TheApplication.application.applicationContext.getString(R.string.prepare_start_tazik_buy_text)
-        infoTextView?.text = String.format(
+        fragmentTazikFinishBinding?.infoTextView?.text = String.format(
             prepareText,
             positions.size,
             percent,
@@ -117,94 +99,73 @@ class StrategyTazikFinishFragment : Fragment() {
     private fun updateServiceButtonText() {
         if (Utils.isServiceRunning(requireContext(), StrategyTazikService::class.java)) {
             if (scheduledStart) {
-                buttonStartLater?.text = getString(R.string.stop)
+                fragmentTazikFinishBinding?.startLaterButton?.text = getString(R.string.stop)
             } else {
-                buttonStartNow?.text = getString(R.string.stop)
+                fragmentTazikFinishBinding?.startNowButton?.text = getString(R.string.stop)
             }
         } else {
             if (scheduledStart) {
-                buttonStartLater?.text = getString(R.string.stop)
+                fragmentTazikFinishBinding?.startLaterButton?.text = getString(R.string.stop)
             } else {
-                buttonStartNow?.text = getString(R.string.start_now)
+                fragmentTazikFinishBinding?.startNowButton?.text = getString(R.string.start_now)
             }
         }
     }
 
-    inner class ItemTazikRecyclerViewAdapter(
-        private var values: List<PurchaseStock>
-    ) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {
-
+    inner class ItemTazikRecyclerViewAdapter(private var values: List<PurchaseStock>) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {
         fun setData(newValues: List<PurchaseStock>) {
             values = newValues
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.fragment_tazik_finish_item, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.position = item
-
-            val avg = item.stock.getPriceDouble()
-            holder.tickerView.text = "${position + 1}) ${item.stock.getTickerLove()} x ${item.lots}"
-            holder.currentPriceView.text = "${item.stock.getPrice2359String()} ➡ ${avg.toMoney(item.stock)}"
-            holder.totalPriceView.text = (item.stock.getPriceDouble() * item.lots).toMoney(item.stock)
-
-            refreshPercent(holder)
-
-            holder.buttonPlus.setOnClickListener {
-                item.addPriceLimitPercent(0.05)
-                refreshPercent(holder)
-                updateInfoText()
-            }
-
-            holder.buttonMinus.setOnClickListener {
-                item.addPriceLimitPercent(-0.05)
-                refreshPercent(holder)
-                updateInfoText()
-            }
-
-            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
-        }
-
-        fun refreshPercent(holder: ViewHolder) {
-            val item = holder.position
-            val percent = item.percentLimitPriceChange
-
-            holder.priceChangePercentView.text = percent.toPercent()
-            holder.priceChangeAbsoluteView.text = item.absoluteLimitPriceChange.toMoney(item.stock)
-            holder.priceChangeAbsoluteTotalView.text = (item.absoluteLimitPriceChange * item.lots).toMoney(item.stock)
-
-            holder.priceBuyView.text = item.getLimitPriceDouble().toMoney(item.stock)
-            holder.priceBuyTotalView.text = (item.getLimitPriceDouble() * item.lots).toMoney(item.stock)
-
-            holder.priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
-            holder.priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
-            holder.priceChangeAbsoluteTotalView.setTextColor(Utils.getColorForValue(percent))
-        }
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentTazikFinishItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            lateinit var position: PurchaseStock
+        inner class ViewHolder(private val binding: FragmentTazikFinishItemBinding) : RecyclerView.ViewHolder(binding.root) {
+            fun bind(index: Int) {
+                val purchaseStock = values[index]
 
-            val tickerView: TextView = view.findViewById(R.id.tickerView)
-            val currentPriceView: TextView = view.findViewById(R.id.priceView)
-            val totalPriceView: TextView = view.findViewById(R.id.stock_total_price)
+                with(binding) {
+                    val avg = purchaseStock.stock.getPriceDouble()
+                    tickerView.text = "${index + 1}) ${purchaseStock.stock.getTickerLove()} x ${purchaseStock.lots}"
+                    priceView.text = "${purchaseStock.stock.getPrice2359String()} ➡ ${avg.toMoney(purchaseStock.stock)}"
+                    priceTotalView.text = (purchaseStock.stock.getPriceDouble() * purchaseStock.lots).toMoney(purchaseStock.stock)
 
-            val priceBuyView: TextView = view.findViewById(R.id.stock_item_price_buy)
-            val priceBuyTotalView: TextView = view.findViewById(R.id.stock_item_price_total_buy)
+                    refreshPercent(purchaseStock)
 
-            val priceChangePercentView: TextView = view.findViewById(R.id.stock_price_change_percent)
-            val priceChangeAbsoluteView: TextView = view.findViewById(R.id.stock_price_absolute_change)
-            val priceChangeAbsoluteTotalView: TextView = view.findViewById(R.id.stock_price_absolute_total_change)
+                    percentPlusButton.setOnClickListener {
+                        purchaseStock.addPriceLimitPercent(0.05)
+                        refreshPercent(purchaseStock)
+                        updateInfoText()
+                    }
 
-            val buttonPlus: Button = view.findViewById(R.id.buttonPlus)
-            val buttonMinus: Button = view.findViewById(R.id.buttonMinus)
+                    percentMinusButton.setOnClickListener {
+                        purchaseStock.addPriceLimitPercent(-0.05)
+                        refreshPercent(purchaseStock)
+                        updateInfoText()
+                    }
+
+                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                }
+            }
+
+            private fun refreshPercent(purchaseStock: PurchaseStock) {
+                val percent = purchaseStock.percentLimitPriceChange
+
+                with(binding) {
+                    priceChangePercentView.text = percent.toPercent()
+                    priceChangeAbsoluteView.text = purchaseStock.absoluteLimitPriceChange.toMoney(purchaseStock.stock)
+                    priceChangeAbsoluteTotalView.text = (purchaseStock.absoluteLimitPriceChange * purchaseStock.lots).toMoney(purchaseStock.stock)
+
+                    priceBuyView.text = purchaseStock.getLimitPriceDouble().toMoney(purchaseStock.stock)
+                    priceBuyTotalView.text = (purchaseStock.getLimitPriceDouble() * purchaseStock.lots).toMoney(purchaseStock.stock)
+
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
+                    priceChangeAbsoluteTotalView.setTextColor(Utils.getColorForValue(percent))
+                }
+            }
         }
     }
 }

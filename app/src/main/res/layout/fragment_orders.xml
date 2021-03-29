@@ -14,7 +14,7 @@
         android:layout_marginTop="0dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.portfolio.PortfolioFragment"
-        tools:listitem="@layout/fragment_portfolio_item" />
+        tools:listitem="@layout/fragment_orders_item" />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -37,7 +37,7 @@
         <Button
             android:layout_height="70dp"
             android:layout_width="0dp"
-            android:id="@+id/cancelButton"
+            android:id="@+id/cancel_button"
             android:layout_marginLeft="5dp"
             android:text="@string/cancel_all"
             android:layout_weight="1"

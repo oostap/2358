@@ -5,9 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,44 +14,38 @@ import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.manager.Strategy2358
 import com.project.ti2358.data.manager.SettingsManager
+import com.project.ti2358.databinding.Fragment2358FinishBinding
+import com.project.ti2358.databinding.Fragment2358FinishItemBinding
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class Strategy2358FinishFragment : Fragment() {
-
+class Strategy2358FinishFragment : Fragment(R.layout.fragment_2358_finish) {
     val strategy2358: Strategy2358 by inject()
-    var adapterList: Item2358RecyclerViewAdapter = Item2358RecyclerViewAdapter(emptyList())
-    var buttonStart: Button? = null
-    var stocks: MutableList<PurchaseStock> = mutableListOf()
-    var infoTextView: TextView? = null
-    var equalPartsCheckBoxView: CheckBox? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    private var fragment2358FinishBinding: Fragment2358FinishBinding? = null
+
+    var adapterList: Item2358RecyclerViewAdapter = Item2358RecyclerViewAdapter(emptyList())
+    var stocks: MutableList<PurchaseStock> = mutableListOf()
+
+    override fun onDestroy() {
+        fragment2358FinishBinding = null
+        super.onDestroy()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_2358_finish, container, false)
-        val list = view.findViewById<RecyclerView>(R.id.list)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = Fragment2358FinishBinding.bind(view)
+        fragment2358FinishBinding = binding
 
-        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
+        binding.list.layoutManager = LinearLayoutManager(context)
+        binding.list.adapter = adapterList
 
-        if (list is RecyclerView) {
-            with(list) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = adapterList
-            }
-        }
-
-        buttonStart = view.findViewById<Button>(R.id.button_start)
         updateServiceButtonText()
 
-        buttonStart?.setOnClickListener {
+        binding.startButton.setOnClickListener {
             if (SettingsManager.get2358PurchaseVolume() <= 0) {
                 Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел 2358.")
             } else {
@@ -72,21 +63,17 @@ class Strategy2358FinishFragment : Fragment() {
         stocks = strategy2358.getPurchaseStock(true)
         adapterList.setData(stocks)
 
-        infoTextView = view.findViewById(R.id.info_text)
         updateInfoText()
 
-        equalPartsCheckBoxView = view.findViewById(R.id.chooseView)
-        equalPartsCheckBoxView?.setOnCheckedChangeListener { _, checked ->
+        binding.chooseView.setOnCheckedChangeListener { _, checked ->
             updateEqualParts(checked)
         }
         updateEqualParts(strategy2358.equalParts)
-
-        return view
     }
 
     private fun updateEqualParts(newValue: Boolean) {
         strategy2358.equalParts = newValue
-        equalPartsCheckBoxView?.isChecked = newValue
+        fragment2358FinishBinding?.chooseView?.isChecked = newValue
 
         if (newValue) {
             stocks = strategy2358.getPurchaseStock(true)
@@ -98,7 +85,7 @@ class Strategy2358FinishFragment : Fragment() {
     private fun updateInfoText() {
         val time = SettingsManager.get2358PurchaseTime()
         val prepareText: String = TheApplication.application.applicationContext.getString(R.string.prepare_start_2358_text)
-        infoTextView?.text = String.format(
+        fragment2358FinishBinding?.infoTextView?.text = String.format(
             prepareText,
             time,
             stocks.size,
@@ -108,108 +95,85 @@ class Strategy2358FinishFragment : Fragment() {
 
     private fun updateServiceButtonText() {
         if (Utils.isServiceRunning(requireContext(), Strategy2358Service::class.java)) {
-            buttonStart?.text = getString(R.string.stop)
+            fragment2358FinishBinding?.startButton?.text = getString(R.string.stop)
         } else {
-            buttonStart?.text = getString(R.string.start)
+            fragment2358FinishBinding?.startButton?.text = getString(R.string.start)
         }
     }
 
-    inner class Item2358RecyclerViewAdapter(
-        private var values: List<PurchaseStock>
-    ) : RecyclerView.Adapter<Item2358RecyclerViewAdapter.ViewHolder>() {
-
+    inner class Item2358RecyclerViewAdapter(private var values: List<PurchaseStock>) : RecyclerView.Adapter<Item2358RecyclerViewAdapter.ViewHolder>() {
         fun setData(newValues: List<PurchaseStock>) {
             values = newValues
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_2358_finish_item, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.purchase = item
-
-            holder.tickerView.text = "${position + 1}) ${item.stock.getTickerLove()}"
-            holder.priceView.text = item.stock.getPriceString()
-
-            refreshPercent(holder, 0.0)
-            holder.pricePlusButton.setOnClickListener {
-                refreshPercent(holder, 0.05)
-            }
-
-            holder.priceMinusButton.setOnClickListener {
-                refreshPercent(holder, -0.05)
-            }
-
-            holder.lotsPlusButton.setOnClickListener {
-                updateEqualParts(false)
-                holder.purchase.addLots(1)
-                refreshPercent(holder, 0.0)
-            }
-
-            holder.lotsMinusButton.setOnClickListener {
-                updateEqualParts(false)
-                holder.purchase.addLots(-1)
-                refreshPercent(holder, 0.0)
-            }
-
-            holder.checkBoxView.setOnCheckedChangeListener { _, checked ->
-                holder.purchase.trailingStop = checked
-                refreshPercent(holder, 0.0)
-            }
-
-            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
-        }
-
-        private fun refreshPercent(holder: ViewHolder, delta: Double) {
-            holder.checkBoxView.isChecked = holder.purchase.trailingStop
-
-            holder.purchaseLotsView.text = "${holder.purchase.lots} шт."
-            if (holder.purchase.trailingStop) {
-                holder.purchase.addPriceProfit2358TrailingTakeProfit(delta)
-                holder.profitPriceFromView.text = holder.purchase.trailingStopTakeProfitPercentActivation.toPercent()
-                holder.profitPriceToView.text = holder.purchase.trailingStopTakeProfitPercentDelta.toPercent()
-
-                holder.profitPriceFromView.setTextColor(Utils.PURPLE)
-                holder.profitPriceToView.setTextColor(Utils.PURPLE)
-            } else {
-                holder.purchase.addPriceProfit2358Percent(delta)
-                holder.profitPriceFromView.text = holder.purchase.percentProfitSellFrom.toPercent()
-                holder.profitPriceToView.text = holder.purchase.percentProfitSellTo.toPercent()
-
-                holder.profitPriceFromView.setTextColor(Utils.GREEN)
-                holder.profitPriceToView.setTextColor(Utils.GREEN)
-            }
-
-            holder.purchasePriceView.text = "%.2f$".format(holder.purchase.stock.getPriceDouble() * holder.purchase.lots)
-
-            updateInfoText()
-        }
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(Fragment2358FinishItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            lateinit var purchase: PurchaseStock
+        inner class ViewHolder(private val binding: Fragment2358FinishItemBinding) : RecyclerView.ViewHolder(binding.root) {
+            fun bind(index: Int) {
+                val purchaseStock = values[index]
 
-            val tickerView: TextView = view.findViewById(R.id.tickerView)
-            val priceView: TextView = view.findViewById(R.id.priceView)
+                with(binding) {
+                    tickerView.text = "${index + 1}) ${purchaseStock.stock.getTickerLove()}"
+                    priceView.text = purchaseStock.stock.getPriceString()
 
-            val purchaseLotsView: TextView = view.findViewById(R.id.stock_purchase_lots)
-            val purchasePriceView: TextView = view.findViewById(R.id.stock_purchase_price)
+                    refreshPercent(purchaseStock, 0.0)
+                    pricePlusButton.setOnClickListener {
+                        refreshPercent(purchaseStock, 0.05)
+                    }
 
-            val profitPriceFromView: TextView = view.findViewById(R.id.stock_price_profit_percent_from)
-            val profitPriceToView: TextView = view.findViewById(R.id.stock_price_profit_percent_to)
+                    priceMinusButton.setOnClickListener {
+                        refreshPercent(purchaseStock, -0.05)
+                    }
 
-            val pricePlusButton: Button = view.findViewById(R.id.button_price_plus)
-            val priceMinusButton: Button = view.findViewById(R.id.button_price_minus)
+                    lotsPlusButton.setOnClickListener {
+                        updateEqualParts(false)
+                        purchaseStock.addLots(1)
+                        refreshPercent(purchaseStock, 0.0)
+                    }
 
-            val lotsPlusButton: Button = view.findViewById(R.id.button_lots_plus)
-            val lotsMinusButton: Button = view.findViewById(R.id.button_lots_minus)
+                    lotsMinusButton.setOnClickListener {
+                        updateEqualParts(false)
+                        purchaseStock.addLots(-1)
+                        refreshPercent(purchaseStock, 0.0)
+                    }
 
-            val checkBoxView: CheckBox = view.findViewById(R.id.chooseView)
+                    chooseView.setOnCheckedChangeListener { _, checked ->
+                        purchaseStock.trailingStop = checked
+                        refreshPercent(purchaseStock, 0.0)
+                    }
+
+                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                }
+            }
+
+            private fun refreshPercent(purchaseStock: PurchaseStock, delta: Double) {
+                with(binding) {
+                    chooseView.isChecked = purchaseStock.trailingStop
+                    lotsView.text = "${purchaseStock.lots} шт."
+
+                    if (purchaseStock.trailingStop) {
+                        purchaseStock.addPriceProfit2358TrailingTakeProfit(delta)
+                        profitPercentFromView.text = purchaseStock.trailingStopTakeProfitPercentActivation.toPercent()
+                        profitPercentToView.text = purchaseStock.trailingStopTakeProfitPercentDelta.toPercent()
+
+                        profitPercentFromView.setTextColor(Utils.PURPLE)
+                        profitPercentToView.setTextColor(Utils.PURPLE)
+                    } else {
+                        purchaseStock.addPriceProfit2358Percent(delta)
+                        profitPercentFromView.text = purchaseStock.percentProfitSellFrom.toPercent()
+                        profitPercentToView.text = purchaseStock.percentProfitSellTo.toPercent()
+
+                        profitPercentFromView.setTextColor(Utils.GREEN)
+                        profitPercentToView.setTextColor(Utils.GREEN)
+                    }
+
+                    priceBuyView.text = "%.2f$".format(purchaseStock.stock.getPriceDouble() * purchaseStock.lots)
+                    updateInfoText()
+                }
+            }
         }
     }
 }

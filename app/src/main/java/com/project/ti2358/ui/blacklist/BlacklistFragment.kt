@@ -15,9 +15,7 @@ import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StrategyBlacklist
 import com.project.ti2358.databinding.FragmentBlacklistBinding
 import com.project.ti2358.databinding.FragmentBlacklistItemBinding
-import com.project.ti2358.databinding.FragmentFavoritesItemBinding
 import com.project.ti2358.service.*
-import com.project.ti2358.ui.favorites.FavoritesFragment
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -44,7 +42,7 @@ class BlacklistFragment : Fragment(R.layout.fragment_blacklist) {
         binding.list.layoutManager = LinearLayoutManager(context)
         binding.list.adapter = adapterList
 
-        binding.buttonUpdate.setOnClickListener {
+        binding.updateButton.setOnClickListener {
             updateData()
         }
 
@@ -94,49 +92,43 @@ class BlacklistFragment : Fragment(R.layout.fragment_blacklist) {
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            return ViewHolder(FragmentBlacklistItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-        }
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentBlacklistItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
         override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
-
         override fun getItemCount(): Int = values.size
 
         inner class ViewHolder(private val binding: FragmentBlacklistItemBinding) : RecyclerView.ViewHolder(binding.root) {
-            lateinit var stock: Stock
-
             fun bind(index: Int) {
-                val item = values[index]
-                stock = item
+                val stock = values[index]
+                with(binding) {
+                    chooseView.setOnCheckedChangeListener(null)
+                    chooseView.isChecked = strategyBlacklist.isSelected(stock)
 
-                binding.chooseView.setOnCheckedChangeListener(null)
-                binding.chooseView.isChecked = strategyBlacklist.isSelected(item)
+                    tickerView.text = "${index + 1}) ${stock.getTickerLove()}"
+                    priceView.text = "${stock.getPrice2359String()} ➡ ${stock.getPriceString()}"
 
-                binding.tickerView.text = "${index + 1}) ${item.getTickerLove()}"
-                binding.priceView.text = "${item.getPrice2359String()} ➡ ${item.getPriceString()}"
+                    val volume = stock.getTodayVolume() / 1000f
+                    volumeSharesView.text = "%.1fk".format(volume)
 
-                val volume = item.getTodayVolume() / 1000f
-                binding.volumeSharesView.text = "%.1fk".format(volume)
+                    val volumeCash = stock.dayVolumeCash / 1000f / 1000f
+                    volumeCashView.text = "%.2fM$".format(volumeCash)
 
-                val volumeCash = item.dayVolumeCash / 1000f / 1000f
-                binding.volumeCashView.text = "%.2fM$".format(volumeCash)
+                    priceChangeAbsoluteView.text = stock.changePrice2359DayAbsolute.toMoney(stock)
+                    priceChangePercentView.text = stock.changePrice2359DayPercent.toPercent()
 
-                binding.priceChangeAbsoluteView.text = item.changePrice2359DayAbsolute.toMoney(item)
-                binding.priceChangePercentView.text = item.changePrice2359DayPercent.toPercent()
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
 
-                binding.priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
-                binding.priceChangePercentView.setTextColor(Utils.getColorForValue(item.changePrice2359DayAbsolute))
+                    chooseView.setOnCheckedChangeListener { _, checked ->
+                        strategyBlacklist.setSelected(stock, checked)
+                        updateTitle()
+                    }
 
-                binding.chooseView.setOnCheckedChangeListener { _, checked ->
-                    strategyBlacklist.setSelected(stock, checked)
-                    updateTitle()
+                    itemView.setOnClickListener {
+                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                    }
+
+                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
                 }
-
-                itemView.setOnClickListener {
-                    Utils.openTinkoffForTicker(requireContext(), stock.ticker)
-                }
-
-                itemView.setBackgroundColor(Utils.getColorForIndex(index))
             }
         }
     }

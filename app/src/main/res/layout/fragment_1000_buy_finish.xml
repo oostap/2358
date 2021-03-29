@@ -15,7 +15,7 @@
         tools:listitem="@layout/fragment_2358_finish_item" />
 
     <TextView
-        android:id="@+id/info_text"
+        android:id="@+id/info_text_view"
         android:layout_width="fill_parent"
         android:layout_height="80dp"
         android:layout_alignParentBottom="true"
@@ -37,7 +37,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/buttonStart700"
+            android:id="@+id/start_700_button"
             android:layout_marginRight="5dp"
             android:text="@string/start_sell_700"
             android:layout_weight="1"
@@ -47,7 +47,7 @@
         <Button
             android:layout_height="70dp"
             android:layout_width="0dp"
-            android:id="@+id/buttonStart1000"
+            android:id="@+id/start_1000_button"
             android:layout_marginLeft="5dp"
             android:text="@string/start_sell_1000"
             android:layout_weight="1"

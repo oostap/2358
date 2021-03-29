@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
@@ -14,49 +12,50 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.*
+import com.project.ti2358.databinding.FragmentFixpriceBinding
+import com.project.ti2358.databinding.FragmentFixpriceItemBinding
 import com.project.ti2358.service.*
 import kotlinx.android.synthetic.main.fragment_fixprice.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class StrategyFixPriceFragment : Fragment() {
+class StrategyFixPriceFragment : Fragment(R.layout.fragment_fixprice) {
     val orderbookManager: OrderbookManager by inject()
     val strategyFixPrice: StrategyFixPrice by inject()
+
+    private var fragmentFixpriceBinding: FragmentFixpriceBinding? = null
+
     var adapterList: ItemFixPriceRecyclerViewAdapter = ItemFixPriceRecyclerViewAdapter(emptyList())
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onDestroy() {
+        fragmentFixpriceBinding = null
+        super.onDestroy()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_fixprice, container, false)
-        list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = FragmentFixpriceBinding.bind(view)
+        fragmentFixpriceBinding = binding
 
-        if (list is RecyclerView) {
-            with(list) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
+
+            resetButton.setOnClickListener { // сброс времени отслеживания
+                strategyFixPrice.restartStrategy()
+                updateTime()
+                updateData()
+            }
+
+            updateButton.setOnClickListener {
+                updateData()
             }
         }
 
-        buttonReset.setOnClickListener { // сброс времени отслеживания
-            strategyFixPrice.restartStrategy()
-            updateTime()
-            updateData()
-        }
-
-        `@+id/update_button`.setOnClickListener {
-            updateData()
-        }
-
         updateData()
-
         updateTime()
-        return view
     }
 
     private fun updateData() {
@@ -70,87 +69,66 @@ class StrategyFixPriceFragment : Fragment() {
         act.supportActionBar?.title = time
     }
 
-    inner class ItemFixPriceRecyclerViewAdapter(
-        private var values: List<Stock>
-    ) : RecyclerView.Adapter<ItemFixPriceRecyclerViewAdapter.ViewHolder>() {
-
+    inner class ItemFixPriceRecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<ItemFixPriceRecyclerViewAdapter.ViewHolder>() {
         fun setData(newValues: List<Stock>) {
             values = newValues
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_fixprice_item, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.stock = item
-
-            holder.tickerView.text = "${position + 1}) ${item.getTickerLove()}"
-
-            val volume = item.getTodayVolume() / 1000f
-            holder.volumeTodayView.text = "%.1fk".format(volume)
-
-            val volumeBefore = item.getVolumeFixPriceBeforeStart() / 1000f
-            val volumeAfter = item.getVolumeFixPriceAfterStart() / 1000f
-            holder.volumeFromStartView.text = "%.1fk+%.1fk".format(volumeBefore, volumeAfter)
-
-            holder.priceView.text = "${item.getPriceFixPriceString()} ➡ ${item.getPriceString()}"
-
-            holder.changePriceAbsoluteView.text = item.changePriceFixDayAbsolute.toMoney(item)
-            holder.changePricePercentView.text = item.changePriceFixDayPercent.toPercent()
-
-            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePriceFixDayPercent))
-            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePriceFixDayPercent))
-            holder.priceView.setTextColor(Utils.getColorForValue(item.changePriceFixDayPercent))
-
-            holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
-            }
-
-            holder.imageOrderbook.setOnClickListener {
-                orderbookManager.start(holder.stock)
-                holder.imageOrderbook.findNavController().navigate(R.id.action_nav_fixprice_to_nav_orderbook)
-            }
-
-            holder.sectorView.text = item.getSectorName()
-            holder.sectorView.setTextColor(Utils.getColorForSector(item.closePrices?.sector))
-
-            holder.itemView.setOnClickListener {
-                Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)
-            }
-
-            if (item.report != null) {
-                holder.reportView.text = item.getReportInfo()
-                holder.reportView.visibility = View.VISIBLE
-            } else {
-                holder.reportView.visibility = View.GONE
-            }
-            holder.reportView.setTextColor(Utils.RED)
-
-            holder.itemView.setBackgroundColor(Utils.getColorForIndex(position))
-        }
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentFixpriceItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            lateinit var stock: Stock
+        inner class ViewHolder(private val binding: FragmentFixpriceItemBinding) : RecyclerView.ViewHolder(binding.root) {
+            fun bind(index: Int) {
+                val stock = values[index]
 
-            val tickerView: TextView = view.findViewById(R.id.tickerView)
-            val priceView: TextView = view.findViewById(R.id.priceView)
+                with(binding) {
+                    tickerView.text = "${index + 1}) ${stock.getTickerLove()}"
 
-            val volumeTodayView: TextView = view.findViewById(R.id.volumeSharesView)
-            val volumeFromStartView: TextView = view.findViewById(R.id.stock_item_volume_from_start)
+                    val volume = stock.getTodayVolume() / 1000f
+                    volumeSharesView.text = "%.1fk".format(volume)
 
-            val changePriceAbsoluteView: TextView = view.findViewById(R.id.priceChangeAbsoluteView)
-            val changePricePercentView: TextView = view.findViewById(R.id.priceChangePercentView)
+                    val volumeBefore = stock.getVolumeFixPriceBeforeStart() / 1000f
+                    val volumeAfter = stock.getVolumeFixPriceAfterStart() / 1000f
+                    volumeSharesFromStartView.text = "%.1fk+%.1fk".format(volumeBefore, volumeAfter)
 
-            val imageOrderbook: ImageView = view.findViewById(R.id.orderbookButton)
+                    priceView.text = "${stock.getPriceFixPriceString()} ➡ ${stock.getPriceString()}"
 
-            val reportView: TextView = view.findViewById(R.id.reportInfoView)
-            val sectorView: TextView = view.findViewById(R.id.sectorView)
+                    priceChangeAbsoluteView.text = stock.changePriceFixDayAbsolute.toMoney(stock)
+                    priceChangePercentView.text = stock.changePriceFixDayPercent.toPercent()
+
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePriceFixDayPercent))
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePriceFixDayPercent))
+                    priceView.setTextColor(Utils.getColorForValue(stock.changePriceFixDayPercent))
+
+                    itemView.setOnClickListener {
+                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                    }
+
+                    orderbookButton.setOnClickListener {
+                        orderbookManager.start(stock)
+                        orderbookButton.findNavController().navigate(R.id.action_nav_fixprice_to_nav_orderbook)
+                    }
+
+                    sectorView.text = stock.getSectorName()
+                    sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))
+
+                    itemView.setOnClickListener {
+                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                    }
+
+                    if (stock.report != null) {
+                        reportInfoView.text = stock.getReportInfo()
+                        reportInfoView.visibility = View.VISIBLE
+                    } else {
+                        reportInfoView.visibility = View.GONE
+                    }
+
+                    reportInfoView.setTextColor(Utils.RED)
+                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                }
+            }
         }
     }
 }

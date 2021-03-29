@@ -449,5 +449,23 @@ class Utils {
         fun getPercentFromTo(from: Double, to: Double): Double {
             return from / to * 100.0 - 100.0
         }
+
+        fun getEmojiForPercent(percent: Double): String {
+            return when {
+                percent <= -20 -> " 💩"
+                percent <= -15 -> " 🦌"
+                percent <= -10 -> " 🤬"
+                percent <= -5 -> " 😡"
+                percent <= -3 -> " 😱"
+                percent <= -1 -> " 😰"
+                percent >= 20 -> " 🤪️"
+                percent >= 15 -> " ❤️"
+                percent >= 10 -> " 🤩"
+                percent >= 5 -> " 😍"
+                percent >= 3 -> " 🥳"
+                percent >= 1 -> " 🤑"
+                else -> ""
+            }
+        }
     }
 }

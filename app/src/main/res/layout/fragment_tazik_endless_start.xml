@@ -2,17 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent" android:layout_height="fill_parent">
 
-    <SearchView
-        android:id="@+id/search_view"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="0dp"
-        android:layout_alignParentTop="true"
-        android:queryHint="Поиск $"
-        android:iconifiedByDefault="false"/>
-
     <androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -21,11 +10,11 @@
         android:layout_height="match_parent"
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp"
-        android:layout_marginBottom="65dp"
+        android:layout_marginBottom="70dp"
         android:layout_marginTop="50dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context=".ui.premarket.PremarketFragment"
-        tools:listitem="@layout/fragment_premarket_item" />
+        tools:context=".ui.strategyTazik.StrategyTazikStartFragment"
+        tools:listitem="@layout/fragment_tazik_endless_start_item" />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -35,25 +24,35 @@
         android:layout_marginRight="10dp"
         android:layout_alignParentBottom="true"
         android:weightSum="2" >
-
         <Button
             android:layout_height="70dp"
-            android:id="@+id/postmarket_button"
+            android:id="@+id/update_button"
             android:layout_marginRight="5dp"
-            android:text="@string/time_closemarket"
+            android:text="@string/update"
             android:layout_weight="1"
             android:textSize="16dp"
             android:layout_width="0dp" />
 
         <Button
             android:layout_height="70dp"
-            android:layout_width="0dp"
-            android:id="@+id/premarket_button"
+            android:id="@+id/start_button"
             android:layout_marginLeft="5dp"
-            android:text="@string/time_premarket"
+            android:text="@string/service_2358_prepare"
             android:layout_weight="1"
-            android:textSize="16sp" />
-
+            android:textSize="16dp"
+            android:layout_width="0dp" />
     </LinearLayout>
+
+    <SearchView
+        android:id="@+id/search_view"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="0dp"
+        android:layout_alignParentTop="true"
+        android:queryHint="Поиск $"
+
+        android:iconifiedByDefault="false"/>
 
 </RelativeLayout>

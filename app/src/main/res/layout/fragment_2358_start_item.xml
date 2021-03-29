@@ -17,7 +17,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tickerView"
+            android:id="@+id/ticker_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -27,7 +27,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/priceView"
+            android:id="@+id/price_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="4dp"
@@ -45,7 +45,7 @@
             android:textSize="10sp" />
 
         <TextView
-            android:id="@+id/reportInfoView"
+            android:id="@+id/report_info_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="4dp"
@@ -62,7 +62,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/volumeSharesView"
+            android:id="@+id/volume_shares_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -71,7 +71,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/volumeCashView"
+            android:id="@+id/volume_cash_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -87,7 +87,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/priceChangePercentView"
+            android:id="@+id/price_change_percent_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -96,7 +96,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/priceChangeAbsoluteView"
+            android:id="@+id/price_change_absolute_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -106,7 +106,7 @@
     </LinearLayout>
 
     <CheckBox
-        android:id="@+id/chooseView"
+        android:id="@+id/choose_view"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="0.49"

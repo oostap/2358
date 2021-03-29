@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
@@ -34,12 +32,12 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
     private val orderbookManager: OrderbookManager by inject()
     private val thirdPartyService: ThirdPartyService by inject()
     val depositManager: DepositManager by inject()
-    var adapterList: ItemPortfolioRecyclerViewAdapter = ItemPortfolioRecyclerViewAdapter(emptyList())
-
-    var jobUpdate: Job? = null
-    var jobVersion: Job? = null
 
     private var fragmentPortfolioBinding: FragmentPortfolioBinding? = null
+
+    var adapterList: ItemPortfolioRecyclerViewAdapter = ItemPortfolioRecyclerViewAdapter(emptyList())
+    var jobUpdate: Job? = null
+    var jobVersion: Job? = null
 
     companion object {
         var versionUpdateShowed: Boolean = false
@@ -63,11 +61,11 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
             adapter = adapterList
         }
 
-        binding.buttonUpdate.setOnClickListener {
+        binding.updateButton.setOnClickListener {
             updateData()
         }
 
-        binding.buttonOrders.setOnClickListener {
+        binding.ordersButton.setOnClickListener {
             view.findNavController().navigate(R.id.action_nav_portfolio_to_nav_orders)
         }
 
@@ -116,75 +114,46 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
     }
 
     inner class ItemPortfolioRecyclerViewAdapter(var values: List<PortfolioPosition>) : RecyclerView.Adapter<ItemPortfolioRecyclerViewAdapter.ViewHolder>() {
-
         fun setData(newValues: List<PortfolioPosition>) {
             values = newValues
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            return ViewHolder(FragmentPortfolioItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-        }
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentPortfolioItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
         override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
-
         override fun getItemCount(): Int = values.size
 
         inner class ViewHolder(private val binding: FragmentPortfolioItemBinding) : RecyclerView.ViewHolder(binding.root) {
-            lateinit var portfolioPosition: PortfolioPosition
-
             fun bind(index: Int) {
-                val item = values[index]
-                portfolioPosition = item
-                binding.tickerView.text = "${index + 1}) ${portfolioPosition.stock?.getTickerLove()}"
+                val portfolioPosition = values[index]
+                with(binding) {
+                    tickerView.text = "${index + 1}) ${portfolioPosition.stock?.getTickerLove()}"
 
-                if (item.blocked.toInt() > 0) {
-                    binding.lotsBlockedView.text = "(${item.blocked.toInt()}🔒)"
-                } else {
-                    binding.lotsBlockedView.text = ""
-                }
+                    lotsBlockedView.text = if (portfolioPosition.blocked.toInt() > 0) "(${portfolioPosition.blocked.toInt()}🔒)" else ""
+                    lotsView.text = "${portfolioPosition.lots}"
 
-                binding.lotsView.text = "${item.lots}"
+                    val avg = portfolioPosition.getAveragePrice()
+                    priceView.text = "${avg.toMoney(portfolioPosition.stock)} ➡ ${portfolioPosition.stock?.getPriceString()}"
 
-                val avg = item.getAveragePrice()
-                binding.priceView.text = "${avg.toMoney(item.stock)} ➡ ${item.stock?.getPriceString()}"
+                    val profit = portfolioPosition.getProfitAmount()
+                    priceChangeAbsoluteView.text = profit.toMoney(portfolioPosition.stock)
 
-                val profit = item.getProfitAmount()
-                binding.priceChangeAbsoluteView.text = profit.toMoney(item.stock)
+                    var percent = portfolioPosition.getProfitPercent()
 
-                var percent = item.getProfitPercent()
+                    // инвертировать доходность шорта
+                    percent *= sign(portfolioPosition.lots.toDouble())
 
-                // инвертировать доходность шорта
-                percent *= sign(item.lots.toDouble())
+                    val totalCash = portfolioPosition.balance * avg + profit
+                    cashView.text = totalCash.toMoney(portfolioPosition.stock)
 
-                var totalCash = item.balance * avg
-                totalCash += profit
-                binding.totalCashView.text = totalCash.toMoney(item.stock)
+                    val emoji = Utils.getEmojiForPercent(percent)
+                    priceChangePercentView.text = percent.toPercent() + emoji
 
-                val emoji = when {
-                    percent <= -20 -> " 💩"
-                    percent <= -15 -> " 🦌"
-                    percent <= -10 -> " 🤬"
-                    percent <= -5 -> " 😡"
-                    percent <= -3 -> " 😱"
-                    percent <= -1 -> " 😰"
-                    percent >= 20 -> " 🤪️"
-                    percent >= 15 -> " ❤️"
-                    percent >= 10 -> " 🤩"
-                    percent >= 5 -> " 😍"
-                    percent >= 3 -> " 🥳"
-                    percent >= 1 -> " 🤑"
-                    else -> ""
-                }
-
-                binding.priceChangePercentView.text = percent.toPercent() + emoji
-
-                binding.priceView.setTextColor(Utils.getColorForValue(percent))
-                binding.priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
-                binding.priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
-
-                binding.orderbookButton.setOnClickListener {
-                    // TODO: тест трейлинг стопа для позы
+                    priceView.setTextColor(Utils.getColorForValue(percent))
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
+                    orderbookButton.setOnClickListener {
+                        // TODO: тест трейлинг стопа для позы
 //                holder.position.stock?.let {
 //                    var purchase = PurchaseStock(it)
 //                    purchase.position = holder.position
@@ -195,31 +164,32 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
 //                    purchase.processInitialProfit()
 //                    purchase.sellWithTrailing()
 
-                    portfolioPosition.stock?.let {
-                        orderbookManager.start(it)
-                        view?.findNavController()?.navigate(R.id.action_nav_portfolio_to_nav_orderbook)
+                        portfolioPosition.stock?.let {
+                            orderbookManager.start(it)
+                            view?.findNavController()?.navigate(R.id.action_nav_portfolio_to_nav_orderbook)
+                        }
                     }
-                }
 
-                itemView.setOnClickListener {
-                    portfolioPosition.stock?.let {
-                        Utils.openTinkoffForTicker(requireContext(), it.ticker)
+                    itemView.setOnClickListener {
+                        portfolioPosition.stock?.let {
+                            Utils.openTinkoffForTicker(requireContext(), it.ticker)
+                        }
                     }
-                }
 
-                item.stock?.let { stock ->
-                    binding.sectorView.text = stock.getSectorName()
-                    binding.sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))
+                    portfolioPosition.stock?.let { stock ->
+                        sectorView.text = stock.getSectorName()
+                        sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))
 
-                    if (stock.report != null) {
-                        binding.reportInfoView.text = stock.getReportInfo()
-                        binding.reportInfoView.visibility = View.VISIBLE
-                    } else {
-                        binding.reportInfoView.visibility = View.GONE
+                        if (stock.report != null) {
+                            reportInfoView.text = stock.getReportInfo()
+                            reportInfoView.visibility = View.VISIBLE
+                        } else {
+                            reportInfoView.visibility = View.GONE
+                        }
+                        reportInfoView.setTextColor(Utils.RED)
                     }
-                    binding.reportInfoView.setTextColor(Utils.RED)
+                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
                 }
-                itemView.setBackgroundColor(Utils.getColorForIndex(index))
             }
         }
     }
