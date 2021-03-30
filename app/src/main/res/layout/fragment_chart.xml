@@ -42,7 +42,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_1min"
+            android:id="@+id/min1_button"
             android:layout_marginRight="5dp"
             android:text="1 min"
             android:layout_weight="1"
@@ -52,7 +52,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_5min"
+            android:id="@+id/min5_button"
             android:layout_marginRight="5dp"
             android:text="5 min"
             android:layout_weight="1"
@@ -62,7 +62,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_1hour"
+            android:id="@+id/hour1_button"
             android:layout_marginRight="5dp"
             android:text="HOUR"
             android:layout_weight="1"
@@ -72,7 +72,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/button_day"
+            android:id="@+id/day_button"
             android:layout_marginRight="0dp"
             android:text="DAY"
             android:layout_weight="1"

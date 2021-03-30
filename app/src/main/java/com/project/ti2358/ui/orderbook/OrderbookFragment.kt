@@ -97,6 +97,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                         true
                     }
                 }
+                volumesView.visibility = VISIBLE
             }
 
             val changes = SettingsManager.getOrderbookPrices().split(" ")
@@ -216,6 +217,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     private fun updatePosition() {
         fragmentOrderbookBinding?.apply {
             activeStock?.let { stock ->
+                positionView.visibility = GONE
                 val pos = depositManager.getPositionForFigi(stock.figi)?.let { p ->
                     val avg = p.getAveragePrice()
                     priceView.text = "${avg.toMoney(stock)} ➡ ${stock.getPriceString()}"
@@ -224,8 +226,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     priceChangeAbsoluteView.text = profit.toMoney(stock)
 
                     val percent = p.getProfitPercent() * sign(p.lots.toDouble())   // инвертировать доходность шорта
-                    var totalCash = p.balance * avg
-                    totalCash += profit
+                    val totalCash = p.balance * avg + profit
                     cashView.text = totalCash.toMoney(stock)
 
                     lotsView.text = "${p.lots}"
@@ -236,11 +237,6 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     priceView.setTextColor(Utils.getColorForValue(percent))
                     priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
                     priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
-                }
-
-                if (pos == null) {
-                    positionView.visibility = GONE
-                } else {
                     positionView.visibility = VISIBLE
                 }
             }
@@ -278,7 +274,6 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     }
 
     fun showEditOrder(orderbookLine: OrderbookLine, operationType: OperationType) {
-
         val context: Context = requireContext()
         val layout = LinearLayout(context)
         layout.orientation = LinearLayout.VERTICAL

@@ -200,6 +200,9 @@ data class PurchaseStock(
         if (lots == 0 || price == 0.0) return null
         val buyPrice = Utils.makeNicePrice(price)
 
+        var profitPrice = buyPrice + buyPrice / 100.0 * profit
+        profitPrice = Utils.makeNicePrice(profitPrice)
+
         var lotsToBuy = lots
         return GlobalScope.launch(Dispatchers.Main) {
             try {
@@ -285,40 +288,29 @@ data class PurchaseStock(
                         status = PurchaseStatus.BOUGHT
                         Utils.showToastAlert("$ticker: куплено по $buyPrice")
 
-                        var profitPrice = buyPrice + buyPrice / 100.0 * profit
-                        profitPrice = Utils.makeNicePrice(profitPrice)
-
                         // выставить ордер на продажу
-                        while (true) {
-                            try {
-                                val orderSell = depositManager.getOrderForFigi(figi, OperationType.SELL)
-                                if (orderSell != null) break
+                        try {
+                            position = depositManager.getPositionForFigi(figi)
+                            if (position == null) break
 
-                                position = depositManager.getPositionForFigi(figi)
-                                var lotsLeft = 0
-                                if (position != null) lotsLeft = position.lots - position.blocked.toInt()
-                                if (lotsLeft <= initialLots) break
+                            val lotsLeft = position.lots - position.blocked.toInt() - initialLots
+                            if (lotsLeft <= 0) break
+                            lotsToBuy -= lotsLeft
+                            if (lotsToBuy < 0) break
 
-                                lotsLeft -= initialLots
-                                lotsToBuy -= lotsLeft
-
-                                status = PurchaseStatus.ORDER_SELL_PREPARE
-                                sellLimitOrder = ordersService.placeLimitOrder(
-                                    lotsLeft,
-                                    figi,
-                                    profitPrice,
-                                    OperationType.SELL,
-                                    depositManager.getActiveBrokerAccountId()
-                                )
-                                status = PurchaseStatus.ORDER_SELL
-                                Utils.showToastAlert("$ticker: ордер на продажу по $profitPrice")
-                                break
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                            depositManager.refreshDeposit()
-                            depositManager.refreshOrders()
-                            delay(DelayMiddle)
+                            status = PurchaseStatus.ORDER_SELL_PREPARE
+                            sellLimitOrder = ordersService.placeLimitOrder(
+                                lotsLeft,
+                                figi,
+                                profitPrice,
+                                OperationType.SELL,
+                                depositManager.getActiveBrokerAccountId()
+                            )
+                            status = PurchaseStatus.ORDER_SELL
+                            Utils.showToastAlert("$ticker: ордер на продажу по $profitPrice")
+                            break
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
                         break
                     }
@@ -326,35 +318,29 @@ data class PurchaseStock(
                     if (orderBuy != null && position != null) { // заявка стоит, частично куплено, можно продавать
                         status = PurchaseStatus.PART_FILLED
 
-                        var profitPrice = buyPrice + buyPrice / 100.0 * profit
-                        profitPrice = Utils.makeNicePrice(profitPrice)
-
                         // выставить ордер на продажу
-                        while (true) {
-                            try {
-                                position = depositManager.getPositionForFigi(figi)
-                                var lotsLeft = 0
-                                if (position != null) lotsLeft = position.lots - position.blocked.toInt()
-                                if (lotsLeft <= initialLots) break
+                        try {
+                            position = depositManager.getPositionForFigi(figi)
+                            if (position == null) break
 
-                                lotsLeft -= initialLots
-                                lotsToBuy -= lotsLeft
+                            val lotsLeft = position.lots - position.blocked.toInt() - initialLots
+                            if (lotsLeft <= 0) break
+                            lotsToBuy -= lotsLeft
+                            if (lotsToBuy < 0) break
 
-                                status = PurchaseStatus.ORDER_SELL_PREPARE
-                                sellLimitOrder = ordersService.placeLimitOrder(
-                                    lotsLeft,
-                                    figi,
-                                    profitPrice,
-                                    OperationType.SELL,
-                                    depositManager.getActiveBrokerAccountId()
-                                )
-                                status = PurchaseStatus.ORDER_SELL
-                                Utils.showToastAlert("$ticker: ордер на продажу по $profitPrice")
-                                break
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                            delay(DelayMiddle)
+                            status = PurchaseStatus.ORDER_SELL_PREPARE
+                            sellLimitOrder = ordersService.placeLimitOrder(
+                                lotsLeft,
+                                figi,
+                                profitPrice,
+                                OperationType.SELL,
+                                depositManager.getActiveBrokerAccountId()
+                            )
+                            status = PurchaseStatus.ORDER_SELL
+                            Utils.showToastAlert("$ticker: ордер на продажу по $profitPrice")
+                            break
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
                     }
 
@@ -648,7 +634,6 @@ data class PurchaseStock(
                 }
 
                 Utils.showToastAlert("$ticker: ордер на покупку по $buyPrice")
-
                 delay(DelayFast)
 
                 // проверяем появился ли в портфеле тикер
@@ -688,33 +673,26 @@ data class PurchaseStock(
                         profitSellPrice = orderbook.getBestPriceFromBid(lots)
                         if (profitSellPrice == 0.0) return@launch
 
-                        while (true) {
-                            try {
-                                profitSellPrice = Utils.makeNicePrice(profitSellPrice)
-                                sellLimitOrder = ordersService.placeLimitOrder(
-                                    lots,
-                                    figi,
-                                    profitSellPrice,
-                                    OperationType.SELL,
-                                    depositManager.getActiveBrokerAccountId()
-                                )
-                                break
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                            delay(DelayFast)
+                        try {
+                            profitSellPrice = Utils.makeNicePrice(profitSellPrice)
+                            sellLimitOrder = ordersService.placeLimitOrder(
+                                lots,
+                                figi,
+                                profitSellPrice,
+                                OperationType.SELL,
+                                depositManager.getActiveBrokerAccountId()
+                            )
+                            status = PurchaseStatus.ORDER_SELL
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            status = PurchaseStatus.ERROR_NEED_WATCH
                         }
-                        status = PurchaseStatus.ORDER_SELL
                     }
                 } else { // продажа 2358 лесенкой
                     position?.let {
                         val totalLots = it.lots
-                        var profitFrom = percentProfitSellFrom
-                        var profitTo = percentProfitSellTo
-
-                        if (profitFrom == 0.0) profitFrom = SettingsManager.get2358TakeProfitFrom()
-
-                        if (profitTo == 0.0) profitTo = SettingsManager.get2358TakeProfitTo()
+                        val profitFrom = if (percentProfitSellFrom != 0.0) percentProfitSellFrom else SettingsManager.get2358TakeProfitFrom()
+                        val profitTo = if (percentProfitSellTo != 0.0) percentProfitSellTo else SettingsManager.get2358TakeProfitTo()
 
                         val profitStep = SettingsManager.get2358TakeProfitStep()
 
@@ -778,23 +756,22 @@ data class PurchaseStock(
                             if (lots <= 0 || profitPrice == 0.0) continue
 
                             // выставить ордер на продажу
-                            while (true) {
-                                try {
-                                    sellLimitOrder = ordersService.placeLimitOrder(
-                                        lots,
-                                        figi,
-                                        profitPrice,
-                                        OperationType.SELL,
-                                        depositManager.getActiveBrokerAccountId()
-                                    )
-                                    break
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                }
-                                delay(DelayFast)
+                            try {
+                                sellLimitOrder = ordersService.placeLimitOrder(
+                                    lots,
+                                    figi,
+                                    profitPrice,
+                                    OperationType.SELL,
+                                    depositManager.getActiveBrokerAccountId()
+                                )
+                                status = PurchaseStatus.ORDER_SELL
+                                break
+                            } catch (e: Exception) {
+                                status = PurchaseStatus.ERROR_NEED_WATCH
+                                e.printStackTrace()
                             }
+                            delay(DelayFast)
                         }
-                        status = PurchaseStatus.ORDER_SELL
                         Utils.showToastAlert("$ticker: ордер на продажу по $profitFrom")
                     }
                 }

@@ -32,8 +32,9 @@ import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
+import com.project.ti2358.databinding.FragmentChartBinding
+import com.project.ti2358.databinding.FragmentOrderbookBinding
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -42,7 +43,6 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.text.DecimalFormat
 import java.util.*
-import kotlin.math.min
 
 class DateFormatter : ValueFormatter() {
     var candles: MutableList<Candle> = mutableListOf()
@@ -75,12 +75,10 @@ class VolumeFormatter : ValueFormatter() {
 class MyMarkerView(context: Context?, layoutResource: Int) : MarkerView(context, layoutResource) {
     private val tvContent: TextView = findViewById(R.id.tvContent)
 
-    // runs every time the MarkerView is redrawn, can be used to update the
-    // content (user-interface)
     override fun refreshContent(e: Entry, highlight: Highlight) {
         if (e is CandleEntry) {
             val candle = e.data as Candle
-            tvContent.text = ("v:%d\no%.2f\nh:%.2f\nl:%.2f\nc:%.2f").format(candle.volume, e.open, e.high, e.low, e.close)
+            tvContent.text = ("v: %d\no: %.2f\nh: %.2f\nl: %.2f\nc: %.2f").format(candle.volume, e.open, e.high, e.low, e.close)
         }
         super.refreshContent(e, highlight)
     }
@@ -96,8 +94,6 @@ class XYMarkerView(context: Context?, private val xAxisValueFormatter: IAxisValu
     private val tvContent: TextView
     private val format: DecimalFormat
 
-    // runs every time the MarkerView is redrawn, can be used to update the
-    // content (user-interface)
     override fun refreshContent(e: Entry, highlight: Highlight) {
         tvContent.text = e.y.toInt().toString()
         super.refreshContent(e, highlight)
@@ -117,127 +113,120 @@ class XYMarkerView(context: Context?, private val xAxisValueFormatter: IAxisValu
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @KoinApiExtension
-class ChartFragment : Fragment(), OnChartGestureListener {
+class ChartFragment : Fragment(R.layout.fragment_chart), OnChartGestureListener {
     private val chartManager: ChartManager by inject()
     val depositManager: DepositManager by inject()
     val stockManager: StockManager by inject()
 
+    private var fragmentChartBinding: FragmentChartBinding? = null
+
     var candleChartDateFormatter = DateFormatter()
     var volumeFormatter = VolumeFormatter()
 
-    lateinit var barChartOSView: BarChart
-    lateinit var candleChartView: CandleStickChart
-    lateinit var barChartView: BarChart
-
     var activeStock: Stock? = null
-    var currentInterval: Interval = Interval.MINUTE
-
+    var currentInterval: Interval = Interval.FIVE_MINUTES
     var job: Job? = null
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onDestroy() {
         job?.cancel()
+        fragmentChartBinding = null
         super.onDestroy()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_chart, container, false)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val binding = FragmentChartBinding.bind(view)
+        fragmentChartBinding = binding
 
-        barChartOSView = view.findViewById(R.id.chart_bar_os_view)
-        barChartOSView.setTouchEnabled(false)
-        barChartOSView.axisRight.isEnabled = false
-        barChartOSView.axisLeft.isEnabled = false
-        barChartOSView.description.isEnabled = false
-        barChartOSView.setDrawGridBackground(false)
-        barChartOSView.xAxis.isEnabled = false
-
-        candleChartView = view.findViewById(R.id.chart_candle_view)
-        candleChartView.description.isEnabled = false
-        candleChartView.setBackgroundColor(Color.WHITE)
-        candleChartView.setDrawGridBackground(true)
-
-        candleChartView.isDragEnabled = true
-        candleChartView.isLongClickable = true
-
-        val mv = MyMarkerView(requireContext(), R.layout.chart_marker)
-        mv.chartView = candleChartView
-        candleChartView.marker = mv
-
-        barChartView = view.findViewById(R.id.chart_bar_view)
-        barChartView.setDrawBarShadow(false)
-        barChartView.description.isEnabled = false
-        barChartView.isHighlightFullBarEnabled = false
-
-        candleChartView.setBackgroundColor(Utils.EMPTY)
-        candleChartView.setGridBackgroundColor(Utils.EMPTY)
-
-        candleChartView.legend.form = Legend.LegendForm.NONE
-        barChartView.legend.form = Legend.LegendForm.NONE
-        barChartOSView.legend.form = Legend.LegendForm.NONE
-
-        candleChartView.onChartGestureListener = this
-        barChartView.onChartGestureListener = this
-
-        candleChartView.axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
-        candleChartView.axisRight.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
-        candleChartView.axisRight.textColor = Utils.getChartTextColor()
-        candleChartView.axisLeft.textColor = Utils.getChartTextColor()
-
-        var xAxis: XAxis = candleChartView.xAxis
-        xAxis.position = XAxis.XAxisPosition.TOP
-        xAxis.axisMinimum = 0f
-        xAxis.granularity = 1f
-        xAxis.valueFormatter = candleChartDateFormatter
-        xAxis.textColor = Utils.getChartTextColor()
-
-        xAxis = barChartView.xAxis
-        xAxis.position = XAxis.XAxisPosition.TOP
-        xAxis.axisMinimum = 0f
-        xAxis.granularity = 1f
-        xAxis.valueFormatter = candleChartDateFormatter
-        xAxis.textColor = Utils.getChartTextColor()
-
-        barChartView.axisRight.isEnabled = false
-
-        barChartView.axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
-        barChartView.axisLeft.axisMinimum = 0f
-        barChartView.axisLeft.granularity = 0f
-        barChartView.axisLeft.valueFormatter = volumeFormatter
-        barChartView.axisLeft.textColor = Utils.getChartTextColor()
-
-        val barMarker = XYMarkerView(requireContext(), volumeFormatter)
-        barMarker.chartView = barChartView
-        barChartView.marker = barMarker
+        binding.chartCandleView.onChartGestureListener = this
+        binding.chartBarOsView.onChartGestureListener = this
 
         activeStock = chartManager.activeStock
 
-        loadData(Interval.FIVE_MINUTES)
+        with(binding) {
+            chartBarOsView.apply {
+                setTouchEnabled(false)
+                axisRight.isEnabled = false
+                axisLeft.isEnabled = false
+                description.isEnabled = false
+                setDrawGridBackground(false)
+                xAxis.isEnabled = false
+                legend.form = Legend.LegendForm.NONE
+            }
 
-        val button1Min = view.findViewById<Button>(R.id.button_1min)
-        button1Min.setOnClickListener {
-            loadData(Interval.MINUTE)
-        }
+            chartCandleView.apply {
+                description.isEnabled = false
+                setBackgroundColor(Color.WHITE)
+                setDrawGridBackground(true)
 
-        val button5Min = view.findViewById<Button>(R.id.button_5min)
-        button5Min.setOnClickListener {
+                isDragEnabled = true
+                isLongClickable = true
+
+                val mv = MyMarkerView(requireContext(), R.layout.chart_marker)
+                mv.chartView = this
+                marker = mv
+
+                setBackgroundColor(Utils.EMPTY)
+                setGridBackgroundColor(Utils.EMPTY)
+                legend.form = Legend.LegendForm.NONE
+
+                axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
+                axisRight.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
+                axisRight.textColor = Utils.getChartTextColor()
+                axisLeft.textColor = Utils.getChartTextColor()
+
+                val xAxis: XAxis = xAxis
+                xAxis.position = XAxis.XAxisPosition.TOP
+                xAxis.axisMinimum = 0f
+                xAxis.granularity = 1f
+                xAxis.valueFormatter = candleChartDateFormatter
+                xAxis.textColor = Utils.getChartTextColor()
+            }
+
+            chartBarView.apply {
+                setDrawBarShadow(false)
+                description.isEnabled = false
+                isHighlightFullBarEnabled = false
+
+                legend.form = Legend.LegendForm.NONE
+
+                val xAxis = xAxis
+                xAxis.position = XAxis.XAxisPosition.TOP
+                xAxis.axisMinimum = 0f
+                xAxis.granularity = 1f
+                xAxis.valueFormatter = candleChartDateFormatter
+                xAxis.textColor = Utils.getChartTextColor()
+
+                axisRight.isEnabled = false
+                axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
+                axisLeft.axisMinimum = 0f
+                axisLeft.granularity = 0f
+                axisLeft.valueFormatter = volumeFormatter
+                axisLeft.textColor = Utils.getChartTextColor()
+
+                val barMarker = XYMarkerView(requireContext(), volumeFormatter)
+                barMarker.chartView = this
+                marker = barMarker
+            }
+
             loadData(Interval.FIVE_MINUTES)
-        }
 
-        val button1Hour = view.findViewById<Button>(R.id.button_1hour)
-        button1Hour.setOnClickListener {
-            loadData(Interval.HOUR)
-        }
+            min1Button.setOnClickListener {
+                loadData(Interval.MINUTE)
+            }
 
-        val buttonDay = view.findViewById<Button>(R.id.button_day)
-        buttonDay.setOnClickListener {
-            loadData(Interval.DAY)
+            min5Button.setOnClickListener {
+                loadData(Interval.FIVE_MINUTES)
+            }
+
+            hour1Button.setOnClickListener {
+                loadData(Interval.HOUR)
+            }
+
+            dayButton.setOnClickListener {
+                loadData(Interval.DAY)
+            }
         }
-        return view
     }
 
     private fun syncCharts(mainChart: Chart<*>, otherCharts: List<Chart<*>>) {
@@ -257,7 +246,7 @@ class ChartFragment : Fragment(), OnChartGestureListener {
         }
     }
 
-    fun loadData(interval: Interval) {
+    private fun loadData(interval: Interval) {
         currentInterval = interval
 
         job?.cancel()
@@ -291,13 +280,13 @@ class ChartFragment : Fragment(), OnChartGestureListener {
         act.supportActionBar?.title = "$ticker $min"
     }
 
-    fun loadData(candles: List<Candle>) {
+    private fun loadData(candles: List<Candle>) {
         if (candles.isEmpty()) return
 
         if (currentInterval == Interval.MINUTE) {
-            barChartOSView.visibility = View.VISIBLE
+            fragmentChartBinding?.chartBarOsView?.visibility = View.VISIBLE
         } else {
-            barChartOSView.visibility = View.GONE
+            fragmentChartBinding?.chartBarOsView?.visibility = View.GONE
         }
 
         val candleList = mutableListOf<CandleEntry>()
@@ -331,8 +320,9 @@ class ChartFragment : Fragment(), OnChartGestureListener {
 
         val candleData = CandleData()
         candleData.addDataSet(cds)
-        candleChartView.data = candleData
-        candleChartView.invalidate()
+
+        fragmentChartBinding?.chartCandleView?.data = candleData
+        fragmentChartBinding?.chartCandleView?.invalidate()
 
         ////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?
         val volumeList = mutableListOf<BarEntry>()
@@ -353,9 +343,8 @@ class ChartFragment : Fragment(), OnChartGestureListener {
         set1.axisDependency = YAxis.AxisDependency.LEFT
 
         val barData = BarData(set1)
-        barChartView.data = barData
-        barChartView.invalidate()
-
+        fragmentChartBinding?.chartBarView?.data = barData
+        fragmentChartBinding?.chartBarView?.invalidate()
 
         // OS
         ////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?
@@ -387,8 +376,8 @@ class ChartFragment : Fragment(), OnChartGestureListener {
             set.setDrawValues(false)
 
             val barData = BarData(set)
-            barChartOSView.data = barData
-            barChartOSView.invalidate()
+            fragmentChartBinding?.chartBarOsView?.data = barData
+            fragmentChartBinding?.chartBarOsView?.invalidate()
         }
     }
 
@@ -406,7 +395,9 @@ class ChartFragment : Fragment(), OnChartGestureListener {
 
     override fun onChartDoubleTapped(me: MotionEvent?) {
 //        log("CHART onChartDoubleTapped")
-        syncCharts(candleChartView, listOf(barChartView, barChartOSView))
+        fragmentChartBinding?.let {
+            syncCharts(it.chartCandleView, listOf(it.chartBarView, it.chartBarOsView))
+        }
     }
 
     override fun onChartSingleTapped(me: MotionEvent?) {
@@ -419,12 +410,16 @@ class ChartFragment : Fragment(), OnChartGestureListener {
 
     override fun onChartScale(me: MotionEvent?, scaleX: Float, scaleY: Float) {
 //        log("CHART onChartScale")
-        syncCharts(candleChartView, listOf(barChartView, barChartOSView))
+        fragmentChartBinding?.let {
+            syncCharts(it.chartCandleView, listOf(it.chartBarView, it.chartBarOsView))
+        }
     }
 
     override fun onChartTranslate(me: MotionEvent?, dX: Float, dY: Float) {
 //        log("CHART onChartTranslate")
-        syncCharts(candleChartView, listOf(barChartView, barChartOSView))
+        fragmentChartBinding?.let {
+            syncCharts(it.chartCandleView, listOf(it.chartBarView, it.chartBarOsView))
+        }
     }
 }
 
