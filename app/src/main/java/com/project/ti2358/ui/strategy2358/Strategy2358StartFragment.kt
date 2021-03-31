@@ -18,6 +18,7 @@ import com.project.ti2358.databinding.Fragment2358StartItemBinding
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import java.util.*
 
 @KoinApiExtension
 class Strategy2358StartFragment : Fragment(R.layout.fragment_2358_start) {
@@ -107,19 +108,19 @@ class Strategy2358StartFragment : Fragment(R.layout.fragment_2358_start) {
                     priceView.text = "${stock.getPrice2359String()} ➡ ${stock.getPriceString()}"
 
                     val volume = stock.getTodayVolume() / 1000f
-                    volumeSharesView.text = "%.1fk".format(volume)
+                    volumeSharesView.text = "%.1fk".format(locale = Locale.US, volume)
 
                     val volumeCash = stock.dayVolumeCash / 1000f / 1000f
-                    volumeCashView.text = "%.2fM$".format(volumeCash)
+                    volumeCashView.text = "%.2fM$".format(locale = Locale.US, volumeCash)
 
-                    priceChangeAbsoluteView.text = stock.changePrice2359DayAbsolute.toMoney(stock)
-                    priceChangePercentView.text = stock.changePrice2359DayPercent.toPercent()
+                    priceChangeAbsoluteView.text = stock.changePrice2300DayAbsolute.toMoney(stock)
+                    priceChangePercentView.text = stock.changePrice2300DayPercent.toPercent()
 
                     sectorView.text = stock.getSectorName()
                     sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))
 
-                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
-                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
 
                     chooseView.setOnCheckedChangeListener { _, checked ->
                         strategy2358.setSelected(stock, checked)

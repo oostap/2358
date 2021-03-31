@@ -128,11 +128,11 @@ class PostmarketFragment : Fragment() {
 //            val volumeCash = item.getPostmarketVolumeCash() / 1000f / 1000f
             holder.volumeTodayCashView.text = "вывести? 🤔" //"%.2fB$".format(volumeCash)
 
-            holder.changePriceAbsoluteView.text = item.changePricePostmarketAbsolute.toMoney(item)
-            holder.changePricePercentView.text = item.changePricePostmarketPercent.toPercent()
+            holder.changePriceAbsoluteView.text = item.changePrice0300Absolute.toMoney(item)
+            holder.changePricePercentView.text = item.changePrice0300Percent.toPercent()
 
-            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePricePostmarketAbsolute))
-            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePricePostmarketAbsolute))
+            holder.changePriceAbsoluteView.setTextColor(Utils.getColorForValue(item.changePrice0300Absolute))
+            holder.changePricePercentView.setTextColor(Utils.getColorForValue(item.changePrice0300Absolute))
 
             holder.itemView.setOnClickListener {
                 Utils.openTinkoffForTicker(requireContext(), holder.stock.ticker)

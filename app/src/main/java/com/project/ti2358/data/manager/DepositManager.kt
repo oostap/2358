@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.util.*
 import java.util.Collections.synchronizedList
 import kotlin.math.abs
 
@@ -135,7 +136,7 @@ class DepositManager : KoinComponent {
                 total += currency.balance
             }
         }
-        return "%.2f$".format(total)
+        return "%.2f$".format(locale = Locale.US, total)
     }
 
     fun getFreeCashRUB(): String {
@@ -145,7 +146,7 @@ class DepositManager : KoinComponent {
                 total += currency.balance
             }
         }
-        return "%.2f₽".format(total)
+        return "%.2f₽".format(locale = Locale.US, total)
     }
 
     private fun getFreeCash(): Double {

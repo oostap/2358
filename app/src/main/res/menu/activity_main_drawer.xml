@@ -4,7 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
+    <group
+        android:checkableBehavior="single"
+        android:id="@+id/group1">
         <item
             android:id="@+id/nav_settings"
             android:checked="true"
@@ -15,10 +17,23 @@
             app:iconTint="@drawable/selector"
             android:icon="@drawable/ic_portfolio"
             android:title="@string/menu_portfolio" />
+    </group>
+
+    <group
+        android:checkableBehavior="single"
+        android:id="@+id/group2">
         <item
             android:id="@+id/nav_favorites"
             android:icon="@drawable/ic_heart"
             android:title="@string/menu_favorites" />
+        <item
+            android:id="@+id/nav_premarket"
+            android:icon="@drawable/ic_glass"
+            android:title="@string/menu_premarket" />
+        <item
+            android:id="@+id/nav_tazik_start"
+            android:icon="@drawable/ic_tazik"
+            android:title="@string/menu_tazik" />
         <item
             android:id="@+id/nav_1000_sell_start"
             android:icon="@drawable/ic_1000"
@@ -27,14 +42,6 @@
             android:id="@+id/nav_1000_buy_start"
             android:icon="@drawable/ic_1000"
             android:title="@string/menu_1000_buy" />
-        <item
-            android:id="@+id/nav_tazik_start"
-            android:icon="@drawable/ic_tazik"
-            android:title="@string/menu_tazik" />
-        <item
-            android:id="@+id/nav_premarket"
-            android:icon="@drawable/ic_glass"
-            android:title="@string/menu_premarket" />
         <item
             android:id="@+id/nav_1728_up"
             android:icon="@drawable/ic_chart_up"
@@ -47,6 +54,16 @@
             android:id="@+id/nav_2358_start"
             android:icon="@drawable/ic_2358"
             android:title="@string/menu_2358" />
+    </group>
+
+    <group
+        android:checkableBehavior="single"
+        android:id="@+id/group3">
+
+        <item
+            android:id="@+id/nav_rockets"
+            android:icon="@drawable/ic_rocket"
+            android:title="@string/menu_rocket" />
         <item
             android:id="@+id/nav_fixprice"
             android:icon="@drawable/ic_fix_price"
@@ -56,10 +73,6 @@
             android:icon="@drawable/ic_reports"
             android:title="@string/menu_reports" />
 
-        <item
-            android:id="@+id/nav_rockets"
-            android:icon="@drawable/ic_rocket"
-            android:title="@string/menu_rocket" />
 
 <!--        <item-->
 <!--            android:id="@+id/nav_tazik_endless_start"-->

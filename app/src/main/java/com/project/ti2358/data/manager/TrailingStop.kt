@@ -6,6 +6,7 @@ import com.project.ti2358.service.toPercent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.*
 import kotlin.math.abs
 
 enum class TrailingStopStatus {
@@ -62,7 +63,7 @@ data class TrailingStop(
                     status = TrailingStopStatus.TAKE_PROFIT_ACTIVATED
                 } else { // проверка на стоп-лосс
                     if (stopLossPercent != 0.0) { // проверка для: "0 == не создавать стоп-лосс"
-                        if (currentChangePercent <= stopLossPercent) { // если пролили, продаём по цене стоп-лосса
+                        if (currentChangePercent <= -abs(stopLossPercent)) { // если пролили, продаём по цене стоп-лосса
                             profitSellPrice = buyPrice - buyPrice / 100.0 * abs(currentChangePercent)
                             log("TRAILING_STOP активация стоп-лосса, продаём по цене = $profitSellPrice")
                             status = TrailingStopStatus.STOP_LOSS_ACTIVATED
@@ -103,20 +104,20 @@ data class TrailingStop(
     }
 
     fun getDescriptionShort(): String {
-        return "%s:%.2f%%".format(stock.ticker, currentChangePercent)
+        return "%s:%.2f%%".format(locale = Locale.US, stock.ticker, currentChangePercent)
     }
 
     fun getDescriptionLong(): String {
-        val currentChange = "%.2f\$ -> %.2f\$ = %.2f%%".format(buyPrice, currentPrice, currentChangePercent)
+        val currentChange = "%.2f\$ -> %.2f\$ = %.2f%%".format(locale = Locale.US, buyPrice, currentPrice, currentChangePercent)
 
-        val takeProfit = "%.2f$/%.2f%%".format(takeProfitActivationPrice, takeProfitActivationPercent)
+        val takeProfit = "%.2f$/%.2f%%".format(locale = Locale.US, takeProfitActivationPrice, takeProfitActivationPercent)
 
-        var stopLoss = "%.2f$/%.2f%%".format(stopLossPrice, stopLossPercent)
+        var stopLoss = "%.2f$/%.2f%%".format(locale = Locale.US, stopLossPrice, stopLossPercent)
         if (stopLossPercent == 0.0) stopLoss = "НЕТ"
 
-        val takeProfitRealtime = "%.2f$/%.2f%%".format(currentTakeProfitPrice, currentTakeProfitPercent)
+        val takeProfitRealtime = "%.2f$/%.2f%%".format(locale = Locale.US, currentTakeProfitPrice, currentTakeProfitPercent)
 
-        return "%s: %s, ТП=%s, СЛ=%s, REALTIME=%s - %s".format(stock.ticker, currentChange, takeProfit, stopLoss, takeProfitRealtime, getStatusString())
+        return "%s: %s, ТП=%s, СЛ=%s, REALTIME=%s - %s".format(locale = Locale.US, stock.ticker, currentChange, takeProfit, stopLoss, takeProfitRealtime, getStatusString())
     }
 
     private fun getStatusString(): String =

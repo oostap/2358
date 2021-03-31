@@ -48,7 +48,7 @@ class StrategyTazik : KoinComponent {
         val max = SettingsManager.getCommonPriceMax()
 
         stocks = all.filter { (it.getPriceDouble() > min && it.getPriceDouble() < max) || it.getPriceDouble() == 0.0 }.toMutableList()
-        stocks.sortBy { it.changePrice2359DayPercent }
+        stocks.sortBy { it.changePrice2300DayPercent }
         loadSelectedStocks(numberSet)
         return stocks
     }
@@ -81,7 +81,7 @@ class StrategyTazik : KoinComponent {
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
             val multiplier = if (it in stocksSelected) 100 else 1
-            it.changePrice2359DayPercent * sign - multiplier
+            it.changePrice2300DayPercent * sign - multiplier
         }
         return stocks
     }
@@ -93,7 +93,7 @@ class StrategyTazik : KoinComponent {
         } else {
             stocksSelected.remove(stock)
         }
-        stocksSelected.sortBy { it.changePrice2359DayPercent }
+        stocksSelected.sortBy { it.changePrice2300DayPercent }
 
         saveSelectedStocks(numberSet)
     }
@@ -162,7 +162,7 @@ class StrategyTazik : KoinComponent {
         val price = getTotalPurchaseString()
         var tickers = ""
         for (stock in stocksToPurchase) {
-            tickers += "%s*%.2f%%".format(stock.stock.ticker, stock.percentLimitPriceChange)
+            tickers += "%s*%.2f%%".format(locale = Locale.US, stock.stock.ticker, stock.percentLimitPriceChange)
         }
 
         return "$price:\n$tickers"

@@ -31,7 +31,8 @@ import kotlin.math.sign
 class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
     private val orderbookManager: OrderbookManager by inject()
     private val thirdPartyService: ThirdPartyService by inject()
-    val depositManager: DepositManager by inject()
+    private val depositManager: DepositManager by inject()
+    private val positionManager: PositionManager by inject()
 
     private var fragmentPortfolioBinding: FragmentPortfolioBinding? = null
 
@@ -55,18 +56,18 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
         val binding = FragmentPortfolioBinding.bind(view)
         fragmentPortfolioBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        with(binding.list) {
-            layoutManager = LinearLayoutManager(context)
-            adapter = adapterList
-        }
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.updateButton.setOnClickListener {
-            updateData()
-        }
+            updateButton.setOnClickListener {
+                updateData()
+            }
 
-        binding.ordersButton.setOnClickListener {
-            view.findNavController().navigate(R.id.action_nav_portfolio_to_nav_orders)
+            ordersButton.setOnClickListener {
+                view.findNavController().navigate(R.id.action_nav_portfolio_to_nav_orders)
+            }
         }
 
         updateData()
@@ -153,27 +154,15 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
                     priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
                     priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
                     orderbookButton.setOnClickListener {
-                        // TODO: тест трейлинг стопа для позы
-//                holder.position.stock?.let {
-//                    var purchase = PurchaseStock(it)
-//                    purchase.position = holder.position
-//                    purchase.trailingStop = true
-//                    purchase.trailingStopTakeProfitPercentActivation = SettingsManager.getTrailingStopTakeProfitPercentActivation()
-//                    purchase.trailingStopTakeProfitPercentDelta = SettingsManager.getTrailingStopTakeProfitPercentDelta()
-//                    purchase.trailingStopStopLossPercent = SettingsManager.getTrailingStopStopLossPercent()
-//                    purchase.processInitialProfit()
-//                    purchase.sellWithTrailing()
-
                         portfolioPosition.stock?.let {
                             orderbookManager.start(it)
-                            view?.findNavController()?.navigate(R.id.action_nav_portfolio_to_nav_orderbook)
+                            itemView.findNavController().navigate(R.id.action_nav_portfolio_to_nav_orderbook)
                         }
                     }
 
                     itemView.setOnClickListener {
-                        portfolioPosition.stock?.let {
-                            Utils.openTinkoffForTicker(requireContext(), it.ticker)
-                        }
+                        positionManager.start(portfolioPosition)
+                        itemView.findNavController().navigate(R.id.action_nav_portfolio_to_nav_portfolio_position)
                     }
 
                     portfolioPosition.stock?.let { stock ->

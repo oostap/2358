@@ -7,6 +7,7 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.lang.Exception
+import java.util.*
 import kotlin.math.abs
 
 @KoinApiExtension
@@ -118,7 +119,7 @@ class Strategy1000Sell() : KoinComponent {
     fun getNotificationTextLong(positions: MutableList<PurchaseStock>): String {
         var tickers = ""
         for (position in positions) {
-            val p = "%.1f$ > %.2f$ > %.1f%%".format(position.position.lots * position.getProfitPriceForSell(), position.getProfitPriceForSell(), position.percentProfitSellFrom)
+            val p = "%.1f$ > %.2f$ > %.1f%%".format(locale = Locale.US, position.position.lots * position.getProfitPriceForSell(), position.getProfitPriceForSell(), position.percentProfitSellFrom)
             tickers += "${position.position.ticker} * ${position.position.lots} = $p ${position.getStatusString()}\n"
         }
 

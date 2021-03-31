@@ -23,6 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import java.util.*
 
 @KoinApiExtension
 class PremarketFragment : Fragment(R.layout.fragment_premarket) {
@@ -131,29 +132,29 @@ class PremarketFragment : Fragment(R.layout.fragment_premarket) {
                     tickerView.text = "${index + 1}) ${stock.getTickerLove()}"
 
                     val volume = stock.getTodayVolume() / 1000f
-                    volumeSharesView.text = "%.1fk".format(volume)
+                    volumeSharesView.text = "%.1fk".format(locale = Locale.US, volume)
 
                     val volumeCash = stock.dayVolumeCash / 1000f / 1000f
-                    volumeCashView.text = "%.2fM$".format(volumeCash)
+                    volumeCashView.text = "%.2fM$".format(locale = Locale.US, volumeCash)
 
                     if (postmarket) {
                         priceView.text = "${stock.getPrice2359String()} ➡ ${stock.getPriceString()}"
 
-                        priceChangeAbsoluteView.text = stock.changePrice2359DayAbsolute.toMoney(stock)
-                        priceChangePercentView.text = stock.changePrice2359DayPercent.toPercent()
+                        priceChangeAbsoluteView.text = stock.changePrice2300DayAbsolute.toMoney(stock)
+                        priceChangePercentView.text = stock.changePrice2300DayPercent.toPercent()
 
-                        priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
-                        priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
-                        priceView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+                        priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
+                        priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
+                        priceView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
                     } else {
                         priceView.text = "${stock.getPricePost1000String()} ➡ ${stock.getPriceString()}"
 
-                        priceChangeAbsoluteView.text = stock.changePriceDayAbsolute.toMoney(stock)
-                        priceChangePercentView.text = stock.changePriceDayPercent.toPercent()
+                        priceChangeAbsoluteView.text = stock.changePrice0145Absolute.toMoney(stock)
+                        priceChangePercentView.text = stock.changePrice0145Percent.toPercent()
 
-                        priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePriceDayAbsolute))
-                        priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePriceDayAbsolute))
-                        priceView.setTextColor(Utils.getColorForValue(stock.changePriceDayAbsolute))
+                        priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice0145Absolute))
+                        priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice0145Absolute))
+                        priceView.setTextColor(Utils.getColorForValue(stock.changePrice0145Absolute))
                     }
 
                     itemView.setOnClickListener {

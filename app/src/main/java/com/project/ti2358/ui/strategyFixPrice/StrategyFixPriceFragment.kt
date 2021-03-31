@@ -18,6 +18,7 @@ import com.project.ti2358.service.*
 import kotlinx.android.synthetic.main.fragment_fixprice.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import java.util.*
 
 @KoinApiExtension
 class StrategyFixPriceFragment : Fragment(R.layout.fragment_fixprice) {
@@ -87,11 +88,11 @@ class StrategyFixPriceFragment : Fragment(R.layout.fragment_fixprice) {
                     tickerView.text = "${index + 1}) ${stock.getTickerLove()}"
 
                     val volume = stock.getTodayVolume() / 1000f
-                    volumeSharesView.text = "%.1fk".format(volume)
+                    volumeSharesView.text = "%.2fk".format(locale = Locale.US, volume)
 
                     val volumeBefore = stock.getVolumeFixPriceBeforeStart() / 1000f
                     val volumeAfter = stock.getVolumeFixPriceAfterStart() / 1000f
-                    volumeSharesFromStartView.text = "%.1fk+%.1fk".format(volumeBefore, volumeAfter)
+                    volumeSharesFromStartView.text = "%.2fk+%.2fk".format(locale = Locale.US, volumeBefore, volumeAfter)
 
                     priceView.text = "${stock.getPriceFixPriceString()} ➡ ${stock.getPriceString()}"
 

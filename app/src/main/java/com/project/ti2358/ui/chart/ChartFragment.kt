@@ -67,7 +67,7 @@ class VolumeFormatter : ValueFormatter() {
     var candles: MutableList<Candle> = mutableListOf()
 
     override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-        return "%.1fk".format(value / 1000f)
+        return "%.1fk".format(locale = Locale.US, value / 1000f)
     }
 }
 

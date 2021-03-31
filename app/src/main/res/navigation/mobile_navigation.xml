@@ -37,7 +37,11 @@
         android:id="@+id/nav_portfolio_position"
         android:name="com.project.ti2358.ui.portfolio.PortfolioPositionFragment"
         android:label="@string/menu_portfolio"
-        tools:layout="@layout/fragment_portfolio_position" />
+        tools:layout="@layout/fragment_portfolio_position" >
+        <action
+            android:id="@+id/action_nav_portfolio_position_to_nav_orderbook"
+            app:destination="@id/nav_orderbook" />
+    </fragment>
 
     <!-- заявки -->
     <fragment

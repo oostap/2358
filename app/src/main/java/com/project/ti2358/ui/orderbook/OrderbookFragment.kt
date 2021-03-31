@@ -32,6 +32,7 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.lang.Exception
 import java.lang.StrictMath.min
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.sign
@@ -431,9 +432,9 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             holder.dragToSellView.setTag(R.string.action_type, "replace")
 
             holder.bidCountView.text = "${item.bidCount}"
-            holder.bidPriceView.text = "%.2f".format(item.bidPrice)
+            holder.bidPriceView.text = "%.2f".format(locale = Locale.US, item.bidPrice)
             holder.askCountView.text = "${item.askCount}"
-            holder.askPriceView.text = "%.2f".format(item.askPrice)
+            holder.askPriceView.text = "%.2f".format(locale = Locale.US, item.askPrice)
 
             var targetPriceAsk = 0.0
             var targetPriceBid = 0.0
@@ -452,11 +453,11 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             val allow = true
             if (targetPriceAsk != 0.0 && allow) {
                 val percentBid = Utils.getPercentFromTo(item.bidPrice, targetPriceBid)
-                holder.bidPricePercentView.text = "%.2f%%".format(percentBid)
+                holder.bidPricePercentView.text = "%.2f%%".format(locale = Locale.US, percentBid)
                 holder.bidPricePercentView.setTextColor(Utils.getColorForValue(percentBid))
 
                 val percentAsk = Utils.getPercentFromTo(item.askPrice, targetPriceAsk)
-                holder.askPricePercentView.text = "%.2f%%".format(percentAsk)
+                holder.askPricePercentView.text = "%.2f%%".format(locale = Locale.US, percentAsk)
                 holder.askPricePercentView.setTextColor(Utils.getColorForValue(percentAsk))
                 holder.askPricePercentView.visibility = VISIBLE
                 holder.bidPricePercentView.visibility = VISIBLE

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent" android:layout_height="fill_parent">
 
     <LinearLayout
@@ -7,13 +8,157 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <include layout="@layout/fragment_portfolio_item" />
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:orientation="horizontal"
+            android:divider="?android:dividerHorizontal"
+            android:dividerPadding="10dp"
+            android:showDividers="middle"
+            android:paddingStart="10dp"
+            android:weightSum="4">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.25"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/ticker_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="2dp"
+                    android:text="1. TSLA"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/price_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="4dp"
+                    android:paddingTop="2dp"
+                    android:gravity="center_vertical"
+                    android:text="700$ = 111$"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/sector_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="2dp"
+                    android:gravity="center_vertical"
+                    android:text="700$"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/report_info_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="4dp"
+                    android:gravity="center_vertical"
+                    android:text="700$"
+                    android:textSize="11sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/lots_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:paddingStart="8dp"
+                        android:gravity="center_vertical"
+                        android:text="250"
+                        android:textSize="14dp" />
+
+                    <TextView
+                        android:id="@+id/lots_blocked_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="2dp"
+                        android:gravity="center_vertical"
+                        android:textAlignment="center"
+                        android:text="(125🔒)"
+                        android:textSize="10dp"
+                        tools:ignore="RtlCompat" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/cash_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:gravity="center_vertical"
+                    android:text="123$"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.95"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/price_change_percent_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:gravity="center_vertical"
+                    android:text="+5%"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/price_change_absolute_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:gravity="center_vertical"
+                    android:text="+20$"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.8"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/orderbook_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitCenter"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    app:srcCompat="@drawable/ic_glass"
+                    app:tint="@color/orderbook_color"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@android:color/darker_gray"
-            android:layout_margin="5dp"/>
+            android:layout_margin="2dp"/>
 
         <LinearLayout
             android:layout_width="200dp"
@@ -23,7 +168,7 @@
 
             <Button
                 android:layout_weight="1"
-                android:id="@+id/lotsMinusButton"
+                android:id="@+id/lots_minus_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="0dp"
@@ -31,7 +176,7 @@
                 android:text="-" />
 
             <EditText
-                android:id="@+id/edit_text_lots"
+                android:id="@+id/lots_edit_text"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -41,7 +186,7 @@
 
             <Button
                 android:layout_weight="1"
-                android:id="@+id/lotsPlusButton"
+                android:id="@+id/lots_plus_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="20dp"
@@ -51,7 +196,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/position_percent"
+            android:id="@+id/lots_percent_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="50%"
@@ -60,13 +205,13 @@
         <SeekBar
             android:id="@+id/lots_bar"
             android:layout_width="match_parent"
-            android:layout_height="40dp" />
+            android:layout_height="30dp" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@android:color/darker_gray"
-            android:layout_margin="5dp"/>
+            android:layout_margin="2dp"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -78,135 +223,36 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_gravity="center"
                 android:weightSum="2" >
 
                 <TextView
-                    android:id="@+id/trade_bid_price"
+                    android:id="@+id/price_bid_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="цена: 12.3$"
                     android:textAlignment="center"/>
                 <TextView
-                    android:id="@+id/trade_bid_profit"
+                    android:id="@+id/profit_bid_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="+1.2% / 10$"
                     android:textAlignment="center"/>
                 <Button
-                    android:layout_height="70dp"
-                    android:id="@+id/button_sell_bid"
+                    android:layout_height="60dp"
+                    android:id="@+id/sell_bid_button"
                     android:text="@string/sell_bid"
                     android:layout_weight="1"
-                    android:textSize="16dp"
+                    android:padding="0dp"
+                    android:textSize="10dp"
                     android:layout_width="wrap_content" />
-            </LinearLayout>
-
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_alignParentBottom="true"
-                android:weightSum="2" >
-
                 <TextView
-                    android:id="@+id/trade_ask_price"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="цена: 12.3$"
-                    android:textAlignment="center"/>
-                <TextView
-                    android:id="@+id/trade_ask_profit"
+                    android:id="@+id/profit_bid_absolute_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="+1.2% / 10$"
-                    android:textAlignment="center"/>
-                <Button
-                    android:layout_height="70dp"
-                    android:id="@+id/button_sell_ask"
-                    android:text="@string/sell_ask"
-                    android:layout_weight="1"
-                    android:textSize="16dp"
-                    android:layout_width="wrap_content" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            android:layout_margin="5dp"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Трейлинг тейк-профит и стоп-лосс"
-            android:textAlignment="center"/>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_gravity="center">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginRight="5dp"
-                android:layout_alignParentBottom="true"
-                android:weightSum="2" >
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="активация"
-                    android:textAlignment="center"/>
-                <LinearLayout
-                    android:layout_width="130dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_gravity="center">
-
-                    <Button
-                        android:layout_weight="1"
-                        android:id="@+id/button_tt_minus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:padding="0dp"
-                        android:textSize="20dp"
-                        android:text="-" />
-
-                    <EditText
-                        android:id="@+id/edit_tt"
-                        android:layout_width="60dp"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:inputType="number"
-                        android:text="1.0"
-                        android:textAlignment="center"/>
-
-                    <Button
-                        android:layout_weight="1"
-                        android:id="@+id/button_tt_plus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="20dp"
-                        android:padding="0dp"
-                        android:text="+" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tt_activation_price"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="123.4$"
                     android:textAlignment="center"/>
             </LinearLayout>
 
@@ -216,23 +262,146 @@
                 android:orientation="vertical"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:layout_alignParentBottom="true"
+                android:layout_gravity="center"
                 android:weightSum="2" >
 
                 <TextView
+                    android:id="@+id/price_limit_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="отклонение"
+                    android:text="цена: 12.3$"
                     android:textAlignment="center"/>
+
                 <LinearLayout
-                    android:layout_width="130dp"
+                    android:layout_width="140dp"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_gravity="center">
 
                     <Button
                         android:layout_weight="1"
-                        android:id="@+id/button_tt_delta_minus"
+                        android:id="@+id/percent_minus_button"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:padding="0dp"
+                        android:textSize="20dp"
+                        android:text="-" />
+
+                    <EditText
+                        android:id="@+id/percent_limit_edit_text"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:inputType="number"
+                        android:text="113.23"
+                        android:textSize="13dp"
+                        android:textAlignment="center"/>
+
+                    <Button
+                        android:layout_weight="1"
+                        android:id="@+id/percent_plus_button"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="20dp"
+                        android:padding="0dp"
+                        android:text="+" />
+
+                </LinearLayout>
+
+                <Button
+                    android:layout_height="60dp"
+                    android:id="@+id/sell_limit_button"
+                    android:text="@string/sell_limit"
+                    android:layout_weight="1"
+                    android:padding="0dp"
+                    android:textSize="12dp"
+                    android:layout_width="match_parent" />
+                <TextView
+                    android:id="@+id/profit_limit_absolute_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="+1.2% / 10$"
+                    android:textAlignment="center"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_gravity="center"
+                android:weightSum="2" >
+
+                <TextView
+                    android:id="@+id/price_ask_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="цена: 12.3$"
+                    android:textAlignment="center"/>
+                <TextView
+                    android:id="@+id/profit_ask_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="+1.2% / 10$"
+                    android:textAlignment="center"/>
+                <Button
+                    android:layout_height="60dp"
+                    android:id="@+id/sell_ask_button"
+                    android:text="@string/sell_ask"
+                    android:layout_weight="1"
+                    android:padding="0dp"
+                    android:textSize="10dp"
+                    android:layout_width="wrap_content" />
+                <TextView
+                    android:id="@+id/profit_ask_absolute_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="+1.2% / 10$"
+                    android:textAlignment="center"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_margin="2dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Трейлинг тейк-профит и стоп-лосс"
+            android:textAlignment="center"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:weightSum="3">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="активация"
+                    android:textAlignment="center"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="center">
+
+                    <Button
+                        android:layout_weight="1"
+                        android:id="@+id/tt_activation_minus_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="0dp"
@@ -240,17 +409,18 @@
                         android:text="-" />
 
                     <EditText
-                        android:id="@+id/edit_tt_delta"
-                        android:layout_width="60dp"
+                        android:id="@+id/tt_activation_edit"
+                        android:layout_width="40dp"
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:inputType="number"
-                        android:text="0.4"
+                        android:text="1.0"
+                        android:textSize="14dp"
                         android:textAlignment="center"/>
 
                     <Button
                         android:layout_weight="1"
-                        android:id="@+id/button_tt_delta_plus"
+                        android:id="@+id/tt_activation_plus_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="20dp"
@@ -260,7 +430,63 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/tt_delta_price"
+                    android:id="@+id/tt_activation_price_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="123.4$"
+                    android:textAlignment="center"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="отклонение"
+                    android:textAlignment="center"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="center">
+
+                    <Button
+                        android:layout_weight="1"
+                        android:id="@+id/tt_delta_minus_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="0dp"
+                        android:textSize="20dp"
+                        android:text="-" />
+
+                    <EditText
+                        android:id="@+id/tt_delta_edit"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:inputType="number"
+                        android:text="0.4"
+                        android:textSize="14dp"
+                        android:textAlignment="center"/>
+
+                    <Button
+                        android:layout_weight="1"
+                        android:id="@+id/tt_delta_plus_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="20dp"
+                        android:padding="0dp"
+                        android:text="+" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tt_delta_price_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="123.4$ - 1.3$"
@@ -268,11 +494,10 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_alignParentBottom="true"
-                android:weightSum="2" >
+                android:layout_weight="1" >
 
                 <TextView
                     android:layout_width="match_parent"
@@ -287,7 +512,7 @@
 
                     <Button
                         android:layout_weight="1"
-                        android:id="@+id/button_sl_minus"
+                        android:id="@+id/tt_stop_loss_minus_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="0dp"
@@ -295,17 +520,18 @@
                         android:text="-" />
 
                     <EditText
-                        android:id="@+id/edit_sl"
-                        android:layout_width="60dp"
+                        android:id="@+id/tt_stop_loss_edit"
+                        android:layout_width="40dp"
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:inputType="number"
                         android:text="-1.0"
+                        android:textSize="14dp"
                         android:textAlignment="center"/>
 
                     <Button
                         android:layout_weight="1"
-                        android:id="@+id/button_sl_plus"
+                        android:id="@+id/tt_stop_loss_plus_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="20dp"
@@ -315,7 +541,7 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/sl_price"
+                    android:id="@+id/tt_stop_loss_price_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="120.4$"
@@ -324,9 +550,9 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/button_sell_tt"
+            android:id="@+id/sell_tt_button"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
+            android:layout_height="60dp"
             android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
             android:text="@string/sell_tt"
@@ -336,7 +562,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@android:color/darker_gray"
-            android:layout_margin="5dp"/>
+            android:layout_margin="2dp"/>
 
     </LinearLayout>
 
@@ -351,21 +577,21 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/updateButton"
+            android:id="@+id/update_button"
             android:layout_marginRight="5dp"
             android:text="@string/update"
             android:layout_weight="1"
-            android:textSize="16dp"
+            android:textSize="14dp"
             android:layout_width="0dp" />
 
         <Button
-            android:id="@+id/button_cancel_all"
+            android:id="@+id/cancel_all_button"
             android:layout_width="0dp"
             android:layout_height="70dp"
             android:layout_marginLeft="5dp"
             android:layout_weight="1"
             android:text="@string/cancel_all2"
-            android:textSize="16dp" />
+            android:textSize="14dp" />
     </LinearLayout>
 
 </RelativeLayout>

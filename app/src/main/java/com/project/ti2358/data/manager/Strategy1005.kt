@@ -33,7 +33,7 @@ class Strategy1005 : KoinComponent {
 
         stocks = all.filter { stock ->
             stock.getPriceDouble() > min && stock.getPriceDouble() < max &&
-            abs(stock.changePrice2359DayPercent) >= abs(change) &&
+            abs(stock.changePrice2300DayPercent) >= abs(change) &&
             stock.getTodayVolume() >= volumeMin &&
             stock.getTodayVolume() <= volumeMax
         }.toMutableList()
@@ -45,7 +45,7 @@ class Strategy1005 : KoinComponent {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-            it.changePrice2359DayPercent * sign
+            it.changePrice2300DayPercent * sign
         }
         return stocks
     }

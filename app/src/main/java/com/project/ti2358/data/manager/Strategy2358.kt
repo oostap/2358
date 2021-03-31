@@ -7,6 +7,7 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.lang.Exception
+import java.util.*
 import kotlin.math.roundToInt
 
 @KoinApiExtension
@@ -31,7 +32,7 @@ class Strategy2358() : KoinComponent {
         val max = SettingsManager.getCommonPriceMax()
 
         stocks = all.filter { stock ->
-            stock.changePrice2359DayPercent <= change &&    // изменение
+            stock.changePrice2300DayPercent <= change &&    // изменение
             stock.getTodayVolume() >= volumeDayPieces &&    // объём в шт
             stock.dayVolumeCash >= volumeDayCash &&         // объём в $
             stock.getPriceDouble() > min &&                 // мин цена
@@ -40,7 +41,7 @@ class Strategy2358() : KoinComponent {
 
         stocks.sortBy {
             val multiplier = if (it in stocksSelected) 100 else 1
-            it.changePrice2359DayPercent * multiplier
+            it.changePrice2300DayPercent * multiplier
         }
 
         return stocks
@@ -53,7 +54,7 @@ class Strategy2358() : KoinComponent {
         } else {
             stocksSelected.remove(stock)
         }
-        stocksSelected.sortBy { it.changePrice2359DayPercent }
+        stocksSelected.sortBy { it.changePrice2300DayPercent }
     }
 
     fun isSelected(stock: Stock): Boolean {
@@ -74,7 +75,7 @@ class Strategy2358() : KoinComponent {
             for (stock in stocksSelected) {
                 if (stock.changeOnStartTimer == 0.0) continue
 
-                val delta = stock.changeOnStartTimer / stock.changePrice2359DayPercent
+                val delta = stock.changeOnStartTimer / stock.changePrice2300DayPercent
 
                 // если бумага отросла больше, чем на половину, то отменить покупку
                 if (delta >= 1.6) {
@@ -136,7 +137,7 @@ class Strategy2358() : KoinComponent {
             purchase.status = PurchaseStatus.WAITING
 
             if (reset) { // запоминаем % подготовки, чтобы после проверить изменение
-                purchase.stock.changeOnStartTimer = purchase.stock.changePrice2359DayPercent
+                purchase.stock.changeOnStartTimer = purchase.stock.changePrice2300DayPercent
             }
         }
 
@@ -164,7 +165,7 @@ class Strategy2358() : KoinComponent {
     fun getNotificationTextLong(): String {
         var tickers = ""
         for (purchase in purchaseToBuy) {
-            val p = "%.2f$".format(purchase.lots * purchase.stock.getPriceDouble())
+            val p = "%.2f$".format(locale = Locale.US, purchase.lots * purchase.stock.getPriceDouble())
             tickers += "${purchase.stock.ticker}*${purchase.lots} = ${p}, "
             tickers += if (purchase.trailingStop) {
                 "ТТ:${purchase.trailingStopTakeProfitPercentActivation.toPercent()}/${purchase.trailingStopTakeProfitPercentDelta.toPercent()}, ${purchase.getStatusString()} ${purchase.currentTrailingStop?.currentChangePercent?.toPercent() ?: ""}\n"

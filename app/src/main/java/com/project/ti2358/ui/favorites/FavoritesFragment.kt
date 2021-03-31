@@ -112,11 +112,11 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
                     tickerView.text = "${index + 1}) ${stock.getTickerLove()}"
                     priceView.text = "${stock.getPrice2359String()} ➡ ${stock.getPriceString()}"
 
-                    priceChangeAbsoluteView.text = stock.changePrice2359DayAbsolute.toMoney(stock)
-                    priceChangePercentView.text = stock.changePrice2359DayPercent.toPercent()
+                    priceChangeAbsoluteView.text = stock.changePrice2300DayAbsolute.toMoney(stock)
+                    priceChangePercentView.text = stock.changePrice2300DayPercent.toPercent()
 
-                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
-                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
 
                     chooseView.setOnCheckedChangeListener { _, checked ->
                         strategyFavorites.setSelected(stock, checked)

@@ -31,16 +31,16 @@ data class Stock(
     var candleToday: Candle? = null                               // реалтайм, дневная свеча
 
     // разница с ценой открытия премаркета
-    var changePriceDayAbsolute: Double = 0.0
-    var changePriceDayPercent: Double = 0.0
+    var changePrice0145Absolute: Double = 0.0
+    var changePrice0145Percent: Double = 0.0
 
-    // разница с ценой закрытия постмаркет US
-    var changePricePostmarketAbsolute: Double = 0.0
-    var changePricePostmarketPercent: Double = 0.0
+    // разница с ценой закрытия постмаркета US в 03:00
+    var changePrice0300Absolute: Double = 0.0
+    var changePrice0300Percent: Double = 0.0
 
     // разница с ценой закрытия ОС
-    var changePrice2359DayAbsolute: Double = 0.0
-    var changePrice2359DayPercent: Double = 0.0
+    var changePrice2300DayAbsolute: Double = 0.0
+    var changePrice2300DayPercent: Double = 0.0
 
     // разница со старта таймера
     var needToFixPrice: Boolean = false
@@ -259,8 +259,8 @@ data class Stock(
     private fun updateChangeToday() {
         candleToday?.let { candle ->
             closePrices?.let { close ->
-                changePriceDayAbsolute = candle.closingPrice - close.post
-                changePriceDayPercent = candle.closingPrice / close.post * 100.0 - 100
+                changePrice0145Absolute = candle.closingPrice - close.post
+                changePrice0145Percent = candle.closingPrice / close.post * 100.0 - 100
 
                 middlePrice = (candle.highestPrice + candle.lowestPrice) / 2.0
                 dayVolumeCash = middlePrice * candle.volume
@@ -271,12 +271,12 @@ data class Stock(
     private fun updateChangePostmarket() {
         closePrices?.let { close ->
             close.yahoo?.let {
-                changePricePostmarketAbsolute = close.yahoo - close.os
-                changePricePostmarketPercent = (100 * close.yahoo) / close.os - 100
+                changePrice0300Absolute = close.yahoo - close.os
+                changePrice0300Percent = (100 * close.yahoo) / close.os - 100
 
                 candleToday?.let { today ->
-                    changePricePostmarketAbsolute = close.yahoo - today.closingPrice
-                    changePricePostmarketPercent = (100 * close.yahoo) / today.closingPrice - 100
+                    changePrice0300Absolute = close.yahoo - today.closingPrice
+                    changePrice0300Percent = (100 * close.yahoo) / today.closingPrice - 100
                 }
             }
         }
@@ -284,12 +284,12 @@ data class Stock(
 
     private fun updateChange2359() {
         closePrices?.let {
-            changePrice2359DayAbsolute = it.post - it.os
-            changePrice2359DayPercent = (100 * it.post) / it.os - 100
+            changePrice2300DayAbsolute = it.post - it.os
+            changePrice2300DayPercent = (100 * it.post) / it.os - 100
 
             candleToday?.let { today ->
-                changePrice2359DayAbsolute = today.closingPrice - it.os
-                changePrice2359DayPercent = (100 * today.closingPrice) / it.os - 100
+                changePrice2300DayAbsolute = today.closingPrice - it.os
+                changePrice2300DayPercent = (100 * today.closingPrice) / it.os - 100
             }
         }
     }

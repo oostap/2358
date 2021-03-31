@@ -36,6 +36,7 @@ class WorkflowManager() : KoinComponent {
             fun provideAlorManager(): AlorManager = AlorManager()
             fun provideOrderbookManager(): OrderbookManager = OrderbookManager()
             fun provideChartManager(): ChartManager = ChartManager()
+            fun providePositionManager(): PositionManager = PositionManager()
 
             fun provideStrategyFavorites(): StrategyFavorites = StrategyFavorites()
             fun provideStrategyBlacklist(): StrategyBlacklist = StrategyBlacklist()
@@ -64,6 +65,7 @@ class WorkflowManager() : KoinComponent {
             single { provideAlorManager() }
             single { provideOrderbookManager() }
             single { provideChartManager() }
+            single { providePositionManager() }
 
             single { provideStrategyFavorites() }
             single { provideStrategyBlacklist() }

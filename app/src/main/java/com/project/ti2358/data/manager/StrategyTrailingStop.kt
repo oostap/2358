@@ -23,19 +23,26 @@ class StrategyTrailingStop : KoinComponent {
     @Synchronized
     fun removeTrailingStop(trailingStop: TrailingStop) {
         activeTrailingStops.remove(trailingStop)
+        checkFinish()
+    }
 
+    fun stopTrailingStopsForStock(stock: Stock) {
+        activeTrailingStops.removeAll { it.stock.ticker == stock.ticker }
+        checkFinish()
+    }
+
+    fun stopStrategy() {
+        activeTrailingStops.forEach { it.stop() }
+        activeTrailingStops.clear()
+        checkFinish()
+    }
+
+    private fun checkFinish() {
         if (activeTrailingStops.isEmpty()) {
             if (Utils.isServiceRunning(TheApplication.application.applicationContext, StrategyTrailingStopService::class.java)) {
                 TheApplication.application.applicationContext.stopService(Intent(TheApplication.application.applicationContext, StrategyTrailingStopService::class.java))
             }
         }
-    }
-
-    fun stopStrategy() {
-        activeTrailingStops.forEach {
-            it.stop()
-        }
-        activeTrailingStops.clear()
     }
 
     fun getNotificationTitleShort(): String {

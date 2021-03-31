@@ -26,7 +26,7 @@ class StrategyPostmarket : KoinComponent {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-            it.changePricePostmarketPercent * sign
+            it.changePrice0300Percent * sign
         }
         return stocks
     }

@@ -27,33 +27,107 @@
         tools:context=".ui.premarket.PremarketFragment"
         tools:listitem="@layout/fragment_premarket_item" />
 
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:layout_alignParentBottom="true"
-        android:weightSum="2" >
+        android:layout_alignParentBottom="true">
 
-        <Button
-            android:layout_height="70dp"
-            android:id="@+id/postmarket_button"
-            android:layout_marginRight="5dp"
-            android:text="@string/time_closemarket"
-            android:layout_weight="1"
-            android:textSize="16dp"
-            android:layout_width="0dp" />
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
+            android:weightSum="4" >
 
-        <Button
-            android:layout_height="70dp"
-            android:layout_width="0dp"
-            android:id="@+id/premarket_button"
-            android:layout_marginLeft="5dp"
-            android:text="@string/time_premarket"
-            android:layout_weight="1"
-            android:textSize="16sp" />
+            <Button
+                android:layout_height="50dp"
+                android:id="@+id/from_2300_button"
+                android:layout_marginRight="5dp"
+                android:text="23:00"
+                android:layout_weight="1"
+                android:padding="0dp"
+                android:textSize="14dp"
+                android:layout_width="0dp" />
 
+            <Button
+                android:layout_height="50dp"
+                android:layout_width="0dp"
+                android:id="@+id/from_0145_button"
+                android:padding="0dp"
+                android:text="01:45"
+                android:layout_weight="1"
+                android:textSize="14dp" />
+
+            <Button
+                android:layout_height="50dp"
+                android:layout_width="0dp"
+                android:id="@+id/from_0300_button"
+                android:layout_marginLeft="5dp"
+                android:padding="0dp"
+                android:text="03:00"
+                android:layout_weight="1"
+                android:textSize="14dp" />
+
+            <Button
+                android:layout_height="50dp"
+                android:layout_width="0dp"
+                android:id="@+id/from_now_button"
+                android:layout_marginLeft="5dp"
+                android:padding="0dp"
+                android:text="NOW"
+                android:layout_weight="1"
+                android:textSize="14dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
+            android:weightSum="4" >
+
+            <Button
+                android:layout_height="50dp"
+                android:id="@+id/to_2300_button"
+                android:layout_marginRight="5dp"
+                android:text="23:00"
+                android:layout_weight="1"
+                android:padding="0dp"
+                android:textSize="14dp"
+                android:layout_width="0dp" />
+
+            <Button
+                android:layout_height="50dp"
+                android:layout_width="0dp"
+                android:id="@+id/to_0145_button"
+                android:padding="0dp"
+                android:text="01:45"
+                android:layout_weight="1"
+                android:textSize="14dp" />
+
+            <Button
+                android:layout_height="50dp"
+                android:layout_width="0dp"
+                android:id="@+id/to_0300_button"
+                android:layout_marginLeft="5dp"
+                android:padding="0dp"
+                android:text="03:00"
+                android:layout_weight="1"
+                android:textSize="14dp" />
+
+            <Button
+                android:layout_height="50dp"
+                android:layout_width="0dp"
+                android:id="@+id/to_now_button"
+                android:layout_marginLeft="5dp"
+                android:padding="0dp"
+                android:text="NOW"
+                android:layout_weight="1"
+                android:textSize="14dp" />
+        </LinearLayout>
     </LinearLayout>
-
 </RelativeLayout>

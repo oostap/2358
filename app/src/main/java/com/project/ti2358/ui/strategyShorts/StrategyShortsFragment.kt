@@ -16,6 +16,7 @@ import com.project.ti2358.databinding.FragmentShortsItemBinding
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import java.util.*
 
 @KoinApiExtension
 class StrategyShortsFragment : Fragment(R.layout.fragment_shorts) {
@@ -70,16 +71,16 @@ class StrategyShortsFragment : Fragment(R.layout.fragment_shorts) {
                     priceView.text = "${stock.getPrice2359String()} ➡ ${stock.getPriceString()}"
 
                     val volume = stock.getTodayVolume() / 1000f
-                    volumeSharesView.text = "%.1fk".format(volume)
+                    volumeSharesView.text = "%.1fk".format(locale = Locale.US, volume)
 
                     val volumeCash = stock.dayVolumeCash / 1000f / 1000f
-                    volumeCashView.text = "%.2fM$".format(volumeCash)
+                    volumeCashView.text = "%.2fM$".format(locale = Locale.US, volumeCash)
 
-                    priceChangeAbsoluteView.text = stock.changePrice2359DayAbsolute.toMoney(stock)
-                    priceChangePercentView.text = stock.changePrice2359DayPercent.toPercent()
+                    priceChangeAbsoluteView.text = stock.changePrice2300DayAbsolute.toMoney(stock)
+                    priceChangePercentView.text = stock.changePrice2300DayPercent.toPercent()
 
-                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
-                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
 
                     itemView.setOnClickListener {
                         Utils.openTinkoffForTicker(requireContext(), stock.ticker)

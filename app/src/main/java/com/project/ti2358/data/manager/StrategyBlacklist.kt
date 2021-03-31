@@ -24,7 +24,7 @@ class StrategyBlacklist : KoinComponent {
     fun process(): MutableList<Stock> {
         val all = stockManager.getAllStocks()
         stocks = all
-        stocks.sortBy { it.changePrice2359DayPercent }
+        stocks.sortBy { it.changePrice2300DayPercent }
         loadSelectedStocks()
         return stocks
     }
@@ -59,7 +59,7 @@ class StrategyBlacklist : KoinComponent {
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
             val multiplier = if (it in stocksSelected) 100 else 1
-            it.changePrice2359DayPercent * sign - multiplier
+            it.changePrice2300DayPercent * sign - multiplier
         }
         return stocks
     }
@@ -71,7 +71,7 @@ class StrategyBlacklist : KoinComponent {
         } else {
             stocksSelected.remove(stock)
         }
-        stocksSelected.sortBy { it.changePrice2359DayPercent }
+        stocksSelected.sortBy { it.changePrice2300DayPercent }
 
         saveSelectedStocks()
     }

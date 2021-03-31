@@ -45,6 +45,13 @@ enum class Step1728 {
     stepFinal,
 }
 
+enum class ScreenerType {
+    screener2300,
+    screener0145,
+    screener0300,
+    screenerNow,
+}
+
 fun Date.toString(format: String, locale: Locale = Locale.getDefault()): String {
     val formatter = SimpleDateFormat(format, locale)
     return formatter.format(this)
@@ -52,11 +59,11 @@ fun Date.toString(format: String, locale: Locale = Locale.getDefault()): String 
 
 fun Double.toMoney(stock: Stock?): String {
     val symbol = stock?.getCurrencySymbol() ?: "$"
-    return "%.2f%s".format(this, symbol)
+    return "%.2f%s".format(locale = Locale.US, this, symbol)
 }
 
 fun Double.toPercent(): String {
-    return "%.2f%%".format(this)
+    return "%.2f%%".format(locale = Locale.US, this)
 }
 
 class Utils {

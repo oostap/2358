@@ -6,6 +6,7 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.lang.Exception
+import java.util.*
 import kotlin.math.roundToInt
 
 @KoinApiExtension
@@ -32,7 +33,7 @@ class Strategy1000Buy : KoinComponent {
         val max = SettingsManager.getCommonPriceMax()
 
         stocks = all.filter { it.getPriceDouble() > min && it.getPriceDouble() < max }.toMutableList()
-        stocks.sortBy { it.changePrice2359DayPercent }
+        stocks.sortBy { it.changePrice2300DayPercent }
         return stocks
     }
 
@@ -40,7 +41,7 @@ class Strategy1000Buy : KoinComponent {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-            it.changePrice2359DayPercent * sign
+            it.changePrice2300DayPercent * sign
         }
         return stocks
     }
@@ -52,7 +53,7 @@ class Strategy1000Buy : KoinComponent {
         } else {
             stocksSelected.remove(stock)
         }
-        stocksSelected.sortBy { it.changePrice2359DayPercent }
+        stocksSelected.sortBy { it.changePrice2300DayPercent }
     }
 
     fun isSelected(stock: Stock): Boolean {
@@ -98,7 +99,7 @@ class Strategy1000Buy : KoinComponent {
         for (p in purchases) {
             value += p.lots * p.getLimitPriceDouble()
         }
-        return "%.1f$".format(value)
+        return "%.1f$".format(locale = Locale.US, value)
     }
 
     fun getTotalPurchasePieces(): Int {
@@ -122,7 +123,7 @@ class Strategy1000Buy : KoinComponent {
     fun getNotificationTextLong(purchases: MutableList<PurchaseStock>): String {
         var tickers = ""
         for (p in purchases) {
-            val text = "%.1f$ > %.2f$ > %.1f%%".format(
+            val text = "%.1f$ > %.2f$ > %.1f%%".format(locale = Locale.US,
                 p.lots * p.getLimitPriceDouble(),
                 p.getLimitPriceDouble(),
                 p.percentLimitPriceChange

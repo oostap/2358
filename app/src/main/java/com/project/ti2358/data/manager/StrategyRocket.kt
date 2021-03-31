@@ -92,7 +92,7 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
         if (stock.minuteCandles.isNotEmpty()) {
             val firstCandle: Candle?
             val lastCandle = stock.minuteCandles.last()
-            var fromIndex: Int = 0
+            var fromIndex = 0
             if (stock.minuteCandles.size >= minutesRocket) {
                 fromIndex = stock.minuteCandles.size - minutesRocket
                 firstCandle = stock.minuteCandles[fromIndex]
@@ -101,7 +101,7 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
                 firstCandle = stock.minuteCandles.first()
             }
 
-            val deltaMinutes: Int = ((lastCandle.time.time - firstCandle.time.time) / 60.0 / 1000.0).toInt()
+            val deltaMinutes = ((lastCandle.time.time - firstCandle.time.time) / 60.0 / 1000.0).toInt()
             if (deltaMinutes > minutesRocket) { // если дальше настроек, игнорим
                 return
             }
@@ -112,7 +112,7 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
             }
 
             val changePercent = lastCandle.closingPrice / firstCandle.openingPrice * 100.0 - 100.0
-            if (volume >= volumeRocket && abs(changePercent) >= percentRocket) {
+            if (volume >= volumeRocket && abs(changePercent) >= abs(percentRocket)) {
 
                 if ((rocketStocks.isNotEmpty() && rocketStocks.first().stock == stock) ||
                     (cometStocks.isNotEmpty() && cometStocks.first().stock == stock)) {
@@ -170,11 +170,10 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
             name = ticker
         }
 
-        val changePercent: String
-        if (rocketStock.changePercent > 0) {
-            changePercent = "+%.2f%%".format(rocketStock.changePercent)
+        val changePercent = if (rocketStock.changePercent > 0) {
+            "+%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
         } else {
-            changePercent = "%.2f%%".format(rocketStock.changePercent)
+            "%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
         }
 
         if (SettingsManager.getRocketVoice()) {

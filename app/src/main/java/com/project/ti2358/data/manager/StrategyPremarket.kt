@@ -32,7 +32,7 @@ class StrategyPremarket : KoinComponent {
 
         stocks = all.filter {
             it.getPriceDouble() > min && it.getPriceDouble() < max &&
-            abs(it.changePriceDayPercent) >= abs(change) &&
+            abs(it.changePrice0145Percent) >= abs(change) &&
             it.getTodayVolume() >= volumeMin &&
             it.getTodayVolume() <= volumeMax
         }.toMutableList()
@@ -44,7 +44,7 @@ class StrategyPremarket : KoinComponent {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-            it.changePriceDayPercent * sign
+            it.changePrice0145Percent * sign
         }
         return stocks
     }

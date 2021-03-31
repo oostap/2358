@@ -20,6 +20,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import java.util.*
 import kotlin.math.roundToInt
 
 @KoinApiExtension
@@ -139,7 +140,7 @@ class Strategy1728DownFragment : Fragment(R.layout.fragment_1728_down) {
                         Step1728.stepFinal -> stock.getTodayVolume()
                     } / 1000f
 
-                    volumeSharesView.text = "%.1fk".format(volume)
+                    volumeSharesView.text = "%.1fk".format(locale = Locale.US, volume)
 
                     priceChangeAbsoluteView.text = changeAbsolute.toMoney(stock)
                     priceChangePercentView.text = changePercent.toPercent()

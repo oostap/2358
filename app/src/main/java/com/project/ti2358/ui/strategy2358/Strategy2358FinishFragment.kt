@@ -19,6 +19,7 @@ import com.project.ti2358.databinding.Fragment2358FinishItemBinding
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import java.util.*
 
 @KoinApiExtension
 class Strategy2358FinishFragment : Fragment(R.layout.fragment_2358_finish) {
@@ -170,7 +171,7 @@ class Strategy2358FinishFragment : Fragment(R.layout.fragment_2358_finish) {
                         profitPercentToView.setTextColor(Utils.GREEN)
                     }
 
-                    priceBuyView.text = "%.2f$".format(purchaseStock.stock.getPriceDouble() * purchaseStock.lots)
+                    priceBuyView.text = "%.2f$".format(locale = Locale.US, purchaseStock.stock.getPriceDouble() * purchaseStock.lots)
                     updateInfoText()
                 }
             }

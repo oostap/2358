@@ -122,11 +122,11 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
                     val volumeCash = stock.dayVolumeCash / 1000f / 1000f
                     volumeCashView.text = "%.2fM$".format(volumeCash)
 
-                    priceChangeAbsoluteView.text = stock.changePrice2359DayAbsolute.toMoney(stock)
-                    priceChangePercentView.text = stock.changePrice2359DayPercent.toPercent()
+                    priceChangeAbsoluteView.text = stock.changePrice2300DayAbsolute.toMoney(stock)
+                    priceChangePercentView.text = stock.changePrice2300DayPercent.toPercent()
 
-                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
-                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2359DayAbsolute))
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
 
                     chooseView.setOnCheckedChangeListener { _, checked ->
                         strategyTazikEndless.setSelected(stock, checked)
