@@ -117,7 +117,7 @@ class Strategy1728DownFragment : Fragment(R.layout.fragment_1728_down) {
 
                 with(binding) {
                     tickerView.text = "${index + 1}) ${stock.getTickerLove()}"
-                    priceView.text = stock.getPriceDouble().toMoney(stock)
+                    priceView.text = stock.getPriceNow().toMoney(stock)
 
                     val changePercent = when (step1728) {
                         Step1728.step700to1200 -> stock.changePrice700to1200Percent
@@ -159,7 +159,7 @@ class Strategy1728DownFragment : Fragment(R.layout.fragment_1728_down) {
                             val purchase = PurchaseStock(stock)
 
                             // считаем лоты
-                            purchase.lots = (SettingsManager.get1728PurchaseVolume() / purchase.stock.getPriceDouble()).roundToInt()
+                            purchase.lots = (SettingsManager.get1728PurchaseVolume() / purchase.stock.getPriceNow()).roundToInt()
 
                             // включаем трейлинг тейк
                             if (SettingsManager.get1728TrailingStop()) {

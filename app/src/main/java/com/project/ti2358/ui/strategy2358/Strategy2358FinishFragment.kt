@@ -171,7 +171,7 @@ class Strategy2358FinishFragment : Fragment(R.layout.fragment_2358_finish) {
                         profitPercentToView.setTextColor(Utils.GREEN)
                     }
 
-                    priceBuyView.text = "%.2f$".format(locale = Locale.US, purchaseStock.stock.getPriceDouble() * purchaseStock.lots)
+                    priceBuyView.text = "%.2f$".format(locale = Locale.US, purchaseStock.stock.getPriceNow() * purchaseStock.lots)
                     updateInfoText()
                 }
             }

@@ -26,7 +26,7 @@ class StrategyFixPrice() : KoinComponent {
         val all = stockManager.getWhiteStocks()
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
-        stocks = all.filter { stock -> stock.getPriceDouble() > min && stock.getPriceDouble() < max }.toMutableList()
+        stocks = all.filter { stock -> stock.getPriceNow() > min && stock.getPriceNow() < max }.toMutableList()
         return stocks
     }
 

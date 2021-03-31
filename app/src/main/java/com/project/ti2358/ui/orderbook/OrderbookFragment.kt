@@ -344,11 +344,9 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     val view = event.localState as View
                     val actionType = v.getTag(R.string.action_type) as String
                     if (actionType == "replace") {
-                        if (v is LinearLayout) {
-                            val dropTarget = v as LinearLayout          // строка, куда кидаем заявку
-                            val position = dropTarget.getTag(R.string.position_line) as Int
-
-                            dropTarget.setBackgroundColor(Utils.LIGHT)
+                        if (v is LinearLayout) { // строка, куда кидаем заявку
+                            val position = v.getTag(R.string.position_line) as Int
+                            v.setBackgroundColor(Utils.LIGHT)
                         }
                     }
                 }
@@ -356,10 +354,9 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     val view = event.localState as View
                     val actionType = v.getTag(R.string.action_type) as String
                     if (actionType == "replace") {
-                        if (v is LinearLayout) {
-                            val dropTarget = v as LinearLayout          // строка, куда кидаем заявку
-                            val position = dropTarget.getTag(R.string.position_line) as Int
-                            dropTarget.setBackgroundColor(Utils.getColorForIndex(position))
+                        if (v is LinearLayout) { // строка, куда кидаем заявку
+                            val position = v.getTag(R.string.position_line) as Int
+                            v.setBackgroundColor(Utils.getColorForIndex(position))
                         }
                     }
                 }
@@ -367,12 +364,11 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     val view = event.localState as View
                     val actionType = v.getTag(R.string.action_type) as String
                     if (actionType == "replace") {
-                        if (v is LinearLayout) {
-                            val dropTarget = v as LinearLayout          // строка, куда кидаем заявку
+                        if (v is LinearLayout) { // строка, куда кидаем заявку
                             val dropped = view as TextView              // заявка
 
-                            val lineTo = dropTarget.getTag(R.string.order_line) as OrderbookLine
-                            val operationTo = dropTarget.getTag(R.string.order_type) as OperationType
+                            val lineTo = v.getTag(R.string.order_line) as OrderbookLine
+                            val operationTo = v.getTag(R.string.order_type) as OperationType
 
                             var lineFrom = dropped.getTag(R.string.order_line) as OrderbookLine
                             val order = dropped.getTag(R.string.order_item) as Order

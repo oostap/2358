@@ -1,5 +1,6 @@
 package com.project.ti2358.ui.premarket
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,7 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.databinding.FragmentPremarketBinding
 import com.project.ti2358.databinding.FragmentPremarketItemBinding
+import com.project.ti2358.service.ScreenerType
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
@@ -29,14 +31,12 @@ import java.util.*
 class PremarketFragment : Fragment(R.layout.fragment_premarket) {
     val stockManager: StockManager by inject()
     val strategyPremarket: StrategyPremarket by inject()
-    val strategy1005: Strategy1005 by inject()
     val orderbookManager: OrderbookManager by inject()
 
     private var fragmentPremarketBinding: FragmentPremarketBinding? = null
 
     var adapterList: ItemPremarketRecyclerViewAdapter = ItemPremarketRecyclerViewAdapter(emptyList())
     lateinit var stocks: MutableList<Stock>
-    var postmarket: Boolean = true
     var job: Job? = null
 
     override fun onDestroy() {
@@ -50,69 +50,126 @@ class PremarketFragment : Fragment(R.layout.fragment_premarket) {
         val binding = FragmentPremarketBinding.bind(view)
         fragmentPremarketBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                processText(query)
-                return false
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String): Boolean {
+                    processText(query)
+                    return false
+                }
+
+                override fun onQueryTextChange(newText: String): Boolean {
+                    processText(newText)
+                    return false
+                }
+
+                fun processText(text: String) {
+                    updateDataWithSearch()
+                }
+            })
+
+            searchView.setOnCloseListener {
+                updateDataForce()
+                false
             }
 
-            override fun onQueryTextChange(newText: String): Boolean {
-                processText(newText)
-                return false
+            from2300Button.setOnClickListener {
+                strategyPremarket.screenerTypeFrom = ScreenerType.screener2300
+                updateDataWithSearch()
             }
 
-            fun processText(text: String) {
-                updateData(false)
-
-                stocks = Utils.search(stocks, text)
-                adapterList.setData(stocks)
+            from0145Button.setOnClickListener {
+                strategyPremarket.screenerTypeFrom = ScreenerType.screener0145
+                updateDataWithSearch()
             }
-        })
 
-        binding.searchView.setOnCloseListener {
-            updateData()
-            false
-        }
+            from0300Button.setOnClickListener {
+                strategyPremarket.screenerTypeFrom = ScreenerType.screener0300
+                updateDataWithSearch()
+            }
 
-        binding.premarketButton.setOnClickListener {
-            postmarket = false
-            updateData(false)
+            fromNowButton.setOnClickListener {
+                strategyPremarket.screenerTypeFrom = ScreenerType.screenerNow
+                updateDataWithSearch()
+            }
 
-            stocks = Utils.search(stocks, binding.searchView.query.toString())
-            adapterList.setData(stocks)
-        }
+            to2300Button.setOnClickListener {
+                strategyPremarket.screenerTypeTo = ScreenerType.screener2300
+                updateDataWithSearch()
+            }
 
-        binding.postmarketButton.setOnClickListener {
-            postmarket = true
-            updateData(false)
+            to0145Button.setOnClickListener {
+                strategyPremarket.screenerTypeTo = ScreenerType.screener0145
+                updateDataWithSearch()
+            }
 
-            stocks = Utils.search(stocks, binding.searchView.query.toString())
-            adapterList.setData(stocks)
+            to0300Button.setOnClickListener {
+                strategyPremarket.screenerTypeTo = ScreenerType.screener0300
+                updateDataWithSearch()
+            }
+
+            toNowButton.setOnClickListener {
+                strategyPremarket.screenerTypeTo = ScreenerType.screenerNow
+                updateDataWithSearch()
+            }
         }
 
         job?.cancel()
         job = GlobalScope.launch(Dispatchers.Main) {
             stockManager.reloadClosePrices()
-            updateData()
+            updateDataForce()
         }
 
-        updateData()
+        updateDataForce()
     }
 
-    fun updateData(update: Boolean = true) {
-        if (postmarket) {
-            stocks = strategy1005.process()
-            stocks = strategy1005.resort()
-        } else {
-            stocks = strategyPremarket.process()
-            stocks = strategyPremarket.resort()
-        }
+    private fun updateDataForce() {
+        stocks = strategyPremarket.process()
+        stocks = strategyPremarket.resort()
+        adapterList.setData(stocks)
+        updateButtons()
+    }
 
-        if (update) adapterList.setData(stocks)
+    fun updateDataWithSearch() {
+        stocks = strategyPremarket.process()
+        stocks = strategyPremarket.resort()
+        stocks = Utils.search(stocks, fragmentPremarketBinding?.searchView?.query.toString())
+        adapterList.setData(stocks)
+        updateButtons()
+    }
+
+    fun updateButtons() {
+        fragmentPremarketBinding?.apply {
+            val colorDefault = Utils.DARK_BLUE
+            val colorSelect = Utils.RED
+
+            from2300Button.setBackgroundColor(colorDefault)
+            from0145Button.setBackgroundColor(colorDefault)
+            from0300Button.setBackgroundColor(colorDefault)
+            fromNowButton.setBackgroundColor(colorDefault)
+
+            to2300Button.setBackgroundColor(colorDefault)
+            to0145Button.setBackgroundColor(colorDefault)
+            to0300Button.setBackgroundColor(colorDefault)
+            toNowButton.setBackgroundColor(colorDefault)
+
+            when (strategyPremarket.screenerTypeFrom) {
+                ScreenerType.screener2300 -> from2300Button.setBackgroundColor(colorSelect)
+                ScreenerType.screener0145 -> from0145Button.setBackgroundColor(colorSelect)
+                ScreenerType.screener0300 -> from0300Button.setBackgroundColor(colorSelect)
+                ScreenerType.screenerNow -> fromNowButton.setBackgroundColor(colorSelect)
+            }
+
+            when (strategyPremarket.screenerTypeTo) {
+                ScreenerType.screener2300 -> to2300Button.setBackgroundColor(colorSelect)
+                ScreenerType.screener0145 -> to0145Button.setBackgroundColor(colorSelect)
+                ScreenerType.screener0300 -> to0300Button.setBackgroundColor(colorSelect)
+                ScreenerType.screenerNow -> toNowButton.setBackgroundColor(colorSelect)
+            }
+        }
     }
 
     inner class ItemPremarketRecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<ItemPremarketRecyclerViewAdapter.ViewHolder>() {
@@ -137,25 +194,14 @@ class PremarketFragment : Fragment(R.layout.fragment_premarket) {
                     val volumeCash = stock.dayVolumeCash / 1000f / 1000f
                     volumeCashView.text = "%.2fM$".format(locale = Locale.US, volumeCash)
 
-                    if (postmarket) {
-                        priceView.text = "${stock.getPrice2359String()} ➡ ${stock.getPriceString()}"
+                    priceView.text = "${stock.priceScreenerFrom.toMoney(stock)} ➡ ${stock.priceScreenerTo.toMoney(stock)}"
 
-                        priceChangeAbsoluteView.text = stock.changePrice2300DayAbsolute.toMoney(stock)
-                        priceChangePercentView.text = stock.changePrice2300DayPercent.toPercent()
+                    priceChangeAbsoluteView.text = stock.changePriceScreenerAbsolute.toMoney(stock)
+                    priceChangePercentView.text = stock.changePriceScreenerPercent.toPercent()
 
-                        priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
-                        priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
-                        priceView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
-                    } else {
-                        priceView.text = "${stock.getPricePost1000String()} ➡ ${stock.getPriceString()}"
-
-                        priceChangeAbsoluteView.text = stock.changePrice0145Absolute.toMoney(stock)
-                        priceChangePercentView.text = stock.changePrice0145Percent.toPercent()
-
-                        priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice0145Absolute))
-                        priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice0145Absolute))
-                        priceView.setTextColor(Utils.getColorForValue(stock.changePrice0145Absolute))
-                    }
+                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePriceScreenerPercent))
+                    priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePriceScreenerPercent))
+                    priceView.setTextColor(Utils.getColorForValue(stock.changePriceScreenerPercent))
 
                     itemView.setOnClickListener {
                         Utils.openTinkoffForTicker(requireContext(), stock.ticker)

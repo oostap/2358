@@ -127,10 +127,10 @@ class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
                 val purchaseStock = values[index]
 
                 with(binding) {
-                    val avg = purchaseStock.stock.getPriceDouble()
+                    val avg = purchaseStock.stock.getPriceNow()
                     tickerView.text = "${index + 1}) ${purchaseStock.stock.getTickerLove()} x ${purchaseStock.lots}"
                     priceView.text = "${purchaseStock.stock.getPrice2359String()} ➡ ${avg.toMoney(purchaseStock.stock)}"
-                    priceTotalView.text = (purchaseStock.stock.getPriceDouble() * purchaseStock.lots).toMoney(purchaseStock.stock)
+                    priceTotalView.text = (purchaseStock.stock.getPriceNow() * purchaseStock.lots).toMoney(purchaseStock.stock)
 
                     refreshPercent(purchaseStock)
 

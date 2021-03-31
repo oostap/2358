@@ -3,13 +3,11 @@ package com.project.ti2358.data.manager
 import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.service.*
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.log
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.*
-import kotlin.math.abs
 import kotlin.math.ceil
 
 enum class PurchaseStatus {
@@ -102,7 +100,7 @@ data class PurchaseStock(
     }
 
     fun updateAbsolutePrice() {
-        fixedPrice = stock.getPriceDouble()
+        fixedPrice = stock.getPriceNow()
         absoluteLimitPriceChange = fixedPrice / 100 * percentLimitPriceChange
         absoluteLimitPriceChange = Utils.makeNicePrice(absoluteLimitPriceChange)
     }

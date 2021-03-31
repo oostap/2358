@@ -59,7 +59,7 @@ class Strategy1728Down() : KoinComponent {
         val all = stockManager.getWhiteStocks()
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
-        stocks = all.filter { it.getPriceDouble() > min && it.getPriceDouble() < max }.toMutableList()
+        stocks = all.filter { it.getPriceNow() > min && it.getPriceNow() < max }.toMutableList()
         return stocks
     }
 

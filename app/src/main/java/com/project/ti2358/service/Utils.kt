@@ -68,6 +68,8 @@ fun Double.toPercent(): String {
 
 class Utils {
     companion object {
+        val DARK_BLUE: Int = Color.parseColor("#1A134C")
+
         val GREEN: Int = Color.parseColor("#58D68D")
         val RED: Int = Color.parseColor("#E74C3C")
 

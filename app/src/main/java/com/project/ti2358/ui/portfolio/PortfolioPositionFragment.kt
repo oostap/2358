@@ -7,7 +7,6 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.model.dto.OperationType
@@ -58,7 +57,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
             purchaseStock = PurchaseStock(it).apply {
                 position = portfolioPosition
                 lots = position.lots
-                percentProfitSellFrom = Utils.getPercentFromTo(stock.getPriceDouble(), position.getAveragePrice())
+                percentProfitSellFrom = Utils.getPercentFromTo(stock.getPriceNow(), position.getAveragePrice())
                 trailingStopTakeProfitPercentActivation = SettingsManager.getTrailingStopTakeProfitPercentActivation()
                 trailingStopTakeProfitPercentDelta = SettingsManager.getTrailingStopTakeProfitPercentDelta()
                 trailingStopStopLossPercent = SettingsManager.getTrailingStopStopLossPercent()

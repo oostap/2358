@@ -79,11 +79,6 @@
 <!--            android:icon="@drawable/ic_tazik"-->
 <!--            android:title="@string/menu_tazik_endless" />-->
 
-        <item
-            android:id="@+id/nav_postmarket"
-            android:icon="@drawable/ic_stocks"
-            android:title="@string/menu_postmarket" />
-
 <!--        <item-->
 <!--            android:id="@+id/nav_shorts"-->
 <!--            android:icon="@drawable/ic_stocks"-->

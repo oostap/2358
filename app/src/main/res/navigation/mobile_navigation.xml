@@ -121,13 +121,6 @@
             app:exitAnim="@animator/slide_out_left" />
     </fragment>
 
-    <!-- постмаркет US -->
-    <fragment
-        android:id="@+id/nav_postmarket"
-        android:name="com.project.ti2358.ui.postmarket.PostmarketFragment"
-        android:label="@string/menu_postmarket"
-        tools:layout="@layout/fragment_postmarket" />
-
     <!-- 2358 -->
 
     <fragment

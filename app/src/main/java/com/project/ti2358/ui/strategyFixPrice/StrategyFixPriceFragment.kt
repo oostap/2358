@@ -94,7 +94,7 @@ class StrategyFixPriceFragment : Fragment(R.layout.fragment_fixprice) {
                     val volumeAfter = stock.getVolumeFixPriceAfterStart() / 1000f
                     volumeSharesFromStartView.text = "%.2fk+%.2fk".format(locale = Locale.US, volumeBefore, volumeAfter)
 
-                    priceView.text = "${stock.getPriceFixPriceString()} ➡ ${stock.getPriceString()}"
+                    priceView.text = "${stock.priceFixed.toMoney(stock)} ➡ ${stock.getPriceString()}"
 
                     priceChangeAbsoluteView.text = stock.changePriceFixDayAbsolute.toMoney(stock)
                     priceChangePercentView.text = stock.changePriceFixDayPercent.toPercent()

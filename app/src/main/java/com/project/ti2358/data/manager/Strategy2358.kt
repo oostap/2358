@@ -35,8 +35,8 @@ class Strategy2358() : KoinComponent {
             stock.changePrice2300DayPercent <= change &&    // изменение
             stock.getTodayVolume() >= volumeDayPieces &&    // объём в шт
             stock.dayVolumeCash >= volumeDayCash &&         // объём в $
-            stock.getPriceDouble() > min &&                 // мин цена
-            stock.getPriceDouble() < max                    // макс цена
+            stock.getPriceNow() > min &&                 // мин цена
+            stock.getPriceNow() < max                    // макс цена
         }.toMutableList()
 
         stocks.sortBy {
@@ -132,7 +132,7 @@ class Strategy2358() : KoinComponent {
 
         for (purchase in purchaseToBuy) {
             if (purchase.lots == 0 || equalParts) { // если уже настраивали количество, то не трогаем
-                purchase.lots = (onePiece / purchase.stock.getPriceDouble()).roundToInt()
+                purchase.lots = (onePiece / purchase.stock.getPriceNow()).roundToInt()
             }
             purchase.status = PurchaseStatus.WAITING
 
@@ -146,7 +146,7 @@ class Strategy2358() : KoinComponent {
 
     fun getTotalPurchaseString(): String {
         var value = 0.0
-        purchaseToBuy.forEach { value += it.lots * it.stock.getPriceDouble() }
+        purchaseToBuy.forEach { value += it.lots * it.stock.getPriceNow() }
         return value.toMoney(null)
     }
 
@@ -165,7 +165,7 @@ class Strategy2358() : KoinComponent {
     fun getNotificationTextLong(): String {
         var tickers = ""
         for (purchase in purchaseToBuy) {
-            val p = "%.2f$".format(locale = Locale.US, purchase.lots * purchase.stock.getPriceDouble())
+            val p = "%.2f$".format(locale = Locale.US, purchase.lots * purchase.stock.getPriceNow())
             tickers += "${purchase.stock.ticker}*${purchase.lots} = ${p}, "
             tickers += if (purchase.trailingStop) {
                 "ТТ:${purchase.trailingStopTakeProfitPercentActivation.toPercent()}/${purchase.trailingStopTakeProfitPercentDelta.toPercent()}, ${purchase.getStatusString()} ${purchase.currentTrailingStop?.currentChangePercent?.toPercent() ?: ""}\n"

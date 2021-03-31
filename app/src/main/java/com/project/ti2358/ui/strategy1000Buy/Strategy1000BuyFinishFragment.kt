@@ -126,7 +126,7 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
 
                 with (binding) {
                     tickerView.text = "${index + 1}) ${purchaseStock.stock.getTickerLove()}"
-                    priceView.text = "${purchaseStock.stock.getPrice2359String()} ➡ ${purchaseStock.stock.getPriceDouble().toMoney(purchaseStock.stock)}"
+                    priceView.text = "${purchaseStock.stock.getPrice2359String()} ➡ ${purchaseStock.stock.getPriceNow().toMoney(purchaseStock.stock)}"
                     priceView.setTextColor(Utils.getColorForValue(purchaseStock.stock.changePrice2300DayPercent))
 
                     refreshPercent(purchaseStock)

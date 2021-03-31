@@ -126,7 +126,7 @@ class StockManager : KoinComponent {
                 stocksAll.forEach {
                     it.apply {
                         it.closePrices = stockClosePrices[it.ticker]
-                        it.process2359()
+                        it.updateChange2300()
                     }
                 }
                 log(stockReports.toString())

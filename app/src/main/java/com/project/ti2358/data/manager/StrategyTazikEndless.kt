@@ -46,7 +46,7 @@ class StrategyTazikEndless : KoinComponent {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks = all.filter { (it.getPriceDouble() > min && it.getPriceDouble() < max) || it.getPriceDouble() == 0.0 }.toMutableList()
+        stocks = all.filter { (it.getPriceNow() > min && it.getPriceNow() < max) || it.getPriceNow() == 0.0 }.toMutableList()
         stocks.sortBy { it.changePrice2300DayPercent }
         loadSelectedStocks()
         return stocks
@@ -109,7 +109,7 @@ class StrategyTazikEndless : KoinComponent {
         stocksToPurchase = stocksSelected.map {
             PurchaseStock(it).apply {
                 percentLimitPriceChange = percent
-                lots = (onePiece / stock.getPriceDouble()).roundToInt()
+                lots = (onePiece / stock.getPriceNow()).roundToInt()
                 updateAbsolutePrice()
                 status = PurchaseStatus.WAITING
             }
@@ -148,15 +148,15 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     fun getNotificationTextLong(): String {
-        stocksToPurchase.sortBy { abs(it.stock.getPriceDouble() / it.fixedPrice * 100 - 100) }
-        stocksToPurchase.sortBy { it.stock.getPriceDouble() / it.fixedPrice * 100 - 100 }
+        stocksToPurchase.sortBy { abs(it.stock.getPriceNow() / it.fixedPrice * 100 - 100) }
+        stocksToPurchase.sortBy { it.stock.getPriceNow() / it.fixedPrice * 100 - 100 }
         stocksToPurchase.sortBy { it.status }
 
         var tickers = ""
         for (stock in stocksToPurchase) {
-            val change = (100 * stock.stock.getPriceDouble()) / stock.fixedPrice - 100
+            val change = (100 * stock.stock.getPriceNow()) / stock.fixedPrice - 100
             tickers += "${stock.stock.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
-                    "${stock.fixedPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceDouble().toMoney(stock.stock)} = " +
+                    "${stock.fixedPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceNow().toMoney(stock.stock)} = " +
                     "${change.toPercent()} ${stock.getStatusString()}\n"
         }
 
@@ -250,7 +250,7 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     fun buyFirstOne() {
-        stocksToPurchase.sortBy { it.stock.getPriceDouble() / it.fixedPrice * 100.0 - 100.0 }
+        stocksToPurchase.sortBy { it.stock.getPriceNow() / it.fixedPrice * 100.0 - 100.0 }
         for (purchase in stocksToPurchase) {
             val closingPrice = purchase.stock.candleToday?.closingPrice ?: 0.0
             if (closingPrice == 0.0) continue

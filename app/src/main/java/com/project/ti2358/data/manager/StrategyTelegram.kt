@@ -32,7 +32,7 @@ class StrategyTelegram : KoinComponent {
         }
 
         stocks = all.filter { stock ->
-            stock.getPriceDouble() > min && stock.getPriceDouble() < max &&
+            stock.getPriceNow() > min && stock.getPriceNow() < max &&
             abs(stock.changePrice2300DayPercent) >= abs(change) &&              // изменение
             stock.getTodayVolume() >= volumeDayPieces                           // объём в шт
         }.toMutableList()

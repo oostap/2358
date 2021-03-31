@@ -1,5 +1,6 @@
 package com.project.ti2358.data.manager
 
+import com.project.ti2358.service.ScreenerType
 import com.project.ti2358.service.Sorting
 import com.project.ti2358.service.Utils
 import org.koin.core.component.KoinApiExtension
@@ -13,6 +14,9 @@ class StrategyPremarket : KoinComponent {
 
     var stocks: MutableList<Stock> = mutableListOf()
     private var currentSort: Sorting = Sorting.DESCENDING
+
+    var screenerTypeFrom: ScreenerType = ScreenerType.screener2300
+    var screenerTypeTo: ScreenerType = ScreenerType.screenerNow
 
     fun process(): MutableList<Stock> {
         val all = stockManager.getWhiteStocks()
@@ -31,11 +35,14 @@ class StrategyPremarket : KoinComponent {
         }
 
         stocks = all.filter {
-            it.getPriceDouble() > min && it.getPriceDouble() < max &&
-            abs(it.changePrice0145Percent) >= abs(change) &&
+            it.getPriceNow() > min && it.getPriceNow() < max &&
             it.getTodayVolume() >= volumeMin &&
             it.getTodayVolume() <= volumeMax
         }.toMutableList()
+
+        stocks.forEach { it.processScreener(screenerTypeFrom, screenerTypeTo) }
+        stocks.removeAll { it.priceScreenerFrom == 0.0 || it.priceScreenerTo == 0.0 }
+        stocks = stocks.filter { abs(it.changePriceScreenerPercent) >= abs(change) }.toMutableList()
 
         return stocks
     }
@@ -44,7 +51,7 @@ class StrategyPremarket : KoinComponent {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-            it.changePrice0145Percent * sign
+            it.changePriceScreenerPercent * sign
         }
         return stocks
     }

@@ -3,14 +3,13 @@ package com.project.ti2358.data.manager
 import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.model.dto.daager.*
+import com.project.ti2358.service.ScreenerType
 import com.project.ti2358.service.toMoney
 import org.koin.core.component.KoinApiExtension
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-data class Stock(
-    var instrument: Instrument
-) {
+data class Stock(var instrument: Instrument) {
     var ticker = instrument.ticker
     var figi = instrument.figi
 
@@ -29,14 +28,6 @@ data class Stock(
 
     var closePrices: ClosePrice? = null
     var candleToday: Candle? = null                               // реалтайм, дневная свеча
-
-    // разница с ценой открытия премаркета
-    var changePrice0145Absolute: Double = 0.0
-    var changePrice0145Percent: Double = 0.0
-
-    // разница с ценой закрытия постмаркета US в 03:00
-    var changePrice0300Absolute: Double = 0.0
-    var changePrice0300Percent: Double = 0.0
 
     // разница с ценой закрытия ОС
     var changePrice2300DayAbsolute: Double = 0.0
@@ -71,6 +62,31 @@ data class Stock(
 
     // все минутные свечи с момента запуска приложения
     var minuteCandles: MutableList<Candle> = mutableListOf()
+
+    var priceScreenerFrom: Double = 0.0
+    var priceScreenerTo: Double = 0.0
+
+    var changePriceScreenerAbsolute: Double = 0.0
+    var changePriceScreenerPercent: Double = 0.0
+
+    fun processScreener(from: ScreenerType, to: ScreenerType) {
+        priceScreenerFrom = when (from) {
+            ScreenerType.screener0145 -> getPrice0145()
+            ScreenerType.screener0300 -> getPrice0300()
+            ScreenerType.screener2300 -> getPrice2300()
+            ScreenerType.screenerNow -> getPriceNow()
+        }
+
+        priceScreenerTo = when (to) {
+            ScreenerType.screener0145 -> getPrice0145()
+            ScreenerType.screener0300 -> getPrice0300()
+            ScreenerType.screener2300 -> getPrice2300()
+            ScreenerType.screenerNow -> getPriceNow()
+        }
+
+        changePriceScreenerAbsolute = priceScreenerTo - priceScreenerFrom
+        changePriceScreenerPercent = priceScreenerTo / priceScreenerFrom * 100.0 - 100.0
+    }
 
     @KoinApiExtension
     fun getTickerLove(): String {
@@ -155,8 +171,7 @@ data class Stock(
         candleToday = candle
 
         updateChangeToday()
-        updateChange2359()
-        updateChangePostmarket()
+        updateChange2300()
         updateChangeFixPrice()
     }
 
@@ -189,11 +204,6 @@ data class Stock(
         updateChangeFixPrice()
     }
 
-    fun process2359() {
-        updateChange2359()
-        updateChangePostmarket()
-    }
-
     fun getVolumeFixPriceBeforeStart(): Int {
         return getTodayVolume() - getVolumeFixPriceAfterStart()
     }
@@ -216,7 +226,7 @@ data class Stock(
         return candleToday?.volume ?: 0
     }
 
-    fun getPriceDouble(): Double {
+    fun getPriceNow(): Double {
         var value = 0.0
 
         closePrices?.let {
@@ -230,12 +240,20 @@ data class Stock(
         return value
     }
 
-    fun getPricePostmarketUSDouble(): Double {
+    fun getPrice0300(): Double {
         return closePrices?.yahoo ?: 0.0
     }
 
+    fun getPrice2300(): Double {
+        return closePrices?.os ?: 0.0
+    }
+
+    fun getPrice0145(): Double {
+        return closePrices?.post ?: 0.0
+    }
+
     fun getPriceString(): String {
-        return getPriceDouble().toMoney(this)
+        return getPriceNow().toMoney(this)
     }
 
     fun getPricePost1000String(): String {
@@ -252,37 +270,16 @@ data class Stock(
         return "0$"
     }
 
-    fun getPriceFixPriceString(): String {
-        return priceFixed.toMoney(this)
-    }
-
     private fun updateChangeToday() {
         candleToday?.let { candle ->
             closePrices?.let { close ->
-                changePrice0145Absolute = candle.closingPrice - close.post
-                changePrice0145Percent = candle.closingPrice / close.post * 100.0 - 100
-
                 middlePrice = (candle.highestPrice + candle.lowestPrice) / 2.0
                 dayVolumeCash = middlePrice * candle.volume
             }
         }
     }
 
-    private fun updateChangePostmarket() {
-        closePrices?.let { close ->
-            close.yahoo?.let {
-                changePrice0300Absolute = close.yahoo - close.os
-                changePrice0300Percent = (100 * close.yahoo) / close.os - 100
-
-                candleToday?.let { today ->
-                    changePrice0300Absolute = close.yahoo - today.closingPrice
-                    changePrice0300Percent = (100 * close.yahoo) / today.closingPrice - 100
-                }
-            }
-        }
-    }
-
-    private fun updateChange2359() {
+    fun updateChange2300() {
         closePrices?.let {
             changePrice2300DayAbsolute = it.post - it.os
             changePrice2300DayPercent = (100 * it.post) / it.os - 100
@@ -296,10 +293,10 @@ data class Stock(
 
     private fun updateChangeFixPrice() {
         if (needToFixPrice && priceFixed == 0.0) {
-            priceFixed = getPriceDouble()
+            priceFixed = getPriceNow()
             needToFixPrice = false
         }
-        val currentPrice = getPriceDouble()
+        val currentPrice = getPriceNow()
         changePriceFixDayAbsolute = currentPrice - priceFixed
         changePriceFixDayPercent = currentPrice / priceFixed * 100.0 - 100.0
     }
@@ -308,7 +305,7 @@ data class Stock(
         needToFixPrice = true
         changePriceFixDayAbsolute = 0.0
         changePriceFixDayPercent = 0.0
-        priceFixed = getPriceDouble()
+        priceFixed = getPriceNow()
         if (minuteCandles.isNotEmpty()) {
             minuteCandleFixed = minuteCandles.last()
         }

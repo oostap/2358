@@ -10,7 +10,6 @@ import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
-import com.project.ti2358.service.log
 import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -41,7 +40,7 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
         val max = SettingsManager.getCommonPriceMax()
 
         stocks.clear()
-        stocks.addAll(all.filter { it.getPriceDouble() > min && it.getPriceDouble() < max })
+        stocks.addAll(all.filter { it.getPriceNow() > min && it.getPriceNow() < max })
 
         return stocks
     }

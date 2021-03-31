@@ -4,8 +4,6 @@ import com.project.ti2358.service.log
 import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.util.*
 import kotlin.math.abs
 
@@ -49,7 +47,7 @@ data class TrailingStop(
         takeProfitActivationPrice = buyPrice + buyPrice / 100.0 * abs(takeProfitActivationPercent)
 
         while (started) {
-            currentPrice = stock.getPriceDouble()
+            currentPrice = stock.getPriceNow()
 
             currentChangePercent = currentPrice / buyPrice * 100.0 - 100.0
             log("TRAILING_STOP изменение: $buyPrice -> ${currentPrice.toMoney(stock)} = ${currentChangePercent.toPercent()}")
