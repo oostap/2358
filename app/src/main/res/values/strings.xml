@@ -74,13 +74,14 @@
 
     <!-- Preference Titles -->
 
-    <string name="stocks_header_2358">Стратегия 2358</string>
-    <string name="stocks_header_1728">Стратегия 1728</string>
-    <string name="stocks_header_1000_sell">Стратегия 10:00:01 sell</string>
-    <string name="stocks_header_1000_buy">Стратегия 10:00:01 buy</string>
-    <string name="stocks_header_1005">Фильтр Премаркета</string>
-    <string name="stocks_header_tazik">Стратегия автотазик</string>
-    <string name="stocks_header_rocket">Ракеты</string>
+    <string name="settings_header_2358">Стратегия 2358</string>
+    <string name="settings_header_1728">Стратегия 1628</string>
+    <string name="settings_header_1000_sell">Стратегия 10:00:00 sell</string>
+    <string name="settings_header_1000_buy">Стратегия 10:00:00 buy</string>
+    <string name="settings_header_1005">Фильтр Премаркета</string>
+    <string name="settings_header_tazik">Стратегия автотазик</string>
+    <string name="settings_header_rocket">Ракеты</string>
+    <string name="settings_header_interface">Интерфейс</string>
 
     <string name="dark_theme">Ночная тема</string>
 
@@ -105,7 +106,7 @@
 
     <!-- orderbook -->
     <string name="orderbook_header">Стакан</string>
-    <string name="orderbook_volumes">Размеры быстрого объёма (через пробел)</string>
+    <string name="orderbook_volumes">Размеры быстрого объёма (числа через пробел)</string>
     <string name="orderbook_prices">Размеры скальперских кнопок (через пробел)</string>
 
     <!-- 2358 settings -->
@@ -115,15 +116,15 @@
     <string name="stocks_2358_purchase_volume">Общая сумма покупки в $</string>
     <string name="stocks_2358_purchase_time">Во сколько тарим? МСК</string>
 
-    <string name="stocks_2358_take_profit_from">Заявка на продажу от в % (0 = не создавать)</string>
-    <string name="stocks_2358_take_profit_to">Заявка на продажу до в % (0 = не создавать)</string>
+    <string name="stocks_2358_take_profit_from">Заявка на продажу от в % (0.0 = не создавать)</string>
+    <string name="stocks_2358_take_profit_to">Заявка на продажу до в % (0.0 = не создавать)</string>
     <string name="stocks_2358_take_profit_step">Количество заявок в равных долях</string>
 
     <!-- 1000 sell settings -->
     <string name="stocks_1000_sell_take_profit">Базовый % заявки на продажу</string>
 
     <!-- 1000 buy settings -->
-    <string name="stocks_1000_buy_take_profit">Заявка на продажу в % (0 = не создавать)</string>
+    <string name="stocks_1000_buy_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
     <string name="stocks_1000_buy_purchase_volume">Общая сумма покупки в $</string>
 
     <!-- 1005 settings -->
@@ -135,7 +136,7 @@
     <string name="stocks_1728_volume_min_day">Объём каждого шага отсева от шт. (через пробел)</string>
     <string name="stocks_1728_price_change">Изменение цены от в %</string>
     <string name="stocks_1728_purchase_volume">Сумма покупки одной позиции в $</string>
-    <string name="stocks_1728_take_profit">Заявка на продажу в % (0 = не создавать)</string>
+    <string name="stocks_1728_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
     <string name="stocks_1728_trailing_stop">Трейлинг тейк</string>
     <string name="stocks_1728_calc_from_os">Отсчёт с конца ОС</string>
 
@@ -143,7 +144,7 @@
     <string name="stocks_tazik_min_percent_to_buy">Минимальная просадка в %</string>
     <string name="stocks_tazik_purchase_volume">Общая сумма покупки</string>
     <string name="stocks_tazik_purchase_parts">Сколько тазиков? (заявок)</string>
-    <string name="stocks_tazik_take_profit">Заявка на продажу в % (0 = не создавать)</string>
+    <string name="stocks_tazik_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
     <string name="stocks_tazik_buy_market">Покупка по рынку</string>
     <string name="stocks_tazik_buy_ask">Покупка из аска</string>
     <string name="stocks_tazik_buy_bid">Покупка из бида</string>

@@ -123,7 +123,7 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
                     return
                 }
 
-                val rocketStock = RocketStock(stock, firstCandle.openingPrice, lastCandle.closingPrice, deltaMinutes, volumeRocket, changePercent)
+                val rocketStock = RocketStock(stock, firstCandle.openingPrice, lastCandle.closingPrice, deltaMinutes, volumeRocket, changePercent, lastCandle.time.time)
                 rocketStock.process()
                 if (changePercent > 0) {
                     rocketStocks.add(0, rocketStock)

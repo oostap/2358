@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -39,39 +40,40 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
         val binding = Fragment1000SellFinishBinding.bind(view)
         fragment1000SellFinishBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterListSell
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterListSell
 
-        ///////////////////////////////////////////////////////////////////
-        binding.start1000Button.setOnClickListener {
-            if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
-                requireContext().stopService(Intent(context, Strategy1000SellService::class.java))
-            } else {
-                if (strategy1000Sell.getTotalPurchasePieces() > 0) {
-                    Utils.startService(requireContext(), Strategy1000SellService::class.java)
+            ///////////////////////////////////////////////////////////////////
+            start1000Button.setOnClickListener {
+                if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
+                    requireContext().stopService(Intent(context, Strategy1000SellService::class.java))
+                } else {
+                    if (strategy1000Sell.getTotalPurchasePieces() > 0) {
+                        Utils.startService(requireContext(), Strategy1000SellService::class.java)
+                    }
                 }
-            }
 
-            this.findNavController().navigateUp()
+                start1000Button.findNavController().navigateUp()
+                updateServiceButtonText1000()
+            }
             updateServiceButtonText1000()
-        }
-        updateServiceButtonText1000()
-        //////////////////////////////////////////////////////////////////
-        binding.start700Button.setOnClickListener {
-            if (Utils.isServiceRunning(requireContext(), Strategy700SellService::class.java)) {
-                requireContext().stopService(Intent(context, Strategy700SellService::class.java))
-            } else {
-                if (strategy1000Sell.getTotalPurchasePieces() > 0) {
-                    Utils.startService(requireContext(), Strategy700SellService::class.java)
+            //////////////////////////////////////////////////////////////////
+            start700Button.setOnClickListener {
+                if (Utils.isServiceRunning(requireContext(), Strategy700SellService::class.java)) {
+                    requireContext().stopService(Intent(context, Strategy700SellService::class.java))
+                } else {
+                    if (strategy1000Sell.getTotalPurchasePieces() > 0) {
+                        Utils.startService(requireContext(), Strategy700SellService::class.java)
+                    }
                 }
-            }
 
-            this.findNavController().navigateUp()
+                start1000Button.findNavController().navigateUp()
+                updateServiceButtonText700()
+            }
             updateServiceButtonText700()
         }
-        updateServiceButtonText700()
-
         positions = strategy1000Sell.processSellPosition()
         adapterListSell.setData(positions)
         updateInfoText()

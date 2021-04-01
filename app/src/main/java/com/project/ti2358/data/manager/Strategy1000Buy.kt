@@ -123,7 +123,7 @@ class Strategy1000Buy : KoinComponent {
     fun getNotificationTextLong(purchases: MutableList<PurchaseStock>): String {
         var tickers = ""
         for (p in purchases) {
-            val text = "%.1f$ > %.2f$ > %.1f%%".format(locale = Locale.US,
+            val text = "%.1f$ > %.2f$ > %.2f%%".format(locale = Locale.US,
                 p.lots * p.getLimitPriceDouble(),
                 p.getLimitPriceDouble(),
                 p.percentLimitPriceChange

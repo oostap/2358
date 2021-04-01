@@ -39,47 +39,42 @@ class BlacklistFragment : Fragment(R.layout.fragment_blacklist) {
         val binding = FragmentBlacklistBinding.bind(view)
         fragmentBlacklistBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.updateButton.setOnClickListener {
-            updateData()
-        }
-
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                processText(query)
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String): Boolean {
-                processText(newText)
-                return false
-            }
-
-            fun processText(text: String) {
+            updateButton.setOnClickListener {
                 updateData()
-
-                stocks = Utils.search(stocks, text)
-                adapterList.setData(stocks)
             }
-        })
 
-        binding.searchView.setOnCloseListener {
-            updateData()
-            false
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String): Boolean {
+                    updateData(query)
+                    return false
+                }
+
+                override fun onQueryTextChange(newText: String): Boolean {
+                    updateData(newText)
+                    return false
+                }
+            })
+
+            searchView.setOnCloseListener {
+                updateData()
+                false
+            }
+            updateData(searchView.query.toString())
         }
-
-        updateData()
-    }
-
-    private fun updateData() {
-        stocks = strategyBlacklist.process()
-        stocks = strategyBlacklist.resort()
-        adapterList.setData(stocks)
 
         updateTitle()
+    }
+
+    private fun updateData(query: String = "") {
+        stocks = strategyBlacklist.process()
+        stocks = strategyBlacklist.resort()
+        stocks = Utils.search(stocks, query)
+        adapterList.setData(stocks)
     }
 
     private fun updateTitle() {

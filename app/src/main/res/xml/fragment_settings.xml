@@ -74,7 +74,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/stocks_header_1005">
+    <PreferenceCategory app:title="@string/settings_header_1005">
         <EditTextPreference
             app:key="@string/setting_key_premarket_price_change_percent"
             app:title="@string/stocks_premarket_price_change_percent"
@@ -94,7 +94,7 @@
             app:defaultValue="10000000"/>
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/stocks_header_2358">
+    <PreferenceCategory app:title="@string/settings_header_2358">
         <EditTextPreference
             app:key="@string/setting_key_2358_price_change_percent"
             app:title="@string/stocks_2358_price_change_percent"
@@ -145,7 +145,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/stocks_header_1000_sell">
+    <PreferenceCategory app:title="@string/settings_header_1000_sell">
         <EditTextPreference
             app:key="@string/setting_key_1000_sell_take_profit"
             app:title="@string/stocks_1000_sell_take_profit"
@@ -153,7 +153,7 @@
             app:defaultValue="1.0"/>
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/stocks_header_1000_buy">
+    <PreferenceCategory app:title="@string/settings_header_1000_buy">
         <EditTextPreference
             app:key="@string/setting_key_1000_buy_take_profit"
             app:title="@string/stocks_1000_buy_take_profit"
@@ -168,7 +168,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/stocks_header_1728">
+    <PreferenceCategory app:title="@string/settings_header_1728">
         <EditTextPreference
             app:key="@string/setting_key_1728_volume_min_steps"
             app:title="@string/stocks_1728_volume_min_day"
@@ -205,7 +205,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/stocks_header_tazik">
+    <PreferenceCategory app:title="@string/settings_header_tazik">
         <EditTextPreference
             app:key="@string/setting_key_tazik_min_percent_to_buy"
             app:title="@string/stocks_tazik_min_percent_to_buy"
@@ -258,7 +258,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/stocks_header_rocket">
+    <PreferenceCategory app:title="@string/settings_header_rocket">
         <EditTextPreference
             app:key="@string/setting_key_rocket_change_percent"
             app:title="@string/stocks_rocket_change_percent"
@@ -290,9 +290,11 @@
 
     </PreferenceCategory>
 
-    <SwitchPreferenceCompat
-        app:key="@string/setting_key_dark_theme"
-        app:title="@string/dark_theme"
-        app:useSimpleSummaryProvider="false" />
+    <PreferenceCategory app:title="@string/settings_header_interface">
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_dark_theme"
+            app:title="@string/dark_theme"
+            app:useSimpleSummaryProvider="false" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

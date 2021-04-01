@@ -219,7 +219,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         fragmentOrderbookBinding?.apply {
             activeStock?.let { stock ->
                 positionView.visibility = GONE
-                val pos = depositManager.getPositionForFigi(stock.figi)?.let { p ->
+                depositManager.getPositionForFigi(stock.figi)?.let { p ->
                     val avg = p.getAveragePrice()
                     priceView.text = "${avg.toMoney(stock)} ➡ ${stock.getPriceString()}"
 

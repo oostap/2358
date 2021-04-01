@@ -182,12 +182,15 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
             //////////////////////////////////////////////////////////////////////////////////////
             sellAskButton.setOnClickListener {
                 purchaseStock.sellToBestAsk()
+                updateOrderbook()
             }
             sellBidButton.setOnClickListener {
                 purchaseStock.sellToBestBid()
+                updateOrderbook()
             }
             sellLimitButton.setOnClickListener {
                 purchaseStock.sellWithLimit()
+                updateOrderbook()
             }
             sellTtButton.setOnClickListener {
                 purchaseStock.trailingStop = true

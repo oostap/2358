@@ -38,6 +38,7 @@ class StockManager : KoinComponent {
     private val strategyBlacklist: StrategyBlacklist by inject()
     private val strategyFavorites: StrategyFavorites by inject()
     private val strategyRocket: StrategyRocket by inject()
+    private val strategyFixPrice: StrategyFixPrice by inject()
 
     private var instrumentsAll: MutableList<Instrument> = mutableListOf()
     private var stocksAll: MutableList<Stock> = mutableListOf()
@@ -252,9 +253,10 @@ class StockManager : KoinComponent {
     }
 
     private fun processStocks() {
-        stocksStream = stocksAll.filter { SettingsManager.isAllowCurrency(it.instrument.currency) }.toMutableList()
+        stocksStream = synchronizedList(stocksAll.filter { SettingsManager.isAllowCurrency(it.instrument.currency) }.toMutableList())
         strategyFavorites.process()
         strategyBlacklist.process()
+        strategyFixPrice.restartStrategy()
 
         // загрузить цену закрытия
         GlobalScope.launch(Dispatchers.Main) {

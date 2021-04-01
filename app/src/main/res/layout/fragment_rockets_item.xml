@@ -63,6 +63,15 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/minutes_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:gravity="center_vertical"
+            android:text="10 мин"
+            android:textSize="14sp" />
+
+        <TextView
             android:id="@+id/volume_shares_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -39,41 +39,43 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
         val binding = Fragment1000BuyFinishBinding.bind(view)
         fragment1000BuyFinishBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        ///////////////////////////////////////////////////////////////
-        binding.start700Button.setOnClickListener {
-            if (SettingsManager.get1000BuyPurchaseVolume() <= 0) {
-                Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел 1000 buy.")
-            } else {
-                if (Utils.isServiceRunning(requireContext(), Strategy700BuyService::class.java)) {
-                    requireContext().stopService(Intent(context, Strategy700BuyService::class.java))
+            ///////////////////////////////////////////////////////////////
+            start700Button.setOnClickListener {
+                if (SettingsManager.get1000BuyPurchaseVolume() <= 0) {
+                    Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел 1000 buy.")
                 } else {
-                    if (strategy1000Buy.getTotalPurchasePieces() > 0) {
-                        Utils.startService(requireContext(), Strategy700BuyService::class.java)
+                    if (Utils.isServiceRunning(requireContext(), Strategy700BuyService::class.java)) {
+                        requireContext().stopService(Intent(context, Strategy700BuyService::class.java))
+                    } else {
+                        if (strategy1000Buy.getTotalPurchasePieces() > 0) {
+                            Utils.startService(requireContext(), Strategy700BuyService::class.java)
+                        }
                     }
                 }
+                updateServiceButtonText700()
             }
-            updateServiceButtonText700()
+            ///////////////////////////////////////////////////////////////
+            start1000Button.setOnClickListener {
+                if (SettingsManager.get1000BuyPurchaseVolume() <= 0) {
+                    Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел 1000 buy.")
+                } else {
+                    if (Utils.isServiceRunning(requireContext(), Strategy1000BuyService::class.java)) {
+                        requireContext().stopService(Intent(context, Strategy1000BuyService::class.java))
+                    } else {
+                        if (strategy1000Buy.getTotalPurchasePieces() > 0) {
+                            Utils.startService(requireContext(), Strategy1000BuyService::class.java)
+                        }
+                    }
+                }
+                updateServiceButtonText1000()
+            }
         }
         updateServiceButtonText700()
-        ///////////////////////////////////////////////////////////////
-        binding.start1000Button.setOnClickListener {
-            if (SettingsManager.get1000BuyPurchaseVolume() <= 0) {
-                Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел 1000 buy.")
-            } else {
-                if (Utils.isServiceRunning(requireContext(), Strategy1000BuyService::class.java)) {
-                    requireContext().stopService(Intent(context, Strategy1000BuyService::class.java))
-                } else {
-                    if (strategy1000Buy.getTotalPurchasePieces() > 0) {
-                        Utils.startService(requireContext(), Strategy1000BuyService::class.java)
-                    }
-                }
-            }
-            updateServiceButtonText1000()
-        }
         updateServiceButtonText1000()
         ///////////////////////////////////////////////////////////////
 

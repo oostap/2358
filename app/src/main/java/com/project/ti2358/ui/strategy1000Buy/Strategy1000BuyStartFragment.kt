@@ -39,44 +39,46 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
         val binding = Fragment1000BuyStartBinding.bind(view)
         fragment1000BuyStartBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.startButton.setOnClickListener {
-            if (strategy1000Buy.stocksSelected.isNotEmpty()) {
-                view.findNavController().navigate(R.id.action_nav_1000_buy_start_to_nav_1000_buy_finish)
-            } else {
-                Utils.showErrorAlert(requireContext())
-            }
-        }
-
-        binding.updateButton.setOnClickListener {
-            updateData()
-        }
-
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                processText(query)
-                return false
+            startButton.setOnClickListener {
+                if (strategy1000Buy.stocksSelected.isNotEmpty()) {
+                    view.findNavController().navigate(R.id.action_nav_1000_buy_start_to_nav_1000_buy_finish)
+                } else {
+                    Utils.showErrorAlert(requireContext())
+                }
             }
 
-            override fun onQueryTextChange(newText: String): Boolean {
-                processText(newText)
-                return false
-            }
-
-            fun processText(text: String) {
+            updateButton.setOnClickListener {
                 updateData()
-
-                stocks = Utils.search(stocks, text)
-                adapterList.setData(stocks)
             }
-        })
-        binding.searchView.setOnCloseListener {
-            stocks = strategy1000Buy.process()
-            adapterList.setData(stocks)
-            false
+
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String): Boolean {
+                    processText(query)
+                    return false
+                }
+
+                override fun onQueryTextChange(newText: String): Boolean {
+                    processText(newText)
+                    return false
+                }
+
+                fun processText(text: String) {
+                    updateData()
+
+                    stocks = Utils.search(stocks, text)
+                    adapterList.setData(stocks)
+                }
+            })
+            searchView.setOnCloseListener {
+                stocks = strategy1000Buy.process()
+                adapterList.setData(stocks)
+                false
+            }
         }
 
         updateData()

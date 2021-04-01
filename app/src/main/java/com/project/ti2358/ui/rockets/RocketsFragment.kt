@@ -19,6 +19,7 @@ import com.project.ti2358.databinding.FragmentRocketsItemBinding
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import java.util.*
 
 @KoinApiExtension
 class RocketsFragment : Fragment(R.layout.fragment_rockets) {
@@ -39,26 +40,28 @@ class RocketsFragment : Fragment(R.layout.fragment_rockets) {
         val binding = FragmentRocketsBinding.bind(view)
         fragmentRocketsBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.startButton.setOnClickListener {
-            if (Utils.isServiceRunning(requireContext(), StrategyRocketService::class.java)) {
-                requireContext().stopService(Intent(context, StrategyRocketService::class.java))
-            } else {
-                Utils.startService(requireContext(), StrategyRocketService::class.java)
+            startButton.setOnClickListener {
+                if (Utils.isServiceRunning(requireContext(), StrategyRocketService::class.java)) {
+                    requireContext().stopService(Intent(context, StrategyRocketService::class.java))
+                } else {
+                    Utils.startService(requireContext(), StrategyRocketService::class.java)
+                }
+                updateServiceButtonText()
             }
             updateServiceButtonText()
-        }
-        updateServiceButtonText()
 
-        binding.rocketButton.setOnClickListener {
-            adapterList.setData(strategyRocket.rocketStocks)
-        }
+            rocketButton.setOnClickListener {
+                adapterList.setData(strategyRocket.rocketStocks)
+            }
 
-        binding.cometButton.setOnClickListener {
-            adapterList.setData(strategyRocket.cometStocks)
+            cometButton.setOnClickListener {
+                adapterList.setData(strategyRocket.cometStocks)
+            }
         }
 
         adapterList.setData(strategyRocket.rocketStocks)
@@ -87,6 +90,9 @@ class RocketsFragment : Fragment(R.layout.fragment_rockets) {
                 val rocketStock = values[index]
                 with(binding) {
                     tickerView.text = "${index + 1}) ${rocketStock.stock.getTickerLove()}"
+
+                    val deltaMinutes = ((Calendar.getInstance().time.time - rocketStock.fireTime) / 60.0 / 1000.0).toInt()
+                    minutesView.text = "$deltaMinutes мин"
 
                     val volume = rocketStock.stock.getTodayVolume() / 1000f
                     volumeSharesView.text = "%.1fk".format(volume)

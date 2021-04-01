@@ -44,47 +44,42 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
         val binding = FragmentFavoritesBinding.bind(view)
         fragmentFavoritesBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.updateButton.setOnClickListener {
-            updateData()
-        }
-
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                processText(query)
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String): Boolean {
-                processText(newText)
-                return false
-            }
-
-            fun processText(text: String) {
+            binding.updateButton.setOnClickListener {
                 updateData()
-
-                stocks = Utils.search(stocks, text)
-                adapterList.setData(stocks)
             }
-        })
 
-        binding.searchView.setOnCloseListener {
-            updateData()
-            false
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String): Boolean {
+                    updateData(query)
+                    return false
+                }
+
+                override fun onQueryTextChange(newText: String): Boolean {
+                    updateData(newText)
+                    return false
+                }
+            })
+
+            searchView.setOnCloseListener {
+                updateData()
+                false
+            }
+
+            updateData(searchView.query.toString())
         }
-
-        updateData()
+        updateTitle()
     }
 
-    private fun updateData() {
+    private fun updateData(query: String = "") {
         stocks = strategyFavorites.process()
         stocks = strategyFavorites.resort()
+        stocks = Utils.search(stocks, query)
         adapterList.setData(stocks)
-
-        updateTitle()
     }
 
     private fun updateTitle() {

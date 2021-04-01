@@ -35,10 +35,6 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
     var jobCancel: Job? = null
     var jobRefresh: Job? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onDestroy() {
         fragmentOrdersBinding = null
         jobCancelAll?.cancel()
@@ -53,23 +49,25 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
         val binding = FragmentOrdersBinding.bind(view)
         fragmentOrdersBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.updateButton.setOnClickListener {
-            jobRefresh?.cancel()
-            jobRefresh = GlobalScope.launch(Dispatchers.Main) {
-                depositManager.refreshOrders()
-                updateData()
+            updateButton.setOnClickListener {
+                jobRefresh?.cancel()
+                jobRefresh = GlobalScope.launch(Dispatchers.Main) {
+                    depositManager.refreshOrders()
+                    updateData()
+                }
             }
-        }
 
-        binding.cancelButton.setOnClickListener {
-            jobCancelAll?.cancel()
-            jobCancelAll = GlobalScope.launch(Dispatchers.Main) {
-                depositManager.cancelAllOrders()
-                updateData()
+            cancelButton.setOnClickListener {
+                jobCancelAll?.cancel()
+                jobCancelAll = GlobalScope.launch(Dispatchers.Main) {
+                    depositManager.cancelAllOrders()
+                    updateData()
+                }
             }
         }
 

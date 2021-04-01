@@ -6,7 +6,8 @@ data class RocketStock(
     val priceTo: Double,
     val time: Int,
     val volume: Int,
-    val changePercent: Double
+    val changePercent: Double,
+    val fireTime: Long
 ) {
     var changePriceRocketAbsolute: Double = 0.0
     var changePriceRocketPercent: Double = 0.0

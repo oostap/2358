@@ -14,10 +14,6 @@ class StrategyFixPrice() : KoinComponent {
 
     var currentSort: Sorting = Sorting.DESCENDING
 
-    init {
-        restartStrategy()
-    }
-
     companion object {
         var strategyStartTime: Calendar = Calendar.getInstance()
     }
