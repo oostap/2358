@@ -68,7 +68,7 @@ class Strategy1000Buy : KoinComponent {
         for (stock in stocksSelected) {
             val purchase = PurchaseStock(stock)
             for (p in purchaseToBuy) {
-                if (p.stock.ticker == stock.ticker) {
+                if (p.ticker == stock.ticker) {
                     purchase.apply {
                         percentLimitPriceChange = p.percentLimitPriceChange
                         lots = p.lots
@@ -114,7 +114,7 @@ class Strategy1000Buy : KoinComponent {
         val price = getTotalPurchaseString(purchases)
         var tickers = ""
         for (p in purchases) {
-            tickers += "${p.lots}*${p.stock.ticker} "
+            tickers += "${p.lots}*${p.ticker} "
         }
 
         return "$price:\n$tickers"
@@ -128,7 +128,7 @@ class Strategy1000Buy : KoinComponent {
                 p.getLimitPriceDouble(),
                 p.percentLimitPriceChange
             )
-            tickers += "${p.stock.ticker} * ${p.lots} = $text ${p.getStatusString()}\n"
+            tickers += "${p.ticker} * ${p.lots} = $text ${p.getStatusString()}\n"
         }
 
         return tickers

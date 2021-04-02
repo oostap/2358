@@ -110,7 +110,7 @@ class RocketsFragment : Fragment(R.layout.fragment_rockets) {
                     priceView.setTextColor(Utils.getColorForValue(rocketStock.changePriceRocketPercent))
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), rocketStock.stock.ticker)
+                        Utils.openTinkoffForTicker(requireContext(), rocketStock.ticker)
                     }
 
                     orderbookButton.setOnClickListener {
@@ -122,7 +122,7 @@ class RocketsFragment : Fragment(R.layout.fragment_rockets) {
                     sectorView.setTextColor(Utils.getColorForSector(rocketStock.stock.closePrices?.sector))
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), rocketStock.stock.ticker)
+                        Utils.openTinkoffForTicker(requireContext(), rocketStock.ticker)
                     }
 
                     if (rocketStock.stock.report != null) {

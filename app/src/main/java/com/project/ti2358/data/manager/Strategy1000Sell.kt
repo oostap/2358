@@ -1,6 +1,7 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.model.dto.PortfolioPosition
+import com.project.ti2358.service.Sorting
 import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.Job
 import org.koin.core.component.KoinApiExtension
@@ -13,13 +14,15 @@ import kotlin.math.abs
 @KoinApiExtension
 class Strategy1000Sell() : KoinComponent {
     private val depositManager: DepositManager by inject()
+    private val stockManager: StockManager by inject()
 
-    var positions: MutableList<PortfolioPosition> = mutableListOf()
-    var positionsSelected: MutableList<PortfolioPosition> = mutableListOf()
+    var stocks: MutableList<Stock> = mutableListOf()
+    var stocksSelected: MutableList<Stock> = mutableListOf()
     private var purchaseToSell: MutableList<PurchaseStock> = mutableListOf()
 
     var positionsToSell700: MutableList<PurchaseStock> = mutableListOf()
     var positionsToSell1000: MutableList<PurchaseStock> = mutableListOf()
+    var currentSort: Sorting = Sorting.DESCENDING
 
     var job1000: MutableList<Job?> = mutableListOf()
     var job700: MutableList<Job?> = mutableListOf()
@@ -27,49 +30,64 @@ class Strategy1000Sell() : KoinComponent {
     var started700: Boolean = false
     var started1000: Boolean = false
 
-    fun process(): MutableList<PortfolioPosition> {
-        positions = depositManager.portfolioPositions
-        positions.sortByDescending { abs(it.lots * it.getAveragePrice()) }
-        return positions
+    fun process(): MutableList<Stock> {
+        val all = stockManager.getWhiteStocks()
+        val min = SettingsManager.getCommonPriceMin()
+        val max = SettingsManager.getCommonPriceMax()
+
+        stocks = all.filter { it.getPriceNow() > min && it.getPriceNow() < max }.toMutableList()
+        stocks.sortBy { it.changePrice2300DayPercent }
+
+        // удалить все бумаги, по которым нет шорта в ТИ
+        stocks.removeAll { it.short == null && depositManager.portfolioPositions.find { p -> p.ticker == it.ticker } == null}
+        return stocks
     }
 
-    fun setSelected(position: PortfolioPosition, value: Boolean) {
-        if (value) {
-            if (position !in positionsSelected)
-                positionsSelected.add(position)
-        } else {
-            positionsSelected.removeAll { it.figi == position.figi }
+    fun resort(): MutableList<Stock> {
+        currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
+        stocks.sortBy { stock ->
+            val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
+            val position = depositManager.portfolioPositions.find { it.ticker == stock.ticker }
+            val multiplier1 = if (position != null) (abs(position.lots * position.getAveragePrice())).toInt() else 1
+            val multiplier3 = if (stock in stocksSelected) 1000 else 1
+            stock.changePrice2300DayPercent * sign - multiplier1 - multiplier3
         }
-        positionsSelected.sortByDescending { abs(it.lots * it.getAveragePrice()) }
+        return stocks
     }
 
-    fun isSelected(position: PortfolioPosition): Boolean {
-        return positionsSelected.find { it.figi == position.figi } != null
+    fun setSelected(stock: Stock, value: Boolean) {
+        if (value) {
+            if (stock !in stocksSelected)
+                stocksSelected.add(stock)
+        } else {
+            stocksSelected.remove(stock)
+        }
+        stocksSelected.sortBy { it.changePrice2300DayPercent }
+    }
+
+    fun isSelected(stock: Stock): Boolean {
+        return stock in stocksSelected
     }
 
     fun processSellPosition(): MutableList<PurchaseStock> {
         val purchases: MutableList<PurchaseStock> = mutableListOf()
 
-        // удалить все позиции, которых нет в портфеле
-        positionsSelected.removeAll { p -> p.figi !in depositManager.portfolioPositions.map { it.figi } }
-
-        for (pos in positionsSelected) {
-            pos.stock?.let { stock ->
-                val purchase = PurchaseStock(stock)
-                for (p in purchaseToSell) {
-                    if (p.stock.ticker == stock.ticker) {
-                        purchase.apply {
-                            percentProfitSellFrom = p.percentProfitSellFrom
-                        }
-                        break
+        for (stock in stocksSelected) {
+            val purchase = PurchaseStock(stock)
+            for (p in purchaseToSell) {
+                if (p.ticker == stock.ticker) {
+                    purchase.apply {
+                        percentProfitSellFrom = p.percentProfitSellFrom
+                        lots = p.lots
                     }
+                    break
                 }
-
-                purchase.apply {
-                    position = pos
-                }
-                purchases.add(purchase)
             }
+
+            purchase.apply {
+                position = depositManager.getPositionForFigi(stock.figi)
+            }
+            purchases.add(purchase)
         }
         purchaseToSell = purchases
 
@@ -84,46 +102,45 @@ class Strategy1000Sell() : KoinComponent {
 
     fun getTotalPurchasePieces(): Int {
         var value = 0
-        for (position in purchaseToSell) {
-            value += position.position.lots
+        for (purchaseStock in purchaseToSell) {
+            value += purchaseStock.lots
         }
         return value
     }
 
     fun getTotalSellString(): String {
         var value = 0.0
-        for (position in purchaseToSell) {
-            value += position.getProfitPriceForSell() * position.position.balance
+        for (purchaseStock in purchaseToSell) {
+            value += purchaseStock.getProfitPriceForSell() * purchaseStock.lots
         }
         return value.toMoney(null)
     }
 
-    fun getTotalSellString(positions: MutableList<PurchaseStock>): String {
+    fun getTotalSellString(purchases: MutableList<PurchaseStock>): String {
         var value = 0.0
-        for (position in positions) {
-            value += position.getProfitPriceForSell() * position.position.balance
+        for (purchaseStock in purchases) {
+            value += purchaseStock.getProfitPriceForSell() * purchaseStock.lots
         }
         return value.toMoney(null)
     }
 
-    fun getNotificationTextShort(positions: MutableList<PurchaseStock>): String {
-        val price = getTotalSellString(positions)
+    fun getNotificationTextShort(purchases: MutableList<PurchaseStock>): String {
+        val price = getTotalSellString(purchases)
         var tickers = ""
-        for (position in positions) {
-            tickers += "${position.position.lots}*${position.position.ticker} "
+        for (purchaseStock in purchases) {
+            tickers += "${purchaseStock.lots}*${purchaseStock.ticker} "
         }
 
         return "$price:\n$tickers"
     }
 
-    fun getNotificationTextLong(positions: MutableList<PurchaseStock>): String {
+    fun getNotificationTextLong(purchases: MutableList<PurchaseStock>): String {
         var tickers = ""
-        for (position in positions) {
-            val p = "%.1f$ > %.2f$ > %.1f%%".format(locale = Locale.US, position.position.lots * position.getProfitPriceForSell(), position.getProfitPriceForSell(), position.percentProfitSellFrom)
-            tickers += "${position.position.ticker} * ${position.position.lots} = $p ${position.getStatusString()}\n"
+        for (purchaseStock in purchases) {
+            val p = "%.2f$=%.2f$ > %.1f%%".format(locale = Locale.US, purchaseStock.getProfitPriceForSell(), purchaseStock.lots * purchaseStock.getProfitPriceForSell(), purchaseStock.percentProfitSellFrom)
+            tickers += "${purchaseStock.ticker}: ${purchaseStock.lots}* = $p ${purchaseStock.getStatusString()}\n"
         }
-
-        return tickers
+        return tickers.trim()
     }
 
     fun prepareSell700() {
@@ -140,7 +157,7 @@ class Strategy1000Sell() : KoinComponent {
         if (started700) return
         started700 = true
         positionsToSell700.forEach {
-            job700.add(it.sell())
+            job700.add(it.sellMorning())
         }
     }
 
@@ -148,7 +165,7 @@ class Strategy1000Sell() : KoinComponent {
         if (started1000) return
         started1000 = true
         positionsToSell1000.forEach {
-            job1000.add(it.sell())
+            job1000.add(it.sellMorning())
         }
     }
 

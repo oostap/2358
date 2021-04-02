@@ -138,7 +138,7 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
     private fun createRocket(rocketStock: RocketStock) {
         val context: Context = TheApplication.application.applicationContext
 
-        val ticker = rocketStock.stock.ticker
+        val ticker = rocketStock.ticker
         val notificationChannelId = ticker
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

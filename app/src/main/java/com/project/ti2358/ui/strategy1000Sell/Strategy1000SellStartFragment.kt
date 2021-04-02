@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.DepositManager
+import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.Strategy1000Sell
 import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.databinding.Fragment1000SellStartBinding
@@ -24,6 +25,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import java.util.*
 
 @KoinApiExtension
 class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start) {
@@ -34,6 +36,7 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
 
     var adapterList: Item1000SellRecyclerViewAdapter = Item1000SellRecyclerViewAdapter(emptyList())
     var jobUpdate: Job? = null
+    var stocks: MutableList<Stock> = mutableListOf()
 
     override fun onDestroy() {
         jobUpdate?.cancel()
@@ -51,7 +54,7 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
         binding.list.adapter = adapterList
 
         binding.startButton.setOnClickListener {
-            if (strategy1000Sell.positionsSelected.isNotEmpty()) {
+            if (strategy1000Sell.stocksSelected.isNotEmpty()) {
                 view.findNavController().navigate(R.id.action_nav_1000_sell_start_to_nav_1000_sell_finish)
             } else {
                 Utils.showErrorAlert(requireContext())
@@ -70,12 +73,14 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
         updateData()
     }
 
-    fun updateData() {
-        adapterList.setData(depositManager.portfolioPositions)
+    private fun updateData() {
+        stocks = strategy1000Sell.process()
+        stocks = strategy1000Sell.resort()
+        adapterList.setData(stocks)
     }
 
-    inner class Item1000SellRecyclerViewAdapter(private var values: List<PortfolioPosition>) : RecyclerView.Adapter<Item1000SellRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<PortfolioPosition>) {
+    inner class Item1000SellRecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<Item1000SellRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<Stock>) {
             values = newValues
             notifyDataSetChanged()
         }
@@ -86,39 +91,53 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
 
         inner class ViewHolder(private val binding: Fragment1000SellStartItemBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(index: Int) {
-                val portfolioPosition = values[index]
+                val stock = values[index]
+                val portfolioPosition = depositManager.getPositionForFigi(stock.figi)
 
                 with(binding) {
-                    tickerView.text = "${index + 1}) ${portfolioPosition.ticker}"
-
+                    tickerView.text = "${index + 1}) ${stock.ticker}"
                     chooseView.setOnCheckedChangeListener(null)
-                    chooseView.isChecked = strategy1000Sell.isSelected(portfolioPosition)
-
-                    val avg = portfolioPosition.getAveragePrice()
-                    volumeSharesView.text = "${portfolioPosition.lots} шт."
-                    priceView.text = avg.toMoney(portfolioPosition.stock)
-
-                    val profit = portfolioPosition.getProfitAmount()
-                    priceChangeAbsoluteView.text = profit.toMoney(portfolioPosition.stock)
-
-                    var totalCash = portfolioPosition.balance * avg
-                    val percent = portfolioPosition.getProfitPercent()
-                    priceChangePercentView.text = percent.toPercent()
-
-                    totalCash += profit
-                    volumeCashView.text = totalCash.toMoney(portfolioPosition.stock)
-
-                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(profit))
-                    priceChangePercentView.setTextColor(Utils.getColorForValue(profit))
+                    chooseView.isChecked = strategy1000Sell.isSelected(stock)
 
                     chooseView.setOnCheckedChangeListener { _, checked ->
-                        strategy1000Sell.setSelected(portfolioPosition, checked)
+                        strategy1000Sell.setSelected(stock, checked)
                     }
 
                     itemView.setOnClickListener { _ ->
-                        portfolioPosition.stock?.let {
-                            Utils.openTinkoffForTicker(requireContext(), it.ticker)
-                        }
+                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                    }
+
+                    if (portfolioPosition != null) { // если есть в депо
+                        val avg = portfolioPosition.getAveragePrice()
+                        volumeSharesView.text = "${portfolioPosition.lots} шт."
+                        priceView.text = "${avg.toMoney(portfolioPosition.stock)} ➡ ${portfolioPosition.stock?.getPriceString()}"
+
+                        val profit = portfolioPosition.getProfitAmount()
+                        priceChangeAbsoluteView.text = profit.toMoney(portfolioPosition.stock)
+
+                        var totalCash = portfolioPosition.balance * avg
+                        val percent = portfolioPosition.getProfitPercent()
+                        priceChangePercentView.text = percent.toPercent()
+
+                        totalCash += profit
+                        volumeCashView.text = totalCash.toMoney(portfolioPosition.stock)
+
+                        priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(profit))
+                        priceChangePercentView.setTextColor(Utils.getColorForValue(profit))
+                        priceView.setTextColor(Utils.getColorForValue(profit))
+
+                    } else { // нет в депо
+                        priceView.text = "${stock.getPrice2359String()} ➡ ${stock.getPriceString()}"
+
+                        volumeSharesView.text = "0 шт."
+                        volumeCashView.text = ""
+
+                        priceChangeAbsoluteView.text = stock.changePrice2300DayAbsolute.toMoney(stock)
+                        priceChangePercentView.text = stock.changePrice2300DayPercent.toPercent()
+
+                        priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
+                        priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
+                        priceView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))

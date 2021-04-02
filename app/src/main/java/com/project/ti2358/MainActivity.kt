@@ -26,6 +26,7 @@ import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
+import java.util.*
 import kotlin.math.abs
 
 
@@ -148,9 +149,11 @@ class MainActivity : AppCompatActivity() {
 
                     index1NameView.text = "SUPER"
                     val superChange = indices[0].change_per + indices[1].change_per + indices[2].change_per + indices[3].change_per
-                    index1ChangeView.text = "%.2f%%".format(superChange)
+                    index1ChangeView.text = "%.2f%%".format(Locale.US, superChange)
 
                     index1EmojiView.text = when {
+                        superChange >= 4.0 -> "🤡🤡🤡"
+                        superChange >= 3.0 -> "🥳🤪🤩"
                         superChange >= 2.0 -> "😍🤑😇"
                         superChange >= 1.0 -> "😍🤑"
                         superChange >= 0.2 -> "🥰"

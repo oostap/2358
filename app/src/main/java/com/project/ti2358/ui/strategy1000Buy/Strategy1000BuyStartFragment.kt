@@ -27,7 +27,7 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
     private var fragment1000BuyStartBinding: Fragment1000BuyStartBinding? = null
 
     var adapterList: Item1005RecyclerViewAdapter = Item1005RecyclerViewAdapter(emptyList())
-    lateinit var stocks: MutableList<Stock>
+    var stocks: MutableList<Stock> = mutableListOf()
 
     override fun onDestroy() {
         fragment1000BuyStartBinding = null

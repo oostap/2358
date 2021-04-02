@@ -56,8 +56,8 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
             stock = it
             purchaseStock = PurchaseStock(it).apply {
                 position = portfolioPosition
-                lots = position.lots
-                percentProfitSellFrom = Utils.getPercentFromTo(stock.getPriceNow(), position.getAveragePrice())
+                lots = position?.lots ?: 0
+                percentProfitSellFrom = Utils.getPercentFromTo(stock.getPriceNow(), position?.getAveragePrice() ?: 0.0)
                 trailingStopTakeProfitPercentActivation = SettingsManager.getTrailingStopTakeProfitPercentActivation()
                 trailingStopTakeProfitPercentDelta = SettingsManager.getTrailingStopTakeProfitPercentDelta()
                 trailingStopStopLossPercent = SettingsManager.getTrailingStopStopLossPercent()
@@ -72,7 +72,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
             }
 
             lotsPlusButton.setOnClickListener {
-                purchaseStock.position.let {
+                purchaseStock.position?.let {
                     purchaseStock.lots += 1
                     if (purchaseStock.lots > it.lots) {
                         purchaseStock.lots = it.lots
@@ -233,7 +233,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
             ttDeltaEdit.setText("%.2f".format(locale = Locale.US, purchaseStock.trailingStopTakeProfitPercentDelta))
             ttStopLossEdit.setText("%.2f".format(locale = Locale.US, purchaseStock.trailingStopStopLossPercent))
 
-            val avg = purchaseStock.position.getAveragePrice()
+            val avg = purchaseStock.position?.getAveragePrice() ?: 0.0
             val activationPrice = avg + purchaseStock.trailingStopTakeProfitPercentActivation / 100.0 * avg
             val stopLossPrice = avg - purchaseStock.trailingStopStopLossPercent / 100.0 * avg
             val delta = purchaseStock.trailingStopTakeProfitPercentDelta / 100.0 * avg
@@ -254,7 +254,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
             percentLimitEditText.setText(percent)
             priceLimitView.text = purchaseStock.getProfitPriceForSell().toMoney(stock)
 
-            val positionMoney = purchaseStock.lots * purchaseStock.position.getAveragePrice()
+            val positionMoney = purchaseStock.lots * (purchaseStock.position?.getAveragePrice() ?: 0.0)
             val profitMoney = purchaseStock.lots * purchaseStock.getProfitPriceForSell()
             val profitDelta = profitMoney - positionMoney
             profitLimitAbsoluteView.text = profitDelta.toMoney(stock)
@@ -267,7 +267,10 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
     private fun updateLots() {
         fragmentPortfolioPositionBinding?.apply {
             lotsEditText.setText(purchaseStock.lots.toString(), TextView.BufferType.EDITABLE)
-            lotsPercentView.text = (purchaseStock.lots.toDouble() / purchaseStock.position.lots.toDouble() * 100.0).toInt().toString() + "%"
+            lotsPercentView.text = "? %"
+            purchaseStock.position?.let {
+                lotsPercentView.text = (purchaseStock.lots.toDouble() / it.lots.toDouble() * 100.0).toInt().toString() + "%"
+            }
             lotsBar.progress = purchaseStock.lots
         }
         updatePrice()
@@ -300,7 +303,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
                         profitAskView.text = percentAsk.toPercent()
                         profitBidView.text = percentBid.toPercent()
 
-                        val positionMoney = purchaseStock.lots * purchaseStock.position.getAveragePrice()
+                        val positionMoney = purchaseStock.lots * (purchaseStock.position?.getAveragePrice() ?: 0.0)
 
                         val profitAskMoney = purchaseStock.lots * priceAsk
                         val profitAskDelta = profitAskMoney - positionMoney

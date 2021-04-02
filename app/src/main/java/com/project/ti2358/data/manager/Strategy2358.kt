@@ -78,9 +78,10 @@ class Strategy2358() : KoinComponent {
                 val delta = stock.changeOnStartTimer / stock.changePrice2300DayPercent
 
                 // если бумага отросла больше, чем на половину, то отменить покупку
-                if (delta >= 1.6) {
-                    stocksToDelete.add(stock)
-                }
+//                /ЕЩВЩ
+//                if (delta >= 1.6) {
+//                    stocksToDelete.add(stock)
+//                }
             }
 
             stocksSelected.removeAll { it in stocksToDelete }
@@ -97,7 +98,7 @@ class Strategy2358() : KoinComponent {
 
             var exists = false
             for (p in purchaseToBuy) {
-                if (p.stock.ticker == stock.ticker) {
+                if (p.ticker == stock.ticker) {
                     purchase.apply {
                         percentProfitSellFrom = p.percentProfitSellFrom
                         percentProfitSellTo = p.percentProfitSellTo
@@ -158,7 +159,7 @@ class Strategy2358() : KoinComponent {
 
     fun getNotificationTextShort(): String {
         var tickers = ""
-        purchaseToBuy.forEach { tickers += "${it.lots}*${it.stock.ticker} " }
+        purchaseToBuy.forEach { tickers += "${it.lots}*${it.ticker} " }
         return "${getTotalPurchaseString()}:\n$tickers"
     }
 
@@ -166,7 +167,7 @@ class Strategy2358() : KoinComponent {
         var tickers = ""
         for (purchase in purchaseToBuy) {
             val p = "%.2f$".format(locale = Locale.US, purchase.lots * purchase.stock.getPriceNow())
-            tickers += "${purchase.stock.ticker}*${purchase.lots} = ${p}, "
+            tickers += "${purchase.ticker}*${purchase.lots} = ${p}, "
             tickers += if (purchase.trailingStop) {
                 "ТТ:${purchase.trailingStopTakeProfitPercentActivation.toPercent()}/${purchase.trailingStopTakeProfitPercentDelta.toPercent()}, ${purchase.getStatusString()} ${purchase.currentTrailingStop?.currentChangePercent?.toPercent() ?: ""}\n"
             } else {

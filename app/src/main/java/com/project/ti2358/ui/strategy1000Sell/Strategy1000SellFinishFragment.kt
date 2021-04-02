@@ -4,10 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -122,62 +123,93 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                 val purchaseStock = values[index]
 
                 with(binding) {
-                    val avg = purchaseStock.position.getAveragePrice()
-                    tickerView.text = "${purchaseStock.position.ticker} x ${purchaseStock.position.lots}"
+                    var deltaLots = 1
+                    purchaseStock.position?.let {
+                        val avg = it.getAveragePrice()
+                        deltaLots = (it.lots * 0.05).toInt()
 
-                    val profit = purchaseStock.position.getProfitAmount()
-                    var totalCash = purchaseStock.position.balance * avg
-                    val percent = purchaseStock.position.getProfitPercent()
-                    percentProfitView.text = percent.toPercent()
+                        tickerView.text = "${it.ticker} x ${it.lots}"
 
-                    totalCash += profit
-                    priceView.text = "${avg.toMoney(purchaseStock.stock)} ➡ ${totalCash.toMoney(purchaseStock.stock)}"
+                        val profit = it.getProfitAmount()
+                        var totalCash = it.balance * avg
+                        val percent = it.getProfitPercent()
+                        percentProfitView.text = percent.toPercent()
 
-                    priceProfitTotalView.text = profit.toMoney(purchaseStock.stock)
-                    priceProfitView.text = (profit / purchaseStock.position.lots).toMoney(purchaseStock.stock)
+                        totalCash += profit
+                        priceView.text = "${avg.toMoney(purchaseStock.stock)} ➡ ${totalCash.toMoney(purchaseStock.stock)}"
 
-                    priceView.setTextColor(Utils.getColorForValue(percent))
-                    percentProfitView.setTextColor(Utils.getColorForValue(percent))
-                    priceProfitView.setTextColor(Utils.getColorForValue(percent))
-                    priceProfitTotalView.setTextColor(Utils.getColorForValue(percent))
+                        priceProfitTotalView.text = profit.toMoney(purchaseStock.stock)
+                        priceProfitView.text = (profit / it.lots).toMoney(purchaseStock.stock)
+
+                        priceView.setTextColor(Utils.getColorForValue(percent))
+                        percentProfitView.setTextColor(Utils.getColorForValue(percent))
+                        priceProfitView.setTextColor(Utils.getColorForValue(percent))
+                        priceProfitTotalView.setTextColor(Utils.getColorForValue(percent))
+                    }
+
+                    if (purchaseStock.position == null) {
+                        tickerView.text = "${purchaseStock.ticker} x ${0}"
+                        priceView.text = "${purchaseStock.stock.getPrice2359String()} ➡ ${purchaseStock.stock.getPriceString()}"
+
+                        percentProfitView.text = ""
+                        priceProfitView.text = ""
+                        priceProfitTotalView.text = ""
+                    }
 
                     refreshPercent(purchaseStock)
 
                     percentPlusButton.setOnClickListener {
                         purchaseStock.percentProfitSellFrom += 0.05
                         refreshPercent(purchaseStock)
-                        updateInfoText()
                     }
 
                     percentMinusButton.setOnClickListener {
                         purchaseStock.percentProfitSellFrom += -0.05
                         refreshPercent(purchaseStock)
-                        updateInfoText()
+                    }
+
+                    lotsPlusButton.setOnClickListener {
+                        purchaseStock.addLots(deltaLots)
+                        refreshPercent(purchaseStock)
+                    }
+
+                    lotsMinusButton.setOnClickListener {
+                        purchaseStock.addLots(-deltaLots)
+                        refreshPercent(purchaseStock)
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))
                 }
             }
 
-            fun refreshPercent(item: PurchaseStock) {
+            fun refreshPercent(purchaseStock: PurchaseStock) {
                 with(binding) {
-                    val futurePercent = item.percentProfitSellFrom
-                    percentProfitFutureView.text = futurePercent.toPercent()
+                    percentProfitFutureView.text = purchaseStock.percentProfitSellFrom.toPercent()
+                    percentProfitFutureView.setTextColor(Utils.getColorForValue(purchaseStock.percentProfitSellFrom))
 
-                    val avg = item.position.getAveragePrice()
-                    val futureProfitPrice = item.getProfitPriceForSell() - avg
-                    priceProfitFutureView.text = futureProfitPrice.toMoney(item.stock)
-                    percentProfitFutureTotalView.text = (futureProfitPrice * item.position.balance).toMoney(item.stock)
+                    lotsView.text = "${purchaseStock.lots} шт."
 
-                    val sellPrice = item.getProfitPriceForSell()
-                    val totalSellPrice = item.getProfitPriceForSell() * item.position.balance
-                    priceTotalView.text = "${sellPrice.toMoney(item.stock)} ➡ ${totalSellPrice.toMoney(item.stock)}"
+                    val sellPrice = purchaseStock.getProfitPriceForSell()
+                    val totalSellPrice = sellPrice * purchaseStock.lots
+                    priceTotalView.text = "${sellPrice.toMoney(purchaseStock.stock)} ➡ ${totalSellPrice.toMoney(purchaseStock.stock)}"
+                    priceTotalView.setTextColor(Utils.getColorForValue(purchaseStock.percentProfitSellFrom))
 
-                    priceTotalView.setTextColor(Utils.getColorForValue(futureProfitPrice))
-                    percentProfitFutureView.setTextColor(Utils.getColorForValue(futureProfitPrice))
-                    priceProfitFutureView.setTextColor(Utils.getColorForValue(futureProfitPrice))
-                    percentProfitFutureTotalView.setTextColor(Utils.getColorForValue(futureProfitPrice))
+                    priceProfitFutureView.text = ""
+                    percentProfitFutureTotalView.text = ""
+
+                    purchaseStock.position?.let {
+                        val futureProfitPrice = sellPrice - it.getAveragePrice()
+                        priceProfitFutureView.text = futureProfitPrice.toMoney(purchaseStock.stock)
+                        percentProfitFutureTotalView.text = (futureProfitPrice * purchaseStock.lots).toMoney(purchaseStock.stock)
+
+                        priceTotalView.setTextColor(Utils.getColorForValue(futureProfitPrice))
+                        percentProfitFutureView.setTextColor(Utils.getColorForValue(futureProfitPrice))
+                        priceProfitFutureView.setTextColor(Utils.getColorForValue(futureProfitPrice))
+                        percentProfitFutureTotalView.setTextColor(Utils.getColorForValue(futureProfitPrice))
+                    }
                 }
+
+                updateInfoText()
             }
         }
     }

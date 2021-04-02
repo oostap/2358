@@ -28,15 +28,16 @@ enum class PurchaseStatus {
 }
 
 @KoinApiExtension
-data class PurchaseStock(
-    var stock: Stock
-) : KoinComponent {
+data class PurchaseStock(var stock: Stock) : KoinComponent {
     private val ordersService: OrdersService by inject()
     private val depositManager: DepositManager by inject()
     private val marketService: MarketService by inject()
     private val strategyTrailingStop: StrategyTrailingStop by inject()
 
-    lateinit var position: PortfolioPosition
+    var ticker = stock.ticker
+    var figi = stock.figi
+
+    var position: PortfolioPosition? = null
     var fixedPrice: Double = 0.0                      // зафиксированная цена, от которой шагаем лимитками
     var percentLimitPriceChange: Double = 0.0         // разница в % с текущей ценой для создания лимитки
     var absoluteLimitPriceChange: Double = 0.0        // если лимитка, то по какой цене
@@ -92,6 +93,12 @@ data class PurchaseStock(
     fun addLots(lot: Int) {
         lots += lot
         if (lots < 1) lots = 1
+
+        position?.let {
+            if (lots > it.lots) {
+                lots = it.lots
+            }
+        }
     }
 
     fun addPriceLimitPercent(change: Double) {
@@ -747,26 +754,25 @@ data class PurchaseStock(
 
                         status = PurchaseStatus.ORDER_SELL_PREPARE
                         for (p in list) {
-                            val lots = p.first
+                            val lotsStep = p.first
                             val profit = p.second
 
                             // вычисляем и округляем до 2 после запятой
                             var profitPrice = buyPrice + buyPrice / 100.0 * profit
                             profitPrice = Utils.makeNicePrice(profitPrice)
 
-                            if (lots <= 0 || profitPrice == 0.0) continue
+                            if (lotsStep <= 0 || profitPrice == 0.0) continue
 
                             // выставить ордер на продажу
                             try {
                                 sellLimitOrder = ordersService.placeLimitOrder(
-                                    lots,
+                                    lotsStep,
                                     figi,
                                     profitPrice,
                                     OperationType.SELL,
                                     depositManager.getActiveBrokerAccountId()
                                 )
                                 status = PurchaseStatus.ORDER_SELL
-                                break
                             } catch (e: Exception) {
                                 status = PurchaseStatus.ERROR_NEED_WATCH
                                 e.printStackTrace()
@@ -778,7 +784,7 @@ data class PurchaseStock(
                 }
 
                 while (true) {
-                    delay(DelayLong)
+                    delay(DelayLong * 5)
                     if (depositManager.getPositionForFigi(figi) == null) { // продано!
                         status = PurchaseStatus.SOLD
                         Utils.showToastAlert("$ticker: продано!")
@@ -795,10 +801,10 @@ data class PurchaseStock(
         }
     }
 
-    fun sell(): Job? {
+    fun sellMorning(): Job? {
         val figi = stock.figi
         val pos = depositManager.getPositionForFigi(figi)
-        if (pos == null || pos.lots == 0 || percentProfitSellFrom == 0.0) {
+        if (pos == null || lots == 0 || pos.lots == 0 || percentProfitSellFrom == 0.0) {
             status = PurchaseStatus.CANCELED
             return null
         }
@@ -806,7 +812,7 @@ data class PurchaseStock(
         return GlobalScope.launch(Dispatchers.Main) {
             try {
                 position = pos
-                val ticker = pos.stock?.ticker
+                val ticker = stock.ticker
 
                 val profitPrice = getProfitPriceForSell()
                 if (profitPrice == 0.0) return@launch
@@ -817,7 +823,7 @@ data class PurchaseStock(
                         // выставить ордер на продажу
                         status = PurchaseStatus.ORDER_SELL_PREPARE
                         sellLimitOrder = ordersService.placeLimitOrder(
-                            pos.lots,
+                            lots,
                             figi,
                             profitPrice,
                             OperationType.SELL,
@@ -839,8 +845,9 @@ data class PurchaseStock(
 
                 // проверяем продалось или нет
                 while (true) {
-                    delay(DelayLong)
-                    if (depositManager.getPositionForFigi(figi) == null) { // продано!
+                    delay(DelayLong + DelayLong)
+                    val p = depositManager.getPositionForFigi(figi)
+                    if (p == null || p.lots < 0) { // продано!
                         status = PurchaseStatus.SOLD
                         break
                     }
@@ -854,6 +861,7 @@ data class PurchaseStock(
 
     fun sellWithLimit(): Job? {
         val figi = stock.figi
+        val ticker = stock.ticker
         val pos = depositManager.getPositionForFigi(figi)
         if (pos == null || lots == 0 || percentProfitSellFrom == 0.0) {
             status = PurchaseStatus.CANCELED
@@ -863,7 +871,6 @@ data class PurchaseStock(
         return GlobalScope.launch(Dispatchers.Main) {
             try {
                 position = pos
-                val ticker = pos.stock?.ticker
 
                 val profitPrice = getProfitPriceForSell()
                 if (profitPrice == 0.0) return@launch
@@ -891,6 +898,8 @@ data class PurchaseStock(
 
     fun sellToBestBid(): Job? {
         val figi = stock.figi
+        val ticker = stock.ticker
+
         val pos = depositManager.getPositionForFigi(figi)
         if (pos == null || pos.lots == 0) {
             status = PurchaseStatus.CANCELED
@@ -901,7 +910,6 @@ data class PurchaseStock(
             try {
                 position = pos
                 status = PurchaseStatus.ORDER_SELL_PREPARE
-                val ticker = pos.stock?.ticker
 
                 val orderbook = marketService.orderbook(figi, 5)
                 val bestBid = orderbook.getBestPriceFromBid(lots)
@@ -973,6 +981,8 @@ data class PurchaseStock(
 
     fun sellWithTrailing(): Job? {
         val figi = stock.figi
+        val ticker = stock.ticker
+
         val pos = depositManager.getPositionForFigi(figi)
         if (pos == null || pos.lots == 0 || percentProfitSellFrom == 0.0) {
             status = PurchaseStatus.CANCELED
@@ -982,9 +992,7 @@ data class PurchaseStock(
         return GlobalScope.launch(Dispatchers.Main) {
             try {
                 position = pos
-                val ticker = pos.stock?.ticker
-
-                currentTrailingStop = TrailingStop(stock, position.getAveragePrice(), trailingStopTakeProfitPercentActivation, trailingStopTakeProfitPercentDelta, trailingStopStopLossPercent)
+                currentTrailingStop = TrailingStop(stock, pos.getAveragePrice(), trailingStopTakeProfitPercentActivation, trailingStopTakeProfitPercentDelta, trailingStopStopLossPercent)
                 currentTrailingStop?.let {
                     strategyTrailingStop.addTrailingStop(it)
                     status = PurchaseStatus.ORDER_SELL_TRAILING
@@ -1019,26 +1027,32 @@ data class PurchaseStock(
     }
 
     fun getProfitPriceForSell(): Double {
-        if (percentProfitSellFrom == 0.0) return 0.0
+        position?.let { // если есть поза, берём среднюю
+            val avg = it.getAveragePrice()
+            val priceProfit = avg + avg / 100.0 * percentProfitSellFrom
+            return Utils.makeNicePrice(priceProfit)
+        }
 
-        val avg = position.getAveragePrice()
-        val priceProfit = avg + avg / 100.0 * percentProfitSellFrom
+        // иначе берём текущую цену бумаги
+        val priceProfit = stock.getPriceNow() + stock.getPriceNow() / 100.0 * percentProfitSellFrom
         return Utils.makeNicePrice(priceProfit)
     }
 
     fun processInitialProfit() {
-        // по умолчанию взять профит из настроек
-        var futureProfit = SettingsManager.get1000SellTakeProfit()
+        position?.let {
+            // по умолчанию взять профит из настроек
+            var futureProfit = SettingsManager.get1000SellTakeProfit()
 
-        // если не задан в настройках, то 1% по умолчанию
-        if (futureProfit == 0.0) futureProfit = 1.0
+            // если не задан в настройках, то 1% по умолчанию
+            if (futureProfit == 0.0) futureProfit = 1.0
 
-        // если текущий профит уже больше, то за базовый взять его
-        val change = position.getProfitAmount()
-        val totalCash = position.balance * position.getAveragePrice()
-        val currentProfit = (100.0 * change) / totalCash
+            // если текущий профит уже больше, то за базовый взять его
+            val change = it.getProfitAmount()
+            val totalCash = it.balance * it.getAveragePrice()
+            val currentProfit = (100.0 * change) / totalCash
 
-        percentProfitSellFrom = if (currentProfit > futureProfit) currentProfit else futureProfit
-        status = PurchaseStatus.WAITING
+            percentProfitSellFrom = if (currentProfit > futureProfit) currentProfit else futureProfit
+            status = PurchaseStatus.WAITING
+        }
     }
 }

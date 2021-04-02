@@ -9,6 +9,9 @@ data class RocketStock(
     val changePercent: Double,
     val fireTime: Long
 ) {
+    var ticker = stock.ticker
+    var figi = stock.figi
+
     var changePriceRocketAbsolute: Double = 0.0
     var changePriceRocketPercent: Double = 0.0
 

@@ -118,7 +118,7 @@ class StrategyTazikEndless : KoinComponent {
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         // удалить все бумаги, у которых 0 лотов
         stocksToPurchase.removeAll { p ->
-            p.lots == 0 || depositManager.portfolioPositions.any { it.ticker == p.stock.ticker }
+            p.lots == 0 || depositManager.portfolioPositions.any { it.ticker == p.ticker }
         }
 
         return stocksToPurchase
@@ -141,7 +141,7 @@ class StrategyTazikEndless : KoinComponent {
         val price = getTotalPurchaseString()
         var tickers = ""
         for (stock in stocksToPurchase) {
-            tickers += "%s*%.2f%%".format(locale = Locale.US, stock.stock.ticker, stock.percentLimitPriceChange)
+            tickers += "%s*%.2f%%".format(locale = Locale.US, stock.ticker, stock.percentLimitPriceChange)
         }
 
         return "$price:\n$tickers"
@@ -155,7 +155,7 @@ class StrategyTazikEndless : KoinComponent {
         var tickers = ""
         for (stock in stocksToPurchase) {
             val change = (100 * stock.stock.getPriceNow()) / stock.fixedPrice - 100
-            tickers += "${stock.stock.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
+            tickers += "${stock.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
                     "${stock.fixedPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceNow().toMoney(stock.stock)} = " +
                     "${change.toPercent()} ${stock.getStatusString()}\n"
         }
@@ -256,7 +256,7 @@ class StrategyTazikEndless : KoinComponent {
             if (closingPrice == 0.0) continue
 
             val change = closingPrice / purchase.fixedPrice * 100.0 - 100.0
-            if (isAllowToBuy(purchase.stock.ticker, change)) {
+            if (isAllowToBuy(purchase.ticker, change)) {
                 purchase.stock.candleToday?.let {
                     processBuy(purchase, purchase.stock, it)
                 }
@@ -285,7 +285,7 @@ class StrategyTazikEndless : KoinComponent {
         val ticker = stock.ticker
 
         // если бумага не в списке скана - игнорируем
-        val sorted = stocksToPurchase.find { it.stock.ticker == ticker }
+        val sorted = stocksToPurchase.find { it.ticker == ticker }
         sorted?.let { purchase ->
             val change = candle.closingPrice / purchase.fixedPrice * 100.0 - 100.0
             if (change <= purchase.percentLimitPriceChange && isAllowToBuy(ticker, change)) {
