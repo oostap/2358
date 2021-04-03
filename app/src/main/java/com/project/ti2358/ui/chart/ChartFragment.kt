@@ -71,7 +71,6 @@ class VolumeFormatter : ValueFormatter() {
     }
 }
 
-@SuppressLint("ViewConstructor")
 class MyMarkerView(context: Context?, layoutResource: Int) : MarkerView(context, layoutResource) {
     private val tvContent: TextView = findViewById(R.id.tvContent)
 
@@ -86,10 +85,8 @@ class MyMarkerView(context: Context?, layoutResource: Int) : MarkerView(context,
     override fun getOffset(): MPPointF {
         return MPPointF((-(width / 2)).toFloat(), (-height).toFloat())
     }
-
 }
 
-@SuppressLint("ViewConstructor")
 class XYMarkerView(context: Context?, private val xAxisValueFormatter: IAxisValueFormatter) : MarkerView(context, R.layout.chart_marker) {
     private val tvContent: TextView
     private val format: DecimalFormat

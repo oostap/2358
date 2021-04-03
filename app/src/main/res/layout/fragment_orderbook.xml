@@ -149,19 +149,22 @@
 
         </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/list"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="0dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginRight="0dp"
-            android:layout_marginBottom="0dp"
-            android:background="#00DF1919"
-            app:layoutManager="LinearLayoutManager"
-            tools:context=".ui.orderbook.OrderbookFragment"
-            tools:listitem="@layout/fragment_orderbook_item"
-            android:backgroundTint="@color/gray" />
+            android:layout_height="400dp">
+            <LinearLayout
+                android:id="@+id/orderbook_lines_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginLeft="0dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginRight="0dp"
+                android:layout_marginBottom="0dp">
+            </LinearLayout>
+
+        </ScrollView>
+
     </LinearLayout>
 
     <RelativeLayout

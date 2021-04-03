@@ -10,7 +10,7 @@
         android:weightSum="2" >
 
     <LinearLayout
-        android:id="@+id/stock_drag_to_buy"
+        android:id="@+id/drag_to_buy_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -23,7 +23,7 @@
             tools:ignore="NestedWeights">
 
             <RelativeLayout
-                android:id="@+id/stock_background_bid"
+                android:id="@+id/background_bid_view"
                 android:layout_height="36dp"
                 android:background="@color/green"
                 android:layout_width="500dp"
@@ -33,7 +33,7 @@
             </RelativeLayout>
 
             <TextView
-                android:id="@+id/stock_price_bid"
+                android:id="@+id/price_bid_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
@@ -45,7 +45,7 @@
                 android:layout_centerVertical="true"/>
 
             <TextView
-                android:id="@+id/stock_price_bid_percent"
+                android:id="@+id/price_bid_percent_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
@@ -58,7 +58,7 @@
                 android:layout_centerVertical="true"/>
 
             <TextView
-                android:id="@+id/stock_count_bid"
+                android:id="@+id/count_bid_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
@@ -71,14 +71,14 @@
 
 
             <LinearLayout
-                android:id="@+id/stock_orders_buy"
+                android:id="@+id/orders_buy_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_centerInParent="true">
 
                 <TextView
-                    android:id="@+id/stock_order_buy_1"
+                    android:id="@+id/order_buy_1_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -92,7 +92,7 @@
                     android:textColor="@color/white"/>
 
                 <TextView
-                    android:id="@+id/stock_order_buy_2"
+                    android:id="@+id/order_buy_2_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -106,7 +106,7 @@
                     android:textColor="@color/white"/>
 
                 <TextView
-                    android:id="@+id/stock_order_buy_3"
+                    android:id="@+id/order_buy_3_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -120,7 +120,7 @@
                     android:textColor="@color/white"/>
 
                 <TextView
-                    android:id="@+id/stock_order_buy_4"
+                    android:id="@+id/order_buy_4_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -138,7 +138,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/stock_drag_to_sell"
+        android:id="@+id/drag_to_sell_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -152,7 +152,7 @@
             tools:ignore="NestedWeights">
 
             <RelativeLayout
-                android:id="@+id/stock_background_ask"
+                android:id="@+id/background_ask_view"
                 android:layout_height="36dp"
                 android:background="@color/red"
                 android:layout_width="50dp"
@@ -162,7 +162,7 @@
             </RelativeLayout>
 
             <TextView
-                android:id="@+id/stock_price_ask"
+                android:id="@+id/price_ask_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="4dp"
@@ -173,7 +173,7 @@
                 android:layout_centerVertical="true"/>
 
             <TextView
-                android:id="@+id/stock_price_ask_percent"
+                android:id="@+id/price_ask_percent_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
@@ -186,7 +186,7 @@
                 android:layout_centerVertical="true"/>
 
             <TextView
-                android:id="@+id/stock_count_ask"
+                android:id="@+id/count_ask_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
@@ -198,14 +198,14 @@
                 android:layout_centerVertical="true"/>
 
             <LinearLayout
-                android:id="@+id/stock_orders_sell"
+                android:id="@+id/orders_sell_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_centerInParent="true">
 
                 <TextView
-                    android:id="@+id/stock_order_sell_1"
+                    android:id="@+id/order_sell_1_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -219,7 +219,7 @@
                     android:background="@color/order_red"/>
 
                 <TextView
-                    android:id="@+id/stock_order_sell_2"
+                    android:id="@+id/order_sell_2_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -233,7 +233,7 @@
                     android:background="@color/order_red"/>
 
                 <TextView
-                    android:id="@+id/stock_order_sell_3"
+                    android:id="@+id/order_sell_3_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -247,7 +247,7 @@
                     android:background="@color/order_red"/>
 
                 <TextView
-                    android:id="@+id/stock_order_sell_4"
+                    android:id="@+id/order_sell_4_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"

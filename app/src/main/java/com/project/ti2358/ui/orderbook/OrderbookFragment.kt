@@ -4,18 +4,23 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.Context
 import android.content.DialogInterface
+import android.graphics.Rect
 import android.os.Bundle
 import android.text.InputType
-import android.view.*
+import android.view.DragEvent
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
 import android.view.View.*
-import android.widget.*
+import android.view.animation.Animation
+import android.view.animation.Transformation
+import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.*
@@ -23,6 +28,7 @@ import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.model.dto.Order
 import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.databinding.FragmentOrderbookBinding
+import com.project.ti2358.databinding.FragmentOrderbookItemBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toMoney
@@ -30,12 +36,12 @@ import com.project.ti2358.service.toPercent
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-import java.lang.Exception
 import java.lang.StrictMath.min
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.sign
+
 
 @KoinApiExtension
 class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
@@ -46,7 +52,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
     private var fragmentOrderbookBinding: FragmentOrderbookBinding? = null
 
-    var adapterList: ItemOrderbookRecyclerViewAdapter = ItemOrderbookRecyclerViewAdapter(emptyList())
+    var orderlinesViews: MutableList<OrderlineHolder> = mutableListOf()
     var activeStock: Stock? = null
     var orderbookLines: MutableList<OrderbookLine> = mutableListOf()
     var jobRefreshOrders: Job? = null
@@ -67,9 +73,12 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         fragmentOrderbookBinding = binding
 
         with(binding) {
-            list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-            list.layoutManager = LinearLayoutManager(context)
-            list.adapter = adapterList
+            // создать лист руками
+            for (i in 0..20) {
+                val orderlineHolder = OrderlineHolder(FragmentOrderbookItemBinding.inflate(LayoutInflater.from(context), null, false))
+                orderbookLinesView.addView(orderlineHolder.binding.root)
+                orderlinesViews.add(orderlineHolder)
+            }
 
             volumesView.children.forEach { it.visibility = GONE }
             buyPlusView.children.forEach { it.visibility = GONE }
@@ -328,7 +337,16 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     private fun updateData() {
         if (!isVisible) return
         orderbookLines = orderbookManager.process()
-        adapterList.setData(orderbookLines)
+
+        fragmentOrderbookBinding?.apply {
+            orderbookLinesView.children.forEach { it.visibility = GONE }
+            val size = min(orderbookLines.size, orderbookLinesView.childCount)
+
+            for (i in 0 until size) {
+                orderbookLinesView.getChildAt(i).visibility = VISIBLE
+                orderlinesViews[i].updateData(orderbookLines[i], i)
+            }
+        }
 
         val ticker = activeStock?.instrument?.ticker ?: ""
         val act = requireActivity() as AppCompatActivity
@@ -339,7 +357,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         override fun onDrag(v: View, event: DragEvent): Boolean {
             log("onDrag")
             when (event.action) {
-                DragEvent.ACTION_DRAG_STARTED -> { }
+                DragEvent.ACTION_DRAG_STARTED -> {
+                }
                 DragEvent.ACTION_DRAG_ENTERED -> {
                     val view = event.localState as View
                     val actionType = v.getTag(R.string.action_type) as String
@@ -382,193 +401,171 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                         orderbookManager.removeOrder(order)
                     }
 
-                    fragmentOrderbookBinding?.scalperPanelView?.visibility = View.VISIBLE
-                    fragmentOrderbookBinding?.trashButton?.visibility = View.GONE
+                    fragmentOrderbookBinding?.scalperPanelView?.visibility = VISIBLE
+                    fragmentOrderbookBinding?.trashButton?.visibility = GONE
                 }
-                DragEvent.ACTION_DRAG_ENDED -> { }
+                DragEvent.ACTION_DRAG_ENDED -> {
+                }
                 else -> { }
             }
             return true
         }
     }
 
-    inner class ItemOrderbookRecyclerViewAdapter(
-        private var values: List<OrderbookLine>
-    ) : RecyclerView.Adapter<ItemOrderbookRecyclerViewAdapter.ViewHolder>() {
-
-        fun setData(newValues: List<OrderbookLine>) {
-            values = newValues
-            notifyDataSetChanged()
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_orderbook_item, parent, false)
-            return ViewHolder(view)
-        }
+    inner class OrderlineHolder(val binding: FragmentOrderbookItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
         @SuppressLint("ClickableViewAccessibility")
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.orderbookLine = item
+        fun updateData(item: OrderbookLine, index: Int) {
+            with(binding) {
+                dragToBuyView.setBackgroundColor(Utils.getColorForIndex(index))
+                dragToSellView.setBackgroundColor(Utils.getColorForIndex(index))
 
-            holder.dragToBuyView.setBackgroundColor(Utils.getColorForIndex(position))
-            holder.dragToSellView.setBackgroundColor(Utils.getColorForIndex(position))
+                dragToBuyView.setOnDragListener(ChoiceDragListener())
+                dragToSellView.setOnDragListener(ChoiceDragListener())
 
-            holder.dragToBuyView.setOnDragListener(ChoiceDragListener())
-            holder.dragToSellView.setOnDragListener(ChoiceDragListener())
+                dragToBuyView.setTag(R.string.position_line, index)
+                dragToBuyView.setTag(R.string.order_line, item)
+                dragToBuyView.setTag(R.string.order_type, OperationType.BUY)
+                dragToBuyView.setTag(R.string.action_type, "replace")
 
-            holder.dragToBuyView.setTag(R.string.position_line, position)
-            holder.dragToBuyView.setTag(R.string.order_line, item)
-            holder.dragToBuyView.setTag(R.string.order_type, OperationType.BUY)
-            holder.dragToBuyView.setTag(R.string.action_type, "replace")
+                dragToSellView.setTag(R.string.position_line, index)
+                dragToSellView.setTag(R.string.order_line, item)
+                dragToSellView.setTag(R.string.order_type, OperationType.SELL)
+                dragToSellView.setTag(R.string.action_type, "replace")
 
-            holder.dragToSellView.setTag(R.string.position_line, position)
-            holder.dragToSellView.setTag(R.string.order_line, item)
-            holder.dragToSellView.setTag(R.string.order_type, OperationType.SELL)
-            holder.dragToSellView.setTag(R.string.action_type, "replace")
+                countBidView.text = "${item.bidCount}"
+                priceBidView.text = "%.2f".format(locale = Locale.US, item.bidPrice)
 
-            holder.bidCountView.text = "${item.bidCount}"
-            holder.bidPriceView.text = "%.2f".format(locale = Locale.US, item.bidPrice)
-            holder.askCountView.text = "${item.askCount}"
-            holder.askPriceView.text = "%.2f".format(locale = Locale.US, item.askPrice)
+                countAskView.text = "${item.askCount}"
+                priceAskView.text = "%.2f".format(locale = Locale.US, item.askPrice)
 
-            var targetPriceAsk = 0.0
-            var targetPriceBid = 0.0
-            var portfolioPosition: PortfolioPosition? = null
-            activeStock?.let {
-                targetPriceAsk = values.first().askPrice
-                targetPriceBid = values.first().bidPrice
+                var targetPriceAsk = 0.0
+                var targetPriceBid = 0.0
+                var portfolioPosition: PortfolioPosition? = null
+                activeStock?.let {
+                    targetPriceAsk = orderbookLines.first().askPrice
+                    targetPriceBid = orderbookLines.first().bidPrice
 
-                portfolioPosition = depositManager.getPositionForFigi(it.figi)
-                portfolioPosition?.let { p ->
-                    targetPriceAsk = p.getAveragePrice()
-                    targetPriceBid = p.getAveragePrice()
+                    portfolioPosition = depositManager.getPositionForFigi(it.figi)
+                    portfolioPosition?.let { p ->
+                        targetPriceAsk = p.getAveragePrice()
+                        targetPriceBid = p.getAveragePrice()
+                    }
                 }
-            }
 
-            val allow = true
-            if (targetPriceAsk != 0.0 && allow) {
-                val percentBid = Utils.getPercentFromTo(item.bidPrice, targetPriceBid)
-                holder.bidPricePercentView.text = "%.2f%%".format(locale = Locale.US, percentBid)
-                holder.bidPricePercentView.setTextColor(Utils.getColorForValue(percentBid))
+                val allow = true
+                if (targetPriceAsk != 0.0 && allow) {
+                    val percentBid = Utils.getPercentFromTo(item.bidPrice, targetPriceBid)
+                    priceBidPercentView.text = "%.2f%%".format(locale = Locale.US, percentBid)
+                    priceBidPercentView.setTextColor(Utils.getColorForValue(percentBid))
+                    priceBidPercentView.visibility = VISIBLE
 
-                val percentAsk = Utils.getPercentFromTo(item.askPrice, targetPriceAsk)
-                holder.askPricePercentView.text = "%.2f%%".format(locale = Locale.US, percentAsk)
-                holder.askPricePercentView.setTextColor(Utils.getColorForValue(percentAsk))
-                holder.askPricePercentView.visibility = VISIBLE
-                holder.bidPricePercentView.visibility = VISIBLE
+                    val percentAsk = Utils.getPercentFromTo(item.askPrice, targetPriceAsk)
+                    priceAskPercentView.text = "%.2f%%".format(locale = Locale.US, percentAsk)
+                    priceAskPercentView.setTextColor(Utils.getColorForValue(percentAsk))
+                    priceAskPercentView.visibility = VISIBLE
 
-                if (percentBid == 0.0 && portfolioPosition != null) {
-                    holder.dragToBuyView.setBackgroundColor(Utils.TEAL)
-                }
-                if (percentAsk == 0.0 && portfolioPosition != null) {
-                    holder.dragToSellView.setBackgroundColor(Utils.TEAL)
-                }
-            } else {
-                holder.askPricePercentView.visibility = GONE
-                holder.bidPricePercentView.visibility = GONE
-            }
-
-            holder.bidBackgroundView.layoutParams.width = (item.bidPercent * 500).toInt()
-            holder.askBackgroundView.layoutParams.width = (item.askPercent * 500).toInt()
-
-            // ордера на покупку
-            val ordersBuy = listOf<TextView>(holder.orderBuy1View, holder.orderBuy2View, holder.orderBuy3View, holder.orderBuy4View)
-            ordersBuy.forEach {
-                it.visibility = View.GONE
-                it.setOnTouchListener(ChoiceTouchListener())
-            }
-
-            var size = min(item.ordersBuy.size, ordersBuy.size)
-            for (i in 0 until size) {
-                ordersBuy[i].visibility = VISIBLE
-                ordersBuy[i].text = "${item.ordersBuy[i].requestedLots - item.ordersBuy[i].executedLots}"
-
-                ordersBuy[i].setTag(R.string.order_line, item)
-                ordersBuy[i].setTag(R.string.order_item, item.ordersBuy[i])
-            }
-
-            // ордера на продажу
-            val ordersSell = listOf<TextView>(holder.orderSell1View, holder.orderSell2View, holder.orderSell3View, holder.orderSell4View)
-            ordersSell.forEach {
-                it.visibility = View.GONE
-                it.setOnTouchListener(ChoiceTouchListener())
-
-            }
-
-            size = min(item.ordersSell.size, ordersSell.size)
-            for (i in 0 until size) {
-                ordersSell[i].visibility = VISIBLE
-                ordersSell[i].text = "${item.ordersSell[i].requestedLots - item.ordersSell[i].executedLots}"
-
-                ordersSell[i].setTag(R.string.order_line, item)
-                ordersSell[i].setTag(R.string.order_item, item.ordersSell[i])
-            }
-
-            holder.dragToSellView.setOnTouchListener { v, event ->
-                if (event.action == MotionEvent.ACTION_DOWN) {
-                    v.setBackgroundColor(Utils.LIGHT)
-                }
-                if (event.action == MotionEvent.ACTION_UP) {
-                    holder.dragToSellView.setBackgroundColor(Utils.getColorForIndex(position))
-                    showEditOrder(holder.orderbookLine, OperationType.SELL)
-                }
-                true
-            }
-
-            holder.dragToBuyView.setOnTouchListener { v, event ->
-                if (event.action == MotionEvent.ACTION_DOWN) {
-                    v.setBackgroundColor(Utils.LIGHT)
-                }
-                if (event.action == MotionEvent.ACTION_UP) {
-                    holder.dragToSellView.setBackgroundColor(Utils.getColorForIndex(position))
-                    showEditOrder(holder.orderbookLine, OperationType.BUY)
-                }
-                true
-            }
-        }
-
-        override fun getItemCount(): Int = values.size
-
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            lateinit var orderbookLine: OrderbookLine
-            val dragToBuyView: LinearLayout = view.findViewById(R.id.stock_drag_to_buy)
-            val dragToSellView: LinearLayout = view.findViewById(R.id.stock_drag_to_sell)
-
-            val bidBackgroundView: RelativeLayout = view.findViewById(R.id.stock_background_bid)
-            val bidCountView: TextView = view.findViewById(R.id.stock_count_bid)
-            val bidPriceView: TextView = view.findViewById(R.id.stock_price_bid)
-            val bidPricePercentView: TextView = view.findViewById(R.id.stock_price_bid_percent)
-
-            val askBackgroundView: RelativeLayout = view.findViewById(R.id.stock_background_ask)
-            val askCountView: TextView = view.findViewById(R.id.stock_count_ask)
-            val askPriceView: TextView = view.findViewById(R.id.stock_price_ask)
-            val askPricePercentView: TextView = view.findViewById(R.id.stock_price_ask_percent)
-
-            val orderBuy1View: TextView = view.findViewById(R.id.stock_order_buy_1)
-            val orderBuy2View: TextView = view.findViewById(R.id.stock_order_buy_2)
-            val orderBuy3View: TextView = view.findViewById(R.id.stock_order_buy_3)
-            val orderBuy4View: TextView = view.findViewById(R.id.stock_order_buy_4)
-
-            val orderSell1View: TextView = view.findViewById(R.id.stock_order_sell_1)
-            val orderSell2View: TextView = view.findViewById(R.id.stock_order_sell_2)
-            val orderSell3View: TextView = view.findViewById(R.id.stock_order_sell_3)
-            val orderSell4View: TextView = view.findViewById(R.id.stock_order_sell_4)
-        }
-
-        inner class ChoiceTouchListener : OnTouchListener {
-            @SuppressLint("ClickableViewAccessibility")
-            override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
-                return if (motionEvent.action == MotionEvent.ACTION_DOWN) {
-                    val data = ClipData.newPlainText("", "")
-                    val shadowBuilder = DragShadowBuilder(view)
-                    view.startDrag(data, shadowBuilder, view, 0)
-                    fragmentOrderbookBinding?.scalperPanelView?.visibility = View.GONE
-                    fragmentOrderbookBinding?.trashButton?.visibility = View.VISIBLE
-                    true
+                    if (percentBid == 0.0 && portfolioPosition != null) {
+                        dragToBuyView.setBackgroundColor(Utils.TEAL)
+                    }
+                    if (percentAsk == 0.0 && portfolioPosition != null) {
+                        dragToSellView.setBackgroundColor(Utils.TEAL)
+                    }
                 } else {
-                    false
+                    priceAskPercentView.visibility = GONE
+                    priceBidPercentView.visibility = GONE
                 }
+
+                backgroundBidView.startAnimation(ResizeWidthAnimation(backgroundBidView, (item.bidPercent * 500).toInt()).apply { duration = 250 })
+                backgroundAskView.startAnimation(ResizeWidthAnimation(backgroundAskView, (item.askPercent * 500).toInt()).apply { duration = 250 })
+
+                // ордера на покупку
+                val ordersBuy = listOf(orderBuy1View, orderBuy2View, orderBuy3View, orderBuy4View)
+                ordersBuy.forEach {
+                    it.visibility = GONE
+                    it.setOnTouchListener(ChoiceTouchListener())
+                }
+
+                var size = min(item.ordersBuy.size, ordersBuy.size)
+                for (i in 0 until size) {
+                    ordersBuy[i].visibility = VISIBLE
+                    ordersBuy[i].text = "${item.ordersBuy[i].requestedLots - item.ordersBuy[i].executedLots}"
+
+                    ordersBuy[i].setTag(R.string.order_line, item)
+                    ordersBuy[i].setTag(R.string.order_item, item.ordersBuy[i])
+                }
+
+                // ордера на продажу
+                val ordersSell = listOf(orderSell1View, orderSell2View, orderSell3View, orderSell4View)
+                ordersSell.forEach {
+                    it.visibility = GONE
+                    it.setOnTouchListener(ChoiceTouchListener())
+
+                }
+
+                size = min(item.ordersSell.size, ordersSell.size)
+                for (i in 0 until size) {
+                    ordersSell[i].visibility = VISIBLE
+                    ordersSell[i].text = "${item.ordersSell[i].requestedLots - item.ordersSell[i].executedLots}"
+
+                    ordersSell[i].setTag(R.string.order_line, item)
+                    ordersSell[i].setTag(R.string.order_item, item.ordersSell[i])
+                }
+
+                dragToSellView.setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        v.setBackgroundColor(Utils.LIGHT)
+                    }
+
+                    if (event.action == MotionEvent.ACTION_UP) {
+                        showEditOrder(item, OperationType.SELL)
+                        v.setBackgroundColor(Utils.getColorForIndex(index))
+                    }
+                    true
+                }
+
+                dragToBuyView.setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        v.setBackgroundColor(Utils.LIGHT)
+                    }
+
+                    if (event.action == MotionEvent.ACTION_UP) {
+                        showEditOrder(item, OperationType.BUY)
+                        v.setBackgroundColor(Utils.getColorForIndex(index))
+                    }
+                    true
+                }
+            }
+        }
+    }
+
+    class ResizeWidthAnimation(private val mView: View, private val mWidth: Int) : Animation() {
+        private val mStartWidth: Int = mView.width
+
+        override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
+            mView.layoutParams.width = mStartWidth + ((mWidth - mStartWidth) * interpolatedTime).toInt()
+            mView.requestLayout()
+        }
+
+        override fun willChangeBounds(): Boolean {
+            return true
+        }
+    }
+
+    inner class ChoiceTouchListener : OnTouchListener {
+        @SuppressLint("ClickableViewAccessibility")
+        override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+            return if (motionEvent.action == MotionEvent.ACTION_DOWN) {
+                val data = ClipData.newPlainText("", "")
+                val shadowBuilder = DragShadowBuilder(view)
+                view.startDrag(data, shadowBuilder, view, 0)
+                fragmentOrderbookBinding?.apply {
+                    scalperPanelView.visibility = GONE
+                    trashButton.visibility = VISIBLE
+                }
+                true
+            } else {
+                false
             }
         }
     }
