@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent" android:layout_height="fill_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="20dp"
+            android:text=" @ostapos разрабатывает приложение и спит спокойно во время закрытия биржи"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            android:textAlignment="center"/>
+
+        <Button android:layout_width="fill_parent"
+            android:layout_height="70dp"
+            android:id="@+id/donate_ostap_button"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:text="ДОНАТ ОСТАПУ"
+            android:textSize="20dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="20dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_margin="10dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="20dp"
+            android:text=" @daager разрабатывает сервер для приложения и переживает за ваше депо больше вас"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            android:textAlignment="center"/>
+
+        <Button android:layout_width="fill_parent"
+            android:layout_height="70dp"
+            android:id="@+id/donate_nurlan_button"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:text="ДОНАТ НУРЛАНУ"
+            android:textSize="20dp"
+            android:layout_alignParentBottom="true" />
+
+    </LinearLayout>
+
+    <Button android:layout_width="fill_parent"
+        android:layout_height="70dp"
+        android:id="@+id/tutorial_button"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:text="Инструкция к 2358"
+        android:padding="0dp"
+        android:textSize="18dp"
+        android:layout_alignParentBottom="true" />
+
+</RelativeLayout>

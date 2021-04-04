@@ -198,12 +198,17 @@ class SettingsManager {
 
         fun get2358VolumeDayCash(): Double {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_volume_min_cash)
-            val value: String? = preferences.getString(key, "0.1")
+            val value: String? = preferences.getString(key, "1.0")
             return try {
-                (value ?: "0.1").toDouble()
+                (value ?: "1.0").toDouble()
             } catch (e: Exception) {
-                0.1
+                1.0
             }
+        }
+
+        fun get2358ProtectStockUp(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_protect_stock_up)
+            return preferences.getBoolean(key, true)
         }
 
         /******************** Premarket *************************/

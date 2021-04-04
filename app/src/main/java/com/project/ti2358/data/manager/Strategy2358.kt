@@ -66,25 +66,26 @@ class Strategy2358() : KoinComponent {
 
         if (reset) started = false
 
-        // удалить бумаги, которые перестали удовлетворять условию 2358
-        stocksSelected.removeAll { it !in stocks }
+        if (SettingsManager.get2358ProtectStockUp()) { // защита от откупа
+            // удалить бумаги, которые перестали удовлетворять условию 2358
+            stocksSelected.removeAll { it !in stocks }
 
-        // проверить и удалить бумаги, которые сильно отросли с момента старта таймера
-        if (!reset) {
-            val stocksToDelete: MutableList<Stock> = mutableListOf()
-            for (stock in stocksSelected) {
-                if (stock.changeOnStartTimer == 0.0) continue
+            // проверить и удалить бумаги, которые сильно отросли с момента старта таймера
+            if (!reset) {
+                val stocksToDelete: MutableList<Stock> = mutableListOf()
+                for (stock in stocksSelected) {
+                    if (stock.changeOnStartTimer == 0.0) continue
 
-                val delta = stock.changeOnStartTimer / stock.changePrice2300DayPercent
+                    val delta = stock.changeOnStartTimer / stock.changePrice2300DayPercent
 
-                // если бумага отросла больше, чем на половину, то отменить покупку
-//                /ЕЩВЩ
-//                if (delta >= 1.6) {
-//                    stocksToDelete.add(stock)
-//                }
+                    // если бумага отросла больше, чем на половину, то отменить покупку
+                    if (delta >= 1.6) {
+                        stocksToDelete.add(stock)
+                    }
+                }
+
+                stocksSelected.removeAll { it in stocksToDelete }
             }
-
-            stocksSelected.removeAll { it in stocksToDelete }
         }
 
         // удалить бумаги, которые уже есть в депо, иначе среднюю невозможно узнать

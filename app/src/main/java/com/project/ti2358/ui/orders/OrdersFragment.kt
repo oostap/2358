@@ -65,7 +65,7 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
             cancelButton.setOnClickListener {
                 jobCancelAll?.cancel()
                 jobCancelAll = GlobalScope.launch(Dispatchers.Main) {
-                    depositManager.cancelAllOrders()
+                    orderbookManager.cancelAllOrders()
                     updateData()
                 }
             }
@@ -119,8 +119,7 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
                     cancelButton.setOnClickListener {
                         jobCancel?.cancel()
                         jobCancel = GlobalScope.launch(Dispatchers.Main) {
-                            depositManager.cancelOrder(order)
-                            depositManager.refreshOrders()
+                            orderbookManager.cancelOrder(order)
                             updateData()
                         }
                     }

@@ -77,30 +77,10 @@ class DepositManager : KoinComponent {
         return accounts.first().brokerAccountId
     }
 
-    suspend fun cancelOrder(order: Order): Boolean {
-        try {
-            ordersService.cancel(order.orderId, getActiveBrokerAccountId())
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return false
-    }
-
-    suspend fun cancelAllOrders() {
-        for (order in orders) {
-            try {
-                cancelOrder(order)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-        refreshOrders()
-    }
-
     suspend fun refreshOrders(): Boolean {
         try {
             if (accounts.isEmpty()) accounts = synchronizedList(portfolioService.accounts().accounts)
-            orders = ordersService.orders(getActiveBrokerAccountId()) as MutableList<Order>
+            orders = synchronizedList(ordersService.orders(getActiveBrokerAccountId()))
             baseSortOrders()
             return true
         } catch (e: Exception) {
@@ -162,7 +142,7 @@ class DepositManager : KoinComponent {
         return total
     }
 
-    public fun getPercentBusyInStocks(): Int {
+    fun getPercentBusyInStocks(): Int {
         val free = getFreeCash()
         var busy = 0.0
 

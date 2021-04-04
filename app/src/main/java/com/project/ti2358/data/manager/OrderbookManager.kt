@@ -3,6 +3,7 @@ package com.project.ti2358.data.manager
 import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.model.dto.Order
 import com.project.ti2358.data.service.OrdersService
+import com.project.ti2358.service.Utils
 import com.project.ti2358.ui.orderbook.OrderbookLine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -38,18 +39,20 @@ class OrderbookManager() : KoinComponent {
         activeStock = null
     }
 
-    fun createOrder(figi: String, price: Double, count: Int, operationType: OperationType) {
+    fun createOrder(stock: Stock, price: Double, count: Int, operationType: OperationType) {
         GlobalScope.launch(Dispatchers.Main) {
             try {
                 ordersService.placeLimitOrder(
                     count,
-                    figi,
+                    stock.figi,
                     price,
                     operationType,
                     depositManager.getActiveBrokerAccountId()
                 )
+                val operation = if (operationType == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
+                Utils.showToastAlert("${stock.ticker} создан новый ордер: $operation")
             } catch (e: Exception) {
-                // возможно уже отменена
+
             }
 
             depositManager.refreshOrders()
@@ -57,23 +60,40 @@ class OrderbookManager() : KoinComponent {
         }
     }
 
-    fun removeOrder(order: Order) {
+    fun cancelOrder(order: Order) {
         GlobalScope.launch(Dispatchers.Main) {
+            val operation = if (order.operation == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
             try {
                 ordersService.cancel(order.orderId, depositManager.getActiveBrokerAccountId())
+                Utils.showToastAlert("${order.stock?.ticker} ордер отменён: $operation")
             } catch (e: Exception) {
                 // возможно уже отменена
+                Utils.showToastAlert("${order.stock?.ticker} ордер УЖЕ отменён: $operation")
             }
 
             depositManager.refreshOrders()
             process()
         }
+    }
+
+    suspend fun cancelAllOrders() {
+        for (order in depositManager.orders) {
+            try {
+                cancelOrder(order)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        depositManager.refreshOrders()
     }
 
     fun replaceOrder(from: Order, price: Double, operationType: OperationType) {
         GlobalScope.launch(Dispatchers.Main) {
             try {
                 ordersService.cancel(from.orderId, depositManager.getActiveBrokerAccountId())
+
+                val operation = if (from.operation == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
+                Utils.showToastAlert("${from.stock?.ticker} ордер отменён: $operation")
             } catch (e: Exception) {
                 // возможно уже отменена, значит двойное действие, отменить всё остальное
                 depositManager.refreshOrders()
@@ -89,6 +109,9 @@ class OrderbookManager() : KoinComponent {
                     from.operation,
                     depositManager.getActiveBrokerAccountId()
                 )
+
+                val operation = if (from.operation == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
+                Utils.showToastAlert("${from.stock?.ticker} создан новый ордер: $operation")
             } catch (e: Exception) {
 
             }

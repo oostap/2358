@@ -204,7 +204,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
                 GlobalScope.launch(Dispatchers.Main) {
                     val orders = depositManager.getOrderAllOrdersForFigi(portfolioPosition.figi, OperationType.SELL)
                     orders.forEach {
-                        depositManager.cancelOrder(it)
+                        orderbookManager.cancelOrder(it)
                     }
                 }
 

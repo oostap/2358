@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.Context
 import android.content.DialogInterface
-import android.graphics.Rect
 import android.os.Bundle
 import android.text.InputType
 import android.view.DragEvent
@@ -41,7 +40,6 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.sign
-
 
 @KoinApiExtension
 class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
@@ -299,17 +297,17 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         val volume = getActiveVolume()
         if (volume != 0) {
             val price = priceBox.text.toString().toDouble()
-            orderbookManager.createOrder(orderbookLine.stock.figi, price, volume, operationType)
+            orderbookManager.createOrder(orderbookLine.stock, price, volume, operationType)
             return
         }
 
-        priceBox.hint = "цены"
-        layout.addView(priceBox) // Notice this is an add method
+        priceBox.hint = "цена"
+        layout.addView(priceBox)
 
         val lotsBox = EditText(context)
         lotsBox.inputType = InputType.TYPE_CLASS_NUMBER
         lotsBox.hint = "количество"
-        layout.addView(lotsBox) // Another add method
+        layout.addView(lotsBox)
 
         var title = if (operationType == OperationType.BUY) "КУПИТЬ!" else "ПРОДАТЬ!"
         val position = depositManager.getPositionForFigi(orderbookLine.stock.figi)
@@ -323,7 +321,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 try {
                     val price = Utils.makeNicePrice(priceBox.text.toString().toDouble())
                     val lots = lotsBox.text.toString().toInt()
-                    orderbookManager.createOrder(orderbookLine.stock.figi, price, lots, operationType)
+                    orderbookManager.createOrder(orderbookLine.stock, price, lots, operationType)
                 } catch (e: Exception) {
                     Utils.showMessageAlert(requireContext(), "Неверный формат чисел!")
                 }
@@ -398,7 +396,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     } else if (actionType == "remove") {
                         val dropped = view as TextView              // заявка
                         val order = dropped.getTag(R.string.order_item) as Order
-                        orderbookManager.removeOrder(order)
+                        orderbookManager.cancelOrder(order)
                     }
 
                     fragmentOrderbookBinding?.scalperPanelView?.visibility = VISIBLE

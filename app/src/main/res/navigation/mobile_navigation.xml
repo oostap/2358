@@ -276,6 +276,13 @@
         android:label="@string/menu_diagnostics"
         tools:layout="@layout/fragment_diagnostics" />
 
+    <!-- donate -->
+    <fragment
+        android:id="@+id/nav_donate"
+        android:name="com.project.ti2358.ui.donate.DonateFragment"
+        android:label="@string/menu_donate_description"
+        tools:layout="@layout/fragment_donate" />
+
     <!-- Chart -->
 
     <fragment

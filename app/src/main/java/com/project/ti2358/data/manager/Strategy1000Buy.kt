@@ -32,7 +32,7 @@ class Strategy1000Buy : KoinComponent {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks = all.filter { it.getPriceNow() > min && it.getPriceNow() < max }.toMutableList()
+        stocks = all.filter { (it.getPriceNow() > min && it.getPriceNow() < max) || it.getPriceNow() == 0.0 }.toMutableList()
         stocks.sortBy { it.changePrice2300DayPercent }
         return stocks
     }

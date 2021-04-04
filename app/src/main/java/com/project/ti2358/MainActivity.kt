@@ -200,7 +200,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_reports,
                 R.id.nav_shorts,
                 R.id.nav_diagnostics,
-                R.id.nav_favorites
+                R.id.nav_favorites,
+                R.id.nav_donate
             ),
             drawerLayout
         )

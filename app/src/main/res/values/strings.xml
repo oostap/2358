@@ -49,6 +49,8 @@
 
     <string name="menu_settings">Настройки</string>
     <string name="menu_diagnostics">Диагностика</string>
+    <string name="menu_donate">Донатики</string>
+    <string name="menu_donate_description">Собираем на новые фичи</string>
     <string name="menu_portfolio">Депозит</string>
     <string name="menu_orders">Заявки</string>
     <string name="menu_reports">Отчёты</string>
@@ -74,7 +76,7 @@
 
     <!-- Preference Titles -->
 
-    <string name="settings_header_2358">Стратегия 2358</string>
+    <string name="settings_header_2358">Стратегия 2258</string>
     <string name="settings_header_1728">Стратегия 1628</string>
     <string name="settings_header_1000_sell">Стратегия 10:00:00 sell</string>
     <string name="settings_header_1000_buy">Стратегия 10:00:00 buy</string>
@@ -119,6 +121,7 @@
     <string name="stocks_2358_take_profit_from">Заявка на продажу от в % (0.0 = не создавать)</string>
     <string name="stocks_2358_take_profit_to">Заявка на продажу до в % (0.0 = не создавать)</string>
     <string name="stocks_2358_take_profit_step">Количество заявок в равных долях</string>
+    <string name="stocks_2358_protect_stock_up">Защита от откупа (исключать отросшие с момента старта таймера)</string>
 
     <!-- 1000 sell settings -->
     <string name="stocks_1000_sell_take_profit">Базовый % заявки на продажу</string>
@@ -198,6 +201,7 @@
     <string name="setting_key_2358_take_profit_from">2358_take_profit_from</string>
     <string name="setting_key_2358_take_profit_to">2358_take_profit_to</string>
     <string name="setting_key_2358_take_profit_step">2358_take_profit_step</string>
+    <string name="setting_key_2358_protect_stock_up">Защита от откупа (исключать отросшие с момента старта таймера)</string>
 
     <!-- 1000 sell settings -->
     <string name="setting_key_1000_sell_take_profit">1000_take_sell_profit</string>

@@ -2,6 +2,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent" android:layout_height="fill_parent">
 
+
+    <SearchView
+        android:id="@+id/search_view"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="0dp"
+        android:layout_alignParentTop="true"
+        android:queryHint="Поиск $"
+        android:iconifiedByDefault="false"/>
+
     <androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -10,8 +22,8 @@
         android:layout_height="match_parent"
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp"
-        android:layout_marginBottom="70dp"
-        android:layout_marginTop="0dp"
+        android:layout_marginBottom="65dp"
+        android:layout_marginTop="50dp"
         app:layoutManager="LinearLayoutManager"
         tools:listitem="@layout/fragment_1000_sell_start_item" />
 

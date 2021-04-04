@@ -7,9 +7,7 @@ import org.koin.core.component.KoinApiExtension
 import retrofit2.Retrofit
 import retrofit2.http.Url
 
-class ThirdPartyService(
-    retrofit: Retrofit
-) {
+class ThirdPartyService(retrofit: Retrofit) {
     private val thirdPartyApi: ThirdPartyApi = retrofit.create(ThirdPartyApi::class.java)
 
     @KoinApiExtension
