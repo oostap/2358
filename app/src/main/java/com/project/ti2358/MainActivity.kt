@@ -129,8 +129,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onDrawerStateChanged(newState: Int) {
-                if (newState == DrawerLayout.STATE_DRAGGING || newState == DrawerLayout.STATE_IDLE)
-                    updateInfo()
+                if (newState == DrawerLayout.STATE_DRAGGING || newState == DrawerLayout.STATE_IDLE) updateInfo()
                 super.onDrawerStateChanged(newState)
             }
 
@@ -151,21 +150,7 @@ class MainActivity : AppCompatActivity() {
                     val superChange = indices[0].change_per + indices[1].change_per + indices[2].change_per + indices[3].change_per
                     index1ChangeView.text = "%.2f%%".format(Locale.US, superChange)
 
-                    index1EmojiView.text = when {
-                        superChange >= 4.0 -> "🤡🤡🤡"
-                        superChange >= 3.0 -> "🥳🤪🤩"
-                        superChange >= 2.0 -> "😍🤑😇"
-                        superChange >= 1.0 -> "😍🤑"
-                        superChange >= 0.2 -> "🥰"
-                        abs(superChange) < 0.2 -> "😐"
-                        superChange <= -5 -> "☠️☠️☠️"
-                        superChange <= -4 -> "🥵🤬😡️"
-                        superChange <= -3 -> "👿🤢😤️"
-                        superChange <= -2 -> "😦😨😣"
-                        superChange <= -1 -> "😰😭"
-                        superChange <= -0.2 -> "😧"
-                        else -> ""
-                    }
+                    index1EmojiView.text = Utils.getEmojiSuperIndex(superChange)
                     index1ChangeView.setTextColor(Utils.getColorForValue(superChange))
                 }
             }

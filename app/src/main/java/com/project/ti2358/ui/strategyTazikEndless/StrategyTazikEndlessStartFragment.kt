@@ -39,44 +39,46 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
         val binding = FragmentTazikEndlessStartBinding.bind(view)
         fragmentTazikEndlessStartBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.startButton.setOnClickListener {
-            if (strategyTazikEndless.stocksSelected.isNotEmpty()) {
-                view.findNavController().navigate(R.id.action_nav_tazik_start_to_nav_tazik_finish)
-            } else {
-                Utils.showErrorAlert(requireContext())
-            }
-        }
-
-        binding.updateButton.setOnClickListener {
-            updateData()
-        }
-
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                processText(query)
-                return false
+            startButton.setOnClickListener {
+                if (strategyTazikEndless.stocksSelected.isNotEmpty()) {
+                    view.findNavController().navigate(R.id.action_nav_tazik_start_to_nav_tazik_finish)
+                } else {
+                    Utils.showErrorAlert(requireContext())
+                }
             }
 
-            override fun onQueryTextChange(newText: String): Boolean {
-                processText(newText)
-                return false
-            }
-
-            fun processText(text: String) {
+            updateButton.setOnClickListener {
                 updateData()
-
-                stocks = Utils.search(stocks, text)
-                adapterList.setData(stocks)
             }
-        })
 
-        binding.searchView.setOnCloseListener {
-            updateData()
-            false
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String): Boolean {
+                    processText(query)
+                    return false
+                }
+
+                override fun onQueryTextChange(newText: String): Boolean {
+                    processText(newText)
+                    return false
+                }
+
+                fun processText(text: String) {
+                    updateData()
+
+                    stocks = Utils.search(stocks, text)
+                    adapterList.setData(stocks)
+                }
+            })
+
+            searchView.setOnCloseListener {
+                updateData()
+                false
+            }
         }
 
         updateData()

@@ -33,7 +33,6 @@ import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.databinding.FragmentChartBinding
-import com.project.ti2358.databinding.FragmentOrderbookBinding
 import com.project.ti2358.service.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

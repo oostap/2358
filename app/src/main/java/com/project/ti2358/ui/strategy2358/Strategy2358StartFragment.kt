@@ -39,51 +39,53 @@ class Strategy2358StartFragment : Fragment(R.layout.fragment_2358_start) {
         val binding = Fragment2358StartBinding.bind(view)
         fragment2358StartBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.startButton.setOnClickListener {
-            if (strategy2358.stocksSelected.isNotEmpty()) {
-                view.findNavController().navigate(R.id.action_nav_2358_start_to_nav_2358_finish)
-            } else {
-                Utils.showErrorAlert(requireContext())
+            startButton.setOnClickListener {
+                if (strategy2358.stocksSelected.isNotEmpty()) {
+                    view.findNavController().navigate(R.id.action_nav_2358_start_to_nav_2358_finish)
+                } else {
+                    Utils.showErrorAlert(requireContext())
+                }
             }
-        }
 
-        binding.updateButton.setOnClickListener {
-            stocks = strategy2358.process()
-            adapterList.setData(stocks)
+            updateButton.setOnClickListener {
+                stocks = strategy2358.process()
+                adapterList.setData(stocks)
+            }
+
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String): Boolean {
+                    processText(query)
+                    return false
+                }
+
+                override fun onQueryTextChange(newText: String): Boolean {
+                    processText(newText)
+                    return false
+                }
+
+                fun processText(text: String) {
+                    stocks = strategy2358.process()
+
+                    stocks = Utils.search(stocks, text)
+                    adapterList.setData(stocks)
+                }
+            })
+            searchView.requestFocus()
+
+            searchView.setOnCloseListener {
+                stocks = strategy2358.process()
+                adapterList.setData(stocks)
+                false
+            }
         }
 
         stocks = strategy2358.process()
         adapterList.setData(stocks)
-
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                processText(query)
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String): Boolean {
-                processText(newText)
-                return false
-            }
-
-            fun processText(text: String) {
-                stocks = strategy2358.process()
-
-                stocks = Utils.search(stocks, text)
-                adapterList.setData(stocks)
-            }
-        })
-        binding.searchView.requestFocus()
-
-        binding.searchView.setOnCloseListener {
-            stocks = strategy2358.process()
-            adapterList.setData(stocks)
-            false
-        }
     }
 
     inner class Item2358RecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<Item2358RecyclerViewAdapter.ViewHolder>() {

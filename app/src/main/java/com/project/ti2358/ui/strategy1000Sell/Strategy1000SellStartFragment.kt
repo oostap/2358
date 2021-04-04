@@ -13,7 +13,6 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.Strategy1000Sell
-import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.databinding.Fragment1000SellStartBinding
 import com.project.ti2358.databinding.Fragment1000SellStartItemBinding
 import com.project.ti2358.service.Utils
@@ -25,7 +24,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-import java.util.*
 
 @KoinApiExtension
 class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start) {
@@ -49,20 +47,22 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
         val binding = Fragment1000SellStartBinding.bind(view)
         fragment1000SellStartBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.startButton.setOnClickListener {
-            if (strategy1000Sell.stocksSelected.isNotEmpty()) {
-                view.findNavController().navigate(R.id.action_nav_1000_sell_start_to_nav_1000_sell_finish)
-            } else {
-                Utils.showErrorAlert(requireContext())
+            startButton.setOnClickListener {
+                if (strategy1000Sell.stocksSelected.isNotEmpty()) {
+                    view.findNavController().navigate(R.id.action_nav_1000_sell_start_to_nav_1000_sell_finish)
+                } else {
+                    Utils.showErrorAlert(requireContext())
+                }
             }
-        }
 
-        binding.updateButton.setOnClickListener {
-            updateData()
+            updateButton.setOnClickListener {
+                updateData()
+            }
         }
 
         jobUpdate?.cancel()

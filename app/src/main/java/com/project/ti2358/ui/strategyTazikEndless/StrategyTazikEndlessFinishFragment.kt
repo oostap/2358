@@ -40,12 +40,14 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
         val binding = FragmentTazikEndlessFinishBinding.bind(view)
         fragmentTazikEndlessFinishBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.startButton.setOnClickListener {
-            tryStartTazik()
+            startButton.setOnClickListener {
+                tryStartTazik()
+            }
         }
 
         positions = strategyTazikEndless.getPurchaseStock()

@@ -455,12 +455,17 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
                 val allow = true
                 if (targetPriceAsk != 0.0 && allow) {
-                    val percentBid = Utils.getPercentFromTo(item.bidPrice, targetPriceBid)
+                    var sign = 1.0
+                    portfolioPosition?.let {
+                        sign = sign(it.lots.toDouble())
+                    }
+
+                    val percentBid = Utils.getPercentFromTo(item.bidPrice, targetPriceBid) * sign
                     priceBidPercentView.text = "%.2f%%".format(locale = Locale.US, percentBid)
                     priceBidPercentView.setTextColor(Utils.getColorForValue(percentBid))
                     priceBidPercentView.visibility = VISIBLE
 
-                    val percentAsk = Utils.getPercentFromTo(item.askPrice, targetPriceAsk)
+                    val percentAsk = Utils.getPercentFromTo(item.askPrice, targetPriceAsk) * sign
                     priceAskPercentView.text = "%.2f%%".format(locale = Locale.US, percentAsk)
                     priceAskPercentView.setTextColor(Utils.getColorForValue(percentAsk))
                     priceAskPercentView.visibility = VISIBLE

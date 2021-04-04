@@ -19,7 +19,6 @@ import com.project.ti2358.data.manager.StrategyFavorites
 import com.project.ti2358.databinding.FragmentFavoritesBinding
 import com.project.ti2358.databinding.FragmentFavoritesItemBinding
 import com.project.ti2358.service.*
-import kotlinx.android.synthetic.main.fragment_favorites.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 

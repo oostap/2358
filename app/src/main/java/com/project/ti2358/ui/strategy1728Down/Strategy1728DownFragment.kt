@@ -46,24 +46,26 @@ class Strategy1728DownFragment : Fragment(R.layout.fragment_1728_down) {
         val binding = Fragment1728DownBinding.bind(view)
         fragment1728DownBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.step1Button.setOnClickListener {
-            updateData(Step1728.step700to1200)
-        }
+            step1Button.setOnClickListener {
+                updateData(Step1728.step700to1200)
+            }
 
-        binding.step2Button.setOnClickListener {
-            updateData(Step1728.step700to1530)
-        }
+            step2Button.setOnClickListener {
+                updateData(Step1728.step700to1530)
+            }
 
-        binding.step3Button.setOnClickListener {
-            updateData(Step1728.step1630to1635)
-        }
+            step3Button.setOnClickListener {
+                updateData(Step1728.step1630to1635)
+            }
 
-        binding.stepFinalButton.setOnClickListener {
-            updateData(Step1728.stepFinal)
+            stepFinalButton.setOnClickListener {
+                updateData(Step1728.stepFinal)
+            }
         }
 
         job?.cancel()

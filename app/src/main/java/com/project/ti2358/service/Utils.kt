@@ -476,5 +476,23 @@ class Utils {
                 else -> ""
             }
         }
+
+        fun getEmojiSuperIndex(percent: Double): String {
+            return when {
+                percent >= 4.0 -> "🤡🤡🤡"
+                percent >= 3.0 -> "🥳🤪🤩"
+                percent >= 2.0 -> "😍🤑😇"
+                percent >= 1.0 -> "😍🤑"
+                percent >= 0.2 -> "🥰"
+                abs(percent) < 0.2 -> "😐"
+                percent <= -5 -> "☠️☠️☠️"
+                percent <= -4 -> "🥵🤬😡️"
+                percent <= -3 -> "👿🤢😤️"
+                percent <= -2 -> "😦😨😣"
+                percent <= -1 -> "😰😭"
+                percent <= -0.2 -> "😧"
+                else -> ""
+            }
+        }
     }
 }

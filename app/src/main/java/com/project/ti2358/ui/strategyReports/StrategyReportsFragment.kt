@@ -45,16 +45,18 @@ class ReportsFragment : Fragment(R.layout.fragment_reports) {
         val binding = FragmentReportsBinding.bind(view)
         fragmentReportsBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.reportButton.setOnClickListener {
-            updateDataReport()
-        }
+            reportButton.setOnClickListener {
+                updateDataReport()
+            }
 
-        binding.divButton.setOnClickListener {
-            updateDataDivs()
+            divButton.setOnClickListener {
+                updateDataDivs()
+            }
         }
 
         updateDataReport()

@@ -15,7 +15,6 @@ import com.project.ti2358.data.manager.*
 import com.project.ti2358.databinding.FragmentFixpriceBinding
 import com.project.ti2358.databinding.FragmentFixpriceItemBinding
 import com.project.ti2358.service.*
-import kotlinx.android.synthetic.main.fragment_fixprice.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.util.*

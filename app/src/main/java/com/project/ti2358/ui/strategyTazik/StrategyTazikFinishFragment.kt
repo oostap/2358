@@ -41,16 +41,18 @@ class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
         val binding = FragmentTazikFinishBinding.bind(view)
         fragmentTazikFinishBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.startNowButton.setOnClickListener {
-            tryStartTazik(false)
-        }
+            startNowButton.setOnClickListener {
+                tryStartTazik(false)
+            }
 
-        binding.startLaterButton.setOnClickListener {
-            tryStartTazik(true)
+            startLaterButton.setOnClickListener {
+                tryStartTazik(true)
+            }
         }
 
         positions = strategyTazik.getPurchaseStock()

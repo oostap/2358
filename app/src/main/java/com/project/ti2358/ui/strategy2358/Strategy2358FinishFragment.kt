@@ -40,25 +40,30 @@ class Strategy2358FinishFragment : Fragment(R.layout.fragment_2358_finish) {
         val binding = Fragment2358FinishBinding.bind(view)
         fragment2358FinishBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with(binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        updateServiceButtonText()
+            updateServiceButtonText()
 
-        binding.startButton.setOnClickListener {
-            if (SettingsManager.get2358PurchaseVolume() <= 0) {
-                Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел 2358.")
-            } else {
-                if (Utils.isServiceRunning(requireContext(), Strategy2358Service::class.java)) {
-                    requireContext().stopService(Intent(context, Strategy2358Service::class.java))
+            startButton.setOnClickListener {
+                if (SettingsManager.get2358PurchaseVolume() <= 0) {
+                    Utils.showMessageAlert(requireContext(), "В настройках не задана общая сумма покупки, раздел 2358.")
                 } else {
-                    if (strategy2358.getTotalPurchasePieces() > 0) {
-                        Utils.startService(requireContext(), Strategy2358Service::class.java)
+                    if (Utils.isServiceRunning(requireContext(), Strategy2358Service::class.java)) {
+                        requireContext().stopService(Intent(context, Strategy2358Service::class.java))
+                    } else {
+                        if (strategy2358.getTotalPurchasePieces() > 0) {
+                            Utils.startService(requireContext(), Strategy2358Service::class.java)
+                        }
                     }
                 }
+                updateServiceButtonText()
             }
-            updateServiceButtonText()
+            chooseView.setOnCheckedChangeListener { _, checked ->
+                updateEqualParts(checked)
+            }
         }
 
         stocks = strategy2358.getPurchaseStock(true)
@@ -66,9 +71,6 @@ class Strategy2358FinishFragment : Fragment(R.layout.fragment_2358_finish) {
 
         updateInfoText()
 
-        binding.chooseView.setOnCheckedChangeListener { _, checked ->
-            updateEqualParts(checked)
-        }
         updateEqualParts(strategy2358.equalParts)
     }
 
