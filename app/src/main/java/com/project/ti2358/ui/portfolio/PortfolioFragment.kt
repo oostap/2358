@@ -154,17 +154,27 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
                     priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
                     priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
                     orderbookButton.setOnClickListener {
-                        portfolioPosition.stock?.let {
-                            orderbookManager.start(it)
-                            itemView.findNavController().navigate(R.id.action_nav_portfolio_to_nav_orderbook)
+                        if (portfolioPosition.stock == null) {
+                            Utils.showMessageAlert(requireContext(), "Какая-то странная бумага, нет такой в каталоге!")
+                        } else {
+                            portfolioPosition.stock?.let {
+                                orderbookManager.start(it)
+                                itemView.findNavController().navigate(R.id.action_nav_portfolio_to_nav_orderbook)
+                            }
                         }
                     }
 
                     itemView.setOnClickListener {
-                        positionManager.start(portfolioPosition)
-                        itemView.findNavController().navigate(R.id.action_nav_portfolio_to_nav_portfolio_position)
+                        if (portfolioPosition.stock == null) {
+                            Utils.showMessageAlert(requireContext(), "Какая-то странная бумага, нет такой в каталоге!")
+                        } else {
+                            positionManager.start(portfolioPosition)
+                            itemView.findNavController().navigate(R.id.action_nav_portfolio_to_nav_portfolio_position)
+                        }
                     }
 
+                    sectorView.text = ""
+                    reportInfoView.text = ""
                     portfolioPosition.stock?.let { stock ->
                         sectorView.text = stock.getSectorName()
                         sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))

@@ -360,6 +360,7 @@ class Utils {
         }
 
         fun makeNicePrice(price: Double): Double {
+            if (price.isNaN()) return 0.0
             return (price * 100.0).roundToInt() / 100.0
         }
 

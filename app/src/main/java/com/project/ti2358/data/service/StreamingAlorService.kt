@@ -85,11 +85,12 @@ class StreamingAlorService {
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-            log("StreamingAlorService::onMessage, text: $text")
             messagesStatus = true
 
             val jsonObject = JSONObject(text)
             if (jsonObject.has("guid")) {
+                log("StreamingAlorService::onMessage, text: $text")
+
                 val eventType = jsonObject.getString("guid")
 
                 val list = eventType.split("_")
@@ -260,14 +261,14 @@ class StreamingAlorService {
         log("StreamingAlorService :: unsubscribe from order book events: ticker: ${stock.ticker}, depth: $depth")
         val cancel = CancelEventBody(SettingsManager.getActiveTokenAlor(), "unsubscribe", "${stock.ticker}_orderbook")
         webSocket?.send(Gson().toJson(cancel))
-        activeOrderSubscriptions[stock] = 0
+        activeOrderSubscriptions.remove(stock)
     }
 
     private fun subscribeBarEventsStream(stock: Stock, interval: Interval, addSubscription: Boolean = true) {
 //        log("StreamingAlorService :: subscribe for bars events: ticker: ${stock.marketInstrument.ticker}, interval: $interval")
 
         val tf = Utils.convertIntervalToAlorTimeframe(interval)
-        val timeFrame = Utils.convertIntervalToSeconds(interval)
+        var timeFrame = Utils.convertIntervalToSeconds(interval)
         val timeName = Utils.convertIntervalToString(interval)
 
 //        val differenceHours = Utils.getTimeDiffBetweenMSK_UTC()
@@ -279,7 +280,18 @@ class StreamingAlorService {
 //        current.add(Calendar.HOUR_OF_DAY, differenceHours)
 //        val time = (current.timeInMillis - current.timeZone.rawOffset) / 1000 - 2 * 60 * 60// Calendar.getInstance().timeInMillis / 1000 - 60 * 60 * 24 // сутки, все минутные свечи за сегодня
 
-        val time = Calendar.getInstance().time.time / 1000
+        val now = Calendar.getInstance()
+//        if (interval == Interval.DAY) {
+//            if (now.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+//                timeFrame *= 3
+//            }
+//
+//            if (now.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+//                timeFrame *= 2
+//            }
+//        }
+
+        val time = now.time.time / 1000 - 60//timeFrame
 
         val bar = BarGetEventBody(
             AlorManager.TOKEN,
