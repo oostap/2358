@@ -352,23 +352,43 @@ class StockManager : KoinComponent {
     }
 
     fun subscribeStockOrderbook(stock: Stock) {
-        streamingTinkoffService
-            .getOrderEventStream(
-                listOf(stock.figi),
-                20
-            )
-            .subscribeBy(
-                onNext = {
-                    addOrderbook(it)
-                },
-                onError = {
-                    it.printStackTrace()
-                }
-            )
+        if (SettingsManager.isAlorQoutes()) {
+            streamingAlorService
+                .getOrderEventStream(
+                    listOf(stock),
+                    20
+                )
+                .subscribeBy(
+                    onNext = {
+                        addOrderbook(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
+        } else {
+            streamingTinkoffService
+                .getOrderEventStream(
+                    listOf(stock.figi),
+                    20
+                )
+                .subscribeBy(
+                    onNext = {
+                        addOrderbook(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
+        }
     }
 
     fun unsubscribeStockOrderbook(stock: Stock) {
-        streamingTinkoffService.unsubscribeOrderEventsStream(stock.figi, 20)
+        if (SettingsManager.isAlorQoutes()) {
+            streamingAlorService.unsubscribeOrderBookEventsStream(stock, 20)
+        } else {
+            streamingTinkoffService.unsubscribeOrderEventsStream(stock.figi, 20)
+        }
     }
 
     fun unsubscribeStock(stock: Stock, interval: Interval) {
@@ -376,7 +396,7 @@ class StockManager : KoinComponent {
     }
 
     private fun addOrderbook(orderbookStream: OrderbookStream) {
-        val stock = stocksStream.find { it.figi == orderbookStream.figi }
+        val stock = stocksStream.find { it.figi == orderbookStream.figi || it.ticker == orderbookStream.figi }
         stock?.processOrderbook(orderbookStream)
     }
 

@@ -6,20 +6,14 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.charts.CandleStickChart
 import com.github.mikephil.charting.charts.Chart
 import com.github.mikephil.charting.components.*
 import com.github.mikephil.charting.data.*
-import com.github.mikephil.charting.formatter.IAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.ChartTouchListener
@@ -70,8 +64,9 @@ class VolumeFormatter : ValueFormatter() {
     }
 }
 
-class MyMarkerView(context: Context?, layoutResource: Int) : MarkerView(context, layoutResource) {
-    private val tvContent: TextView = findViewById(R.id.tvContent)
+@SuppressLint("ViewConstructor")
+class MyMarkerView(context: Context?) : MarkerView(context, R.layout.chart_marker) {
+    private val tvContent: TextView = findViewById(R.id.text_view)
 
     override fun refreshContent(e: Entry, highlight: Highlight) {
         if (e is CandleEntry) {
@@ -86,9 +81,8 @@ class MyMarkerView(context: Context?, layoutResource: Int) : MarkerView(context,
     }
 }
 
-class XYMarkerView(context: Context?, private val xAxisValueFormatter: IAxisValueFormatter) : MarkerView(context, R.layout.chart_marker) {
-    private val tvContent: TextView
-    private val format: DecimalFormat
+class XYMarkerView(context: Context?) : MarkerView(context, R.layout.chart_marker) {
+    private val tvContent: TextView = findViewById(R.id.text_view)
 
     override fun refreshContent(e: Entry, highlight: Highlight) {
         tvContent.text = e.y.toInt().toString()
@@ -98,14 +92,8 @@ class XYMarkerView(context: Context?, private val xAxisValueFormatter: IAxisValu
     override fun getOffset(): MPPointF {
         return MPPointF((-(width / 2)).toFloat(), (-height).toFloat())
     }
-
-    init {
-        tvContent = findViewById(R.id.tvContent)
-        format = DecimalFormat("###.0")
-    }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @KoinApiExtension
@@ -158,7 +146,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), OnChartGestureListener 
                 isDragEnabled = true
                 isLongClickable = true
 
-                val mv = MyMarkerView(requireContext(), R.layout.chart_marker)
+                val mv = MyMarkerView(requireContext())
                 mv.chartView = this
                 marker = mv
 
@@ -200,7 +188,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), OnChartGestureListener 
                 axisLeft.valueFormatter = volumeFormatter
                 axisLeft.textColor = Utils.getChartTextColor()
 
-                val barMarker = XYMarkerView(requireContext(), volumeFormatter)
+                val barMarker = XYMarkerView(requireContext())
                 barMarker.chartView = this
                 marker = barMarker
             }

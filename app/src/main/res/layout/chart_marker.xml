@@ -6,7 +6,7 @@
     android:background="@color/teal_200">
 
     <TextView
-        android:id="@+id/tvContent"
+        android:id="@+id/text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"

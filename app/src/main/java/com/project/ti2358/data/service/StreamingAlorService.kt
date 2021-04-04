@@ -6,8 +6,10 @@ import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
+import com.project.ti2358.data.model.dto.OrderbookStream
 import com.project.ti2358.data.model.streamAlor.BarGetEventBody
 import com.project.ti2358.data.model.streamAlor.CancelEventBody
+import com.project.ti2358.data.model.streamAlor.OrderBookGetEventBody
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import io.reactivex.rxjava3.core.Flowable
@@ -33,13 +35,13 @@ class StreamingAlorService {
         const val RECONNECT_ATTEMPT_LIMIT = 1000
     }
     
-    private val gson = Gson()
     private var webSocket: WebSocket? = null
     private val client: OkHttpClient = OkHttpClient()
     private val socketListener = AlorSocketListener()
     private var currentAttemptCount = 0
     private val publishProcessor: PublishProcessor<Any> = PublishProcessor.create()
     private val activeCandleSubscriptions: MutableMap<Stock, MutableList<Interval>> = mutableMapOf()
+    private val activeOrderSubscriptions: MutableMap<Stock, Int> = mutableMapOf()
     private val threadPoolExecutor = Executors.newSingleThreadExecutor()
 
     var connectedStatus: Boolean = false
@@ -83,7 +85,7 @@ class StreamingAlorService {
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-//            log("StreamingAlorService::onMessage, text: $text")
+            log("StreamingAlorService::onMessage, text: $text")
             messagesStatus = true
 
             val jsonObject = JSONObject(text)
@@ -94,9 +96,9 @@ class StreamingAlorService {
                 if (list.size != 2) return
 
                 val ticker = list.first()
-                val intervalString = list.last()
+                val messageType = list.last()
 
-                val interval: Interval? = Utils.convertStringToInterval(intervalString)
+                val interval: Interval? = Utils.convertStringToInterval(messageType)
                 interval?.let {
                     val data = jsonObject.getJSONObject("data")
                     val time = data.getLong("time") * 1000
@@ -106,6 +108,32 @@ class StreamingAlorService {
                         data.getDouble("low"), data.getInt("volume"), Date(time), interval, ticker
                     )
                     publishProcessor.onNext(candle)
+                    return
+                }
+
+                if (messageType == "orderbook") {
+                    val data = jsonObject.getJSONObject("data")
+
+                    val jsonBids = data.getJSONArray("bids")
+                    val bids = mutableListOf<List<Double>>()
+                    for (i in 0 until jsonBids.length()) {
+                        val bid = jsonBids.getJSONObject(i)
+                        val price = bid.getDouble("price")
+                        val quantity = bid.getDouble("volume")
+                        bids.add(listOf(price, quantity))
+                    }
+
+                    val jsonAsks = data.getJSONArray("asks")
+                    val asks = mutableListOf<List<Double>>()
+                    for (i in 0 until jsonAsks.length()) {
+                        val ask = jsonAsks.getJSONObject(i)
+                        val price = ask.getDouble("price")
+                        val quantity = ask.getDouble("volume")
+                        asks.add(listOf(price, quantity))
+                    }
+                    val orderbook = OrderbookStream(ticker, 20, bids, asks)
+                    publishProcessor.onNext(orderbook)
+                    return
                 }
             }
         }
@@ -134,50 +162,105 @@ class StreamingAlorService {
     }
 
     fun resubscribe(): Single<Boolean> {
-        return Single
-            .create<Boolean> { emitter ->
-                activeCandleSubscriptions.forEach { candleEntry ->
-                    candleEntry.value.forEach {
-                        subscribeBarEventsStream(candleEntry.key, it, addSubscription = false)
-                    }
+        return Single.create<Boolean> { emitter ->
+            activeCandleSubscriptions.forEach { candleEntry ->
+                candleEntry.value.forEach {
+                    subscribeBarEventsStream(candleEntry.key, it, addSubscription = false)
                 }
-                emitter.onSuccess(true)
             }
-            .subscribeOn(Schedulers.from(threadPoolExecutor))
+            activeOrderSubscriptions.forEach { orderEntry ->
+                subscribeOrderBookEventsStream(orderEntry.key, orderEntry.value, addSubscription = false)
+            }
+            emitter.onSuccess(true)
+        }
+        .subscribeOn(Schedulers.from(threadPoolExecutor))
     }
 
-    fun getCandleEventStream(
-        stocks: List<Stock>,
-        interval: Interval
-    ): Flowable<Candle> {
-        return Single
-            .create<Boolean> { emitter ->
-                val excessFigis = activeCandleSubscriptions.keys - stocks
+    fun getOrderEventStream(stocks: List<Stock>, depth: Int): Flowable<OrderbookStream> {
+        return Single.create<Boolean> { emitter ->
+            val excessFigis = activeCandleSubscriptions.keys - stocks
 
-                stocks.forEach { stock ->
-                    if (!isCandleSubscribedAlready(stock, interval)) {
-                        subscribeBarEventsStream(stock, interval)
-                    }
+            stocks.forEach { stock ->
+                if (!isOrderBookSubscribedAlready(stock, depth)) {
+                    subscribeOrderBookEventsStream(stock, depth)
                 }
-
-                excessFigis.forEach { stock ->
-                    if (isCandleSubscribedAlready(stock, interval)) {
-                        unsubscribeCandleEventsStream(stock, interval)
-                    }
-                }
-
-                emitter.onSuccess(true)
             }
+
+            excessFigis.forEach { stock ->
+                if (isOrderBookSubscribedAlready(stock, depth)) {
+                    unsubscribeOrderBookEventsStream(stock, depth)
+                }
+            }
+
+            emitter.onSuccess(true)
+        }
             .subscribeOn(Schedulers.from(threadPoolExecutor))
             .flatMapPublisher {
                 publishProcessor.filter {
-                    it is Candle && it.interval == interval
-                } as Flowable<Candle>
+                    it is OrderbookStream && it.depth == depth
+                } as Flowable<OrderbookStream>
             }
     }
-    
+
+    fun getCandleEventStream(stocks: List<Stock>, interval: Interval): Flowable<Candle> {
+        return Single.create<Boolean> { emitter ->
+            val excessFigis = activeCandleSubscriptions.keys - stocks
+
+            stocks.forEach { stock ->
+                if (!isCandleSubscribedAlready(stock, interval)) {
+                    subscribeBarEventsStream(stock, interval)
+                }
+            }
+
+            excessFigis.forEach { stock ->
+                if (isCandleSubscribedAlready(stock, interval)) {
+                    unsubscribeCandleEventsStream(stock, interval)
+                }
+            }
+
+            emitter.onSuccess(true)
+        }
+        .subscribeOn(Schedulers.from(threadPoolExecutor))
+        .flatMapPublisher {
+            publishProcessor.filter {
+                it is Candle && it.interval == interval
+            } as Flowable<Candle>
+        }
+    }
+
+    private fun isOrderBookSubscribedAlready(stock: Stock, depth: Int): Boolean {
+        return activeOrderSubscriptions[stock] == depth
+    }
+
     private fun isCandleSubscribedAlready(stock: Stock, interval: Interval): Boolean {
         return activeCandleSubscriptions[stock]?.contains(interval) ?: false
+    }
+
+    private fun subscribeOrderBookEventsStream(stock: Stock, depth: Int, addSubscription: Boolean = true) {
+        log("StreamingAlorService :: subscribe for orderbook events: ticker: ${stock.ticker}, depth: $depth")
+
+        val bar = OrderBookGetEventBody(
+            AlorManager.TOKEN,
+            "OrderBookGetAndSubscribe",
+            stock.ticker,
+            "SPBX",
+            depth,
+            "Simple",
+            false,
+            "${stock.ticker}_orderbook"
+        )
+
+        webSocket?.send(Gson().toJson(bar))
+        if (addSubscription) {
+            activeOrderSubscriptions[stock] = depth
+        }
+    }
+
+    fun unsubscribeOrderBookEventsStream(stock: Stock, depth: Int) {
+        log("StreamingAlorService :: unsubscribe from order book events: ticker: ${stock.ticker}, depth: $depth")
+        val cancel = CancelEventBody(SettingsManager.getActiveTokenAlor(), "unsubscribe", "${stock.ticker}_orderbook")
+        webSocket?.send(Gson().toJson(cancel))
+        activeOrderSubscriptions[stock] = 0
     }
 
     private fun subscribeBarEventsStream(stock: Stock, interval: Interval, addSubscription: Boolean = true) {

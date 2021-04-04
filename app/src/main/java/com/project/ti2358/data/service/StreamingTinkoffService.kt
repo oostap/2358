@@ -19,8 +19,10 @@ import kotlinx.coroutines.launch
 import okhttp3.*
 import okio.ByteString
 import org.json.JSONObject
+import org.koin.core.component.KoinApiExtension
 import java.util.concurrent.Executors
 
+@KoinApiExtension
 class StreamingTinkoffService {
 
     companion object {
@@ -45,6 +47,7 @@ class StreamingTinkoffService {
         connect()
     }
 
+    @KoinApiExtension
     fun connect() {
         if (currentAttemptCount > RECONNECT_ATTEMPT_LIMIT) {
             return
