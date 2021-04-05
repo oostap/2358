@@ -72,6 +72,9 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
         with(binding) {
             // создать лист руками
+            orderlinesViews.clear()
+            orderbookLinesView.removeAllViews()
+
             for (i in 0..20) {
                 val orderlineHolder = OrderlineHolder(FragmentOrderbookItemBinding.inflate(LayoutInflater.from(context), null, false))
                 orderbookLinesView.addView(orderlineHolder.binding.root)
@@ -339,7 +342,6 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         fragmentOrderbookBinding?.apply {
             orderbookLinesView.children.forEach { it.visibility = GONE }
             val size = min(orderbookLines.size, orderbookLinesView.childCount)
-
             for (i in 0 until size) {
                 orderbookLinesView.getChildAt(i).visibility = VISIBLE
                 orderlinesViews[i].updateData(orderbookLines[i], i)
@@ -355,8 +357,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         override fun onDrag(v: View, event: DragEvent): Boolean {
             log("onDrag")
             when (event.action) {
-                DragEvent.ACTION_DRAG_STARTED -> {
-                }
+                DragEvent.ACTION_DRAG_STARTED -> { }
                 DragEvent.ACTION_DRAG_ENTERED -> {
                     val view = event.localState as View
                     val actionType = v.getTag(R.string.action_type) as String
@@ -402,8 +403,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     fragmentOrderbookBinding?.scalperPanelView?.visibility = VISIBLE
                     fragmentOrderbookBinding?.trashButton?.visibility = GONE
                 }
-                DragEvent.ACTION_DRAG_ENDED -> {
-                }
+                DragEvent.ACTION_DRAG_ENDED -> { }
                 else -> { }
             }
             return true

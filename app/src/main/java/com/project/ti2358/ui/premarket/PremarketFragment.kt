@@ -1,6 +1,5 @@
 package com.project.ti2358.ui.premarket
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -91,6 +90,11 @@ class PremarketFragment : Fragment(R.layout.fragment_premarket) {
                 updateDataWithSearch()
             }
 
+            from0700Button.setOnClickListener {
+                strategyPremarket.screenerTypeFrom = ScreenerType.screener0700
+                updateDataWithSearch()
+            }
+            ////////?////////?////////?////////?////////?////////?////////?////////?
             fromNowButton.setOnClickListener {
                 strategyPremarket.screenerTypeFrom = ScreenerType.screenerNow
                 updateDataWithSearch()
@@ -108,6 +112,11 @@ class PremarketFragment : Fragment(R.layout.fragment_premarket) {
 
             to0300Button.setOnClickListener {
                 strategyPremarket.screenerTypeTo = ScreenerType.screener0300
+                updateDataWithSearch()
+            }
+
+            to0700Button.setOnClickListener {
+                strategyPremarket.screenerTypeTo = ScreenerType.screener0700
                 updateDataWithSearch()
             }
 
@@ -149,17 +158,20 @@ class PremarketFragment : Fragment(R.layout.fragment_premarket) {
             from2300Button.setBackgroundColor(colorDefault)
             from0145Button.setBackgroundColor(colorDefault)
             from0300Button.setBackgroundColor(colorDefault)
+            from0700Button.setBackgroundColor(colorDefault)
             fromNowButton.setBackgroundColor(colorDefault)
 
             to2300Button.setBackgroundColor(colorDefault)
             to0145Button.setBackgroundColor(colorDefault)
             to0300Button.setBackgroundColor(colorDefault)
+            to0700Button.setBackgroundColor(colorDefault)
             toNowButton.setBackgroundColor(colorDefault)
 
             when (strategyPremarket.screenerTypeFrom) {
                 ScreenerType.screener2300 -> from2300Button.setBackgroundColor(colorSelect)
                 ScreenerType.screener0145 -> from0145Button.setBackgroundColor(colorSelect)
                 ScreenerType.screener0300 -> from0300Button.setBackgroundColor(colorSelect)
+                ScreenerType.screener0700 -> from0700Button.setBackgroundColor(colorSelect)
                 ScreenerType.screenerNow -> fromNowButton.setBackgroundColor(colorSelect)
             }
 
@@ -167,6 +179,7 @@ class PremarketFragment : Fragment(R.layout.fragment_premarket) {
                 ScreenerType.screener2300 -> to2300Button.setBackgroundColor(colorSelect)
                 ScreenerType.screener0145 -> to0145Button.setBackgroundColor(colorSelect)
                 ScreenerType.screener0300 -> to0300Button.setBackgroundColor(colorSelect)
+                ScreenerType.screener0700 -> to0700Button.setBackgroundColor(colorSelect)
                 ScreenerType.screenerNow -> toNowButton.setBackgroundColor(colorSelect)
             }
         }

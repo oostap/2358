@@ -49,6 +49,7 @@ enum class ScreenerType {
     screener2300,
     screener0145,
     screener0300,
+    screener0700,
     screenerNow,
 }
 
@@ -292,6 +293,17 @@ class Utils {
             val hour = msk.get(Calendar.HOUR_OF_DAY)
 
             if (hour >= 7 || hour <= 2) {
+                return true
+            }
+
+            return false
+        }
+
+        fun isSessionBefore10(): Boolean {
+            val msk = getTimeMSK()
+            val hour = msk.get(Calendar.HOUR_OF_DAY)
+
+            if (hour < 10) {
                 return true
             }
 

@@ -149,7 +149,9 @@ class Strategy1000Buy : KoinComponent {
         started700 = true
 
         for (purchase in stocksToBuy700) {
-            job700.add(purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), SettingsManager.get1000BuyTakeProfit()))
+            val job = purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), SettingsManager.get1000BuyTakeProfit(), 50)
+            if (job != null)
+                job700.add(job)
         }
     }
 
@@ -158,7 +160,9 @@ class Strategy1000Buy : KoinComponent {
         started1000 = true
 
         for (purchase in stocksToBuy1000) {
-            job1000.add(purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), SettingsManager.get1000BuyTakeProfit()))
+            val job = purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), SettingsManager.get1000BuyTakeProfit(), 50)
+            if (job != null)
+                job1000.add(job)
         }
     }
 

@@ -344,7 +344,7 @@ class StrategyTazikEndless : KoinComponent {
                 var finalProfit = baseProfit + abs(delta)
 
                 if (baseProfit == 0.0) finalProfit = 0.0
-                job = purchase.buyLimitFromBid(buyPrice, finalProfit)
+                job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1)
             }
         }
 

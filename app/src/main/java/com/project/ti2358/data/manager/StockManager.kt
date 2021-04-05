@@ -402,22 +402,16 @@ class StockManager : KoinComponent {
 
     @Synchronized
     private fun addCandle(candle: Candle) {
-        val stock: Stock?
-        if (SettingsManager.isAlorQoutes() && (candle.interval == Interval.MINUTE || candle.interval == Interval.DAY)) {
-            stock = stocksStream.find { it.ticker == candle.figi }
-            stock?.processCandle(candle)
-        } else {
-            stock = stocksStream.find { it.figi == candle.figi }
-            stock?.processCandle(candle)
-        }
-
+        val stock: Stock? = stocksStream.find { it.ticker == candle.figi || it.figi == candle.figi }
         stock?.let {
+            it.processCandle(candle)
+
             if (candle.interval == Interval.DAY) {
-                strategyTazik.processStrategy(stock, candle)
+                strategyTazik.processStrategy(it, candle)
             }
 
             if (candle.interval == Interval.MINUTE) {
-                strategyRocket.processStrategy(stock)
+                strategyRocket.processStrategy(it)
             }
         }
     }

@@ -38,6 +38,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
     var figi = stock.figi
 
     var position: PortfolioPosition? = null
+    var tazikPrice: Double = 0.0                      // зафиксированная цена, от которой считаем тазы
     var fixedPrice: Double = 0.0                      // зафиксированная цена, от которой шагаем лимитками
     var percentLimitPriceChange: Double = 0.0         // разница в % с текущей ценой для создания лимитки
     var absoluteLimitPriceChange: Double = 0.0        // если лимитка, то по какой цене
@@ -199,8 +200,8 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
         }
     }
 
-    fun buyLimitFromBid(price: Double, profit: Double): Job? {
-        if (lots == 0 || price == 0.0) return null
+    fun buyLimitFromBid(price: Double, profit: Double, counter: Int): Job? {
+        if (lots > 999999999 || lots == 0 || price == 0.0) return null
         val buyPrice = Utils.makeNicePrice(price)
 
         var profitPrice = buyPrice + buyPrice / 100.0 * profit
@@ -216,9 +217,9 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                 val initialLots = p?.lots ?: 0
 
                 // счётчик на количество повторов (возможно просто нет депо) = примерно 1 минуту
-                var counter = 50
-                while (counter >= 0) { // выставить ордер на покупку
-                    counter--
+                var tries = counter
+                while (tries >= 0) { // выставить ордер на покупку
+                    tries--
 
                     try {
                         status = PurchaseStatus.ORDER_BUY_PREPARE
@@ -250,7 +251,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                     }
                     delay(DelayFast)
                 }
-                if (counter < 0) { // заявка не выставилась, сворачиваем лавочку, можно вернуть один таз
+                if (tries < 0) { // заявка не выставилась, сворачиваем лавочку, можно вернуть один таз
                     Utils.showToastAlert("$ticker: не смогли выставить ордер на покупку по $buyPrice")
                     return@launch
                 }

@@ -95,6 +95,9 @@ class Strategy1000Sell() : KoinComponent {
             if (it.percentProfitSellFrom == 0.0) {
                 it.processInitialProfit()
             }
+            if (it.lots == 0) {
+                it.lots = it.position?.lots ?: 1
+            }
             it.status = PurchaseStatus.WAITING
         }
         return purchaseToSell

@@ -74,6 +74,7 @@ data class Stock(var instrument: Instrument) {
             ScreenerType.screener0145 -> getPrice0145()
             ScreenerType.screener0300 -> getPrice0300()
             ScreenerType.screener2300 -> getPrice2300()
+            ScreenerType.screener0700 -> getPrice1000()
             ScreenerType.screenerNow -> getPriceNow()
         }
 
@@ -81,6 +82,7 @@ data class Stock(var instrument: Instrument) {
             ScreenerType.screener0145 -> getPrice0145()
             ScreenerType.screener0300 -> getPrice0300()
             ScreenerType.screener2300 -> getPrice2300()
+            ScreenerType.screener0700 -> getPrice1000()
             ScreenerType.screenerNow -> getPriceNow()
         }
 
@@ -246,6 +248,10 @@ data class Stock(var instrument: Instrument) {
 
     fun getPrice2300(): Double {
         return closePrices?.os ?: 0.0
+    }
+
+    fun getPrice1000(): Double {
+        return candleToday?.openingPrice ?: 0.0
     }
 
     fun getPrice0145(): Double {
