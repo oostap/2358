@@ -95,11 +95,11 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
         lots += lot
         if (lots < 1) lots = 1
 
-        position?.let {
-            if (lots > it.lots) {
-                lots = it.lots
-            }
-        }
+//        position?.let {
+//            if (lots > it.lots) {
+//                lots = it.lots
+//            }
+//        }
     }
 
     fun addPriceLimitPercent(change: Double) {

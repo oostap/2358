@@ -1,6 +1,5 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.model.dto.PortfolioPosition
 import com.project.ti2358.service.Sorting
 import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.Job
@@ -140,8 +139,8 @@ class Strategy1000Sell() : KoinComponent {
     fun getNotificationTextLong(purchases: MutableList<PurchaseStock>): String {
         var tickers = ""
         for (purchaseStock in purchases) {
-            val p = "%.2f$=%.2f$ > %.1f%%".format(locale = Locale.US, purchaseStock.getProfitPriceForSell(), purchaseStock.lots * purchaseStock.getProfitPriceForSell(), purchaseStock.percentProfitSellFrom)
-            tickers += "${purchaseStock.ticker}: ${purchaseStock.lots}* = $p ${purchaseStock.getStatusString()}\n"
+            val p = "%d*%.2f$=%.2f$ > %.1f%%".format(locale = Locale.US, purchaseStock.lots, purchaseStock.getProfitPriceForSell(), purchaseStock.lots * purchaseStock.getProfitPriceForSell(), purchaseStock.percentProfitSellFrom)
+            tickers += "${purchaseStock.ticker}: $p ${purchaseStock.getStatusString()}\n"
         }
         return tickers.trim()
     }

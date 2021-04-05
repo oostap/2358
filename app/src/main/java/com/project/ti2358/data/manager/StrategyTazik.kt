@@ -27,6 +27,7 @@ class StrategyTazik : KoinComponent {
     var stocksSelected: MutableList<Stock> = mutableListOf()
 
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
+    var stocksToPurchaseClone: MutableList<PurchaseStock> = mutableListOf()
     var stocksTickerBuyed: MutableMap<String, Double> = mutableMapOf()
 
     var activeJobs: MutableList<Job?> = mutableListOf()
@@ -132,6 +133,8 @@ class StrategyTazik : KoinComponent {
             p.lots == 0 || depositManager.portfolioPositions.any { it.ticker == p.ticker }
         }
 
+        stocksToPurchaseClone = stocksToPurchase.toMutableList()
+
         return stocksToPurchase
     }
 
@@ -199,8 +202,8 @@ class StrategyTazik : KoinComponent {
             startStrategy()
             return
         }
-        // подписаться только бумаги тазика, чтобы быстрее работало?
-        stockManager.resetSubscription(stocksToPurchase.map { it.stock })
+//        // подписаться только бумаги тазика, чтобы быстрее работало?
+//        stockManager.resetSubscription(stocksToPurchase.map { it.stock })
 
         started = false
 
@@ -280,8 +283,8 @@ class StrategyTazik : KoinComponent {
         }
         activeJobs.clear()
 
-        // подписаться обратно на все бумаги
-        stockManager.resetSubscription(stocks)
+//        // подписаться обратно на все бумаги
+//        stockManager.resetSubscription(stocks)
     }
 
     fun addBasicPercentLimitPriceChange(sign: Int) {
@@ -354,13 +357,16 @@ class StrategyTazik : KoinComponent {
         val ticker = stock.ticker
 
         // если бумага не в списке скана - игнорируем
-        val sorted = stocksToPurchase.find { it.ticker == ticker }
-        sorted?.let { purchase ->
-            val change = candle.closingPrice / purchase.tazikPrice * 100.0 - 100.0
-            if (purchase.tazikPrice != 0.0 &&
-                change > -50 && // защита от бага ти?
-                change <= purchase.percentLimitPriceChange && isAllowToBuy(ticker, change)) {
-                processBuy(purchase, stock, candle)
+        synchronized(stocksToPurchaseClone) {
+            val sorted = stocksToPurchaseClone.find { it.ticker == ticker }
+            sorted?.let { purchase ->
+                val change = candle.closingPrice / purchase.tazikPrice * 100.0 - 100.0
+                if (purchase.tazikPrice != 0.0 &&
+                    change > -50 && // защита от бага ти?
+                    change <= purchase.percentLimitPriceChange && isAllowToBuy(ticker, change)
+                ) {
+                    processBuy(purchase, stock, candle)
+                }
             }
         }
     }

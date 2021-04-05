@@ -286,7 +286,7 @@ class StockManager : KoinComponent {
                         Interval.MINUTE
                     )
                     .onBackpressureBuffer()
-                    .subscribeOn(Schedulers.io())
+                    .subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onNext = {
@@ -303,7 +303,7 @@ class StockManager : KoinComponent {
                         Interval.DAY
                     )
                     .onBackpressureBuffer()
-                    .subscribeOn(Schedulers.io())
+                    .subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onNext = {
@@ -320,7 +320,7 @@ class StockManager : KoinComponent {
                         Interval.DAY
                     )
                     .onBackpressureBuffer()
-                    .subscribeOn(Schedulers.io())
+                    .subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onNext = {
@@ -337,7 +337,7 @@ class StockManager : KoinComponent {
                         Interval.MINUTE
                     )
                     .onBackpressureBuffer()
-                    .subscribeOn(Schedulers.io())
+                    .subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onNext = {
@@ -358,6 +358,9 @@ class StockManager : KoinComponent {
                     listOf(stock),
                     20
                 )
+                .onBackpressureBuffer()
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
                         addOrderbook(it)
@@ -372,6 +375,9 @@ class StockManager : KoinComponent {
                     listOf(stock.figi),
                     20
                 )
+                .onBackpressureBuffer()
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
                         addOrderbook(it)

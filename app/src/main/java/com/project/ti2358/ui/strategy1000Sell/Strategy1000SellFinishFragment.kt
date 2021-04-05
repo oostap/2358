@@ -126,7 +126,10 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                     var deltaLots = 1
                     purchaseStock.position?.let {
                         val avg = it.getAveragePrice()
-                        deltaLots = (it.lots * 0.05).toInt()
+
+                        if (it.lots > 20) {
+                            deltaLots = (it.lots * 0.05).toInt()
+                        }
 
                         tickerView.text = "${it.ticker} x ${it.lots}"
 

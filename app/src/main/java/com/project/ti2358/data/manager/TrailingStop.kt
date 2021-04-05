@@ -95,7 +95,7 @@ data class TrailingStop(
                     break
                 }
             }
-            delay(200)
+            delay(400)
         }
 
         return profitSellPrice

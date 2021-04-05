@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.util.*
+import kotlin.math.abs
 import kotlin.math.sign
 
 @KoinApiExtension
@@ -235,7 +236,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
 
             val avg = purchaseStock.position?.getAveragePrice() ?: 0.0
             val activationPrice = avg + purchaseStock.trailingStopTakeProfitPercentActivation / 100.0 * avg
-            val stopLossPrice = avg - purchaseStock.trailingStopStopLossPercent / 100.0 * avg
+            val stopLossPrice = avg - abs(purchaseStock.trailingStopStopLossPercent / 100.0 * avg)
             val delta = purchaseStock.trailingStopTakeProfitPercentDelta / 100.0 * avg
 
             ttActivationPriceView.text = activationPrice.toMoney(stock)
