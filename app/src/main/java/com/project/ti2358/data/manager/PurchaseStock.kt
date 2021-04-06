@@ -805,7 +805,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
     fun sellMorning(): Job? {
         val figi = stock.figi
         val pos = depositManager.getPositionForFigi(figi)
-        if (pos == null || lots == 0 || pos.lots == 0 || percentProfitSellFrom == 0.0) {
+        if (lots == 0 || percentProfitSellFrom == 0.0) {
             status = PurchaseStatus.CANCELED
             return null
         }
