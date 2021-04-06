@@ -92,6 +92,7 @@ class Strategy1000Sell() : KoinComponent {
 
         purchaseToSell.forEach {
             if (it.percentProfitSellFrom == 0.0) {
+                it.percentProfitSellFrom = SettingsManager.get1000SellTakeProfit()
                 it.processInitialProfit()
             }
             if (it.lots == 0) {

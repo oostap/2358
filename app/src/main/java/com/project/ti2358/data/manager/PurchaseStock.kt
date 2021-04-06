@@ -813,6 +813,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
         return GlobalScope.launch(Dispatchers.Main) {
             try {
                 position = pos
+                val short = position == null
                 val ticker = stock.ticker
 
                 val profitPrice = getProfitPriceForSell()
@@ -848,9 +849,16 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                 while (true) {
                     delay(DelayLong + DelayLong)
                     val p = depositManager.getPositionForFigi(figi)
-                    if (p == null || p.lots < 0) { // продано!
-                        status = PurchaseStatus.SOLD
-                        break
+                    if (!short) {
+                        if (p == null || p.lots == 0) { // продано
+                            status = PurchaseStatus.SOLD
+                            break
+                        }
+                    } else {
+                        if (p != null && p.lots < 0) { // шорт
+                            status = PurchaseStatus.SOLD
+                            break
+                        }
                     }
                 }
             } catch (e: Exception) {
