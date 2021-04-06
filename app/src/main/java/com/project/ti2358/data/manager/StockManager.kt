@@ -219,6 +219,8 @@ class StockManager : KoinComponent {
         "BBBY" to "бабайка",
         "ARCT" to "конь скотина",
         "PBI" to "пибай",
+        
+        "BIDU" to "байда беда",
     )
 
     private fun afterLoadInstruments() {
