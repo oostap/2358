@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.github.mikephil.charting.charts.CandleStickChart
 import com.github.mikephil.charting.charts.Chart
 import com.github.mikephil.charting.components.*
 import com.github.mikephil.charting.data.*
@@ -49,9 +50,9 @@ class DateFormatter : ValueFormatter() {
         timeCandle.time = candle.time
 
         if (candle.interval == Interval.DAY) {
-            return "%02d.%02d".format(timeCandle.get(Calendar.MONTH), timeCandle.get(Calendar.DAY_OF_MONTH))
+            return "%02d.%02d".format(locale = Locale.US, timeCandle.get(Calendar.MONTH), timeCandle.get(Calendar.DAY_OF_MONTH))
         } else {
-            return "%02d:%02d".format(timeCandle.get(Calendar.HOUR_OF_DAY), timeCandle.get(Calendar.MINUTE))
+            return "%02d:%02d".format(locale = Locale.US, timeCandle.get(Calendar.HOUR_OF_DAY), timeCandle.get(Calendar.MINUTE))
         }
     }
 }
@@ -362,6 +363,21 @@ class ChartFragment : Fragment(R.layout.fragment_chart), OnChartGestureListener 
             val barData = BarData(set)
             fragmentChartBinding?.chartBarOsView?.data = barData
             fragmentChartBinding?.chartBarOsView?.invalidate()
+        }
+
+        fragmentChartBinding?.apply {
+            chartCandleView.apply {
+                xAxis.axisMinimum = 0f;
+                xAxis.axisMaximum = candles.size + 10f;
+            }
+            chartBarView.apply {
+                xAxis.axisMinimum = 0f;
+                xAxis.axisMaximum = candles.size + 10f;
+            }
+            chartBarOsView.apply {
+                xAxis.axisMinimum = 0f;
+                xAxis.axisMaximum = candles.size + 10f;
+            }
         }
     }
 

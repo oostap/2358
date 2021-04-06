@@ -1048,6 +1048,8 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
     }
 
     fun processInitialProfit() {
+        percentProfitSellFrom = SettingsManager.get1000SellTakeProfit()
+
         position?.let {
             // по умолчанию взять профит из настроек
             var futureProfit = SettingsManager.get1000SellTakeProfit()
@@ -1061,7 +1063,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
             val currentProfit = (100.0 * change) / totalCash
 
             percentProfitSellFrom = if (currentProfit > futureProfit) currentProfit else futureProfit
-            status = PurchaseStatus.WAITING
         }
+        status = PurchaseStatus.WAITING
     }
 }

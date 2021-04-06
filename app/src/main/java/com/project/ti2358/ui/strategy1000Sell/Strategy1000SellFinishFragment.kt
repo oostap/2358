@@ -82,7 +82,7 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
 
     private fun updateServiceButtonText1000() {
         if (Utils.isServiceRunning(requireContext(), Strategy1000SellService::class.java)) {
-            fragment1000SellFinishBinding?.start1000Button?.text = getString(R.string.stop_sell_1000)
+            fragment1000SellFinishBinding?.start1000Button?.text = getString(R.string.stop_1000)
         } else {
             fragment1000SellFinishBinding?.start1000Button?.text = getString(R.string.start_sell_1000)
         }
@@ -90,7 +90,7 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
 
     private fun updateServiceButtonText700() {
         if (Utils.isServiceRunning(requireContext(), Strategy700SellService::class.java)) {
-            fragment1000SellFinishBinding?.start700Button?.text = getString(R.string.stop_sell_700)
+            fragment1000SellFinishBinding?.start700Button?.text = getString(R.string.stop_700)
         } else {
             fragment1000SellFinishBinding?.start700Button?.text = getString(R.string.start_sell_700)
         }

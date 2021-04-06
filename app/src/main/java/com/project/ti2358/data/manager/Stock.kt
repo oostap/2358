@@ -17,7 +17,7 @@ data class Stock(var instrument: Instrument) {
     var report: Report? = null
     var dividend: Dividend? = null
     var short: StockShort? = null
-    var stockIndices: List<String>? = null
+    var stockIndices: Map<String, Double>? = null
 
     var orderbookStream: OrderbookStream? = null
 
@@ -118,7 +118,7 @@ data class Stock(var instrument: Instrument) {
     fun getSectorName(): String {
         var sector = closePrices?.sector ?: ""
         stockIndices?.forEach {
-            sector += " | ${StockManager.stockIndex?.getShortName(it)}"
+            sector += " | %s %.2f%%".format(Locale.US, StockManager.stockIndexComponents?.getShortName(it.key), it.value)
         }
         return sector
     }

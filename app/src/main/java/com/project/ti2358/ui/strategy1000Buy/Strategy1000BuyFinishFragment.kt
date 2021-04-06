@@ -98,17 +98,17 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
 
     private fun updateServiceButtonText700() {
         if (Utils.isServiceRunning(requireContext(), Strategy700BuyService::class.java)) {
-            fragment1000BuyFinishBinding?.start700Button?.text = getString(R.string.stop_sell_700)
+            fragment1000BuyFinishBinding?.start700Button?.text = getString(R.string.stop_700)
         } else {
-            fragment1000BuyFinishBinding?.start700Button?.text = getString(R.string.start_sell_700)
+            fragment1000BuyFinishBinding?.start700Button?.text = getString(R.string.start_buy_700)
         }
     }
 
     private fun updateServiceButtonText1000() {
         if (Utils.isServiceRunning(requireContext(), Strategy1000BuyService::class.java)) {
-            fragment1000BuyFinishBinding?.start1000Button?.text = getString(R.string.stop_sell_1000)
+            fragment1000BuyFinishBinding?.start1000Button?.text = getString(R.string.stop_1000)
         } else {
-            fragment1000BuyFinishBinding?.start1000Button?.text = getString(R.string.start_sell_1000)
+            fragment1000BuyFinishBinding?.start1000Button?.text = getString(R.string.start_buy_1000)
         }
     }
 

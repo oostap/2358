@@ -55,7 +55,7 @@ class StockManager : KoinComponent {
     private val gson = Gson()
 
     companion object {
-        var stockIndex: StockIndex? = null
+        var stockIndexComponents: StockIndexComponents? = null
     }
 
     fun getAllStocks(): MutableList<Stock> {
@@ -143,9 +143,9 @@ class StockManager : KoinComponent {
 
     private suspend fun reloadStockIndices() {
         try {
-            stockIndex = thirdPartyService.daagerStockIndices()
+            stockIndexComponents = thirdPartyService.daagerStockIndices()
             stocksAll.forEach { it.apply {
-                stockIndices = stockIndex?.data?.get(it.ticker)
+                stockIndices = stockIndexComponents?.data?.get(it.ticker)
             }}
             log(stockReports.toString())
         } catch (e: Exception) {

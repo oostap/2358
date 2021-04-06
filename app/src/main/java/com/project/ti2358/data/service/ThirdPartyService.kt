@@ -26,7 +26,7 @@ class ThirdPartyService(retrofit: Retrofit) {
 
     suspend fun daagerShortInfo(): Map<String, StockShort> = thirdPartyApi.daagerShortInfo("https://tinvest.daager.ru/ostap-api/short.json")
 
-    suspend fun daagerStockIndices(): StockIndex = thirdPartyApi.daagerStockIndices("https://tinvest.daager.ru/ostap-api/indices_components2.json")
+    suspend fun daagerStockIndices(): StockIndexComponents = thirdPartyApi.daagerStockIndices("https://tinvest.daager.ru/ostap-api/gen/indices_components.json")
 
     suspend fun daagerStock1728(): Map<String, StockPrice1728> = thirdPartyApi.daagerStock1728("https://tinvest.daager.ru/ostap-api/gen/1600.json").payload
 
