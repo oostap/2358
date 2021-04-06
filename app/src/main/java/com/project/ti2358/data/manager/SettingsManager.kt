@@ -374,6 +374,16 @@ class SettingsManager {
             }
         }
 
+        fun getTazikApproximationFactor(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_approximation_factor)
+            val value: String? = preferences.getString(key, "0.65")
+            return try {
+                (value ?: "0.65").toDouble()
+            } catch (e: Exception) {
+                0.65
+            }
+        }
+
         fun getTazikBuyAsk(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_buy_ask)
             return preferences.getBoolean(key, false)

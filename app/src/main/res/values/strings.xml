@@ -148,6 +148,7 @@
     <string name="stocks_tazik_purchase_volume">Общая сумма покупки</string>
     <string name="stocks_tazik_purchase_parts">Сколько тазиков? (заявок)</string>
     <string name="stocks_tazik_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
+    <string name="stocks_tazik_approximation_factor">Приближение к низу свечи [0.0, 1.0]</string>
     <string name="stocks_tazik_buy_market">Покупка по рынку</string>
     <string name="stocks_tazik_buy_ask">Покупка из аска</string>
     <string name="stocks_tazik_buy_bid">Покупка из бида</string>
@@ -233,6 +234,7 @@
     <string name="setting_key_tazik_buy_market">tazik_buy_market</string>
     <string name="setting_key_tazik_times2">tazik_times2</string>
     <string name="setting_key_tazik_allow_averaging">tazik_allow_averaging</string>
+    <string name="setting_key_tazik_approximation_factor">tazik_approximation_factor</string>
 
     <!-- rocket settings -->
     <string name="setting_key_rocket_change_percent">rocket_change_percent</string>

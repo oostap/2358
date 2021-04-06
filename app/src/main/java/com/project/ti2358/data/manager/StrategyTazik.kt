@@ -410,8 +410,9 @@ class StrategyTazik : KoinComponent {
                 // ищем цену максимально близкую к просадке
                 var delta = abs(change) - abs(purchase.percentLimitPriceChange)
 
-                // 0.80 коэф приближения к нижней точке, в самом низу могут не налить
-                delta *= 0.65
+                // коэф приближения к нижней точке, в самом низу могут не налить
+                val factor = abs(SettingsManager.getTazikApproximationFactor())
+                delta *= factor
 
                 // корректируем % падения для покупки
                 val percent = abs(purchase.percentLimitPriceChange) + delta
@@ -422,7 +423,7 @@ class StrategyTazik : KoinComponent {
                 // вычисляем процент профита после сдвига лимитки ниже
 
                 // финальный профит
-                delta *= 0.65
+                delta *= factor
                 var finalProfit = baseProfit + abs(delta)
 
                 if (baseProfit == 0.0) finalProfit = 0.0

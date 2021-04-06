@@ -235,6 +235,12 @@
             app:useSimpleSummaryProvider="true"
             app:defaultValue="1"/>
 
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_approximation_factor"
+            app:title="@string/stocks_tazik_approximation_factor"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0.65"/>
+
         <SwitchPreferenceCompat
             app:key="@string/setting_key_tazik_buy_bid"
             app:title="@string/stocks_tazik_buy_bid"
