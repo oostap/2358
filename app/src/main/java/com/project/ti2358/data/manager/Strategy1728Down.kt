@@ -52,6 +52,7 @@ class Strategy1728Down() : KoinComponent {
         stocksFinal = process1625to1632()
         stocksFinal.removeAll { it !in candidates }
         stocksFinal.sortByDescending { it.changePrice1630to1635Percent }
+        stocksFinal.sortByDescending { it.volume1630to1635 }
         return stocksFinal
     }
 
