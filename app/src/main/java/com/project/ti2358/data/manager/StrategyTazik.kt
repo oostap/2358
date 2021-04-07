@@ -390,17 +390,17 @@ class StrategyTazik : KoinComponent {
             }
             else -> { // ставим лимитку
                 // ищем цену максимально близкую к просадке
-                var delta = abs(change) - abs(purchase.percentLimitPriceChange)
+                var delta = abs(change) - abs(purchase.percentLimitPriceChange)     // 3.0% - 1.0% = 2.0%
 
                 // коэф приближения к нижней точке, в самом низу могут не налить
-                val factor = abs(SettingsManager.getTazikApproximationFactor())
-                delta *= factor
+                val factor = abs(SettingsManager.getTazikApproximationFactor())     // 0.25%
+                delta *= factor                                                     // 2.0% * 0.25% = 0.5%
 
                 // корректируем % падения для покупки
-                val percent = abs(purchase.percentLimitPriceChange) + delta
+                val percent = abs(purchase.percentLimitPriceChange) + delta         // 1.0% + 0.5% = 1.5%
 
                 // вычислияем финальную цену лимитки
-                val buyPrice = purchase.tazikPrice - purchase.tazikPrice / 100.0 * abs(percent)
+                val buyPrice = purchase.tazikPrice - purchase.tazikPrice / 100.0 * abs(percent)     // 100$ - 100$ * 0.015% = 98.5$
 
                 // вычисляем процент профита после сдвига лимитки ниже
 
