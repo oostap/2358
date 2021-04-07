@@ -119,6 +119,12 @@ class SettingsManager {
                 0.0
             }
         }
+
+        fun getTrailingStopSellBestBid(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_trailing_stop_sell_best_bid)
+            return preferences.getBoolean(key, false)
+        }
+
         /******************** orderbook *************************/
 
         fun getOrderbookVolumes(): String {

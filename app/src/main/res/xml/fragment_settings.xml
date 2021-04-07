@@ -77,6 +77,11 @@
             app:useSimpleSummaryProvider="true"
             app:defaultValue="0.0"/>
 
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_trailing_stop_sell_best_bid"
+            app:title="@string/stocks_trailing_stop_sell_best_bid"
+            app:defaultValue="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_1005">

@@ -1,5 +1,6 @@
 package com.project.ti2358.data.manager
 
+import android.location.SettingInjectorService
 import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.service.*
 import com.project.ti2358.service.Utils
@@ -554,8 +555,11 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                         if (profitSellPrice == 0.0) return@launch
 
                         // выставить ордер на продажу в лучший бид
-                        val orderbook = marketService.orderbook(figi, 5)
-                        profitSellPrice = orderbook.getBestPriceFromBid(lots)
+                        if (SettingsManager.getTrailingStopSellBestBid()) {
+                            val orderbook = marketService.orderbook(figi, 5)
+                            profitSellPrice = orderbook.getBestPriceFromBid(lots)
+                        }
+
                         if (profitSellPrice == 0.0) return@launch
 
                         while (true) {
@@ -690,9 +694,10 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                         status = PurchaseStatus.ORDER_SELL_PREPARE
                         if (profitSellPrice == 0.0) return@launch
 
-                        // выставить ордер на продажу в лучший бид
-                        val orderbook = marketService.orderbook(figi, 5)
-                        profitSellPrice = orderbook.getBestPriceFromBid(lots)
+                        if (SettingsManager.getTrailingStopSellBestBid()) { // выставить ордер на продажу в лучший бид
+                            val orderbook = marketService.orderbook(figi, 5)
+                            profitSellPrice = orderbook.getBestPriceFromBid(lots)
+                        }
                         if (profitSellPrice == 0.0) return@launch
 
                         try {

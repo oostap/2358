@@ -109,6 +109,7 @@
     <string name="stocks_trailing_stop_take_profit_percent_activation">Тейк-профит в %</string>
     <string name="stocks_trailing_stop_take_profit_percent_delta">Отклонение в %</string>
     <string name="stocks_trailing_stop_stop_loss_percent">Стоп-лосс в % (0.0 = без стоп-лосса)</string>
+    <string name="stocks_trailing_stop_sell_best_bid">Продажа в лучший бид</string>
 
     <!-- orderbook -->
     <string name="orderbook_header">Стакан</string>
@@ -206,6 +207,7 @@
     <string name="setting_key_trailing_stop_take_profit_percent_activation">trailing_stop_take_profit_percent_activation</string>
     <string name="setting_key_trailing_stop_take_profit_percent_delta">trailing_stop_take_profit_percent_delta</string>
     <string name="setting_key_trailing_stop_stop_loss_percent">trailing_stop_stop_loss_percent</string>
+    <string name="setting_key_trailing_stop_sell_best_bid">trailing_stop_sell_best_bid</string>
 
     <!-- orderbook -->
     <string name="setting_key_orderbook_volumes">orderbook_volumes</string>
