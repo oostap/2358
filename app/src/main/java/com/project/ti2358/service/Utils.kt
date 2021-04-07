@@ -303,7 +303,7 @@ class Utils {
             val msk = getTimeMSK()
             val hour = msk.get(Calendar.HOUR_OF_DAY)
 
-            if (hour < 10) {
+            if (hour < 10 && hour >= 7) {
                 return true
             }
 

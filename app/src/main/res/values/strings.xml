@@ -72,7 +72,7 @@
     <string name="menu_blacklist">Чёрный список</string>
     <string name="menu_favorites">Избранные</string>
     <string name="menu_chart">График</string>
-    <string name="menu_tazik_endless">Бесконечный таз ♾</string>
+    <string name="menu_tazik_endless">Бесконечный таз</string>
 
     <string name="reports">ОТЧЁТЫ</string>
     <string name="dividends">ДИВЫ</string>
@@ -133,6 +133,7 @@
     <!-- 1000 buy settings -->
     <string name="stocks_1000_buy_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
     <string name="stocks_1000_buy_purchase_volume">Общая сумма покупки в $</string>
+    <string name="stocks_1000_buy_order_lifetime_seconds">Время жизни заявки в секундах</string>
 
     <!-- premarket settings -->
     <string name="stocks_premarket_price_change_percent">Изменение от %</string>
@@ -149,7 +150,7 @@
 
     <!-- tazik settings -->
     <string name="stocks_tazik_set_1">Набор 1 (тикеры через пробел)</string>
-    <string name="stocks_tazik_set_2">Набор 1 (тикеры через пробел)</string>
+    <string name="stocks_tazik_set_2">Набор 2 (тикеры через пробел)</string>
     <string name="stocks_tazik_min_percent_to_buy">Минимальная просадка в %</string>
     <string name="stocks_tazik_purchase_volume">Общая сумма покупки</string>
     <string name="stocks_tazik_purchase_parts">Сколько тазиков? (заявок)</string>
@@ -160,6 +161,17 @@
     <string name="stocks_tazik_buy_bid">Покупка из бида</string>
     <string name="stocks_tazik_allow_averaging">Разрешить усреднение</string>
     <string name="stocks_tazik_times">Время старта тазиков МСК (через ",")</string>
+    <string name="stocks_tazik_order_lifetime_seconds">Время жизни заявки в секундах</string>
+
+    <!-- endless tazik settings -->
+    <string name="stocks_tazik_endless_set">Набор тикеров через пробел</string>
+    <string name="stocks_tazik_endless_reset_interval_seconds">Интервал сброса цены в секундах</string>
+    <string name="stocks_tazik_endless_min_percent_to_buy">Минимальная просадка в %</string>
+    <string name="stocks_tazik_endless_purchase_volume">Общая сумма покупки</string>
+    <string name="stocks_tazik_endless_purchase_parts">Сколько тазиков? (заявок)</string>
+    <string name="stocks_tazik_endless_order_lifetime_seconds">Время жизни заявки в секундах</string>
+    <string name="stocks_tazik_endless_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
+    <string name="stocks_tazik_endless_approximation_factor">Приближение к низу свечи [0.0, 1.0]</string>
 
     <!-- rocket settings -->
     <string name="stocks_rocket_change_percent">Изменение в %</string>
@@ -217,6 +229,7 @@
     <!-- 1000 buy settings -->
     <string name="setting_key_1000_buy_take_profit">1000_buy_take_profit</string>
     <string name="setting_key_1000_buy_purchase_volume">1000_buy_purchase_volume</string>
+    <string name="setting_key_1000_buy_order_lifetime_seconds">Время жизни заявки в секундах</string>
 
     <!-- premarket settings -->
     <string name="setting_key_premarket_price_change_percent">premarket_price_change_percent</string>
@@ -244,6 +257,17 @@
     <string name="setting_key_tazik_times2">tazik_times2</string>
     <string name="setting_key_tazik_allow_averaging">tazik_allow_averaging</string>
     <string name="setting_key_tazik_approximation_factor">tazik_approximation_factor</string>
+    <string name="setting_key_tazik_order_lifetime_seconds">tazik_order_lifetime_seconds</string>
+
+    <!-- endless tazik settings -->
+    <string name="setting_key_tazik_endless_set">tazik_endless_set</string>
+    <string name="setting_key_tazik_endless_reset_interval_seconds">tazik_endless_reset_interval_seconds</string>
+    <string name="setting_key_tazik_endless_min_percent_to_buy">tazik_endless_min_percent_to_buy</string>
+    <string name="setting_key_tazik_endless_purchase_volume">tazik_endless_purchase_volume</string>
+    <string name="setting_key_tazik_endless_purchase_parts">tazik_endless_purchase_parts</string>
+    <string name="setting_key_tazik_endless_take_profit">tazik_endless_take_profit</string>
+    <string name="setting_key_tazik_endless_approximation_factor">tazik_endless_approximation_factor</string>
+    <string name="setting_key_tazik_endless_order_lifetime_seconds">tazik_endless_order_lifetime_seconds</string>
 
     <!-- rocket settings -->
     <string name="setting_key_rocket_change_percent">rocket_change_percent</string>

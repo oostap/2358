@@ -201,7 +201,9 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_shorts,
                 R.id.nav_diagnostics,
                 R.id.nav_favorites,
-                R.id.nav_donate
+                R.id.nav_donate,
+                R.id.nav_tazik_start,
+                R.id.nav_tazik_endless_start
             ),
             drawerLayout
         )

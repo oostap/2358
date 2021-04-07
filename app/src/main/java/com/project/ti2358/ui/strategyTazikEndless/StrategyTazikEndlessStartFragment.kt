@@ -46,7 +46,7 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
 
             startButton.setOnClickListener {
                 if (strategyTazikEndless.stocksSelected.isNotEmpty()) {
-                    view.findNavController().navigate(R.id.action_nav_tazik_start_to_nav_tazik_finish)
+                    view.findNavController().navigate(R.id.action_nav_tazik_endless_start_to_nav_tazik_endless_finish)
                 } else {
                     Utils.showErrorAlert(requireContext())
                 }

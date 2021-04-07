@@ -58,15 +58,15 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
     }
 
     fun tryStartTazik() {
-        if (SettingsManager.getTazikPurchaseVolume() <= 0 || SettingsManager.getTazikPurchaseParts() == 0) {
-            Utils.showMessageAlert(requireContext(),"В настройках не задана общая сумма покупки или количество частей, раздел Автотазик.")
+        if (SettingsManager.getTazikEndlessPurchaseVolume() <= 0 || SettingsManager.getTazikEndlessPurchaseParts() == 0) {
+            Utils.showMessageAlert(requireContext(),"В настройках не задана общая сумма покупки или количество частей, раздел Бесконечный таз")
         } else {
-            if (Utils.isServiceRunning(requireContext(), StrategyTazikService::class.java)) {
-                requireContext().stopService(Intent(context, StrategyTazikService::class.java))
+            if (Utils.isServiceRunning(requireContext(), StrategyTazikEndlessService::class.java)) {
+                requireContext().stopService(Intent(context, StrategyTazikEndlessService::class.java))
                 strategyTazikEndless.stopStrategy()
             } else {
                 if (strategyTazikEndless.stocksToPurchase.size > 0) {
-                    Utils.startService(requireContext(), StrategyTazikService::class.java)
+                    Utils.startService(requireContext(), StrategyTazikEndlessService::class.java)
                     strategyTazikEndless.startStrategy()
                 }
             }
@@ -75,11 +75,11 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
     }
 
     fun updateInfoText() {
-        val percent = SettingsManager.getTazikChangePercent()
-        val volume = SettingsManager.getTazikPurchaseVolume().toDouble()
-        val p = SettingsManager.getTazikPurchaseParts()
+        val percent = SettingsManager.getTazikEndlessChangePercent()
+        val volume = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
+        val p = SettingsManager.getTazikEndlessPurchaseParts()
         val parts = "%d по %.2f$".format(p, volume / p)
-        startTime = SettingsManager.getTazikNearestTime()
+        startTime = "сейчас"
 
         val prepareText: String = TheApplication.application.applicationContext.getString(R.string.prepare_start_tazik_buy_text)
         fragmentTazikEndlessFinishBinding?.infoTextView?.text = String.format(
@@ -93,7 +93,7 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
     }
 
     private fun updateServiceButtonText() {
-        if (Utils.isServiceRunning(requireContext(), StrategyTazikService::class.java)) {
+        if (Utils.isServiceRunning(requireContext(), StrategyTazikEndlessService::class.java)) {
             fragmentTazikEndlessFinishBinding?.startButton?.text = getString(R.string.stop)
         } else {
             fragmentTazikEndlessFinishBinding?.startButton?.text = getString(R.string.start_now)

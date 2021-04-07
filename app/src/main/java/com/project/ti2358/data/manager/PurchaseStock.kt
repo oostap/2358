@@ -39,6 +39,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
 
     var position: PortfolioPosition? = null
     var tazikPrice: Double = 0.0                      // зафиксированная цена, от которой считаем тазы
+    var tazikEndlessPrice: Double = 0.0               // обновляемая фиксированная цена, от которой считаем бесконечные тазы
     var fixedPrice: Double = 0.0                      // зафиксированная цена, от которой шагаем лимитками
     var percentLimitPriceChange: Double = 0.0         // разница в % с текущей ценой для создания лимитки
     var absoluteLimitPriceChange: Double = 0.0        // если лимитка, то по какой цене
@@ -200,7 +201,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
         }
     }
 
-    fun buyLimitFromBid(price: Double, profit: Double, counter: Int): Job? {
+    fun buyLimitFromBid(price: Double, profit: Double, counter: Int, orderLifeTimeSeconds: Int): Job? {
         if (lots > 999999999 || lots == 0 || price == 0.0) return null
         val buyPrice = Utils.makeNicePrice(price)
 
@@ -262,7 +263,10 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
 
                 // проверяем появился ли в портфеле тикер
                 var position: PortfolioPosition?
+                var iterations = 0
+
                 while (true) {
+                    iterations++
                     try {
                         depositManager.refreshDeposit()
                         depositManager.refreshOrders()
@@ -270,6 +274,15 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                         e.printStackTrace()
                         delay(DelayLong)
                         continue
+                    }
+
+                    if (iterations * DelayLong > orderLifeTimeSeconds) { // отменить заявку, завершить корутину
+                        status = PurchaseStatus.CANCELED
+                        sellLimitOrder?.let {
+                            ordersService.cancel(it.orderId, depositManager.getActiveBrokerAccountId())
+                        }
+                        Utils.showToastAlert("$ticker: не налили по $buyPrice")
+                        return@launch
                     }
 
                     val orderBuy = depositManager.getOrderForFigi(figi, OperationType.BUY)

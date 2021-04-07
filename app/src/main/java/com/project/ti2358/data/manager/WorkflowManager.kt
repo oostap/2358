@@ -51,11 +51,11 @@ class WorkflowManager() : KoinComponent {
             fun provideStrategyTrailingStop(): StrategyTrailingStop = StrategyTrailingStop()
             fun provideStrategyFixPrice(): StrategyFixPrice = StrategyFixPrice()
             fun provideStrategyRocket(): StrategyRocket = StrategyRocket()
+            fun provideStrategyTazikEndless(): StrategyTazikEndless = StrategyTazikEndless()
 
             // unused yet
             fun provideStrategyShorts(): StrategyShorts = StrategyShorts()
             fun provideStrategyTelegram(): StrategyTelegram = StrategyTelegram()
-            fun provideStrategyTazikEndless(): StrategyTazikEndless = StrategyTazikEndless()
 
             single { provideStocksManager() }
             single { provideDepoManager() }
@@ -78,11 +78,11 @@ class WorkflowManager() : KoinComponent {
             single { provideStrategyTrailingStop() }
             single { provideStrategyFixPrice() }
             single { provideStrategyRocket() }
+            single { provideStrategyTazikEndless() }
 
             // unused yet
             single { provideStrategyShorts() }
             single { provideStrategyTelegram() }
-            single { provideStrategyTazikEndless() }
         }
 
         private val apiModule = module {

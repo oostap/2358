@@ -69,15 +69,13 @@
             android:icon="@drawable/ic_fix_price"
             android:title="@string/menu_fixprice" />
         <item
+            android:id="@+id/nav_tazik_endless_start"
+            android:icon="@drawable/ic_tazik_endless"
+            android:title="@string/menu_tazik_endless" />
+        <item
             android:id="@+id/nav_reports"
             android:icon="@drawable/ic_reports"
             android:title="@string/menu_reports" />
-
-
-<!--        <item-->
-<!--            android:id="@+id/nav_tazik_endless_start"-->
-<!--            android:icon="@drawable/ic_tazik"-->
-<!--            android:title="@string/menu_tazik_endless" />-->
 
 <!--        <item-->
 <!--            android:id="@+id/nav_shorts"-->

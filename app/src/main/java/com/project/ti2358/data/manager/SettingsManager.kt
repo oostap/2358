@@ -260,7 +260,7 @@ class SettingsManager {
             }
         }
 
-        /******************** 1000 sell *************************/
+        /******************** 1000 buy *************************/
 
         fun get1000BuyTakeProfit(): Double {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_take_profit)
@@ -279,6 +279,16 @@ class SettingsManager {
                 parseInt(value ?: "500")
             } catch (e: Exception) {
                 500
+            }
+        }
+
+        fun get1000BuyOrderLifeTimeSeconds(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_order_lifetime_seconds)
+            val value: String? = preferences.getString(key, "120")
+            return try {
+                parseInt(value ?: "120")
+            } catch (e: Exception) {
+                120
             }
         }
 
@@ -360,6 +370,16 @@ class SettingsManager {
                 (value ?: "-1.0").toDouble()
             } catch (e: Exception) {
                 -1.0
+            }
+        }
+
+        fun getTazikOrderLifeTimeSeconds(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_order_lifetime_seconds)
+            val value: String? = preferences.getString(key, "120")
+            return try {
+                parseInt(value ?: "120")
+            } catch (e: Exception) {
+                120
             }
         }
 
@@ -469,6 +489,85 @@ class SettingsManager {
             }
 
             return ""
+        }
+
+        /******************** THE TAZIK ENDLESS *************************/
+
+        fun getTazikEndlessSet(): List<String> {
+            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_set)
+            val value: String? = preferences.getString(key, "")?.trim()
+            val array = value?.split(" ")
+            return array ?: emptyList()
+        }
+
+        fun getTazikEndlessResetIntervalSeconds(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_reset_interval_seconds)
+            val value: String? = preferences.getString(key, "300")
+            return try {
+                parseInt(value ?: "300")
+            } catch (e: Exception) {
+                300
+            }
+        }
+
+        fun getTazikEndlessOrderLifeTimeSeconds(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_order_lifetime_seconds)
+            val value: String? = preferences.getString(key, "120")
+            return try {
+                parseInt(value ?: "120")
+            } catch (e: Exception) {
+                120
+            }
+        }
+
+        fun getTazikEndlessChangePercent(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_min_percent_to_buy)
+            val value: String? = preferences.getString(key, "-1.0")
+            return try {
+                (value ?: "-1.0").toDouble()
+            } catch (e: Exception) {
+                -1.0
+            }
+        }
+
+        fun getTazikEndlessPurchaseVolume(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_purchase_volume)
+            val value: String? = preferences.getString(key, "500")
+            return try {
+                parseInt(value ?: "500")
+            } catch (e: Exception) {
+                500
+            }
+        }
+
+        fun getTazikEndlessPurchaseParts(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_purchase_parts)
+            val value: String? = preferences.getString(key, "2")
+            return try {
+                (value ?: "2").toInt()
+            } catch (e: Exception) {
+                2
+            }
+        }
+
+        fun getTazikEndlessTakeProfit(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_take_profit)
+            val value: String? = preferences.getString(key, "1.0")
+            return try {
+                (value ?: "1.0").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun getTazikEndlessApproximationFactor(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_approximation_factor)
+            val value: String? = preferences.getString(key, "0.65")
+            return try {
+                (value ?: "0.65").toDouble()
+            } catch (e: Exception) {
+                0.65
+            }
         }
 
         /******************** Rockets *************************/

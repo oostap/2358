@@ -35,6 +35,7 @@ class StockManager : KoinComponent {
     private val streamingTinkoffService: StreamingTinkoffService by inject()
     private val streamingAlorService: StreamingAlorService by inject()
     private val strategyTazik: StrategyTazik by inject()
+    private val strategyTazikEndless: StrategyTazikEndless by inject()
     private val strategyBlacklist: StrategyBlacklist by inject()
     private val strategyFavorites: StrategyFavorites by inject()
     private val strategyRocket: StrategyRocket by inject()
@@ -479,10 +480,12 @@ class StockManager : KoinComponent {
 
             if (candle.interval == Interval.MINUTE) {
                 strategyTazik.processStrategy(it, candle)
+                strategyTazikEndless.processStrategy(it, candle)
+                strategyRocket.processStrategy(it)
             }
 
-            if (candle.interval == Interval.MINUTE) {
-                strategyRocket.processStrategy(it)
+            if (candle.interval == Interval.DAY) { // получить 1 раз объёмы и всё
+                unsubscribeStock(it, Interval.DAY)
             }
         }
     }

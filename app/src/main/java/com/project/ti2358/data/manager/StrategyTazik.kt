@@ -304,7 +304,6 @@ class StrategyTazik : KoinComponent {
     }
 
     fun buyFirstOne() {
-        stocksToPurchase.sortBy { it.stock.getPriceNow() / it.tazikPrice * 100.0 - 100.0 }
         for (purchase in stocksToPurchase) {
             val closingPrice = purchase.stock.candleToday?.closingPrice ?: 0.0
             if (closingPrice == 0.0) continue
@@ -362,6 +361,8 @@ class StrategyTazik : KoinComponent {
             return
         }
 
+        if (purchase.tazikPrice == 0.0) return
+
         val change = candle.closingPrice / purchase.tazikPrice * 100.0 - 100.0
         stocksTickerBuyed[stock.ticker] = change
         // просадка < x%
@@ -409,7 +410,7 @@ class StrategyTazik : KoinComponent {
                 var finalProfit = baseProfit + abs(delta)
 
                 if (baseProfit == 0.0) finalProfit = 0.0
-                job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1)
+                job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikOrderLifeTimeSeconds())
             }
         }
 
