@@ -217,8 +217,8 @@ class StrategyTazikEndless : KoinComponent {
 
         for (purchase in stocksToPurchase) {
             purchase.percentLimitPriceChange += sign * PercentLimitChangeDelta
-            purchase.stock.candleToday?.let {
-                processBuy(purchase, purchase.stock, it)
+            if (purchase.stock.minuteCandles.isNotEmpty()) {
+                processStrategy(purchase.stock, purchase.stock.minuteCandles.last())
             }
         }
     }

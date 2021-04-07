@@ -277,7 +277,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                         continue
                     }
 
-                    if (iterations * DelayLong > orderLifeTimeSeconds) { // отменить заявку, завершить корутину
+                    if (iterations * DelayLong / 1000 > orderLifeTimeSeconds) { // отменить заявку, завершить корутину
                         status = PurchaseStatus.CANCELED
                         sellLimitOrder?.let {
                             ordersService.cancel(it.orderId, depositManager.getActiveBrokerAccountId())
