@@ -32,6 +32,9 @@ interface ThirdPartyApi {
     suspend fun daagerStock1728(@Url url: String): Response<Map<String, StockPrice1728>>
 
     @GET
+    suspend fun daagerMorningCompanies(@Url url: String): Response<Map<String, Any>>
+
+    @GET
     suspend fun daagerStocks(@Url url: String): Map<String, Instrument>
 
     @GET

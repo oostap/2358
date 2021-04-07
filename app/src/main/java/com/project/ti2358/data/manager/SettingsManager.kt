@@ -334,6 +334,20 @@ class SettingsManager {
 
         /******************** THE TAZIK *************************/
 
+        fun getTazikSet1(): List<String> {
+            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_set_1)
+            val value: String? = preferences.getString(key, "")?.trim()
+            val array = value?.split(" ")
+            return array ?: emptyList()
+        }
+
+        fun getTazikSet2(): List<String> {
+            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_set_2)
+            val value: String? = preferences.getString(key, "")?.trim()
+            val array = value?.split(" ")
+            return array ?: emptyList()
+        }
+
         fun getTazikChangePercent(): Double {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_min_percent_to_buy)
             val value: String? = preferences.getString(key, "-1.0")

@@ -212,6 +212,18 @@
 
     <PreferenceCategory app:title="@string/settings_header_tazik">
         <EditTextPreference
+            app:key="@string/setting_key_tazik_set_1"
+            app:title="@string/stocks_tazik_set_1"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="SPCE GTHX"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_set_2"
+            app:title="@string/stocks_tazik_set_2"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="ARCT BLUE"/>
+
+        <EditTextPreference
             app:key="@string/setting_key_tazik_min_percent_to_buy"
             app:title="@string/stocks_tazik_min_percent_to_buy"
             app:useSimpleSummaryProvider="true"

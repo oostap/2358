@@ -133,7 +133,7 @@
     <string name="stocks_1000_buy_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
     <string name="stocks_1000_buy_purchase_volume">Общая сумма покупки в $</string>
 
-    <!-- 1005 settings -->
+    <!-- premarket settings -->
     <string name="stocks_premarket_price_change_percent">Изменение от %</string>
     <string name="stocks_premarket_volume_min_day">Объём за день ОТ шт.</string>
     <string name="stocks_premarket_volume_max_day">Объём за день ДО шт.</string>
@@ -147,6 +147,8 @@
     <string name="stocks_1728_calc_from_os">Отсчёт с конца ОС</string>
 
     <!-- tazik settings -->
+    <string name="stocks_tazik_set_1">Набор 1 (тикеры через пробел)</string>
+    <string name="stocks_tazik_set_2">Набор 1 (тикеры через пробел)</string>
     <string name="stocks_tazik_min_percent_to_buy">Минимальная просадка в %</string>
     <string name="stocks_tazik_purchase_volume">Общая сумма покупки</string>
     <string name="stocks_tazik_purchase_parts">Сколько тазиков? (заявок)</string>
@@ -228,6 +230,8 @@
     <string name="setting_key_1728_calc_from_os">1728_calc_from_os</string>
 
     <!-- tazik settings -->
+    <string name="setting_key_tazik_set_1">tazik_set_1</string>
+    <string name="setting_key_tazik_set_2">tazik_set_2</string>
     <string name="setting_key_tazik_min_percent_to_buy">tazik_min_percent_to_buy</string>
     <string name="setting_key_tazik_purchase_volume">tazik_purchase_volume</string>
     <string name="setting_key_tazik_purchase_parts">tazik_purchase_parts</string>

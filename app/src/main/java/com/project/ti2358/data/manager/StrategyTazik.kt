@@ -2,8 +2,7 @@ package com.project.ti2358.data.manager
 
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.service.*
@@ -21,8 +20,6 @@ class StrategyTazik : KoinComponent {
     private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
 
-    private val keySavedSelectedStock: String = "tazik_selected"
-
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
 
@@ -37,7 +34,6 @@ class StrategyTazik : KoinComponent {
 
     var scheduledStartTime: Calendar? = null
     var currentSort: Sorting = Sorting.DESCENDING
-    private val gson = Gson()
 
     companion object {
         const val PercentLimitChangeDelta = 0.05
@@ -57,23 +53,16 @@ class StrategyTazik : KoinComponent {
     private fun loadSelectedStocks(numberSet: Int) {
         stocksSelected.clear()
 
-        val key = "${keySavedSelectedStock}_$numberSet"
-        val jsonStocks = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext).getString(key, null)
-        jsonStocks?.let {
-            val itemType = object : TypeToken<List<String>>() {}.type
-            val stocksSelectedList: List<String> = gson.fromJson(jsonStocks, itemType)
-            stocksSelected = stocks.filter { it.ticker in stocksSelectedList }.toMutableList()
-        }
+        val setList: List<String> = if (numberSet == 1) SettingsManager.getTazikSet1() else SettingsManager.getTazikSet2()
+        stocksSelected = stocks.filter { it.ticker in setList }.toMutableList()
     }
 
     private fun saveSelectedStocks(numberSet: Int) {
-        val list = stocksSelected.map { it.ticker }.toMutableList()
-
+        val setList = stocksSelected.map { it.ticker }.toList()
         val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
         val editor: SharedPreferences.Editor = preferences.edit()
-        val data = gson.toJson(list)
-        val key = "${keySavedSelectedStock}_$numberSet"
-        editor.putString(key, data)
+        val key = if (numberSet == 1) TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_set_1) else TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_set_2)
+        editor.putString(key, setList.joinToString(separator = " "))
         editor.apply()
     }
 

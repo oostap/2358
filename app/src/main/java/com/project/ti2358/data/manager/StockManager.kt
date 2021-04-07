@@ -51,6 +51,7 @@ class StockManager : KoinComponent {
     var stockReports: Map<String, ReportStock> = mutableMapOf()
     var stockShorts: Map<String, StockShort> = mutableMapOf()
     var stockPrice1728: Map<String, StockPrice1728>? = mutableMapOf()
+    var stockMorning: Map<String, Any> = mutableMapOf()
 
     private val gson = Gson()
 
@@ -195,6 +196,19 @@ class StockManager : KoinComponent {
         }
     }
 
+    suspend fun reloadMorningCompanies() {
+        try {
+            stockMorning = thirdPartyService.daagerMorningCompanies()
+            stocksAll.forEach {
+                it.morning = stockMorning[it.ticker]
+            }
+            log(stockMorning.toString())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            log("daager MorningCompanies not reached")
+        }
+    }
+
     private val alterNames: Map<String, String> = mapOf(
         "SPCE" to "галя вирджин",
         "ZYNE" to "зина",
@@ -269,6 +283,7 @@ class StockManager : KoinComponent {
                     reloadShortInfo()
                     reloadStockIndices()
                     reloadStockPrice1728()
+                    reloadMorningCompanies()
                     break
                 } catch (e: Exception) {
                     e.printStackTrace()

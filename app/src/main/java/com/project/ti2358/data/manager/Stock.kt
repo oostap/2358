@@ -18,6 +18,7 @@ data class Stock(var instrument: Instrument) {
     var dividend: Dividend? = null
     var short: StockShort? = null
     var stockIndices: Map<String, Double>? = null
+    var morning: Any? = null
 
     var orderbookStream: OrderbookStream? = null
 
@@ -94,7 +95,11 @@ data class Stock(var instrument: Instrument) {
     fun getTickerLove(): String {
         var t = ticker
         if (StrategyFavorites.stocksSelected.find { it.ticker == t } != null) {
-            t += " ❤️"
+            t += "❤️"
+        }
+
+        if (morning != null) {
+            t += "🕖"
         }
         return t
     }
@@ -251,7 +256,7 @@ data class Stock(var instrument: Instrument) {
     }
 
     fun getPrice1000(): Double {
-        return candleToday?.openingPrice ?: 0.0
+        return candleToday?.openingPrice ?: getPrice0145()
     }
 
     fun getPrice0145(): Double {
@@ -260,13 +265,6 @@ data class Stock(var instrument: Instrument) {
 
     fun getPriceString(): String {
         return getPriceNow().toMoney(this)
-    }
-
-    fun getPricePost1000String(): String {
-        closePrices?.let {
-            return it.post.toMoney(this)
-        }
-        return "0$"
     }
 
     fun getPrice2359String(): String {

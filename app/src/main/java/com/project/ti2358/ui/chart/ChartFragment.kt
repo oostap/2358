@@ -144,6 +144,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), OnChartGestureListener 
                 setBackgroundColor(Color.WHITE)
                 setDrawGridBackground(true)
 
+                setPinchZoom(false)
                 isDragEnabled = true
                 isLongClickable = true
 

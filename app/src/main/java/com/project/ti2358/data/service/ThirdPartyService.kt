@@ -30,6 +30,8 @@ class ThirdPartyService(retrofit: Retrofit) {
 
     suspend fun daagerStock1728(): Map<String, StockPrice1728> = thirdPartyApi.daagerStock1728("https://tinvest.daager.ru/ostap-api/gen/1600.json").payload
 
+    suspend fun daagerMorningCompanies(): Map<String, Any> = thirdPartyApi.daagerMorningCompanies("https://tinvest.daager.ru/ostap-api/gen/morning_companies.json").payload
+
 //    suspend fun daagerStocks(): Map<String, Instrument> = thirdPartyApi.daagerStocks("https://tinvest.daager.ru/tinkoff_stocks.json")
 
     suspend fun githubVersion(): String {
