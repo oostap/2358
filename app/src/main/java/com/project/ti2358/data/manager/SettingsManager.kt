@@ -34,8 +34,13 @@ class SettingsManager {
 
         fun getActiveBaseUrlTinkoff(): String = "https://api-invest.tinkoff.ru/openapi/"
 
-        fun isAlorQoutes(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_market_alor)
+        fun getAlorQuotes(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_alor_quotes)
+            return preferences.getBoolean(key, false)
+        }
+
+        fun getAlorOrdebook(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_alor_orderbook)
             return preferences.getBoolean(key, false)
         }
 

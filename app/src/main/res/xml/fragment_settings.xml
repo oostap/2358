@@ -14,8 +14,13 @@
 
 
         <SwitchPreferenceCompat
-            app:key="@string/setting_key_market_alor"
+            app:key="@string/setting_key_alor_quotes"
             app:title="@string/alor_qoutes_title"
+            app:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_alor_orderbook"
+            app:title="@string/alor_orderbook_title"
             app:defaultValue="false" />
 
         <EditTextPreference

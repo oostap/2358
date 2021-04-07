@@ -23,7 +23,7 @@ class WorkflowManager() : KoinComponent {
         depositManager.startUpdatePortfolio()
         stockManager.startUpdateIndices()
 
-        if (SettingsManager.isAlorQoutes()) alorManager.refreshToken()
+        if (SettingsManager.getAlorQuotes() || SettingsManager.getAlorOrdebook()) alorManager.refreshToken()
 
         strategyTelegram.start()
     }

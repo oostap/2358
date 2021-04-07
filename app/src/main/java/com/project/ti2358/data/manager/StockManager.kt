@@ -294,9 +294,17 @@ class StockManager : KoinComponent {
         }
     }
 
-    fun resetSubscription(stockz: List<Stock>) {
-        stockz.let { stocks ->
-            if (SettingsManager.isAlorQoutes()) {
+    fun startTazik(stocks: List<Stock>) {
+        resetSubscription(stocks, day = false)
+    }
+
+    fun stopTazik() {
+        resetSubscription(stocksStream)
+    }
+
+    private fun resetSubscription(stocks: List<Stock>, day: Boolean = true, minute: Boolean = true) {
+        if (SettingsManager.getAlorQuotes()) {
+            if (minute) {
                 streamingAlorService
                     .getCandleEventStream(
                         stocks,
@@ -313,7 +321,26 @@ class StockManager : KoinComponent {
                             it.printStackTrace()
                         }
                     )
+            } else {
+                streamingAlorService
+                    .getCandleEventStream(
+                        emptyList(),
+                        Interval.MINUTE
+                    )
+                    .onBackpressureBuffer()
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                        onNext = {
+                            addCandle(it)
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        }
+                    )
+            }
 
+            if (day) {
                 streamingAlorService
                     .getCandleEventStream(
                         stocks,
@@ -331,6 +358,25 @@ class StockManager : KoinComponent {
                         }
                     )
             } else {
+                streamingAlorService
+                    .getCandleEventStream(
+                        emptyList(),
+                        Interval.DAY
+                    )
+                    .onBackpressureBuffer()
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                        onNext = {
+                            addCandle(it)
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        }
+                    )
+            }
+        } else {
+            if (day) {
                 streamingTinkoffService
                     .getCandleEventStream(
                         stocks.map { it.figi },
@@ -347,7 +393,9 @@ class StockManager : KoinComponent {
                             it.printStackTrace()
                         }
                     )
+            }
 
+            if (minute) {
                 streamingTinkoffService
                     .getCandleEventStream(
                         stocks.map { it.figi },
@@ -369,7 +417,7 @@ class StockManager : KoinComponent {
     }
 
     fun subscribeStockOrderbook(stock: Stock) {
-        if (SettingsManager.isAlorQoutes()) {
+        if (SettingsManager.getAlorOrdebook()) {
             streamingAlorService
                 .getOrderEventStream(
                     listOf(stock),
@@ -407,7 +455,7 @@ class StockManager : KoinComponent {
     }
 
     fun unsubscribeStockOrderbook(stock: Stock) {
-        if (SettingsManager.isAlorQoutes()) {
+        if (SettingsManager.getAlorOrdebook()) {
             streamingAlorService.unsubscribeOrderBookEventsStream(stock, 20)
         } else {
             streamingTinkoffService.unsubscribeOrderEventsStream(stock.figi, 20)
@@ -429,7 +477,7 @@ class StockManager : KoinComponent {
         stock?.let {
             it.processCandle(candle)
 
-            if (candle.interval == Interval.DAY) {
+            if (candle.interval == Interval.MINUTE) {
                 strategyTazik.processStrategy(it, candle)
             }
 

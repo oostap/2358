@@ -191,8 +191,9 @@ class StrategyTazik : KoinComponent {
             startStrategy()
             return
         }
-//        // подписаться только бумаги тазика, чтобы быстрее работало?
-//        stockManager.resetSubscription(stocksToPurchase.map { it.stock })
+
+        // подписаться только бумаги тазика, чтобы быстрее работало?
+        stockManager.startTazik(stocksToPurchase.map { it.stock })
 
         started = false
 
@@ -228,15 +229,7 @@ class StrategyTazik : KoinComponent {
 
         // зафикировать цену, чтобы change считать от неё
         for (purchase in stocksToPurchase) {
-            // вчерашняя, если стартуем до сессии
-            purchase.stock.closePrices?.let {
-                purchase.tazikPrice = it.post
-            }
-
-            // сегодняшняя, если внутри дня
-            purchase.stock.candleToday?.let {
-                purchase.tazikPrice = it.closingPrice
-            }
+            purchase.tazikPrice = purchase.stock.getPriceNow()
         }
     }
 
@@ -272,8 +265,8 @@ class StrategyTazik : KoinComponent {
         }
         activeJobs.clear()
 
-//        // подписаться обратно на все бумаги
-//        stockManager.resetSubscription(stocks)
+        // подписаться обратно на все бумаги
+        stockManager.stopTazik()
     }
 
     fun addBasicPercentLimitPriceChange(sign: Int) {

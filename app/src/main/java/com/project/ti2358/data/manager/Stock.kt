@@ -244,6 +244,10 @@ data class Stock(var instrument: Instrument) {
             value = it.closingPrice
         }
 
+        if (minuteCandles.isNotEmpty()) {
+            value = minuteCandles.last().closingPrice
+        }
+
         return value
     }
 

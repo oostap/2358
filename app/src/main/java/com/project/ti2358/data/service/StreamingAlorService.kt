@@ -89,7 +89,7 @@ class StreamingAlorService {
 
             val jsonObject = JSONObject(text)
             if (jsonObject.has("guid")) {
-                log("StreamingAlorService::onMessage, text: $text")
+//                log("StreamingAlorService::onMessage, text: $text")
 
                 val eventType = jsonObject.getString("guid")
 

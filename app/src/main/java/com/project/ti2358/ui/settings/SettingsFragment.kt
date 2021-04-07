@@ -9,6 +9,7 @@ import com.project.ti2358.data.manager.AlorManager
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.service.StreamingAlorService
 import com.project.ti2358.data.service.StreamingTinkoffService
+import com.project.ti2358.service.Utils
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -81,27 +82,19 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         /////////// ALOR
 
-        val alorKey: String = getString(R.string.setting_key_market_alor)
-        val alorPreference: SwitchPreferenceCompat? = findPreference(alorKey)
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
-        val isAlor = sharedPreferences.getBoolean(alorKey, false)
+        val alorQoutesKey: String = getString(R.string.setting_key_alor_quotes)
+        val alorQoutesPreference: SwitchPreferenceCompat? = findPreference(alorQoutesKey)
 
-        alorPreference?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
-            updateAlor(newValue as Boolean)
-            alorManager.refreshToken()
-            streamingTinkoffService.disconnect()
-            streamingTinkoffService.connect()
+        val alorOrderbookKey: String = getString(R.string.setting_key_alor_orderbook)
+        val alorOrderbookPreference: SwitchPreferenceCompat? = findPreference(alorOrderbookKey)
 
-            if (!newValue) {
-                streamingAlorService.disconnect()
-            } else {
-                streamingAlorService.connect()
-            }
-            stockManager.loadStocks(true)
+        val alorListener = Preference.OnPreferenceChangeListener { preference, newValue ->
+            Utils.showToastAlert("Необходим перезапуск!")
             true
         }
 
-        updateAlor(isAlor)
+        alorQoutesPreference?.onPreferenceChangeListener = alorListener
+        alorOrderbookPreference?.onPreferenceChangeListener = alorListener
 
         val alorTokenKey: String = getString(R.string.setting_key_token_market_alor)
         val alorToken: EditTextPreference? = findPreference(alorTokenKey)
@@ -110,11 +103,5 @@ class SettingsFragment : PreferenceFragmentCompat() {
             stockManager.loadStocks(true)
             true
         }
-    }
-
-    private fun updateAlor(alor: Boolean) {
-        val alorTokenKey: String = getString(R.string.setting_key_token_market_alor)
-        val alorPreference: EditTextPreference? = findPreference(alorTokenKey)
-        alorPreference?.isVisible = alor
     }
 }
