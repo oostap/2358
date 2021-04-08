@@ -4,7 +4,6 @@ import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.model.dto.daager.*
 import com.project.ti2358.service.ScreenerType
-import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import org.koin.core.component.KoinApiExtension
 import java.util.*
@@ -23,7 +22,6 @@ data class Stock(var instrument: Instrument) {
 
     var orderbookStream: OrderbookStream? = null
 
-    var middlePrice: Double = 0.0
     var dayVolumeCash: Double = 0.0
 
     var changeOnStartTimer: Double = 0.0    // сколько % было на старте таймера для 2358
@@ -238,17 +236,8 @@ data class Stock(var instrument: Instrument) {
     fun getPriceNow(): Double {
         var value = 0.0
 
-        if (!Utils.isActiveSession()) { // если биржа закрыта, то NOW = POST
-            closePrices?.let {
-                return it.post
-            }
-            return 0.0
-        }
-
-        if (Utils.isSessionBefore10() && morning == null) { // если время от 7 до 10 и бумага не торгуется, то NOW = POST
-            closePrices?.let {
-                return it.post
-            }
+        closePrices?.let {
+            value = it.post
         }
 
         candleToday?.let {
@@ -291,7 +280,7 @@ data class Stock(var instrument: Instrument) {
 
     private fun updateChangeToday() {
         candleToday?.let { candle ->
-            middlePrice = (candle.highestPrice + candle.lowestPrice) / 2.0
+            val middlePrice = (candle.highestPrice + candle.lowestPrice) / 2.0
             dayVolumeCash = middlePrice * candle.volume
         }
     }

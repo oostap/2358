@@ -14,15 +14,21 @@ import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.manager.StrategyTazik
 import com.project.ti2358.data.manager.SettingsManager
+import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.databinding.FragmentTazikFinishBinding
 import com.project.ti2358.databinding.FragmentTazikFinishItemBinding
 import com.project.ti2358.service.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
 class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
     val strategyTazik: StrategyTazik by inject()
+    val stockManager: StockManager by inject()
 
     private var fragmentTazikFinishBinding: FragmentTazikFinishBinding? = null
 
@@ -30,9 +36,11 @@ class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
     var positions: MutableList<PurchaseStock> = mutableListOf()
     var startTime: String = ""
     var scheduledStart: Boolean = false
+    var job: Job? = null
 
     override fun onDestroy() {
         fragmentTazikFinishBinding = null
+        job?.cancel()
         super.onDestroy()
     }
 
@@ -60,6 +68,11 @@ class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
 
         updateInfoText()
         updateServiceButtonText()
+
+        job?.cancel()
+        job = GlobalScope.launch(Dispatchers.Main) {
+            stockManager.reloadClosePrices()
+        }
     }
 
     fun tryStartTazik(scheduled : Boolean) {

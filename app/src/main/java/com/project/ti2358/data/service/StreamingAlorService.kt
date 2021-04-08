@@ -293,10 +293,13 @@ class StreamingAlorService {
 
         val time = now.time.time / 1000 - 60//timeFrame
 
+        var ticker = stock.ticker
+        ticker = ticker.replace(".", " ") // 'RDS.A' -> 'RDS A'
+
         val bar = BarGetEventBody(
             AlorManager.TOKEN,
             "BarsGetAndSubscribe",
-            stock.ticker,
+            ticker,
             "SPBX",
             tf,
             time,
