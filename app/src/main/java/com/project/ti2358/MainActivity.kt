@@ -60,18 +60,6 @@ class MainActivity : AppCompatActivity() {
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
         val navController = findNavController(R.id.nav_host_fragment)
-        toolbar.setNavigationOnClickListener { onSupportNavigateUp() }
-//        navController.set
-//        toolbar.setOnMenuItemClickListener {
-//            navController.navigateUp()
-//            val navController = findNavController(R.id.nav_host_fragment)
-//            when (it.itemId) {
-//                android.R.id.home -> {
-//                    navController.popBackStack()
-//                }
-//            }
-//            navController.popBackStack()
-//        }
 
         val header = navView.getHeaderView(0)
         val cashUSDView: TextView = header.findViewById(R.id.free_cash_usd)
@@ -182,6 +170,10 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+        actionBarDrawerToggle.isDrawerIndicatorEnabled = false
+        actionBarDrawerToggle.setToolbarNavigationClickListener {
+            onSupportNavigateUp()
         }
         drawerLayout.addDrawerListener(actionBarDrawerToggle)
 
