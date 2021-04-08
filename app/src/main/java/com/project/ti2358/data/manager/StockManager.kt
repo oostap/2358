@@ -340,62 +340,7 @@ class StockManager : KoinComponent {
                         }
                     )
             }
-
-            if (day) {
-                streamingAlorService
-                    .getCandleEventStream(
-                        stocks,
-                        Interval.DAY
-                    )
-                    .onBackpressureBuffer()
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onNext = {
-                            addCandle(it)
-                        },
-                        onError = {
-                            it.printStackTrace()
-                        }
-                    )
-            } else {
-                streamingAlorService
-                    .getCandleEventStream(
-                        emptyList(),
-                        Interval.DAY
-                    )
-                    .onBackpressureBuffer()
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onNext = {
-                            addCandle(it)
-                        },
-                        onError = {
-                            it.printStackTrace()
-                        }
-                    )
-            }
         } else {
-            if (day) {
-                streamingTinkoffService
-                    .getCandleEventStream(
-                        stocks.map { it.figi },
-                        Interval.DAY
-                    )
-                    .onBackpressureBuffer()
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onNext = {
-                            addCandle(it)
-                        },
-                        onError = {
-                            it.printStackTrace()
-                        }
-                    )
-            }
-
             if (minute) {
                 streamingTinkoffService
                     .getCandleEventStream(
@@ -413,7 +358,60 @@ class StockManager : KoinComponent {
                             it.printStackTrace()
                         }
                     )
+            } else {
+                streamingTinkoffService
+                    .getCandleEventStream(
+                        emptyList(),
+                        Interval.MINUTE
+                    )
+                    .onBackpressureBuffer()
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                        onNext = {
+                            addCandle(it)
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        }
+                    )
             }
+        }
+
+        if (day) { // дневные лучше всегда брать с ТИ, алор отдаёт очень долго, нужны только для объёмы и когда минутных ещё нет
+            streamingTinkoffService
+                .getCandleEventStream(
+                    stocks.map { it.figi },
+                    Interval.DAY
+                )
+                .onBackpressureBuffer()
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = {
+                        addCandle(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
+        } else {
+            streamingTinkoffService
+                .getCandleEventStream(
+                    emptyList(),
+                    Interval.DAY
+                )
+                .onBackpressureBuffer()
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = {
+                        addCandle(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
         }
     }
 
@@ -463,14 +461,6 @@ class StockManager : KoinComponent {
         }
     }
 
-    fun unsubscribeStock(stock: Stock, interval: Interval) {
-        if (SettingsManager.getAlorQuotes()) {
-            streamingAlorService.unsubscribeCandleEventsStream(stock, interval)
-        } else {
-            streamingTinkoffService.unsubscribeCandleEventsStream(stock.figi, interval)
-        }
-    }
-
     private fun addOrderbook(orderbookStream: OrderbookStream) {
         val stock = stocksStream.find { it.figi == orderbookStream.figi || it.ticker == orderbookStream.figi }
         stock?.processOrderbook(orderbookStream)
@@ -488,8 +478,8 @@ class StockManager : KoinComponent {
                 strategyRocket.processStrategy(it)
             }
 
-            if (candle.interval == Interval.DAY) { // получить 1 раз объёмы и всё
-                unsubscribeStock(it, Interval.DAY)
+            if (candle.interval == Interval.DAY) { // получить дневные свечи 1 раз по всем тикерам и отключиться
+                streamingTinkoffService.unsubscribeCandleEventsStream(stock.figi, Interval.DAY)
             }
         }
     }

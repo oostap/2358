@@ -87,7 +87,7 @@ class StreamingTinkoffService {
 
         override fun onMessage(webSocket: WebSocket, text: String) {
             messagesStatus = true
-//            log("StreamingService::onMessage, text: $text")
+//            log("StreamingTinkoffService::onMessage, text: $text")
             val jsonObject = JSONObject(text)
             val eventType = jsonObject.getString("event")
             val payload = jsonObject.getString("payload")
