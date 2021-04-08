@@ -464,7 +464,11 @@ class StockManager : KoinComponent {
     }
 
     fun unsubscribeStock(stock: Stock, interval: Interval) {
-        streamingTinkoffService.getCandleEventStream(listOf(stock.figi), interval)
+        if (SettingsManager.getAlorQuotes()) {
+            streamingAlorService.unsubscribeCandleEventsStream(stock, interval)
+        } else {
+            streamingTinkoffService.unsubscribeCandleEventsStream(stock.figi, interval)
+        }
     }
 
     private fun addOrderbook(orderbookStream: OrderbookStream) {

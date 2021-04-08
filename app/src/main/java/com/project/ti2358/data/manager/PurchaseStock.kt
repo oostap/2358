@@ -1,6 +1,5 @@
 package com.project.ti2358.data.manager
 
-import android.location.SettingInjectorService
 import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.service.*
 import com.project.ti2358.service.Utils
@@ -225,7 +224,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
 
                     try {
                         status = PurchaseStatus.ORDER_BUY_PREPARE
-                        sellLimitOrder = ordersService.placeLimitOrder(
+                        buyLimitOrder = ordersService.placeLimitOrder(
                             lotsToBuy,
                             figi,
                             buyPrice,
@@ -234,7 +233,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                         )
                         delay(DelayMiddle)
 
-                        if (sellLimitOrder!!.status == OrderStatus.NEW || sellLimitOrder!!.status == OrderStatus.PENDING_NEW) {
+                        if (buyLimitOrder!!.status == OrderStatus.NEW || buyLimitOrder!!.status == OrderStatus.PENDING_NEW) {
                             status = PurchaseStatus.ORDER_BUY
                             break
                         }
@@ -243,8 +242,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                         depositManager.refreshDeposit()
 
                         // если нет ни ордера, ни позиции, значит чета не так, повторяем
-                        if (depositManager.getOrderAllOrdersForFigi(figi, OperationType.BUY).isEmpty() &&
-                            depositManager.getPositionForFigi(figi) == null) continue
+                        if (depositManager.getOrderAllOrdersForFigi(figi, OperationType.BUY).isEmpty()) continue
 
                         status = PurchaseStatus.ORDER_BUY
                         break
@@ -850,10 +848,16 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                             depositManager.getActiveBrokerAccountId()
                         )
                         delay(DelayMiddle)
+
+                        if (sellLimitOrder!!.status == OrderStatus.NEW || sellLimitOrder!!.status == OrderStatus.PENDING_NEW) {
+                            status = PurchaseStatus.ORDER_BUY
+                            break
+                        }
+
                         depositManager.refreshOrders()
                         if (depositManager.getOrderAllOrdersForFigi(figi, OperationType.SELL).isEmpty()) continue
-                        status = PurchaseStatus.ORDER_SELL
 
+                        status = PurchaseStatus.ORDER_SELL
                         Utils.showToastAlert("$ticker: ордер на продажу по $profitPrice")
                         break
                     } catch (e: Exception) {

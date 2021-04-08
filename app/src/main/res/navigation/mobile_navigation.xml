@@ -82,12 +82,16 @@
             app:enterAnim="@animator/slide_in_right"
             app:exitAnim="@animator/slide_out_left"
             app:popEnterAnim="@animator/slide_in_right"
-            app:popExitAnim="@animator/slide_out_left" />
+            app:popExitAnim="@animator/slide_out_left"
+            app:popUpTo="@id/nav_favorites"/>
         <action
             android:id="@+id/action_nav_favorites_to_nav_chart"
             app:destination="@id/nav_chart"
             app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left" />
+            app:exitAnim="@animator/slide_out_left"
+            app:popEnterAnim="@animator/slide_in_right"
+            app:popExitAnim="@animator/slide_out_left"
+            app:popUpTo="@id/nav_favorites"/>
     </fragment>
 
     <!-- шорты -->

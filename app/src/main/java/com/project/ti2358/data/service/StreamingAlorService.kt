@@ -24,17 +24,21 @@ import okhttp3.*
 import okio.ByteString
 import org.json.JSONObject
 import org.koin.core.component.KoinApiExtension
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.util.*
 import java.util.concurrent.Executors
 
 @KoinApiExtension
-class StreamingAlorService {
+class StreamingAlorService : KoinComponent {
 
     companion object {
         const val STREAMING_URL = "wss://api.alor.ru/ws"
         const val RECONNECT_ATTEMPT_LIMIT = 1000
     }
-    
+
+    private val alorManager: AlorManager by inject()
+
     private var webSocket: WebSocket? = null
     private val client: OkHttpClient = OkHttpClient()
     private val socketListener = AlorSocketListener()
@@ -154,7 +158,9 @@ class StreamingAlorService {
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             log("StreamingAlorService::onFailure + ${t.localizedMessage}")
             GlobalScope.launch(Dispatchers.Main) {
-                delay(3000)
+                delay(1500)
+                alorManager.refreshToken()
+                delay(1500)
                 connect()
             }
             connectedStatus = false
@@ -240,10 +246,13 @@ class StreamingAlorService {
     private fun subscribeOrderBookEventsStream(stock: Stock, depth: Int, addSubscription: Boolean = true) {
         log("StreamingAlorService :: subscribe for orderbook events: ticker: ${stock.ticker}, depth: $depth")
 
+        var ticker = stock.ticker
+        ticker = ticker.replace(".", " ") // 'RDS.A' -> 'RDS A'
+
         val bar = OrderBookGetEventBody(
             AlorManager.TOKEN,
             "OrderBookGetAndSubscribe",
-            stock.ticker,
+            ticker,
             "SPBX",
             depth,
             "Simple",
@@ -318,7 +327,7 @@ class StreamingAlorService {
         }
     }
 
-    private fun unsubscribeCandleEventsStream(stock: Stock, interval: Interval) {
+    public fun unsubscribeCandleEventsStream(stock: Stock, interval: Interval) {
         log("StreamingAlorService :: unsubscribe from candle events: ticker: ${stock.ticker}, interval: $interval")
         val timeName = Utils.convertIntervalToString(interval)
         val cancel = CancelEventBody(SettingsManager.getActiveTokenAlor(), "unsubscribe", "${stock.ticker}_$timeName")
