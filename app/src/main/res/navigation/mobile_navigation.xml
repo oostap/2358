@@ -296,4 +296,13 @@
         tools:layout="@layout/fragment_chart" >
     </fragment>
 
+    <!-- Pastuh -->
+
+    <fragment
+        android:id="@+id/nav_pastuh"
+        android:name="com.project.ti2358.ui.pastuh.PastuhFragment"
+        android:label="@string/menu_pastuh"
+        tools:layout="@layout/fragment_pastuh">
+    </fragment>
+
 </navigation>

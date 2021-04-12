@@ -19,6 +19,7 @@ import kotlin.math.roundToInt
 class StrategyTazikEndless : KoinComponent {
     private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
+    private val strategySpeaker: StrategySpeaker by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
@@ -290,6 +291,7 @@ class StrategyTazikEndless : KoinComponent {
         stocksTickerBuyed[stock.ticker] = change
         // просадка < x%
         log("ПРОСАДКА, ТАРИМ! ${stock.ticker} ➡ $change ➡ ${candle.closingPrice}")
+        strategySpeaker.speakTazik(purchase, change)
 
         val baseProfit = SettingsManager.getTazikEndlessTakeProfit()
 

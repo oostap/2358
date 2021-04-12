@@ -70,7 +70,7 @@ class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
         updateServiceButtonText()
 
         job?.cancel()
-        job = GlobalScope.launch(Dispatchers.Main) {
+        job = GlobalScope.launch(Dispatchers.IO) {
             stockManager.reloadClosePrices()
         }
     }

@@ -73,6 +73,7 @@
     <string name="menu_favorites">Избранные</string>
     <string name="menu_chart">График</string>
     <string name="menu_tazik_endless">Бесконечный таз</string>
+    <string name="menu_pastuh">Телеграм бот</string>
 
     <string name="reports">ОТЧЁТЫ</string>
     <string name="dividends">ДИВЫ</string>
@@ -87,6 +88,7 @@
     <string name="settings_header_tazik">Стратегия автотазик</string>
     <string name="settings_header_rocket">Ракеты</string>
     <string name="settings_header_interface">Интерфейс</string>
+    <string name="settings_header_telegram">Телеграм</string>
 
     <string name="dark_theme">Ночная тема</string>
 
@@ -163,6 +165,7 @@
     <string name="stocks_tazik_allow_averaging">Разрешить усреднение</string>
     <string name="stocks_tazik_times">Время старта тазиков МСК (через ",")</string>
     <string name="stocks_tazik_order_lifetime_seconds">Время жизни заявки в секундах</string>
+    <string name="stocks_tazik_voice">Озвучка тазов</string>
 
     <!-- endless tazik settings -->
     <string name="stocks_tazik_endless_set">Набор тикеров через пробел</string>
@@ -179,7 +182,13 @@
     <string name="stocks_rocket_change_volume">Объём в шт</string>
     <string name="stocks_rocket_change_minutes">За сколько минут?</string>
     <string name="stocks_rocket_notify_alive_seconds">Время жизни сигнала в шторке (секунды)</string>
-    <string name="stocks_rocket_rocket_voice">Голосовое сопровождение</string>
+    <string name="stocks_rocket_voice">Озвучка ракет</string>
+
+    <!-- telegram settings -->
+    <string name="stocks_telegram_bot_api_key">API KEY бота</string>
+    <string name="stocks_telegram_chat_id">Айди телеграм чата/канала</string>
+    <string name="stocks_telegram_update_delay">Интервал обновления в секундах 5+</string>
+    <string name="stocks_telegram_hello">Приветствие при запуске бота</string>
 
     <string name="position_line">position_line</string>
     <string name="action_type">drag_type</string>
@@ -260,6 +269,7 @@
     <string name="setting_key_tazik_allow_averaging">tazik_allow_averaging</string>
     <string name="setting_key_tazik_approximation_factor">tazik_approximation_factor</string>
     <string name="setting_key_tazik_order_lifetime_seconds">tazik_order_lifetime_seconds</string>
+    <string name="setting_key_tazik_voice">tazik_voice</string>
 
     <!-- endless tazik settings -->
     <string name="setting_key_tazik_endless_set">tazik_endless_set</string>
@@ -277,5 +287,11 @@
     <string name="setting_key_rocket_change_volume">rocket_change_volume</string>
     <string name="setting_key_rocket_notify_alive_seconds">notify_alive_seconds</string>
     <string name="setting_key_rocket_voice">rocket_voice</string>
+
+    <!-- telegram settings -->
+    <string name="setting_key_telegram_bot_api_key">telegram_bot_api_key</string>
+    <string name="setting_key_telegram_chat_id">telegram_chat_id</string>
+    <string name="setting_key_telegram_update_delay">telegram_update_delay</string>
+    <string name="setting_key_telegram_hello">telegram_hello</string>
 
 </resources>

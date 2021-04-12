@@ -497,6 +497,10 @@ class SettingsManager {
             return ""
         }
 
+        fun getTazikVoice(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_voice)
+            return preferences.getBoolean(key, true)
+        }
         /******************** THE TAZIK ENDLESS *************************/
 
         fun getTazikEndlessSet(): List<String> {
@@ -620,6 +624,39 @@ class SettingsManager {
         fun getRocketVoice(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_rocket_voice)
             return preferences.getBoolean(key, true)
+        }
+
+        /******************** Telegram *************************/
+        fun getTelegramBotApiKey(): String {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_bot_api_key)
+            val value: String? = preferences.getString(key, "")
+            return value ?: ""
+        }
+
+        fun getTelegramChatID(): Long {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_chat_id)
+            val value: String? = preferences.getString(key, "0")
+            return try {
+                parseInt(value ?: "0").toLong()
+            } catch (e: Exception) {
+                0
+            }
+        }
+
+        fun getTelegramUpdateDelay(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_update_delay)
+            val value: String? = preferences.getString(key, "10")
+            return try {
+                parseInt(value ?: "10")
+            } catch (e: Exception) {
+                10
+            }
+        }
+
+        fun getTelegramHello(): String {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_hello)
+            val value: String? = preferences.getString(key, "Бот запущен 🦌")
+            return value ?: "Бот запущен 🦌"
         }
     }
 }

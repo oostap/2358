@@ -16,7 +16,7 @@ class WorkflowManager() : KoinComponent {
     private val alorManager: AlorManager by inject()
     private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
-    private val strategyTelegram: StrategyTelegram by inject()
+    private val strategySpeaker: StrategySpeaker by inject()
 
     fun startApp() {
         stockManager.loadStocks()
@@ -25,7 +25,7 @@ class WorkflowManager() : KoinComponent {
 
         if (SettingsManager.getAlorQuotes() || SettingsManager.getAlorOrdebook()) alorManager.refreshToken()
 
-        strategyTelegram.start()
+        strategySpeaker.start()
     }
 
     companion object {
@@ -52,6 +52,7 @@ class WorkflowManager() : KoinComponent {
             fun provideStrategyFixPrice(): StrategyFixPrice = StrategyFixPrice()
             fun provideStrategyRocket(): StrategyRocket = StrategyRocket()
             fun provideStrategyTazikEndless(): StrategyTazikEndless = StrategyTazikEndless()
+            fun provideStrategySpeaker(): StrategySpeaker = StrategySpeaker()
 
             // unused yet
             fun provideStrategyShorts(): StrategyShorts = StrategyShorts()
@@ -79,6 +80,7 @@ class WorkflowManager() : KoinComponent {
             single { provideStrategyFixPrice() }
             single { provideStrategyRocket() }
             single { provideStrategyTazikEndless() }
+            single { provideStrategySpeaker() }
 
             // unused yet
             single { provideStrategyShorts() }
@@ -107,7 +109,7 @@ class WorkflowManager() : KoinComponent {
             fun provideRetrofit(): Retrofit {
                 var level = HttpLoggingInterceptor.Level.NONE
                 if (BuildConfig.DEBUG) {
-                    level = HttpLoggingInterceptor.Level.BODY
+                    level = HttpLoggingInterceptor.Level.BASIC
                 }
 
                 val httpClient = OkHttpClient.Builder()

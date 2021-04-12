@@ -301,6 +301,11 @@
             app:useSimpleSummaryProvider="true"
             app:defaultValue="06:59:55,09:59:55,10:59:55,15:29:55"/>
 
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_voice"
+            app:title="@string/stocks_tazik_voice"
+            app:defaultValue="true" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/menu_tazik_endless">
@@ -381,9 +386,32 @@
 
         <SwitchPreferenceCompat
             app:key="@string/setting_key_rocket_voice"
-            app:title="@string/stocks_rocket_rocket_voice"
+            app:title="@string/stocks_rocket_voice"
             app:defaultValue="true" />
 
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/settings_header_telegram">
+        <EditTextPreference
+            app:key="@string/setting_key_telegram_bot_api_key"
+            app:title="@string/stocks_telegram_bot_api_key"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue=""/>
+        <EditTextPreference
+            app:key="@string/setting_key_telegram_chat_id"
+            app:title="@string/stocks_telegram_chat_id"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue=""/>
+        <EditTextPreference
+            app:key="@string/setting_key_telegram_update_delay"
+            app:title="@string/stocks_telegram_update_delay"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="10"/>
+        <EditTextPreference
+            app:key="@string/setting_key_telegram_hello"
+            app:title="@string/stocks_telegram_hello"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="Бот запущен 🦌"/>
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_interface">

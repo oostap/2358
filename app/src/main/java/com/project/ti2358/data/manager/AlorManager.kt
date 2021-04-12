@@ -18,7 +18,7 @@ class AlorManager : KoinComponent {
     }
 
     fun refreshToken() {
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(Dispatchers.IO) {
             try {
                 TOKEN = thirdPartyService.alorRefreshToken("https://oauth.alor.ru/refresh")
                 streamingAlorService.resubscribe()

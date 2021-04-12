@@ -19,6 +19,7 @@ import kotlin.math.roundToInt
 class StrategyTazik : KoinComponent {
     private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
+    private val strategySpeaker: StrategySpeaker by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
@@ -102,7 +103,7 @@ class StrategyTazik : KoinComponent {
 
         stocksToPurchase = stocksSelected.map {
             PurchaseStock(it).apply {
-                percentLimitPriceChange = percent
+                percentLimitPriceChange = -abs(percent)
 
                 // отнять процент роста с начала премаркета, если мы запускаем в 10
                 if (before10) {
@@ -193,7 +194,7 @@ class StrategyTazik : KoinComponent {
         }
 
         // подписаться только бумаги тазика, чтобы быстрее работало?
-        stockManager.startTazik(stocksToPurchase.map { it.stock })
+//        stockManager.startTazik(stocksToPurchase.map { it.stock })
 
         started = false
 
@@ -266,7 +267,7 @@ class StrategyTazik : KoinComponent {
         activeJobs.clear()
 
         // подписаться обратно на все бумаги
-        stockManager.stopTazik()
+//        stockManager.stopTazik()
     }
 
     fun addBasicPercentLimitPriceChange(sign: Int) {
@@ -344,6 +345,7 @@ class StrategyTazik : KoinComponent {
                 val change = candle.closingPrice / purchase.tazikPrice * 100.0 - 100.0
                 if (purchase.tazikPrice != 0.0 &&
                     change > -50 && // защита от бага ти?
+                    change < 0 &&
                     change <= purchase.percentLimitPriceChange && isAllowToBuy(ticker, change)
                 ) {
                     processBuy(purchase, stock, candle)
@@ -375,6 +377,7 @@ class StrategyTazik : KoinComponent {
         val onePiece: Double = totalMoney / SettingsManager.getTazikPurchaseParts()
         purchase.lots = (onePiece / stock.getPriceNow()).roundToInt()
 
+        strategySpeaker.speakTazik(purchase, change)
         when {
             SettingsManager.getTazikBuyAsk() -> { // покупка из аска
                 job = purchase.buyLimitFromAsk(baseProfit)
@@ -406,8 +409,8 @@ class StrategyTazik : KoinComponent {
                 // вычисляем процент профита после сдвига лимитки ниже
 
                 // финальный профит
-                delta *= factor
-                var finalProfit = baseProfit + abs(delta)
+                delta *= factor                                                     // 0.5% * 0.25% = 0.125%
+                var finalProfit = baseProfit + abs(delta)                           // 0.9% + 0.125% = 1.025%
 
                 if (baseProfit == 0.0) finalProfit = 0.0
                 job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikOrderLifeTimeSeconds())

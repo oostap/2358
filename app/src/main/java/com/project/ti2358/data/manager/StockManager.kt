@@ -87,7 +87,7 @@ class StockManager : KoinComponent {
 
         instrumentsAll.clear()
 
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(Dispatchers.IO) {
             while (instrumentsAll.isEmpty()) {
                 try {
                     instrumentsAll = synchronizedList(marketService.stocks().instruments as MutableList<Instrument>)
@@ -106,7 +106,7 @@ class StockManager : KoinComponent {
     }
 
     fun startUpdateIndices() {
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(Dispatchers.IO) {
             while (true) {
                 try {
                     indices = synchronizedList(thirdPartyService.daagerIndices() as MutableList<Index>)
@@ -276,7 +276,7 @@ class StockManager : KoinComponent {
         strategyFixPrice.restartStrategy()
 
         // загрузить цену закрытия
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(Dispatchers.IO) {
             while (true) {
                 try {
                     reloadClosePrices()

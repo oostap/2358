@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
-import android.speech.tts.TextToSpeech
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
@@ -21,17 +20,17 @@ import org.koin.core.component.inject
 import java.util.*
 import kotlin.math.abs
 
-
 @KoinApiExtension
-class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
+class StrategyRocket() : KoinComponent {
     private val stockManager: StockManager by inject()
+    private val strategySpeaker: StrategySpeaker by inject()
+
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
     var rocketStocks: MutableList<RocketStock> = mutableListOf()
     var cometStocks: MutableList<RocketStock> = mutableListOf()
 
     private var started: Boolean = false
-    private var textToSpeech: TextToSpeech? = null
 
     fun process(): MutableList<Stock> {
         val all = stockManager.getWhiteStocks()
@@ -45,30 +44,7 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
         return stocks
     }
 
-    override fun onInit(i: Int) {
-        if (i == TextToSpeech.SUCCESS) {
-            textToSpeech?.let {
-                val locale = Locale.getDefault()
-                val result = it.setLanguage(locale)
-                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-//                    Utils.showToastAlert("TTS не запущен 1")
-                }
-            }
-        }
-    }
-
-    fun speak(text: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            textToSpeech?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
-        } else {
-            textToSpeech?.speak(text, TextToSpeech.QUEUE_FLUSH, null)
-        }
-    }
-
     fun startStrategy() {
-        if (textToSpeech == null) {
-            textToSpeech = TextToSpeech(TheApplication.application.applicationContext, this)
-        }
         rocketStocks.clear()
         cometStocks.clear()
         started = true
@@ -164,25 +140,13 @@ class StrategyRocket() : KoinComponent, TextToSpeech.OnInitListener {
 
         val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(context, notificationChannelId) else Notification.Builder(context)
 
-        var name = rocketStock.stock.instrument.name
-        if (rocketStock.stock.alterName != "") {
-            name = ticker
-        }
-
         val changePercent = if (rocketStock.changePercent > 0) {
             "+%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
         } else {
             "%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
         }
 
-        if (SettingsManager.getRocketVoice()) {
-            if (rocketStock.changePercent > 0) {
-                speak("Ракета в $name! $changePercent за ${rocketStock.time} мин")
-            } else {
-                speak("Комета в $name! $changePercent за ${rocketStock.time} мин")
-            }
-        }
-
+        strategySpeaker.speakRocket(rocketStock)
         val title = "$ticker: ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин"
 
         val notification = builder

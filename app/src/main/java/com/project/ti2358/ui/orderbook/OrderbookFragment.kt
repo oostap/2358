@@ -479,8 +479,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     priceBidPercentView.visibility = GONE
                 }
 
-                backgroundBidView.startAnimation(ResizeWidthAnimation(backgroundBidView, (item.bidPercent * 500).toInt()).apply { duration = 250 })
-                backgroundAskView.startAnimation(ResizeWidthAnimation(backgroundAskView, (item.askPercent * 500).toInt()).apply { duration = 250 })
+                backgroundBidView.startAnimation(ResizeWidthAnimation(backgroundBidView, (item.bidPercent * 1000).toInt()).apply { duration = 250 })
+                backgroundAskView.startAnimation(ResizeWidthAnimation(backgroundAskView, (item.askPercent * 1000).toInt()).apply { duration = 250 })
 
                 // ордера на покупку
                 val ordersBuy = listOf(orderBuy1View, orderBuy2View, orderBuy3View, orderBuy4View)

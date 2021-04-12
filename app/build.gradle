@@ -14,8 +14,8 @@ android {
         applicationId "com.project.ti2358"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 40
-        versionName "v1.6.6"
+        versionCode 41
+        versionName "v1.6.7"
         multiDexEnabled true
     }
 
@@ -101,4 +101,7 @@ dependencies {
 
     // charts
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    // telega
+    implementation 'io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:6.0.3'
 }

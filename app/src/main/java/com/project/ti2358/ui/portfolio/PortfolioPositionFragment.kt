@@ -234,7 +234,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
             ttDeltaEdit.setText("%.2f".format(locale = Locale.US, purchaseStock.trailingStopTakeProfitPercentDelta))
             ttStopLossEdit.setText("%.2f".format(locale = Locale.US, purchaseStock.trailingStopStopLossPercent))
 
-            val avg = purchaseStock.position?.getAveragePrice() ?: 0.0
+            val avg = purchaseStock.position?.stock?.getPriceNow() ?: 0.0
             val activationPrice = avg + purchaseStock.trailingStopTakeProfitPercentActivation / 100.0 * avg
             val stopLossPrice = avg - abs(purchaseStock.trailingStopStopLossPercent / 100.0 * avg)
             val delta = purchaseStock.trailingStopTakeProfitPercentDelta / 100.0 * avg

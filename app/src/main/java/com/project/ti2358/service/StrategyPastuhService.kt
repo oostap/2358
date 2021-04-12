@@ -13,20 +13,21 @@ import android.widget.Toast
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.StrategyRocket
+import com.project.ti2358.data.manager.StrategyTelegram
 import kotlinx.coroutines.*
 import okhttp3.internal.notify
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class StrategyRocketService : Service() {
+class StrategyPastuhService : Service() {
 
-    private val NOTIFICATION_ACTION = "event.rocket"
-    private val NOTIFICATION_CANCEL_ACTION = "event.rocket.cancel"
+    private val NOTIFICATION_ACTION = "event.pastuh"
+    private val NOTIFICATION_CANCEL_ACTION = "event.pastuh.cancel"
     private val NOTIFICATION_CHANNEL_ID = "ROCKET CHANNEL NOTIFICATION"
-    private val NOTIFICATION_ID = 1700113
+    private val NOTIFICATION_ID = 17001131
 
-    private val strategyRocket: StrategyRocket by inject()
+    private val strategyTelegram: StrategyTelegram by inject()
 
     private var wakeLock: PowerManager.WakeLock? = null
     private var isServiceRunning = false
@@ -48,7 +49,7 @@ class StrategyRocketService : Service() {
                         notificationButtonReceiver
                     )
                     notificationButtonReceiver = null
-                    context.stopService(Intent(context, StrategyRocketService::class.java))
+                    context.stopService(Intent(context, StrategyPastuhService::class.java))
                 }
             }
         }
@@ -59,24 +60,24 @@ class StrategyRocketService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "ROCKET","",  "", "")
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "PASTUH","",  "", "")
         startForeground(NOTIFICATION_ID, notification)
-        strategyRocket.startStrategy()
+        strategyTelegram.startStrategy()
         scheduleUpdate()
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Ракеты отменены", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Телеграм бот отключен", Toast.LENGTH_LONG).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
         job?.cancel()
-        strategyRocket.stopStrategy()
+        strategyTelegram.stopStrategy()
         super.onDestroy()
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Ракеты запущены", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Телеграм бот запущено", Toast.LENGTH_LONG).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
@@ -95,7 +96,7 @@ class StrategyRocketService : Service() {
     }
 
     private fun stopService() {
-        Toast.makeText(this, "Ракеты остановлены", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Телеграм бот остановлен", Toast.LENGTH_SHORT).show()
         try {
             wakeLock?.let {
                 if (it.isHeld) {
@@ -111,7 +112,7 @@ class StrategyRocketService : Service() {
     }
 
     private fun updateNotification() {
-        val title = "Работают ракеты!"
+        val title = "Работает телеграм бот!"
 
         val cancelIntent = Intent(NOTIFICATION_ACTION).apply { putExtra("type", NOTIFICATION_CANCEL_ACTION) }
         val pendingCancelIntent = PendingIntent.getBroadcast(this, 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)
