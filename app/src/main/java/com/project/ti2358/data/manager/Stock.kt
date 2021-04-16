@@ -100,6 +100,9 @@ data class Stock(var instrument: Instrument) {
         if (morning != null) {
             t += "🕖"
         }
+        if (short != null) {
+            t += "👖"
+        }
         return t
     }
 

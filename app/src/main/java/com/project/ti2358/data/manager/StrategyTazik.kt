@@ -129,7 +129,7 @@ class StrategyTazik : KoinComponent {
     }
 
     fun getNotificationTitle(): String {
-        if (started) return "Внимание! Работает автотазик!"
+        if (started) return "Работает автотазик!"
 
         if (scheduledStartTime == null) {
             return "Старт тазика через ???"

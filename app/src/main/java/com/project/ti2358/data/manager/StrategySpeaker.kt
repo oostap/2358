@@ -41,24 +41,16 @@ class StrategySpeaker() : KoinComponent, TextToSpeech.OnInitListener {
 
     fun speakRocket(rocketStock: RocketStock) {
         if (SettingsManager.getRocketVoice()) {
-            var name = rocketStock.stock.instrument.name
-            if (rocketStock.stock.alterName != "") {
-                name = rocketStock.stock.ticker
-            }
-
+            val name = rocketStock.stock.instrument.name
             val type = if (rocketStock.changePercent > 0) "ракета" else "комета"
-            speak("$type $name ${rocketStock.changePercent}% ${rocketStock.time} мин")
+            speak("%s %s %.2f%% %d мин".format(type, name, rocketStock.changePercent, rocketStock.time))
         }
     }
 
     fun speakTazik(purchaseStock: PurchaseStock, change: Double) {
         if (SettingsManager.getTazikVoice()) {
-            var name = purchaseStock.stock.instrument.name
-            if (purchaseStock.stock.alterName != "") {
-                name = purchaseStock.stock.ticker
-            }
-
-            speak("Таз: заявка $name просадка ${change}%")
+            val name = purchaseStock.stock.instrument.name
+            speak("Заявка на покупку %s просадка %.2f%%".format(name, change))
         }
     }
 }

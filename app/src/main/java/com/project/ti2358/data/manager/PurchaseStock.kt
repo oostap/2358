@@ -474,7 +474,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                 try {
                     status = PurchaseStatus.ORDER_BUY_PREPARE
 
-                    val orderbook = marketService.orderbook(figi, 5)
+                    val orderbook = marketService.orderbook(figi, 10)
                     buyPrice = orderbook.getBestPriceFromAsk(lots)
                     if (buyPrice == 0.0) return@launch
 
@@ -614,7 +614,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                 var buyPrice: Double = 0.0
                 try {
                     status = PurchaseStatus.ORDER_BUY_PREPARE
-                    val orderbook = marketService.orderbook(figi, 5)
+                    val orderbook = marketService.orderbook(figi, 10)
                     buyPrice = orderbook.getBestPriceFromAsk(lots)
                     if (buyPrice == 0.0) return@launch
 
@@ -959,8 +959,8 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                 status = PurchaseStatus.ORDER_SELL_PREPARE
                 val ticker = pos.stock?.ticker
 
-                val orderbook = marketService.orderbook(figi, 5)
-                val bestAsk = orderbook.getBestPriceFromAsk(1)
+                val orderbook = marketService.orderbook(figi, 10)
+                val bestAsk = orderbook.getBestPriceFromAsk(lots)
                 val profitSellPrice = Utils.makeNicePrice(bestAsk)
 
                 try { // выставить ордер на продажу
@@ -999,7 +999,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
         return GlobalScope.launch(Dispatchers.Main) {
             try {
                 position = pos
-                currentTrailingStop = TrailingStop(stock, pos.getAveragePrice(), trailingStopTakeProfitPercentActivation, trailingStopTakeProfitPercentDelta, trailingStopStopLossPercent)
+                currentTrailingStop = TrailingStop(stock, stock.getPriceNow(), trailingStopTakeProfitPercentActivation, trailingStopTakeProfitPercentDelta, trailingStopStopLossPercent)
                 currentTrailingStop?.let {
                     strategyTrailingStop.addTrailingStop(it)
                     status = PurchaseStatus.ORDER_SELL_TRAILING

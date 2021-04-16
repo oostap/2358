@@ -1,25 +1,16 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.model.dto.Candle
-import com.project.ti2358.data.model.dto.Candles
-import com.project.ti2358.data.model.dto.OperationType
-import com.project.ti2358.data.model.dto.Order
 import com.project.ti2358.data.service.MarketService
 import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toString
 import com.project.ti2358.ui.orderbook.OrderbookLine
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.lang.Exception
 import java.util.*
-import kotlin.math.max
 
 @KoinApiExtension
 class ChartManager() : KoinComponent {

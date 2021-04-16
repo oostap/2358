@@ -86,13 +86,14 @@ class StrategyPastuhService : Service() {
             }
         }
 
-        job?.cancel()
-        job = GlobalScope.launch(Dispatchers.Main) {
-            while (isServiceRunning) {
-                updateNotification()
-                delay(1000)
-            }
-        }
+//        job?.cancel()
+//        job = GlobalScope.launch(Dispatchers.Main) {
+//            while (isServiceRunning) {
+//                updateNotification()
+//                delay(1000 * 10)
+//            }
+//        }
+        updateNotification()
     }
 
     private fun stopService() {

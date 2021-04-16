@@ -290,8 +290,8 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
 
                 val orderbook = positionManager.loadOrderbook()
                 orderbook?.let {
-                    val priceAsk = it.getBestPriceFromAsk(1)
-                    val priceBid = it.getBestPriceFromBid(1)
+                    val priceAsk = it.getBestPriceFromAsk(0)
+                    val priceBid = it.getBestPriceFromBid(0)
                     val pricePosition = portfolioPosition.getAveragePrice()
 
                     val percentBid = Utils.getPercentFromTo(priceBid, pricePosition)

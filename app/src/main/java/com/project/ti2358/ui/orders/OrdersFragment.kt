@@ -109,7 +109,7 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
             fun bind(index: Int) {
                 val order = values[index]
                 with(binding) {
-                    tickerView.text = "${index + 1}) ${order.stock?.instrument?.ticker}"
+                    tickerView.text = "${index + 1}) ${order.stock?.getTickerLove()}"
                     lotsView.text = "${order.executedLots} / ${order.requestedLots} шт."
                     priceView.text = order.price.toMoney(order.stock)
 

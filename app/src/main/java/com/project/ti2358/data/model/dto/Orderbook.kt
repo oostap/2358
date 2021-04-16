@@ -15,10 +15,12 @@ data class Orderbook(
     val limitDown: Double,
 ) {
     fun getBestPriceFromAsk(quantity: Int): Double {
+        if (quantity == 0) return asks.first().price
+
         var total = 0
         for (ask in asks) {
             total += ask.quantity
-            if (total >= quantity) {
+            if (total >= quantity * 2) { // берём с запасом, чтобы не проскочить аск
                 return ask.price
             }
         }
@@ -26,6 +28,8 @@ data class Orderbook(
     }
 
     fun getBestPriceFromBid(quantity: Int): Double {
+        if (quantity == 0) return bids.first().price
+
         var total = 0
         for (ask in bids) {
             total += ask.quantity

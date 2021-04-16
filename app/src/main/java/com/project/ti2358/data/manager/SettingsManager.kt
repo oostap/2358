@@ -633,14 +633,10 @@ class SettingsManager {
             return value ?: ""
         }
 
-        fun getTelegramChatID(): Long {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_chat_id)
-            val value: String? = preferences.getString(key, "0")
-            return try {
-                parseInt(value ?: "0").toLong()
-            } catch (e: Exception) {
-                0
-            }
+        fun getTelegramChatID(): String {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_channel_id)
+            val value: String? = preferences.getString(key, "")
+            return value ?: ""
         }
 
         fun getTelegramUpdateDelay(): Int {
@@ -657,6 +653,22 @@ class SettingsManager {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_hello)
             val value: String? = preferences.getString(key, "Бот запущен 🦌")
             return value ?: "Бот запущен 🦌"
+        }
+
+        fun getTelegramBye(): String {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_bye)
+            val value: String? = preferences.getString(key, "Бот остановлен! 🐹")
+            return value ?: "Бот остановлен! 🐹"
+        }
+
+        fun getTelegramSendTrades(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_trades)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getTelegramSendRockets(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_rockets)
+            return preferences.getBoolean(key, true)
         }
     }
 }

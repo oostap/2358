@@ -72,27 +72,35 @@ class StockManager : KoinComponent {
     }
 
     fun loadStocks(force: Boolean = false) {
-        val key = "all_instruments"
+        var reloadStocks = force
         val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
+        val keyStartUp = "start_ups"
+        var countStartUps = preferences.getInt(keyStartUp, 4)
+        countStartUps++
+        if (countStartUps % 5 == 0) reloadStocks = true
+        val editor: SharedPreferences.Editor = preferences.edit()
+        editor.putInt(keyStartUp, countStartUps)
+        editor.apply()
+
+        val key = "all_instruments"
         var jsonInstruments = preferences.getString(key, null)
         if (jsonInstruments != null) {
             val itemType = object : TypeToken<List<Instrument>>() {}.type
             instrumentsAll = synchronizedList(gson.fromJson(jsonInstruments, itemType))
         }
 
-        if (instrumentsAll.isNotEmpty() && !force) {
+        if (instrumentsAll.isNotEmpty() && !reloadStocks) {
             afterLoadInstruments()
             return
         }
 
         instrumentsAll.clear()
 
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.Default) {
             while (instrumentsAll.isEmpty()) {
                 try {
                     instrumentsAll = synchronizedList(marketService.stocks().instruments as MutableList<Instrument>)
                     jsonInstruments = gson.toJson(instrumentsAll)
-                    val editor: SharedPreferences.Editor = preferences.edit()
                     editor.putString(key, jsonInstruments)
                     editor.apply()
                     afterLoadInstruments()
@@ -106,7 +114,7 @@ class StockManager : KoinComponent {
     }
 
     fun startUpdateIndices() {
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.Default) {
             while (true) {
                 try {
                     indices = synchronizedList(thirdPartyService.daagerIndices() as MutableList<Index>)
@@ -276,7 +284,7 @@ class StockManager : KoinComponent {
         strategyFixPrice.restartStrategy()
 
         // загрузить цену закрытия
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.Default) {
             while (true) {
                 try {
                     reloadClosePrices()

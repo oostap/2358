@@ -120,7 +120,7 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
                 val portfolioPosition = depositManager.getPositionForFigi(stock.figi)
 
                 with(binding) {
-                    tickerView.text = "${index + 1}) ${stock.ticker}"
+                    tickerView.text = "${index + 1}) ${stock.getTickerLove()}"
                     chooseView.setOnCheckedChangeListener(null)
                     chooseView.isChecked = strategy1000Sell.isSelected(stock)
 

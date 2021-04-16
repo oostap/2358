@@ -123,7 +123,7 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     fun getNotificationTitle(): String {
-        if (started) return "Внимание! Работает бесконечный таз!"
+        if (started) return "Работает бесконечный таз!"
 
         return "Бесконечный таз приостановлен"
     }

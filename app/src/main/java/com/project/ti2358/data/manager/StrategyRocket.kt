@@ -24,6 +24,7 @@ import kotlin.math.abs
 class StrategyRocket() : KoinComponent {
     private val stockManager: StockManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
+    private val strategyTelegram: StrategyTelegram by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
@@ -47,6 +48,7 @@ class StrategyRocket() : KoinComponent {
     fun startStrategy() {
         rocketStocks.clear()
         cometStocks.clear()
+        process()
         started = true
     }
 
@@ -57,7 +59,6 @@ class StrategyRocket() : KoinComponent {
     @Synchronized
     fun processStrategy(stock: Stock) {
         if (!started) return
-        process()
         if (stock !in stocks) return
 
         val percentRocket = SettingsManager.getRocketChangePercent()
@@ -89,15 +90,9 @@ class StrategyRocket() : KoinComponent {
             val changePercent = lastCandle.closingPrice / firstCandle.openingPrice * 100.0 - 100.0
             if (volume >= volumeRocket && abs(changePercent) >= abs(percentRocket)) {
 
-                if ((rocketStocks.isNotEmpty() && rocketStocks.first().stock == stock) ||
-                    (cometStocks.isNotEmpty() && cometStocks.first().stock == stock)) {
-                    return
-                }
-
-                if ((rocketStocks.size > 1 && rocketStocks[1].stock == stock) ||
-                    (cometStocks.size > 1 && cometStocks[1].stock == stock)) {
-                    return
-                }
+                // если уже есть в списке, то не дублировать
+                if (rocketStocks.find { it.stock.ticker == stock.ticker && ((Calendar.getInstance().time.time - it.fireTime) / 60.0 / 1000.0).toInt() < 5 } != null) return
+                if (cometStocks.find { it.stock.ticker == stock.ticker && ((Calendar.getInstance().time.time - it.fireTime) / 60.0 / 1000.0).toInt() < 5 } != null) return
 
                 val rocketStock = RocketStock(stock, firstCandle.openingPrice, lastCandle.closingPrice, deltaMinutes, volumeRocket, changePercent, lastCandle.time.time)
                 rocketStock.process()
@@ -147,6 +142,8 @@ class StrategyRocket() : KoinComponent {
         }
 
         strategySpeaker.speakRocket(rocketStock)
+        strategyTelegram.sendRocket(rocketStock)
+
         val title = "$ticker: ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин"
 
         val notification = builder

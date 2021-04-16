@@ -398,7 +398,7 @@
             app:useSimpleSummaryProvider="true"
             app:defaultValue=""/>
         <EditTextPreference
-            app:key="@string/setting_key_telegram_chat_id"
+            app:key="@string/setting_key_telegram_channel_id"
             app:title="@string/stocks_telegram_chat_id"
             app:useSimpleSummaryProvider="true"
             app:defaultValue=""/>
@@ -412,6 +412,22 @@
             app:title="@string/stocks_telegram_hello"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="Бот запущен 🦌"/>
+        <EditTextPreference
+            app:key="@string/setting_key_telegram_bye"
+            app:title="@string/stocks_telegram_bye"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="Бот остановлен! 🐹"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_telegram_send_trades"
+            app:title="@string/stocks_telegram_send_trades"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_telegram_send_rockets"
+            app:title="@string/stocks_telegram_send_rockets"
+            app:defaultValue="true" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_interface">

@@ -17,7 +17,7 @@
         android:id="@+id/nav_portfolio"
         android:name="com.project.ti2358.ui.portfolio.PortfolioFragment"
         android:label="@string/menu_portfolio"
-        tools:layout="@layout/fragment_portfolio" >
+        tools:layout="@layout/fragment_portfolio">
         <action
             android:id="@+id/action_nav_portfolio_to_nav_orders"
             app:destination="@id/nav_orders"
@@ -37,7 +37,7 @@
         android:id="@+id/nav_portfolio_position"
         android:name="com.project.ti2358.ui.portfolio.PortfolioPositionFragment"
         android:label="@string/menu_portfolio"
-        tools:layout="@layout/fragment_portfolio_position" >
+        tools:layout="@layout/fragment_portfolio_position">
         <action
             android:id="@+id/action_nav_portfolio_position_to_nav_orderbook"
             app:destination="@id/nav_orderbook" />
@@ -48,7 +48,7 @@
         android:id="@+id/nav_orders"
         android:name="com.project.ti2358.ui.orders.OrdersFragment"
         android:label="@string/menu_orders"
-        tools:layout="@layout/fragment_orders" >
+        tools:layout="@layout/fragment_orders">
         <action
             android:id="@+id/action_nav_orders_to_nav_orderbook"
             app:destination="@id/nav_orderbook"
@@ -75,7 +75,7 @@
         android:id="@+id/nav_favorites"
         android:name="com.project.ti2358.ui.favorites.FavoritesFragment"
         android:label="@string/menu_favorites"
-        tools:layout="@layout/fragment_favorites" >
+        tools:layout="@layout/fragment_favorites">
         <action
             android:id="@+id/action_nav_favorites_to_nav_orderbook"
             app:destination="@id/nav_orderbook"
@@ -83,7 +83,7 @@
             app:exitAnim="@animator/slide_out_left"
             app:popEnterAnim="@animator/slide_in_right"
             app:popExitAnim="@animator/slide_out_left"
-            app:popUpTo="@id/nav_favorites"/>
+            app:popUpTo="@id/nav_favorites" />
         <action
             android:id="@+id/action_nav_favorites_to_nav_chart"
             app:destination="@id/nav_chart"
@@ -91,7 +91,7 @@
             app:exitAnim="@animator/slide_out_left"
             app:popEnterAnim="@animator/slide_in_right"
             app:popExitAnim="@animator/slide_out_left"
-            app:popUpTo="@id/nav_favorites"/>
+            app:popUpTo="@id/nav_favorites" />
     </fragment>
 
     <!-- шорты -->
@@ -106,7 +106,7 @@
         android:id="@+id/nav_orderbook"
         android:name="com.project.ti2358.ui.orderbook.OrderbookFragment"
         android:label="@string/menu_orderbook"
-        tools:layout="@layout/fragment_orderbook" >
+        tools:layout="@layout/fragment_orderbook">
         <action
             android:id="@+id/action_nav_orderbook_to_nav_chart"
             app:destination="@id/nav_chart" />
@@ -117,7 +117,7 @@
         android:id="@+id/nav_premarket"
         android:name="com.project.ti2358.ui.premarket.PremarketFragment"
         android:label="@string/menu_premarket"
-        tools:layout="@layout/fragment_premarket" >
+        tools:layout="@layout/fragment_premarket">
         <action
             android:id="@+id/action_nav_premarket_to_nav_orderbook"
             app:destination="@id/nav_orderbook"
@@ -131,13 +131,12 @@
         android:id="@+id/nav_2358_start"
         android:name="com.project.ti2358.ui.strategy2358.Strategy2358StartFragment"
         android:label="@string/menu_2358"
-        tools:layout="@layout/fragment_2358_start" >
+        tools:layout="@layout/fragment_2358_start">
         <action
             android:id="@+id/action_nav_2358_start_to_nav_2358_finish"
             app:destination="@id/nav_2358_finish"
             app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left"
-             />
+            app:exitAnim="@animator/slide_out_left" />
     </fragment>
 
     <fragment
@@ -152,7 +151,7 @@
         android:id="@+id/nav_fixprice"
         android:name="com.project.ti2358.ui.strategyFixPrice.StrategyFixPriceFragment"
         android:label="@string/menu_fixprice"
-        tools:layout="@layout/fragment_fixprice" >
+        tools:layout="@layout/fragment_fixprice">
         <action
             android:id="@+id/action_nav_fixprice_to_nav_orderbook"
             app:destination="@id/nav_orderbook"
@@ -166,15 +165,13 @@
         android:id="@+id/nav_1728_up"
         android:name="com.project.ti2358.ui.strategy1728Up.Strategy1728UpFragment"
         android:label="@string/menu_1728_up"
-        tools:layout="@layout/fragment_1728_up" >
-    </fragment>
+        tools:layout="@layout/fragment_1728_up"></fragment>
 
     <fragment
         android:id="@+id/nav_1728_down"
         android:name="com.project.ti2358.ui.strategy1728Down.Strategy1728DownFragment"
         android:label="@string/menu_1728_down"
-        tools:layout="@layout/fragment_1728_down" >
-    </fragment>
+        tools:layout="@layout/fragment_1728_down"></fragment>
 
     <!-- Rockets -->
 
@@ -182,7 +179,7 @@
         android:id="@+id/nav_rockets"
         android:name="com.project.ti2358.ui.rockets.RocketsFragment"
         android:label="@string/menu_rocket"
-        tools:layout="@layout/fragment_rockets" >
+        tools:layout="@layout/fragment_rockets">
         <action
             android:id="@+id/action_nav_rocket_to_nav_orderbook"
             app:destination="@id/nav_orderbook"
@@ -196,22 +193,20 @@
         android:id="@+id/nav_1000_sell_start"
         android:name="com.project.ti2358.ui.strategy1000Sell.Strategy1000SellStartFragment"
         android:label="@string/menu_1000_sell"
-        tools:layout="@layout/fragment_1000_sell_start" >
+        tools:layout="@layout/fragment_1000_sell_start">
         <action
             android:id="@+id/action_nav_1000_sell_start_to_nav_1000_sell_finish"
             app:destination="@id/nav_1000_sell_finish"
             app:enterAnim="@animator/slide_in_right"
             app:exitAnim="@animator/slide_out_left"
-            app:popUpToInclusive="true"
-            />
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
         android:id="@+id/nav_1000_sell_finish"
         android:name="com.project.ti2358.ui.strategy1000Sell.Strategy1000SellFinishFragment"
         android:label="@string/menu_1000_sell"
-        tools:layout="@layout/fragment_1000_sell_start" >
-    </fragment>
+        tools:layout="@layout/fragment_1000_sell_start"></fragment>
 
     <!-- 1000 Buy -->
 
@@ -219,13 +214,12 @@
         android:id="@+id/nav_1000_buy_start"
         android:name="com.project.ti2358.ui.strategy1000Buy.Strategy1000BuyStartFragment"
         android:label="@string/menu_1000_buy"
-        tools:layout="@layout/fragment_1000_buy_start" >
+        tools:layout="@layout/fragment_1000_buy_start">
         <action
             android:id="@+id/action_nav_1000_buy_start_to_nav_1000_buy_finish"
             app:destination="@id/nav_1000_buy_finish"
             app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left"
-            />
+            app:exitAnim="@animator/slide_out_left" />
     </fragment>
 
     <fragment
@@ -240,13 +234,12 @@
         android:id="@+id/nav_tazik_start"
         android:name="com.project.ti2358.ui.strategyTazik.StrategyTazikStartFragment"
         android:label="@string/menu_tazik"
-        tools:layout="@layout/fragment_tazik_start" >
+        tools:layout="@layout/fragment_tazik_start">
         <action
             android:id="@+id/action_nav_tazik_start_to_nav_tazik_finish"
             app:destination="@id/nav_tazik_finish"
             app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left"
-            />
+            app:exitAnim="@animator/slide_out_left" />
     </fragment>
 
     <fragment
@@ -261,7 +254,7 @@
         android:id="@+id/nav_tazik_endless_start"
         android:name="com.project.ti2358.ui.strategyTazikEndless.StrategyTazikEndlessStartFragment"
         android:label="@string/menu_tazik_endless"
-        tools:layout="@layout/fragment_tazik_start" >
+        tools:layout="@layout/fragment_tazik_start">
         <action
             android:id="@+id/action_nav_tazik_endless_start_to_nav_tazik_endless_finish"
             app:destination="@id/nav_tazik_endless_finish" />
@@ -293,8 +286,7 @@
         android:id="@+id/nav_chart"
         android:name="com.project.ti2358.ui.chart.ChartFragment"
         android:label="@string/menu_chart"
-        tools:layout="@layout/fragment_chart" >
-    </fragment>
+        tools:layout="@layout/fragment_chart" />
 
     <!-- Pastuh -->
 
@@ -302,7 +294,11 @@
         android:id="@+id/nav_pastuh"
         android:name="com.project.ti2358.ui.pastuh.PastuhFragment"
         android:label="@string/menu_pastuh"
-        tools:layout="@layout/fragment_pastuh">
-    </fragment>
+        tools:layout="@layout/fragment_pastuh" />
+
+    <deepLink
+        android:id="@+id/deepLinkOrderbook"
+        app:action="ACTION_VIEW"
+        app:uri="https://www.2358.com/stocks/{ticker}" />
 
 </navigation>

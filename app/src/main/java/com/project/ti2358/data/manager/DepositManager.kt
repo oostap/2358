@@ -31,7 +31,7 @@ class DepositManager : KoinComponent {
     private var refreshDepositDelay: Long = 20 * 1000 // 20s
 
     public fun startUpdatePortfolio() {
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.Default) {
             while (true) {
                 try {
                     if (accounts.isEmpty()) accounts = synchronizedList(portfolioService.accounts().accounts)

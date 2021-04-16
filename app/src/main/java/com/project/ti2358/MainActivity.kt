@@ -3,7 +3,6 @@ package com.project.ti2358
 import android.content.pm.PackageInfo
 import android.os.Bundle
 import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import android.widget.TextView

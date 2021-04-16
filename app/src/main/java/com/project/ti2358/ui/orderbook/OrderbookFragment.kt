@@ -348,7 +348,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             }
         }
 
-        val ticker = activeStock?.instrument?.ticker ?: ""
+        val ticker = activeStock?.getTickerLove() ?: ""
         val act = requireActivity() as AppCompatActivity
         act.supportActionBar?.title = getString(R.string.menu_orderbook) + " $ticker"
     }

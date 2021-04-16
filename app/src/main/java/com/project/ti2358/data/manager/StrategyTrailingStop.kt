@@ -46,7 +46,7 @@ class StrategyTrailingStop : KoinComponent {
     }
 
     fun getNotificationTitleShort(): String {
-        return "Внимание! Работает трейлинг стоп! 📈"
+        return "Работает трейлинг стоп! 📈"
     }
 
     fun getNotificationTitleLong(): String {
