@@ -391,6 +391,62 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/settings_header_2225">
+        <EditTextPreference
+            app:key="@string/setting_key_2225_price_change_percent"
+            app:title="@string/stocks_2225_price_change_percent"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_2225_volume_min_day"
+            app:title="@string/stocks_2225_volume_min_day"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="150000"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_2225_volume_min_cash"
+            app:title="@string/stocks_2225_volume_min_cash"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_2225_purchase_time"
+            app:title="@string/stocks_2225_purchase_time"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="22:24:00"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_2225_purchase_volume"
+            app:title="@string/stocks_2225_purchase_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_2225_take_profit_from"
+            app:title="@string/stocks_2225_take_profit_from"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0.5"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_2225_take_profit_to"
+            app:title="@string/stocks_2225_take_profit_to"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0.5"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_2225_take_profit_step"
+            app:title="@string/stocks_2225_take_profit_step"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_2225_protect_stock_up"
+            app:title="@string/stocks_2225_protect_stock_up"
+            app:defaultValue="true" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/settings_header_telegram">
         <EditTextPreference
             app:key="@string/setting_key_telegram_bot_api_key"

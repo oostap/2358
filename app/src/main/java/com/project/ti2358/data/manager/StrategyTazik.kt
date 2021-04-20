@@ -6,7 +6,10 @@ import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.service.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -36,6 +39,7 @@ class StrategyTazik : KoinComponent {
     var scheduledStartTime: Calendar? = null
     var currentSort: Sorting = Sorting.DESCENDING
 
+    var jobReloadClosePrices: Job? = null
     companion object {
         const val PercentLimitChangeDelta = 0.05
     }
@@ -193,9 +197,6 @@ class StrategyTazik : KoinComponent {
             return
         }
 
-        // подписаться только бумаги тазика, чтобы быстрее работало?
-//        stockManager.startTazik(stocksToPurchase.map { it.stock })
-
         started = false
 
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
@@ -236,20 +237,24 @@ class StrategyTazik : KoinComponent {
 
     @Synchronized
     private fun startStrategy() {
-        fixPrice()
+        jobReloadClosePrices?.cancel()
+        jobReloadClosePrices = GlobalScope.launch(Dispatchers.Default) {
+            stockManager.reloadClosePrices()
+            fixPrice()
 
-        activeJobs.forEach {
-            try {
-                if (it?.isActive == true) {
-                    it.cancel()
+            activeJobs.forEach {
+                try {
+                    if (it?.isActive == true) {
+                        it.cancel()
+                    }
+                } catch (e: Exception) {
+
                 }
-            } catch (e: Exception) {
-
             }
+            activeJobs.clear()
+            stocksTickerBuyed.clear()
+            started = true
         }
-        activeJobs.clear()
-        stocksTickerBuyed.clear()
-        started = true
     }
 
     @Synchronized
@@ -265,9 +270,6 @@ class StrategyTazik : KoinComponent {
             }
         }
         activeJobs.clear()
-
-        // подписаться обратно на все бумаги
-//        stockManager.stopTazik()
     }
 
     fun addBasicPercentLimitPriceChange(sign: Int) {
@@ -282,21 +284,35 @@ class StrategyTazik : KoinComponent {
     }
 
     @Synchronized
-    private fun isAllowToBuy(ticker: String, change: Double): Boolean {
+    private fun isAllowToBuy(purchase: PurchaseStock, change: Double): Boolean {
+        if (purchase.tazikPrice != 0.0 &&               // стартовая цена нулевая = не загрузились цены
+            change > -50 &&                             // конечная цена нулевая или просто огромная просадка
+            change < 0 &&                               // изменение отрицательное
+            change <= purchase.percentLimitPriceChange  // изменение в пределах наших настроек
+        ) {
+            return false
+        }
+
+        // если тазик утренний, то проверять, чтоб цена покупки была ниже цены закрытия
+        val buyPrice = purchase.tazikPrice - purchase.tazikPrice / 100.0 * abs(purchase.percentLimitPriceChange)
+        if (Utils.isSessionBefore10() && buyPrice > purchase.stock.getPrice0145()) {
+            return false
+        }
+
+        val ticker = purchase.ticker
+
         // лимит на заявки исчерпан?
         val parts = SettingsManager.getTazikPurchaseParts()
         if (activeJobs.size >= parts) return false
 
         // ещё не брали бумагу?
         if (ticker !in stocksTickerBuyed) {
-            log("TAZIK 1: $ticker $stocksTickerBuyed ${stocksTickerBuyed[ticker]} $change")
             return true
         }
 
         // текущий change ниже предыдущего на 1.5x?
         if (SettingsManager.getTazikAllowAveraging()) { // разрешить усреднение?
             if (ticker in stocksTickerBuyed && stocksTickerBuyed[ticker] != 0.0 && change < stocksTickerBuyed[ticker]!! * 1.5) {
-                log("TAZIK 2: $ticker $stocksTickerBuyed ${stocksTickerBuyed[ticker]} $change")
                 return true
             }
         }
@@ -310,7 +326,7 @@ class StrategyTazik : KoinComponent {
             if (closingPrice == 0.0) continue
 
             val change = closingPrice / purchase.tazikPrice * 100.0 - 100.0
-            if (isAllowToBuy(purchase.ticker, change)) {
+            if (isAllowToBuy(purchase, change)) {
                 purchase.stock.candleToday?.let {
                     processBuy(purchase, purchase.stock, it)
                 }
@@ -346,7 +362,7 @@ class StrategyTazik : KoinComponent {
                 if (purchase.tazikPrice != 0.0 &&
                     change > -50 && // защита от бага ти?
                     change < 0 &&
-                    change <= purchase.percentLimitPriceChange && isAllowToBuy(ticker, change)
+                    change <= purchase.percentLimitPriceChange && isAllowToBuy(purchase, change)
                 ) {
                     processBuy(purchase, stock, candle)
                 }

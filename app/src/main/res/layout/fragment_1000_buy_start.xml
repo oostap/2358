@@ -24,7 +24,7 @@
         android:layout_marginBottom="65dp"
         android:layout_marginTop="50dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context=".ui.strategy2358.Strategy2358StartFragment"
+        tools:context=".ui.strategy2225.Strategy2358StartFragment"
         tools:listitem="@layout/fragment_1000_buy_start_item" />
 
     <LinearLayout

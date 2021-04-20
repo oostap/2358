@@ -4,6 +4,7 @@ import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.model.dto.daager.*
 import com.project.ti2358.service.ScreenerType
+import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import org.koin.core.component.KoinApiExtension
 import java.util.*
@@ -233,22 +234,32 @@ data class Stock(var instrument: Instrument) {
     }
 
     fun getTodayVolume(): Int {
-        return candleToday?.volume ?: 0
+        var volume = 0
+        minuteCandles.forEach {
+            volume += it.volume
+        }
+        return volume + (candleToday?.volume ?: 0)
     }
 
     fun getPriceNow(): Double {
         var value = 0.0
 
-        closePrices?.let {
-            value = it.post
-        }
+        if (Utils.getTimeMSK().get(Calendar.HOUR_OF_DAY) < 7) { // если время до старта, то всегда берём post
+            closePrices?.let {
+                value = it.post
+            }
+        } else if (Utils.getTimeMSK().get(Calendar.HOUR_OF_DAY) < 10 && morning == null) { // если с 7 до 10 и бумага не торгуется с утра, то берём post
+            closePrices?.let {
+                value = it.post
+            }
+        } else {
+            candleToday?.let {
+                value = it.closingPrice
+            }
 
-        candleToday?.let {
-            value = it.closingPrice
-        }
-
-        if (minuteCandles.isNotEmpty()) {
-            value = minuteCandles.last().closingPrice
+            if (minuteCandles.isNotEmpty()) {
+                value = minuteCandles.last().closingPrice
+            }
         }
 
         return value

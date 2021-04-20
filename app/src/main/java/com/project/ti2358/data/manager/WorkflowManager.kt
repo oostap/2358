@@ -44,6 +44,7 @@ class WorkflowManager() : KoinComponent {
             fun provideStrategy1000Sell(): Strategy1000Sell = Strategy1000Sell()
             fun provideStrategy1000Buy(): Strategy1000Buy = Strategy1000Buy()
             fun provideStrategy2358(): Strategy2358 = Strategy2358()
+            fun provideStrategy2225(): Strategy2225 = Strategy2225()
             fun provideStrategy1728Up(): Strategy1728Up = Strategy1728Up()
             fun provideStrategy1728Down(): Strategy1728Down = Strategy1728Down()
             fun provideStrategyTazik(): StrategyTazik = StrategyTazik()
@@ -72,6 +73,7 @@ class WorkflowManager() : KoinComponent {
             single { provideStrategy1000Sell() }
             single { provideStrategy1000Buy() }
             single { provideStrategy2358() }
+            single { provideStrategy2225() }
             single { provideStrategy1728Up() }
             single { provideStrategy1728Down() }
             single { provideStrategyTazik() }

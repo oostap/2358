@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent" android:layout_height="fill_parent">
+
+    <TextView
+        android:id="@+id/priceChangePercentView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="0dp"
+        android:gravity="center_vertical"
+        android:padding="8dp"
+        android:text="@string/trailing_take"
+        android:visibility="gone"/>
+
+    <androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginBottom="150dp"
+        android:layout_marginTop="30dp"
+        app:layoutManager="LinearLayoutManager"
+        tools:context=".ui.strategy2225.Strategy2225FinishFragment"
+        tools:listitem="@layout/fragment_2358_finish_item" />
+
+    <Button android:layout_width="fill_parent"
+        android:layout_height="70dp"
+        android:id="@+id/start_button"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:text="@string/start"
+        android:textSize="20dp"
+        android:layout_alignParentBottom="true" />
+
+    <TextView
+        android:id="@+id/info_text_view"
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="70dp"
+        android:text="Запуск таймера на покупку: \nВремя МСК: 2358: \nБумаг: 5\nСумма: ~1000$"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <CheckBox
+        android:id="@+id/choose_view"
+        android:layout_height="50dp"
+        android:layout_width="150dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:text="Пересчёт в равных долях"
+        android:layoutDirection="rtl"
+        android:textAlignment="center"
+        android:layout_marginBottom="80dp"/>
+
+</RelativeLayout>

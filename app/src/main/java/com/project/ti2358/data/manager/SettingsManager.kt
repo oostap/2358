@@ -670,5 +670,88 @@ class SettingsManager {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_rockets)
             return preferences.getBoolean(key, true)
         }
+
+        /******************** 2225 short *************************/
+
+        fun get2225ChangePercent(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2225_price_change_percent)
+            val value: String? = preferences.getString(key, "1")
+            return try {
+                (value ?: "1").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun get2225PurchaseTime(): String {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2225_purchase_time)
+            val value: String? = preferences.getString(key, "22:24:00")
+            return value ?: "22:24:00"
+        }
+
+        fun get2225PurchaseVolume(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2225_purchase_volume)
+            val value: String? = preferences.getString(key, "0")
+            return try {
+                parseInt(value ?: "0")
+            } catch (e: Exception) {
+                0
+            }
+        }
+
+        fun get2225TakeProfitFrom(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2225_take_profit_from)
+            val value: String? = preferences.getString(key, "1.0")
+            return try {
+                (value ?: "1.0").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun get2225TakeProfitTo(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2225_take_profit_to)
+            val value: String? = preferences.getString(key, "1.0")
+            return try {
+                (value ?: "1.0").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun get2225TakeProfitStep(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2225_take_profit_step)
+            val value: String? = preferences.getString(key, "1")
+            return try {
+                parseInt(value ?: "1")
+            } catch (e: Exception) {
+                1
+            }
+        }
+
+        fun get2225VolumeDayPieces(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2225_volume_min_day)
+            val value: String? = preferences.getString(key, "150000")
+            return try {
+                parseInt(value ?: "150000")
+            } catch (e: Exception) {
+                150000
+            }
+        }
+
+        fun get2225VolumeDayCash(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2225_volume_min_cash)
+            val value: String? = preferences.getString(key, "1.0")
+            return try {
+                (value ?: "1.0").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun get2225ProtectStockUp(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2225_protect_stock_up)
+            return preferences.getBoolean(key, false)
+        }
     }
 }

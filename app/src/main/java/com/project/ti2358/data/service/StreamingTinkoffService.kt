@@ -248,7 +248,7 @@ class StreamingTinkoffService {
     public fun unsubscribeCandleEventsStream(figi: String, interval: Interval) {
 //        Log.d("StreamingService", "unsubscribe from candle events: figi: $figi, interval: $interval")
         webSocket?.send(Gson().toJson(CandleEventBody("candle:unsubscribe", figi, interval)))
-        activeCandleSubscriptions[figi]?.remove(interval)
+//        activeCandleSubscriptions[figi]?.remove(interval)
     }
 
 }

@@ -303,124 +303,60 @@ class StockManager : KoinComponent {
         }
     }
 
-    fun startTazik(stocks: List<Stock>) {
-        resetSubscription(stocks, day = false)
-    }
-
-    fun stopTazik() {
-        resetSubscription(stocksStream)
-    }
-
     private fun resetSubscription(stocks: List<Stock>, day: Boolean = true, minute: Boolean = true) {
         if (SettingsManager.getAlorQuotes()) {
-            if (minute) {
-                streamingAlorService
-                    .getCandleEventStream(
-                        stocks,
-                        Interval.MINUTE
-                    )
-                    .onBackpressureBuffer()
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onNext = {
-                            addCandle(it)
-                        },
-                        onError = {
-                            it.printStackTrace()
-                        }
-                    )
-            } else {
-                streamingAlorService
-                    .getCandleEventStream(
-                        emptyList(),
-                        Interval.MINUTE
-                    )
-                    .onBackpressureBuffer()
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onNext = {
-                            addCandle(it)
-                        },
-                        onError = {
-                            it.printStackTrace()
-                        }
-                    )
-            }
+            streamingAlorService
+                .getCandleEventStream(
+                    if (minute) stocks else emptyList(),
+                    Interval.MINUTE
+                )
+                .onBackpressureBuffer()
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = {
+                        addCandle(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
         } else {
-            if (minute) {
-                streamingTinkoffService
-                    .getCandleEventStream(
-                        stocks.map { it.figi },
-                        Interval.MINUTE
-                    )
-                    .onBackpressureBuffer()
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onNext = {
-                            addCandle(it)
-                        },
-                        onError = {
-                            it.printStackTrace()
-                        }
-                    )
-            } else {
-                streamingTinkoffService
-                    .getCandleEventStream(
-                        emptyList(),
-                        Interval.MINUTE
-                    )
-                    .onBackpressureBuffer()
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onNext = {
-                            addCandle(it)
-                        },
-                        onError = {
-                            it.printStackTrace()
-                        }
-                    )
-            }
+            streamingTinkoffService
+                .getCandleEventStream(
+                    if (minute) stocks.map { it.figi } else emptyList(),
+                    Interval.MINUTE
+                )
+                .onBackpressureBuffer()
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = {
+                        addCandle(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
         }
 
-        if (day) { // дневные лучше всегда брать с ТИ, алор отдаёт очень долго, нужны только для объёмы и когда минутных ещё нет
-            streamingTinkoffService
-                .getCandleEventStream(
-                    stocks.map { it.figi },
-                    Interval.DAY
-                )
-                .onBackpressureBuffer()
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onNext = {
-                        addCandle(it)
-                    },
-                    onError = {
-                        it.printStackTrace()
-                    }
-                )
-        } else {
-            streamingTinkoffService
-                .getCandleEventStream(
-                    emptyList(),
-                    Interval.DAY
-                )
-                .onBackpressureBuffer()
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onNext = {
-                        addCandle(it)
-                    },
-                    onError = {
-                        it.printStackTrace()
-                    }
-                )
-        }
+        // дневные лучше всегда брать с ТИ, алор отдаёт очень долго, нужны только для объёмы и когда минутных ещё нет
+        streamingTinkoffService
+            .getCandleEventStream(
+                if (day) stocks.map { it.figi } else emptyList(),
+                Interval.DAY
+            )
+            .onBackpressureBuffer()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onNext = {
+                    addCandle(it)
+                },
+                onError = {
+                    it.printStackTrace()
+                }
+            )
     }
 
     fun subscribeStockOrderbook(stock: Stock) {

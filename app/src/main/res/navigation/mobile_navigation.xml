@@ -145,6 +145,26 @@
         android:label="@string/menu_2358"
         tools:layout="@layout/fragment_2358_start" />
 
+    <!-- 2225 -->
+
+    <fragment
+        android:id="@+id/nav_2225_start"
+        android:name="com.project.ti2358.ui.strategy2225.Strategy2225StartFragment"
+        android:label="@string/menu_2225"
+        tools:layout="@layout/fragment_2225_start">
+        <action
+            android:id="@+id/action_nav_2225_start_to_nav_2225_finish"
+            app:destination="@id/nav_2225_finish"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_2225_finish"
+        android:name="com.project.ti2358.ui.strategy2225.Strategy2225FinishFragment"
+        android:label="@string/menu_2225"
+        tools:layout="@layout/fragment_2225_start" />
+
     <!-- fixprice -->
 
     <fragment
