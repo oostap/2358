@@ -24,7 +24,7 @@ data class Orderbook(
                 return ask.price
             }
         }
-        return 0.0
+        return asks.last().price
     }
 
     fun getBestPriceFromBid(quantity: Int): Double {
@@ -37,6 +37,6 @@ data class Orderbook(
                 return ask.price
             }
         }
-        return 0.0
+        return bids.last().price
     }
 }

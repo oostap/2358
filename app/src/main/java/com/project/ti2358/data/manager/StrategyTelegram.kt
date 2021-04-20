@@ -230,7 +230,7 @@ class StrategyTelegram : KoinComponent {
                     } else {
                         "%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
                     }
-                    val text = "$emoji ${rocketStock.ticker}: ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин"
+                    val text = "$emoji$${rocketStock.ticker} ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин, v = ${rocketStock.volume}"
                     val chatId = SettingsManager.getTelegramChatID().toLong()
                     val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text)
                 } catch (e: Exception) {
