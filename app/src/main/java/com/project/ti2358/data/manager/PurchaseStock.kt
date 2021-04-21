@@ -75,7 +75,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
     fun getStatusString(): String =
         when (status) {
             PurchaseStatus.NONE -> "NONE"
-            PurchaseStatus.WAITING -> "ждём ⏳"
+            PurchaseStatus.WAITING -> "⏳"
             PurchaseStatus.ORDER_BUY_PREPARE -> "ордер: до покупки"
             PurchaseStatus.ORDER_BUY -> "ордер: покупка!"
             PurchaseStatus.BOUGHT -> "куплено! 💸"

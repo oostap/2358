@@ -246,6 +246,12 @@
             app:defaultValue="-1"/>
 
         <EditTextPreference
+            app:key="@string/setting_key_tazik_min_volume"
+            app:title="@string/stocks_tazik_min_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="100"/>
+
+        <EditTextPreference
             app:key="@string/setting_key_tazik_purchase_volume"
             app:title="@string/stocks_tazik_purchase_volume"
             app:useSimpleSummaryProvider="true"
@@ -274,21 +280,6 @@
             app:title="@string/stocks_tazik_approximation_factor"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="0.65"/>
-
-        <SwitchPreferenceCompat
-            app:key="@string/setting_key_tazik_buy_bid"
-            app:title="@string/stocks_tazik_buy_bid"
-            app:defaultValue="true" />
-
-        <SwitchPreferenceCompat
-            app:key="@string/setting_key_tazik_buy_ask"
-            app:title="@string/stocks_tazik_buy_ask"
-            app:defaultValue="false" />
-
-        <SwitchPreferenceCompat
-            app:key="@string/setting_key_tazik_buy_market"
-            app:title="@string/stocks_tazik_buy_market"
-            app:defaultValue="false" />
 
         <SwitchPreferenceCompat
             app:key="@string/setting_key_tazik_allow_averaging"
@@ -326,6 +317,12 @@
             app:title="@string/stocks_tazik_endless_min_percent_to_buy"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="-1.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_endless_min_volume"
+            app:title="@string/stocks_tazik_endless_min_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="100"/>
 
         <EditTextPreference
             app:key="@string/setting_key_tazik_endless_purchase_volume"

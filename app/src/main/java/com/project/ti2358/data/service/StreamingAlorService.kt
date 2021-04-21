@@ -27,6 +27,7 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
 @KoinApiExtension
@@ -44,8 +45,8 @@ class StreamingAlorService : KoinComponent {
     private val socketListener = AlorSocketListener()
     private var currentAttemptCount = 0
     private val publishProcessor: PublishProcessor<Any> = PublishProcessor.create()
-    private val activeCandleSubscriptions: MutableMap<Stock, MutableList<Interval>> = mutableMapOf()
-    private val activeOrderSubscriptions: MutableMap<Stock, Int> = mutableMapOf()
+    private val activeCandleSubscriptions: MutableMap<Stock, MutableList<Interval>> = ConcurrentHashMap()
+    private val activeOrderSubscriptions: MutableMap<Stock, Int> = ConcurrentHashMap()
     private val threadPoolExecutor = Executors.newSingleThreadExecutor()
 
     var connectedStatus: Boolean = false

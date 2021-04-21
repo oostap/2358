@@ -95,7 +95,9 @@
             android:id="@+id/cash_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="8dp"
             android:gravity="center_vertical"
             android:text="123$"
             android:textSize="14sp" />
@@ -111,7 +113,9 @@
             android:id="@+id/price_change_percent_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="8dp"
             android:gravity="center_vertical"
             android:text="+5%"
             android:textSize="14sp" />
@@ -120,7 +124,9 @@
             android:id="@+id/price_change_absolute_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="8dp"
             android:gravity="center_vertical"
             android:text="+20$"
             android:textSize="14sp" />

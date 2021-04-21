@@ -20,6 +20,8 @@ import okhttp3.*
 import okio.ByteString
 import org.json.JSONObject
 import org.koin.core.component.KoinApiExtension
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
 
 @KoinApiExtension
@@ -27,7 +29,7 @@ class StreamingTinkoffService {
 
     companion object {
         const val STREAMING_URL = "wss://api-invest.tinkoff.ru/openapi/md/v1/md-openapi/ws"
-        const val RECONNECT_ATTEMPT_LIMIT = 1000
+        const val RECONNECT_ATTEMPT_LIMIT = 10000
     }
 
     private var webSocket: WebSocket? = null
@@ -36,8 +38,8 @@ class StreamingTinkoffService {
     private val gson = Gson()
     private var currentAttemptCount = 0
     private val publishProcessor: PublishProcessor<Any> = PublishProcessor.create()
-    private val activeCandleSubscriptions: MutableMap<String, MutableList<Interval>> = mutableMapOf()
-    private val activeOrderSubscriptions: MutableMap<String, MutableList<Int>> = mutableMapOf()
+    private val activeCandleSubscriptions: MutableMap<String, MutableList<Interval>> = ConcurrentHashMap()
+    private val activeOrderSubscriptions: MutableMap<String, MutableList<Int>> = ConcurrentHashMap()
     private val threadPoolExecutor = Executors.newSingleThreadExecutor()
 
     var connectedStatus: Boolean = false
@@ -204,15 +206,11 @@ class StreamingTinkoffService {
     }
 
     private fun isOrderSubscribedAlready(figi: String, depth: Int): Boolean {
-        return activeOrderSubscriptions[figi]?.let { list ->
-            list.contains(depth)
-        } ?: false
+        return activeOrderSubscriptions[figi]?.contains(depth) ?: false
     }
 
     private fun isCandleSubscribedAlready(figi: String, interval: Interval): Boolean {
-        return activeCandleSubscriptions[figi]?.let { list ->
-            list.contains(interval)
-        } ?: false
+        return activeCandleSubscriptions[figi]?.contains(interval) ?: false
     }
 
     private fun subscribeOrderEventsStream(figi: String, depth: Int, addSubscription: Boolean = true) {
@@ -220,10 +218,9 @@ class StreamingTinkoffService {
         webSocket?.send(Gson().toJson(OrderEventBody("orderbook:subscribe", figi, depth)))
         if (addSubscription) {
             if (activeOrderSubscriptions[figi] == null) {
-                activeOrderSubscriptions[figi] = mutableListOf(depth)
-            } else {
-                activeOrderSubscriptions[figi]?.add(depth)
+                activeOrderSubscriptions[figi] = CopyOnWriteArrayList()
             }
+            activeOrderSubscriptions[figi]?.add(depth)
         }
     }
 
@@ -238,17 +235,16 @@ class StreamingTinkoffService {
         webSocket?.send(Gson().toJson(CandleEventBody("candle:subscribe", figi, interval)))
         if (addSubscription) {
             if (activeCandleSubscriptions[figi] == null) {
-                activeCandleSubscriptions[figi] = mutableListOf(interval)
-            } else {
-                activeCandleSubscriptions[figi]?.add(interval)
+                activeCandleSubscriptions[figi] = CopyOnWriteArrayList()
             }
+            activeCandleSubscriptions[figi]?.add(interval)
         }
     }
 
     public fun unsubscribeCandleEventsStream(figi: String, interval: Interval) {
 //        Log.d("StreamingService", "unsubscribe from candle events: figi: $figi, interval: $interval")
         webSocket?.send(Gson().toJson(CandleEventBody("candle:unsubscribe", figi, interval)))
-//        activeCandleSubscriptions[figi]?.remove(interval)
+        activeCandleSubscriptions[figi]?.remove(interval)
     }
 
 }

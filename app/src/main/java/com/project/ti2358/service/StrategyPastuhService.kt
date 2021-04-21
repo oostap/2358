@@ -88,8 +88,12 @@ class StrategyPastuhService : Service() {
 
         job?.cancel()
         job = GlobalScope.launch(Dispatchers.Main) {
-            delay(1000)
-            updateNotification()
+            var count = 10
+            while (count > 0) {
+                delay(1000)
+                updateNotification()
+                count--
+            }
         }
     }
 

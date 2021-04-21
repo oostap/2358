@@ -132,18 +132,15 @@ class StrategyTazikEndlessService : Service() {
             Notification.Action.Builder(0, "  +${StrategyTazikEndless.PercentLimitChangeDelta}  ", pendingPlusIntent).build()
         }
 
-//        val buyIntent = Intent(NOTIFICATION_ACTION_FILTER).apply { putExtra("type", NOTIFICATION_ACTION_BUY) }
-//        val pendingBuyIntent = PendingIntent.getBroadcast(this, 4, buyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-//        var actionBuy: Notification.Action? = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-//            Notification.Action.Builder(null, "ТАРИМ ПЕРВУЮ", pendingBuyIntent).build()
-//        } else {
-//            Notification.Action.Builder(0, "ТАРИМ ПЕРВУЮ", pendingBuyIntent).build()
-//        }
-//
-//        if (!strategyTazikEndless.started) {
-//            actionBuy = null
-//        }
-        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, title, shortText, longText, longTitleText, actionCancel, actionPlus, /*actionMinus, actionBuy*/) // больше трёх кнопок нельзя
+        val minusIntent = Intent(NOTIFICATION_ACTION_FILTER).apply { putExtra("type", NOTIFICATION_ACTION_MINUS) }
+        val pendingMinusIntent = PendingIntent.getBroadcast(this, 3, minusIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val actionMinus: Notification.Action = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            Notification.Action.Builder(null, "  -${StrategyTazikEndless.PercentLimitChangeDelta}  ", pendingMinusIntent).build()
+        } else {
+            Notification.Action.Builder(0, "  -${StrategyTazikEndless.PercentLimitChangeDelta}  ", pendingMinusIntent).build()
+        }
+
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, title, shortText, longText, longTitleText, actionCancel, actionPlus, actionMinus)
 
         synchronized(notification) {
             notification.notify()

@@ -379,6 +379,16 @@ class SettingsManager {
             }
         }
 
+        fun getTazikMinVolume(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_min_volume)
+            val value: String? = preferences.getString(key, "100")
+            return try {
+                parseInt(value ?: "100")
+            } catch (e: Exception) {
+                100
+            }
+        }
+
         fun getTazikOrderLifeTimeSeconds(): Int {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_order_lifetime_seconds)
             val value: String? = preferences.getString(key, "120")
@@ -427,21 +437,6 @@ class SettingsManager {
             } catch (e: Exception) {
                 0.65
             }
-        }
-
-        fun getTazikBuyAsk(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_buy_ask)
-            return preferences.getBoolean(key, false)
-        }
-
-        fun getTazikBuyMarket(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_buy_market)
-            return preferences.getBoolean(key, false)
-        }
-
-        fun getTazikBuyBid(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_buy_bid)
-            return preferences.getBoolean(key, false)
         }
 
         fun getTazikAllowAveraging(): Boolean {
@@ -517,6 +512,16 @@ class SettingsManager {
                 parseInt(value ?: "300")
             } catch (e: Exception) {
                 300
+            }
+        }
+
+        fun getTazikEndlessMinVolume(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_min_volume)
+            val value: String? = preferences.getString(key, "100")
+            return try {
+                parseInt(value ?: "100")
+            } catch (e: Exception) {
+                100
             }
         }
 

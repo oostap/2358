@@ -17,12 +17,6 @@ import org.koin.core.component.KoinApiExtension
 class SettingsFragment : PreferenceFragmentCompat() {
     private val alorManager: AlorManager by inject()
     private val stockManager: StockManager by inject()
-    private val streamingAlorService: StreamingAlorService by inject()
-    private val streamingTinkoffService: StreamingTinkoffService by inject()
-
-    var tazikAskPreference: SwitchPreferenceCompat? = null
-    var tazikBidPreference: SwitchPreferenceCompat? = null
-    var tazikMarketPreference: SwitchPreferenceCompat? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.fragment_settings, rootKey)
@@ -50,36 +44,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        val tazikAskKey = getString(R.string.setting_key_tazik_buy_ask)
-        tazikAskPreference = findPreference(tazikAskKey)
-
-        var key = getString(R.string.setting_key_tazik_buy_market)
-        tazikMarketPreference = findPreference(key)
-
-        key = getString(R.string.setting_key_tazik_buy_bid)
-        tazikBidPreference = findPreference(key)
-
-        val listener = Preference.OnPreferenceChangeListener { preference, newValue ->
-            if (newValue as Boolean) {
-                tazikMarketPreference?.isChecked = false
-                tazikAskPreference?.isChecked = false
-                tazikBidPreference?.isChecked = false
-                true
-            } else {
-                if (preference.key == tazikAskKey) {
-                    false
-                } else {
-                    tazikAskPreference?.isChecked = true
-                    true
-                }
-            }
-        }
-
-        tazikMarketPreference?.onPreferenceChangeListener = listener
-        tazikAskPreference?.onPreferenceChangeListener = listener
-        tazikBidPreference?.onPreferenceChangeListener = listener
-
         /////////// ALOR
 
         val alorQoutesKey: String = getString(R.string.setting_key_alor_quotes)

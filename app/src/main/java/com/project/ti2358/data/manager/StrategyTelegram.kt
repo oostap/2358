@@ -68,6 +68,13 @@ class StrategyTelegram : KoinComponent {
 
                             operation.stock = stockManager.getStockByFigi(operation.figi)
 
+                            val dateNow = Calendar.getInstance()
+                            val dateOperation = Calendar.getInstance()
+                            dateOperation.time = operation.date
+                            if (abs(dateOperation.get(Calendar.DAY_OF_YEAR) - dateNow.get(Calendar.DAY_OF_YEAR)) > 1) {
+                                continue
+                            }
+
                             try {
                                 val chatId = SettingsManager.getTelegramChatID().toLong()
                                 while (true) {
