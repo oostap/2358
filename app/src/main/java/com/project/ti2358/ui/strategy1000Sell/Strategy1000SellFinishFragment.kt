@@ -7,6 +7,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -181,16 +182,29 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                         refreshPercent(purchaseStock)
                     }
 
+                    lotsEditText.addTextChangedListener { v ->
+                        val value = try {
+                            (v.toString()).toInt()
+                        } catch (e: Exception) {
+                            1
+                        }
+                        log("lots = $value")
+                        purchaseStock.lots = value
+                        refreshPercent(purchaseStock, false)
+                    }
+
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))
                 }
             }
 
-            fun refreshPercent(purchaseStock: PurchaseStock) {
+            fun refreshPercent(purchaseStock: PurchaseStock, updateLots: Boolean = true) {
                 with(binding) {
                     percentProfitFutureView.text = purchaseStock.percentProfitSellFrom.toPercent()
                     percentProfitFutureView.setTextColor(Utils.getColorForValue(purchaseStock.percentProfitSellFrom))
 
-                    lotsView.text = "${purchaseStock.lots} шт."
+                    if (updateLots) {
+                        lotsEditText.setText("${purchaseStock.lots}")
+                    }
 
                     val sellPrice = purchaseStock.getProfitPriceForSell()
                     val totalSellPrice = sellPrice * purchaseStock.lots

@@ -241,7 +241,7 @@ data class Stock(var instrument: Instrument) {
         return volume + (candleToday?.volume ?: 0)
     }
 
-    fun getPriceNow(): Double {
+    fun getPriceNow(volume: Int = 0): Double {
         var value = 0.0
 
         if (Utils.getTimeMSK().get(Calendar.HOUR_OF_DAY) < 7) { // если время до старта, то всегда берём post
@@ -257,8 +257,16 @@ data class Stock(var instrument: Instrument) {
                 value = it.closingPrice
             }
 
-            if (minuteCandles.isNotEmpty()) {
-                value = minuteCandles.last().closingPrice
+//            if (minuteCandles.isNotEmpty()) {
+//                value = minuteCandles.last().closingPrice
+//            }
+
+            // учесть объём свечи для фиксации цен в тазах
+            for (i in minuteCandles.indices.reversed()) {
+                if (minuteCandles[i].volume > volume) {
+                    value = minuteCandles[i].closingPrice
+                    break
+                }
             }
         }
 

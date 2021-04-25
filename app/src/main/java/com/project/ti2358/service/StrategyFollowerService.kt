@@ -12,6 +12,7 @@ import android.os.PowerManager
 import android.widget.Toast
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.StrategyFollower
 import com.project.ti2358.data.manager.StrategyRocket
 import com.project.ti2358.data.manager.StrategyTelegram
 import kotlinx.coroutines.*
@@ -20,14 +21,14 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class StrategyPastuhService : Service() {
+class StrategyFollowerService : Service() {
 
-    private val NOTIFICATION_ACTION = "event.pastuh"
-    private val NOTIFICATION_CANCEL_ACTION = "event.pastuh.cancel"
-    private val NOTIFICATION_CHANNEL_ID = "ROCKET CHANNEL NOTIFICATION"
-    private val NOTIFICATION_ID = 17001131
+    private val NOTIFICATION_ACTION = "event.follower"
+    private val NOTIFICATION_CANCEL_ACTION = "event.follower.cancel"
+    private val NOTIFICATION_CHANNEL_ID = "FOLLOWER CHANNEL NOTIFICATION"
+    private val NOTIFICATION_ID = 170011312
 
-    private val strategyTelegram: StrategyTelegram by inject()
+    private val strategyFollower: StrategyFollower by inject()
 
     private var wakeLock: PowerManager.WakeLock? = null
     private var isServiceRunning = false
@@ -49,7 +50,7 @@ class StrategyPastuhService : Service() {
                         notificationButtonReceiver
                     )
                     notificationButtonReceiver = null
-                    context.stopService(Intent(context, StrategyPastuhService::class.java))
+                    context.stopService(Intent(context, StrategyFollowerService::class.java))
                 }
             }
         }
@@ -60,24 +61,24 @@ class StrategyPastuhService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "PASTUH","",  "", "")
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "FOLLOWER","",  "", "")
         startForeground(NOTIFICATION_ID, notification)
-        strategyTelegram.startStrategy()
+        strategyFollower.startStrategy()
         scheduleUpdate()
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Телеграм бот отключен", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Исполнение команд отключено", Toast.LENGTH_LONG).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
         job?.cancel()
-        strategyTelegram.stopStrategy()
+        strategyFollower.stopStrategy()
         super.onDestroy()
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Телеграм бот запущено", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Исполнение команд запущено", Toast.LENGTH_LONG).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
@@ -98,7 +99,7 @@ class StrategyPastuhService : Service() {
     }
 
     private fun stopService() {
-        Toast.makeText(this, "Телеграм бот остановлен", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Исполнение команд остановлено", Toast.LENGTH_SHORT).show()
         try {
             wakeLock?.let {
                 if (it.isHeld) {
@@ -114,7 +115,7 @@ class StrategyPastuhService : Service() {
     }
 
     private fun updateNotification() {
-        val title = "Работает телеграм бот!"
+        val title = "Работает исполнение команд из телеги!"
 
         val cancelIntent = Intent(NOTIFICATION_ACTION).apply { putExtra("type", NOTIFICATION_CANCEL_ACTION) }
         val pendingCancelIntent = PendingIntent.getBroadcast(this, 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)

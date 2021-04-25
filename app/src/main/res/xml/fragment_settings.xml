@@ -483,6 +483,19 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/settings_header_follower">
+        <EditTextPreference
+            app:key="@string/setting_key_follower_pastuh_id"
+            app:title="@string/stocks_follower_pastuh_id"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue=""/>
+        <EditTextPreference
+            app:key="@string/setting_key_follower_purchase_volume"
+            app:title="@string/stocks_follower_purchase_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="250"/>
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/settings_header_interface">
         <SwitchPreferenceCompat
             app:key="@string/setting_key_dark_theme"

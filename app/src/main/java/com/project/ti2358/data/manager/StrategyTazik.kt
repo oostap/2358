@@ -104,7 +104,7 @@ class StrategyTazik : KoinComponent {
         val percent = SettingsManager.getTazikChangePercent()
         val totalMoney: Double = SettingsManager.getTazikPurchaseVolume().toDouble()
         val onePiece: Double = totalMoney / SettingsManager.getTazikPurchaseParts()
-        val before10 = Utils.isSessionBefore10()
+        val before10 = Utils.isSessionBefore11()
 
         stocksToPurchase = stocksSelected.map {
             PurchaseStock(it).apply {
@@ -296,7 +296,7 @@ class StrategyTazik : KoinComponent {
 
         // если тазик утренний, то проверять, чтоб цена покупки была ниже цены закрытия
         val buyPrice = purchase.tazikPrice - purchase.tazikPrice / 100.0 * abs(purchase.percentLimitPriceChange)
-        if (Utils.isSessionBefore10() && buyPrice > purchase.stock.getPrice0145()) {
+        if (Utils.isSessionBefore11() && buyPrice > purchase.stock.getPrice0145()) {
             return false
         }
 

@@ -24,6 +24,9 @@
     <string name="set_1">Набор 1</string>
     <string name="set_2">Набор 2</string>
 
+    <string name="start_telegram">Включить телеграм бота</string>
+    <string name="start_follower">Включить команды</string>
+
     <string name="start_sell_700">ПРОДАТЬ 700</string>
     <string name="start_sell_1000">ПРОДАТЬ 1000</string>
     <string name="start_buy_700">КУПИТЬ 700</string>
@@ -91,6 +94,7 @@
     <string name="settings_header_rocket">Ракеты</string>
     <string name="settings_header_interface">Интерфейс</string>
     <string name="settings_header_telegram">Телеграм</string>
+    <string name="settings_header_follower">Телеграм - команды</string>
     <string name="settings_header_2225">Стратегия 2225 шорт</string>
 
     <string name="dark_theme">Ночная тема</string>
@@ -187,12 +191,16 @@
 
     <!-- telegram settings -->
     <string name="stocks_telegram_bot_api_key">API KEY бота</string>
-    <string name="stocks_telegram_chat_id">Айди телеграм чата/канала</string>
+    <string name="stocks_telegram_chat_id">Айди телеграм чата</string>
     <string name="stocks_telegram_update_delay">Интервал обновления в секундах 5+</string>
     <string name="stocks_telegram_hello">Привет при старте бота</string>
     <string name="stocks_telegram_bye">Пока при финише бота</string>
     <string name="stocks_telegram_send_trades">Отправлять сделки</string>
     <string name="stocks_telegram_send_rockets">Отправлять ракеты</string>
+
+    <!-- follower settings -->
+    <string name="stocks_follower_pastuh_id">Айди торговцев через пробел</string>
+    <string name="stocks_follower_purchase_volume">Общая сумма для торговли</string>
 
     <!-- 2225 short settings -->
     <string name="stocks_2225_price_change_percent">Изменение от %</string>
@@ -310,6 +318,10 @@
     <string name="setting_key_telegram_bye">telegram_bye</string>
     <string name="setting_key_telegram_send_trades">telegram_send_trades</string>
     <string name="setting_key_telegram_send_rockets">telegram_send_rockets</string>
+
+    <!-- follower settings -->
+    <string name="setting_key_follower_pastuh_id">follower_pastuh_id</string>
+    <string name="setting_key_follower_purchase_volume">follower_purchase_volume</string>
 
     <!-- 2225 short settings -->
     <string name="setting_key_2225_price_change_percent">2225_price_change_percent</string>

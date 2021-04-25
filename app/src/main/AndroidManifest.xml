@@ -82,7 +82,13 @@
         </service>
 
         <service
-            android:name=".service.StrategyPastuhService"
+            android:name=".service.StrategyTelegramService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
+
+        <service
+            android:name=".service.StrategyFollowerService"
             android:enabled="true"
             android:exported="false">
         </service>

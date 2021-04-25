@@ -20,7 +20,17 @@
         android:id="@+id/start_button"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:text="@string/start"
+        android:text="@string/start_telegram"
+        android:textSize="20dp"
+        android:layout_alignParentBottom="true" />
+
+    <Button android:layout_width="fill_parent"
+        android:layout_height="70dp"
+        android:id="@+id/start_follower_button"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="70dp"
+        android:text="@string/start_follower"
         android:textSize="20dp"
         android:layout_alignParentBottom="true" />
 

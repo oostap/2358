@@ -758,5 +758,23 @@ class SettingsManager {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2225_protect_stock_up)
             return preferences.getBoolean(key, false)
         }
+
+        /******************** Follower *************************/
+        fun getFollowerIds(): List<Long> {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_follower_pastuh_id)
+            val value: String? = preferences.getString(key, "")
+            val ids = value?.split(" ") ?: return emptyList()
+            return ids.map { it.toLong() }
+        }
+
+        fun getFollowerPurchaseVolume(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_follower_purchase_volume)
+            val value: String? = preferences.getString(key, "250")
+            return try {
+                parseInt(value ?: "250")
+            } catch (e: Exception) {
+                250
+            }
+        }
     }
 }

@@ -1,6 +1,9 @@
 package com.project.ti2358.data.manager
 
+import android.content.Context
 import android.content.SharedPreferences
+import android.os.PowerManager
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
@@ -10,11 +13,11 @@ import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.lang.Exception
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.abs
 import kotlin.math.roundToInt
+
 
 @KoinApiExtension
 class StrategyTazikEndless : KoinComponent {
@@ -95,20 +98,34 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     fun getPurchaseStock(): MutableList<PurchaseStock> {
-        stocksToPurchase.clear()
-
         val percent = SettingsManager.getTazikEndlessChangePercent()
         val totalMoney: Double = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
         val onePiece: Double = totalMoney / SettingsManager.getTazikEndlessPurchaseParts()
 
-        stocksToPurchase = stocksSelected.map {
-            PurchaseStock(it).apply {
-                percentLimitPriceChange = percent
-                lots = (onePiece / stock.getPriceNow()).roundToInt()
-                updateAbsolutePrice()
-                status = PurchaseStatus.WAITING
+        val purchases: MutableList<PurchaseStock> = mutableListOf()
+        for (stock in stocksSelected) {
+            val purchase = PurchaseStock(stock)
+            for (p in stocksToPurchase) {
+                if (p.ticker == stock.ticker) {
+                    purchase.apply {
+                        percentLimitPriceChange = p.percentLimitPriceChange
+                    }
+                    break
+                }
             }
-        }.toMutableList()
+            purchases.add(purchase)
+        }
+        stocksToPurchase = purchases
+        stocksToPurchase.forEach {
+            if (it.percentLimitPriceChange == 0.0) {
+                it.percentLimitPriceChange = percent
+            }
+            if (it.stock.getPriceNow() != 0.0) {
+                it.lots = (onePiece / it.stock.getPriceNow()).roundToInt()
+            }
+            it.updateAbsolutePrice()
+            it.status = PurchaseStatus.WAITING
+        }
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         // удалить все бумаги, у которых 0 лотов = не хватает на покупку одной части
@@ -131,7 +148,15 @@ class StrategyTazikEndless : KoinComponent {
     fun getTotalPurchaseString(): String {
         val volume = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
         val p = SettingsManager.getTazikEndlessPurchaseParts()
-        return String.format("%d из %d по %.2f$, просадка %.2f / %.2f / %.2f", stocksTickerInProcess.size, p, volume / p, basicPercentLimitPriceChange, SettingsManager.getTazikEndlessTakeProfit(), SettingsManager.getTazikEndlessApproximationFactor())
+        return String.format(
+            "%d из %d по %.2f$, просадка %.2f / %.2f / %.2f",
+            stocksTickerInProcess.size,
+            p,
+            volume / p,
+            basicPercentLimitPriceChange,
+            SettingsManager.getTazikEndlessTakeProfit(),
+            SettingsManager.getTazikEndlessApproximationFactor()
+        )
     }
 
     fun getNotificationTextShort(): String {
@@ -163,7 +188,7 @@ class StrategyTazikEndless : KoinComponent {
     private fun fixPrice() {
         // зафикировать цену, чтобы change считать от неё
         for (purchase in stocksToPurchaseClone) {
-            purchase.tazikEndlessPrice = purchase.stock.getPriceNow()
+            purchase.tazikEndlessPrice = purchase.stock.getPriceNow(SettingsManager.getTazikEndlessMinVolume())
         }
     }
 

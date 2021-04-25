@@ -277,6 +277,10 @@ class StockManager : KoinComponent {
         return stocksAll.find { it.figi == figi }
     }
 
+    fun getStockByTicker(ticker: String): Stock? {
+        return stocksAll.find { it.ticker == ticker }
+    }
+
     private fun processStocks() {
         stocksStream = synchronizedList(stocksAll.filter { SettingsManager.isAllowCurrency(it.instrument.currency) }.toMutableList())
         strategyFavorites.process()

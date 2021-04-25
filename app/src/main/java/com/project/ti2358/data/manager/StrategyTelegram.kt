@@ -30,6 +30,7 @@ class StrategyTelegram : KoinComponent {
     private val stockManager: StockManager by inject()
     private val operationsService: OperationsService by inject()
     private val depositManager: DepositManager by inject()
+    private val strategyFollower: StrategyFollower by inject()
 
     var jobUpdateOperations: Job? = null
     var operations: MutableList<Operation> = mutableListOf()
@@ -38,7 +39,7 @@ class StrategyTelegram : KoinComponent {
     var started: Boolean = false
     var telegramBot: Bot? = null
 
-    private fun startUpdateOperations() {
+    private fun restartUpdateOperations() {
         val delay = SettingsManager.getTelegramUpdateDelay().toLong()
         jobUpdateOperations?.cancel()
         jobUpdateOperations = GlobalScope.launch(Dispatchers.Default) {
@@ -103,7 +104,7 @@ class StrategyTelegram : KoinComponent {
     fun startStrategy() {
         started = true
 
-        if (SettingsManager.getTelegramSendTrades()) startUpdateOperations()
+        if (SettingsManager.getTelegramSendTrades()) restartUpdateOperations()
 
         telegramBot?.stopPolling()
         telegramBot = bot {
@@ -122,26 +123,41 @@ class StrategyTelegram : KoinComponent {
 
                 // сообщение в ЛС боту
                 text {
-                    log("telegram msg ${update.message?.text}")
-                    val userText = update.message?.text ?: ""
-                    if (userText == "chat_id") {
+                    log("chat telegram msg ${update.message?.text}")
+                    val command = (update.message?.text ?: "").trim()
+
+                    if (command == "chat_id") {
                         val text = "айди чата: ${update.message!!.chat.id}"
                         bot.sendMessage(ChatId.fromId(id = update.message!!.chat.id), text = text)
                         update.consume()
-                    }
-                }
-
-                // сообщение в канале
-                channel {
-                    log("telegram msg ${channelPost.text} ")
-                    val userText = channelPost.text ?: ""
-
-                    if (userText == "chat_id") {
-                        val text = "айди чата: ${channelPost.chat.id}"
-                        bot.sendMessage(ChatId.fromId(id = channelPost.chat.id), text = text)
+                    } else if (command == "my_id") {
+                        val text = "твой айди: ${update.message!!.from?.id}"
+                        bot.sendMessage(ChatId.fromId(id = update.message!!.chat.id), text = text)
+                        update.consume()
+                    } else if (command.startsWith("#")) {
+                        val success = strategyFollower.processStrategy(update.message!!.from?.id ?: 0, command)
+                        val status = if (success) "+" else "-"
+                        bot.sendMessage(ChatId.fromId(id = update.message!!.chat.id), text = status, replyToMessageId = update.message!!.messageId)
                         update.consume()
                     }
                 }
+
+//                // сообщение в канале
+//                channel {
+//                    log("channel telegram msg ${channelPost.text} ")
+//                    val userText = channelPost.text ?: ""
+//
+//                    if (userText == "chat_id") {
+//                        val text = "айди канала: ${channelPost.chat.id}"
+//                        bot.sendMessage(ChatId.fromId(id = channelPost.chat.id), text = text)
+//                        update.consume()
+//                    } else if (userText == "my_id") {
+//                        val text = "твой айди: ${channelPost.from?.id}"
+//                        bot.sendMessage(ChatId.fromId(id = channelPost.chat.id), text = text)
+//                        update.consume()
+//                    }
+//                }
+
                 pollAnswer {
                     log("pollAnswer")
                     // do whatever you want with the answer

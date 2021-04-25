@@ -297,11 +297,11 @@ class Utils {
             return false
         }
 
-        fun isSessionBefore10(): Boolean {
+        fun isSessionBefore11(): Boolean {
             val msk = getTimeMSK()
             val hour = msk.get(Calendar.HOUR_OF_DAY)
 
-            if (hour < 10 && hour >= 7) {
+            if (hour < 11 && hour >= 7) {
                 return true
             }
 

@@ -54,10 +54,11 @@ class WorkflowManager() : KoinComponent {
             fun provideStrategyRocket(): StrategyRocket = StrategyRocket()
             fun provideStrategyTazikEndless(): StrategyTazikEndless = StrategyTazikEndless()
             fun provideStrategySpeaker(): StrategySpeaker = StrategySpeaker()
+            fun provideStrategyTelegram(): StrategyTelegram = StrategyTelegram()
+            fun provideStrategyFollower(): StrategyFollower = StrategyFollower()
 
             // unused yet
             fun provideStrategyShorts(): StrategyShorts = StrategyShorts()
-            fun provideStrategyTelegram(): StrategyTelegram = StrategyTelegram()
 
             single { provideStocksManager() }
             single { provideDepoManager() }
@@ -83,10 +84,11 @@ class WorkflowManager() : KoinComponent {
             single { provideStrategyRocket() }
             single { provideStrategyTazikEndless() }
             single { provideStrategySpeaker() }
+            single { provideStrategyTelegram() }
+            single { provideStrategyFollower() }
 
             // unused yet
             single { provideStrategyShorts() }
-            single { provideStrategyTelegram() }
         }
 
         private val apiModule = module {

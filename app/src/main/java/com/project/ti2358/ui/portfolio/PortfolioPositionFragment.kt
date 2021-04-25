@@ -226,6 +226,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
         updateTrailingStop()
         updateLots()
         updateOrderbook()
+        updatePosition()
     }
 
     private fun updateTrailingStop() {

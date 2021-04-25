@@ -204,6 +204,8 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         workflowManager.startApp()
+
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     override fun onResume() {
