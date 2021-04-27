@@ -671,6 +671,11 @@ class SettingsManager {
             return preferences.getBoolean(key, true)
         }
 
+        fun getTelegramSendOrders(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_orders)
+            return preferences.getBoolean(key, false)
+        }
+
         fun getTelegramSendRockets(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_rockets)
             return preferences.getBoolean(key, true)

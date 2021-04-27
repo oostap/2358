@@ -2,6 +2,7 @@ package com.project.ti2358.data.manager
 
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.project.ti2358.TheApplication
@@ -315,7 +316,7 @@ class StockManager : KoinComponent {
                     Interval.MINUTE
                 )
                 .onBackpressureBuffer()
-                .subscribeOn(Schedulers.computation())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
@@ -323,6 +324,7 @@ class StockManager : KoinComponent {
                     },
                     onError = {
                         it.printStackTrace()
+                        FirebaseCrashlytics.getInstance().recordException(it)
                     }
                 )
         } else {
@@ -332,7 +334,7 @@ class StockManager : KoinComponent {
                     Interval.MINUTE
                 )
                 .onBackpressureBuffer()
-                .subscribeOn(Schedulers.computation())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
@@ -340,6 +342,7 @@ class StockManager : KoinComponent {
                     },
                     onError = {
                         it.printStackTrace()
+                        FirebaseCrashlytics.getInstance().recordException(it)
                     }
                 )
         }
@@ -351,7 +354,7 @@ class StockManager : KoinComponent {
                 Interval.DAY
             )
             .onBackpressureBuffer()
-            .subscribeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {
@@ -359,6 +362,7 @@ class StockManager : KoinComponent {
                 },
                 onError = {
                     it.printStackTrace()
+                    FirebaseCrashlytics.getInstance().recordException(it)
                 }
             )
     }
@@ -379,6 +383,7 @@ class StockManager : KoinComponent {
                     },
                     onError = {
                         it.printStackTrace()
+                        FirebaseCrashlytics.getInstance().recordException(it)
                     }
                 )
         } else {
@@ -396,6 +401,7 @@ class StockManager : KoinComponent {
                     },
                     onError = {
                         it.printStackTrace()
+                        FirebaseCrashlytics.getInstance().recordException(it)
                     }
                 )
         }

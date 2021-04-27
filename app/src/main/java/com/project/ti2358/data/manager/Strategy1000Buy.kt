@@ -86,7 +86,9 @@ class Strategy1000Buy : KoinComponent {
             }
             it.updateAbsolutePrice()
             if (it.lots == 0) { // если уже настраивали количество, то не трогаем
-                it.lots = (onePiece / it.getLimitPriceDouble()).roundToInt()
+                if (!it.getLimitPriceDouble().isNaN()) {
+                    it.lots = (onePiece / it.getLimitPriceDouble()).roundToInt()
+                }
             }
             it.status = PurchaseStatus.WAITING
         }

@@ -255,12 +255,16 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                 }
                 if (tries < 0) { // заявка не выставилась, сворачиваем лавочку, можно вернуть один таз
                     Utils.showToastAlert("$ticker: не смогли выставить ордер на покупку по $buyPrice")
+                    status = PurchaseStatus.CANCELED
                     return@launch
                 }
 
                 Utils.showToastAlert("$ticker: ордер на покупку по $buyPrice")
 
-                if (profit == 0.0) return@launch
+                if (profit == 0.0) { // если заявку на продажу не создавать, то выйти не сразу, подождать 10 сек
+                    delay(10 * 1000)
+                    return@launch
+                }
 
                 // проверяем появился ли в портфеле тикер
                 var position: PortfolioPosition?
@@ -282,7 +286,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                         buyLimitOrder?.let {
                             ordersService.cancel(it.orderId, depositManager.getActiveBrokerAccountId())
                         }
-                        Utils.showToastAlert("$ticker: не налили по $buyPrice")
+                        Utils.showToastAlert("$ticker: заявка отменена по $buyPrice")
                         return@launch
                     }
 

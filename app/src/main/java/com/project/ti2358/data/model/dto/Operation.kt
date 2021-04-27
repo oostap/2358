@@ -1,8 +1,6 @@
 package com.project.ti2358.data.model.dto
 
-import android.annotation.SuppressLint
 import com.project.ti2358.data.manager.Stock
-import java.text.SimpleDateFormat
 import java.util.*
 
 data class Operation (

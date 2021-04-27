@@ -82,7 +82,7 @@ class Strategy1728UpFragment : Fragment(R.layout.fragment_1728_up) {
         stocks = when (step1728) {
             Step1728.step700to1200 -> strategy1728Up.process700to1200()
             Step1728.step700to1530 -> strategy1728Up.process700to1600()
-            Step1728.step1630to1635 -> strategy1728Up.process1630to1635()
+            Step1728.step1630to1635 -> strategy1728Up.process1628to1635()
             Step1728.stepFinal -> strategy1728Up.processFinal()
         }
         adapterList.setData(stocks)
@@ -94,7 +94,7 @@ class Strategy1728UpFragment : Fragment(R.layout.fragment_1728_up) {
             val title = when (step1728) {
                 Step1728.step700to1200 -> "1: 07:00 - 12:00, объём ${SettingsManager.get1728Volume(0)}"
                 Step1728.step700to1530 -> "2: 07:00 - 16:00, объём ${SettingsManager.get1728Volume(1)}"
-                Step1728.step1630to1635 -> "3: 16:30 - 16:35, объём ${SettingsManager.get1728Volume(2)}"
+                Step1728.step1630to1635 -> "3: 16:28 - 16:35, объём ${SettingsManager.get1728Volume(2)}"
                 Step1728.stepFinal -> "1 - 2 - 3 - 🚀"
             }
 
@@ -124,21 +124,21 @@ class Strategy1728UpFragment : Fragment(R.layout.fragment_1728_up) {
                     val changePercent = when (step1728) {
                         Step1728.step700to1200 -> stock.changePrice700to1200Percent
                         Step1728.step700to1530 -> stock.changePrice700to1600Percent
-                        Step1728.step1630to1635 -> stock.changePrice1630to1635Percent
-                        Step1728.stepFinal -> stock.changePrice1630to1635Percent
+                        Step1728.step1630to1635 -> stock.changePrice1628to1635Percent
+                        Step1728.stepFinal -> stock.changePrice1628to1635Percent
                     }
 
                     val changeAbsolute = when (step1728) {
                         Step1728.step700to1200 -> stock.changePrice700to1200Absolute
                         Step1728.step700to1530 -> stock.changePrice700to1600Absolute
-                        Step1728.step1630to1635 -> stock.changePrice1630to1635Absolute
-                        Step1728.stepFinal -> stock.changePrice1630to1635Absolute
+                        Step1728.step1630to1635 -> stock.changePrice1628to1635Absolute
+                        Step1728.stepFinal -> stock.changePrice1628to1635Absolute
                     }
 
                     val volume = when (step1728) {
                         Step1728.step700to1200 -> stock.volume700to1200
                         Step1728.step700to1530 -> stock.volume700to1600
-                        Step1728.step1630to1635 -> stock.volume1630to1635
+                        Step1728.step1630to1635 -> stock.volume1628to1635
                         Step1728.stepFinal -> stock.getTodayVolume()
                     } / 1000f
 

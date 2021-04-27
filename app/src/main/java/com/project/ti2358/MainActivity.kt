@@ -23,6 +23,10 @@ import com.project.ti2358.data.manager.WorkflowManager
 import com.project.ti2358.data.model.dto.daager.Index
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.util.*
@@ -37,6 +41,8 @@ class MainActivity : AppCompatActivity() {
     val stockManager: StockManager by inject()
     val depositManager: DepositManager by inject()
     val workflowManager: WorkflowManager by inject()
+
+    var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -212,6 +218,11 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         val navView: NavigationView = findViewById(R.id.nav_view)
         navView.requestFocus()
+
+        job?.cancel()
+        job = GlobalScope.launch(Dispatchers.Default) {
+            stockManager.reloadClosePrices()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

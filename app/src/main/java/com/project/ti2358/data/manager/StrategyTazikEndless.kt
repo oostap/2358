@@ -163,9 +163,9 @@ class StrategyTazikEndless : KoinComponent {
         val price = getTotalPurchaseString()
         var tickers = ""
         for (stock in stocksToPurchase) {
-            tickers += "%s*%.2f%%".format(locale = Locale.US, stock.ticker, stock.percentLimitPriceChange)
+            tickers += "${stock.ticker} "
         }
-
+        if (tickers == "") tickers = "⏳"
         return "$price:\n$tickers"
     }
 
@@ -177,6 +177,8 @@ class StrategyTazikEndless : KoinComponent {
         var tickers = ""
         for (stock in stocksToPurchase) {
             val change = (100 * stock.stock.getPriceNow()) / stock.tazikEndlessPrice - 100
+            if (change >= -0.01) continue
+
             tickers += "${stock.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
                     "${stock.tazikEndlessPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceNow().toMoney(stock.stock)} = " +
                     "${change.toPercent()} ${stock.getStatusString()}\n"
@@ -279,7 +281,11 @@ class StrategyTazikEndless : KoinComponent {
         // если стратегия стартанула и какие-то корутины уже завершились, то убрать их, чтобы появился доступ для новых покупок
         for (value in stocksTickerInProcess) {
             if (!value.value.first.isActive) {
-                stocksTickerInProcess.remove(value.key)
+                GlobalScope.launch(Dispatchers.Main) {
+                    val seconds = SettingsManager.getTazikEndlessResetIntervalSeconds().toLong()
+                    delay(1000 * seconds)
+                    stocksTickerInProcess.remove(value.key)
+                }
                 break
             }
         }

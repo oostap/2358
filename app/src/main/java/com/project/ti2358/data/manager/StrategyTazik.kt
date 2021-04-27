@@ -40,7 +40,6 @@ class StrategyTazik : KoinComponent {
     var scheduledStartTime: Calendar? = null
     var currentSort: Sorting = Sorting.DESCENDING
 
-    var jobReloadClosePrices: Job? = null
     companion object {
         const val PercentLimitChangeDelta = 0.05
     }
@@ -168,9 +167,9 @@ class StrategyTazik : KoinComponent {
         val price = getTotalPurchaseString()
         var tickers = ""
         for (stock in stocksToPurchase) {
-            tickers += "%s*%.2f%%".format(locale = Locale.US, stock.ticker, stock.percentLimitPriceChange)
+            tickers += "${stock.ticker} "
         }
-
+        if (tickers == "") tickers = "⏳"
         return "$price:\n$tickers"
     }
 
@@ -182,6 +181,8 @@ class StrategyTazik : KoinComponent {
         var tickers = ""
         for (stock in stocksToPurchase) {
             val change = (100 * stock.stock.getPriceNow()) / stock.tazikPrice - 100
+            if (change >= -0.01) continue
+
             tickers += "${stock.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
                     "${stock.tazikPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceNow().toMoney(stock.stock)} = " +
                     "${change.toPercent()} ${stock.getStatusString()}\n"
@@ -238,23 +239,19 @@ class StrategyTazik : KoinComponent {
 
     @Synchronized
     private fun startStrategy() {
-        jobReloadClosePrices?.cancel()
-        jobReloadClosePrices = GlobalScope.launch(Dispatchers.Default) {
-            stockManager.reloadClosePrices()
-            fixPrice()
+        fixPrice()
 
-            stocksTickerInProcess.forEach {
-                try {
-                    if (it.value.first.isActive) {
-                        it.value.first.cancel()
-                    }
-                } catch (e: Exception) {
-
+        stocksTickerInProcess.forEach {
+            try {
+                if (it.value.first.isActive) {
+                    it.value.first.cancel()
                 }
+            } catch (e: Exception) {
+
             }
-            stocksTickerInProcess.clear()
-            started = true
         }
+        stocksTickerInProcess.clear()
+        started = true
     }
 
     @Synchronized

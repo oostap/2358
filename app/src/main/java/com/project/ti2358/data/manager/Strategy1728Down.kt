@@ -51,8 +51,8 @@ class Strategy1728Down() : KoinComponent {
         val candidates = process700to1600() //process700to1200() + process700to1600()
         stocksFinal = process1625to1632()
         stocksFinal.removeAll { it !in candidates }
-        stocksFinal.sortByDescending { it.changePrice1630to1635Percent }
-        stocksFinal.sortByDescending { it.volume1630to1635 }
+        stocksFinal.sortByDescending { it.changePrice1628to1635Percent }
+        stocksFinal.sortByDescending { it.volume1628to1635 }
         return stocksFinal
     }
 

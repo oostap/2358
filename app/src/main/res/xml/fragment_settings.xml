@@ -477,6 +477,11 @@
             app:defaultValue="true" />
 
         <SwitchPreferenceCompat
+            app:key="@string/setting_key_telegram_send_orders"
+            app:title="@string/stocks_telegram_send_orders"
+            app:defaultValue="false" />
+
+        <SwitchPreferenceCompat
             app:key="@string/setting_key_telegram_send_rockets"
             app:title="@string/stocks_telegram_send_rockets"
             app:defaultValue="true" />

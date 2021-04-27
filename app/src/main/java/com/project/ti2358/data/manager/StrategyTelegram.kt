@@ -7,11 +7,10 @@ import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.*
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.network.fold
+import com.project.ti2358.data.model.dto.*
 
-import com.project.ti2358.data.model.dto.Operation
-import com.project.ti2358.data.model.dto.OperationStatus
-import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.service.OperationsService
+import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toMoney
@@ -29,12 +28,17 @@ import kotlin.math.sign
 class StrategyTelegram : KoinComponent {
     private val stockManager: StockManager by inject()
     private val operationsService: OperationsService by inject()
+    private val ordersService: OrdersService by inject()
     private val depositManager: DepositManager by inject()
     private val strategyFollower: StrategyFollower by inject()
 
     var jobUpdateOperations: Job? = null
     var operations: MutableList<Operation> = mutableListOf()
     var operationsPosted: MutableList<String> = mutableListOf()
+
+    var jobUpdateOrders: Job? = null
+    var orders: MutableList<Order> = mutableListOf()
+    var ordersPosted: MutableList<String> = mutableListOf()
 
     var started: Boolean = false
     var telegramBot: Bot? = null
@@ -52,21 +56,23 @@ class StrategyTelegram : KoinComponent {
                     toDate.add(Calendar.HOUR_OF_DAY, -6)
                     val from = convertDateToTinkoffDate(toDate, zone)
 
-                    depositManager.refreshDeposit()
-
                     operations = Collections.synchronizedList(operationsService.operations(from, to, depositManager.getActiveBrokerAccountId()).operations)
                     operations.sortBy { it.date }
                     if (operationsPosted.isEmpty()) {
                         operations.forEach {
                             operationsPosted.add(it.id)
                         }
+                    } else {
+                        operationsPosted.add("empty")
                     }
+
+                    depositManager.refreshDeposit()
 
                     for (operation in operations) {
                         if (operation.id !in operationsPosted) {
-                            operationsPosted.add(operation.id)
-                            if (operation.status != OperationStatus.DONE || operation.price == 0.0 || operation.quantity == 0) continue
+                            if (operation.status != OperationStatus.DONE || operation.quantityExecuted == 0) continue
 
+                            operationsPosted.add(operation.id)
                             operation.stock = stockManager.getStockByFigi(operation.figi)
 
                             val dateNow = Calendar.getInstance()
@@ -101,10 +107,58 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
+    private fun restartUpdateOrders() {
+        val delay = SettingsManager.getTelegramUpdateDelay().toLong()
+        jobUpdateOrders?.cancel()
+        jobUpdateOrders = GlobalScope.launch(Dispatchers.Default) {
+            while (true) {
+                try {
+                    orders = Collections.synchronizedList(ordersService.orders(depositManager.getActiveBrokerAccountId()))
+                    if (ordersPosted.isEmpty()) {
+                        orders.forEach {
+                            ordersPosted.add(it.orderId)
+                        }
+                    } else {
+                        ordersPosted.add("empty")
+                    }
+
+                    for (order in orders) {
+                        if (order.orderId !in ordersPosted) {
+                            if (order.status != OrderStatus.NEW) continue
+
+                            ordersPosted.add(order.orderId)
+                            order.stock = stockManager.getStockByFigi(order.figi)
+
+                            try {
+                                val chatId = SettingsManager.getTelegramChatID().toLong()
+                                while (true) {
+                                    val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = orderToString(order))
+                                    if (result?.first?.isSuccessful == true) {
+                                        break
+                                    } else {
+                                        delay(5000)
+                                        continue
+                                    }
+                                }
+                            } catch (e: Exception) {
+
+                            }
+                            continue
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                delay(delay * 1000)
+            }
+        }
+    }
+
     fun startStrategy() {
         started = true
 
         if (SettingsManager.getTelegramSendTrades()) restartUpdateOperations()
+        if (SettingsManager.getTelegramSendOrders()) restartUpdateOrders()
 
         telegramBot?.stopPolling()
         telegramBot = bot {
@@ -185,6 +239,7 @@ class StrategyTelegram : KoinComponent {
                 telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = SettingsManager.getTelegramBye())
                 telegramBot?.stopPolling()
                 jobUpdateOperations?.cancel()
+                jobUpdateOrders?.cancel()
             } catch (e: Exception) {
 
             }
@@ -195,10 +250,57 @@ class StrategyTelegram : KoinComponent {
         return calendar.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS") + zone
     }
 
+    private fun orderToString(order: Order): String {
+        val ticker = order.stock?.ticker
+        val orderSymbol = if (order.operation == OperationType.BUY) "🟢" else "🔴"
+        var orderString = if (order.operation == OperationType.BUY) "BUY " else "SELL "
+        val position = depositManager.getPositionForFigi(order.figi)
+        if (position == null && order.operation == OperationType.BUY) {
+            orderString += "LONG вход"
+        }
+
+        if (position == null && order.operation == OperationType.SELL) {
+            orderString += "SHORT вход"
+        }
+
+        if (position != null && order.operation == OperationType.SELL) {
+            orderString += if (position.lots < 0) { // продажа в шорте
+                "SHORT усреднение"
+            } else { // продажа в лонге
+                if (order.requestedLots == abs(position.lots)) {
+                    "LONG выход"
+                } else {
+                    "LONG выход часть"
+                }
+            }
+        }
+
+        if (position != null && order.operation == OperationType.BUY) {
+            orderString += if (position.lots < 0) { // покупка в шорте
+                if (order.requestedLots == abs(position.lots)) {
+                    "SHORT выход"
+                } else {
+                    "SHORT выход часть"
+                }
+            } else { // покупка в лонге
+                "LONG усреднение"
+            }
+        }
+
+        var depo = ""
+        position?.let {
+            val percent = it.getProfitPercent() * sign(it.lots.toDouble())
+            val emoji = Utils.getEmojiForPercent(percent)
+            depo += "\n💼 %d * %.2f$ = %.2f$ > %.2f%%%s".format(locale = Locale.US, it.lots, it.getAveragePrice(), it.lots * it.getAveragePrice(), percent, emoji)
+        }
+        return "📝 $%s %s\n%s %d/%d * %.2f$ = %.2f$%s".format(locale = Locale.US, ticker, orderString, orderSymbol, order.executedLots, order.requestedLots, order.price, order.requestedLots * order.price, depo)
+    }
+
     @SuppressLint("SimpleDateFormat")
     private fun operationToString(operation: Operation): String {
         val ticker = operation.stock?.ticker
-        var operationString = if (operation.operationType == OperationType.BUY) "Покупка 🟢 " else "Продажа 🔴 "
+        val operationSymbol = if (operation.operationType == OperationType.BUY) "🟢" else "🔴"
+        var operationString = if (operation.operationType == OperationType.BUY) "BUY " else "SELL "
         val position = depositManager.getPositionForFigi(operation.figi)
         if (position == null && operation.operationType == OperationType.BUY) {
             operationString += "SHORT выход"
@@ -232,15 +334,19 @@ class StrategyTelegram : KoinComponent {
             }
         }
 
-        val dateString = SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS").format(operation.date)
+        val msk = Utils.getTimeMSK()
+        msk.time.time = operation.date.time
+        val differenceHours = Utils.getTimeDiffBetweenMSK()
+        msk.add(Calendar.HOUR_OF_DAY, -differenceHours)
+
+        val dateString = msk.time.toString("HH:mm:ss")
         var depo = ""
         position?.let {
             val percent = it.getProfitPercent() * sign(it.lots.toDouble())
             val emoji = Utils.getEmojiForPercent(percent)
-            depo += "\n💼: %d шт. * %.2f$ = %.2f > %.2f%%%s".format(it.lots, it.getAveragePrice(), it.lots * it.getAveragePrice(), percent, emoji)
-
+            depo += "\n💼 %d * %.2f$ = %.2f$ > %.2f%%%s".format(locale = Locale.US, it.lots, it.getAveragePrice(), it.lots * it.getAveragePrice(), percent, emoji)
         }
-        return "$%s %s\n%d шт. * %.2f$ = %.2f\n%s%s".format(ticker, operationString, operation.quantityExecuted, operation.price, operation.quantityExecuted * operation.price, dateString, depo)
+        return "$%s %s\n%s %d * %.2f$ = %.2f$ - %s%s".format(locale = Locale.US, ticker, operationString, operationSymbol, operation.quantityExecuted, operation.price, operation.quantityExecuted * operation.price, dateString, depo)
     }
 
     fun sendRocket(rocketStock: RocketStock) {

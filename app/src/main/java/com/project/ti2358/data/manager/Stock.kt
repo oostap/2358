@@ -5,6 +5,7 @@ import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.model.dto.daager.*
 import com.project.ti2358.service.ScreenerType
 import com.project.ti2358.service.Utils
+import com.project.ti2358.service.log
 import com.project.ti2358.service.toMoney
 import org.koin.core.component.KoinApiExtension
 import java.util.*
@@ -53,9 +54,9 @@ data class Stock(var instrument: Instrument) {
     var changePrice700to1600Percent: Double = 0.0
     var volume700to1600 = 0
     // изменение с 1630 до 1635
-    var changePrice1630to1635Absolute: Double = 0.0
-    var changePrice1630to1635Percent: Double = 0.0
-    var volume1630to1635 = 0
+    var changePrice1628to1635Absolute: Double = 0.0
+    var changePrice1628to1635Percent: Double = 0.0
+    var volume1628to1635 = 0
     // изменение с 1628 до 1632
     var changePrice1625to1632Absolute: Double = 0.0
     var changePrice1625to1632Percent: Double = 0.0
@@ -244,29 +245,42 @@ data class Stock(var instrument: Instrument) {
     fun getPriceNow(volume: Int = 0): Double {
         var value = 0.0
 
-        if (Utils.getTimeMSK().get(Calendar.HOUR_OF_DAY) < 7) { // если время до старта, то всегда берём post
+        val hour = Utils.getTimeMSK().get(Calendar.HOUR_OF_DAY)
+        if (hour > 2 && hour < 7) { // если время до старта, то всегда берём post
             closePrices?.let {
                 value = it.post
             }
-        } else if (Utils.getTimeMSK().get(Calendar.HOUR_OF_DAY) < 10 && morning == null) { // если с 7 до 10 и бумага не торгуется с утра, то берём post
+        } else if (hour > 2 && hour < 10 && morning == null) { // если с 7 до 10 и бумага не торгуется с утра, то берём post
             closePrices?.let {
                 value = it.post
             }
         } else {
-            candleToday?.let {
-                value = it.closingPrice
+            closePrices?.let {
+                value = it.post
             }
 
-//            if (minuteCandles.isNotEmpty()) {
-//                value = minuteCandles.last().closingPrice
+//            candleToday?.let {
+//                value = it.closingPrice
 //            }
 
             // учесть объём свечи для фиксации цен в тазах
+            var minuteValue: Double = 0.0
             for (i in minuteCandles.indices.reversed()) {
-                if (minuteCandles[i].volume > volume) {
-                    value = minuteCandles[i].closingPrice
+                if (minuteCandles[i].volume >= volume) {
+                    minuteValue = minuteCandles[i].closingPrice
                     break
                 }
+            }
+
+            if (minuteValue == 0.0) {
+                for (i in minuteCandles.indices.reversed()) {
+                    if (minuteCandles[i].closingPrice < value) {
+                        value = minuteCandles[i].closingPrice
+                        break
+                    }
+                }
+            } else {
+                value = minuteValue
             }
         }
 

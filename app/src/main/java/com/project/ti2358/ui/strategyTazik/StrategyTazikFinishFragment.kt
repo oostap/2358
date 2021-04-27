@@ -36,11 +36,9 @@ class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
     var positions: MutableList<PurchaseStock> = mutableListOf()
     var startTime: String = ""
     var scheduledStart: Boolean = false
-    var job: Job? = null
 
     override fun onDestroy() {
         fragmentTazikFinishBinding = null
-        job?.cancel()
         super.onDestroy()
     }
 
@@ -68,11 +66,6 @@ class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
 
         updateInfoText()
         updateServiceButtonText()
-
-        job?.cancel()
-        job = GlobalScope.launch(Dispatchers.Default) {
-            stockManager.reloadClosePrices()
-        }
     }
 
     fun tryStartTazik(scheduled : Boolean) {
