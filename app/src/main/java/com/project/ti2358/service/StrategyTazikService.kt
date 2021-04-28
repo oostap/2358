@@ -47,7 +47,6 @@ class StrategyTazikService : Service() {
                     if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
                     notificationButtonReceiver = null
                     context.stopService(Intent(context, StrategyTazikService::class.java))
-                    strategyTazik.stopStrategy()
                 }
 
                 if (type == NOTIFICATION_ACTION_PLUS) {

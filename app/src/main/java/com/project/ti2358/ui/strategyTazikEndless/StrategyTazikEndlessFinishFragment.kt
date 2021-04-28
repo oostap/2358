@@ -63,7 +63,6 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
         } else {
             if (Utils.isServiceRunning(requireContext(), StrategyTazikEndlessService::class.java)) {
                 requireContext().stopService(Intent(context, StrategyTazikEndlessService::class.java))
-                strategyTazikEndless.stopStrategy()
             } else {
                 if (strategyTazikEndless.stocksToPurchase.size > 0) {
                     Utils.startService(requireContext(), StrategyTazikEndlessService::class.java)

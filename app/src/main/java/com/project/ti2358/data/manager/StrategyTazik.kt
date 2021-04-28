@@ -24,6 +24,7 @@ class StrategyTazik : KoinComponent {
     private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
+    private val strategyTelegram: StrategyTelegram by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
@@ -103,16 +104,18 @@ class StrategyTazik : KoinComponent {
         val percent = SettingsManager.getTazikChangePercent()
         val totalMoney: Double = SettingsManager.getTazikPurchaseVolume().toDouble()
         val onePiece: Double = totalMoney / SettingsManager.getTazikPurchaseParts()
-        val before10 = Utils.isSessionBefore11()
+        val before11 = Utils.isSessionBefore11()
 
         stocksToPurchase = stocksSelected.map {
             PurchaseStock(it).apply {
                 percentLimitPriceChange = -abs(percent)
 
                 // отнять процент роста с начала премаркета, если мы запускаем в 10
-                if (before10) {
+                if (before11) {
                     val deltaPercent = it.getPriceNow() / it.getPrice0145() * 100.0 - 100.0
-                    percentLimitPriceChange -= abs(deltaPercent * 0.5)
+                    if (!deltaPercent.isNaN()) {
+                        percentLimitPriceChange -= abs(deltaPercent * 0.5)
+                    }
                 }
 
                 lots = (onePiece / stock.getPriceNow()).roundToInt()
@@ -126,6 +129,12 @@ class StrategyTazik : KoinComponent {
         stocksToPurchase.removeAll { p ->
             p.lots == 0 || depositManager.portfolioPositions.any { it.ticker == p.ticker }
         }
+
+        // удалить все бумаги, у которых недавно или скоро отчёты
+        stocksToPurchase.removeAll { it.stock.report != null }
+
+        // удалить все бумаги, у которых скоро дивы
+        stocksToPurchase.removeAll { it.stock.dividend != null }
 
         stocksToPurchaseClone = stocksToPurchase.toMutableList()
 
@@ -160,7 +169,9 @@ class StrategyTazik : KoinComponent {
     fun getTotalPurchaseString(): String {
         val volume = SettingsManager.getTazikPurchaseVolume().toDouble()
         val p = SettingsManager.getTazikPurchaseParts()
-        return String.format("%d из %d по %.2f$, просадка %.2f / %.2f / %.2f", activeJobs.size, p, volume / p, basicPercentLimitPriceChange, SettingsManager.getTazikTakeProfit(), SettingsManager.getTazikApproximationFactor())
+        val volumeShares = SettingsManager.getTazikMinVolume()
+        return String.format("%d из %d по %.2f$, просадка %.2f / %.2f / %.2f / %d",
+            activeJobs.size, p, volume / p, basicPercentLimitPriceChange, SettingsManager.getTazikTakeProfit(), SettingsManager.getTazikApproximationFactor(), volumeShares)
     }
 
     fun getNotificationTextShort(): String {
@@ -169,24 +180,29 @@ class StrategyTazik : KoinComponent {
         for (stock in stocksToPurchase) {
             tickers += "${stock.ticker} "
         }
-        if (tickers == "") tickers = "⏳"
         return "$price:\n$tickers"
     }
 
     fun getNotificationTextLong(): String {
-        stocksToPurchase.sortBy { abs(it.stock.getPriceNow() / it.tazikPrice * 100 - 100) }
-        stocksToPurchase.sortBy { it.stock.getPriceNow() / it.tazikPrice * 100 - 100 }
+        val volume = SettingsManager.getTazikMinVolume()
+        stocksToPurchase.sortBy { abs(it.stock.getPriceNow(volume) / it.tazikPrice * 100 - 100) }
+        stocksToPurchase.sortBy { it.stock.getPriceNow(volume) / it.tazikPrice * 100 - 100 }
         stocksToPurchase.sortBy { it.status }
 
         var tickers = ""
         for (stock in stocksToPurchase) {
-            val change = (100 * stock.stock.getPriceNow()) / stock.tazikPrice - 100
-            if (change >= -0.01) continue
+            val change = (100 * stock.stock.getPriceNow(volume)) / stock.tazikPrice - 100
+            if (change >= -0.01 && stock.status == PurchaseStatus.WAITING && stocksToPurchase.size > 5) continue
 
+            var vol = 0
+            if (stock.stock.minuteCandles.isNotEmpty()) {
+                vol = stock.stock.minuteCandles.last().volume
+            }
             tickers += "${stock.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
-                    "${stock.tazikPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceNow().toMoney(stock.stock)} = " +
-                    "${change.toPercent()} ${stock.getStatusString()}\n"
+                    "${stock.tazikPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceNow(volume).toMoney(stock.stock)} = " +
+                    "${change.toPercent()} ${stock.getStatusString()} v=${vol}\n"
         }
+        if (tickers == "") tickers = "только отрицательные бумаги ⏳⏳⏳"
 
         return tickers
     }
@@ -252,6 +268,7 @@ class StrategyTazik : KoinComponent {
         }
         stocksTickerInProcess.clear()
         started = true
+        strategyTelegram.sendTazik(true)
     }
 
     @Synchronized
@@ -267,6 +284,7 @@ class StrategyTazik : KoinComponent {
             }
         }
         stocksTickerInProcess.clear()
+        strategyTelegram.sendTazik(false)
     }
 
     fun addBasicPercentLimitPriceChange(sign: Int) {

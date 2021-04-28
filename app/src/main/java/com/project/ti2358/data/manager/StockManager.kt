@@ -316,7 +316,7 @@ class StockManager : KoinComponent {
                     Interval.MINUTE
                 )
                 .onBackpressureBuffer()
-                .subscribeOn(Schedulers.io())
+                .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
@@ -334,7 +334,7 @@ class StockManager : KoinComponent {
                     Interval.MINUTE
                 )
                 .onBackpressureBuffer()
-                .subscribeOn(Schedulers.io())
+                .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
@@ -354,7 +354,7 @@ class StockManager : KoinComponent {
                 Interval.DAY
             )
             .onBackpressureBuffer()
-            .subscribeOn(Schedulers.io())
+            .subscribeOn(Schedulers.computation())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {

@@ -24,6 +24,7 @@ class StrategyTazikEndless : KoinComponent {
     private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
+    private val strategyTelegram: StrategyTelegram by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
@@ -127,11 +128,17 @@ class StrategyTazikEndless : KoinComponent {
             it.status = PurchaseStatus.WAITING
         }
 
-        // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         // удалить все бумаги, у которых 0 лотов = не хватает на покупку одной части
-        stocksToPurchase.removeAll { p ->
-            p.lots == 0 || depositManager.portfolioPositions.any { it.ticker == p.ticker }
-        }
+        stocksToPurchase.removeAll { it.lots == 0 }
+
+        // удалить все бумаги, у которых недавно или скоро отчёты
+        stocksToPurchase.removeAll { it.stock.report != null }
+
+        // удалить все бумаги, у которых скоро дивы
+        stocksToPurchase.removeAll { it.stock.dividend != null }
+
+        // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
+        stocksToPurchase.removeAll { p -> depositManager.portfolioPositions.any { it.ticker == p.ticker } }
 
         stocksToPurchaseClone = stocksToPurchase.toMutableList()
 
@@ -148,14 +155,16 @@ class StrategyTazikEndless : KoinComponent {
     fun getTotalPurchaseString(): String {
         val volume = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
         val p = SettingsManager.getTazikEndlessPurchaseParts()
+        val volumeShares = SettingsManager.getTazikEndlessMinVolume()
         return String.format(
-            "%d из %d по %.2f$, просадка %.2f / %.2f / %.2f",
+            "%d из %d по %.2f$, просадка %.2f / %.2f / %.2f / %d",
             stocksTickerInProcess.size,
             p,
             volume / p,
             basicPercentLimitPriceChange,
             SettingsManager.getTazikEndlessTakeProfit(),
-            SettingsManager.getTazikEndlessApproximationFactor()
+            SettingsManager.getTazikEndlessApproximationFactor(),
+            volumeShares
         )
     }
 
@@ -165,24 +174,29 @@ class StrategyTazikEndless : KoinComponent {
         for (stock in stocksToPurchase) {
             tickers += "${stock.ticker} "
         }
-        if (tickers == "") tickers = "⏳"
         return "$price:\n$tickers"
     }
 
     fun getNotificationTextLong(): String {
-        stocksToPurchase.sortBy { abs(it.stock.getPriceNow() / it.tazikEndlessPrice * 100 - 100) }
-        stocksToPurchase.sortBy { it.stock.getPriceNow() / it.tazikEndlessPrice * 100 - 100 }
+        val volume = SettingsManager.getTazikEndlessMinVolume()
+        stocksToPurchase.sortBy { abs(it.stock.getPriceNow(volume, true) / it.tazikEndlessPrice * 100 - 100) }
+        stocksToPurchase.sortBy { it.stock.getPriceNow(volume, true) / it.tazikEndlessPrice * 100 - 100 }
         stocksToPurchase.sortBy { it.status }
 
         var tickers = ""
         for (stock in stocksToPurchase) {
-            val change = (100 * stock.stock.getPriceNow()) / stock.tazikEndlessPrice - 100
-            if (change >= -0.01) continue
+            val change = (100 * stock.stock.getPriceNow(volume, true)) / stock.tazikEndlessPrice - 100
+            if (change >= -0.01 && stock.status == PurchaseStatus.WAITING && stocksToPurchase.size > 5) continue
 
+            var vol = 0
+            if (stock.stock.minuteCandles.isNotEmpty()) {
+                vol = stock.stock.minuteCandles.last().volume
+            }
             tickers += "${stock.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
-                    "${stock.tazikEndlessPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceNow().toMoney(stock.stock)} = " +
-                    "${change.toPercent()} ${stock.getStatusString()}\n"
+                    "${stock.tazikEndlessPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceNow(volume, true).toMoney(stock.stock)} = " +
+                    "${change.toPercent()} ${stock.getStatusString()} v=${vol}\n"
         }
+        if (tickers == "") tickers = "только отрицательные бумаги ⏳⏳⏳"
 
         return tickers
     }
@@ -190,7 +204,7 @@ class StrategyTazikEndless : KoinComponent {
     private fun fixPrice() {
         // зафикировать цену, чтобы change считать от неё
         for (purchase in stocksToPurchaseClone) {
-            purchase.tazikEndlessPrice = purchase.stock.getPriceNow(SettingsManager.getTazikEndlessMinVolume())
+            purchase.tazikEndlessPrice = purchase.stock.getPriceNow(SettingsManager.getTazikEndlessMinVolume(), true)
         }
     }
 
@@ -220,6 +234,8 @@ class StrategyTazikEndless : KoinComponent {
                 fixPrice()
             }
         }
+
+        strategyTelegram.sendTazikEndless(true)
     }
 
     @Synchronized
@@ -236,6 +252,7 @@ class StrategyTazikEndless : KoinComponent {
         }
         stocksTickerInProcess.clear()
         jobResetPrice?.cancel()
+        strategyTelegram.sendTazikEndless(false)
     }
 
     fun addBasicPercentLimitPriceChange(sign: Int) {
@@ -282,8 +299,7 @@ class StrategyTazikEndless : KoinComponent {
         for (value in stocksTickerInProcess) {
             if (!value.value.first.isActive) {
                 GlobalScope.launch(Dispatchers.Main) {
-                    val seconds = SettingsManager.getTazikEndlessResetIntervalSeconds().toLong()
-                    delay(1000 * seconds)
+                    delay(1000 * 10)
                     stocksTickerInProcess.remove(value.key)
                 }
                 break
@@ -321,7 +337,6 @@ class StrategyTazikEndless : KoinComponent {
         }
 
         if (purchase.tazikEndlessPrice == 0.0) {
-            purchase.tazikEndlessPrice = candle.closingPrice
             return
         }
 

@@ -335,7 +335,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                             )
 
                             if (sellLimitOrder!!.status == OrderStatus.NEW || sellLimitOrder!!.status == OrderStatus.PENDING_NEW) {
-                                status = PurchaseStatus.ORDER_SELL
+//                                status = PurchaseStatus.ORDER_SELL
                                 Utils.showToastAlert("$ticker: ордер на продажу по $profitPrice")
                             } else { // заявка отклонена, вернуть лоты
                                 lotsToBuy += lotsToSell

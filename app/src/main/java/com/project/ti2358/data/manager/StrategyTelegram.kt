@@ -368,4 +368,55 @@ class StrategyTelegram : KoinComponent {
             }
         }
     }
+
+    fun sendTazik(start: Boolean) {
+        if (started) {
+            GlobalScope.launch(Dispatchers.Default) {
+                val chatId = SettingsManager.getTelegramChatID().toLong()
+                try {
+                    val text = if (start) {
+                        String.format(
+                            "🟢🛁 старт: %.2f%% / %.2f%% / %.2f / v%d / %ds",
+                            SettingsManager.getTazikChangePercent(),
+                            SettingsManager.getTazikTakeProfit(),
+                            SettingsManager.getTazikApproximationFactor(),
+                            SettingsManager.getTazikMinVolume(),
+                            SettingsManager.getTazikOrderLifeTimeSeconds())
+                    } else {
+                        "🔴🛁 стоп!"
+                    }
+
+                    val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    fun sendTazikEndless(start: Boolean) {
+        if (started) {
+            GlobalScope.launch(Dispatchers.Default) {
+                val chatId = SettingsManager.getTelegramChatID().toLong()
+                try {
+                    val text = if (start) {
+                        String.format(
+                            "🟢🛁♾ старт: %.2f%% / %.2f%% / %.2f / v%d / %ds / %ds",
+                            SettingsManager.getTazikEndlessChangePercent(),
+                            SettingsManager.getTazikEndlessTakeProfit(),
+                            SettingsManager.getTazikEndlessApproximationFactor(),
+                            SettingsManager.getTazikEndlessMinVolume(),
+                            SettingsManager.getTazikEndlessResetIntervalSeconds(),
+                            SettingsManager.getTazikEndlessOrderLifeTimeSeconds())
+                    } else {
+                        "🔴🛁♾ стоп!"
+                    }
+
+                    val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
 }
