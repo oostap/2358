@@ -191,16 +191,16 @@
 
     <PreferenceCategory app:title="@string/settings_header_1728">
         <EditTextPreference
-            app:key="@string/setting_key_1728_volume_min_steps"
-            app:title="@string/stocks_1728_volume_min_day"
+            app:key="@string/setting_key_1728_volume_min_each_steps"
+            app:title="@string/stocks_1728_volume_min_each_steps"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="1000 2000 3000"/>
 
         <EditTextPreference
-            app:key="@string/setting_key_1728_price_change"
-            app:title="@string/stocks_1728_price_change"
+            app:key="@string/setting_key_1728_price_change_steps"
+            app:title="@string/stocks_1728_price_change_steps"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="1.0"/>
+            app:defaultValue="1.0 1.0 1.0"/>
 
         <EditTextPreference
             app:key="@string/setting_key_1728_purchase_volume"
@@ -353,6 +353,16 @@
             app:title="@string/stocks_tazik_endless_approximation_factor"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="0.65"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_endless_exclude_report"
+            app:title="@string/stocks_tazik_endless_exclude_report"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_endless_exclude_divs"
+            app:title="@string/stocks_tazik_endless_exclude_divs"
+            app:defaultValue="true" />
 
     </PreferenceCategory>
 

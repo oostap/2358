@@ -150,8 +150,8 @@
     <string name="stocks_premarket_volume_max_day">Объём за день ДО шт.</string>
 
     <!-- 1728 settings -->
-    <string name="stocks_1728_volume_min_day">Объём каждого шага отсева от шт. (через пробел)</string>
-    <string name="stocks_1728_price_change">Изменение цены от в %</string>
+    <string name="stocks_1728_volume_min_each_steps">Объём каждого шага отсева от шт. (через пробел)</string>
+    <string name="stocks_1728_price_change_steps">Изменение каждого шага цены от в % (через пробел)</string>
     <string name="stocks_1728_purchase_volume">Сумма покупки одной позиции в $</string>
     <string name="stocks_1728_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
     <string name="stocks_1728_trailing_stop">Трейлинг тейк</string>
@@ -181,6 +181,8 @@
     <string name="stocks_tazik_endless_order_lifetime_seconds">Время жизни заявки в секундах</string>
     <string name="stocks_tazik_endless_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
     <string name="stocks_tazik_endless_approximation_factor">Приближение к низу свечи [0.0, 1.0]</string>
+    <string name="stocks_tazik_endless_exclude_report">Исключать отчёты</string>
+    <string name="stocks_tazik_endless_exclude_divs">Исключать дивы</string>
 
     <!-- rocket settings -->
     <string name="stocks_rocket_change_percent">Изменение в %</string>
@@ -272,8 +274,8 @@
     <string name="setting_key_premarket_volume_max_day">premarket_volume_max_day</string>
 
     <!-- 1728 settings -->
-    <string name="setting_key_1728_volume_min_steps">1728_volume_min_each_steps</string>
-    <string name="setting_key_1728_price_change">1728_price_change</string>
+    <string name="setting_key_1728_volume_min_each_steps">1728_volume_min_each_steps</string>
+    <string name="setting_key_1728_price_change_steps">1728_price_change_steps</string>
     <string name="setting_key_1728_purchase_volume">1728_purchase_volume</string>
     <string name="setting_key_1728_take_profit">1728_take_profit</string>
     <string name="setting_key_1728_trailing_stop">1728_trailing_stop</string>
@@ -303,6 +305,8 @@
     <string name="setting_key_tazik_endless_take_profit">tazik_endless_take_profit</string>
     <string name="setting_key_tazik_endless_approximation_factor">tazik_endless_approximation_factor</string>
     <string name="setting_key_tazik_endless_order_lifetime_seconds">tazik_endless_order_lifetime_seconds</string>
+    <string name="setting_key_tazik_endless_exclude_report">endless_exclude_report</string>
+    <string name="setting_key_tazik_endless_exclude_divs">endless_exclude_divs</string>
 
     <!-- rocket settings -->
     <string name="setting_key_rocket_change_percent">rocket_change_percent</string>

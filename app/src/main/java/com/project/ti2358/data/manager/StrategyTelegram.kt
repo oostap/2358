@@ -189,9 +189,15 @@ class StrategyTelegram : KoinComponent {
                         bot.sendMessage(ChatId.fromId(id = update.message!!.chat.id), text = text)
                         update.consume()
                     } else if (command.startsWith("#")) {
-                        val success = strategyFollower.processStrategy(update.message!!.from?.id ?: 0, command)
-                        val status = if (success) "+" else "-"
-                        bot.sendMessage(ChatId.fromId(id = update.message!!.chat.id), text = status, replyToMessageId = update.message!!.messageId)
+                        if (strategyFollower.started) {
+                            val success = strategyFollower.processStrategy(update.message!!.from?.id ?: 0, command)
+                            val status = if (success) "+" else "-"
+                            bot.sendMessage(
+                                ChatId.fromId(id = update.message!!.chat.id),
+                                text = status,
+                                replyToMessageId = update.message!!.messageId
+                            )
+                        }
                         update.consume()
                     }
                 }

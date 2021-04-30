@@ -105,6 +105,9 @@ data class Stock(var instrument: Instrument) {
         if (short != null) {
             t += "👖"
         }
+        if (report != null || dividend != null) {
+            t += "❗️"
+        }
         return t
     }
 

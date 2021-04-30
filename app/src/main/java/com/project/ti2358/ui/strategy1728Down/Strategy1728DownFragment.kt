@@ -92,9 +92,9 @@ class Strategy1728DownFragment : Fragment(R.layout.fragment_1728_down) {
     private fun updateTitle() {
         if (isAdded) {
             val title = when (step1728) {
-                Step1728.step700to1200 -> "1: 07:00 - 12:00, объём ${SettingsManager.get1728Volume(0)}"
-                Step1728.step700to1530 -> "2: 07:00 - 16:00, объём ${SettingsManager.get1728Volume(1)}"
-                Step1728.step1630to1635 -> "3: 16:25 - 16:32, объём ${SettingsManager.get1728Volume(2)}"
+                Step1728.step700to1200 -> "1: 07:00 - 12:00, ${SettingsManager.get1728Volume(0)} ${SettingsManager.get1728ChangePercent(0)}"
+                Step1728.step700to1530 -> "2: 07:00 - 16:00, ${SettingsManager.get1728Volume(1)} ${SettingsManager.get1728ChangePercent(1)}"
+                Step1728.step1630to1635 -> "3: 16:25 - 16:32, ${SettingsManager.get1728Volume(2)} ${SettingsManager.get1728ChangePercent(2)}"
                 Step1728.stepFinal -> "1 - 2 - 3 - 🚀"
             }
 

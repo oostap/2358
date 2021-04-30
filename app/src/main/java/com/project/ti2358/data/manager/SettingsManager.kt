@@ -300,11 +300,14 @@ class SettingsManager {
 
         /******************** 1728 *************************/
 
-        fun get1728ChangePercent(): Double {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_price_change)
-            val value: String? = preferences.getString(key, "1")
+        fun get1728ChangePercent(step: Int): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_price_change_steps)
+            val value: String? = preferences.getString(key, "1.0 1.0 1.0")
+            val volumes = value?.split(" ") ?: return 1.0
+            if (volumes.size < 3) return 1.0
+
             return try {
-                (value ?: "1").toDouble()
+                volumes[step].toDouble()
             } catch (e: Exception) {
                 1.0
             }
@@ -341,7 +344,7 @@ class SettingsManager {
         }
 
         fun get1728Volume(step: Int): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_volume_min_steps)
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1728_volume_min_each_steps)
             val value: String? = preferences.getString(key, "1000 2000 3000")
             val volumes = value?.split(" ") ?: return 2000
             if (volumes.size < 3) return 2000
@@ -583,6 +586,16 @@ class SettingsManager {
             } catch (e: Exception) {
                 0.65
             }
+        }
+
+        fun getTazikEndlessExcludeReports(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_exclude_report)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getTazikEndlessExcludeDivs(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_exclude_divs)
+            return preferences.getBoolean(key, true)
         }
 
         /******************** Rockets *************************/

@@ -68,7 +68,7 @@ class Strategy1728Down() : KoinComponent {
         stocks700_1200 = process()
 
         val fromCloseOS = SettingsManager.get1728CalcFromOS()
-        val change = SettingsManager.get1728ChangePercent()
+        val change = SettingsManager.get1728ChangePercent(0)
         val volume = SettingsManager.get1728Volume(0)
         stocks700_1200 = stocks700_1200.filter { it.getTodayVolume() >= volume }.toMutableList()
 
@@ -100,7 +100,7 @@ class Strategy1728Down() : KoinComponent {
         stocks700_1600 = process()
 
         val fromCloseOS = SettingsManager.get1728CalcFromOS()
-        val change = SettingsManager.get1728ChangePercent()
+        val change = SettingsManager.get1728ChangePercent(1)
         val volume = SettingsManager.get1728Volume(1)
         stocks700_1600 = stocks700_1600.filter { it.getTodayVolume() >= volume }.toMutableList()
 
@@ -136,7 +136,7 @@ class Strategy1728Down() : KoinComponent {
         log("1728 TO ${time1632.time}")
 
         val volume = SettingsManager.get1728Volume(2)
-        val change = SettingsManager.get1728ChangePercent()
+        val change = SettingsManager.get1728ChangePercent(2)
         stocks1625_1632 = stocks1625_1632.filter { it.getTodayVolume() >= volume }.toMutableList()
 
         stocks1625_1632.forEach { stock ->

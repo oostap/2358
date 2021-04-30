@@ -1,9 +1,6 @@
 package com.project.ti2358.data.manager
 
-import android.content.Context
 import android.content.SharedPreferences
-import android.os.PowerManager
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
@@ -13,11 +10,9 @@ import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.abs
 import kotlin.math.roundToInt
-
 
 @KoinApiExtension
 class StrategyTazikEndless : KoinComponent {
@@ -132,10 +127,14 @@ class StrategyTazikEndless : KoinComponent {
         stocksToPurchase.removeAll { it.lots == 0 }
 
         // удалить все бумаги, у которых недавно или скоро отчёты
-        stocksToPurchase.removeAll { it.stock.report != null }
+        if (SettingsManager.getTazikEndlessExcludeReports()) {
+            stocksToPurchase.removeAll { it.stock.report != null }
+        }
 
         // удалить все бумаги, у которых скоро дивы
-        stocksToPurchase.removeAll { it.stock.dividend != null }
+        if (SettingsManager.getTazikEndlessExcludeDivs()) {
+            stocksToPurchase.removeAll { it.stock.dividend != null }
+        }
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         stocksToPurchase.removeAll { p -> depositManager.portfolioPositions.any { it.ticker == p.ticker } }
