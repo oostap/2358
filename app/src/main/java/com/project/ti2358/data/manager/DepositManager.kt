@@ -12,6 +12,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.util.*
 import java.util.Collections.synchronizedList
 import kotlin.math.abs
@@ -116,7 +118,9 @@ class DepositManager : KoinComponent {
                 total += currency.balance
             }
         }
-        return "%.2f$".format(locale = Locale.US, total)
+        val symbols = DecimalFormatSymbols.getInstance()
+        symbols.groupingSeparator = ' '
+        return DecimalFormat( "###,###.##",symbols).format(total)
     }
 
     fun getFreeCashRUB(): String {
@@ -126,7 +130,9 @@ class DepositManager : KoinComponent {
                 total += currency.balance
             }
         }
-        return "%.2f₽".format(locale = Locale.US, total)
+        val symbols = DecimalFormatSymbols.getInstance()
+        symbols.groupingSeparator = ' '
+        return  DecimalFormat( "###,###.##",symbols).format(total)
     }
 
     private fun getFreeCash(): Double {
