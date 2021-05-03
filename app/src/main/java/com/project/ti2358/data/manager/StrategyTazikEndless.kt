@@ -195,7 +195,7 @@ class StrategyTazikEndless : KoinComponent {
                     "${stock.tazikEndlessPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceNow(volume, true).toMoney(stock.stock)} = " +
                     "${change.toPercent()} ${stock.getStatusString()} v=${vol}\n"
         }
-        if (tickers == "") tickers = "только отрицательные бумаги ⏳⏳⏳"
+        if (tickers == "") tickers = "только отрицательные бумаги ⏳"
 
         return tickers
     }

@@ -253,6 +253,7 @@ class StockManager : KoinComponent {
         val ignoreFigi = arrayOf("BBG00GTWPCQ0", "BBG000R3RKT8", "BBG0089KM290", "BBG000D9V7T4", "BBG000TZGXK8", "BBG001P3K000", "BBG003QRSQD3", "BBG001DJNR51", "BBG000MDCJV7", "BBG000BS9HN3", "BBG000BCNYT9", "BBG002BHBHM1", "BBG000GLG0G0", "BBG00F40L971", "BBG000BXNJ07", "BBG00HY28P97", "BBG000PCNQN7", "BBG000C1JTL6", "BBG000BGTX98", "BBG000C15114", "BBG000BB0P33", "BBG000FH5YM1", "BBG00J5LMW10", "BBG000BL4504")
         val ignoreTickers = arrayOf("AAXN", "LVGO", "TECD", "NBL", "AIMT", "CXO", "ETFC", "LOGM", "IMMU", "LM", "BMCH", "AGN", "MYL", "MYOK", "AXE", "HDS", "AGN", "SINA", "TIF", "TCS")
 
+        val temp = mutableListOf<Stock>()
         for (instrument in instrumentsAll) {
             // исключить фиги, по которым не отдаёт данные
             if (instrument.figi in ignoreFigi) continue
@@ -266,10 +267,11 @@ class StockManager : KoinComponent {
             // исключить фонды тинькова
             if ("TCS" in instrument.figi) continue
 
-            stocksAll.add(Stock(instrument).apply {
+            temp.add(Stock(instrument).apply {
                 alterName = alterNames[ticker] ?: ""
             })
         }
+        stocksAll = synchronizedList(temp)
         processStocks()
         resetSubscription(stocksStream)
     }

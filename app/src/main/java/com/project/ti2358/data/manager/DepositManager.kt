@@ -111,6 +111,18 @@ class DepositManager : KoinComponent {
         }
     }
 
+    fun getFreeCashEUR(): String {
+        var total = 0.0
+        for (currency in currencyPositions) {
+            if (currency.currency == Currency.EUR) {
+                total += currency.balance
+            }
+        }
+        val symbols = DecimalFormatSymbols.getInstance()
+        symbols.groupingSeparator = ' '
+        return DecimalFormat("###,###.##€", symbols).format(total)
+    }
+
     fun getFreeCashUSD(): String {
         var total = 0.0
         for (currency in currencyPositions) {
@@ -120,7 +132,7 @@ class DepositManager : KoinComponent {
         }
         val symbols = DecimalFormatSymbols.getInstance()
         symbols.groupingSeparator = ' '
-        return DecimalFormat( "###,###.##",symbols).format(total)
+        return DecimalFormat("###,###.##$", symbols).format(total)
     }
 
     fun getFreeCashRUB(): String {
@@ -132,7 +144,7 @@ class DepositManager : KoinComponent {
         }
         val symbols = DecimalFormatSymbols.getInstance()
         symbols.groupingSeparator = ' '
-        return  DecimalFormat( "###,###.##",symbols).format(total)
+        return DecimalFormat("###,###.##₽", symbols).format(total)
     }
 
     private fun getFreeCash(): Double {

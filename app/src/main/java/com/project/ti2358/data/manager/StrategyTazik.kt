@@ -6,10 +6,7 @@ import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.service.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -124,17 +121,21 @@ class StrategyTazik : KoinComponent {
             }
         }.toMutableList()
 
-        // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
-        // удалить все бумаги, у которых 0 лотов
-        stocksToPurchase.removeAll { p ->
-            p.lots == 0 || depositManager.portfolioPositions.any { it.ticker == p.ticker }
-        }
+        // удалить все бумаги, у которых 0 лотов = не хватает на покупку одной части
+        stocksToPurchase.removeAll { it.lots == 0 }
 
         // удалить все бумаги, у которых недавно или скоро отчёты
-        stocksToPurchase.removeAll { it.stock.report != null }
+        if (SettingsManager.getTazikEndlessExcludeReports()) {
+            stocksToPurchase.removeAll { it.stock.report != null }
+        }
 
         // удалить все бумаги, у которых скоро дивы
-        stocksToPurchase.removeAll { it.stock.dividend != null }
+        if (SettingsManager.getTazikEndlessExcludeDivs()) {
+            stocksToPurchase.removeAll { it.stock.dividend != null }
+        }
+
+        // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
+        stocksToPurchase.removeAll { p -> depositManager.portfolioPositions.any { it.ticker == p.ticker } }
 
         stocksToPurchaseClone = stocksToPurchase.toMutableList()
 
@@ -326,7 +327,7 @@ class StrategyTazik : KoinComponent {
             return true
         }
 
-        // текущий change ниже предыдущего на 1.5x?
+        // усреднение => текущий change ниже предыдущего на 1.5x?
         if (SettingsManager.getTazikAllowAveraging() && ticker in stocksTickerInProcess) { // разрешить усреднение?
             val prevChange = stocksTickerInProcess[ticker]?.second ?: 0.0
             if (prevChange != 0.0 && abs(change / prevChange) >= 1.5) {
@@ -361,7 +362,10 @@ class StrategyTazik : KoinComponent {
         // если стратегия стартанула и какие-то корутины уже завершились, то убрать их, чтобы появился доступ для новых покупок
         for (value in stocksTickerInProcess) {
             if (!value.value.first.isActive) {
-                stocksTickerInProcess.remove(value.key)
+                GlobalScope.launch(Dispatchers.Main) {
+                    delay(1000 * 10)
+                    stocksTickerInProcess.remove(value.key)
+                }
                 break
             }
         }
