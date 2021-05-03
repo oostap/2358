@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.StrategyBlacklist
 import com.project.ti2358.databinding.FragmentBlacklistBinding
 import com.project.ti2358.databinding.FragmentBlacklistItemBinding
@@ -23,6 +24,7 @@ import java.util.*
 @KoinApiExtension
 class BlacklistFragment : Fragment(R.layout.fragment_blacklist) {
     val strategyBlacklist: StrategyBlacklist by inject()
+    val stockManager: StockManager by inject()
 
     private var fragmentBlacklistBinding: FragmentBlacklistBinding? = null
 
@@ -71,7 +73,7 @@ class BlacklistFragment : Fragment(R.layout.fragment_blacklist) {
     }
 
     private fun updateData(query: String = "") {
-        stocks = strategyBlacklist.process()
+        stocks = strategyBlacklist.process(stockManager.stocksStream)
         stocks = strategyBlacklist.resort()
         stocks = Utils.search(stocks, query)
         adapterList.setData(stocks)

@@ -8,11 +8,9 @@ import com.project.ti2358.TheApplication
 import com.project.ti2358.service.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 @KoinApiExtension
 class StrategyFavorites : KoinComponent {
-    private val stockManager: StockManager by inject()
     private val keySavedStocks: String = "favorites"
 
     var stocks: MutableList<Stock> = mutableListOf()
@@ -24,9 +22,8 @@ class StrategyFavorites : KoinComponent {
         var stocksSelected: MutableList<Stock> = mutableListOf()
     }
 
-    fun process(): MutableList<Stock> {
-        val all = stockManager.getAllStocks()
-        stocks = all
+    fun process(allStocks: List<Stock>): MutableList<Stock> {
+        stocks = allStocks.toMutableList()
         stocks.sortBy { it.changePrice2300DayPercent }
         loadSelectedStocks()
         return stocks
