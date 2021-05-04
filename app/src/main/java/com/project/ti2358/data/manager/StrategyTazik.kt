@@ -22,15 +22,14 @@ class StrategyTazik : KoinComponent {
     private val depositManager: DepositManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTelegram: StrategyTelegram by inject()
+    private val strategyBlacklist: StrategyBlacklist by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
 
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
     var stocksToPurchaseClone: MutableList<PurchaseStock> = mutableListOf()
-    var stocksTickerInProcess: MutableMap<String, Pair<Job, Double>> = ConcurrentHashMap()
-
-    var activeJobs: MutableList<Job?> = mutableListOf()
+    var stocksTickerInProcess: MutableMap<String, Pair<Job?, Double>> = ConcurrentHashMap()
 
     var basicPercentLimitPriceChange: Double = 0.0
     var started: Boolean = false
@@ -137,6 +136,10 @@ class StrategyTazik : KoinComponent {
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         stocksToPurchase.removeAll { p -> depositManager.portfolioPositions.any { it.ticker == p.ticker } }
 
+        // удалить все бумаги из чёрного списка
+        val blacklist = strategyBlacklist.getBlacklistStocks()
+        stocksToPurchase.removeAll { it.ticker in blacklist.map { stock -> stock.ticker } }
+
         stocksToPurchaseClone = stocksToPurchase.toMutableList()
 
         return stocksToPurchase
@@ -172,7 +175,7 @@ class StrategyTazik : KoinComponent {
         val p = SettingsManager.getTazikPurchaseParts()
         val volumeShares = SettingsManager.getTazikMinVolume()
         return String.format("%d из %d по %.2f$, просадка %.2f / %.2f / %.2f / %d",
-            activeJobs.size, p, volume / p, basicPercentLimitPriceChange, SettingsManager.getTazikTakeProfit(), SettingsManager.getTazikApproximationFactor(), volumeShares)
+            stocksTickerInProcess.size, p, volume / p, basicPercentLimitPriceChange, SettingsManager.getTazikTakeProfit(), SettingsManager.getTazikApproximationFactor(), volumeShares)
     }
 
     fun getNotificationTextShort(): String {
@@ -260,8 +263,8 @@ class StrategyTazik : KoinComponent {
 
         stocksTickerInProcess.forEach {
             try {
-                if (it.value.first.isActive) {
-                    it.value.first.cancel()
+                if (it.value.first?.isActive == true) {
+                    it.value.first?.cancel()
                 }
             } catch (e: Exception) {
 
@@ -277,8 +280,8 @@ class StrategyTazik : KoinComponent {
         started = false
         stocksTickerInProcess.forEach {
             try {
-                if (it.value.first.isActive) {
-                    it.value.first.cancel()
+                if (it.value.first?.isActive == true) {
+                    it.value.first?.cancel()
                 }
             } catch (e: Exception) {
 
@@ -320,7 +323,7 @@ class StrategyTazik : KoinComponent {
 
         // лимит на заявки исчерпан?
         val parts = SettingsManager.getTazikPurchaseParts()
-        if (activeJobs.size >= parts) return false
+        if (stocksTickerInProcess.size >= parts) return false
 
         // ещё не брали бумагу?
         if (ticker !in stocksTickerInProcess) {
@@ -361,12 +364,16 @@ class StrategyTazik : KoinComponent {
 
         // если стратегия стартанула и какие-то корутины уже завершились, то убрать их, чтобы появился доступ для новых покупок
         for (value in stocksTickerInProcess) {
-            if (!value.value.first.isActive) {
-                GlobalScope.launch(Dispatchers.Main) {
-                    delay(1000 * 10)
-                    stocksTickerInProcess.remove(value.key)
+            value.value.first?.let {
+                if (!it.isActive) {
+                    val key = value.key
+                    stocksTickerInProcess.remove(key)
+
+                    val purchase = stocksToPurchaseClone.find { stock -> stock.ticker == key }
+                    purchase?.let { stock ->
+                        stock.tazikPrice = stock.stock.getPriceNow(SettingsManager.getTazikMinVolume())
+                    }
                 }
-                break
             }
         }
     }
@@ -402,6 +409,9 @@ class StrategyTazik : KoinComponent {
 
         val change = candle.closingPrice / purchase.tazikPrice * 100.0 - 100.0
 
+        // предварительно положить null, чтобы параллельно ничего не произошло
+        stocksTickerInProcess[stock.ticker] = Pair(null, change)
+
         // просадка < x%
         log("ПРОСАДКА, БЕРЁМ! ${stock.ticker} ➡ $change ➡ ${candle.closingPrice}")
 
@@ -432,7 +442,9 @@ class StrategyTazik : KoinComponent {
         var finalProfit = baseProfit + abs(delta)                           // 0.9% + 0.125% = 1.025%
 
         if (baseProfit == 0.0) finalProfit = 0.0
-        val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikOrderLifeTimeSeconds())
+        val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 0, SettingsManager.getTazikOrderLifeTimeSeconds())
+
+        strategyTelegram.sendTazikBuy(purchase, buyPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
 
         if (job != null) {
             stocksTickerInProcess[stock.ticker] = Pair(job, change)

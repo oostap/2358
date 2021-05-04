@@ -24,6 +24,7 @@ class DepositManager : KoinComponent {
 
     private val portfolioService: PortfolioService by inject()
     private val ordersService: OrdersService by inject()
+    private val strategyBlacklist: StrategyBlacklist by inject()
 
     var portfolioPositions: MutableList<PortfolioPosition> = synchronizedList(mutableListOf())
     var currencyPositions: MutableList<CurrencyPosition> = synchronizedList(mutableListOf())
@@ -212,5 +213,12 @@ class DepositManager : KoinComponent {
                 order.stock = stocksManager.getStockByFigi(order.figi)
             }
         }
+    }
+
+    fun getPositions() : List<PortfolioPosition> {
+        val list = portfolioPositions
+        val blacklist = strategyBlacklist.getBlacklistStocks()
+        list.removeAll { it.ticker in blacklist.map { stock -> stock.ticker } }
+        return list
     }
 }

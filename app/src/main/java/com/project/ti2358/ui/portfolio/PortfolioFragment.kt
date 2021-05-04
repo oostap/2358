@@ -101,7 +101,7 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
         jobUpdate = GlobalScope.launch(Dispatchers.Main) {
             depositManager.refreshDeposit()
             depositManager.refreshKotleta()
-            adapterList.setData(depositManager.portfolioPositions)
+            adapterList.setData(depositManager.getPositions())
             updateTitle()
         }
     }

@@ -222,8 +222,6 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                 // счётчик на количество повторов (возможно просто нет депо) = примерно 1 минуту
                 var tries = counter
                 while (tries >= 0) { // выставить ордер на покупку
-                    tries--
-
                     try {
                         status = PurchaseStatus.ORDER_BUY_PREPARE
                         buyLimitOrder = ordersService.placeLimitOrder(
@@ -244,14 +242,15 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                         depositManager.refreshDeposit()
 
                         // если нет ни ордера, ни позиции, значит чета не так, повторяем
-                        if (depositManager.getOrderAllOrdersForFigi(figi, OperationType.BUY).isEmpty()) continue
-
-                        status = PurchaseStatus.ORDER_BUY
-                        break
+                        if (depositManager.getOrderAllOrdersForFigi(figi, OperationType.BUY).isNotEmpty()) {
+                            status = PurchaseStatus.ORDER_BUY
+                            break
+                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
                     delay(DelaySuperFast)
+                    tries--
                 }
                 if (tries < 0) { // заявка не выставилась, сворачиваем лавочку, можно вернуть один таз
                     Utils.showToastAlert("$ticker: не смогли выставить ордер на покупку по $buyPrice")

@@ -425,4 +425,26 @@ class StrategyTelegram : KoinComponent {
             }
         }
     }
+
+    fun sendTazikBuy(purchase: PurchaseStock, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
+        if (started) {
+            GlobalScope.launch(Dispatchers.Default) {
+                try {
+                    val chatId = SettingsManager.getTelegramChatID().toLong()
+                    val text = "$%s по %.2f$, %.2f$ -> %.2f$ = %.2f%%, %d/%d".format(purchase.ticker, buyPrice, priceFrom, priceTo, change, tazikUsed, tazikTotal)
+                    while (true) {
+                        val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text)
+                        if (result?.first?.isSuccessful == true) {
+                            break
+                        } else {
+                            delay(4000)
+                            continue
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
 }
