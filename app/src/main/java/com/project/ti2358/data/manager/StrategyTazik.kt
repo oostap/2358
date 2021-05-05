@@ -206,7 +206,7 @@ class StrategyTazik : KoinComponent {
                     "${stock.tazikPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceNow(volume).toMoney(stock.stock)} = " +
                     "${change.toPercent()} ${stock.getStatusString()} v=${vol}\n"
         }
-        if (tickers == "") tickers = "только отрицательные бумаги ⏳⏳⏳"
+        if (tickers == "") tickers = "только отрицательные бумаги ⏳"
 
         return tickers
     }
@@ -344,17 +344,12 @@ class StrategyTazik : KoinComponent {
     fun buyFirstOne() {
         for (purchase in stocksToPurchase) {
             val closingPrice = purchase.stock.candleToday?.closingPrice ?: 0.0
-            val volume = purchase.stock.candleToday?.volume ?: 0
+            if (closingPrice == 0.0 || purchase.stock.ticker in stocksTickerInProcess) continue
 
-            if (closingPrice == 0.0) continue
-
-            val change = closingPrice / purchase.tazikPrice * 100.0 - 100.0
-            if (isAllowToBuy(purchase, change, volume)) {
-                purchase.stock.candleToday?.let {
-                    processBuy(purchase, purchase.stock, it)
-                }
-                break
+            purchase.stock.candleToday?.let {
+                processBuy(purchase, purchase.stock, it)
             }
+            break
         }
     }
 
@@ -368,11 +363,6 @@ class StrategyTazik : KoinComponent {
                 if (!it.isActive) {
                     val key = value.key
                     stocksTickerInProcess.remove(key)
-
-                    val purchase = stocksToPurchaseClone.find { stock -> stock.ticker == key }
-                    purchase?.let { stock ->
-                        stock.tazikPrice = stock.stock.getPriceNow(SettingsManager.getTazikMinVolume())
-                    }
                 }
             }
         }
@@ -442,8 +432,9 @@ class StrategyTazik : KoinComponent {
         var finalProfit = baseProfit + abs(delta)                           // 0.9% + 0.125% = 1.025%
 
         if (baseProfit == 0.0) finalProfit = 0.0
-        val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 0, SettingsManager.getTazikOrderLifeTimeSeconds())
+        val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikOrderLifeTimeSeconds())
 
+        purchase.tazikPrice = candle.closingPrice
         strategyTelegram.sendTazikBuy(purchase, buyPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
 
         if (job != null) {

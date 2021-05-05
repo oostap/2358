@@ -284,8 +284,7 @@ class StrategyTazikEndless : KoinComponent {
         val ticker = purchase.ticker
 
         // лимит на заявки исчерпан?
-        val parts = SettingsManager.getTazikEndlessPurchaseParts()
-        if (stocksTickerInProcess.size >= parts) return false
+        if (stocksTickerInProcess.size >= SettingsManager.getTazikEndlessPurchaseParts()) return false
 
         // ещё не брали бумагу?
         if (ticker !in stocksTickerInProcess) {
@@ -305,11 +304,6 @@ class StrategyTazikEndless : KoinComponent {
                 if (!it.isActive) {
                     val key = value.key
                     stocksTickerInProcess.remove(key)
-
-                    val purchase = stocksToPurchaseClone.find { stock -> stock.ticker == key }
-                    purchase?.let { stock ->
-                        stock.tazikEndlessPrice = stock.stock.getPriceNow(SettingsManager.getTazikEndlessMinVolume(), true)
-                    }
                 }
             }
         }
@@ -375,8 +369,9 @@ class StrategyTazikEndless : KoinComponent {
 //        delta *= SettingsManager.getTazikEndlessApproximationFactor() // не учитывать приближение, просто сдавать по настройкам
 
         val finalProfit = SettingsManager.getTazikEndlessTakeProfit()
-        val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 0, SettingsManager.getTazikEndlessOrderLifeTimeSeconds())
+        val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikEndlessOrderLifeTimeSeconds())
 
+        purchase.tazikEndlessPrice = candle.closingPrice
         strategyTelegram.sendTazikBuy(purchase, buyPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
 
         if (job != null) {

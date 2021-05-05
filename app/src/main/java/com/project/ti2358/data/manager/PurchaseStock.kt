@@ -276,7 +276,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                             continue
                         }
 
-                        if (iterations * DelayLong / 1000.0 > orderLifeTimeSeconds && status == PurchaseStatus.ORDER_BUY) { // отменить заявку на покупку
+                        if (iterations * DelayLong / 1000.0 > orderLifeTimeSeconds && (status == PurchaseStatus.ORDER_BUY || status == PurchaseStatus.ORDER_SELL)) { // отменить заявку на покупку
                             status = PurchaseStatus.CANCELED
                             buyLimitOrder?.let {
                                 ordersService.cancel(it.orderId, depositManager.getActiveBrokerAccountId())
@@ -308,7 +308,6 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                         }
 
                         position?.let { // появилась позиция, проверить есть ли что продать
-                            Utils.showToastAlert("$ticker: куплено по $buyPrice")
                             // выставить ордер на продажу
                             try {
                                 val lotsToSell = it.lots - it.blocked.toInt() - lotsPortfolio
@@ -320,6 +319,8 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                                 if (lotsToBuy < 0) {    // если вся купленная позиция распродана, продолжаем
                                     return@let
                                 }
+
+                                Utils.showToastAlert("$ticker: куплено по $buyPrice")
 
                                 sellLimitOrder = ordersService.placeLimitOrder(
                                     lotsToSell,
