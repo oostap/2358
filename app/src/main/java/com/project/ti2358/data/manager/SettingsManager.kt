@@ -495,6 +495,21 @@ class SettingsManager {
             return ""
         }
 
+        fun getTazikExcludeReports(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_exclude_report)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getTazikExcludeDivs(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_exclude_divs)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getTazikExcludeDepo(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_exclude_depo)
+            return preferences.getBoolean(key, true)
+        }
+
         fun getTazikVoice(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_voice)
             return preferences.getBoolean(key, true)
@@ -588,6 +603,11 @@ class SettingsManager {
             }
         }
 
+        fun getTazikEndlessAllowAveraging(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_allow_averaging)
+            return preferences.getBoolean(key, false)
+        }
+
         fun getTazikEndlessExcludeReports(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_exclude_report)
             return preferences.getBoolean(key, true)
@@ -595,6 +615,11 @@ class SettingsManager {
 
         fun getTazikEndlessExcludeDivs(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_exclude_divs)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getTazikEndlessExcludeDepo(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_exclude_depo)
             return preferences.getBoolean(key, true)
         }
 

@@ -124,17 +124,19 @@ class StrategyTazik : KoinComponent {
         stocksToPurchase.removeAll { it.lots == 0 }
 
         // удалить все бумаги, у которых недавно или скоро отчёты
-        if (SettingsManager.getTazikEndlessExcludeReports()) {
+        if (SettingsManager.getTazikExcludeReports()) {
             stocksToPurchase.removeAll { it.stock.report != null }
         }
 
         // удалить все бумаги, у которых скоро дивы
-        if (SettingsManager.getTazikEndlessExcludeDivs()) {
+        if (SettingsManager.getTazikExcludeDivs()) {
             stocksToPurchase.removeAll { it.stock.dividend != null }
         }
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
-        stocksToPurchase.removeAll { p -> depositManager.portfolioPositions.any { it.ticker == p.ticker } }
+        if (SettingsManager.getTazikExcludeDepo()) {
+            stocksToPurchase.removeAll { p -> depositManager.portfolioPositions.any { it.ticker == p.ticker } }
+        }
 
         // удалить все бумаги из чёрного списка
         val blacklist = strategyBlacklist.getBlacklistStocks()
@@ -322,16 +324,20 @@ class StrategyTazik : KoinComponent {
         val ticker = purchase.ticker
 
         // лимит на заявки исчерпан?
-        val parts = SettingsManager.getTazikPurchaseParts()
-        if (stocksTickerInProcess.size >= parts) return false
+        if (stocksTickerInProcess.size >= SettingsManager.getTazikPurchaseParts()) return false
+
+        // проверить, если бумага в депо и усреднение отключено, то запретить тарить
+        if (depositManager.portfolioPositions.find { it.ticker == purchase.ticker } != null && !SettingsManager.getTazikAllowAveraging()) {
+            return false
+        }
 
         // ещё не брали бумагу?
         if (ticker !in stocksTickerInProcess) {
             return true
         }
 
-        // усреднение => текущий change ниже предыдущего на 1.5x?
-        if (SettingsManager.getTazikAllowAveraging()) { // разрешить усреднение?
+        // разрешить усреднение?
+        if (SettingsManager.getTazikAllowAveraging()) {
             return true
         }
 

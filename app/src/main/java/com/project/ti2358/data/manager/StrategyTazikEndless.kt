@@ -138,7 +138,9 @@ class StrategyTazikEndless : KoinComponent {
         }
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
-        stocksToPurchase.removeAll { p -> depositManager.portfolioPositions.any { it.ticker == p.ticker } }
+        if (SettingsManager.getTazikEndlessExcludeDepo()) {
+            stocksToPurchase.removeAll { p -> depositManager.portfolioPositions.any { it.ticker == p.ticker } }
+        }
 
         // удалить все бумаги из чёрного списка
         val blacklist = strategyBlacklist.getBlacklistStocks()
@@ -286,8 +288,18 @@ class StrategyTazikEndless : KoinComponent {
         // лимит на заявки исчерпан?
         if (stocksTickerInProcess.size >= SettingsManager.getTazikEndlessPurchaseParts()) return false
 
+        // проверить, если бумага в депо и усреднение отключено, то запретить тарить
+        if (depositManager.portfolioPositions.find { it.ticker == purchase.ticker } != null && !SettingsManager.getTazikEndlessAllowAveraging()) {
+            return false
+        }
+
         // ещё не брали бумагу?
         if (ticker !in stocksTickerInProcess) {
+            return true
+        }
+
+        // разрешить усреднение?
+        if (SettingsManager.getTazikEndlessAllowAveraging()) {
             return true
         }
 
