@@ -22,7 +22,6 @@ enum class PurchaseStatus {
     WAITING,
     SOLD,
     CANCELED,
-    NOT_FILLED,
     PART_FILLED,
 
     ERROR_NEED_WATCH,
@@ -84,7 +83,6 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
             PurchaseStatus.ORDER_SELL -> "ордер: продажа!"
             PurchaseStatus.SOLD -> "продано! 🤑"
             PurchaseStatus.CANCELED -> "отменена! 🛑"
-            PurchaseStatus.NOT_FILLED -> "не налили 😰"
             PurchaseStatus.PART_FILLED -> "частично налили, продаём"
             PurchaseStatus.ERROR_NEED_WATCH -> "ошибка, дальше руками 🤷‍"
         }
@@ -214,6 +212,8 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
 
         val lotsPortfolio = p?.lots ?: 0
         var lotsToBuy = lots
+
+        status = PurchaseStatus.WAITING
         return GlobalScope.launch(Dispatchers.Main) {
             try {
                 val figi = stock.figi
@@ -302,7 +302,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                         }
 
                         if (orderBuy == null && position == null) { // заявка отменена, ничего не куплено
-                            status = PurchaseStatus.NOT_FILLED
+                            status = PurchaseStatus.CANCELED
                             Utils.showToastAlert("$ticker: не налили по $buyPrice")
                             return@launch
                         }

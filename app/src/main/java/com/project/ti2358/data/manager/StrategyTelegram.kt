@@ -368,6 +368,16 @@ class StrategyTelegram : KoinComponent {
                     val text = "$emoji$${rocketStock.ticker} ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин, v = ${rocketStock.volume}"
                     val chatId = SettingsManager.getTelegramChatID().toLong()
                     val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text)
+
+                    result?.let {
+                        GlobalScope.launch(Dispatchers.Default) {
+                            delay(10 * 1000)
+                            val id = it.first?.body()?.result?.messageId
+                            if (id != null) {
+                                telegramBot?.deleteMessage(ChatId.fromId(id = chatId), messageId = id)
+                            }
+                        }
+                    }
                 } catch (e: Exception) {
 
                 }

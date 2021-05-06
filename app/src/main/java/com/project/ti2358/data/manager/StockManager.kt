@@ -147,7 +147,7 @@ class StockManager : KoinComponent {
                 e.printStackTrace()
                 log("daager ClosePrices not reached")
             }
-            delay(10000)
+            delay(1000)
             tries--
         }
     }
