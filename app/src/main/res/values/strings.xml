@@ -198,13 +198,14 @@
 
     <!-- telegram settings -->
     <string name="stocks_telegram_bot_api_key">API KEY бота</string>
-    <string name="stocks_telegram_chat_id">Айди телеграм чата</string>
+    <string name="stocks_telegram_chat_id">Айди телеграм чатов через пробел</string>
     <string name="stocks_telegram_update_delay">Интервал обновления в секундах 5+</string>
     <string name="stocks_telegram_hello">Привет при старте бота</string>
     <string name="stocks_telegram_bye">Пока при финише бота</string>
     <string name="stocks_telegram_send_trades">Трейды</string>
     <string name="stocks_telegram_send_orders">Ордеры</string>
     <string name="stocks_telegram_send_rockets">Ракеты</string>
+    <string name="stocks_telegram_send_taziks">Тазики</string>
 
     <!-- follower settings -->
     <string name="stocks_follower_pastuh_id">Айди торговцев через пробел</string>
@@ -334,6 +335,7 @@
     <string name="setting_key_telegram_send_trades">telegram_send_trades</string>
     <string name="setting_key_telegram_send_orders">telegram_send_orders</string>
     <string name="setting_key_telegram_send_rockets">telegram_send_rockets</string>
+    <string name="setting_key_telegram_send_taziks">telegram_send_taziks</string>
 
     <!-- follower settings -->
     <string name="setting_key_follower_pastuh_id">follower_pastuh_id</string>

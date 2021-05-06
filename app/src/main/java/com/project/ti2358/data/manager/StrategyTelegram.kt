@@ -82,21 +82,7 @@ class StrategyTelegram : KoinComponent {
                                 continue
                             }
 
-                            try {
-                                val chatId = SettingsManager.getTelegramChatID().toLong()
-                                while (true) {
-                                    val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = operationToString(operation))
-                                    if (result?.first?.isSuccessful == true) {
-                                        break
-                                    } else {
-                                        delay(5000)
-                                        continue
-                                    }
-                                }
-                            } catch (e: Exception) {
-
-                            }
-                            continue
+                            sendMessageToChats(operationToString(operation))
                         }
                     }
                 } catch (e: Exception) {
@@ -129,21 +115,7 @@ class StrategyTelegram : KoinComponent {
                             ordersPosted.add(order.orderId)
                             order.stock = stockManager.getStockByFigi(order.figi)
 
-                            try {
-                                val chatId = SettingsManager.getTelegramChatID().toLong()
-                                while (true) {
-                                    val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = orderToString(order))
-                                    if (result?.first?.isSuccessful == true) {
-                                        break
-                                    } else {
-                                        delay(5000)
-                                        continue
-                                    }
-                                }
-                            } catch (e: Exception) {
-
-                            }
-                            continue
+                            sendMessageToChats(orderToString(order))
                         }
                     }
                 } catch (e: Exception) {
@@ -225,31 +197,12 @@ class StrategyTelegram : KoinComponent {
             }
         }
         telegramBot?.startPolling()
-
-        GlobalScope.launch(Dispatchers.Default) {
-            try {
-                val chatId = SettingsManager.getTelegramChatID().toLong()
-                val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = SettingsManager.getTelegramHello())
-                log(result.toString())
-            } catch (e: Exception) {
-
-            }
-        }
+        sendMessageToChats(SettingsManager.getTelegramHello(), deleteAfterSeconds = 10)
     }
 
     fun stopStrategy() {
         started = false
-        GlobalScope.launch(Dispatchers.Default) {
-            try {
-                val chatId = SettingsManager.getTelegramChatID().toLong()
-                telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = SettingsManager.getTelegramBye())
-                telegramBot?.stopPolling()
-                jobUpdateOperations?.cancel()
-                jobUpdateOrders?.cancel()
-            } catch (e: Exception) {
-
-            }
-        }
+        sendMessageToChats(SettingsManager.getTelegramBye(), deleteAfterSeconds = 10, stop = true)
     }
 
     private fun convertDateToTinkoffDate(calendar: Calendar, zone: String): String {
@@ -357,103 +310,93 @@ class StrategyTelegram : KoinComponent {
 
     fun sendRocket(rocketStock: RocketStock) {
         if (started && SettingsManager.getTelegramSendRockets()) {
-            GlobalScope.launch(Dispatchers.Default) {
-                try {
-                    val emoji = if (rocketStock.changePercent > 0) "🚀" else "☄️"
-                    val changePercent = if (rocketStock.changePercent > 0) {
-                        "+%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
-                    } else {
-                        "%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
-                    }
-                    val text = "$emoji$${rocketStock.ticker} ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин, v = ${rocketStock.volume}"
-                    val chatId = SettingsManager.getTelegramChatID().toLong()
-                    val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text)
-
-                    result?.let {
-                        GlobalScope.launch(Dispatchers.Default) {
-                            delay(10 * 1000)
-                            val id = it.first?.body()?.result?.messageId
-                            if (id != null) {
-                                telegramBot?.deleteMessage(ChatId.fromId(id = chatId), messageId = id)
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-
-                }
+            val emoji = if (rocketStock.changePercent > 0) "🚀" else "☄️"
+            val changePercent = if (rocketStock.changePercent > 0) {
+                "+%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
+            } else {
+                "%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
             }
+            val text = "$emoji$${rocketStock.ticker} ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин, v = ${rocketStock.volume}"
+            sendMessageToChats(text, 60)
         }
     }
 
     fun sendTazik(start: Boolean) {
-        if (started) {
-            GlobalScope.launch(Dispatchers.Default) {
-                val chatId = SettingsManager.getTelegramChatID().toLong()
-                try {
-                    val text = if (start) {
-                        String.format(
-                            "🟢🛁 старт: %.2f%% / %.2f%% / %.2f / v%d / %ds",
-                            SettingsManager.getTazikChangePercent(),
-                            SettingsManager.getTazikTakeProfit(),
-                            SettingsManager.getTazikApproximationFactor(),
-                            SettingsManager.getTazikMinVolume(),
-                            SettingsManager.getTazikOrderLifeTimeSeconds())
-                    } else {
-                        "🔴🛁 стоп!"
-                    }
-
-                    val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+        if (started && SettingsManager.getTelegramSendTaziks()) {
+            val text = if (start) {
+                String.format(
+                    "🟢🛁 старт: %.2f%% / %.2f%% / %.2f / v%d / %ds",
+                    SettingsManager.getTazikChangePercent(),
+                    SettingsManager.getTazikTakeProfit(),
+                    SettingsManager.getTazikApproximationFactor(),
+                    SettingsManager.getTazikMinVolume(),
+                    SettingsManager.getTazikOrderLifeTimeSeconds())
+            } else {
+                "🔴🛁 стоп!"
             }
+            sendMessageToChats(text)
         }
     }
 
     fun sendTazikEndless(start: Boolean) {
-        if (started) {
-            GlobalScope.launch(Dispatchers.Default) {
-                val chatId = SettingsManager.getTelegramChatID().toLong()
-                try {
-                    val text = if (start) {
-                        String.format(
-                            "🟢🛁♾ старт: %.2f%% / %.2f%% / %.2f / v%d / %ds / %ds",
-                            SettingsManager.getTazikEndlessChangePercent(),
-                            SettingsManager.getTazikEndlessTakeProfit(),
-                            SettingsManager.getTazikEndlessApproximationFactor(),
-                            SettingsManager.getTazikEndlessMinVolume(),
-                            SettingsManager.getTazikEndlessResetIntervalSeconds(),
-                            SettingsManager.getTazikEndlessOrderLifeTimeSeconds())
-                    } else {
-                        "🔴🛁♾ стоп!"
-                    }
-
-                    val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+        if (started && SettingsManager.getTelegramSendTaziks()) {
+            val text = if (start) {
+                String.format(
+                    "🟢🛁♾ старт: %.2f%% / %.2f%% / %.2f / v%d / %ds / %ds",
+                    SettingsManager.getTazikEndlessChangePercent(),
+                    SettingsManager.getTazikEndlessTakeProfit(),
+                    SettingsManager.getTazikEndlessApproximationFactor(),
+                    SettingsManager.getTazikEndlessMinVolume(),
+                    SettingsManager.getTazikEndlessResetIntervalSeconds(),
+                    SettingsManager.getTazikEndlessOrderLifeTimeSeconds())
+            } else {
+                "🔴🛁♾ стоп!"
             }
+            sendMessageToChats(text)
         }
     }
 
     fun sendTazikBuy(purchase: PurchaseStock, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
-        if (started) {
-            GlobalScope.launch(Dispatchers.Default) {
-                try {
-                    val chatId = SettingsManager.getTelegramChatID().toLong()
-                    val text = "$%s по %.2f$, %.2f$ -> %.2f$ = %.2f%%, %d/%d".format(purchase.ticker, buyPrice, priceFrom, priceTo, change, tazikUsed, tazikTotal)
+        if (started && SettingsManager.getTelegramSendTaziks()) {
+            val text = "🛁$%s по %.2f$, %.2f$ -> %.2f$ = %.2f%%, %d/%d".format(locale = Locale.US, purchase.ticker, buyPrice, priceFrom, priceTo, change, tazikUsed, tazikTotal)
+            sendMessageToChats(text)
+        }
+    }
+
+    private fun sendMessageToChats(text: String, deleteAfterSeconds: Int = -1, stop: Boolean = false) {
+        GlobalScope.launch(Dispatchers.Default) {
+            try {
+                val chatIds = SettingsManager.getTelegramChatID()
+                for (chatId in chatIds) {
+                    if (text == "") break
+
                     while (true) {
                         val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text)
-                        if (result?.first?.isSuccessful == true) {
-                            break
-                        } else {
-                            delay(4000)
+                        if (result?.first?.isSuccessful != true) {
+                            delay(2500)
                             continue
                         }
+
+                        if (deleteAfterSeconds != -1) {
+                            GlobalScope.launch(Dispatchers.Default) {
+                                delay(deleteAfterSeconds * 1000L)
+                                val id = result.first?.body()?.result?.messageId
+                                if (id != null) {
+                                    telegramBot?.deleteMessage(ChatId.fromId(id = chatId), messageId = id)
+                                }
+                            }
+                        }
+                        break
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
                 }
+
+                if (stop) {
+                    telegramBot?.stopPolling()
+                    jobUpdateOperations?.cancel()
+                    jobUpdateOrders?.cancel()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

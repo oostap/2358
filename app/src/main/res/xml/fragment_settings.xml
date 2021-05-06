@@ -522,6 +522,11 @@
             app:title="@string/stocks_telegram_send_rockets"
             app:defaultValue="true" />
 
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_telegram_send_taziks"
+            app:title="@string/stocks_telegram_send_taziks"
+            app:defaultValue="true" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_follower">

@@ -353,6 +353,7 @@ class StrategyTazikEndless : KoinComponent {
         // ищем цену максимально близкую к просадке
         var delta = abs(change) - abs(purchase.percentLimitPriceChange)
 
+
         // 0.80 коэф приближения к нижней точке, в самом низу могут не налить
         delta *= SettingsManager.getTazikEndlessApproximationFactor()
 
@@ -363,11 +364,14 @@ class StrategyTazikEndless : KoinComponent {
         val buyPrice = purchase.tazikEndlessPrice - abs(purchase.tazikEndlessPrice / 100.0 * percent)
 
         // вычисляем процент профита после сдвига лимитки ниже
+        var finalProfit = SettingsManager.getTazikEndlessTakeProfit()
 
-        // финальный профит
-//        delta *= SettingsManager.getTazikEndlessApproximationFactor() // не учитывать приближение, просто сдавать по настройкам
+        // если мы усредняем, то нужно поставить лимитку продажу выше первого закупа, иначе может получится, что мы сами у себя купим/продадим
+        if (stock.ticker in stocksTickerInProcess && SettingsManager.getTazikEndlessAllowAveraging()) {
+            delta *= SettingsManager.getTazikEndlessApproximationFactor()
+            finalProfit += abs(delta)
+        }
 
-        val finalProfit = SettingsManager.getTazikEndlessTakeProfit()
         val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikEndlessOrderLifeTimeSeconds())
         if (job != null) {
             stocksTickerInProcess[stock.ticker] = job

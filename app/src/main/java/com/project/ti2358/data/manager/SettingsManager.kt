@@ -676,11 +676,13 @@ class SettingsManager {
             return value ?: ""
         }
 
-        fun getTelegramChatID(): String {
+        fun getTelegramChatID(): List<Long> {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_channel_id)
             val value: String? = preferences.getString(key, "")
-            return value ?: ""
+            val ids = value?.split(" ") ?: return emptyList()
+            return ids.map { it.toLong() }
         }
+
 
         fun getTelegramUpdateDelay(): Int {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_update_delay)
@@ -716,6 +718,11 @@ class SettingsManager {
 
         fun getTelegramSendRockets(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_rockets)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getTelegramSendTaziks(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_taziks)
             return preferences.getBoolean(key, true)
         }
 

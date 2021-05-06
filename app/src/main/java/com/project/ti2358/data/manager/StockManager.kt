@@ -213,7 +213,7 @@ class StockManager : KoinComponent {
     }
 
     private val alterNames: Map<String, String> = mapOf(
-        "SPCE" to "галя вирджин",
+        "SPCE" to "галя вирджин спейс",
         "ZYNE" to "зина",
         "COTY" to "кот",
         "M" to "мася",
@@ -434,8 +434,8 @@ class StockManager : KoinComponent {
                 strategyRocket.processStrategy(it)
             }
 
-            withContext(Dispatchers.Main) {
-                if (candle.interval == Interval.DAY) { // получить дневные свечи 1 раз по всем тикерам и отключиться
+            if (candle.interval == Interval.DAY) { // получить дневные свечи 1 раз по всем тикерам и отключиться
+                withContext(Dispatchers.Main) {
                     streamingTinkoffService.unsubscribeCandleEventsStream(stock.figi, Interval.DAY)
                 }
             }
