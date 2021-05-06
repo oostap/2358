@@ -13,10 +13,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.StrategyTazikEndless
 import com.project.ti2358.databinding.FragmentTazikEndlessStartBinding
 import com.project.ti2358.databinding.FragmentTazikEndlessStartItemBinding
 import com.project.ti2358.service.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -85,11 +90,12 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
     }
 
     private fun updateData() {
-        stocks = strategyTazikEndless.process()
-        stocks = strategyTazikEndless.resort()
-        adapterList.setData(stocks)
-
-        updateTitle()
+        GlobalScope.launch(Dispatchers.Main) {
+            strategyTazikEndless.process()
+            stocks = strategyTazikEndless.resort()
+            adapterList.setData(stocks)
+            updateTitle()
+        }
     }
 
     private fun updateTitle() {
@@ -131,8 +137,10 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
                     priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
 
                     chooseView.setOnCheckedChangeListener { _, checked ->
-                        strategyTazikEndless.setSelected(stock, checked)
-                        updateTitle()
+                        GlobalScope.launch {
+                            strategyTazikEndless.setSelected(stock, checked)
+                            updateTitle()
+                        }
                     }
 
                     itemView.setOnClickListener {

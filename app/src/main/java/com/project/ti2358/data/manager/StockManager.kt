@@ -19,10 +19,7 @@ import com.project.ti2358.service.log
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.schedulers.Schedulers
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -42,11 +39,10 @@ class StockManager : KoinComponent {
     private val strategyRocket: StrategyRocket by inject()
     private val strategyFixPrice: StrategyFixPrice by inject()
 
-    private var instrumentsAll: MutableList<Instrument> = mutableListOf()
     private var stocksAll: MutableList<Stock> = mutableListOf()
 
     // все акции, которые участвуют в расчётах с учётом базовой сортировки по валюте $
-    private var stocksStream: MutableList<Stock> = mutableListOf()
+    var stocksStream: List<Stock> = listOf()
 
     var indices: MutableList<Index> = mutableListOf()
     var stockClosePrices: Map<String, ClosePrice> = mutableMapOf()
@@ -59,20 +55,17 @@ class StockManager : KoinComponent {
 
     companion object {
         var stockIndexComponents: StockIndexComponents? = null
+        val stockContext = newSingleThreadContext("computationThread")
     }
 
-    fun getAllStocks(): MutableList<Stock> {
-        return stocksStream
-    }
-
-    @Synchronized
     fun getWhiteStocks(): MutableList<Stock> {
         val blacklist = strategyBlacklist.getBlacklistStocks()
         val all = stocksStream
         return all.filter { it !in blacklist }.toMutableList()
     }
 
-    fun loadStocks(force: Boolean = false) {
+    fun loadStocks(force: Boolean = false) = GlobalScope.launch (stockContext) {
+        var instrumentsAll: MutableList<Instrument> = mutableListOf()
         var reloadStocks = force
         val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
         val keyStartUp = "start_ups"
@@ -91,26 +84,26 @@ class StockManager : KoinComponent {
         }
 
         if (instrumentsAll.isNotEmpty() && !reloadStocks) {
-            afterLoadInstruments()
-            return
-        }
+            afterLoadInstruments(instrumentsAll)
+        } else {
+            instrumentsAll.clear()
 
-        instrumentsAll.clear()
-
-        GlobalScope.launch(Dispatchers.Default) {
-            while (instrumentsAll.isEmpty()) {
-                try {
-                    instrumentsAll = synchronizedList(marketService.stocks().instruments as MutableList<Instrument>)
-                    jsonInstruments = gson.toJson(instrumentsAll)
-                    editor.putString(key, jsonInstruments)
-                    editor.apply()
-                    afterLoadInstruments()
-                    break
-                } catch (e: Exception) {
-                    e.printStackTrace()
+            launch (Dispatchers.IO){
+                while (instrumentsAll.isEmpty()) {
+                    try {
+                        instrumentsAll = synchronizedList(marketService.stocks().instruments as MutableList<Instrument>)
+                        jsonInstruments = gson.toJson(instrumentsAll)
+                        editor.putString(key, jsonInstruments)
+                        editor.apply()
+                        afterLoadInstruments(instrumentsAll)
+                        break
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    delay(1000) // 1 sec
                 }
-                delay(1000) // 1 sec
             }
+
         }
     }
 
@@ -130,7 +123,7 @@ class StockManager : KoinComponent {
         }
     }
 
-    suspend fun reloadClosePrices() {
+    suspend fun reloadClosePrices() = withContext(stockContext) {
         var tries = 10
         while (tries > 0) {
             try {
@@ -152,7 +145,7 @@ class StockManager : KoinComponent {
         }
     }
 
-    private suspend fun reloadStockIndices() {
+    private suspend fun reloadStockIndices() = withContext(stockContext) {
         try {
             stockIndexComponents = thirdPartyService.daagerStockIndices()
             stocksAll.forEach { it.apply {
@@ -164,7 +157,7 @@ class StockManager : KoinComponent {
         }
     }
 
-    suspend fun reloadReports() {
+    suspend fun reloadReports() = withContext(stockContext) {
         try {
             stockReports = thirdPartyService.daagerReports()
             stocksAll.forEach {
@@ -177,7 +170,7 @@ class StockManager : KoinComponent {
         }
     }
 
-    suspend fun reloadShortInfo() {
+    suspend fun reloadShortInfo() = withContext(stockContext){
         try {
             stockShorts = thirdPartyService.daagerShortInfo()
             stocksAll.forEach {
@@ -190,7 +183,7 @@ class StockManager : KoinComponent {
         }
     }
 
-    suspend fun reloadStockPrice1728() {
+    suspend fun reloadStockPrice1728() = withContext(stockContext){
         try {
             stockPrice1728 = thirdPartyService.daagerStock1728()
             stocksAll.forEach {
@@ -206,7 +199,7 @@ class StockManager : KoinComponent {
         }
     }
 
-    suspend fun reloadMorningCompanies() {
+    suspend fun reloadMorningCompanies() = withContext(stockContext){
         try {
             stockMorning = thirdPartyService.daagerMorningCompanies()
             stocksAll.forEach {
@@ -247,7 +240,7 @@ class StockManager : KoinComponent {
         "BIDU" to "байда беда",
     )
 
-    private fun afterLoadInstruments() {
+    private suspend fun afterLoadInstruments(instrumentsAll: MutableList<Instrument>) = withContext(stockContext){
         stocksAll.clear()
 
         val ignoreFigi = arrayOf("BBG00GTWPCQ0", "BBG000R3RKT8", "BBG0089KM290", "BBG000D9V7T4", "BBG000TZGXK8", "BBG001P3K000", "BBG003QRSQD3", "BBG001DJNR51", "BBG000MDCJV7", "BBG000BS9HN3", "BBG000BCNYT9", "BBG002BHBHM1", "BBG000GLG0G0", "BBG00F40L971", "BBG000BXNJ07", "BBG00HY28P97", "BBG000PCNQN7", "BBG000C1JTL6", "BBG000BGTX98", "BBG000C15114", "BBG000BB0P33", "BBG000FH5YM1", "BBG00J5LMW10", "BBG000BL4504")
@@ -273,7 +266,7 @@ class StockManager : KoinComponent {
         }
         stocksAll = synchronizedList(temp)
         processStocks()
-        resetSubscription(stocksStream)
+        resetSubscription()
     }
 
     fun getStockByFigi(figi: String): Stock? {
@@ -284,37 +277,35 @@ class StockManager : KoinComponent {
         return stocksAll.find { it.ticker == ticker }
     }
 
-    private fun processStocks() {
+    private suspend fun processStocks() = withContext(stockContext) {
         stocksStream = synchronizedList(stocksAll.filter { SettingsManager.isAllowCurrency(it.instrument.currency) }.toMutableList())
-        strategyFavorites.process()
-        strategyBlacklist.process()
+        strategyFavorites.process(stocksStream)
+        strategyBlacklist.process(stocksStream)
         strategyFixPrice.restartStrategy()
 
         // загрузить цену закрытия
-        GlobalScope.launch(Dispatchers.Default) {
-            while (true) {
-                try {
-                    reloadClosePrices()
-                    reloadReports()
-                    reloadShortInfo()
-                    reloadStockIndices()
-                    reloadStockPrice1728()
-                    reloadMorningCompanies()
-                    break
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    log("daager some OpenAPI not reached")
-                }
-                delay(1000)
+        while (true) {
+            try {
+                reloadClosePrices()
+                reloadReports()
+                reloadShortInfo()
+                reloadStockIndices()
+                reloadStockPrice1728()
+                reloadMorningCompanies()
+                break
+            } catch (e: Exception) {
+                e.printStackTrace()
+                log("daager some OpenAPI not reached")
             }
+            delay(1000)
         }
     }
 
-    private fun resetSubscription(stocks: List<Stock>, day: Boolean = true, minute: Boolean = true) {
+    private suspend fun resetSubscription(day: Boolean = true, minute: Boolean = true) = withContext(stockContext) {
         if (SettingsManager.getAlorQuotes()) {
             streamingAlorService
                 .getCandleEventStream(
-                    if (minute) stocks else emptyList(),
+                    if (minute) stocksStream else emptyList(),
                     Interval.MINUTE
                 )
                 .onBackpressureBuffer()
@@ -322,7 +313,9 @@ class StockManager : KoinComponent {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
-                        addCandle(it)
+                        GlobalScope.launch {
+                            addCandle(it)
+                        }
                     },
                     onError = {
                         it.printStackTrace()
@@ -332,7 +325,7 @@ class StockManager : KoinComponent {
         } else {
             streamingTinkoffService
                 .getCandleEventStream(
-                    if (minute) stocks.map { it.figi } else emptyList(),
+                    if (minute) stocksStream.map { it.figi } else emptyList(),
                     Interval.MINUTE
                 )
                 .onBackpressureBuffer()
@@ -340,7 +333,9 @@ class StockManager : KoinComponent {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
-                        addCandle(it)
+                        GlobalScope.launch {
+                            addCandle(it)
+                        }
                     },
                     onError = {
                         it.printStackTrace()
@@ -352,7 +347,7 @@ class StockManager : KoinComponent {
         // дневные лучше всегда брать с ТИ, алор отдаёт очень долго, нужны только для объёмы и когда минутных ещё нет
         streamingTinkoffService
             .getCandleEventStream(
-                if (day) stocks.map { it.figi } else emptyList(),
+                if (day) stocksStream.map { it.figi } else emptyList(),
                 Interval.DAY
             )
             .onBackpressureBuffer()
@@ -360,7 +355,9 @@ class StockManager : KoinComponent {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {
-                    addCandle(it)
+                    GlobalScope.launch {
+                        addCandle(it)
+                    }
                 },
                 onError = {
                     it.printStackTrace()
@@ -381,7 +378,9 @@ class StockManager : KoinComponent {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
-                        addOrderbook(it)
+                        GlobalScope.launch {
+                            addOrderbook(it)
+                        }
                     },
                     onError = {
                         it.printStackTrace()
@@ -399,7 +398,9 @@ class StockManager : KoinComponent {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
-                        addOrderbook(it)
+                        GlobalScope.launch {
+                            addOrderbook(it)
+                        }
                     },
                     onError = {
                         it.printStackTrace()
@@ -417,13 +418,12 @@ class StockManager : KoinComponent {
         }
     }
 
-    private fun addOrderbook(orderbookStream: OrderbookStream) {
+    private suspend fun addOrderbook(orderbookStream: OrderbookStream) = withContext(stockContext) {
         val stock = stocksStream.find { it.figi == orderbookStream.figi || it.ticker == orderbookStream.figi }
         stock?.processOrderbook(orderbookStream)
     }
 
-    @Synchronized
-    private fun addCandle(candle: Candle) {
+    private suspend fun addCandle(candle: Candle) = withContext(stockContext) {
         val stock: Stock? = stocksStream.find { it.ticker == candle.figi || it.figi == candle.figi }
         stock?.let {
             it.processCandle(candle)
@@ -434,8 +434,10 @@ class StockManager : KoinComponent {
                 strategyRocket.processStrategy(it)
             }
 
-            if (candle.interval == Interval.DAY) { // получить дневные свечи 1 раз по всем тикерам и отключиться
-                streamingTinkoffService.unsubscribeCandleEventsStream(stock.figi, Interval.DAY)
+            withContext(Dispatchers.Main) {
+                if (candle.interval == Interval.DAY) { // получить дневные свечи 1 раз по всем тикерам и отключиться
+                    streamingTinkoffService.unsubscribeCandleEventsStream(stock.figi, Interval.DAY)
+                }
             }
         }
     }

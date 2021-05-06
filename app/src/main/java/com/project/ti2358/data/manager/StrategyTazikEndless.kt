@@ -40,7 +40,7 @@ class StrategyTazikEndless : KoinComponent {
         const val PercentLimitChangeDelta = 0.05
     }
 
-    fun process(): MutableList<Stock> {
+    suspend fun process() = withContext(StockManager.stockContext) {
         val all = stockManager.getWhiteStocks()
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
@@ -48,7 +48,6 @@ class StrategyTazikEndless : KoinComponent {
         stocks = all.filter { (it.getPriceNow() > min && it.getPriceNow() < max) || it.getPriceNow() == 0.0 }.toMutableList()
         stocks.sortBy { it.changePrice2300DayPercent }
         loadSelectedStocks()
-        return stocks
     }
 
     private fun loadSelectedStocks() {
@@ -68,17 +67,19 @@ class StrategyTazikEndless : KoinComponent {
         editor.apply()
     }
 
-    fun resort(): MutableList<Stock> {
-        currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
-        stocks.sortBy {
-            val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-            val multiplier = if (it in stocksSelected) 100 else 1
-            it.changePrice2300DayPercent * sign - multiplier
+    suspend fun resort(): MutableList<Stock> {
+        withContext(StockManager.stockContext) {
+            currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
+            stocks.sortBy {
+                val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
+                val multiplier = if (it in stocksSelected) 100 else 1
+                it.changePrice2300DayPercent * sign - multiplier
+            }
         }
         return stocks
     }
 
-    fun setSelected(stock: Stock, value: Boolean) {
+    suspend fun setSelected(stock: Stock, value: Boolean) = withContext(StockManager.stockContext){
         if (value) {
             if (stock !in stocksSelected)
                 stocksSelected.add(stock)
@@ -94,7 +95,7 @@ class StrategyTazikEndless : KoinComponent {
         return stock in stocksSelected
     }
 
-    fun getPurchaseStock(): MutableList<PurchaseStock> {
+    fun getPurchaseStock(): MutableList<PurchaseStock> = runBlocking(StockManager.stockContext) {
         val percent = SettingsManager.getTazikEndlessChangePercent()
         val totalMoney: Double = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
         val onePiece: Double = totalMoney / SettingsManager.getTazikEndlessPurchaseParts()
@@ -148,7 +149,7 @@ class StrategyTazikEndless : KoinComponent {
 
         stocksToPurchaseClone = stocksToPurchase.toMutableList()
 
-        return stocksToPurchase
+        return@runBlocking stocksToPurchase
     }
 
     fun getNotificationTitle(): String {
@@ -157,7 +158,6 @@ class StrategyTazikEndless : KoinComponent {
         return "Бесконечный таз приостановлен"
     }
 
-    @Synchronized
     fun getTotalPurchaseString(): String {
         val volume = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
         val p = SettingsManager.getTazikEndlessPurchaseParts()
@@ -214,8 +214,7 @@ class StrategyTazikEndless : KoinComponent {
         }
     }
 
-    @Synchronized
-    fun startStrategy() {
+    suspend fun startStrategy() = withContext(StockManager.stockContext){
         basicPercentLimitPriceChange = SettingsManager.getTazikEndlessChangePercent()
 
         fixPrice()
@@ -244,8 +243,7 @@ class StrategyTazikEndless : KoinComponent {
         strategyTelegram.sendTazikEndless(true)
     }
 
-    @Synchronized
-    fun stopStrategy() {
+    suspend fun stopStrategy() = withContext(StockManager.stockContext){
         started = false
         stocksTickerInProcess.forEach {
             try {
@@ -261,7 +259,7 @@ class StrategyTazikEndless : KoinComponent {
         strategyTelegram.sendTazikEndless(false)
     }
 
-    fun addBasicPercentLimitPriceChange(sign: Int) {
+    fun addBasicPercentLimitPriceChange(sign: Int) = runBlocking (StockManager.stockContext){
         basicPercentLimitPriceChange += sign * PercentLimitChangeDelta
 
         for (purchase in stocksToPurchase) {
@@ -272,7 +270,6 @@ class StrategyTazikEndless : KoinComponent {
         }
     }
 
-    @Synchronized
     private fun isAllowToBuy(purchase: PurchaseStock, change: Double, volume: Int): Boolean {
         if (purchase.tazikEndlessPrice == 0.0 ||                    // стартовая цена нулевая = не загрузились цены
             abs(change) > 50 ||                                     // конечная цена нулевая или просто огромная просадка
@@ -306,9 +303,8 @@ class StrategyTazikEndless : KoinComponent {
         return false
     }
 
-    @Synchronized
-    fun processUpdate() {
-        if (!started) return
+    fun processUpdate() = runBlocking(StockManager.stockContext){
+        if (!started) return@runBlocking
 
         // если стратегия стартанула и какие-то корутины уже завершились, то убрать их, чтобы появился доступ для новых покупок
         for (value in stocksTickerInProcess) {
@@ -319,28 +315,24 @@ class StrategyTazikEndless : KoinComponent {
         }
     }
 
-    @Synchronized
-    fun processStrategy(stock: Stock, candle: Candle) {
-        if (!started) return
+    suspend fun processStrategy(stock: Stock, candle: Candle) = withContext(StockManager.stockContext) {
+        if (!started) return@withContext
 
         val ticker = stock.ticker
 
         // если бумага не в списке скана - игнорируем
-        synchronized(stocksToPurchaseClone) {
-            val sorted = stocksToPurchaseClone.find { it.ticker == ticker }
-            sorted?.let { purchase ->
-                val change = candle.closingPrice / purchase.tazikEndlessPrice * 100.0 - 100.0
-                val volume = candle.volume
+        val sorted = stocksToPurchaseClone.find { it.ticker == ticker }
+        sorted?.let { purchase ->
+            val change = candle.closingPrice / purchase.tazikEndlessPrice * 100.0 - 100.0
+            val volume = candle.volume
 
-                if (isAllowToBuy(purchase, change, volume)) {
-                    processBuy(purchase, stock, candle)
-                }
+            if (isAllowToBuy(purchase, change, volume)) {
+                processBuy(purchase, stock, candle)
             }
         }
     }
 
-    @Synchronized
-    private fun processBuy(purchase: PurchaseStock, stock: Stock, candle: Candle) {
+    private suspend fun processBuy(purchase: PurchaseStock, stock: Stock, candle: Candle) {
         // завершение стратегии
         val parts = SettingsManager.getTazikEndlessPurchaseParts()
         if (stocksTickerInProcess.size >= parts) { // останавливить стратегию автоматически

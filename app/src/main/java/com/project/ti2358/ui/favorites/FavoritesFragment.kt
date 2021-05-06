@@ -12,13 +12,13 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.ChartManager
-import com.project.ti2358.data.manager.OrderbookManager
-import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.manager.StrategyFavorites
+import com.project.ti2358.data.manager.*
 import com.project.ti2358.databinding.FragmentFavoritesBinding
 import com.project.ti2358.databinding.FragmentFavoritesItemBinding
 import com.project.ti2358.service.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -27,6 +27,7 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
     val orderbookManager: OrderbookManager by inject()
     val chartManager: ChartManager by inject()
     val strategyFavorites: StrategyFavorites by inject()
+    val stockManager: StockManager by inject()
 
     private var fragmentFavoritesBinding: FragmentFavoritesBinding? = null
 
@@ -75,10 +76,12 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
     }
 
     private fun updateData(query: String = "") {
-        stocks = strategyFavorites.process()
-        stocks = strategyFavorites.resort()
-        stocks = Utils.search(stocks, query)
-        adapterList.setData(stocks)
+        GlobalScope.launch(Dispatchers.Main) {
+            strategyFavorites.process(stockManager.stocksStream)
+            stocks = strategyFavorites.resort()
+            stocks = Utils.search(stocks, query)
+            adapterList.setData(stocks)
+        }
     }
 
     private fun updateTitle() {

@@ -17,6 +17,8 @@ import com.project.ti2358.data.manager.StrategyTazikEndless
 import com.project.ti2358.databinding.FragmentTazikEndlessFinishBinding
 import com.project.ti2358.databinding.FragmentTazikEndlessFinishItemBinding
 import com.project.ti2358.service.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -66,7 +68,9 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
             } else {
                 if (strategyTazikEndless.stocksToPurchase.size > 0) {
                     Utils.startService(requireContext(), StrategyTazikEndlessService::class.java)
-                    strategyTazikEndless.startStrategy()
+                    GlobalScope.launch {
+                        strategyTazikEndless.startStrategy()
+                    }
                 }
             }
         }

@@ -379,7 +379,6 @@ class StrategyTazik : KoinComponent {
         }
     }
 
-    @Synchronized
     fun processStrategy(stock: Stock, candle: Candle) {
         if (!started) return
 
