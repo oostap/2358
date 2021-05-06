@@ -222,7 +222,7 @@ class StrategyTazikEndless : KoinComponent {
 
         stocksTickerInProcess.forEach {
             try {
-                if (it.value.isActive == true) {
+                if (it.value.isActive) {
                     it.value.cancel()
                 }
             } catch (e: Exception) {
@@ -249,7 +249,7 @@ class StrategyTazikEndless : KoinComponent {
         started = false
         stocksTickerInProcess.forEach {
             try {
-                if (it.value.isActive == true) {
+                if (it.value.isActive) {
                     it.value.cancel()
                 }
             } catch (e: Exception) {

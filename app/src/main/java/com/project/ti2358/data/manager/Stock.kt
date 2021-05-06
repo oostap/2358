@@ -323,7 +323,7 @@ data class Stock(var instrument: Instrument) {
     private fun updateChangeToday() {
         candleToday?.let { candle ->
             val middlePrice = (candle.highestPrice + candle.lowestPrice) / 2.0
-            dayVolumeCash = middlePrice * candle.volume
+            dayVolumeCash = middlePrice * getTodayVolume()
         }
     }
 
