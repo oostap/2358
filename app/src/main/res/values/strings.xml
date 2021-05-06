@@ -169,6 +169,9 @@
     <string name="stocks_tazik_allow_averaging">Разрешить усреднение</string>
     <string name="stocks_tazik_times">Время старта тазиков МСК (через ",")</string>
     <string name="stocks_tazik_order_lifetime_seconds">Время жизни заявки в секундах</string>
+    <string name="stocks_tazik_exclude_report">Исключать отчёты</string>
+    <string name="stocks_tazik_exclude_divs">Исключать дивы</string>
+    <string name="stocks_tazik_exclude_depo">Исключать бумаги депо</string>
     <string name="stocks_tazik_voice">Озвучка тазов</string>
 
     <!-- endless tazik settings -->
@@ -181,8 +184,10 @@
     <string name="stocks_tazik_endless_order_lifetime_seconds">Время жизни заявки в секундах</string>
     <string name="stocks_tazik_endless_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
     <string name="stocks_tazik_endless_approximation_factor">Приближение к низу свечи [0.0, 1.0]</string>
+    <string name="stocks_tazik_endless_allow_averaging">Разрешить усреднение</string>
     <string name="stocks_tazik_endless_exclude_report">Исключать отчёты</string>
     <string name="stocks_tazik_endless_exclude_divs">Исключать дивы</string>
+    <string name="stocks_tazik_endless_exclude_depo">Исключать бумаги депо</string>
 
     <!-- rocket settings -->
     <string name="stocks_rocket_change_percent">Изменение в %</string>
@@ -293,6 +298,9 @@
     <string name="setting_key_tazik_allow_averaging">tazik_allow_averaging</string>
     <string name="setting_key_tazik_approximation_factor">tazik_approximation_factor</string>
     <string name="setting_key_tazik_order_lifetime_seconds">tazik_order_lifetime_seconds</string>
+    <string name="setting_key_tazik_exclude_report">tazik_exclude_report</string>
+    <string name="setting_key_tazik_exclude_divs">tazik_exclude_divs</string>
+    <string name="setting_key_tazik_exclude_depo">tazik_exclude_depo</string>
     <string name="setting_key_tazik_voice">tazik_voice</string>
 
     <!-- endless tazik settings -->
@@ -305,8 +313,10 @@
     <string name="setting_key_tazik_endless_take_profit">tazik_endless_take_profit</string>
     <string name="setting_key_tazik_endless_approximation_factor">tazik_endless_approximation_factor</string>
     <string name="setting_key_tazik_endless_order_lifetime_seconds">tazik_endless_order_lifetime_seconds</string>
+    <string name="setting_key_tazik_endless_allow_averaging">tazik_endless_allow_averaging</string>
     <string name="setting_key_tazik_endless_exclude_report">endless_exclude_report</string>
     <string name="setting_key_tazik_endless_exclude_divs">endless_exclude_divs</string>
+    <string name="setting_key_tazik_endless_exclude_depo">endless_exclude_depo</string>
 
     <!-- rocket settings -->
     <string name="setting_key_rocket_change_percent">rocket_change_percent</string>

@@ -20,13 +20,14 @@ class StrategyTazikEndless : KoinComponent {
     private val depositManager: DepositManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTelegram: StrategyTelegram by inject()
+    private val strategyBlacklist: StrategyBlacklist by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
 
     var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
     var stocksToPurchaseClone: MutableList<PurchaseStock> = mutableListOf()
-    var stocksTickerInProcess: MutableMap<String, Pair<Job, Double>> = ConcurrentHashMap()
+    var stocksTickerInProcess: MutableMap<String, Job> = ConcurrentHashMap()
 
     var basicPercentLimitPriceChange: Double = 0.0
     var started: Boolean = false
@@ -138,7 +139,13 @@ class StrategyTazikEndless : KoinComponent {
         }
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
-        stocksToPurchase.removeAll { p -> depositManager.portfolioPositions.any { it.ticker == p.ticker } }
+        if (SettingsManager.getTazikEndlessExcludeDepo()) {
+            stocksToPurchase.removeAll { p -> depositManager.portfolioPositions.any { it.ticker == p.ticker } }
+        }
+
+        // удалить все бумаги из чёрного списка
+        val blacklist = strategyBlacklist.getBlacklistStocks()
+        stocksToPurchase.removeAll { it.ticker in blacklist.map { stock -> stock.ticker } }
 
         stocksToPurchaseClone = stocksToPurchase.toMutableList()
 
@@ -195,7 +202,7 @@ class StrategyTazikEndless : KoinComponent {
                     "${stock.tazikEndlessPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceNow(volume, true).toMoney(stock.stock)} = " +
                     "${change.toPercent()} ${stock.getStatusString()} v=${vol}\n"
         }
-        if (tickers == "") tickers = "только отрицательные бумаги ⏳⏳⏳"
+        if (tickers == "") tickers = "только отрицательные бумаги ⏳"
 
         return tickers
     }
@@ -214,8 +221,8 @@ class StrategyTazikEndless : KoinComponent {
 
         stocksTickerInProcess.forEach {
             try {
-                if (it.value.first.isActive) {
-                    it.value.first.cancel()
+                if (it.value.isActive == true) {
+                    it.value.cancel()
                 }
             } catch (e: Exception) {
 
@@ -240,8 +247,8 @@ class StrategyTazikEndless : KoinComponent {
         started = false
         stocksTickerInProcess.forEach {
             try {
-                if (it.value.first.isActive) {
-                    it.value.first.cancel()
+                if (it.value.isActive == true) {
+                    it.value.cancel()
                 }
             } catch (e: Exception) {
 
@@ -276,11 +283,20 @@ class StrategyTazikEndless : KoinComponent {
         val ticker = purchase.ticker
 
         // лимит на заявки исчерпан?
-        val parts = SettingsManager.getTazikEndlessPurchaseParts()
-        if (stocksTickerInProcess.size >= parts) return false
+        if (stocksTickerInProcess.size >= SettingsManager.getTazikEndlessPurchaseParts()) return false
+
+        // проверить, если бумага в депо и усреднение отключено, то запретить тарить
+        if (depositManager.portfolioPositions.find { it.ticker == purchase.ticker } != null && !SettingsManager.getTazikEndlessAllowAveraging()) {
+            return false
+        }
 
         // ещё не брали бумагу?
         if (ticker !in stocksTickerInProcess) {
+            return true
+        }
+
+        // разрешить усреднение?
+        if (SettingsManager.getTazikEndlessAllowAveraging()) {
             return true
         }
 
@@ -292,12 +308,9 @@ class StrategyTazikEndless : KoinComponent {
 
         // если стратегия стартанула и какие-то корутины уже завершились, то убрать их, чтобы появился доступ для новых покупок
         for (value in stocksTickerInProcess) {
-            if (!value.value.first.isActive) {
-                GlobalScope.launch(Dispatchers.Main) {
-                    delay(1000 * 10)
-                    stocksTickerInProcess.remove(value.key)
-                }
-                break
+            if (!value.value.isActive) {
+                val key = value.key
+                stocksTickerInProcess.remove(key)
             }
         }
     }
@@ -322,7 +335,7 @@ class StrategyTazikEndless : KoinComponent {
     private suspend fun processBuy(purchase: PurchaseStock, stock: Stock, candle: Candle) {
         // завершение стратегии
         val parts = SettingsManager.getTazikEndlessPurchaseParts()
-        if (stocksTickerInProcess.size >= parts) { // TODO: не останавливать стратегию автоматически
+        if (stocksTickerInProcess.size >= parts) { // останавливить стратегию автоматически
             stopStrategy()
             return
         }
@@ -356,9 +369,11 @@ class StrategyTazikEndless : KoinComponent {
 
         val finalProfit = SettingsManager.getTazikEndlessTakeProfit()
         val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikEndlessOrderLifeTimeSeconds())
-
         if (job != null) {
-            stocksTickerInProcess[stock.ticker] = Pair(job, change)
+            stocksTickerInProcess[stock.ticker] = job
         }
+
+        purchase.tazikEndlessPrice = candle.closingPrice
+        strategyTelegram.sendTazikBuy(purchase, buyPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
     }
 }

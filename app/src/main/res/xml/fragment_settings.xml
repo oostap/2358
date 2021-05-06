@@ -293,6 +293,21 @@
             app:defaultValue="06:59:55,09:59:55,10:59:55,15:29:55"/>
 
         <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_exclude_report"
+            app:title="@string/stocks_tazik_exclude_report"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_exclude_divs"
+            app:title="@string/stocks_tazik_exclude_divs"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_exclude_depo"
+            app:title="@string/stocks_tazik_exclude_depo"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
             app:key="@string/setting_key_tazik_voice"
             app:title="@string/stocks_tazik_voice"
             app:defaultValue="true" />
@@ -354,6 +369,12 @@
             app:useSimpleSummaryProvider="true"
             app:defaultValue="0.65"/>
 
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_endless_allow_averaging"
+            app:title="@string/stocks_tazik_endless_allow_averaging"
+            app:defaultValue="false" />
+
         <SwitchPreferenceCompat
             app:key="@string/setting_key_tazik_endless_exclude_report"
             app:title="@string/stocks_tazik_endless_exclude_report"
@@ -362,6 +383,11 @@
         <SwitchPreferenceCompat
             app:key="@string/setting_key_tazik_endless_exclude_divs"
             app:title="@string/stocks_tazik_endless_exclude_divs"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_endless_exclude_depo"
+            app:title="@string/stocks_tazik_endless_exclude_depo"
             app:defaultValue="true" />
 
     </PreferenceCategory>

@@ -14,7 +14,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import java.util.*
 import java.util.Collections.synchronizedList
 import kotlin.math.abs
 
@@ -24,6 +23,7 @@ class DepositManager : KoinComponent {
 
     private val portfolioService: PortfolioService by inject()
     private val ordersService: OrdersService by inject()
+    private val strategyBlacklist: StrategyBlacklist by inject()
 
     var portfolioPositions: MutableList<PortfolioPosition> = synchronizedList(mutableListOf())
     var currencyPositions: MutableList<CurrencyPosition> = synchronizedList(mutableListOf())
@@ -111,6 +111,18 @@ class DepositManager : KoinComponent {
         }
     }
 
+    fun getFreeCashEUR(): String {
+        var total = 0.0
+        for (currency in currencyPositions) {
+            if (currency.currency == Currency.EUR) {
+                total += currency.balance
+            }
+        }
+        val symbols = DecimalFormatSymbols.getInstance()
+        symbols.groupingSeparator = ' '
+        return DecimalFormat("###,###.##€", symbols).format(total)
+    }
+
     fun getFreeCashUSD(): String {
         var total = 0.0
         for (currency in currencyPositions) {
@@ -120,7 +132,7 @@ class DepositManager : KoinComponent {
         }
         val symbols = DecimalFormatSymbols.getInstance()
         symbols.groupingSeparator = ' '
-        return DecimalFormat( "###,###.##",symbols).format(total)
+        return DecimalFormat("###,###.##$", symbols).format(total)
     }
 
     fun getFreeCashRUB(): String {
@@ -132,7 +144,7 @@ class DepositManager : KoinComponent {
         }
         val symbols = DecimalFormatSymbols.getInstance()
         symbols.groupingSeparator = ' '
-        return  DecimalFormat( "###,###.##",symbols).format(total)
+        return DecimalFormat("###,###.##₽", symbols).format(total)
     }
 
     private fun getFreeCash(): Double {
@@ -200,5 +212,12 @@ class DepositManager : KoinComponent {
                 order.stock = stocksManager.getStockByFigi(order.figi)
             }
         }
+    }
+
+    fun getPositions() : List<PortfolioPosition> {
+        val list = portfolioPositions
+        val blacklist = strategyBlacklist.getBlacklistStocks()
+        list.removeAll { it.ticker in blacklist.map { stock -> stock.ticker } }
+        return list
     }
 }

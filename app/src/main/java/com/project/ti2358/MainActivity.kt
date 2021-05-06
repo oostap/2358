@@ -67,8 +67,7 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
 
         val header = navView.getHeaderView(0)
-        val cashUSDView: TextView = header.findViewById(R.id.free_cash_usd)
-        val cashRUBView: TextView = header.findViewById(R.id.free_cash_rub)
+        val freeCashView: TextView = header.findViewById(R.id.free_cash)
 
         val index1NameView: TextView = header.findViewById(R.id.index_1_name)
         val index2NameView: TextView = header.findViewById(R.id.index_2_name)
@@ -127,8 +126,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             fun updateInfo() {
-                cashUSDView.text = depositManager.getFreeCashUSD()
-                cashRUBView.text = depositManager.getFreeCashRUB()
+                val cash = depositManager.getFreeCashEUR() + "\n" + depositManager.getFreeCashRUB() + "\n" + depositManager.getFreeCashUSD()
+                freeCashView.text = cash
 
                 val indices = stockManager.indices
 

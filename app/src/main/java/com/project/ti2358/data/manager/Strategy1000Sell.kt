@@ -38,7 +38,7 @@ class Strategy1000Sell() : KoinComponent {
         stocks.sortBy { it.changePrice2300DayPercent }
 
         // удалить все бумаги, по которым нет шорта в ТИ
-        stocks.removeAll { it.short == null && depositManager.portfolioPositions.find { p -> p.ticker == it.ticker } == null}
+        stocks.removeAll { it.short == null && depositManager.getPositions().find { p -> p.ticker == it.ticker } == null}
         return stocks
     }
 
@@ -46,7 +46,7 @@ class Strategy1000Sell() : KoinComponent {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy { stock ->
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-            val position = depositManager.portfolioPositions.find { it.ticker == stock.ticker }
+            val position = depositManager.getPositions().find { it.ticker == stock.ticker }
             val multiplier1 = if (position != null) (abs(position.lots * position.getAveragePrice())).toInt() else 1
             val multiplier3 = if (stock in stocksSelected) 1000 else 1
             stock.changePrice2300DayPercent * sign - multiplier1 - multiplier3

@@ -368,6 +368,16 @@ class StrategyTelegram : KoinComponent {
                     val text = "$emoji$${rocketStock.ticker} ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин, v = ${rocketStock.volume}"
                     val chatId = SettingsManager.getTelegramChatID().toLong()
                     val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text)
+
+                    result?.let {
+                        GlobalScope.launch(Dispatchers.Default) {
+                            delay(10 * 1000)
+                            val id = it.first?.body()?.result?.messageId
+                            if (id != null) {
+                                telegramBot?.deleteMessage(ChatId.fromId(id = chatId), messageId = id)
+                            }
+                        }
+                    }
                 } catch (e: Exception) {
 
                 }
@@ -419,6 +429,28 @@ class StrategyTelegram : KoinComponent {
                     }
 
                     val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    fun sendTazikBuy(purchase: PurchaseStock, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
+        if (started) {
+            GlobalScope.launch(Dispatchers.Default) {
+                try {
+                    val chatId = SettingsManager.getTelegramChatID().toLong()
+                    val text = "$%s по %.2f$, %.2f$ -> %.2f$ = %.2f%%, %d/%d".format(purchase.ticker, buyPrice, priceFrom, priceTo, change, tazikUsed, tazikTotal)
+                    while (true) {
+                        val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text)
+                        if (result?.first?.isSuccessful == true) {
+                            break
+                        } else {
+                            delay(4000)
+                            continue
+                        }
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
