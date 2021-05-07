@@ -340,19 +340,12 @@ class StrategyTazikEndless : KoinComponent {
             return
         }
 
-        if (purchase.tazikEndlessPrice == 0.0) {
-            return
-        }
+        if (purchase.tazikEndlessPrice == 0.0) return
 
         val change = candle.closingPrice / purchase.tazikEndlessPrice * 100.0 - 100.0
 
-        // просадка < x%
-        log("ПРОСАДКА, ТАРИМ! ${stock.ticker} ➡ $change ➡ ${candle.closingPrice}")
-        strategySpeaker.speakTazik(purchase, change)
-
         // ищем цену максимально близкую к просадке
         var delta = abs(change) - abs(purchase.percentLimitPriceChange)
-
 
         // 0.80 коэф приближения к нижней точке, в самом низу могут не налить
         delta *= SettingsManager.getTazikEndlessApproximationFactor()
@@ -362,6 +355,28 @@ class StrategyTazikEndless : KoinComponent {
 
         // вычислияем финальную цену лимитки
         val buyPrice = purchase.tazikEndlessPrice - abs(purchase.tazikEndlessPrice / 100.0 * percent)
+
+        // защита от спайков - сколько минут цена была выше цены покупки, начиная с предыдущей
+        var minutes = SettingsManager.getTazikEndlessSpikeProtection()
+        if (purchase.stock.minuteCandles.size > minutes) { // если свечей на проверку хватает
+            for (i in purchase.stock.minuteCandles.indices.reversed()) {
+
+                // пропустить текущую свечу, по которой у нас просадка
+                if (i == purchase.stock.minuteCandles.size - 1) continue
+
+                // проверить цены закрытия нескольких предыдущих свечей
+                if (purchase.stock.minuteCandles[i].closingPrice > buyPrice) { // если цена выше, отнимаем счётчик, проверяем дальше
+                    minutes--
+
+                    // если несколько свечей подряд с ценой выше, то всё ок - тарим!
+                    if (minutes == 0) {
+                        break
+                    }
+                } else { // был спайк на несколько свечек - тарить опасно!
+                    return
+                }
+            }
+        }
 
         // вычисляем процент профита после сдвига лимитки ниже
         var finalProfit = SettingsManager.getTazikEndlessTakeProfit()
@@ -377,7 +392,8 @@ class StrategyTazikEndless : KoinComponent {
             stocksTickerInProcess[stock.ticker] = job
         }
 
-        purchase.tazikEndlessPrice = candle.closingPrice
+        strategySpeaker.speakTazik(purchase, change)
         strategyTelegram.sendTazikBuy(purchase, buyPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
+        purchase.tazikEndlessPrice = candle.closingPrice
     }
 }

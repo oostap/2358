@@ -33,6 +33,7 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
     private val thirdPartyService: ThirdPartyService by inject()
     private val depositManager: DepositManager by inject()
     private val positionManager: PositionManager by inject()
+    private val strategySpeaker: StrategySpeaker by inject()
 
     private var fragmentPortfolioBinding: FragmentPortfolioBinding? = null
 

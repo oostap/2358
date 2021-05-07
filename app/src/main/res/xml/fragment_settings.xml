@@ -390,6 +390,12 @@
             app:title="@string/stocks_tazik_endless_exclude_depo"
             app:defaultValue="true" />
 
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_endless_spike_protection"
+            app:title="@string/stocks_tazik_endless_spike_protection"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_rocket">

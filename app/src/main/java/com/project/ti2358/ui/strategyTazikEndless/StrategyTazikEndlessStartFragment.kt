@@ -18,10 +18,7 @@ import com.project.ti2358.data.manager.StrategyTazikEndless
 import com.project.ti2358.databinding.FragmentTazikEndlessStartBinding
 import com.project.ti2358.databinding.FragmentTazikEndlessStartItemBinding
 import com.project.ti2358.service.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -73,10 +70,14 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
                 }
 
                 fun processText(text: String) {
-                    updateData()
-
-                    stocks = Utils.search(stocks, text)
-                    adapterList.setData(stocks)
+                    updateData().invokeOnCompletion {
+                        GlobalScope.launch {
+                            stocks = Utils.search(stocks, text)
+                            withContext(Dispatchers.Main) {
+                                adapterList.setData(stocks)
+                            }
+                        }
+                    }
                 }
             })
 
@@ -89,8 +90,8 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
         updateData()
     }
 
-    private fun updateData() {
-        GlobalScope.launch(Dispatchers.Main) {
+    private fun updateData() : Job {
+        return GlobalScope.launch(Dispatchers.Main) {
             strategyTazikEndless.process()
             stocks = strategyTazikEndless.resort()
             adapterList.setData(stocks)
@@ -139,7 +140,9 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
                     chooseView.setOnCheckedChangeListener { _, checked ->
                         GlobalScope.launch {
                             strategyTazikEndless.setSelected(stock, checked)
-                            updateTitle()
+                            withContext(Dispatchers.Main) {
+                                updateTitle()
+                            }
                         }
                     }
 

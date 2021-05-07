@@ -87,11 +87,12 @@ data class TrailingStop(
                     log("TRAILING_STOP продаём по цене ${currentPrice.toMoney(stock)}, профит ${currentChangePercent.toPercent()}")
                     status = TrailingStopStatus.TAKE_PROFIT_ACTIVATED_STOP
 
-                    profitSellPrice = if (currentChangePercent < takeProfitActivationPercent) {
-                        buyPrice + buyPrice / 100.0 * takeProfitActivationPercent // если скачок ниже базового, то тейк на базовый
-                    } else {
-                        currentPrice                                                          // иначе по текущей
-                    }
+                    profitSellPrice = currentTakeProfitPrice // currentPrice // currentTakeProfitPrice
+//                    if (currentChangePercent < takeProfitActivationPercent) {
+//                        buyPrice + buyPrice / 100.0 * takeProfitActivationPercent // если скачок ниже базового, то тейк на базовый
+//                    } else {
+//                        currentPrice                                              // иначе по текущей
+//                    }
                     break
                 }
             }

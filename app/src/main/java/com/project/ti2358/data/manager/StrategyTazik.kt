@@ -409,15 +409,10 @@ class StrategyTazik : KoinComponent {
 
         val change = candle.closingPrice / purchase.tazikPrice * 100.0 - 100.0
 
-        // просадка < x%
-        log("ПРОСАДКА, БЕРЁМ! ${stock.ticker} ➡ $change ➡ ${candle.closingPrice}")
-
         val baseProfit = SettingsManager.getTazikTakeProfit()
         val totalMoney: Double = SettingsManager.getTazikPurchaseVolume().toDouble()
         val onePiece: Double = totalMoney / SettingsManager.getTazikPurchaseParts()
         purchase.lots = (onePiece / stock.getPriceNow()).roundToInt()
-
-        strategySpeaker.speakTazik(purchase, change)
 
         // ищем цену максимально близкую к просадке
         var delta = abs(change) - abs(purchase.percentLimitPriceChange)     // 3.0% - 1.0% = 2.0%
@@ -444,7 +439,8 @@ class StrategyTazik : KoinComponent {
             stocksTickerInProcess[stock.ticker] = job
         }
 
-        purchase.tazikPrice = candle.closingPrice
+        strategySpeaker.speakTazik(purchase, change)
         strategyTelegram.sendTazikBuy(purchase, buyPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
+        purchase.tazikPrice = candle.closingPrice
     }
 }

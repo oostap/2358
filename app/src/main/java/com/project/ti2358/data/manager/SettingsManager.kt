@@ -623,6 +623,16 @@ class SettingsManager {
             return preferences.getBoolean(key, true)
         }
 
+        fun getTazikEndlessSpikeProtection(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_spike_protection)
+            val value: String? = preferences.getString(key, "1")
+            return try {
+                parseInt(value ?: "1")
+            } catch (e: Exception) {
+                1
+            }
+        }
+
         /******************** Rockets *************************/
         fun getRocketChangePercent(): Double {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_rocket_change_percent)

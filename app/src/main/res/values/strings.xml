@@ -188,6 +188,7 @@
     <string name="stocks_tazik_endless_exclude_report">Исключать отчёты</string>
     <string name="stocks_tazik_endless_exclude_divs">Исключать дивы</string>
     <string name="stocks_tazik_endless_exclude_depo">Исключать бумаги депо</string>
+    <string name="stocks_tazik_endless_spike_protection">Защита от спайков в минутах (0 = без защиты)</string>
 
     <!-- rocket settings -->
     <string name="stocks_rocket_change_percent">Изменение в %</string>
@@ -318,6 +319,7 @@
     <string name="setting_key_tazik_endless_exclude_report">endless_exclude_report</string>
     <string name="setting_key_tazik_endless_exclude_divs">endless_exclude_divs</string>
     <string name="setting_key_tazik_endless_exclude_depo">endless_exclude_depo</string>
+    <string name="setting_key_tazik_endless_spike_protection">tazik_endless_spike_protection</string>
 
     <!-- rocket settings -->
     <string name="setting_key_rocket_change_percent">rocket_change_percent</string>

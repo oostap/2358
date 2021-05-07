@@ -5,11 +5,13 @@ import android.speech.tts.TextToSpeech
 import com.project.ti2358.TheApplication
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.util.*
 
 @KoinApiExtension
 class StrategySpeaker() : KoinComponent, TextToSpeech.OnInitListener {
     private var textToSpeech: TextToSpeech? = null
+    private val stocksManager: StockManager by inject()
 
     fun start() {
         if (textToSpeech == null) {
@@ -49,8 +51,9 @@ class StrategySpeaker() : KoinComponent, TextToSpeech.OnInitListener {
 
     fun speakTazik(purchaseStock: PurchaseStock, change: Double) {
         if (SettingsManager.getTazikVoice()) {
-            val name = purchaseStock.stock.instrument.name
-            speak("Заявка на покупку %s просадка %.2f%%".format(name, change))
+            val tickerLetters = purchaseStock.stock.ticker.split("", " ")
+            val tickerWithSpace = tickerLetters.joinToString(" ")
+            speak("%s %.2f%%".format(tickerWithSpace, change))
         }
     }
 }
