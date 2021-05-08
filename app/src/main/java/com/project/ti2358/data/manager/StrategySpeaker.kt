@@ -3,15 +3,16 @@ package com.project.ti2358.data.manager
 import android.os.Build
 import android.speech.tts.TextToSpeech
 import com.project.ti2358.TheApplication
+import com.project.ti2358.service.Utils
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import java.util.*
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @KoinApiExtension
-class StrategySpeaker() : KoinComponent, TextToSpeech.OnInitListener {
+class StrategySpeaker : KoinComponent, TextToSpeech.OnInitListener {
     private var textToSpeech: TextToSpeech? = null
-    private val stocksManager: StockManager by inject()
 
     fun start() {
         if (textToSpeech == null) {
@@ -25,7 +26,7 @@ class StrategySpeaker() : KoinComponent, TextToSpeech.OnInitListener {
                 val locale = Locale.getDefault()
                 val result = it.setLanguage(locale)
                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-//                    Utils.showToastAlert("TTS не запущен 1")
+                    Utils.showToastAlert("Голосовой движок не пашет!")
                 }
             }
         }
@@ -43,17 +44,44 @@ class StrategySpeaker() : KoinComponent, TextToSpeech.OnInitListener {
 
     fun speakRocket(rocketStock: RocketStock) {
         if (SettingsManager.getRocketVoice()) {
-            val name = rocketStock.stock.instrument.name
+            val text = makeNiceChange(rocketStock.stock.ticker, rocketStock.changePercent)
             val type = if (rocketStock.changePercent > 0) "ракета" else "комета"
-            speak("%s %s %.2f%% %d мин".format(type, name, rocketStock.changePercent, rocketStock.time))
+            speak("$type $text ${rocketStock.time} мин")
         }
     }
 
     fun speakTazik(purchaseStock: PurchaseStock, change: Double) {
         if (SettingsManager.getTazikVoice()) {
-            val tickerLetters = purchaseStock.stock.ticker.split("", " ")
-            val tickerWithSpace = tickerLetters.joinToString(" ")
-            speak("%s %.2f%%".format(tickerWithSpace, change))
+            val text = makeNiceChange(purchaseStock.stock.ticker, change)
+            speak(text)
         }
+    }
+
+    fun speakTazikSpikeSkip(purchaseStock: PurchaseStock, change: Double) {
+        if (SettingsManager.getTazikVoice()) {
+            val text = makeNiceChange(purchaseStock.stock.ticker, change)
+            speak("спайк. $text")
+        }
+    }
+
+    private fun makeNiceChange(ticker: String, change: Double) : String {
+        val tickerLetters = ticker.split("")
+        val tickerSpaced = tickerLetters.joinToString(" ")
+
+        val first = change.toInt()
+        val second = abs((change - first) * 10).roundToInt()
+
+        var text = tickerSpaced
+        if (change > 0) text += " +"
+        text += " $first"
+        if (second != 0) text += " и $second"
+        text += "%"
+
+        return text
+    }
+
+    fun test() {
+        val text = makeNiceChange("CCXI", -50.4)
+        speak("спайк. $text")
     }
 }

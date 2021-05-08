@@ -373,6 +373,7 @@ class StrategyTazikEndless : KoinComponent {
                         break
                     }
                 } else { // был спайк на несколько свечек - тарить опасно!
+                    strategySpeaker.speakTazikSpikeSkip(purchase, change)
                     return
                 }
             }
