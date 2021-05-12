@@ -358,24 +358,24 @@ class StrategyTazikEndless : KoinComponent {
 
         // защита от спайков - сколько минут цена была выше цены покупки, начиная с предыдущей
         var minutes = SettingsManager.getTazikEndlessSpikeProtection()
-        if (purchase.stock.minuteCandles.size > minutes) { // если свечей на проверку хватает
-            for (i in purchase.stock.minuteCandles.indices.reversed()) {
+        for (i in purchase.stock.minuteCandles.indices.reversed()) {
 
-                // пропустить текущую свечу, по которой у нас просадка
-                if (i == purchase.stock.minuteCandles.size - 1) continue
+            // пропустить текущую свечу, по которой у нас просадка
+            if (i == purchase.stock.minuteCandles.size - 1) continue
 
-                // проверить цены закрытия нескольких предыдущих свечей
-                if (purchase.stock.minuteCandles[i].closingPrice > buyPrice) { // если цена выше, отнимаем счётчик, проверяем дальше
-                    minutes--
+            // проверить цены закрытия нескольких предыдущих свечей
+            if (purchase.stock.minuteCandles[i].closingPrice > buyPrice) { // если цена выше, отнимаем счётчик, проверяем дальше
+                minutes--
 
-                    // если несколько свечей подряд с ценой выше, то всё ок - тарим!
-                    if (minutes == 0) {
-                        break
-                    }
-                } else { // был спайк на несколько свечек - тарить опасно!
-                    strategySpeaker.speakTazikSpikeSkip(purchase, change)
-                    return
+                // если несколько свечей подряд с ценой выше, то всё ок - тарим!
+                if (minutes == 0) {
+                    break
                 }
+            } else { // был спайк на несколько свечек - тарить опасно!
+                // обновить цену, чтобы не затарить на следующей свече, возможен нож ступенькой
+                purchase.tazikEndlessPrice = candle.closingPrice
+                strategySpeaker.speakTazikSpikeSkip(purchase, change)
+                return
             }
         }
 
@@ -392,9 +392,11 @@ class StrategyTazikEndless : KoinComponent {
         if (job != null) {
             stocksTickerInProcess[stock.ticker] = job
         }
+        var sellPrice = buyPrice + buyPrice / 100.0 * finalProfit
+        sellPrice = Utils.makeNicePrice(sellPrice)
 
         strategySpeaker.speakTazik(purchase, change)
-        strategyTelegram.sendTazikBuy(purchase, buyPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
+        strategyTelegram.sendTazikBuy(purchase, buyPrice, sellPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
         purchase.tazikEndlessPrice = candle.closingPrice
     }
 }

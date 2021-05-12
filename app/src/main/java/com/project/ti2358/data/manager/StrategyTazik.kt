@@ -439,8 +439,11 @@ class StrategyTazik : KoinComponent {
             stocksTickerInProcess[stock.ticker] = job
         }
 
+        var sellPrice = buyPrice + buyPrice / 100.0 * finalProfit
+        sellPrice = Utils.makeNicePrice(sellPrice)
+
         strategySpeaker.speakTazik(purchase, change)
-        strategyTelegram.sendTazikBuy(purchase, buyPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
+        strategyTelegram.sendTazikBuy(purchase, buyPrice, sellPrice, purchase.tazikPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
         purchase.tazikPrice = candle.closingPrice
     }
 }

@@ -13,10 +13,7 @@ class StrategyFixPrice() : KoinComponent {
     var stocksSelected: MutableList<Stock> = mutableListOf()
 
     var currentSort: Sorting = Sorting.DESCENDING
-
-    companion object {
-        var strategyStartTime: Calendar = Calendar.getInstance()
-    }
+    var strategyStartTime: Calendar = Calendar.getInstance()
 
     fun process(): MutableList<Stock> {
         val all = stockManager.getWhiteStocks()

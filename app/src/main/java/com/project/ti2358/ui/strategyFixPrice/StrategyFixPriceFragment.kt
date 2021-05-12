@@ -64,7 +64,7 @@ class StrategyFixPriceFragment : Fragment(R.layout.fragment_fixprice) {
     }
 
     private fun updateTime() {
-        val time = StrategyFixPrice.strategyStartTime.time.toString("HH:mm:ss") + " - ..."
+        val time = strategyFixPrice.strategyStartTime.time.toString("HH:mm:ss") + " - NOW"
         val act = requireActivity() as AppCompatActivity
         act.supportActionBar?.title = time
     }

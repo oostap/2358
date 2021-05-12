@@ -321,6 +321,20 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
+    fun sendTrend(trendStock: TrendStock) {
+        if (started && SettingsManager.getTelegramSendTrends()) {
+            val emoji = if (trendStock.changeFromStartToLow < 0) "⤴️" else "⤵️️"
+            val text = "%s$%s %.2f%% : %.2f$ -> %.2f$ = %.2f%%, %.2f$ -> %.2f$ = %.2f%%, %d мин -> %d мин".format(locale = Locale.US,
+                emoji,
+                trendStock.ticker,
+                trendStock.turnValue,
+                trendStock.priceStart, trendStock.priceLow, trendStock.changeFromStartToLow,
+                trendStock.priceLow, trendStock.priceNow, trendStock.changeFromLowToNow,
+                trendStock.timeFromStartToLow, trendStock.timeFromLowToNow)
+            sendMessageToChats(text, -1)
+        }
+    }
+
     fun sendTazik(start: Boolean) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
             val text = if (start) {
@@ -356,9 +370,9 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun sendTazikBuy(purchase: PurchaseStock, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
+    fun sendTazikBuy(purchase: PurchaseStock, buyPrice: Double, sellPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
-            val text = "🛁$%s по %.2f$, %.2f$ -> %.2f$ = %.2f%%, %d/%d".format(locale = Locale.US, purchase.ticker, buyPrice, priceFrom, priceTo, change, tazikUsed, tazikTotal)
+            val text = "🛁$%s B%.2f$ -> S%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(locale = Locale.US, purchase.ticker, buyPrice, sellPrice, priceFrom, priceTo, change, tazikUsed, tazikTotal)
             sendMessageToChats(text)
         }
     }

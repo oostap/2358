@@ -79,6 +79,7 @@
     <string name="menu_chart">График</string>
     <string name="menu_tazik_endless">Бесконечный таз</string>
     <string name="menu_pastuh">Телеграм бот</string>
+    <string name="menu_trends">Смена тренда</string>
 
     <string name="reports">ОТЧЁТЫ</string>
     <string name="dividends">ДИВЫ</string>
@@ -92,6 +93,7 @@
     <string name="settings_header_1005">Фильтр Премаркета</string>
     <string name="settings_header_tazik">Стратегия автотазик</string>
     <string name="settings_header_rocket">Ракеты</string>
+    <string name="settings_header_trends">Смена тренда</string>
     <string name="settings_header_interface">Интерфейс</string>
     <string name="settings_header_telegram">Телеграм</string>
     <string name="settings_header_follower">Телеграм - команды</string>
@@ -207,6 +209,7 @@
     <string name="stocks_telegram_send_orders">Ордеры</string>
     <string name="stocks_telegram_send_rockets">Ракеты</string>
     <string name="stocks_telegram_send_taziks">Тазики</string>
+    <string name="stocks_telegram_send_trends">Тренды</string>
 
     <!-- follower settings -->
     <string name="stocks_follower_pastuh_id">Айди торговцев через пробел</string>
@@ -222,6 +225,13 @@
     <string name="stocks_2225_take_profit_to">Заявка на откуп до в % (0.0 = не создавать)</string>
     <string name="stocks_2225_take_profit_step">Количество заявок в равных долях</string>
     <string name="stocks_2225_protect_stock_up">Защита от раннего слива</string>
+
+    <!-- trend settings -->
+    <string name="stocks_trend_change_min_down_change_percent">Просадка со старта в %</string>
+    <string name="stocks_trend_change_min_up_change_percent">Подъём с лоя в % от % со старта</string>
+    <string name="stocks_trend_after_minutes">Сигналы спустя время в мин</string>
+    <string name="stocks_trend_only_love">Только избранные</string>
+    <string name="stocks_trend_voice">Озвучка трендов</string>
 
     <string name="position_line">position_line</string>
     <string name="action_type">drag_type</string>
@@ -338,6 +348,7 @@
     <string name="setting_key_telegram_send_orders">telegram_send_orders</string>
     <string name="setting_key_telegram_send_rockets">telegram_send_rockets</string>
     <string name="setting_key_telegram_send_taziks">telegram_send_taziks</string>
+    <string name="setting_key_telegram_send_trends">telegram_send_trends</string>
 
     <!-- follower settings -->
     <string name="setting_key_follower_pastuh_id">follower_pastuh_id</string>
@@ -353,5 +364,12 @@
     <string name="setting_key_2225_take_profit_to">2225_take_profit_to</string>
     <string name="setting_key_2225_take_profit_step">2225_take_profit_step</string>
     <string name="setting_key_2225_protect_stock_up">2225_protect_stock_up</string>
+
+    <!-- trend settings -->
+    <string name="setting_key_trend_change_min_down_change_percent">trend_change_min_down_change_percent</string>
+    <string name="setting_key_trend_change_min_up_change_percent">trend_change_min_up_change_percent</string>
+    <string name="setting_key_trend_after_minutes">trend_after_minutes</string>
+    <string name="setting_key_trend_only_love">trend_only_love</string>
+    <string name="setting_key_trend_voice">trend_voice</string>
 
 </resources>

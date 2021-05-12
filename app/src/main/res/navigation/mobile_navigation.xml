@@ -207,6 +207,20 @@
             app:exitAnim="@animator/slide_out_left" />
     </fragment>
 
+    <!-- Trends -->
+
+    <fragment
+        android:id="@+id/nav_trends"
+        android:name="com.project.ti2358.ui.trends.TrendsFragment"
+        android:label="@string/menu_trends"
+        tools:layout="@layout/fragment_trends">
+        <action
+            android:id="@+id/action_nav_trend_to_nav_orderbook"
+            app:destination="@id/nav_orderbook"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left" />
+    </fragment>
+
     <!-- 1000 Sell -->
 
     <fragment

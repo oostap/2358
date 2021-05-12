@@ -736,6 +736,10 @@ class SettingsManager {
             return preferences.getBoolean(key, true)
         }
 
+        fun getTelegramSendTrends(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_trends)
+            return preferences.getBoolean(key, true)
+        }
         /******************** 2225 short *************************/
 
         fun get2225ChangePercent(): Double {
@@ -835,6 +839,47 @@ class SettingsManager {
             } catch (e: Exception) {
                 250
             }
+        }
+
+        /******************** Trends *************************/
+        fun getTrendMinDownPercent(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_trend_change_min_down_change_percent)
+            val value: String? = preferences.getString(key, "5.0")
+            return try {
+                (value ?: "5.0").toDouble()
+            } catch (e: Exception) {
+                5.0
+            }
+        }
+
+        fun getTrendMinUpPercent(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_trend_change_min_up_change_percent)
+            val value: String? = preferences.getString(key, "20.0")
+            return try {
+                (value ?: "20.0").toDouble()
+            } catch (e: Exception) {
+                20.0
+            }
+        }
+
+        fun getTrendAfterMinutes(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_trend_after_minutes)
+            val value: String? = preferences.getString(key, "15")
+            return try {
+                parseInt(value ?: "15")
+            } catch (e: Exception) {
+                15
+            }
+        }
+
+        fun getTrendLove(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_trend_only_love)
+            return preferences.getBoolean(key, false)
+        }
+
+        fun getTrendVoice(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_trend_voice)
+            return preferences.getBoolean(key, true)
         }
     }
 }

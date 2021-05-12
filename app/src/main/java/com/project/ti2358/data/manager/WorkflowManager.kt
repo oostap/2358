@@ -56,6 +56,7 @@ class WorkflowManager() : KoinComponent {
             fun provideStrategySpeaker(): StrategySpeaker = StrategySpeaker()
             fun provideStrategyTelegram(): StrategyTelegram = StrategyTelegram()
             fun provideStrategyFollower(): StrategyFollower = StrategyFollower()
+            fun provideStrategyBounce(): StrategyTrend = StrategyTrend()
 
             // unused yet
             fun provideStrategyShorts(): StrategyShorts = StrategyShorts()
@@ -86,6 +87,7 @@ class WorkflowManager() : KoinComponent {
             single { provideStrategySpeaker() }
             single { provideStrategyTelegram() }
             single { provideStrategyFollower() }
+            single { provideStrategyBounce() }
 
             // unused yet
             single { provideStrategyShorts() }

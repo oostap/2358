@@ -64,6 +64,14 @@ class StrategySpeaker : KoinComponent, TextToSpeech.OnInitListener {
         }
     }
 
+    fun speakTrend(trendStock: TrendStock) {
+        if (SettingsManager.getTrendVoice()) {
+            val text = makeNiceChange(trendStock.stock.ticker, trendStock.changeFromStartToLow)
+            val type = if (trendStock.changeFromStartToLow < 0) "Отскок вверх️" else "Отскок вниз"
+            speak("$type $text") // ${trendStock.timeFromStartToLow} -> ${trendStock.timeFromStartToLow} мин -> ")
+        }
+    }
+
     private fun makeNiceChange(ticker: String, change: Double) : String {
         val tickerLetters = ticker.split("")
         val tickerSpaced = tickerLetters.joinToString(" ")

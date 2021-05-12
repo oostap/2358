@@ -188,13 +188,14 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                         } catch (e: Exception) {
                             1
                         }
-                        log("lots = $value")
                         purchaseStock.lots = value
                         refreshPercent(purchaseStock, false)
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))
                 }
+
+                refreshPercent(purchaseStock)
             }
 
             fun refreshPercent(purchaseStock: PurchaseStock, updateLots: Boolean = true) {

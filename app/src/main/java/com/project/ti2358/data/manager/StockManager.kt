@@ -38,6 +38,7 @@ class StockManager : KoinComponent {
     private val strategyFavorites: StrategyFavorites by inject()
     private val strategyRocket: StrategyRocket by inject()
     private val strategyFixPrice: StrategyFixPrice by inject()
+    private val strategyTrend: StrategyTrend by inject()
 
     private var stocksAll: MutableList<Stock> = mutableListOf()
 
@@ -432,6 +433,7 @@ class StockManager : KoinComponent {
                 strategyTazik.processStrategy(it, candle)
                 strategyTazikEndless.processStrategy(it, candle)
                 strategyRocket.processStrategy(it)
+                strategyTrend.processStrategy(it, candle)
             }
 
             if (candle.interval == Interval.DAY) { // получить дневные свечи 1 раз по всем тикерам и отключиться

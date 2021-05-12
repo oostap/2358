@@ -430,6 +430,37 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/settings_header_trends">
+        <EditTextPreference
+            app:key="@string/setting_key_trend_change_min_down_change_percent"
+            app:title="@string/stocks_trend_change_min_down_change_percent"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="4.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_trend_change_min_up_change_percent"
+            app:title="@string/stocks_trend_change_min_up_change_percent"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="20"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_trend_after_minutes"
+            app:title="@string/stocks_trend_after_minutes"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="15"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_trend_only_love"
+            app:title="@string/stocks_trend_only_love"
+            app:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_trend_voice"
+            app:title="@string/stocks_trend_voice"
+            app:defaultValue="true" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/settings_header_2225">
         <EditTextPreference
             app:key="@string/setting_key_2225_price_change_percent"
@@ -531,6 +562,11 @@
         <SwitchPreferenceCompat
             app:key="@string/setting_key_telegram_send_taziks"
             app:title="@string/stocks_telegram_send_taziks"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_telegram_send_trends"
+            app:title="@string/stocks_telegram_send_trends"
             app:defaultValue="true" />
 
     </PreferenceCategory>

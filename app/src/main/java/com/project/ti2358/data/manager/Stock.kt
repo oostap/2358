@@ -35,8 +35,11 @@ data class Stock(var instrument: Instrument) {
     var changePrice2300DayAbsolute: Double = 0.0
     var changePrice2300DayPercent: Double = 0.0
 
-    // разница со старта таймера
-    var needToFixPrice: Boolean = false
+    // для Trends
+    var priceTrend: Double = 0.0
+    var trendStartTime: Calendar = Calendar.getInstance()
+
+    // разница со старта таймера для FixPrice
     var minuteCandleFixed: Candle? = null
     var priceFixed: Double = 0.0
     var changePriceFixDayAbsolute: Double = 0.0
@@ -335,22 +338,24 @@ data class Stock(var instrument: Instrument) {
     }
 
     private fun updateChangeFixPrice() {
-        if (needToFixPrice && priceFixed == 0.0) {
-            priceFixed = getPriceNow()
-            needToFixPrice = false
-        }
+        if (priceFixed == 0.0) priceFixed = getPriceNow()
         val currentPrice = getPriceNow()
         changePriceFixDayAbsolute = currentPrice - priceFixed
         changePriceFixDayPercent = currentPrice / priceFixed * 100.0 - 100.0
     }
 
     fun resetFixPrice() {
-        needToFixPrice = true
         changePriceFixDayAbsolute = 0.0
         changePriceFixDayPercent = 0.0
         priceFixed = getPriceNow()
         if (minuteCandles.isNotEmpty()) {
             minuteCandleFixed = minuteCandles.last()
         }
+    }
+
+    fun resetTrendPrice() {
+        priceTrend = getPriceNow()
+        trendStartTime = Calendar.getInstance()
+        trendStartTime.set(Calendar.SECOND, 0)
     }
 }

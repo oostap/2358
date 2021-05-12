@@ -69,6 +69,10 @@
             android:icon="@drawable/ic_rocket"
             android:title="@string/menu_rocket" />
         <item
+            android:id="@+id/nav_trends"
+            android:icon="@drawable/ic_rocket"
+            android:title="@string/menu_trends" />
+        <item
             android:id="@+id/nav_fixprice"
             android:icon="@drawable/ic_fix_price"
             android:title="@string/menu_fixprice" />
