@@ -81,9 +81,9 @@
             android:icon="@drawable/ic_tazik_endless"
             android:title="@string/menu_tazik_endless" />
         <item
-            android:id="@+id/nav_pastuh"
+            android:id="@+id/nav_telegram"
             android:icon="@drawable/ic_pastuh"
-            android:title="@string/menu_pastuh" />
+            android:title="@string/menu_telegram" />
         <item
             android:id="@+id/nav_reports"
             android:icon="@drawable/ic_reports"

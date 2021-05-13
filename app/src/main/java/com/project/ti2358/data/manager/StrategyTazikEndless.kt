@@ -240,7 +240,7 @@ class StrategyTazikEndless : KoinComponent {
             }
         }
 
-        strategyTelegram.sendTazikEndless(true)
+        strategyTelegram.sendTazikEndlessStart(true)
     }
 
     suspend fun stopStrategy() = withContext(StockManager.stockContext){
@@ -256,7 +256,7 @@ class StrategyTazikEndless : KoinComponent {
         }
         stocksTickerInProcess.clear()
         jobResetPrice?.cancel()
-        strategyTelegram.sendTazikEndless(false)
+        strategyTelegram.sendTazikEndlessStart(false)
     }
 
     fun addBasicPercentLimitPriceChange(sign: Int) = runBlocking (StockManager.stockContext){

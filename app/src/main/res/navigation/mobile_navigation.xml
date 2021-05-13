@@ -322,13 +322,13 @@
         android:label="@string/menu_chart"
         tools:layout="@layout/fragment_chart" />
 
-    <!-- Pastuh -->
+    <!-- Telegram -->
 
     <fragment
-        android:id="@+id/nav_pastuh"
-        android:name="com.project.ti2358.ui.pastuh.PastuhFragment"
-        android:label="@string/menu_pastuh"
-        tools:layout="@layout/fragment_pastuh" />
+        android:id="@+id/nav_telegram"
+        android:name="com.project.ti2358.ui.telegram.TelegramFragment"
+        android:label="@string/menu_telegram"
+        tools:layout="@layout/fragment_telegram" />
 
     <deepLink
         android:id="@+id/deepLinkOrderbook"

@@ -23,7 +23,6 @@ import kotlin.math.abs
 @KoinApiExtension
 class StrategyTrend : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val strategyFavorites: StrategyFavorites by inject()
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTelegram: StrategyTelegram by inject()
 
@@ -54,10 +53,13 @@ class StrategyTrend : KoinComponent {
         }
 
         started = true
+
+        strategyTelegram.sendTrendStart(true)
     }
 
     fun stopStrategy() {
         started = false
+        strategyTelegram.sendTrendStart(false)
     }
 
     @Synchronized

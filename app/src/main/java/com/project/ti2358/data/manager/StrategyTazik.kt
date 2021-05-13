@@ -284,7 +284,7 @@ class StrategyTazik : KoinComponent {
             }
         }
         stocksTickerInProcess.clear()
-        strategyTelegram.sendTazik(true)
+        strategyTelegram.sendTazikStart(true)
     }
 
     @Synchronized
@@ -300,7 +300,7 @@ class StrategyTazik : KoinComponent {
             }
         }
         stocksTickerInProcess.clear()
-        strategyTelegram.sendTazik(false)
+        strategyTelegram.sendTazikStart(false)
     }
 
     fun addBasicPercentLimitPriceChange(sign: Int) {

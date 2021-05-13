@@ -680,6 +680,11 @@ class SettingsManager {
         }
 
         /******************** Telegram *************************/
+        fun getTelegramAutostart(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_autostart)
+            return preferences.getBoolean(key, false)
+        }
+
         fun getTelegramBotApiKey(): String {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_bot_api_key)
             val value: String? = preferences.getString(key, "")

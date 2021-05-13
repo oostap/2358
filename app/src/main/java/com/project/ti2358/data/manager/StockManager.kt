@@ -1,5 +1,6 @@
 package com.project.ti2358.data.manager
 
+import android.content.Intent
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -15,6 +16,8 @@ import com.project.ti2358.data.service.MarketService
 import com.project.ti2358.data.service.StreamingAlorService
 import com.project.ti2358.data.service.StreamingTinkoffService
 import com.project.ti2358.data.service.ThirdPartyService
+import com.project.ti2358.service.StrategyTelegramService
+import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -39,6 +42,7 @@ class StockManager : KoinComponent {
     private val strategyRocket: StrategyRocket by inject()
     private val strategyFixPrice: StrategyFixPrice by inject()
     private val strategyTrend: StrategyTrend by inject()
+    private val strategyTelegram: StrategyTelegram by inject()
 
     private var stocksAll: MutableList<Stock> = mutableListOf()
 
@@ -135,11 +139,11 @@ class StockManager : KoinComponent {
                         it.updateChange2300()
                     }
                 }
-                log(stockReports.toString())
                 break
             } catch (e: Exception) {
                 e.printStackTrace()
                 log("daager ClosePrices not reached")
+                strategyTelegram.sendClosePriceLoaded(false)
             }
             delay(1000)
             tries--
@@ -152,7 +156,6 @@ class StockManager : KoinComponent {
             stocksAll.forEach { it.apply {
                 stockIndices = stockIndexComponents?.data?.get(it.ticker)
             }}
-            log(stockReports.toString())
         } catch (e: Exception) {
             log("daager StockIndex not reached")
         }
@@ -165,7 +168,6 @@ class StockManager : KoinComponent {
                 it.report = stockReports[it.ticker]?.report
                 it.dividend = stockReports[it.ticker]?.dividend
             }
-            log(stockReports.toString())
         } catch (e: Exception) {
             log("daager Reports not reached")
         }
@@ -177,7 +179,6 @@ class StockManager : KoinComponent {
             stocksAll.forEach {
                 it.short = stockShorts[it.ticker]
             }
-            log(stockShorts.toString())
         } catch (e: Exception) {
             e.printStackTrace()
             log("daager Shorts not reached")
@@ -284,7 +285,14 @@ class StockManager : KoinComponent {
         strategyBlacklist.process(stocksStream)
         strategyFixPrice.restartStrategy()
 
-        // загрузить цену закрытия
+        // автостарт телеги
+        if (SettingsManager.getTelegramBotApiKey() != "" && SettingsManager.getTelegramAutostart()) {
+            if (!Utils.isServiceRunning(TheApplication.application.applicationContext, StrategyTelegramService::class.java)) {
+                Utils.startService(TheApplication.application.applicationContext, StrategyTelegramService::class.java)
+            }
+        }
+
+        // загрузить цены закрытия
         while (true) {
             try {
                 reloadClosePrices()

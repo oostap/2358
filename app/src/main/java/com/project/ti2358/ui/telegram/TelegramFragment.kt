@@ -1,4 +1,4 @@
-package com.project.ti2358.ui.pastuh
+package com.project.ti2358.ui.telegram
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,7 +8,7 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.StockManager
-import com.project.ti2358.databinding.FragmentPastuhBinding
+import com.project.ti2358.databinding.FragmentTelegramBinding
 import com.project.ti2358.service.StrategyFollowerService
 import com.project.ti2358.service.StrategyTelegramService
 import com.project.ti2358.service.Utils
@@ -16,21 +16,21 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class PastuhFragment : Fragment(R.layout.fragment_pastuh) {
+class TelegramFragment : Fragment(R.layout.fragment_telegram) {
     val depositManager: DepositManager by inject()
     val stockManager: StockManager by inject()
 
-    private var fragmentPastuhBinding: FragmentPastuhBinding? = null
+    private var fragmentTelegramBinding: FragmentTelegramBinding? = null
 
     override fun onDestroy() {
-        fragmentPastuhBinding = null
+        fragmentTelegramBinding = null
         super.onDestroy()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val binding = FragmentPastuhBinding.bind(view)
-        fragmentPastuhBinding = binding
+        val binding = FragmentTelegramBinding.bind(view)
+        fragmentTelegramBinding = binding
 
         with(binding) {
             startButton.setOnClickListener {
@@ -65,15 +65,15 @@ class PastuhFragment : Fragment(R.layout.fragment_pastuh) {
 
     private fun updateServiceButtonText() {
         if (Utils.isServiceRunning(requireContext(), StrategyTelegramService::class.java)) {
-            fragmentPastuhBinding?.startButton?.text = getString(R.string.stop)
+            fragmentTelegramBinding?.startButton?.text = getString(R.string.stop)
         } else {
-            fragmentPastuhBinding?.startButton?.text = getString(R.string.start_telegram)
+            fragmentTelegramBinding?.startButton?.text = getString(R.string.start_telegram)
         }
 
         if (Utils.isServiceRunning(requireContext(), StrategyFollowerService::class.java)) {
-            fragmentPastuhBinding?.startFollowerButton?.text = getString(R.string.stop)
+            fragmentTelegramBinding?.startFollowerButton?.text = getString(R.string.stop)
         } else {
-            fragmentPastuhBinding?.startFollowerButton?.text = getString(R.string.start_follower)
+            fragmentTelegramBinding?.startFollowerButton?.text = getString(R.string.start_follower)
         }
     }
 }

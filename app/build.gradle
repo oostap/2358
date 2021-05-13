@@ -14,8 +14,8 @@ android {
         applicationId "com.project.ti2358"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 54
-        versionName "v1.8.0"
+        versionCode 55
+        versionName "v1.8.1"
         multiDexEnabled true
     }
 

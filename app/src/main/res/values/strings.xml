@@ -78,7 +78,7 @@
     <string name="menu_favorites">Избранные</string>
     <string name="menu_chart">График</string>
     <string name="menu_tazik_endless">Бесконечный таз</string>
-    <string name="menu_pastuh">Телеграм бот</string>
+    <string name="menu_telegram">Телеграм бот</string>
     <string name="menu_trends">Смена тренда</string>
 
     <string name="reports">ОТЧЁТЫ</string>
@@ -200,6 +200,7 @@
     <string name="stocks_rocket_voice">Озвучка ракет</string>
 
     <!-- telegram settings -->
+    <string name="stocks_telegram_autostart">Автостарт на запуске</string>
     <string name="stocks_telegram_bot_api_key">API KEY бота</string>
     <string name="stocks_telegram_chat_id">Айди телеграм чатов через пробел</string>
     <string name="stocks_telegram_update_delay">Интервал обновления в секундах 5+</string>
@@ -339,6 +340,7 @@
     <string name="setting_key_rocket_voice">rocket_voice</string>
 
     <!-- telegram settings -->
+    <string name="setting_key_telegram_autostart">telegram_autostart</string>
     <string name="setting_key_telegram_bot_api_key">telegram_bot_api_key</string>
     <string name="setting_key_telegram_channel_id">telegram_channel_id</string>
     <string name="setting_key_telegram_update_delay">telegram_update_delay</string>
