@@ -5,7 +5,6 @@ import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.model.dto.daager.*
 import com.project.ti2358.service.ScreenerType
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.log
 import com.project.ti2358.service.toMoney
 import org.koin.core.component.KoinApiExtension
 import java.util.*
@@ -98,7 +97,7 @@ data class Stock(var instrument: Instrument) {
     @KoinApiExtension
     fun getTickerLove(): String {
         var t = ticker
-        if (StrategyFavorites.stocksSelected.find { it.ticker == t } != null) {
+        if (StrategyLove.stocksSelected.find { it.ticker == t } != null) {
             t += "❤️"
         }
 

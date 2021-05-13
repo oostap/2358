@@ -38,7 +38,7 @@ class WorkflowManager() : KoinComponent {
             fun provideChartManager(): ChartManager = ChartManager()
             fun providePositionManager(): PositionManager = PositionManager()
 
-            fun provideStrategyFavorites(): StrategyFavorites = StrategyFavorites()
+            fun provideStrategyFavorites(): StrategyLove = StrategyLove()
             fun provideStrategyBlacklist(): StrategyBlacklist = StrategyBlacklist()
             fun provideStrategyPremarket(): StrategyPremarket = StrategyPremarket()
             fun provideStrategy1000Sell(): Strategy1000Sell = Strategy1000Sell()

@@ -2,12 +2,15 @@ package com.project.ti2358.ui.strategy1000Sell
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doAfterTextChanged
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -119,6 +122,8 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
         override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
+        var watcher: TextWatcher? = null
+
         inner class ViewHolder(private val binding: Fragment1000SellFinishItemBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(index: Int) {
                 val purchaseStock = values[index]
@@ -160,8 +165,6 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                         priceProfitTotalView.text = ""
                     }
 
-                    refreshPercent(purchaseStock)
-
                     percentPlusButton.setOnClickListener {
                         purchaseStock.percentProfitSellFrom += 0.05
                         refreshPercent(purchaseStock)
@@ -182,30 +185,31 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                         refreshPercent(purchaseStock)
                     }
 
-                    lotsEditText.addTextChangedListener { v ->
-                        val value = try {
-                            (v.toString()).toInt()
-                        } catch (e: Exception) {
-                            1
-                        }
-                        purchaseStock.lots = value
-                        refreshPercent(purchaseStock, false)
-                    }
-
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))
-                }
+                    refreshPercent(purchaseStock)
 
-                refreshPercent(purchaseStock)
+                    lotsEditText.clearFocus()
+                    lotsEditText.removeCallbacks {  }
+                    lotsEditText.removeTextChangedListener(watcher)
+                    lotsEditText.setText("${purchaseStock.lots}")
+                    watcher = lotsEditText.addTextChangedListener { v ->
+                        if (lotsEditText.hasFocus()) {
+                            val value = try {
+                                (v.toString()).toInt()
+                            } catch (e: Exception) {
+                                1
+                            }
+                            purchaseStock.lots = value
+                            refreshPercent(purchaseStock)
+                        }
+                    }
+                }
             }
 
-            fun refreshPercent(purchaseStock: PurchaseStock, updateLots: Boolean = true) {
+            private fun refreshPercent(purchaseStock: PurchaseStock) {
                 with(binding) {
                     percentProfitFutureView.text = purchaseStock.percentProfitSellFrom.toPercent()
                     percentProfitFutureView.setTextColor(Utils.getColorForValue(purchaseStock.percentProfitSellFrom))
-
-                    if (updateLots) {
-                        lotsEditText.setText("${purchaseStock.lots}")
-                    }
 
                     val sellPrice = purchaseStock.getProfitPriceForSell()
                     val totalSellPrice = sellPrice * purchaseStock.lots

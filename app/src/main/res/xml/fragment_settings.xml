@@ -84,6 +84,14 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/menu_favorites">
+        <EditTextPreference
+            app:key="@string/setting_key_love_set"
+            app:title="@string/stocks_love_set"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="SPCE RIG"/>
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/settings_header_1005">
         <EditTextPreference
             app:key="@string/setting_key_premarket_price_change_percent"
@@ -102,6 +110,12 @@
             app:title="@string/stocks_premarket_volume_max_day"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="10000000"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_premarket_only_love"
+            app:title="@string/stocks_premarket_only_love"
+            app:defaultValue="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_2358">

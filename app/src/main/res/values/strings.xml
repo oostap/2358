@@ -150,6 +150,7 @@
     <string name="stocks_premarket_price_change_percent">Изменение от %</string>
     <string name="stocks_premarket_volume_min_day">Объём за день ОТ шт.</string>
     <string name="stocks_premarket_volume_max_day">Объём за день ДО шт.</string>
+    <string name="stocks_premarket_only_love">Только избранные</string>
 
     <!-- 1728 settings -->
     <string name="stocks_1728_volume_min_each_steps">Объём каждого шага отсева от шт. (через пробел)</string>
@@ -158,6 +159,9 @@
     <string name="stocks_1728_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
     <string name="stocks_1728_trailing_stop">Трейлинг тейк</string>
     <string name="stocks_1728_calc_from_os">Отсчёт с конца ОС</string>
+
+    <!-- love settings -->
+    <string name="stocks_love_set">Набор избранных (тикеры через пробел)</string>
 
     <!-- tazik settings -->
     <string name="stocks_tazik_set_1">Набор 1 (тикеры через пробел)</string>
@@ -286,10 +290,14 @@
     <string name="setting_key_1000_buy_purchase_volume">1000_buy_purchase_volume</string>
     <string name="setting_key_1000_buy_order_lifetime_seconds">1000_buy_order_lifetime_seconds</string>
 
+    <!-- love settings -->
+    <string name="setting_key_love_set">love_set</string>
+
     <!-- premarket settings -->
     <string name="setting_key_premarket_price_change_percent">premarket_price_change_percent</string>
     <string name="setting_key_premarket_volume_min_day">premarket_volume_min_day</string>
     <string name="setting_key_premarket_volume_max_day">premarket_volume_max_day</string>
+    <string name="setting_key_premarket_only_love">premarket_only_love</string>
 
     <!-- 1728 settings -->
     <string name="setting_key_1728_volume_min_each_steps">1728_volume_min_each_steps</string>

@@ -1,6 +1,5 @@
 package com.project.ti2358.data.manager
 
-import android.content.Intent
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -38,7 +37,7 @@ class StockManager : KoinComponent {
     private val strategyTazik: StrategyTazik by inject()
     private val strategyTazikEndless: StrategyTazikEndless by inject()
     private val strategyBlacklist: StrategyBlacklist by inject()
-    private val strategyFavorites: StrategyFavorites by inject()
+    private val strategyLove: StrategyLove by inject()
     private val strategyRocket: StrategyRocket by inject()
     private val strategyFixPrice: StrategyFixPrice by inject()
     private val strategyTrend: StrategyTrend by inject()
@@ -281,7 +280,7 @@ class StockManager : KoinComponent {
 
     private suspend fun processStocks() = withContext(stockContext) {
         stocksStream = synchronizedList(stocksAll.filter { SettingsManager.isAllowCurrency(it.instrument.currency) }.toMutableList())
-        strategyFavorites.process(stocksStream)
+        strategyLove.process(stocksStream)
         strategyBlacklist.process(stocksStream)
         strategyFixPrice.restartStrategy()
 

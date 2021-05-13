@@ -2,21 +2,16 @@ package com.project.ti2358.data.manager
 
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.service.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 
 @KoinApiExtension
-class StrategyFavorites : KoinComponent {
-    private val keySavedStocks: String = "favorites"
-
+class StrategyLove : KoinComponent {
     var stocks: MutableList<Stock> = mutableListOf()
     var currentSort: Sorting = Sorting.DESCENDING
-
-    private val gson = Gson()
 
     companion object {
         var stocksSelected: MutableList<Stock> = mutableListOf()
@@ -32,21 +27,17 @@ class StrategyFavorites : KoinComponent {
     private fun loadSelectedStocks() {
         stocksSelected.clear()
 
-        val jsonStocks = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext).getString(keySavedStocks, null)
-        jsonStocks?.let {
-            val itemType = object : TypeToken<List<String>>() {}.type
-            val stocksSelectedList: List<String> = gson.fromJson(jsonStocks, itemType)
-            stocksSelected = stocks.filter { it.ticker in stocksSelectedList }.toMutableList()
-        }
+        val stocksSelectedList: List<String> = SettingsManager.getLoveSet()
+        stocksSelected = stocks.filter { it.ticker in stocksSelectedList }.toMutableList()
     }
 
     private fun saveSelectedStocks() {
-        val list = stocksSelected.map { it.ticker }.toMutableList()
+        val setList = stocksSelected.map { it.ticker }.toMutableList()
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
         val editor: SharedPreferences.Editor = preferences.edit()
-        val data = gson.toJson(list)
-        editor.putString(keySavedStocks, data)
+        val key = TheApplication.application.applicationContext.getString(R.string.setting_key_love_set)
+        editor.putString(key, setList.joinToString(separator = " "))
         editor.apply()
     }
 

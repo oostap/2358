@@ -2,7 +2,6 @@ package com.project.ti2358.data.manager
 
 import com.project.ti2358.service.ScreenerType
 import com.project.ti2358.service.Sorting
-import com.project.ti2358.service.Utils
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -35,6 +34,10 @@ class StrategyPremarket : KoinComponent {
         stocks.forEach { it.processScreener(screenerTypeFrom, screenerTypeTo) }
         stocks.removeAll { it.priceScreenerFrom == 0.0 || it.priceScreenerTo == 0.0 }
         stocks = stocks.filter { abs(it.changePriceScreenerPercent) >= abs(change) }.toMutableList()
+
+        if (SettingsManager.getPremarketOnlyLove()) {
+            stocks.removeAll { it.ticker !in StrategyLove.stocksSelected.map { stock -> stock.ticker } }
+        }
 
         return stocks
     }

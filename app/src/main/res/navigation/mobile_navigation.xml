@@ -73,9 +73,9 @@
     <!-- избранные -->
     <fragment
         android:id="@+id/nav_favorites"
-        android:name="com.project.ti2358.ui.favorites.FavoritesFragment"
+        android:name="com.project.ti2358.ui.love.LoveFragment"
         android:label="@string/menu_favorites"
-        tools:layout="@layout/fragment_favorites">
+        tools:layout="@layout/fragment_love">
         <action
             android:id="@+id/action_nav_favorites_to_nav_orderbook"
             app:destination="@id/nav_orderbook"

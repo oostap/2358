@@ -222,6 +222,15 @@ class SettingsManager {
             return preferences.getBoolean(key, true)
         }
 
+        /******************** Love *************************/
+
+        fun getLoveSet(): List<String> {
+            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_love_set)
+            val value: String? = preferences.getString(key, "")?.trim()
+            val array = value?.split(" ")
+            return array ?: emptyList()
+        }
+
         /******************** Premarket *************************/
 
         fun getPremarketChangePercent(): Double {
@@ -252,6 +261,11 @@ class SettingsManager {
             } catch (e: Exception) {
                 10000000
             }
+        }
+
+        fun getPremarketOnlyLove(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_premarket_only_love)
+            return preferences.getBoolean(key, false)
         }
 
         /******************** 1000 sell *************************/

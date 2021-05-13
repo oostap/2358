@@ -68,7 +68,7 @@ class StrategyTrend : KoinComponent {
         if (stock !in stocks) return
 
         if (SettingsManager.getTrendLove()) {
-            if (StrategyFavorites.stocksSelected.find { it.ticker == stock.ticker } == null) return
+            if (StrategyLove.stocksSelected.find { it.ticker == stock.ticker } == null) return
         }
 
         val changeStartPercent = SettingsManager.getTrendMinDownPercent()
