@@ -122,9 +122,9 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
         override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        var watcher: TextWatcher? = null
-
         inner class ViewHolder(private val binding: Fragment1000SellFinishItemBinding) : RecyclerView.ViewHolder(binding.root) {
+            var watcher: TextWatcher? = null
+
             fun bind(index: Int) {
                 val purchaseStock = values[index]
 
@@ -168,21 +168,25 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                     percentPlusButton.setOnClickListener {
                         purchaseStock.percentProfitSellFrom += 0.05
                         refreshPercent(purchaseStock)
+                        lotsEditText.setText("${purchaseStock.lots}")
                     }
 
                     percentMinusButton.setOnClickListener {
                         purchaseStock.percentProfitSellFrom += -0.05
                         refreshPercent(purchaseStock)
+                        lotsEditText.setText("${purchaseStock.lots}")
                     }
 
                     lotsPlusButton.setOnClickListener {
                         purchaseStock.addLots(deltaLots)
                         refreshPercent(purchaseStock)
+                        lotsEditText.setText("${purchaseStock.lots}")
                     }
 
                     lotsMinusButton.setOnClickListener {
                         purchaseStock.addLots(-deltaLots)
                         refreshPercent(purchaseStock)
+                        lotsEditText.setText("${purchaseStock.lots}")
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))
