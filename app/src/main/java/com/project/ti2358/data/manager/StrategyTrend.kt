@@ -65,6 +65,7 @@ class StrategyTrend : KoinComponent {
     @Synchronized
     fun processStrategy(stock: Stock, candle: Candle) {
         if (!started) return
+        process()
         if (stock !in stocks) return
 
         if (SettingsManager.getTrendLove()) {
@@ -175,13 +176,8 @@ class StrategyTrend : KoinComponent {
         val notificationChannelId = ticker
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val channel = NotificationChannel(
-                notificationChannelId,
-                "Trend notifications channel $ticker",
-                NotificationManager.IMPORTANCE_HIGH
-            ).let {
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val channel = NotificationChannel(notificationChannelId, "Trend notifications channel $ticker", NotificationManager.IMPORTANCE_HIGH).let {
                 it.description = notificationChannelId
                 it.lightColor = Color.RED
                 it.enableVibration(true)

@@ -334,7 +334,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "%.2f%%".format(locale = Locale.US, trendStock.turnValue)
             }
-            val text = "%s$%s %.2f%% : %.2f$ -> %.2f$ = %.2f%%, %.2f$ -> %.2f$ = %.2f%%, %d мин -> %d мин".format(locale = Locale.US,
+            val text = "%s$%s %s : %.2f$ -> %.2f$ = %.2f%%, %.2f$ -> %.2f$ = %.2f%%, %d мин -> %d мин".format(locale = Locale.US,
                 emoji,
                 trendStock.ticker,
                 turnValue,
