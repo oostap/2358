@@ -1,30 +1,17 @@
 package com.project.ti2358.ui.chart
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.graphics.Color
-import android.graphics.Matrix
-import android.graphics.Paint
 import android.os.Bundle
-import android.view.MotionEvent
 import android.view.View
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.github.mikephil.charting.charts.CandleStickChart
-import com.github.mikephil.charting.charts.Chart
-import com.github.mikephil.charting.components.*
-import com.github.mikephil.charting.data.*
-import com.github.mikephil.charting.formatter.ValueFormatter
-import com.github.mikephil.charting.highlight.Highlight
-import com.github.mikephil.charting.listener.ChartTouchListener
-import com.github.mikephil.charting.listener.OnChartGestureListener
-import com.github.mikephil.charting.utils.MPPointF
+import com.icechao.klinelib.adapter.KLineChartAdapter
+import com.icechao.klinelib.formatter.IDateTimeFormatter
+import com.icechao.klinelib.utils.DateUtil
+import com.icechao.klinelib.utils.LogUtil
+import com.icechao.klinelib.utils.SlidListener
+import com.icechao.klinelib.utils.Status
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.ChartManager
-import com.project.ti2358.data.manager.DepositManager
-import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.manager.StockManager
+import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.databinding.FragmentChartBinding
@@ -35,82 +22,23 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-import java.text.DecimalFormat
 import java.util.*
 
-class DateFormatter : ValueFormatter() {
-    var candles: MutableList<Candle> = mutableListOf()
-
-    override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-        val index = value.toInt()
-        if (index >= candles.size) return ""
-
-        val candle = candles[value.toInt()]
-        val timeCandle = Calendar.getInstance()
-        timeCandle.time = candle.time
-
-        if (candle.interval == Interval.DAY) {
-            return "%02d.%02d".format(locale = Locale.US, timeCandle.get(Calendar.MONTH), timeCandle.get(Calendar.DAY_OF_MONTH))
-        } else {
-            return "%02d:%02d".format(locale = Locale.US, timeCandle.get(Calendar.HOUR_OF_DAY), timeCandle.get(Calendar.MINUTE))
-        }
-    }
-}
-
-class VolumeFormatter : ValueFormatter() {
-    var candles: MutableList<Candle> = mutableListOf()
-
-    override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-        return "%.1fk".format(locale = Locale.US, value / 1000f)
-    }
-}
-
-@SuppressLint("ViewConstructor")
-class MyMarkerView(context: Context?) : MarkerView(context, R.layout.chart_marker) {
-    private val tvContent: TextView = findViewById(R.id.text_view)
-
-    override fun refreshContent(e: Entry, highlight: Highlight) {
-        if (e is CandleEntry) {
-            val candle = e.data as Candle
-            tvContent.text = ("v: %d\no: %.2f\nh: %.2f\nl: %.2f\nc: %.2f").format(candle.volume, e.open, e.high, e.low, e.close)
-        }
-        super.refreshContent(e, highlight)
-    }
-
-    override fun getOffset(): MPPointF {
-        return MPPointF((-(width / 2)).toFloat(), (-height).toFloat())
-    }
-}
-
-class XYMarkerView(context: Context?) : MarkerView(context, R.layout.chart_marker) {
-    private val tvContent: TextView = findViewById(R.id.text_view)
-
-    override fun refreshContent(e: Entry, highlight: Highlight) {
-        tvContent.text = e.y.toInt().toString()
-        super.refreshContent(e, highlight)
-    }
-
-    override fun getOffset(): MPPointF {
-        return MPPointF((-(width / 2)).toFloat(), (-height).toFloat())
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 @KoinApiExtension
-class ChartFragment : Fragment(R.layout.fragment_chart), OnChartGestureListener {
+class ChartFragment : Fragment(R.layout.fragment_chart) {
     private val chartManager: ChartManager by inject()
     val depositManager: DepositManager by inject()
     val stockManager: StockManager by inject()
 
     private var fragmentChartBinding: FragmentChartBinding? = null
 
-    var candleChartDateFormatter = DateFormatter()
-    var volumeFormatter = VolumeFormatter()
-
     var activeStock: Stock? = null
     var currentInterval: Interval = Interval.FIVE_MINUTES
     var job: Job? = null
+
+    var chartAdapter = KLineChartAdapter<Candle>()
+
+    var currentIndex : Status.IndexStatus = Status.IndexStatus.NONE
 
     override fun onDestroy() {
         job?.cancel()
@@ -118,83 +46,27 @@ class ChartFragment : Fragment(R.layout.fragment_chart), OnChartGestureListener 
         super.onDestroy()
     }
 
+    inner class DateFormatter : IDateTimeFormatter {
+        override fun format(date: Date?): String? {
+            return when (currentInterval) {
+                in listOf(Interval.MINUTE, Interval.FIVE_MINUTES, Interval.TEN_MINUTES, Interval.FIFTEEN_MINUTES, Interval.THIRTY_MINUTES) -> {
+                    DateUtil.HHMMTimeFormat.format(date)
+                }
+                Interval.HOUR -> DateUtil.MMddHHmmTimeFormat.format(date)
+                else -> DateUtil.yyyyMMddFormat.format(date)
+
+            }
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentChartBinding.bind(view)
         fragmentChartBinding = binding
 
-        binding.chartCandleView.onChartGestureListener = this
-        binding.chartBarOsView.onChartGestureListener = this
-
         activeStock = chartManager.activeStock
 
         with(binding) {
-            chartBarOsView.apply {
-                setTouchEnabled(false)
-                axisRight.isEnabled = false
-                axisLeft.isEnabled = false
-                description.isEnabled = false
-                setDrawGridBackground(false)
-                xAxis.isEnabled = false
-                legend.form = Legend.LegendForm.NONE
-            }
-
-            chartCandleView.apply {
-                description.isEnabled = false
-                setBackgroundColor(Color.WHITE)
-                setDrawGridBackground(true)
-
-                setPinchZoom(false)
-                isDragEnabled = true
-                isLongClickable = true
-
-                val mv = MyMarkerView(requireContext())
-                mv.chartView = this
-                marker = mv
-
-                setBackgroundColor(Utils.EMPTY)
-                setGridBackgroundColor(Utils.EMPTY)
-                legend.form = Legend.LegendForm.NONE
-
-                axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
-                axisRight.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
-                axisRight.textColor = Utils.getChartTextColor()
-                axisLeft.textColor = Utils.getChartTextColor()
-
-                val xAxis: XAxis = xAxis
-                xAxis.position = XAxis.XAxisPosition.TOP
-                xAxis.axisMinimum = 0f
-                xAxis.granularity = 1f
-                xAxis.valueFormatter = candleChartDateFormatter
-                xAxis.textColor = Utils.getChartTextColor()
-            }
-
-            chartBarView.apply {
-                setDrawBarShadow(false)
-                description.isEnabled = false
-                isHighlightFullBarEnabled = false
-
-                legend.form = Legend.LegendForm.NONE
-
-                val xAxis = xAxis
-                xAxis.position = XAxis.XAxisPosition.TOP
-                xAxis.axisMinimum = 0f
-                xAxis.granularity = 1f
-                xAxis.valueFormatter = candleChartDateFormatter
-                xAxis.textColor = Utils.getChartTextColor()
-
-                axisRight.isEnabled = false
-                axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
-                axisLeft.axisMinimum = 0f
-                axisLeft.granularity = 0f
-                axisLeft.valueFormatter = volumeFormatter
-                axisLeft.textColor = Utils.getChartTextColor()
-
-                val barMarker = XYMarkerView(requireContext())
-                barMarker.chartView = this
-                marker = barMarker
-            }
-
             loadData(Interval.FIVE_MINUTES)
 
             min1Button.setOnClickListener {
@@ -205,6 +77,18 @@ class ChartFragment : Fragment(R.layout.fragment_chart), OnChartGestureListener 
                 loadData(Interval.FIVE_MINUTES)
             }
 
+            min10Button.setOnClickListener {
+                loadData(Interval.TEN_MINUTES)
+            }
+
+            min15Button.setOnClickListener {
+                loadData(Interval.FIFTEEN_MINUTES)
+            }
+
+            min30Button.setOnClickListener {
+                loadData(Interval.THIRTY_MINUTES)
+            }
+
             hour1Button.setOnClickListener {
                 loadData(Interval.HOUR)
             }
@@ -212,23 +96,107 @@ class ChartFragment : Fragment(R.layout.fragment_chart), OnChartGestureListener 
             dayButton.setOnClickListener {
                 loadData(Interval.DAY)
             }
-        }
-    }
 
-    private fun syncCharts(mainChart: Chart<*>, otherCharts: List<Chart<*>>) {
-        val mainVals = FloatArray(9)
-        var otherMatrix: Matrix
-        val otherVals = FloatArray(9)
-        val mainMatrix: Matrix = mainChart.viewPortHandler.matrixTouch
-        mainMatrix.getValues(mainVals)
-        for (tempChart in otherCharts) {
-            otherMatrix = tempChart.viewPortHandler.matrixTouch
-            otherMatrix.getValues(otherVals)
-            otherVals[Matrix.MSCALE_X] = mainVals[Matrix.MSCALE_X]
-            otherVals[Matrix.MTRANS_X] = mainVals[Matrix.MTRANS_X]
-            otherVals[Matrix.MSKEW_X] = mainVals[Matrix.MSKEW_X]
-            otherMatrix.setValues(otherVals)
-            tempChart.viewPortHandler.refresh(otherMatrix, tempChart, true)
+            weekButton.setOnClickListener {
+                loadData(Interval.WEEK)
+            }
+
+            volumeButton.setOnClickListener {
+                chartLineView.volShowState = !chartLineView.volShowState
+                updateVolumeButton()
+            }
+
+            maButton.setOnClickListener {
+                if (chartLineView.status == Status.MainStatus.MA) {
+                    chartLineView.changeMainDrawType(Status.MainStatus.NONE)
+                } else {
+                    chartLineView.changeMainDrawType(Status.MainStatus.MA)
+                }
+                updatePrimaryIndicatorButton()
+            }
+
+            bollButton.setOnClickListener {
+                if (chartLineView.status == Status.MainStatus.BOLL) {
+                    chartLineView.changeMainDrawType(Status.MainStatus.NONE)
+                } else {
+                    chartLineView.changeMainDrawType(Status.MainStatus.BOLL)
+                }
+                updatePrimaryIndicatorButton()
+            }
+
+            rsiButton.setOnClickListener {
+                if (currentIndex == Status.IndexStatus.RSI) {
+                    currentIndex = Status.IndexStatus.NONE
+                } else {
+                    currentIndex = Status.IndexStatus.RSI
+                }
+
+                chartLineView.setIndexDraw(currentIndex)
+                updateSecondaryIndicatorButton()
+            }
+
+            macdButton.setOnClickListener {
+                if (currentIndex == Status.IndexStatus.MACD) {
+                    currentIndex = Status.IndexStatus.NONE
+                } else {
+                    currentIndex = Status.IndexStatus.MACD
+                }
+
+                chartLineView.setIndexDraw(currentIndex)
+                updateSecondaryIndicatorButton()
+            }
+
+            kdjButton.setOnClickListener {
+                if (currentIndex == Status.IndexStatus.KDJ) {
+                    currentIndex = Status.IndexStatus.NONE
+                } else {
+                    currentIndex = Status.IndexStatus.KDJ
+                }
+
+                chartLineView.setIndexDraw(currentIndex)
+                updateSecondaryIndicatorButton()
+            }
+
+            wrButton.setOnClickListener {
+                if (currentIndex == Status.IndexStatus.WR) {
+                    currentIndex = Status.IndexStatus.NONE
+                } else {
+                    currentIndex = Status.IndexStatus.WR
+                }
+
+                chartLineView.setIndexDraw(currentIndex)
+                updateSecondaryIndicatorButton()
+            }
+
+            chartAdapter = KLineChartAdapter()
+            chartLineView.setAdapter(chartAdapter)
+                .setAnimLoadData(false)
+                .setDateTimeFormatter(DateFormatter())
+                .setGridColumns(5)
+                .setGridRows(5)
+                .setOverScrollRange((requireActivity().windowManager.defaultDisplay.width / 5).toFloat()) //滑动边界监听  Sliding boundary monitoring
+                .setSlidListener(object : SlidListener {
+                    override fun onSlidLeft() {
+                        LogUtil.e("onSlidLeft")
+                    }
+
+                    override fun onSlidRight() {
+                        LogUtil.e("onSlidRight")
+                    }
+                })
+
+            val marketInfoText = arrayOf("time", "o", "h", "l", "c", "chg$", "chg%", "vol")
+            chartLineView.setSelectedInfoLabels(marketInfoText)
+            chartLineView.setIndexDraw(Status.IndexStatus.MACD)
+            chartLineView.changeMainDrawType(Status.MainStatus.BOLL)
+            chartLineView.setVolChartStatues(Status.VolChartStatus.BAR_CHART)
+            chartLineView.volShowState = true
+
+            currentIndex = Status.IndexStatus.MACD
+            updateTitleData()
+            updateVolumeButton()
+            updatePrimaryIndicatorButton()
+            updateSecondaryIndicatorButton()
         }
     }
 
@@ -238,194 +206,106 @@ class ChartFragment : Fragment(R.layout.fragment_chart), OnChartGestureListener 
         job?.cancel()
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
-                when (currentInterval) {
-                    Interval.MINUTE -> loadData(chartManager.loadCandlesMinute1())
-                    Interval.FIVE_MINUTES -> loadData(chartManager.loadCandlesMinute5())
-                    Interval.HOUR -> loadData(chartManager.loadCandlesHour1())
-                    Interval.DAY -> loadData(chartManager.loadCandlesDay())
-                }
+                loadData(chartManager.loadCandlesForInterval(activeStock, currentInterval))
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
-        updateTitleData()
+        updateIntervalButtons()
+    }
+
+    private fun updateSecondaryIndicatorButton() {
+        fragmentChartBinding?.apply {
+            val colorDefault = Utils.DARK_BLUE
+            val colorSelect = Utils.RED
+
+            macdButton.setBackgroundColor(colorDefault)
+            rsiButton.setBackgroundColor(colorDefault)
+            kdjButton.setBackgroundColor(colorDefault)
+            wrButton.setBackgroundColor(colorDefault)
+
+            if (currentIndex == Status.IndexStatus.MACD) {
+                macdButton.setBackgroundColor(colorSelect)
+            } else if (currentIndex == Status.IndexStatus.RSI) {
+                rsiButton.setBackgroundColor(colorSelect)
+            } else if (currentIndex == Status.IndexStatus.KDJ) {
+                kdjButton.setBackgroundColor(colorSelect)
+            } else if (currentIndex == Status.IndexStatus.WR) {
+                wrButton.setBackgroundColor(colorSelect)
+            }
+        }
+    }
+
+    private fun updatePrimaryIndicatorButton() {
+        fragmentChartBinding?.apply {
+            val colorDefault = Utils.DARK_BLUE
+            val colorSelect = Utils.RED
+
+            bollButton.setBackgroundColor(colorDefault)
+            maButton.setBackgroundColor(colorDefault)
+
+            if (chartLineView.status == Status.MainStatus.BOLL) {
+                bollButton.setBackgroundColor(colorSelect)
+            } else if (chartLineView.status == Status.MainStatus.MA) {
+                maButton.setBackgroundColor(colorSelect)
+            }
+        }
+    }
+
+    private fun updateVolumeButton() {
+        fragmentChartBinding?.apply {
+            val colorDefault = Utils.DARK_BLUE
+            val colorSelect = Utils.RED
+
+            if (chartLineView.volShowState) {
+                volumeButton.setBackgroundColor(colorSelect)
+            } else {
+                volumeButton.setBackgroundColor(colorDefault)
+            }
+        }
+    }
+
+    private fun updateIntervalButtons() {
+        fragmentChartBinding?.apply {
+            val colorDefault = Utils.DARK_BLUE
+            val colorSelect = Utils.RED
+
+            min1Button.setBackgroundColor(colorDefault)
+            min5Button.setBackgroundColor(colorDefault)
+            min10Button.setBackgroundColor(colorDefault)
+            min15Button.setBackgroundColor(colorDefault)
+            min30Button.setBackgroundColor(colorDefault)
+            hour1Button.setBackgroundColor(colorDefault)
+            weekButton.setBackgroundColor(colorDefault)
+            dayButton.setBackgroundColor(colorDefault)
+
+            when (currentInterval) {
+                Interval.MINUTE -> min1Button.setBackgroundColor(colorSelect)
+                Interval.FIVE_MINUTES -> min5Button.setBackgroundColor(colorSelect)
+                Interval.TWO_MINUTES -> TODO()
+                Interval.THREE_MINUTES -> TODO()
+                Interval.TEN_MINUTES -> min10Button.setBackgroundColor(colorSelect)
+                Interval.FIFTEEN_MINUTES -> min15Button.setBackgroundColor(colorSelect)
+                Interval.THIRTY_MINUTES -> min30Button.setBackgroundColor(colorSelect)
+                Interval.HOUR -> hour1Button.setBackgroundColor(colorSelect)
+                Interval.TWO_HOURS -> TODO()
+                Interval.FOUR_HOURS -> TODO()
+                Interval.DAY -> dayButton.setBackgroundColor(colorSelect)
+                Interval.WEEK -> weekButton.setBackgroundColor(colorSelect)
+                Interval.MONTH -> TODO()
+            }
+        }
     }
 
     private fun updateTitleData() {
         val ticker = activeStock?.instrument?.ticker ?: ""
         val act = requireActivity() as AppCompatActivity
-
-        val min = when (currentInterval) {
-            Interval.MINUTE -> "1 MIN"
-            Interval.FIVE_MINUTES -> "5 MIN"
-            Interval.HOUR -> "1 HOUR"
-            Interval.DAY -> "DAY"
-            else -> "NONE"
-        }
-
-        act.supportActionBar?.title = "$ticker $min"
+        act.supportActionBar?.title = "$ticker"
     }
 
     private fun loadData(candles: List<Candle>) {
         if (candles.isEmpty()) return
 
-        if (currentInterval == Interval.MINUTE) {
-            fragmentChartBinding?.chartBarOsView?.visibility = View.VISIBLE
-        } else {
-            fragmentChartBinding?.chartBarOsView?.visibility = View.GONE
-        }
-
-        val candleList = mutableListOf<CandleEntry>()
-        var i = 0
-        for (candle in candles) {
-            val bar = CandleEntry(
-                i.toFloat(),
-                candle.highestPrice.toFloat(),
-                candle.lowestPrice.toFloat(),
-                candle.openingPrice.toFloat(),
-                candle.closingPrice.toFloat()
-            )
-            bar.data = candle
-            candleList.add(bar)
-            i++
-        }
-        candleChartDateFormatter.candles = candles.toMutableList()
-        volumeFormatter.candles = candles.toMutableList()
-
-        val cds = CandleDataSet(candleList, "")
-        cds.shadowColor = Utils.getChartTextColor()
-        cds.shadowWidth = 0.7f
-        cds.decreasingColor = Utils.RED
-        cds.decreasingPaintStyle = Paint.Style.FILL
-        cds.increasingColor = Utils.GREEN
-        cds.increasingPaintStyle = Paint.Style.FILL
-        cds.neutralColor = Utils.getNeutralColor()
-        cds.valueTextColor = Utils.RED
-        cds.valueTextSize = 10f
-        cds.setDrawValues(false)
-
-        val candleData = CandleData()
-        candleData.addDataSet(cds)
-
-        fragmentChartBinding?.chartCandleView?.data = candleData
-        fragmentChartBinding?.chartCandleView?.invalidate()
-
-        ////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?
-        val volumeList = mutableListOf<BarEntry>()
-        val colorList = mutableListOf<Int>()
-        i = 0
-        for (candle in candles) {
-            val bar = BarEntry(i.toFloat(), candle.volume.toFloat())
-            val color = if (candle.openingPrice > candle.closingPrice) Utils.RED else Utils.GREEN
-            volumeList.add(bar)
-            colorList.add(color)
-            i++
-        }
-        val set1 = BarDataSet(volumeList, "")
-        set1.colors = colorList
-        set1.valueTextColor = Color.rgb(60, 220, 78)
-        set1.valueTextSize = 10f
-        set1.setDrawValues(false)
-        set1.axisDependency = YAxis.AxisDependency.LEFT
-
-        val barData = BarData(set1)
-        fragmentChartBinding?.chartBarView?.data = barData
-        fragmentChartBinding?.chartBarView?.invalidate()
-
-        // OS
-        ////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?////////?
-        .let {
-            val volumeList = mutableListOf<BarEntry>()
-            i = 0
-            for (candle in candles) {
-                val c = Utils.getTimeMSK()
-                c.time = candle.time
-                var volume = 0
-                val hour = c.get(Calendar.HOUR_OF_DAY)
-                val minutes = c.get(Calendar.MINUTE)
-                if ((hour == 16 && minutes == 30) ||
-                    (hour == 1 && minutes == 45) ||
-                    (hour == 7 && minutes == 0) ||
-                    (hour == 10 && minutes == 0) ||
-                    (hour == 23 && minutes == 0)) {
-                    volume = 1000000
-                }
-
-                val bar = BarEntry(i.toFloat(), volume.toFloat())
-                volumeList.add(bar)
-                i++
-            }
-            val set = BarDataSet(volumeList, "")
-            set.color = Utils.PURPLE
-            set.valueTextColor = Color.rgb(60, 220, 78)
-            set.valueTextSize = 10f
-            set.setDrawValues(false)
-
-            val barData = BarData(set)
-            fragmentChartBinding?.chartBarOsView?.data = barData
-            fragmentChartBinding?.chartBarOsView?.invalidate()
-        }
-
-        fragmentChartBinding?.apply {
-            chartCandleView.apply {
-                xAxis.axisMinimum = 0f;
-                xAxis.axisMaximum = candles.size + 10f;
-            }
-            chartBarView.apply {
-                xAxis.axisMinimum = 0f;
-                xAxis.axisMaximum = candles.size + 10f;
-            }
-            chartBarOsView.apply {
-                xAxis.axisMinimum = 0f;
-                xAxis.axisMaximum = candles.size + 10f;
-            }
-        }
-    }
-
-    override fun onChartGestureStart(me: MotionEvent?, lastPerformedGesture: ChartTouchListener.ChartGesture?) {
-//        log("CHART onChartGestureStart")
-    }
-
-    override fun onChartGestureEnd(me: MotionEvent?, lastPerformedGesture: ChartTouchListener.ChartGesture?) {
-//        log("CHART onChartGestureEnd")
-    }
-
-    override fun onChartLongPressed(me: MotionEvent?) {
-//        log("CHART onChartLongPressed")
-    }
-
-    override fun onChartDoubleTapped(me: MotionEvent?) {
-//        log("CHART onChartDoubleTapped")
-        fragmentChartBinding?.let {
-            syncCharts(it.chartCandleView, listOf(it.chartBarView, it.chartBarOsView))
-        }
-    }
-
-    override fun onChartSingleTapped(me: MotionEvent?) {
-//        log("CHART onChartSingleTapped")
-    }
-
-    override fun onChartFling(me1: MotionEvent?, me2: MotionEvent?, velocityX: Float, velocityY: Float) {
-//        log("CHART onChartFling")
-    }
-
-    override fun onChartScale(me: MotionEvent?, scaleX: Float, scaleY: Float) {
-//        log("CHART onChartScale")
-        fragmentChartBinding?.let {
-            syncCharts(it.chartCandleView, listOf(it.chartBarView, it.chartBarOsView))
-        }
-    }
-
-    override fun onChartTranslate(me: MotionEvent?, dX: Float, dY: Float) {
-//        log("CHART onChartTranslate")
-        fragmentChartBinding?.let {
-            syncCharts(it.chartCandleView, listOf(it.chartBarView, it.chartBarOsView))
-        }
+        chartAdapter.resetData(candles, true)
     }
 }
-
-//RSI
-//RS = Средняя цена Up Close / (Средняя цена Down Close) за данный период
-//Фактическое значение RSI рассчитывается путем индексации индикатора до 100 с использованием следующей формулы:
-//
-//RSI = 100 - 100 / (1 + RS)

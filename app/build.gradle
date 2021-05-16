@@ -99,9 +99,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
-    // charts
-    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
-
     // telega
     implementation 'io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:6.0.3'
+
+    // ta
+    implementation 'com.icechao.klinelib:klinelib:2.0.5'
 }

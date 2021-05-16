@@ -1,6 +1,7 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.model.dto.Candle
+import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.service.MarketService
 import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.service.Utils
@@ -15,99 +16,46 @@ import java.util.*
 @KoinApiExtension
 class ChartManager() : KoinComponent {
     private val marketService: MarketService by inject()
-    private val stockManager: StockManager by inject()
-    private val depositManager: DepositManager by inject()
-    private val ordersService: OrdersService by inject()
-
-    var activeStock: Stock? = null
     var orderbook: MutableList<OrderbookLine> = mutableListOf()
+    var activeStock: Stock? = null
 
-    fun start(stock: Stock) {
-        activeStock = stock
-    }
-
-    suspend fun loadCandlesMinute1(): List<Candle> {
-        activeStock?.let {
+    suspend fun loadCandlesForInterval(stock: Stock?, interval: Interval): List<Candle> {
+        stock?.let {
             val figi = it.figi
             val ticker = it.ticker
 
             val zone = Utils.getTimezoneCurrent()
             val toDate = Calendar.getInstance()
-            var deltaDay = 0
+
+            var deltaToDay = 0
             if (toDate.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-                deltaDay = -1
+                deltaToDay = -1
             }
-            toDate.add(Calendar.DAY_OF_YEAR, deltaDay)
-            val to = convertDateToTinkoffDate(toDate, zone)
-
-            toDate.add(Calendar.DAY_OF_YEAR, -1)
-            val from = convertDateToTinkoffDate(toDate, zone)
-
-            log("CANDLES: TICKER $ticker FROM $from TO $to")
-            return marketService.candles(figi, "1min", from, to).candles
-        }
-        return emptyList()
-    }
-
-    suspend fun loadCandlesMinute5(): List<Candle> {
-        activeStock?.let {
-            val figi = it.figi
-            val ticker = it.ticker
-
-            val zone = Utils.getTimezoneCurrent()
-            val toDate = Calendar.getInstance()
-            var deltaDay = 0
-            if (toDate.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-                deltaDay = -1
+            var deltaFromDay = 0
+            if (interval in listOf(Interval.MINUTE, Interval.FIVE_MINUTES, Interval.TEN_MINUTES, Interval.FIFTEEN_MINUTES, Interval.THIRTY_MINUTES)) {
+                deltaFromDay = -1
+            } else if (interval in listOf(Interval.HOUR)) {
+                deltaFromDay = -7
+            } else if (interval in listOf(Interval.WEEK)) {
+                deltaFromDay = -500
+            } else if (interval in listOf(Interval.DAY)) {
+                deltaFromDay = -150
             }
-            toDate.add(Calendar.DAY_OF_YEAR, deltaDay)
+
+            toDate.add(Calendar.DAY_OF_YEAR, deltaToDay)
             val to = convertDateToTinkoffDate(toDate, zone)
 
-            toDate.add(Calendar.DAY_OF_YEAR, -1)
+            toDate.add(Calendar.DAY_OF_YEAR, deltaFromDay)
             val from = convertDateToTinkoffDate(toDate, zone)
 
-
+            val intervalName = Utils.convertIntervalToString(interval)
             log("CANDLES: TICKER $ticker FROM $from TO $to")
-            return marketService.candles(figi, "5min", from, to).candles
+            return marketService.candles(figi, intervalName, from, to).candles
         }
         return emptyList()
     }
 
-    suspend fun loadCandlesHour1(): List<Candle> {
-        activeStock?.let {
-            val figi = it.figi
-            val ticker = it.ticker
-
-            val zone = Utils.getTimezoneCurrent()
-            val toDate = Calendar.getInstance()
-            val to = convertDateToTinkoffDate(toDate, zone)
-            toDate.add(Calendar.DAY_OF_YEAR, -7)
-            val from = convertDateToTinkoffDate(toDate, zone)
-
-            log("CANDLES: TICKER $ticker FROM $from TO $to")
-            return marketService.candles(figi, "hour", from, to).candles
-        }
-        return emptyList()
-    }
-
-    suspend fun loadCandlesDay(): List<Candle> {
-        activeStock?.let {
-            val figi = it.figi
-            val ticker = it.ticker
-
-            val zone = Utils.getTimezoneCurrent()
-            val toDate = Calendar.getInstance()
-            val to = convertDateToTinkoffDate(toDate, zone)
-            toDate.add(Calendar.DAY_OF_YEAR, -60)
-            val from = convertDateToTinkoffDate(toDate, zone)
-
-            log("CANDLES: TICKER $ticker FROM $from TO $to")
-            return marketService.candles(figi, "day", from, to).candles
-        }
-        return emptyList()
-    }
-
-    fun convertDateToTinkoffDate(calendar: Calendar, zone: String): String {
+    private fun convertDateToTinkoffDate(calendar: Calendar, zone: String): String {
         return calendar.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS") + zone
     }
 }

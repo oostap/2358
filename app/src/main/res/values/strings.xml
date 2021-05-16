@@ -72,14 +72,14 @@
     <string name="menu_1728_up">1628 вверх</string>
     <string name="menu_1728_down">1628 вниз</string>
     <string name="menu_fixprice">Fix Price</string>
-    <string name="menu_rocket">Ракета</string>
+    <string name="menu_rocket">Ракеты</string>
     <string name="menu_tazik">Автотазик</string>
     <string name="menu_blacklist">Чёрный список</string>
     <string name="menu_favorites">Избранные</string>
     <string name="menu_chart">График</string>
     <string name="menu_tazik_endless">Бесконечный таз</string>
     <string name="menu_telegram">Телеграм бот</string>
-    <string name="menu_trends">Смена тренда</string>
+    <string name="menu_trends">Тренды</string>
 
     <string name="reports">ОТЧЁТЫ</string>
     <string name="dividends">ДИВЫ</string>
@@ -93,7 +93,7 @@
     <string name="settings_header_1005">Фильтр Премаркета</string>
     <string name="settings_header_tazik">Стратегия автотазик</string>
     <string name="settings_header_rocket">Ракеты</string>
-    <string name="settings_header_trends">Смена тренда</string>
+    <string name="settings_header_trends">Тренды</string>
     <string name="settings_header_interface">Интерфейс</string>
     <string name="settings_header_telegram">Телеграм</string>
     <string name="settings_header_follower">Телеграм - команды</string>

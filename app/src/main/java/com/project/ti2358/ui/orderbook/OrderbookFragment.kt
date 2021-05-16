@@ -186,7 +186,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
             chartButton.setOnClickListener {
                 activeStock?.let {
-                    chartManager.start(it)
+                    chartManager.activeStock = it
                     view.findNavController().navigate(R.id.action_nav_orderbook_to_nav_chart)
                 }
             }

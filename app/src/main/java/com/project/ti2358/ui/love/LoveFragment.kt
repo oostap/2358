@@ -130,7 +130,7 @@ class LoveFragment : Fragment(R.layout.fragment_love) {
                     }
 
                     chartButton.setOnClickListener {
-                        chartManager.start(stock)
+                        chartManager.activeStock = stock
                         chartButton.findNavController().navigate(R.id.action_nav_favorites_to_nav_chart)
                     }
 

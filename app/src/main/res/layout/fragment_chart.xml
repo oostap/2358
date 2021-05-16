@@ -7,29 +7,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:layout_marginBottom="170dp"
-        android:layout_weight="4">
+        android:layout_marginBottom="100dp">
 
-        <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/chart_bar_os_view"
+        <com.icechao.klinelib.view.ScrollView
             android:layout_width="match_parent"
-            android:layout_marginTop="-100dp"
-            android:layout_marginBottom="-100dp"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content">
 
-        <com.github.mikephil.charting.charts.CandleStickChart
-            android:id="@+id/chart_candle_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            <com.icechao.klinelib.view.KChartView
+                android:id="@+id/chart_line_view"
+                android:layout_width="match_parent"
+                android:layout_height="580dp" />
 
+        </com.icechao.klinelib.view.ScrollView>
     </RelativeLayout>
-
-    <com.github.mikephil.charting.charts.BarChart
-        android:id="@+id/chart_bar_view"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginBottom="60dp"
-        android:layout_alignParentBottom="true"/>
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -38,45 +28,166 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_alignParentBottom="true"
-        android:weightSum="4" >
+        android:layout_marginBottom="50dp"
+        android:weightSum="7" >
 
         <Button
-            android:layout_height="70dp"
+            android:layout_height="50dp"
+            android:id="@+id/volume_button"
+            android:layout_marginRight="5dp"
+            android:text="V"
+            android:layout_weight="1"
+            android:textSize="13dp"
+            android:padding="0dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="50dp"
+            android:id="@+id/ma_button"
+            android:layout_marginRight="5dp"
+            android:text="MA"
+            android:layout_weight="1"
+            android:textSize="13dp"
+            android:padding="0dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="50dp"
+            android:id="@+id/boll_button"
+            android:layout_marginRight="5dp"
+            android:text="BOLL"
+            android:layout_weight="1"
+            android:textSize="13dp"
+            android:padding="0dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="50dp"
+            android:id="@+id/rsi_button"
+            android:layout_marginRight="5dp"
+            android:text="RSI"
+            android:layout_weight="1"
+            android:textSize="13dp"
+            android:padding="0dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="50dp"
+            android:id="@+id/macd_button"
+            android:layout_marginRight="5dp"
+            android:text="MACD"
+            android:layout_weight="1"
+            android:textSize="13dp"
+            android:padding="0dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="50dp"
+            android:id="@+id/kdj_button"
+            android:layout_marginRight="5dp"
+            android:text="KDJ"
+            android:layout_weight="1"
+            android:textSize="13dp"
+            android:padding="0dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="50dp"
+            android:id="@+id/wr_button"
+            android:text="WR"
+            android:layout_weight="1"
+            android:textSize="13dp"
+            android:padding="0dp"
+            android:layout_width="0dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_alignParentBottom="true"
+        android:weightSum="8" >
+
+        <Button
+            android:layout_height="50dp"
             android:id="@+id/min1_button"
             android:layout_marginRight="5dp"
-            android:text="1 min"
+            android:text="1M"
             android:layout_weight="1"
-            android:textSize="18dp"
+            android:textSize="15dp"
             android:padding="0dp"
             android:layout_width="0dp" />
 
         <Button
-            android:layout_height="70dp"
+            android:layout_height="50dp"
             android:id="@+id/min5_button"
             android:layout_marginRight="5dp"
-            android:text="5 min"
+            android:text="5M"
             android:layout_weight="1"
-            android:textSize="18dp"
+            android:textSize="15dp"
             android:padding="0dp"
             android:layout_width="0dp" />
 
         <Button
-            android:layout_height="70dp"
+            android:layout_height="50dp"
+            android:id="@+id/min10_button"
+            android:layout_marginRight="5dp"
+            android:text="10M"
+            android:layout_weight="1"
+            android:textSize="15dp"
+            android:padding="0dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="50dp"
+            android:id="@+id/min15_button"
+            android:layout_marginRight="5dp"
+            android:text="15M"
+            android:layout_weight="1"
+            android:textSize="15dp"
+            android:padding="0dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="50dp"
+            android:id="@+id/min30_button"
+            android:layout_marginRight="5dp"
+            android:text="30M"
+            android:layout_weight="1"
+            android:textSize="15dp"
+            android:padding="0dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="50dp"
             android:id="@+id/hour1_button"
             android:layout_marginRight="5dp"
-            android:text="HOUR"
+            android:text="1H"
             android:layout_weight="1"
-            android:textSize="18dp"
+            android:textSize="15dp"
             android:padding="0dp"
             android:layout_width="0dp" />
 
         <Button
-            android:layout_height="70dp"
+            android:layout_height="50dp"
             android:id="@+id/day_button"
-            android:layout_marginRight="0dp"
-            android:text="DAY"
+            android:layout_marginRight="5dp"
+            android:text="D"
             android:layout_weight="1"
-            android:textSize="18dp"
+            android:textSize="15dp"
+            android:padding="0dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="50dp"
+            android:id="@+id/week_button"
+            android:layout_marginRight="0dp"
+            android:text="W"
+            android:layout_weight="1"
+            android:textSize="15dp"
             android:padding="0dp"
             android:layout_width="0dp" />
 

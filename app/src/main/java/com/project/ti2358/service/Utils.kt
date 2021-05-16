@@ -436,7 +436,7 @@ class Utils {
                 Interval.TEN_MINUTES -> "10min"
                 Interval.FIFTEEN_MINUTES -> "15min"
                 Interval.THIRTY_MINUTES -> "30min"
-                Interval.FOUR_HOURS -> "5hours"
+                Interval.FOUR_HOURS -> "4hour"
                 Interval.MONTH -> "month"
             }
         }
