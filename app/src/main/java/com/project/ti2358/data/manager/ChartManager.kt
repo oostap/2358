@@ -49,7 +49,7 @@ class ChartManager() : KoinComponent {
             val from = convertDateToTinkoffDate(toDate, zone)
 
             val intervalName = Utils.convertIntervalToString(interval)
-            log("CANDLES: TICKER $ticker FROM $from TO $to")
+//            log("CANDLES: TICKER $ticker FROM $from TO $to")
             return marketService.candles(figi, intervalName, from, to).candles
         }
         return emptyList()

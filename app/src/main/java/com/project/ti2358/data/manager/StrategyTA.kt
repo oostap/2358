@@ -21,7 +21,7 @@ class StrategyTA : KoinComponent {
 
     fun process(): MutableList<Stock> {
         val all = stockManager.getWhiteStocks()
-        all.removeAll { it.ticker !in StrategyLove.stocksSelected.map { stock -> stock.ticker } }
+//        all.removeAll { it.ticker !in StrategyLove.stocksSelected.map { stock -> stock.ticker } }
         return all
     }
 
@@ -32,8 +32,15 @@ class StrategyTA : KoinComponent {
 
                 all.forEach {
                     val candles = chartManager.loadCandlesForInterval(it, Interval.DAY)
-                    processTurnMACD(it, candles)
-                    delay(500)
+                    analyticsAdapter.resetData(candles)
+                    val macd = processTurnMACD(it, candles)
+                    val volume = processTurnUpVolume(it, candles)
+
+                    if (macd && volume) {
+                        log("TURN UP ${it.ticker} VOLUME + MACD")
+                    }
+
+                    delay(400)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -41,11 +48,34 @@ class StrategyTA : KoinComponent {
         }
     }
 
-    private fun processTurnMACD(stock: Stock, candles: List<Candle>) {
-        analyticsAdapter.resetData(candles)
+    private fun processTurnUpVolume(stock: Stock, candles: List<Candle>) : Boolean {
+        if (candles.size > 30) {
+            var days = 30
+            var totalVolume = 0
+            for (i in candles.indices.reversed()) {
+                totalVolume += candles[i].volume
+                days--
+                if (days <= 0) break
+            }
+            val avgVolume = totalVolume / 30
 
+            days = 30
+            for (i in candles.indices.reversed()) {
+                val change = candles[i].closingPrice / candles[i].openingPrice * 100.0 - 100.0
+                if (candles[i].volume > avgVolume * 6 && change > -5) {
+                    log("${stock.ticker} VOLUME TURN UP ! v = ${candles[i].volume}, date = ${candles[i].time}")
+                    return true
+                }
+                days--
+                if (days <= 0) break
+            }
+        }
+        return false
+    }
+
+    private fun processTurnMACD(stock: Stock, candles: List<Candle>) : Boolean  {
         var steps = 2
-        var bearishDays = 5
+        var afterBearishDays = 5
 
         if (candles.size > 10) {
             var lastMacd = candles.last().macd
@@ -74,16 +104,17 @@ class StrategyTA : KoinComponent {
             var checkDays = 8
             for (i in candles.indices.reversed()) {
                 if (candles[i].macd < 0) {
-                    bearishDays--
+                    afterBearishDays--
                 }
                 checkDays--
                 if (checkDays <= 0) break
             }
         }
 
-        if (steps == 0 && bearishDays < 0) {
+        if (steps == 0 && afterBearishDays < 0) {
             log("${stock.ticker} MACD TURN UP")
+            return true
         }
-
+        return false
     }
 }
