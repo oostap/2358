@@ -42,6 +42,12 @@
             app:title="@string/stocks_usd_max"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="5000"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_stocks_allow_rus"
+            app:title="@string/stocks_allow_rus"
+            app:defaultValue="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/orderbook_header">
@@ -409,6 +415,11 @@
             app:title="@string/stocks_tazik_endless_spike_protection"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="1"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_endless_close_price_protection"
+            app:title="@string/stocks_tazik_endless_close_price_protection"
+            app:defaultValue="false" />
 
     </PreferenceCategory>
 

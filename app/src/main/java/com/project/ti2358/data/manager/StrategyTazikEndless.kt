@@ -5,6 +5,7 @@ import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
+import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.service.*
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
@@ -98,7 +99,7 @@ class StrategyTazikEndless : KoinComponent {
     fun getPurchaseStock(): MutableList<PurchaseStock> = runBlocking(StockManager.stockContext) {
         val percent = SettingsManager.getTazikEndlessChangePercent()
         val totalMoney: Double = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
-        val onePiece: Double = totalMoney / SettingsManager.getTazikEndlessPurchaseParts()
+        var onePiece: Double = totalMoney / SettingsManager.getTazikEndlessPurchaseParts()
 
         val purchases: MutableList<PurchaseStock> = mutableListOf()
         for (stock in stocksSelected) {
@@ -118,8 +119,12 @@ class StrategyTazikEndless : KoinComponent {
             if (it.percentLimitPriceChange == 0.0) {
                 it.percentLimitPriceChange = percent
             }
+
+            if (it.stock.instrument.currency == Currency.RUB) {
+                onePiece *= Utils.getUSDRUB()
+            }
             if (it.stock.getPriceNow() != 0.0) {
-                it.lots = (onePiece / it.stock.getPriceNow()).roundToInt()
+                it.lots = (onePiece / (it.stock.getPriceNow() * it.stock.instrument.lot)).roundToInt()
             }
             it.updateAbsolutePrice()
             it.status = PurchaseStatus.WAITING
@@ -375,6 +380,13 @@ class StrategyTazikEndless : KoinComponent {
                 // обновить цену, чтобы не затарить на следующей свече, возможен нож ступенькой
                 purchase.tazikEndlessPrice = candle.closingPrice
                 strategySpeaker.speakTazikSpikeSkip(purchase, change)
+                return
+            }
+        }
+
+        // проверка на цену закрытия (выше не тарить)
+        if (SettingsManager.getTazikEndlessClosePriceProtection()) {
+            if (buyPrice > stock.getPrice2300()) {
                 return
             }
         }

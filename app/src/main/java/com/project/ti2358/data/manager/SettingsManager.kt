@@ -88,6 +88,11 @@ class SettingsManager {
             }
         }
 
+        fun isAllowRus(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_stocks_allow_rus)
+            return preferences.getBoolean(key, false)
+        }
+
         /******************** Trailing take *************************/
 
         fun getTrailingStopTakeProfitPercentActivation(): Double {
@@ -645,6 +650,11 @@ class SettingsManager {
             } catch (e: Exception) {
                 1
             }
+        }
+
+        fun getTazikEndlessClosePriceProtection(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_close_price_protection)
+            return preferences.getBoolean(key, false)
         }
 
         /******************** Rockets *************************/

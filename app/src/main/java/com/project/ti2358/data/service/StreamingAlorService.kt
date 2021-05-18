@@ -5,6 +5,7 @@ import com.project.ti2358.data.manager.AlorManager
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.model.dto.Candle
+import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.OrderbookStream
 import com.project.ti2358.data.model.streamAlor.BarGetEventBody
@@ -250,11 +251,16 @@ class StreamingAlorService : KoinComponent {
         var ticker = stock.ticker
         ticker = ticker.replace(".", " ") // 'RDS.A' -> 'RDS A'
 
+        var exch = "SPBX"
+        if (stock.instrument.currency != Currency.USD) {
+            exch = "MOEX"
+        }
+
         val bar = OrderBookGetEventBody(
             AlorManager.TOKEN,
             "OrderBookGetAndSubscribe",
             ticker,
-            "SPBX",
+            exch,
             depth,
             "Simple",
             false,
@@ -306,11 +312,16 @@ class StreamingAlorService : KoinComponent {
         var ticker = stock.ticker
         ticker = ticker.replace(".", " ") // 'RDS.A' -> 'RDS A'
 
+        var exch = "SPBX"
+        if (stock.instrument.currency != Currency.USD) {
+            exch = "MOEX"
+        }
+
         val bar = BarGetEventBody(
             AlorManager.TOKEN,
             "BarsGetAndSubscribe",
             ticker,
-            "SPBX",
+            exch,
             tf,
             time,
             "Simple",

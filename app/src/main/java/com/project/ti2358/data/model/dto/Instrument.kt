@@ -10,5 +10,9 @@ data class Instrument (
     val country: String,
     val logo: String,
 
+    val minPriceIncrement: Double,
+    val lot: Int,
+    val minQuantity: Int,
+
     val currency: Currency?,
 )

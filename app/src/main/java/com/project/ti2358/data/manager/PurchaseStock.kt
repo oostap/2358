@@ -260,7 +260,17 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
 
                 Utils.showToastAlert("$ticker: ордер на покупку по $buyPrice")
 
-                if (profit != 0.0) {
+                if (profit == 0.0) {
+                    delay(orderLifeTimeSeconds * 1000L)
+                    status = PurchaseStatus.CANCELED
+                    try {
+                        buyLimitOrder?.let {
+                            ordersService.cancel(it.orderId, depositManager.getActiveBrokerAccountId())
+                        }
+                    } catch (e: Exception) {
+
+                    }
+                } else {
                     // проверяем появился ли в портфеле тикер
                     var position: PortfolioPosition?
                     var iterations = 0

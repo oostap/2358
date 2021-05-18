@@ -17,6 +17,7 @@ import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.OperationType
 import org.koin.core.component.KoinApiExtension
@@ -56,9 +57,16 @@ fun Date.toString(format: String, locale: Locale = Locale.getDefault()): String 
     return formatter.format(this)
 }
 
-fun Double.toMoney(stock: Stock?): String {
-    val symbol = stock?.getCurrencySymbol() ?: "$"
-    return "%.2f%s".format(locale = Locale.US, this, symbol)
+fun Double.toMoney(stock: Stock?, showSymbol: Boolean = true): String {
+    var symbol = stock?.getCurrencySymbol() ?: "$"
+    if (!showSymbol) {
+        symbol = ""
+    }
+    if (stock?.instrument?.currency == Currency.RUB) {
+        return "%.4f%s".format(locale = Locale.US, this, symbol)
+    } else {
+        return "%.2f%s".format(locale = Locale.US, this, symbol)
+    }
 }
 
 fun Double.toPercent(): String {
@@ -506,6 +514,10 @@ class Utils {
                 percent <= -0.2 -> "😧"
                 else -> ""
             }
+        }
+
+        fun getUSDRUB(): Double {
+            return 74.0
         }
     }
 }

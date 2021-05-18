@@ -279,7 +279,11 @@ class StockManager : KoinComponent {
     }
 
     private suspend fun processStocks() = withContext(stockContext) {
-        stocksStream = synchronizedList(stocksAll.filter { SettingsManager.isAllowCurrency(it.instrument.currency) }.toMutableList())
+        if (SettingsManager.isAllowRus()) {
+            stocksStream = stocksAll
+        } else {
+            stocksStream = synchronizedList(stocksAll.filter { SettingsManager.isAllowCurrency(it.instrument.currency) }.toMutableList())
+        }
         strategyLove.process(stocksStream)
         strategyBlacklist.process(stocksStream)
         strategyFixPrice.restartStrategy()
@@ -290,6 +294,9 @@ class StockManager : KoinComponent {
                 Utils.startService(TheApplication.application.applicationContext, StrategyTelegramService::class.java)
             }
         }
+
+//        log("ALL STOCKS: ${stocksStream.subList(0, stocksStream.size / 2).joinToString(separator = " ") { it.ticker }}")
+//        log("ALL STOCKS: ${stocksStream.subList(stocksStream.size / 2, stocksStream.size).joinToString(separator = " ") { it.ticker }}")
 
         // загрузить цены закрытия
         while (true) {

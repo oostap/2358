@@ -185,13 +185,13 @@
         android:id="@+id/nav_1728_up"
         android:name="com.project.ti2358.ui.strategy1728Up.Strategy1728UpFragment"
         android:label="@string/menu_1728_up"
-        tools:layout="@layout/fragment_1728_up"></fragment>
+        tools:layout="@layout/fragment_1728_up" />
 
     <fragment
         android:id="@+id/nav_1728_down"
         android:name="com.project.ti2358.ui.strategy1728Down.Strategy1728DownFragment"
         android:label="@string/menu_1728_down"
-        tools:layout="@layout/fragment_1728_down"></fragment>
+        tools:layout="@layout/fragment_1728_down" />
 
     <!-- Rockets -->
 
@@ -240,7 +240,7 @@
         android:id="@+id/nav_1000_sell_finish"
         android:name="com.project.ti2358.ui.strategy1000Sell.Strategy1000SellFinishFragment"
         android:label="@string/menu_1000_sell"
-        tools:layout="@layout/fragment_1000_sell_start"></fragment>
+        tools:layout="@layout/fragment_1000_sell_start" />
 
     <!-- 1000 Buy -->
 

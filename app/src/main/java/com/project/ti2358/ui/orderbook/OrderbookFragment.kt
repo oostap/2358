@@ -194,7 +194,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             positionView.setOnClickListener {
                 activeStock?.let {
                     depositManager.getPositionForFigi(it.figi)?.let { p ->
-                        volumeEditText.setText(abs(p.lots).toString())
+                        volumeEditText.setText(abs(p.lots - p.blocked).toString())
                     }
                 }
             }
@@ -432,10 +432,10 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 dragToSellView.setTag(R.string.action_type, "replace")
 
                 countBidView.text = "${item.bidCount}"
-                priceBidView.text = "%.2f".format(locale = Locale.US, item.bidPrice)
+                priceBidView.text = item.bidPrice.toMoney(item.stock, false)
 
                 countAskView.text = "${item.askCount}"
-                priceAskView.text = "%.2f".format(locale = Locale.US, item.askPrice)
+                priceAskView.text = item.askPrice.toMoney(item.stock, false)
 
                 var targetPriceAsk = 0.0
                 var targetPriceBid = 0.0

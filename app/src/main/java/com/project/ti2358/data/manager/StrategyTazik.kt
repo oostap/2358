@@ -5,6 +5,7 @@ import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
+import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.service.*
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
@@ -99,7 +100,7 @@ class StrategyTazik : KoinComponent {
 
         val percent = SettingsManager.getTazikChangePercent()
         val totalMoney: Double = SettingsManager.getTazikPurchaseVolume().toDouble()
-        val onePiece: Double = totalMoney / SettingsManager.getTazikPurchaseParts()
+        var onePiece: Double = totalMoney / SettingsManager.getTazikPurchaseParts()
         val before11 = Utils.isSessionBefore11()
 
         stocksToPurchase = stocksSelected.map {
@@ -114,7 +115,10 @@ class StrategyTazik : KoinComponent {
                     }
                 }
 
-                lots = (onePiece / stock.getPriceNow()).roundToInt()
+                if (stock.instrument.currency == Currency.RUB) {
+                    onePiece *= Utils.getUSDRUB()
+                }
+                lots = (onePiece / (stock.getPriceNow() * stock.instrument.lot)).roundToInt()
                 updateAbsolutePrice()
                 status = PurchaseStatus.WAITING
             }
