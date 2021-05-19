@@ -184,7 +184,7 @@
     <!-- endless tazik settings -->
     <string name="stocks_tazik_endless_set">Набор тикеров через пробел</string>
     <string name="stocks_tazik_endless_reset_interval_seconds">Интервал сброса цены в секундах</string>
-    <string name="stocks_tazik_endless_day_min_volume">Реагировать на объём от шт.</string>
+    <string name="stocks_tazik_endless_day_min_volume">Общий дневной объём от шт.</string>
     <string name="stocks_tazik_endless_min_volume">Реагировать на объём от шт.</string>
     <string name="stocks_tazik_endless_min_percent_to_buy">Минимальная просадка в %</string>
     <string name="stocks_tazik_endless_purchase_volume">Общая сумма покупки</string>
@@ -195,7 +195,7 @@
     <string name="stocks_tazik_endless_allow_averaging">Разрешить усреднение</string>
     <string name="stocks_tazik_endless_exclude_report">Исключать отчёты</string>
     <string name="stocks_tazik_endless_exclude_divs">Исключать дивы</string>
-    <string name="stocks_tazik_endless_exclude_depo">Исключать бумаги депо</string>
+    <string name="stocks_tazik_endless_exclude_depo">Исключать бумаги из депо</string>
     <string name="stocks_tazik_endless_spike_protection">Защита от спайков в минутах (0 = без защиты)</string>
     <string name="stocks_tazik_endless_close_price_protection">Не выше цены закрытия</string>
 
@@ -236,7 +236,7 @@
 
     <!-- trend settings -->
     <string name="stocks_trend_change_min_down_change_percent">Просадка со старта в %</string>
-    <string name="stocks_trend_change_min_up_change_percent">Подъём с лоя в % от % со старта</string>
+    <string name="stocks_trend_change_min_up_change_percent">Подъём с лоя от % со старта в %</string>
     <string name="stocks_trend_after_minutes">Сигналы спустя время в мин</string>
     <string name="stocks_trend_only_love">Только избранные</string>
     <string name="stocks_trend_voice">Озвучка трендов</string>

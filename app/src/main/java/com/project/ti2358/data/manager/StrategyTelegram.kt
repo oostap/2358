@@ -322,7 +322,7 @@ class StrategyTelegram : KoinComponent {
                 "%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
             }
             val text = "$emoji$${rocketStock.ticker} ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин, v = ${rocketStock.volume}"
-            sendMessageToChats(text, 120)
+            sendMessageToChats(text, 180)
         }
     }
 

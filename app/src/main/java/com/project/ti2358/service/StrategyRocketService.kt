@@ -61,7 +61,10 @@ class StrategyRocketService : Service() {
         super.onCreate()
         val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "ROCKET","",  "", "")
         startForeground(NOTIFICATION_ID, notification)
-        strategyRocket.startStrategy()
+
+        GlobalScope.launch {
+            strategyRocket.startStrategy()
+        }
         scheduleUpdate()
     }
 
@@ -71,7 +74,10 @@ class StrategyRocketService : Service() {
         notificationButtonReceiver = null
         isServiceRunning = false
         job?.cancel()
-        strategyRocket.stopStrategy()
+
+        GlobalScope.launch {
+            strategyRocket.stopStrategy()
+        }
         super.onDestroy()
     }
 

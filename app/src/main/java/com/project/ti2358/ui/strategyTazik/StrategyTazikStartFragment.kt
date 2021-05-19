@@ -17,6 +17,7 @@ import com.project.ti2358.data.manager.StrategyTazik
 import com.project.ti2358.databinding.FragmentTazikStartBinding
 import com.project.ti2358.databinding.FragmentTazikStartItemBinding
 import com.project.ti2358.service.*
+import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.util.*
@@ -95,12 +96,13 @@ class StrategyTazikStartFragment : Fragment(R.layout.fragment_tazik_start) {
         updateData()
     }
 
-    private fun updateData() {
-        stocks = strategyTazik.process(numberSet)
-        stocks = strategyTazik.resort()
-        adapterList.setData(stocks)
-
-        updateTitle()
+    private fun updateData() : Job {
+        return GlobalScope.launch(Dispatchers.Main) {
+            stocks = strategyTazik.process(numberSet)
+            stocks = strategyTazik.resort()
+            adapterList.setData(stocks)
+            updateTitle()
+        }
     }
 
     private fun updateTitle() {
@@ -142,8 +144,12 @@ class StrategyTazikStartFragment : Fragment(R.layout.fragment_tazik_start) {
                     priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
 
                     chooseView.setOnCheckedChangeListener { _, checked ->
-                        strategyTazik.setSelected(stock, checked, numberSet)
-                        updateTitle()
+                        GlobalScope.launch {
+                            strategyTazik.setSelected(stock, checked, numberSet)
+                            withContext(Dispatchers.Main) {
+                                updateTitle()
+                            }
+                        }
                     }
 
                     itemView.setOnClickListener {

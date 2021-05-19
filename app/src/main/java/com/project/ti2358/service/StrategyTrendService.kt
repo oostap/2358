@@ -61,7 +61,9 @@ class StrategyTrendService : Service() {
         super.onCreate()
         val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "TREND","",  "", "")
         startForeground(NOTIFICATION_ID, notification)
-        strategyTrend.startStrategy()
+        GlobalScope.launch {
+            strategyTrend.startStrategy()
+        }
         scheduleUpdate()
     }
 
@@ -71,7 +73,10 @@ class StrategyTrendService : Service() {
         notificationButtonReceiver = null
         isServiceRunning = false
         job?.cancel()
-        strategyTrend.stopStrategy()
+
+        GlobalScope.launch {
+            strategyTrend.stopStrategy()
+        }
         super.onDestroy()
     }
 

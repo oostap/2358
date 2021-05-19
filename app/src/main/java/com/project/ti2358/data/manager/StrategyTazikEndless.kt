@@ -80,7 +80,7 @@ class StrategyTazikEndless : KoinComponent {
         return stocks
     }
 
-    suspend fun setSelected(stock: Stock, value: Boolean) = withContext(StockManager.stockContext){
+    suspend fun setSelected(stock: Stock, value: Boolean) = withContext(StockManager.stockContext) {
         if (value) {
             if (stock !in stocksSelected)
                 stocksSelected.add(stock)
@@ -219,7 +219,7 @@ class StrategyTazikEndless : KoinComponent {
         }
     }
 
-    suspend fun startStrategy() = withContext(StockManager.stockContext){
+    suspend fun startStrategy() = withContext(StockManager.stockContext) {
         basicPercentLimitPriceChange = SettingsManager.getTazikEndlessChangePercent()
 
         fixPrice()
@@ -248,7 +248,7 @@ class StrategyTazikEndless : KoinComponent {
         strategyTelegram.sendTazikEndlessStart(true)
     }
 
-    suspend fun stopStrategy() = withContext(StockManager.stockContext){
+    suspend fun stopStrategy() = withContext(StockManager.stockContext) {
         started = false
         stocksTickerInProcess.forEach {
             try {
@@ -264,7 +264,7 @@ class StrategyTazikEndless : KoinComponent {
         strategyTelegram.sendTazikEndlessStart(false)
     }
 
-    fun addBasicPercentLimitPriceChange(sign: Int) = runBlocking (StockManager.stockContext){
+    fun addBasicPercentLimitPriceChange(sign: Int) = runBlocking (StockManager.stockContext) {
         basicPercentLimitPriceChange += sign * PercentLimitChangeDelta
 
         for (purchase in stocksToPurchase) {
@@ -309,7 +309,7 @@ class StrategyTazikEndless : KoinComponent {
         return false
     }
 
-    fun processUpdate() = runBlocking(StockManager.stockContext){
+    fun processUpdate() = runBlocking(StockManager.stockContext) {
         if (!started) return@runBlocking
 
         // если стратегия стартанула и какие-то корутины уже завершились, то убрать их, чтобы появился доступ для новых покупок

@@ -10,15 +10,13 @@ import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.service.toMoney
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.*
 import kotlin.math.abs
+import kotlin.random.Random
 
 @KoinApiExtension
 class StrategyRocket() : KoinComponent {
@@ -33,7 +31,7 @@ class StrategyRocket() : KoinComponent {
 
     private var started: Boolean = false
 
-    fun process(): MutableList<Stock> {
+    suspend fun process(): MutableList<Stock> = withContext(StockManager.stockContext) {
         val all = stockManager.getWhiteStocks()
 
         val min = SettingsManager.getCommonPriceMin()
@@ -42,24 +40,23 @@ class StrategyRocket() : KoinComponent {
         stocks.clear()
         stocks.addAll(all.filter { it.getPriceNow() > min && it.getPriceNow() < max })
 
-        return stocks
+        return@withContext stocks
     }
 
-    fun startStrategy() {
+    suspend fun startStrategy() = withContext(StockManager.stockContext) {
         rocketStocks.clear()
         cometStocks.clear()
         process()
         started = true
     }
 
-    fun stopStrategy() {
+    suspend fun stopStrategy() = withContext(StockManager.stockContext) {
         started = false
     }
 
-    @Synchronized
-    fun processStrategy(stock: Stock) {
-        if (!started) return
-        if (stock !in stocks) return
+    suspend fun processStrategy(stock: Stock) = withContext(StockManager.stockContext) {
+        if (!started) return@withContext
+        if (stock !in stocks) return@withContext
 
         val percentRocket = SettingsManager.getRocketChangePercent()
         val minutesRocket = SettingsManager.getRocketChangeMinutes()
@@ -79,7 +76,7 @@ class StrategyRocket() : KoinComponent {
 
             val deltaMinutes = ((lastCandle.time.time - firstCandle.time.time) / 60.0 / 1000.0).toInt()
             if (deltaMinutes > minutesRocket) { // если дальше настроек, игнорим
-                return
+                return@withContext
             }
 
             var volume = 0
@@ -90,9 +87,11 @@ class StrategyRocket() : KoinComponent {
             val changePercent = lastCandle.closingPrice / firstCandle.openingPrice * 100.0 - 100.0
             if (volume >= volumeRocket && abs(changePercent) >= abs(percentRocket)) {
 
-                // если уже есть в списке, то не дублировать
-                if (rocketStocks.find { it.stock.ticker == stock.ticker && ((Calendar.getInstance().time.time - it.fireTime) / 60.0 / 1000.0).toInt() < 5 } != null) return
-                if (cometStocks.find { it.stock.ticker == stock.ticker && ((Calendar.getInstance().time.time - it.fireTime) / 60.0 / 1000.0).toInt() < 5 } != null) return
+                val all = rocketStocks + cometStocks
+                val last = all.findLast { it.stock.ticker == stock.ticker }
+                last?.let {
+                    if (((Calendar.getInstance().time.time - it.fireTime) / 60.0 / 1000.0).toInt() < 3) return@withContext
+                }
 
                 val rocketStock = RocketStock(stock, firstCandle.openingPrice, lastCandle.closingPrice, deltaMinutes, volume, changePercent, lastCandle.time.time)
                 rocketStock.process()
@@ -106,7 +105,7 @@ class StrategyRocket() : KoinComponent {
         }
     }
 
-    private fun createRocket(rocketStock: RocketStock) {
+    private suspend fun createRocket(rocketStock: RocketStock) = withContext(StockManager.stockContext) {
         val context: Context = TheApplication.application.applicationContext
 
         val ticker = rocketStock.ticker
@@ -157,7 +156,7 @@ class StrategyRocket() : KoinComponent {
             .build()
 
         val manager = context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
-        val uid = kotlin.random.Random.Default.nextInt(0, 100000)
+        val uid = Random.nextInt(0, 100000)
         manager.notify(ticker, uid, notification)
 
         val alive: Long = SettingsManager.getRocketNotifyAlive().toLong()
