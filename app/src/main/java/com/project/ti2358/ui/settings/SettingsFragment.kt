@@ -3,13 +3,14 @@ package com.project.ti2358.ui.settings
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.fragment.app.FragmentManager
+import androidx.navigation.findNavController
 import androidx.preference.*
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.AlorManager
 import com.project.ti2358.data.manager.StockManager
-import com.project.ti2358.data.service.StreamingAlorService
-import com.project.ti2358.data.service.StreamingTinkoffService
 import com.project.ti2358.service.Utils
+import com.project.ti2358.service.log
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -20,6 +21,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.fragment_settings, rootKey)
+
+        val key: String = (arguments?.get("key") ?: "").toString()
+        if (key != "") scrollToPreference(key)
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
         val darkThemeKey = getString(R.string.setting_key_dark_theme)
@@ -32,7 +36,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
             Configuration.UI_MODE_NIGHT_NO -> {
                 darkThemePreference?.isChecked = false
             }
-            Configuration.UI_MODE_NIGHT_UNDEFINED -> {}
+            Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+            }
         }
 
         darkThemePreference?.onPreferenceChangeListener  = Preference.OnPreferenceChangeListener { preference, newValue ->

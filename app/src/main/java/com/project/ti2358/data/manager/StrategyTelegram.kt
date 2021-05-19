@@ -357,7 +357,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴⤴️⤵️️ стоп!"
             }
-            sendMessageToChats(text, 15)
+            sendMessageToChats(text, -1)
         }
     }
 
@@ -374,7 +374,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴🛁 стоп!"
             }
-            sendMessageToChats(text, 15)
+            sendMessageToChats(text, -1)
         }
     }
 
@@ -392,7 +392,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴🛁♾ стоп!"
             }
-            sendMessageToChats(text, 15)
+            sendMessageToChats(text, -1)
         }
     }
 

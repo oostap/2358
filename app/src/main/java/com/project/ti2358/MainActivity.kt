@@ -9,7 +9,9 @@ import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
+import androidx.core.view.marginBottom
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
@@ -57,8 +59,8 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         // add back arrow to toolbar
         if (supportActionBar != null) {
-            supportActionBar?.setDisplayHomeAsUpEnabled(true);
-            supportActionBar?.setDisplayShowHomeEnabled(true);
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)
+            supportActionBar?.setDisplayShowHomeEnabled(true)
         }
 
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
@@ -68,11 +70,41 @@ class MainActivity : AppCompatActivity() {
         // угловая круглая кнопка
         val fab: FloatingActionButton = findViewById(R.id.fab)
         fab.setOnClickListener { view ->
-            navController.navigate(R.id.nav_settings, null)
+            var key = ""
+            navController.currentDestination?.let {
+                if (it.id == R.id.nav_premarket) {
+                    key = "premarket_price_change_percent"
+                } else if (it.id in listOf(R.id.nav_tazik_endless_start, R.id.nav_tazik_endless_finish)) {
+                    key = "tazik_endless_set"
+                } else if (it.id in listOf(R.id.nav_tazik_start, R.id.nav_tazik_finish)) {
+                    key = "tazik_set_1"
+                } else if (it.id in listOf(R.id.nav_2358_start, R.id.nav_2358_finish)) {
+                    key = "2358_price_change_percent"
+                } else if (it.id in listOf(R.id.nav_1000_buy_start, R.id.nav_1000_buy_finish)) {
+                    key = "1000_buy_take_profit"
+                } else if (it.id in listOf(R.id.nav_1000_sell_start, R.id.nav_1000_sell_finish)) {
+                    key = "1000_take_sell_profit"
+                } else if (it.id in listOf(R.id.nav_2225_start, R.id.nav_2225_finish)) {
+                    key = "2225_price_change_percent"
+                } else if (it.id in listOf(R.id.nav_1728_up, R.id.nav_1728_down)) {
+                    key = "1728_volume_min_each_steps"
+                } else if (it.id in listOf(R.id.nav_rockets)) {
+                    key = "rocket_change_percent"
+                } else if (it.id in listOf(R.id.nav_trends)) {
+                    key = "trend_change_min_down_change_percent"
+                } else if (it.id in listOf(R.id.nav_telegram)) {
+                    key = "telegram_autostart"
+                } else if (it.id in listOf(R.id.nav_favorites)) {
+                    key = "love_set"
+                }
+            }
+
+            val bundle = bundleOf("key" to key)
+            navController.navigate(R.id.nav_settings, bundle)
         }
 
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
-            if (destination.id in listOf(R.id.nav_settings, R.id.nav_orderbook, R.id.nav_orders, R.id.nav_chart, R.id.nav_donate)) {
+            if (destination.id in listOf(R.id.nav_settings, R.id.nav_orderbook, R.id.nav_orders, R.id.nav_chart, R.id.nav_donate, R.id.nav_reports)) {
                 fab.visibility = View.INVISIBLE
             } else {
                 fab.visibility = View.VISIBLE
