@@ -280,7 +280,8 @@ class StrategyTazikEndless : KoinComponent {
             abs(change) > 50 ||                                     // конечная цена нулевая или просто огромная просадка
             change > 0 ||                                           // изменение положительное
             change > purchase.percentLimitPriceChange ||            // изменение не в пределах наших настроек
-            volume < SettingsManager.getTazikEndlessMinVolume()     // если объём свечи меньше настроек
+            volume < SettingsManager.getTazikEndlessMinVolume() ||  // если объём свечи меньше настроек
+            purchase.stock.getTodayVolume() < SettingsManager.getTazikEndlessDayMinVolume() // дневной объём меньше, чем нужно
         ) {
             return false
         }
@@ -380,6 +381,7 @@ class StrategyTazikEndless : KoinComponent {
                 // обновить цену, чтобы не затарить на следующей свече, возможен нож ступенькой
                 purchase.tazikEndlessPrice = candle.closingPrice
                 strategySpeaker.speakTazikSpikeSkip(purchase, change)
+                strategyTelegram.sendTazikSpike(purchase, buyPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
                 return
             }
         }

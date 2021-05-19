@@ -184,6 +184,7 @@
     <!-- endless tazik settings -->
     <string name="stocks_tazik_endless_set">Набор тикеров через пробел</string>
     <string name="stocks_tazik_endless_reset_interval_seconds">Интервал сброса цены в секундах</string>
+    <string name="stocks_tazik_endless_day_min_volume">Реагировать на объём от шт.</string>
     <string name="stocks_tazik_endless_min_volume">Реагировать на объём от шт.</string>
     <string name="stocks_tazik_endless_min_percent_to_buy">Минимальная просадка в %</string>
     <string name="stocks_tazik_endless_purchase_volume">Общая сумма покупки</string>
@@ -330,6 +331,7 @@
     <!-- endless tazik settings -->
     <string name="setting_key_tazik_endless_set">tazik_endless_set</string>
     <string name="setting_key_tazik_endless_reset_interval_seconds">tazik_endless_reset_interval_seconds</string>
+    <string name="setting_key_tazik_endless_day_min_volume">tazik_endless_day_min_volume</string>
     <string name="setting_key_tazik_endless_min_volume">endless_min_volume</string>
     <string name="setting_key_tazik_endless_min_percent_to_buy">tazik_endless_min_percent_to_buy</string>
     <string name="setting_key_tazik_endless_purchase_volume">tazik_endless_purchase_volume</string>

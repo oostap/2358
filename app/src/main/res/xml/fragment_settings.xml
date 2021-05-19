@@ -360,6 +360,12 @@
             app:defaultValue="100"/>
 
         <EditTextPreference
+            app:key="@string/setting_key_tazik_endless_day_min_volume"
+            app:title="@string/stocks_tazik_endless_day_min_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="100"/>
+
+        <EditTextPreference
             app:key="@string/setting_key_tazik_endless_purchase_volume"
             app:title="@string/stocks_tazik_endless_purchase_volume"
             app:useSimpleSummaryProvider="true"

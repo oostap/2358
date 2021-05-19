@@ -562,6 +562,16 @@ class SettingsManager {
             }
         }
 
+        fun getTazikEndlessDayMinVolume(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_day_min_volume)
+            val value: String? = preferences.getString(key, "100")
+            return try {
+                parseInt(value ?: "100")
+            } catch (e: Exception) {
+                100
+            }
+        }
+
         fun getTazikEndlessOrderLifeTimeSeconds(): Int {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_order_lifetime_seconds)
             val value: String? = preferences.getString(key, "120")
