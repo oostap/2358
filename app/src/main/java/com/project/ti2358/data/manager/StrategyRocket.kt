@@ -86,18 +86,18 @@ class StrategyRocket() : KoinComponent {
 
             val changePercent = lastCandle.closingPrice / firstCandle.openingPrice * 100.0 - 100.0
             if (volume >= volumeRocket && abs(changePercent) >= abs(percentRocket)) {
-
-                val all = rocketStocks + cometStocks
-                val last = all.findLast { it.stock.ticker == stock.ticker }
-                last?.let {
-                    if (((Calendar.getInstance().time.time - it.fireTime) / 60.0 / 1000.0).toInt() < 3) return@withContext
-                }
-
                 val rocketStock = RocketStock(stock, firstCandle.openingPrice, lastCandle.closingPrice, deltaMinutes, volume, changePercent, lastCandle.time.time)
                 rocketStock.process()
+
                 if (changePercent > 0) {
+                    val last = rocketStocks.find { it.stock.ticker == stock.ticker }
+                    if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 3) return@withContext }
+
                     rocketStocks.add(0, rocketStock)
                 } else {
+                    val last = cometStocks.find { it.stock.ticker == stock.ticker }
+                    if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 3) return@withContext }
+
                     cometStocks.add(0, rocketStock)
                 }
                 createRocket(rocketStock)
@@ -105,7 +105,7 @@ class StrategyRocket() : KoinComponent {
         }
     }
 
-    private suspend fun createRocket(rocketStock: RocketStock) = withContext(StockManager.stockContext) {
+    private fun createRocket(rocketStock: RocketStock) {
         val context: Context = TheApplication.application.applicationContext
 
         val ticker = rocketStock.ticker

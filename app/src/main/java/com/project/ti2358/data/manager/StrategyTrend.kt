@@ -145,13 +145,6 @@ class StrategyTrend : KoinComponent {
 
         log("СМЕНА ТРЕНДА ${stock.ticker} = $changeFromStartToLow -> $changeFromLowToNow, total = $changeStartPercent, turnout = $turnValue")
 
-        // если бумага недавно уже отскакивала за последние 5 минут, то не дублировать
-        val all = trendUpStocks + trendDownStocks
-        val last = all.findLast { it.stock.ticker == stock.ticker }
-        last?.let {
-            if (((Calendar.getInstance().time.time - it.fireTime) / 60.0 / 1000.0).toInt() < 3) return@withContext
-        }
-
         val trendStock = TrendStock(stock,
             stock.priceTrend, extremumValue, fromLowToNowCandles.last().closingPrice,
             changeFromStartToLow, changeFromLowToNow, turnValue,
@@ -160,8 +153,14 @@ class StrategyTrend : KoinComponent {
         )
 
         if (changeFromStart > 0) {
+            val last = trendDownStocks.find { it.stock.ticker == stock.ticker }
+            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 4) return@withContext }
+
             trendDownStocks.add(0, trendStock)
         } else {
+            val last = trendUpStocks.find { it.stock.ticker == stock.ticker }
+            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 4) return@withContext }
+
             trendUpStocks.add(0, trendStock)
         }
         createTrend(trendStock)
