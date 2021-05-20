@@ -56,7 +56,7 @@ class StrategyTrend : KoinComponent {
         strategyTelegram.sendTrendStart(true)
     }
 
-    suspend fun stopStrategy() = withContext(StockManager.stockContext) {
+    fun stopStrategy() {
         started = false
         strategyTelegram.sendTrendStart(false)
     }

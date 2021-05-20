@@ -51,7 +51,7 @@ class StrategyRocket() : KoinComponent {
         started = true
     }
 
-    suspend fun stopStrategy() = withContext(StockManager.stockContext) {
+    fun stopStrategy() {
         started = false
     }
 

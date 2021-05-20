@@ -75,9 +75,7 @@ class StrategyRocketService : Service() {
         isServiceRunning = false
         job?.cancel()
 
-        GlobalScope.launch {
-            strategyRocket.stopStrategy()
-        }
+        strategyRocket.stopStrategy()
         super.onDestroy()
     }
 

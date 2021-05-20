@@ -73,10 +73,7 @@ class StrategyTrendService : Service() {
         notificationButtonReceiver = null
         isServiceRunning = false
         job?.cancel()
-
-        GlobalScope.launch {
-            strategyTrend.stopStrategy()
-        }
+        strategyTrend.stopStrategy()
         super.onDestroy()
     }
 

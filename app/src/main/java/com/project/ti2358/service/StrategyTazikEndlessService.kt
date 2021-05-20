@@ -84,9 +84,9 @@ class StrategyTazikEndlessService : Service() {
         notificationButtonReceiver = null
         isServiceRunning = false
         job?.cancel()
-        GlobalScope.launch {
-            strategyTazikEndless.stopStrategy()
-        }
+
+        strategyTazikEndless.stopStrategy()
+
         super.onDestroy()
     }
 

@@ -307,7 +307,7 @@ class StrategyTazik : KoinComponent {
         strategyTelegram.sendTazikStart(true)
     }
 
-    suspend fun stopStrategy() = withContext(StockManager.stockContext) {
+    fun stopStrategy() {
         started = false
         stocksTickerInProcess.forEach {
             try {
