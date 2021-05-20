@@ -32,7 +32,7 @@ class StrategyRocket() : KoinComponent {
 
     private var started: Boolean = false
 
-    suspend fun process(): MutableList<Stock> = withContext(StockManager.stockContext) {
+    suspend fun process(): MutableList<Stock> = withContext(StockManager.rocketContext) {
         val all = stockManager.getWhiteStocks()
 
         val min = SettingsManager.getCommonPriceMin()
@@ -44,7 +44,7 @@ class StrategyRocket() : KoinComponent {
         return@withContext stocks
     }
 
-    suspend fun startStrategy() = withContext(StockManager.stockContext) {
+    suspend fun startStrategy() = withContext(StockManager.rocketContext) {
         rocketStocks.clear()
         cometStocks.clear()
         process()
@@ -55,9 +55,9 @@ class StrategyRocket() : KoinComponent {
         started = false
     }
 
-    suspend fun processStrategy(stock: Stock) = withContext(StockManager.stockContext) {
-        if (!started) return@withContext
-        if (stock !in stocks) return@withContext
+    fun processStrategy(stock: Stock) = runBlocking(StockManager.rocketContext) {
+        if (!started) return@runBlocking
+        if (stock !in stocks) return@runBlocking
 
         val percentRocket = SettingsManager.getRocketChangePercent()
         val minutesRocket = SettingsManager.getRocketChangeMinutes()
@@ -77,7 +77,7 @@ class StrategyRocket() : KoinComponent {
 
             val deltaMinutes = ((lastCandle.time.time - firstCandle.time.time) / 60.0 / 1000.0).toInt()
             if (deltaMinutes > minutesRocket) { // если дальше настроек, игнорим
-                return@withContext
+                return@runBlocking
             }
 
             var volume = 0
@@ -92,12 +92,12 @@ class StrategyRocket() : KoinComponent {
 
                 if (changePercent > 0) {
                     val last = rocketStocks.firstOrNull { it.stock.ticker == stock.ticker }
-                    if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 3) return@withContext }
+                    if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 3) return@runBlocking }
 
                     rocketStocks.add(0, rocketStock)
                 } else {
                     val last = cometStocks.firstOrNull { it.stock.ticker == stock.ticker }
-                    if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 3) return@withContext }
+                    if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 3) return@runBlocking }
 
                     cometStocks.add(0, rocketStock)
                 }

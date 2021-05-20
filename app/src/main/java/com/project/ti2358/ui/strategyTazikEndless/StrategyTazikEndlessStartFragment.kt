@@ -133,8 +133,10 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
     }
 
     private fun updateTitle() {
-        val act = requireActivity() as AppCompatActivity
-        act.supportActionBar?.title = "Бесконечный таз (${strategyTazikEndless.stocksSelected.size} шт.)"
+        if (isAdded) {
+            val act = requireActivity() as AppCompatActivity
+            act.supportActionBar?.title = "Бесконечный таз (${strategyTazikEndless.stocksSelected.size} шт.)"
+        }
     }
 
     inner class ItemTazikRecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {

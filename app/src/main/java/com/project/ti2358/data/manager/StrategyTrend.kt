@@ -31,7 +31,7 @@ class StrategyTrend : KoinComponent {
 
     private var started: Boolean = false
 
-    suspend fun process(): MutableList<Stock> = withContext(StockManager.stockContext) {
+    suspend fun process(): MutableList<Stock> = withContext(StockManager.trendContext) {
         val all = stockManager.getWhiteStocks()
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
@@ -42,7 +42,7 @@ class StrategyTrend : KoinComponent {
         return@withContext stocks
     }
 
-    suspend fun startStrategy() = withContext(StockManager.stockContext) {
+    suspend fun startStrategy() = withContext(StockManager.trendContext) {
         trendUpStocks.clear()
         trendDownStocks.clear()
 
@@ -61,13 +61,13 @@ class StrategyTrend : KoinComponent {
         strategyTelegram.sendTrendStart(false)
     }
 
-    suspend fun processStrategy(stock: Stock, candle: Candle) = withContext(StockManager.stockContext) {
-        if (!started) return@withContext
+    fun processStrategy(stock: Stock, candle: Candle) = runBlocking(StockManager.trendContext) {
+        if (!started) return@runBlocking
         process()
-        if (stock !in stocks) return@withContext
+        if (stock !in stocks) return@runBlocking
 
         if (SettingsManager.getTrendLove()) {
-            if (StrategyLove.stocksSelected.find { it.ticker == stock.ticker } == null) return@withContext
+            if (StrategyLove.stocksSelected.find { it.ticker == stock.ticker } == null) return@runBlocking
         }
 
         val changeStartPercent = SettingsManager.getTrendMinDownPercent()
@@ -98,7 +98,7 @@ class StrategyTrend : KoinComponent {
                 fromStartToNowCandles.removeLast()
 
             // если прошло мало минут, то игнорим
-            if (fromStartToNowCandles.size < afterMinutes) return@withContext
+            if (fromStartToNowCandles.size < afterMinutes) return@runBlocking
 
             if (changeFromStart < 0) { // если изменение от старта < 0, то ищем минимальную свечу
                 extremumValue = 10000.0
@@ -128,7 +128,7 @@ class StrategyTrend : KoinComponent {
         }
 
         // если свечей мало, ливаем
-        if (fromStartToLowCandles.isEmpty() || fromLowToNowCandles.isEmpty()) return@withContext
+        if (fromStartToLowCandles.isEmpty() || fromLowToNowCandles.isEmpty()) return@runBlocking
 
         // изменение от старта скана до точки минимума
         val changeFromStartToLow = extremumValue / stock.priceTrend * 100.0 - 100.0
@@ -137,12 +137,12 @@ class StrategyTrend : KoinComponent {
         val changeFromLowToNow = fromLowToNowCandles.last().closingPrice / extremumValue * 100.0 - 100.0
 
         // проверка просадки, большая ли
-        if (abs(changeFromStartToLow) < abs(changeStartPercent)) return@withContext
+        if (abs(changeFromStartToLow) < abs(changeStartPercent)) return@runBlocking
 
         // вычисление процента отскока
         val turnValue = abs(changeFromLowToNow / changeFromStartToLow * 100.0)
 
-        if (abs(turnValue) < changeEndPercent) return@withContext
+        if (abs(turnValue) < changeEndPercent) return@runBlocking
 
         log("СМЕНА ТРЕНДА ${stock.ticker} = $changeFromStartToLow -> $changeFromLowToNow, total = $changeStartPercent, turnout = $turnValue")
 
@@ -155,12 +155,12 @@ class StrategyTrend : KoinComponent {
 
         if (changeFromStart > 0) {
             val last = trendDownStocks.find { it.stock.ticker == stock.ticker }
-            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 4) return@withContext }
+            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 4) return@runBlocking }
 
             trendDownStocks.add(0, trendStock)
         } else {
             val last = trendUpStocks.find { it.stock.ticker == stock.ticker }
-            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 4) return@withContext }
+            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 4) return@runBlocking }
 
             trendUpStocks.add(0, trendStock)
         }
@@ -169,7 +169,7 @@ class StrategyTrend : KoinComponent {
         stock.resetTrendPrice()
     }
 
-    private suspend fun createTrend(trendStock: TrendStock) = withContext(StockManager.stockContext) {
+    private fun createTrend(trendStock: TrendStock) {
         val context: Context = TheApplication.application.applicationContext
 
         val ticker = trendStock.ticker

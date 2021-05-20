@@ -136,8 +136,10 @@ class StrategyTazikStartFragment : Fragment(R.layout.fragment_tazik_start) {
     }
 
     private fun updateTitle() {
-        val act = requireActivity() as AppCompatActivity
-        act.supportActionBar?.title = "Автотазик - $numberSet (${strategyTazik.stocksSelected.size} шт.)"
+        if (isAdded) {
+            val act = requireActivity() as AppCompatActivity
+            act.supportActionBar?.title = "Автотазик - $numberSet (${strategyTazik.stocksSelected.size} шт.)"
+        }
     }
 
     inner class ItemTazikRecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {

@@ -60,6 +60,8 @@ class StockManager : KoinComponent {
     companion object {
         var stockIndexComponents: StockIndexComponents? = null
         val stockContext = newSingleThreadContext("computationThread")
+        val rocketContext = newSingleThreadContext("computationRocketThread")
+        val trendContext = newSingleThreadContext("computationTrendThread")
     }
 
     fun getWhiteStocks(): MutableList<Stock> {
