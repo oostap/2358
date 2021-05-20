@@ -15,6 +15,7 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.*
+import java.util.Collections.synchronizedList
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -25,8 +26,8 @@ class StrategyTrend : KoinComponent {
     private val strategyTelegram: StrategyTelegram by inject()
 
     private var stocks: MutableList<Stock> = mutableListOf()
-    var trendUpStocks: MutableList<TrendStock> = mutableListOf()
-    var trendDownStocks: MutableList<TrendStock> = mutableListOf()
+    var trendUpStocks: MutableList<TrendStock> = synchronizedList(mutableListOf())
+    var trendDownStocks: MutableList<TrendStock> = synchronizedList(mutableListOf())
 
     private var started: Boolean = false
 

@@ -21,8 +21,10 @@
     <string name="cancel_all2">Отменить всё</string>
     <string name="sell_tt">Продать с трейлинг-стопом</string>
 
-    <string name="set_1">Набор 1</string>
-    <string name="set_2">Набор 2</string>
+    <string name="set_1">1</string>
+    <string name="set_2">2</string>
+    <string name="set_3">3</string>
+    <string name="set_love">❤️</string>
 
     <string name="start_telegram">Включить телеграм бота</string>
     <string name="start_follower">Включить команды</string>
@@ -167,6 +169,7 @@
     <!-- tazik settings -->
     <string name="stocks_tazik_set_1">Набор 1 (тикеры через пробел)</string>
     <string name="stocks_tazik_set_2">Набор 2 (тикеры через пробел)</string>
+    <string name="stocks_tazik_set_3">Набор 3 (тикеры через пробел)</string>
     <string name="stocks_tazik_min_percent_to_buy">Минимальная просадка в %</string>
     <string name="stocks_tazik_min_volume">Реагировать на объём от шт.</string>
     <string name="stocks_tazik_purchase_volume">Общая сумма покупки</string>
@@ -182,7 +185,10 @@
     <string name="stocks_tazik_voice">Озвучка тазов</string>
 
     <!-- endless tazik settings -->
-    <string name="stocks_tazik_endless_set">Набор тикеров через пробел</string>
+    <string name="stocks_tazik_endless_set">Набор 1 (тикеры через пробел)</string>
+    <string name="stocks_tazik_endless_set_2">Набор 2 (тикеры через пробел)</string>
+    <string name="stocks_tazik_endless_set_3">Набор 3 (тикеры через пробел)</string>
+
     <string name="stocks_tazik_endless_reset_interval_seconds">Интервал сброса цены в секундах</string>
     <string name="stocks_tazik_endless_day_min_volume">Общий дневной объём от шт.</string>
     <string name="stocks_tazik_endless_min_volume">Реагировать на объём от шт.</string>
@@ -314,6 +320,7 @@
     <!-- tazik settings -->
     <string name="setting_key_tazik_set_1">tazik_set_1</string>
     <string name="setting_key_tazik_set_2">tazik_set_2</string>
+    <string name="setting_key_tazik_set_3">tazik_set_3</string>
     <string name="setting_key_tazik_min_percent_to_buy">tazik_min_percent_to_buy</string>
     <string name="setting_key_tazik_min_volume">tazik_min_volume</string>
     <string name="setting_key_tazik_purchase_volume">tazik_purchase_volume</string>
@@ -330,6 +337,8 @@
 
     <!-- endless tazik settings -->
     <string name="setting_key_tazik_endless_set">tazik_endless_set</string>
+    <string name="setting_key_tazik_endless_set_2">tazik_endless_set_2</string>
+    <string name="setting_key_tazik_endless_set_3">tazik_endless_set_3</string>
     <string name="setting_key_tazik_endless_reset_interval_seconds">tazik_endless_reset_interval_seconds</string>
     <string name="setting_key_tazik_endless_day_min_volume">tazik_endless_day_min_volume</string>
     <string name="setting_key_tazik_endless_min_volume">endless_min_volume</string>

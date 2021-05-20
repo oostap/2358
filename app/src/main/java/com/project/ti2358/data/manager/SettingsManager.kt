@@ -391,6 +391,13 @@ class SettingsManager {
             return array ?: emptyList()
         }
 
+        fun getTazikSet3(): List<String> {
+            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_set_3)
+            val value: String? = preferences.getString(key, "")?.trim()
+            val array = value?.split(" ")
+            return array ?: emptyList()
+        }
+
         fun getTazikChangePercent(): Double {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_min_percent_to_buy)
             val value: String? = preferences.getString(key, "-1.0")
@@ -535,10 +542,24 @@ class SettingsManager {
         }
         /******************** THE TAZIK ENDLESS *************************/
 
-        fun getTazikEndlessSet(): List<String> {
+        fun getTazikEndlessSet1(): List<String> {
             val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_set)
             val value: String? = preferences.getString(key, "")?.trim()
-            val array = value?.split(" ")
+            val array = value?.split("SPCE GTHX ARCT BLUE")
+            return array ?: emptyList()
+        }
+
+        fun getTazikEndlessSet2(): List<String> {
+            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_set_2)
+            val value: String? = preferences.getString(key, "")?.trim()
+            val array = value?.split("VIPS ACH BABA JD BIDU")
+            return array ?: emptyList()
+        }
+
+        fun getTazikEndlessSet3(): List<String> {
+            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_set_3)
+            val value: String? = preferences.getString(key, "")?.trim()
+            val array = value?.split("VTBR OZON MGNT BELU")
             return array ?: emptyList()
         }
 

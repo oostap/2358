@@ -6,6 +6,7 @@ import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Currency
+import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.service.*
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
@@ -56,7 +57,13 @@ class StrategyTazik : KoinComponent {
     private fun loadSelectedStocks(numberSet: Int) {
         stocksSelected.clear()
 
-        val setList: List<String> = if (numberSet == 1) SettingsManager.getTazikSet1() else SettingsManager.getTazikSet2()
+        val setList: List<String> = when (numberSet) {
+            1 -> SettingsManager.getTazikSet1()
+            2 -> SettingsManager.getTazikSet2()
+            3 -> SettingsManager.getTazikSet3()
+            4 -> SettingsManager.getLoveSet()
+            else -> emptyList()
+        }
         stocksSelected = stocks.filter { it.ticker in setList }.toMutableList()
     }
 
@@ -64,9 +71,19 @@ class StrategyTazik : KoinComponent {
         val setList = stocksSelected.map { it.ticker }.toList()
         val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
         val editor: SharedPreferences.Editor = preferences.edit()
-        val key = if (numberSet == 1) TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_set_1) else TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_set_2)
-        editor.putString(key, setList.joinToString(separator = " "))
-        editor.apply()
+
+        val key = when (numberSet) {
+            1 -> TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_set_1)
+            2 -> TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_set_2)
+            3 -> TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_set_3)
+            4 -> TheApplication.application.applicationContext.getString(R.string.setting_key_love_set)
+            else -> ""
+        }
+
+        if (key != "") {
+            editor.putString(key, setList.joinToString(separator = " "))
+            editor.apply()
+        }
     }
 
     fun resort(): MutableList<Stock> {

@@ -24,23 +24,40 @@
         android:layout_marginRight="80dp"
         android:layout_marginBottom="65dp"
         android:layout_alignParentBottom="true"
-        android:weightSum="2" >
+        android:weightSum="4" >
         <Button
             android:layout_height="70dp"
             android:id="@+id/set1_button"
             android:layout_marginRight="5dp"
             android:text="@string/set_1"
             android:layout_weight="1"
-            android:textSize="16dp"
+            android:textSize="20dp"
             android:layout_width="0dp" />
 
         <Button
             android:layout_height="70dp"
             android:id="@+id/set2_button"
-            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
             android:text="@string/set_2"
             android:layout_weight="1"
-            android:textSize="16dp"
+            android:textSize="20dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="70dp"
+            android:id="@+id/set3_button"
+            android:text="@string/set_3"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="70dp"
+            android:id="@+id/setLove_button"
+            android:layout_marginLeft="5dp"
+            android:text="@string/set_love"
+            android:layout_weight="1"
+            android:textSize="20dp"
             android:layout_width="0dp" />
     </LinearLayout>
 

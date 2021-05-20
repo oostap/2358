@@ -30,6 +30,7 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
 
     var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
     lateinit var stocks: MutableList<Stock>
+    var numberSet: Int = 1
 
     override fun onDestroy() {
         fragmentTazikEndlessStartBinding = null
@@ -54,6 +55,26 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
                 }
             }
 
+            set1Button.setOnClickListener {
+                numberSet = 1
+                updateData()
+            }
+
+            set2Button.setOnClickListener {
+                numberSet = 2
+                updateData()
+            }
+
+            set3Button.setOnClickListener {
+                numberSet = 3
+                updateData()
+            }
+
+            setLoveButton.setOnClickListener {
+                numberSet = 4
+                updateData()
+            }
+
             updateButton.setOnClickListener {
                 updateData()
             }
@@ -70,14 +91,7 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
                 }
 
                 fun processText(text: String) {
-                    updateData().invokeOnCompletion {
-                        GlobalScope.launch {
-                            stocks = Utils.search(stocks, text)
-                            withContext(Dispatchers.Main) {
-                                adapterList.setData(stocks)
-                            }
-                        }
-                    }
+                    updateData(text)
                 }
             })
 
@@ -90,12 +104,31 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
         updateData()
     }
 
-    private fun updateData() : Job {
-        return GlobalScope.launch(Dispatchers.Main) {
-            strategyTazikEndless.process()
+    private fun updateData(search: String = "") {
+        GlobalScope.launch(Dispatchers.Main) {
+            strategyTazikEndless.process(numberSet)
             stocks = strategyTazikEndless.resort()
+            if (search != "") stocks = Utils.search(stocks, search)
             adapterList.setData(stocks)
             updateTitle()
+
+            fragmentTazikEndlessStartBinding?.let {
+                val colorDefault = Utils.DARK_BLUE
+                val colorSelect = Utils.RED
+
+                it.set1Button.setBackgroundColor(colorDefault)
+                it.set2Button.setBackgroundColor(colorDefault)
+                it.set3Button.setBackgroundColor(colorDefault)
+                it.setLoveButton.setBackgroundColor(colorDefault)
+
+                when (numberSet) {
+                    1 -> it.set1Button.setBackgroundColor(colorSelect)
+                    2 -> it.set2Button.setBackgroundColor(colorSelect)
+                    3 -> it.set3Button.setBackgroundColor(colorSelect)
+                    4 -> it.setLoveButton.setBackgroundColor(colorSelect)
+                    else -> { }
+                }
+            }
         }
     }
 
@@ -139,7 +172,7 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
 
                     chooseView.setOnCheckedChangeListener { _, checked ->
                         GlobalScope.launch {
-                            strategyTazikEndless.setSelected(stock, checked)
+                            strategyTazikEndless.setSelected(stock, checked, numberSet)
                             withContext(Dispatchers.Main) {
                                 updateTitle()
                             }

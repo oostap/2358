@@ -15,6 +15,7 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.*
+import java.util.Collections.synchronizedList
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -25,9 +26,9 @@ class StrategyRocket() : KoinComponent {
     private val strategyTelegram: StrategyTelegram by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
-    var stocksSelected: MutableList<Stock> = mutableListOf()
-    var rocketStocks: MutableList<RocketStock> = mutableListOf()
-    var cometStocks: MutableList<RocketStock> = mutableListOf()
+    var stocksSelected: MutableList<Stock> = synchronizedList(mutableListOf())
+    var rocketStocks: MutableList<RocketStock> = synchronizedList(mutableListOf())
+    var cometStocks: MutableList<RocketStock> = synchronizedList(mutableListOf())
 
     private var started: Boolean = false
 
@@ -90,12 +91,12 @@ class StrategyRocket() : KoinComponent {
                 rocketStock.process()
 
                 if (changePercent > 0) {
-                    val last = rocketStocks.find { it.stock.ticker == stock.ticker }
+                    val last = rocketStocks.firstOrNull { it.stock.ticker == stock.ticker }
                     if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 3) return@withContext }
 
                     rocketStocks.add(0, rocketStock)
                 } else {
-                    val last = cometStocks.find { it.stock.ticker == stock.ticker }
+                    val last = cometStocks.firstOrNull { it.stock.ticker == stock.ticker }
                     if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 3) return@withContext }
 
                     cometStocks.add(0, rocketStock)

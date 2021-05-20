@@ -11,7 +11,9 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.icechao.klinelib.utils.Status
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StrategyTazik
 import com.project.ti2358.databinding.FragmentTazikStartBinding
@@ -43,71 +45,99 @@ class StrategyTazikStartFragment : Fragment(R.layout.fragment_tazik_start) {
         val binding = FragmentTazikStartBinding.bind(view)
         fragmentTazikStartBinding = binding
 
-        binding.list.addItemDecoration(DividerItemDecoration(binding.list.context, DividerItemDecoration.VERTICAL))
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapterList
+        with (binding) {
+            list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
+            list.layoutManager = LinearLayoutManager(context)
+            list.adapter = adapterList
 
-        binding.startButton.setOnClickListener {
-            if (strategyTazik.stocksSelected.isNotEmpty()) {
-                view.findNavController().navigate(R.id.action_nav_tazik_start_to_nav_tazik_finish)
-            } else {
-                Utils.showErrorAlert(requireContext())
-            }
-        }
-
-        binding.updateButton.setOnClickListener {
-            updateData()
-        }
-
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                processText(query)
-                return false
+            startButton.setOnClickListener {
+                if (strategyTazik.stocksSelected.isNotEmpty()) {
+                    view.findNavController().navigate(R.id.action_nav_tazik_start_to_nav_tazik_finish)
+                } else {
+                    Utils.showErrorAlert(requireContext())
+                }
             }
 
-            override fun onQueryTextChange(newText: String): Boolean {
-                processText(newText)
-                return false
-            }
-
-            fun processText(text: String) {
+            updateButton.setOnClickListener {
                 updateData()
-
-                stocks = Utils.search(stocks, text)
-                adapterList.setData(stocks)
             }
-        })
 
-        binding.searchView.setOnCloseListener {
-            updateData()
-            false
-        }
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String): Boolean {
+                    processText(query)
+                    return false
+                }
 
-        binding.set1Button.setOnClickListener {
-            numberSet = 1
-            updateData()
-        }
+                override fun onQueryTextChange(newText: String): Boolean {
+                    processText(newText)
+                    return false
+                }
 
-        binding.set2Button.setOnClickListener {
-            numberSet = 2
-            updateData()
+                fun processText(text: String) {
+                    updateData(text)
+                }
+            })
+
+            searchView.setOnCloseListener {
+                updateData()
+                false
+            }
+
+            set1Button.setOnClickListener {
+                numberSet = 1
+                updateData()
+            }
+
+            set2Button.setOnClickListener {
+                numberSet = 2
+                updateData()
+            }
+
+            set3Button.setOnClickListener {
+                numberSet = 3
+                updateData()
+            }
+
+            setLoveButton.setOnClickListener {
+                numberSet = 4
+                updateData()
+            }
         }
 
         updateData()
     }
 
-    private fun updateData() : Job {
-        return GlobalScope.launch(Dispatchers.Main) {
+    private fun updateData(search: String = "") {
+        GlobalScope.launch(Dispatchers.Main) {
             stocks = strategyTazik.process(numberSet)
             stocks = strategyTazik.resort()
+            if (search != "") stocks = Utils.search(stocks, search)
             adapterList.setData(stocks)
             updateTitle()
+
+            fragmentTazikStartBinding?.let {
+                val colorDefault = Utils.DARK_BLUE
+                val colorSelect = Utils.RED
+
+                it.set1Button.setBackgroundColor(colorDefault)
+                it.set2Button.setBackgroundColor(colorDefault)
+                it.set3Button.setBackgroundColor(colorDefault)
+                it.setLoveButton.setBackgroundColor(colorDefault)
+
+                when (numberSet) {
+                    1 -> it.set1Button.setBackgroundColor(colorSelect)
+                    2 -> it.set2Button.setBackgroundColor(colorSelect)
+                    3 -> it.set3Button.setBackgroundColor(colorSelect)
+                    4 -> it.setLoveButton.setBackgroundColor(colorSelect)
+                    else -> { }
+                }
+            }
         }
     }
 
     private fun updateTitle() {
         val act = requireActivity() as AppCompatActivity
-        act.supportActionBar?.title = "Автотазик - Набор $numberSet (${strategyTazik.stocksSelected.size} шт.)"
+        act.supportActionBar?.title = "Автотазик - $numberSet (${strategyTazik.stocksSelected.size} шт.)"
     }
 
     inner class ItemTazikRecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {

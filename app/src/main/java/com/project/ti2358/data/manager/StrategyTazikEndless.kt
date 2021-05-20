@@ -41,31 +41,47 @@ class StrategyTazikEndless : KoinComponent {
         const val PercentLimitChangeDelta = 0.05
     }
 
-    suspend fun process() = withContext(StockManager.stockContext) {
+    suspend fun process(numberSet: Int) = withContext(StockManager.stockContext) {
         val all = stockManager.getWhiteStocks()
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
         stocks = all.filter { (it.getPriceNow() > min && it.getPriceNow() < max) || it.getPriceNow() == 0.0 }.toMutableList()
         stocks.sortBy { it.changePrice2300DayPercent }
-        loadSelectedStocks()
+        loadSelectedStocks(numberSet)
     }
 
-    private fun loadSelectedStocks() {
+    private fun loadSelectedStocks(numberSet: Int) {
         stocksSelected.clear()
 
-        val stocksSelectedList: List<String> = SettingsManager.getTazikEndlessSet()
-        stocksSelected = stocks.filter { it.ticker in stocksSelectedList }.toMutableList()
+        val setList: List<String> = when (numberSet) {
+            1 -> SettingsManager.getTazikEndlessSet1()
+            2 -> SettingsManager.getTazikEndlessSet2()
+            3 -> SettingsManager.getTazikEndlessSet3()
+            4 -> SettingsManager.getLoveSet()
+            else -> emptyList()
+        }
+        stocksSelected = stocks.filter { it.ticker in setList }.toMutableList()
     }
 
-    private fun saveSelectedStocks() {
+    private fun saveSelectedStocks(numberSet: Int) {
         val setList = stocksSelected.map { it.ticker }.toMutableList()
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
         val editor: SharedPreferences.Editor = preferences.edit()
-        val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_set)
-        editor.putString(key, setList.joinToString(separator = " "))
-        editor.apply()
+
+        val key = when (numberSet) {
+            1 -> TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_set)
+            2 -> TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_set_2)
+            3 -> TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_set_3)
+            4 -> TheApplication.application.applicationContext.getString(R.string.setting_key_love_set)
+            else -> ""
+        }
+
+        if (key != "") {
+            editor.putString(key, setList.joinToString(separator = " "))
+            editor.apply()
+        }
     }
 
     suspend fun resort(): MutableList<Stock> {
@@ -80,7 +96,7 @@ class StrategyTazikEndless : KoinComponent {
         return stocks
     }
 
-    suspend fun setSelected(stock: Stock, value: Boolean) = withContext(StockManager.stockContext) {
+    suspend fun setSelected(stock: Stock, value: Boolean, numberSet: Int) = withContext(StockManager.stockContext) {
         if (value) {
             if (stock !in stocksSelected)
                 stocksSelected.add(stock)
@@ -89,7 +105,7 @@ class StrategyTazikEndless : KoinComponent {
         }
         stocksSelected.sortBy { it.changePrice2300DayPercent }
 
-        saveSelectedStocks()
+        saveSelectedStocks(numberSet)
     }
 
     fun isSelected(stock: Stock): Boolean {

@@ -260,6 +260,12 @@
             app:defaultValue="ARCT BLUE"/>
 
         <EditTextPreference
+            app:key="@string/setting_key_tazik_set_3"
+            app:title="@string/stocks_tazik_set_3"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="VTBR SNGS"/>
+
+        <EditTextPreference
             app:key="@string/setting_key_tazik_min_percent_to_buy"
             app:title="@string/stocks_tazik_min_percent_to_buy"
             app:useSimpleSummaryProvider="true"
@@ -340,6 +346,18 @@
             app:title="@string/stocks_tazik_endless_set"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="SPCE GTHX ARCT BLUE"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_endless_set_2"
+            app:title="@string/stocks_tazik_endless_set_2"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="VIPS ACH BABA JD BIDU"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_endless_set_3"
+            app:title="@string/stocks_tazik_endless_set_3"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="VTBR OZON MGNT BELU"/>
 
         <EditTextPreference
             app:key="@string/setting_key_tazik_endless_reset_interval_seconds"
