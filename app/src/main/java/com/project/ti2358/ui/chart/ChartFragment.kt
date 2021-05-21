@@ -1,5 +1,6 @@
 package com.project.ti2358.ui.chart
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +17,7 @@ import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.databinding.FragmentChartBinding
 import com.project.ti2358.service.Utils
+import com.project.ti2358.service.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -170,7 +172,12 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
 
             chartAdapter = KLineChartAdapter()
             chartLineView.setAdapter(chartAdapter)
+                .setSelectedPointRadius(20f)
+                .setPriceLabelInLineMarginRight(200f)
+                .setSelectedPointColor(Color.RED)
                 .setAnimLoadData(false)
+                .setPriceLabelInLineClickable(true)
+                .setLabelSpace(130f)
                 .setDateTimeFormatter(DateFormatter())
                 .setGridColumns(5)
                 .setGridRows(5)
@@ -184,6 +191,9 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
                         LogUtil.e("onSlidRight")
                     }
                 })
+                .setOnSelectedChangedListener { view, index, values ->
+                    log("CHANGE CLICK ${values[0]}")
+                }
 
             val marketInfoText = arrayOf("time", "o", "h", "l", "c", "chg$", "chg%", "vol")
             chartLineView.setSelectedInfoLabels(marketInfoText)
@@ -191,6 +201,8 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
             chartLineView.changeMainDrawType(Status.MainStatus.BOLL)
             chartLineView.setVolChartStatues(Status.VolChartStatus.BAR_CHART)
             chartLineView.volShowState = true
+            chartLineView.setCrossFollowTouch(Status.CrossTouchModel.FOLLOW_FINGERS)
+            chartLineView.setYLabelState(Status.YLabelModel.LABEL_WITH_GRID)
 
             currentIndex = Status.IndexStatus.MACD
             updateTitleData()

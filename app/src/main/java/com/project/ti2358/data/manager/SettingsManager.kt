@@ -544,22 +544,22 @@ class SettingsManager {
 
         fun getTazikEndlessSet1(): List<String> {
             val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_set)
-            val value: String? = preferences.getString(key, "")?.trim()
-            val array = value?.split("SPCE GTHX ARCT BLUE")
+            val value: String? = preferences.getString(key, "SPCE GTHX ARCT BLUE")?.trim()
+            val array = value?.split(" ")
             return array ?: emptyList()
         }
 
         fun getTazikEndlessSet2(): List<String> {
             val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_set_2)
-            val value: String? = preferences.getString(key, "")?.trim()
-            val array = value?.split("VIPS ACH BABA JD BIDU")
+            val value: String? = preferences.getString(key, "VIPS ACH BABA JD BIDU")?.trim()
+            val array = value?.split(" ")
             return array ?: emptyList()
         }
 
         fun getTazikEndlessSet3(): List<String> {
             val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_set_3)
-            val value: String? = preferences.getString(key, "")?.trim()
-            val array = value?.split("VTBR OZON MGNT BELU")
+            val value: String? = preferences.getString(key, "VTBR OZON MGNT BELU")?.trim()
+            val array = value?.split(" ")
             return array ?: emptyList()
         }
 
