@@ -16,8 +16,7 @@
             <com.icechao.klinelib.view.KChartView
                 android:id="@+id/chart_line_view"
                 android:layout_width="match_parent"
-                android:layout_height="500dp"
-                android:layout_marginRight="20dp"/>
+                android:layout_height="500dp"/>
 
         </com.icechao.klinelib.view.ScrollView>
     </RelativeLayout>

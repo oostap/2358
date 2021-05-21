@@ -18,10 +18,7 @@ import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.databinding.FragmentChartBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.util.*
@@ -37,10 +34,11 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
     var activeStock: Stock? = null
     var currentInterval: Interval = Interval.FIVE_MINUTES
     var job: Job? = null
-
+    var jobRefreshMinutes: Job? = null
     var chartAdapter = KLineChartAdapter<Candle>()
 
     var currentIndex : Status.IndexStatus = Status.IndexStatus.NONE
+    var currentCandles : List<Candle> = emptyList()
 
     override fun onDestroy() {
         job?.cancel()
@@ -218,7 +216,34 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
         job?.cancel()
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
-                loadData(chartManager.loadCandlesForInterval(activeStock, currentInterval))
+                currentCandles = chartManager.loadCandlesForInterval(activeStock, currentInterval)
+                loadData(currentCandles)
+
+//                jobRefreshMinutes?.cancel()
+//
+//                if (currentInterval == Interval.MINUTE) {
+//                    jobRefreshMinutes = GlobalScope.launch(StockManager.stockContext) {
+//                        while (true) {
+//                            delay(500)
+//
+//                            var i = 0
+//                            activeStock?.minuteCandles?.forEach { stockCandle ->
+//                                log("START !! ${stockCandle.time.time}")
+//
+//                                i = 0
+//                                currentCandles.forEach { chartCandle ->
+//                                    log("END !! ${chartCandle.time.time}")
+//                                    if (chartCandle.time.time == stockCandle.time.time && chartCandle.volume != stockCandle.volume) {
+//                                        chartAdapter.changeItem(i, stockCandle)
+//                                    } else if (stockCandle.time.time > chartCandle.time.time) {
+//                                        chartAdapter.addLast(stockCandle)
+//                                    }
+//                                    i++
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }

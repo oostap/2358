@@ -85,8 +85,10 @@ class LoveFragment : Fragment(R.layout.fragment_love) {
     }
 
     private fun updateTitle() {
-        val act = requireActivity() as AppCompatActivity
-        act.supportActionBar?.title = "Избранные (${StrategyLove.stocksSelected.size} шт.)"
+        if (isAdded) {
+            val act = requireActivity() as AppCompatActivity
+            act.supportActionBar?.title = "Избранные (${StrategyLove.stocksSelected.size} шт.)"
+        }
     }
 
     inner class ItemFavoritesRecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<ItemFavoritesRecyclerViewAdapter.ViewHolder>() {

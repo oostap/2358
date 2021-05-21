@@ -5,6 +5,7 @@ import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.service.*
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 
@@ -17,11 +18,11 @@ class StrategyLove : KoinComponent {
         var stocksSelected: MutableList<Stock> = mutableListOf()
     }
 
-    fun process(allStocks: List<Stock>): MutableList<Stock> {
+    suspend fun process(allStocks: List<Stock>): MutableList<Stock> = withContext(StockManager.stockContext) {
         stocks = allStocks.toMutableList()
         stocks.sortBy { it.changePrice2300DayPercent }
         loadSelectedStocks()
-        return stocks
+        return@withContext stocks
     }
 
     private fun loadSelectedStocks() {
@@ -41,14 +42,14 @@ class StrategyLove : KoinComponent {
         editor.apply()
     }
 
-    fun resort(): MutableList<Stock> {
+    suspend fun resort(): MutableList<Stock> = withContext(StockManager.stockContext) {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
             val multiplier = if (it in stocksSelected) 100 else 1
             it.changePrice2300DayPercent * sign - multiplier
         }
-        return stocks
+        return@withContext stocks
     }
 
     fun setSelected(stock: Stock, value: Boolean) {
