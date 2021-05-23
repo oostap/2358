@@ -59,8 +59,8 @@ dependencies {
     implementation "androidx.multidex:multidex:2.0.1"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.6.0-alpha03'
-    implementation 'androidx.appcompat:appcompat:1.3.0-rc01'
+    implementation 'androidx.core:core-ktx:1.6.0-beta01'
+    implementation 'androidx.appcompat:appcompat:1.4.0-alpha01'
     implementation 'com.google.android.material:material:1.3.0'
 
     //Koin
@@ -98,6 +98,7 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:26.3.0')
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-messaging-ktx'
 
     // telega
     implementation 'io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:6.0.3'

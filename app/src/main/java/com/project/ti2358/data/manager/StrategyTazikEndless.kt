@@ -36,6 +36,7 @@ class StrategyTazikEndless : KoinComponent {
     var jobResetPrice: Job? = null
 
     var currentSort: Sorting = Sorting.DESCENDING
+    var currentPurchaseSort: Sorting = Sorting.DESCENDING
 
     companion object {
         const val PercentLimitChangeDelta = 0.05
@@ -202,6 +203,22 @@ class StrategyTazikEndless : KoinComponent {
             tickers += "${stock.ticker} "
         }
         return "$price:\n$tickers"
+    }
+
+    fun getSortedPurchases(): List<PurchaseStock> {
+        currentPurchaseSort = if (currentPurchaseSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
+
+        val volume = SettingsManager.getTazikEndlessMinVolume()
+        if (currentPurchaseSort == Sorting.ASCENDING) {
+            stocksToPurchase.sortBy { abs(it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100) }
+            stocksToPurchase.sortBy { it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100 }
+        } else {
+            stocksToPurchase.sortByDescending { abs(it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100) }
+            stocksToPurchase.sortByDescending { it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100 }
+        }
+        stocksToPurchase.sortBy { it.status }
+
+        return stocksToPurchase
     }
 
     fun getNotificationTextLong(): String {

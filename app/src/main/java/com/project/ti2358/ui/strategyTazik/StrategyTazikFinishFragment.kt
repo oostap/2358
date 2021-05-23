@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -59,6 +60,10 @@ class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
             startLaterButton.setOnClickListener {
                 tryStartTazik(true)
             }
+
+            statusButton.setOnClickListener {
+                view.findNavController().navigate(R.id.action_nav_tazik_finish_to_nav_tazik_status)
+            }
         }
 
         positions = strategyTazik.getPurchaseStock()
@@ -86,7 +91,7 @@ class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
     }
 
     fun updateInfoText() {
-        val percent = SettingsManager.getTazikChangePercent()
+        val percent = if (strategyTazik.started) strategyTazik.basicPercentLimitPriceChange else SettingsManager.getTazikChangePercent()
         val volume = SettingsManager.getTazikPurchaseVolume().toDouble()
         val p = SettingsManager.getTazikPurchaseParts()
         val parts = "%d по %.2f$".format(p, volume / p)

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -50,6 +51,10 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
             startButton.setOnClickListener {
                 tryStartTazik()
             }
+
+            statusButton.setOnClickListener {
+                view.findNavController().navigate(R.id.action_nav_tazik_endless_finish_to_nav_tazik_endless_status)
+            }
         }
 
         positions = strategyTazikEndless.getPurchaseStock()
@@ -78,7 +83,7 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
     }
 
     fun updateInfoText() {
-        val percent = SettingsManager.getTazikEndlessChangePercent()
+        val percent = if (strategyTazikEndless.started) strategyTazikEndless.basicPercentLimitPriceChange else SettingsManager.getTazikEndlessChangePercent()
         val volume = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
         val p = SettingsManager.getTazikEndlessPurchaseParts()
         val parts = "%d по %.2f$".format(p, volume / p)

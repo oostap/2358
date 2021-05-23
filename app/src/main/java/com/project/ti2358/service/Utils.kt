@@ -15,6 +15,7 @@ import com.project.ti2358.BuildConfig
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.model.dto.Currency
@@ -459,6 +460,21 @@ class Utils {
             }
 
             return null
+        }
+
+        @KoinApiExtension
+        @JvmName("searchStocks")
+        fun search(stocks: List<PurchaseStock>, text: String): MutableList<PurchaseStock> {
+            if (text.isNotEmpty()) {
+                val list = stocks.filter {
+                    it.ticker.contains(text, ignoreCase = true) ||
+                            it.stock.instrument.name.contains(text, ignoreCase = true) ||
+                            it.stock.alterName.contains(text, ignoreCase = true)
+                }.toMutableList()
+                list.sortBy { it.ticker.length }
+                return list
+            }
+            return stocks.toMutableList()
         }
 
         fun search(stocks: List<Stock>, text: String): MutableList<Stock> {

@@ -74,22 +74,16 @@ class StrategyTA : KoinComponent {
     }
 
     private fun processTurnMACD(stock: Stock, candles: List<Candle>) : Boolean  {
-        var steps = 2
-        var afterBearishDays = 5
+        var steps = 3
+        var afterBearishDays = 0
+
+        var lastMacd = candles.last().macd
 
         if (candles.size > 10) {
-            var lastMacd = candles.last().macd
-            val coefMacd = 0.99f
-
             for (i in candles.indices.reversed()) {
                 if (i == candles.size - 1) continue
 
-                var success = false
-                if (lastMacd < 0 && candles[i].macd < 0) {
-                    success = candles[i].macd * coefMacd < lastMacd
-                } else if (lastMacd > 0 && candles[i].macd > 0) {
-                    success = candles[i].macd < lastMacd * coefMacd
-                }
+                val success = candles[i].macd < lastMacd
 
                 if (success) {
                     lastMacd = candles[i].macd
@@ -104,15 +98,15 @@ class StrategyTA : KoinComponent {
             var checkDays = 8
             for (i in candles.indices.reversed()) {
                 if (candles[i].macd < 0) {
-                    afterBearishDays--
+                    afterBearishDays++
                 }
                 checkDays--
                 if (checkDays <= 0) break
             }
         }
 
-        if (steps == 0 && afterBearishDays < 0) {
-            log("${stock.ticker} MACD TURN UP")
+        if (steps == 0 && afterBearishDays < 3 && lastMacd > 0) {
+            log("${stock.ticker} MACD TURN UP $lastMacd")
             return true
         }
         return false

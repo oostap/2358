@@ -32,16 +32,24 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
         android:layout_alignParentBottom="true"
-        android:weightSum="1" >
+        android:weightSum="4" >
 
         <Button
             android:layout_height="70dp"
             android:id="@+id/start_button"
             android:layout_marginRight="5dp"
             android:text="@string/start"
+            android:layout_weight="3"
+            android:textSize="14dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="70dp"
+            android:id="@+id/status_button"
+            android:text="📝"
             android:layout_weight="1"
             android:textSize="14dp"
             android:layout_width="0dp" />

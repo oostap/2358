@@ -74,9 +74,9 @@ class MainActivity : AppCompatActivity() {
             navController.currentDestination?.let {
                 if (it.id == R.id.nav_premarket) {
                     key = "premarket_price_change_percent"
-                } else if (it.id in listOf(R.id.nav_tazik_endless_start, R.id.nav_tazik_endless_finish)) {
+                } else if (it.id in listOf(R.id.nav_tazik_endless_start, R.id.nav_tazik_endless_finish, R.id.nav_tazik_endless_status)) {
                     key = "tazik_endless_set"
-                } else if (it.id in listOf(R.id.nav_tazik_start, R.id.nav_tazik_finish)) {
+                } else if (it.id in listOf(R.id.nav_tazik_start, R.id.nav_tazik_finish, R.id.nav_tazik_status)) {
                     key = "tazik_set_1"
                 } else if (it.id in listOf(R.id.nav_2358_start, R.id.nav_2358_finish)) {
                     key = "2358_price_change_percent"

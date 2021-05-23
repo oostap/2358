@@ -39,6 +39,8 @@ class StrategyTazik : KoinComponent {
     var scheduledStartTime: Calendar? = null
     var currentSort: Sorting = Sorting.DESCENDING
 
+    var currentPurchaseSort: Sorting = Sorting.DESCENDING
+
     companion object {
         const val PercentLimitChangeDelta = 0.05
     }
@@ -113,6 +115,8 @@ class StrategyTazik : KoinComponent {
     }
 
     fun getPurchaseStock(): MutableList<PurchaseStock> = runBlocking(StockManager.stockContext) {
+        if (started) return@runBlocking stocksToPurchase
+
         stocksToPurchase.clear()
 
         val percent = SettingsManager.getTazikChangePercent()
@@ -208,6 +212,22 @@ class StrategyTazik : KoinComponent {
             tickers += "${stock.ticker} "
         }
         return "$price:\n$tickers"
+    }
+
+    fun getSortedPurchases(): List<PurchaseStock> {
+        currentPurchaseSort = if (currentPurchaseSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
+
+        val volume = 0
+        if (currentPurchaseSort == Sorting.ASCENDING) {
+            stocksToPurchase.sortBy { abs(it.stock.getPriceNow(volume) / it.tazikPrice * 100 - 100) }
+            stocksToPurchase.sortBy { it.stock.getPriceNow(volume) / it.tazikPrice * 100 - 100 }
+        } else {
+            stocksToPurchase.sortByDescending { abs(it.stock.getPriceNow(volume) / it.tazikPrice * 100 - 100) }
+            stocksToPurchase.sortByDescending { it.stock.getPriceNow(volume) / it.tazikPrice * 100 - 100 }
+        }
+        stocksToPurchase.sortBy { it.status }
+
+        return stocksToPurchase
     }
 
     fun getNotificationTextLong(): String {
