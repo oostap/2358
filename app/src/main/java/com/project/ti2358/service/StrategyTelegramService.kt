@@ -154,11 +154,7 @@ class StrategyTelegramService : Service() {
             .addAction(actionCancel)
 
         val notification = builder.build()
-
-        synchronized(notification) {
-            notification.notify()
-            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            manager.notify(NOTIFICATION_ID, notification)
-        }
+        val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(NOTIFICATION_ID, notification)
     }
 }

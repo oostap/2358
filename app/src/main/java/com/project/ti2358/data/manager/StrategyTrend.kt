@@ -164,7 +164,12 @@ class StrategyTrend : KoinComponent {
 
             trendUpStocks.add(0, trendStock)
         }
-        createTrend(trendStock)
+
+        GlobalScope.launch(Dispatchers.Main) {
+            strategySpeaker.speakTrend(trendStock)
+            strategyTelegram.sendTrend(trendStock)
+            createTrend(trendStock)
+        }
 
         stock.resetTrendPrice()
     }
@@ -198,9 +203,6 @@ class StrategyTrend : KoinComponent {
         } else {
             "%.2f%%".format(locale = Locale.US, trendStock.changeFromStartToLow)
         }
-
-        strategySpeaker.speakTrend(trendStock)
-        strategyTelegram.sendTrend(trendStock)
 
         val emoji = if (trendStock.changeFromStartToLow < 0) "⤴️" else "⤵️️"
         val text = "%s$%s %.2f%% - %.2f$ -> %.2f$ = %.2f%%, %.2f$ -> %.2f$ = %.2f%%, %d мин -> %d мин".format(locale = Locale.US,

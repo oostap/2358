@@ -9,11 +9,14 @@ import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
+import com.project.ti2358.data.model.dto.OperationType
+import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.lang.Exception
 import java.util.*
 import java.util.Collections.synchronizedList
 import kotlin.math.abs
@@ -101,7 +104,11 @@ class StrategyRocket() : KoinComponent {
 
                     cometStocks.add(0, rocketStock)
                 }
-                createRocket(rocketStock)
+                GlobalScope.launch(Dispatchers.Main) {
+                    strategySpeaker.speakRocket(rocketStock)
+                    strategyTelegram.sendRocket(rocketStock)
+                    createRocket(rocketStock)
+                }
             }
         }
     }
@@ -140,9 +147,6 @@ class StrategyRocket() : KoinComponent {
         } else {
             "%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
         }
-
-        strategySpeaker.speakRocket(rocketStock)
-        strategyTelegram.sendRocket(rocketStock)
 
         val title = "$ticker: ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин"
 

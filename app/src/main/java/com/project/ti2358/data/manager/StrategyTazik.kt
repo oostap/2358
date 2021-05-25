@@ -217,17 +217,18 @@ class StrategyTazik : KoinComponent {
     fun getSortedPurchases(): List<PurchaseStock> {
         currentPurchaseSort = if (currentPurchaseSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
 
+        val local = stocksToPurchase.toMutableList()
+        local.removeAll { it.tazikPrice == 0.0 }
+
         val volume = 0
         if (currentPurchaseSort == Sorting.ASCENDING) {
-            stocksToPurchase.sortBy { abs(it.stock.getPriceNow(volume) / it.tazikPrice * 100 - 100) }
-            stocksToPurchase.sortBy { it.stock.getPriceNow(volume) / it.tazikPrice * 100 - 100 }
+            local.sortBy { it.stock.getPriceNow(volume) / it.tazikPrice * 100 - 100 }
         } else {
-            stocksToPurchase.sortByDescending { abs(it.stock.getPriceNow(volume) / it.tazikPrice * 100 - 100) }
-            stocksToPurchase.sortByDescending { it.stock.getPriceNow(volume) / it.tazikPrice * 100 - 100 }
+            local.sortByDescending { it.stock.getPriceNow(volume) / it.tazikPrice * 100 - 100 }
         }
-        stocksToPurchase.sortBy { it.status }
+        local.sortBy { it.status }
 
-        return stocksToPurchase
+        return local
     }
 
     fun getNotificationTextLong(): String {

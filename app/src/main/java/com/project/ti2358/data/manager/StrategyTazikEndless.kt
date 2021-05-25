@@ -208,17 +208,18 @@ class StrategyTazikEndless : KoinComponent {
     fun getSortedPurchases(): List<PurchaseStock> {
         currentPurchaseSort = if (currentPurchaseSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
 
+        val local = stocksToPurchase.toMutableList()
+        local.removeAll { it.tazikEndlessPrice == 0.0 }
+
         val volume = SettingsManager.getTazikEndlessMinVolume()
         if (currentPurchaseSort == Sorting.ASCENDING) {
-            stocksToPurchase.sortBy { abs(it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100) }
-            stocksToPurchase.sortBy { it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100 }
+            local.sortBy { it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100 }
         } else {
-            stocksToPurchase.sortByDescending { abs(it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100) }
-            stocksToPurchase.sortByDescending { it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100 }
+            local.sortByDescending { it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100 }
         }
-        stocksToPurchase.sortBy { it.status }
+        local.sortBy { it.status }
 
-        return stocksToPurchase
+        return local
     }
 
     fun getNotificationTextLong(): String {
@@ -421,7 +422,7 @@ class StrategyTazikEndless : KoinComponent {
 
         // проверка на цену закрытия (выше не тарить)
         if (SettingsManager.getTazikEndlessClosePriceProtection()) {
-            if (buyPrice > stock.getPrice2300()) {
+            if (buyPrice >= stock.getPrice2300()) {
                 return
             }
         }

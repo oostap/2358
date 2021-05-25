@@ -102,7 +102,7 @@ class StrategyTazikService : Service() {
         job = GlobalScope.launch(Dispatchers.Main) {
             while (isServiceRunning) {
                 val seconds = updateNotification()
-                delay(1 * 250 * seconds)
+                delay(1 * 1000 * seconds)
             }
         }
     }
@@ -144,12 +144,8 @@ class StrategyTazikService : Service() {
         }
 
         val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, title, shortText, longText, longTitleText, actionCancel, actionPlus, /*actionMinus,*/ actionBuy) // больше трёх кнопок нельзя
-
-        synchronized(notification) {
-            notification.notify()
-            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            manager.notify(NOTIFICATION_ID, notification)
-        }
+        val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(NOTIFICATION_ID, notification)
 
         return 1
     }

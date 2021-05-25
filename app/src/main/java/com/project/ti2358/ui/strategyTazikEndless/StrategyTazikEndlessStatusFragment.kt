@@ -55,6 +55,10 @@ class StrategyTazikEndlessStatusFragment : Fragment(R.layout.fragment_tazik_endl
                 updateData()
             }
 
+            updateButton.setOnClickListener {
+                updateData()
+            }
+
             searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String): Boolean {
                     processText(query)
