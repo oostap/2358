@@ -78,7 +78,7 @@ class StrategyTelegram : KoinComponent {
                             val dateNow = Calendar.getInstance()
                             val dateOperation = Calendar.getInstance()
                             dateOperation.time = operation.date
-                            if (abs(dateOperation.get(Calendar.DAY_OF_YEAR) - dateNow.get(Calendar.DAY_OF_YEAR)) > 1) {
+                            if (abs(dateNow.get(Calendar.DAY_OF_YEAR) - dateOperation.get(Calendar.DAY_OF_YEAR)) >= 1) {
                                 continue
                             }
 

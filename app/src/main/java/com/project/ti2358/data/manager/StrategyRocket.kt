@@ -9,14 +9,11 @@ import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
-import com.project.ti2358.data.model.dto.OperationType
-import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.lang.Exception
 import java.util.*
 import java.util.Collections.synchronizedList
 import kotlin.math.abs
@@ -63,34 +60,34 @@ class StrategyRocket() : KoinComponent {
         if (stock !in stocks) return@runBlocking
 
         val percentRocket = SettingsManager.getRocketChangePercent()
-        val minutesRocket = SettingsManager.getRocketChangeMinutes()
+        var minutesRocket = SettingsManager.getRocketChangeMinutes()
         val volumeRocket = SettingsManager.getRocketChangeVolume()
 
         if (stock.minuteCandles.isNotEmpty()) {
-            val firstCandle: Candle?
-            val lastCandle = stock.minuteCandles.last()
+            var fromCandle = stock.minuteCandles.last()
+            val toCandle = stock.minuteCandles.last()
+
             var fromIndex = 0
-            if (stock.minuteCandles.size >= minutesRocket) {
-                fromIndex = stock.minuteCandles.size - minutesRocket
-                firstCandle = stock.minuteCandles[fromIndex]
-            } else {
-                fromIndex = 0
-                firstCandle = stock.minuteCandles.first()
+            for (i in stock.minuteCandles.indices.reversed()) {
+                if (stock.minuteCandles[i].lowestPrice < fromCandle.lowestPrice) {
+                    fromCandle = stock.minuteCandles[i]
+                    fromIndex = i
+                }
+
+                minutesRocket--
+                if (minutesRocket == 0) break
             }
 
-            val deltaMinutes = ((lastCandle.time.time - firstCandle.time.time) / 60.0 / 1000.0).toInt()
-            if (deltaMinutes > minutesRocket) { // если дальше настроек, игнорим
-                return@runBlocking
-            }
+            val deltaMinutes = ((toCandle.time.time - fromCandle.time.time) / 60.0 / 1000.0).toInt()
 
             var volume = 0
             for (i in fromIndex until stock.minuteCandles.size) {
                 volume += stock.minuteCandles[i].volume
             }
 
-            val changePercent = lastCandle.closingPrice / firstCandle.openingPrice * 100.0 - 100.0
+            val changePercent = toCandle.closingPrice / fromCandle.openingPrice * 100.0 - 100.0
             if (volume >= volumeRocket && abs(changePercent) >= abs(percentRocket)) {
-                val rocketStock = RocketStock(stock, firstCandle.openingPrice, lastCandle.closingPrice, deltaMinutes, volume, changePercent, lastCandle.time.time)
+                val rocketStock = RocketStock(stock, fromCandle.openingPrice, toCandle.closingPrice, deltaMinutes, volume, changePercent, toCandle.time.time)
                 rocketStock.process()
 
                 if (changePercent > 0) {

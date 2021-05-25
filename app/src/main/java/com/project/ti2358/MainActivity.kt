@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
-            if (destination.id in listOf(R.id.nav_settings, R.id.nav_orderbook, R.id.nav_orders, R.id.nav_chart, R.id.nav_donate, R.id.nav_reports)) {
+            if (destination.id in listOf(R.id.nav_settings, R.id.nav_orderbook, R.id.nav_orders, R.id.nav_chart, R.id.nav_donate, R.id.nav_reports, R.id.nav_premarket)) {
                 fab.visibility = View.INVISIBLE
             } else {
                 fab.visibility = View.VISIBLE
