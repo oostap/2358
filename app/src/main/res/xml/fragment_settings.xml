@@ -482,6 +482,11 @@
             app:title="@string/stocks_rocket_voice"
             app:defaultValue="true" />
 
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_rocket_only_love"
+            app:title="@string/stocks_rocket_only_love"
+            app:defaultValue="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_trends">

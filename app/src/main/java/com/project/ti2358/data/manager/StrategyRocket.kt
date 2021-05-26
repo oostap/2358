@@ -59,6 +59,10 @@ class StrategyRocket() : KoinComponent {
         if (!started) return@runBlocking
         if (stock !in stocks) return@runBlocking
 
+        if (SettingsManager.getRocketOnlyLove()) {
+            if (StrategyLove.stocksSelected.find { it.ticker == stock.ticker } == null) return@runBlocking
+        }
+
         val percentRocket = SettingsManager.getRocketChangePercent()
         var minutesRocket = SettingsManager.getRocketChangeMinutes()
         val volumeRocket = SettingsManager.getRocketChangeVolume()

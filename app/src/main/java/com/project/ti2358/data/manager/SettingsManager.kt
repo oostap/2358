@@ -738,6 +738,11 @@ class SettingsManager {
             return preferences.getBoolean(key, true)
         }
 
+        fun getRocketOnlyLove(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_rocket_only_love)
+            return preferences.getBoolean(key, false)
+        }
+
         /******************** Telegram *************************/
         fun getTelegramAutostart(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_autostart)
