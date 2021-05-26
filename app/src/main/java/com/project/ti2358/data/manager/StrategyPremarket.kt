@@ -2,6 +2,7 @@ package com.project.ti2358.data.manager
 
 import com.project.ti2358.service.ScreenerType
 import com.project.ti2358.service.Sorting
+import com.project.ti2358.service.Utils
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -37,6 +38,10 @@ class StrategyPremarket : KoinComponent {
 
         if (SettingsManager.getPremarketOnlyLove()) {
             stocks.removeAll { it.ticker !in StrategyLove.stocksSelected.map { stock -> stock.ticker } }
+        }
+
+        if (SettingsManager.getPremarketOnlyMorning() && Utils.isMorningSession()) {
+            stocks.removeAll { it.morning == null }
         }
 
         return stocks

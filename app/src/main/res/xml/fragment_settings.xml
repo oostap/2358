@@ -122,6 +122,11 @@
             app:title="@string/stocks_premarket_only_love"
             app:defaultValue="false" />
 
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_premarket_only_morning"
+            app:title="@string/stocks_premarket_only_morning"
+            app:defaultValue="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_2358">

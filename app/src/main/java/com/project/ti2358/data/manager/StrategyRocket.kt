@@ -92,12 +92,12 @@ class StrategyRocket() : KoinComponent {
 
                 if (changePercent > 0) {
                     val last = rocketStocks.firstOrNull { it.stock.ticker == stock.ticker }
-                    if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 3) return@runBlocking }
+                    if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return@runBlocking }
 
                     rocketStocks.add(0, rocketStock)
                 } else {
                     val last = cometStocks.firstOrNull { it.stock.ticker == stock.ticker }
-                    if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 3) return@runBlocking }
+                    if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return@runBlocking }
 
                     cometStocks.add(0, rocketStock)
                 }

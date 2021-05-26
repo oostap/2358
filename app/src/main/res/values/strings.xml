@@ -154,6 +154,7 @@
     <string name="stocks_premarket_volume_min_day">Объём за день ОТ шт.</string>
     <string name="stocks_premarket_volume_max_day">Объём за день ДО шт.</string>
     <string name="stocks_premarket_only_love">Только избранные</string>
+    <string name="stocks_premarket_only_morning">С 7 до 10 только утренние</string>
 
     <!-- 1728 settings -->
     <string name="stocks_1728_volume_min_each_steps">Объём каждого шага отсева от шт. (через пробел)</string>
@@ -308,6 +309,7 @@
     <string name="setting_key_premarket_volume_min_day">premarket_volume_min_day</string>
     <string name="setting_key_premarket_volume_max_day">premarket_volume_max_day</string>
     <string name="setting_key_premarket_only_love">premarket_only_love</string>
+    <string name="setting_key_premarket_only_morning">premarket_only_morning</string>
 
     <!-- 1728 settings -->
     <string name="setting_key_1728_volume_min_each_steps">1728_volume_min_each_steps</string>

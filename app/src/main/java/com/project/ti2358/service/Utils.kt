@@ -306,6 +306,12 @@ class Utils {
             return false
         }
 
+        fun isMorningSession(): Boolean {
+            val msk = getTimeMSK()
+            val hour = msk.get(Calendar.HOUR_OF_DAY)
+            return hour in 7..9
+        }
+
         fun isSessionBefore11(): Boolean {
             val msk = getTimeMSK()
             val hour = msk.get(Calendar.HOUR_OF_DAY)

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -66,91 +67,94 @@ class PremarketFragment : Fragment(R.layout.fragment_premarket) {
                 }
 
                 fun processText(text: String) {
-                    updateDataWithSearch()
+                    updateData(text)
                 }
             })
 
             searchView.setOnCloseListener {
-                updateDataForce()
+                updateData(searchView.query.toString())
                 false
             }
 
             from2300Button.setOnClickListener {
                 strategyPremarket.screenerTypeFrom = ScreenerType.screener2300
-                updateDataWithSearch()
+                updateData(searchView.query.toString())
             }
 
             from0145Button.setOnClickListener {
                 strategyPremarket.screenerTypeFrom = ScreenerType.screener0145
-                updateDataWithSearch()
+                updateData(searchView.query.toString())
             }
 
             from0300Button.setOnClickListener {
                 strategyPremarket.screenerTypeFrom = ScreenerType.screener0300
-                updateDataWithSearch()
+                updateData(searchView.query.toString())
             }
 
             from0700Button.setOnClickListener {
                 strategyPremarket.screenerTypeFrom = ScreenerType.screener0700
-                updateDataWithSearch()
+                updateData(searchView.query.toString())
             }
             ////////?////////?////////?////////?////////?////////?////////?////////?
             fromNowButton.setOnClickListener {
                 strategyPremarket.screenerTypeFrom = ScreenerType.screenerNow
-                updateDataWithSearch()
+                updateData(searchView.query.toString())
             }
 
             to2300Button.setOnClickListener {
                 strategyPremarket.screenerTypeTo = ScreenerType.screener2300
-                updateDataWithSearch()
+                updateData(searchView.query.toString())
             }
 
             to0145Button.setOnClickListener {
                 strategyPremarket.screenerTypeTo = ScreenerType.screener0145
-                updateDataWithSearch()
+                updateData(searchView.query.toString())
             }
 
             to0300Button.setOnClickListener {
                 strategyPremarket.screenerTypeTo = ScreenerType.screener0300
-                updateDataWithSearch()
+                updateData(searchView.query.toString())
             }
 
             to0700Button.setOnClickListener {
                 strategyPremarket.screenerTypeTo = ScreenerType.screener0700
-                updateDataWithSearch()
+                updateData(searchView.query.toString())
             }
 
             toNowButton.setOnClickListener {
                 strategyPremarket.screenerTypeTo = ScreenerType.screenerNow
-                updateDataWithSearch()
+                updateData(searchView.query.toString())
             }
         }
 
         job?.cancel()
         job = GlobalScope.launch(Dispatchers.Main) {
             stockManager.reloadClosePrices()
-            updateDataForce()
+            updateData()
         }
 
-        updateDataForce()
+        updateData()
     }
 
-    private fun updateDataForce() {
+    private fun updateData(search: String = "") {
         stocks = strategyPremarket.process()
         stocks = strategyPremarket.resort()
+        if (search != "") {
+            stocks = Utils.search(stocks, search)
+        }
         adapterList.setData(stocks)
         updateButtons()
+        updateTitle()
     }
 
-    fun updateDataWithSearch() {
-        stocks = strategyPremarket.process()
-        stocks = strategyPremarket.resort()
-        stocks = Utils.search(stocks, fragmentPremarketBinding?.searchView?.query.toString())
-        adapterList.setData(stocks)
-        updateButtons()
+    private fun updateTitle() {
+        if (isAdded) {
+            val act = requireActivity() as AppCompatActivity
+            act.supportActionBar?.title = "Премаркет ${stocks.size}"
+        }
     }
 
-    fun updateButtons() {
+    private fun updateButtons() {
         fragmentPremarketBinding?.apply {
             val colorDefault = Utils.DARK_BLUE
             val colorSelect = Utils.RED

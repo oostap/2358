@@ -273,6 +273,10 @@ class SettingsManager {
             return preferences.getBoolean(key, false)
         }
 
+        fun getPremarketOnlyMorning(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_premarket_only_morning)
+            return preferences.getBoolean(key, false)
+        }
         /******************** 1000 sell *************************/
 
         fun get1000SellTakeProfit(): Double {
