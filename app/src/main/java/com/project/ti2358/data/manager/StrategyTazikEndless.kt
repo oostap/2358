@@ -355,8 +355,8 @@ class StrategyTazikEndless : KoinComponent {
         }
     }
 
-    suspend fun processStrategy(stock: Stock, candle: Candle) = withContext(StockManager.stockContext) {
-        if (!started) return@withContext
+    fun processStrategy(stock: Stock, candle: Candle) {
+        if (!started) return
 
         val ticker = stock.ticker
 
@@ -372,7 +372,7 @@ class StrategyTazikEndless : KoinComponent {
         }
     }
 
-    private suspend fun processBuy(purchase: PurchaseStock, stock: Stock, candle: Candle) {
+    private fun processBuy(purchase: PurchaseStock, stock: Stock, candle: Candle) {
         // завершение стратегии
         val parts = SettingsManager.getTazikEndlessPurchaseParts()
         if (stocksTickerInProcess.size >= parts) { // останавливить стратегию автоматически

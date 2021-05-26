@@ -417,8 +417,8 @@ class StrategyTazik : KoinComponent {
         }
     }
 
-    suspend fun processStrategy(stock: Stock, candle: Candle) = withContext(StockManager.stockContext) {
-        if (!started) return@withContext
+    fun processStrategy(stock: Stock, candle: Candle) {
+        if (!started) return
 
         val ticker = stock.ticker
 
@@ -434,7 +434,7 @@ class StrategyTazik : KoinComponent {
         }
     }
 
-    private suspend fun processBuy(purchase: PurchaseStock, stock: Stock, candle: Candle) {
+    private fun processBuy(purchase: PurchaseStock, stock: Stock, candle: Candle) {
         // завершение стратегии
         val parts = SettingsManager.getTazikPurchaseParts()
         if (stocksTickerInProcess.size >= parts) {

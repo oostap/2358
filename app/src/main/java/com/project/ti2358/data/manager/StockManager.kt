@@ -1,6 +1,7 @@
 package com.project.ti2358.data.manager
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.gson.Gson
@@ -19,6 +20,7 @@ import com.project.ti2358.service.StrategyTelegramService
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.*
@@ -27,6 +29,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.Collections.synchronizedList
 import java.util.Collections.synchronizedMap
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 @KoinApiExtension
 class StockManager : KoinComponent {
@@ -60,11 +64,13 @@ class StockManager : KoinComponent {
     companion object {
         var stockIndexComponents: StockIndexComponents? = null
         val stockContext = newSingleThreadContext("computationThread")
+        val candleScheduler: Scheduler = Schedulers.from(Executors.newSingleThreadExecutor())
         val rocketContext = newSingleThreadContext("computationRocketThread")
         val trendContext = newSingleThreadContext("computationTrendThread")
     }
 
     fun getWhiteStocks(): MutableList<Stock> {
+        stockContext.executor
         val blacklist = strategyBlacklist.getBlacklistStocks()
         val all = stocksStream
         return all.filter { it !in blacklist }.toMutableList()
@@ -327,10 +333,10 @@ class StockManager : KoinComponent {
                 )
                 .onBackpressureBuffer()
                 .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(candleScheduler)
                 .subscribeBy(
                     onNext = {
-                        GlobalScope.launch {
+                        runBlocking {
                             addCandle(it)
                         }
                     },
@@ -347,10 +353,10 @@ class StockManager : KoinComponent {
                 )
                 .onBackpressureBuffer()
                 .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(candleScheduler)
                 .subscribeBy(
                     onNext = {
-                        GlobalScope.launch {
+                        runBlocking {
                             addCandle(it)
                         }
                     },
@@ -369,10 +375,10 @@ class StockManager : KoinComponent {
             )
             .onBackpressureBuffer()
             .subscribeOn(Schedulers.computation())
-            .observeOn(AndroidSchedulers.mainThread())
+            .observeOn(candleScheduler)
             .subscribeBy(
                 onNext = {
-                    GlobalScope.launch {
+                    runBlocking {
                         addCandle(it)
                     }
                 },

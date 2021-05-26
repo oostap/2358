@@ -8,7 +8,6 @@ import android.os.Build
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
@@ -20,7 +19,7 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 @KoinApiExtension
-class StrategyRocket() : KoinComponent {
+class StrategyRocket : KoinComponent {
     private val stockManager: StockManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTelegram: StrategyTelegram by inject()
@@ -55,12 +54,12 @@ class StrategyRocket() : KoinComponent {
         started = false
     }
 
-    fun processStrategy(stock: Stock) = runBlocking(StockManager.rocketContext) {
-        if (!started) return@runBlocking
-        if (stock !in stocks) return@runBlocking
+    fun processStrategy(stock: Stock) {
+        if (!started) return
+        if (stock !in stocks) return
 
         if (SettingsManager.getRocketOnlyLove()) {
-            if (StrategyLove.stocksSelected.find { it.ticker == stock.ticker } == null) return@runBlocking
+            if (StrategyLove.stocksSelected.find { it.ticker == stock.ticker } == null) return
         }
 
         val percentRocket = SettingsManager.getRocketChangePercent()
@@ -96,12 +95,16 @@ class StrategyRocket() : KoinComponent {
 
                 if (changePercent > 0) {
                     val last = rocketStocks.firstOrNull { it.stock.ticker == stock.ticker }
-                    if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return@runBlocking }
+                    if (last != null) {
+                        if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return
+                    }
 
                     rocketStocks.add(0, rocketStock)
                 } else {
                     val last = cometStocks.firstOrNull { it.stock.ticker == stock.ticker }
-                    if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return@runBlocking }
+                    if (last != null) {
+                        if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return
+                    }
 
                     cometStocks.add(0, rocketStock)
                 }

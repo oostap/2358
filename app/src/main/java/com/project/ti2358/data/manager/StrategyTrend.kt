@@ -61,13 +61,13 @@ class StrategyTrend : KoinComponent {
         strategyTelegram.sendTrendStart(false)
     }
 
-    fun processStrategy(stock: Stock, candle: Candle) = runBlocking(StockManager.trendContext) {
-        if (!started) return@runBlocking
-        process()
-        if (stock !in stocks) return@runBlocking
+    fun processStrategy(stock: Stock, candle: Candle) {
+        if (!started) return
+        runBlocking { process() }
+        if (stock !in stocks) return
 
         if (SettingsManager.getTrendLove()) {
-            if (StrategyLove.stocksSelected.find { it.ticker == stock.ticker } == null) return@runBlocking
+            if (StrategyLove.stocksSelected.find { it.ticker == stock.ticker } == null) return
         }
 
         val changeStartPercent = SettingsManager.getTrendMinDownPercent()
@@ -98,7 +98,7 @@ class StrategyTrend : KoinComponent {
                 fromStartToNowCandles.removeLast()
 
             // если прошло мало минут, то игнорим
-            if (fromStartToNowCandles.size < afterMinutes) return@runBlocking
+            if (fromStartToNowCandles.size < afterMinutes) return
 
             if (changeFromStart < 0) { // если изменение от старта < 0, то ищем минимальную свечу
                 extremumValue = 10000.0
@@ -128,7 +128,7 @@ class StrategyTrend : KoinComponent {
         }
 
         // если свечей мало, ливаем
-        if (fromStartToLowCandles.isEmpty() || fromLowToNowCandles.isEmpty()) return@runBlocking
+        if (fromStartToLowCandles.isEmpty() || fromLowToNowCandles.isEmpty()) return
 
         // изменение от старта скана до точки минимума
         val changeFromStartToLow = extremumValue / stock.priceTrend * 100.0 - 100.0
@@ -137,12 +137,12 @@ class StrategyTrend : KoinComponent {
         val changeFromLowToNow = fromLowToNowCandles.last().closingPrice / extremumValue * 100.0 - 100.0
 
         // проверка просадки, большая ли
-        if (abs(changeFromStartToLow) < abs(changeStartPercent)) return@runBlocking
+        if (abs(changeFromStartToLow) < abs(changeStartPercent)) return
 
         // вычисление процента отскока
         val turnValue = abs(changeFromLowToNow / changeFromStartToLow * 100.0)
 
-        if (abs(turnValue) < changeEndPercent) return@runBlocking
+        if (abs(turnValue) < changeEndPercent) return
 
         log("СМЕНА ТРЕНДА ${stock.ticker} = $changeFromStartToLow -> $changeFromLowToNow, total = $changeStartPercent, turnout = $turnValue")
 
@@ -155,12 +155,12 @@ class StrategyTrend : KoinComponent {
 
         if (changeFromStart > 0) {
             val last = trendDownStocks.find { it.stock.ticker == stock.ticker }
-            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 4) return@runBlocking }
+            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 4) return }
 
             trendDownStocks.add(0, trendStock)
         } else {
             val last = trendUpStocks.find { it.stock.ticker == stock.ticker }
-            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 4) return@runBlocking }
+            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 4) return}
 
             trendUpStocks.add(0, trendStock)
         }
