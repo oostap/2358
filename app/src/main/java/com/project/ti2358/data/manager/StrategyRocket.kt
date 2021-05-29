@@ -46,16 +46,21 @@ class StrategyRocket : KoinComponent {
     suspend fun startStrategy() = withContext(StockManager.rocketContext) {
         rocketStocks.clear()
         cometStocks.clear()
+
         process()
+
         started = true
+        strategyTelegram.sendRocketStart(true)
     }
 
     fun stopStrategy() {
         started = false
+        strategyTelegram.sendRocketStart(false)
     }
 
     fun processStrategy(stock: Stock) {
         if (!started) return
+        if (stocks.isEmpty()) runBlocking { process() }
         if (stock !in stocks) return
 
         if (SettingsManager.getRocketOnlyLove()) {
@@ -66,54 +71,55 @@ class StrategyRocket : KoinComponent {
         var minutesRocket = SettingsManager.getRocketChangeMinutes()
         val volumeRocket = SettingsManager.getRocketChangeVolume()
 
-        if (stock.minuteCandles.isNotEmpty()) {
-            var fromCandle = stock.minuteCandles.last()
-            val toCandle = stock.minuteCandles.last()
+        if (stock.minuteCandles.isEmpty()) return
 
-            var fromIndex = 0
-            for (i in stock.minuteCandles.indices.reversed()) {
-                if (stock.minuteCandles[i].lowestPrice < fromCandle.lowestPrice) {
-                    fromCandle = stock.minuteCandles[i]
-                    fromIndex = i
-                }
+        var fromCandle = stock.minuteCandles.last()
+        val toCandle = stock.minuteCandles.last()
 
-                minutesRocket--
-                if (minutesRocket == 0) break
+        var fromIndex = 0
+        for (i in stock.minuteCandles.indices.reversed()) {
+            if (stock.minuteCandles[i].lowestPrice < fromCandle.lowestPrice) {
+                fromCandle = stock.minuteCandles[i]
+                fromIndex = i
             }
 
-            val deltaMinutes = ((toCandle.time.time - fromCandle.time.time) / 60.0 / 1000.0).toInt()
+            minutesRocket--
+            if (minutesRocket == 0) break
+        }
 
-            var volume = 0
-            for (i in fromIndex until stock.minuteCandles.size) {
-                volume += stock.minuteCandles[i].volume
+        val deltaMinutes = ((toCandle.time.time - fromCandle.time.time) / 60.0 / 1000.0).toInt()
+
+        var volume = 0
+        for (i in fromIndex until stock.minuteCandles.size) {
+            volume += stock.minuteCandles[i].volume
+        }
+
+        val changePercent = toCandle.closingPrice / fromCandle.openingPrice * 100.0 - 100.0
+        if (volume < volumeRocket || abs(changePercent) < abs(percentRocket)) return
+
+        val rocketStock = RocketStock(stock, fromCandle.openingPrice, toCandle.closingPrice, deltaMinutes, volume, changePercent, toCandle.time.time)
+        rocketStock.process()
+
+        if (changePercent > 0) {
+            val last = rocketStocks.firstOrNull { it.stock.ticker == stock.ticker }
+            if (last != null) {
+                if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return
             }
 
-            val changePercent = toCandle.closingPrice / fromCandle.openingPrice * 100.0 - 100.0
-            if (volume >= volumeRocket && abs(changePercent) >= abs(percentRocket)) {
-                val rocketStock = RocketStock(stock, fromCandle.openingPrice, toCandle.closingPrice, deltaMinutes, volume, changePercent, toCandle.time.time)
-                rocketStock.process()
-
-                if (changePercent > 0) {
-                    val last = rocketStocks.firstOrNull { it.stock.ticker == stock.ticker }
-                    if (last != null) {
-                        if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return
-                    }
-
-                    rocketStocks.add(0, rocketStock)
-                } else {
-                    val last = cometStocks.firstOrNull { it.stock.ticker == stock.ticker }
-                    if (last != null) {
-                        if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return
-                    }
-
-                    cometStocks.add(0, rocketStock)
-                }
-                GlobalScope.launch(Dispatchers.Main) {
-                    strategySpeaker.speakRocket(rocketStock)
-                    strategyTelegram.sendRocket(rocketStock)
-                    createRocket(rocketStock)
-                }
+            rocketStocks.add(0, rocketStock)
+        } else {
+            val last = cometStocks.firstOrNull { it.stock.ticker == stock.ticker }
+            if (last != null) {
+                if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return
             }
+
+            cometStocks.add(0, rocketStock)
+        }
+
+        GlobalScope.launch(Dispatchers.Main) {
+            strategySpeaker.speakRocket(rocketStock)
+            strategyTelegram.sendRocket(rocketStock)
+            createRocket(rocketStock)
         }
     }
 

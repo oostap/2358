@@ -349,6 +349,22 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
+    fun sendRocketStart(start: Boolean) {
+        if (started && SettingsManager.getTelegramSendRockets()) {
+            val text = if (start) {
+                String.format(
+                    locale = Locale.US,
+                    "🟢🚀☄️ старт: %.2f%% / %d мин / v%d",
+                    SettingsManager.getRocketChangePercent(),
+                    SettingsManager.getRocketChangeMinutes(),
+                    SettingsManager.getRocketChangeVolume())
+            } else {
+                "🔴🚀☄️️ стоп!"
+            }
+            sendMessageToChats(text, -1)
+        }
+    }
+
     fun sendTrendStart(start: Boolean) {
         if (started && SettingsManager.getTelegramSendTrends()) {
             val text = if (start) {
@@ -453,11 +469,11 @@ class StrategyTelegram : KoinComponent {
     }
 
     fun sendTest() {
-        val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(InlineKeyboardButton.Url(
-                text = "SPCE",
-                url = "https://www.tinkoff.ru/invest/stocks/SPCE/"
-            )
-        )
-        sendMessageToChats("12345", deleteAfterSeconds = 5, replyMarkup = replyMarkup)
+//        val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(InlineKeyboardButton.Url(
+//                text = "SPCE",
+//                url = "https://www.tinkoff.ru/invest/stocks/SPCE/"
+//            )
+//        )
+//        sendMessageToChats("12345", deleteAfterSeconds = 5, replyMarkup = replyMarkup)
     }
 }

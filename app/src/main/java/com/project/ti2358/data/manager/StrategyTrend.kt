@@ -52,7 +52,6 @@ class StrategyTrend : KoinComponent {
         }
 
         started = true
-
         strategyTelegram.sendTrendStart(true)
     }
 
@@ -63,7 +62,7 @@ class StrategyTrend : KoinComponent {
 
     fun processStrategy(stock: Stock, candle: Candle) {
         if (!started) return
-        runBlocking { process() }
+        if (stocks.isEmpty()) runBlocking { process() }
         if (stock !in stocks) return
 
         if (SettingsManager.getTrendLove()) {
