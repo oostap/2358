@@ -11,6 +11,7 @@ class StrategyReports : KoinComponent {
 
     var stocksDividend: MutableList<Stock> = mutableListOf()
     var stocksReport: MutableList<Stock> = mutableListOf()
+    var stocksFDA: MutableList<Stock> = mutableListOf()
 
     var currentSort: Sorting = Sorting.DESCENDING
 
@@ -19,6 +20,7 @@ class StrategyReports : KoinComponent {
 
         stocksDividend = all.filter { it.dividend != null }.toMutableList()
         stocksReport = all.filter { it.report != null }.toMutableList()
+        stocksFDA = all.filter { it.fda != null }.toMutableList()
 
         return stocksReport
     }
@@ -43,5 +45,16 @@ class StrategyReports : KoinComponent {
             }
         }
         return stocksDividend
+    }
+
+    fun resortFDA(): MutableList<Stock> {
+        currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
+        stocksFDA.sortBy {
+            val sign = if (currentSort == Sorting.ASCENDING) -1 else 1
+            it.fda?.let { d ->
+                d.date * sign
+            }
+        }
+        return stocksFDA
     }
 }

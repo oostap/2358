@@ -18,4 +18,7 @@
     <color name="order_green">#04a775</color>
 
     <color name="orderbook_color">#1A134C</color>
+
+    <color name="menu_text_color">#1A134C</color>
+    <color name="menu_icon_tint">#1A134C</color>
 </resources>

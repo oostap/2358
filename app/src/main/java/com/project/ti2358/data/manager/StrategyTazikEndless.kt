@@ -160,6 +160,11 @@ class StrategyTazikEndless : KoinComponent {
             stocksToPurchase.removeAll { it.stock.dividend != null }
         }
 
+        // удалить все бумаги, у которых скоро FDA фаза
+        if (SettingsManager.getTazikEndlessExcludeFDA()) {
+            stocksToPurchase.removeAll { it.stock.fda != null }
+        }
+
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         if (SettingsManager.getTazikEndlessExcludeDepo()) {
             stocksToPurchase.removeAll { p -> depositManager.portfolioPositions.any { it.ticker == p.ticker } }
@@ -217,7 +222,6 @@ class StrategyTazikEndless : KoinComponent {
         } else {
             local.sortByDescending { it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100 }
         }
-        local.sortBy { it.status }
 
         return local
     }
@@ -225,22 +229,27 @@ class StrategyTazikEndless : KoinComponent {
     fun getNotificationTextLong(): String {
         val volume = SettingsManager.getTazikEndlessMinVolume()
 
-        stocksToPurchase.sortBy { abs(it.stock.getPriceNow(volume, true) / it.tazikEndlessPrice * 100 - 100) }
-        stocksToPurchase.sortBy { it.stock.getPriceNow(volume, true) / it.tazikEndlessPrice * 100 - 100 }
-        stocksToPurchase.sortBy { it.status }
+        val stocks = stocksToPurchase.map {
+            Pair(it.stock.getPriceNow(volume, true), it)
+        }.sortedBy {
+            it.first / it.second.tazikEndlessPrice * 100 - 100
+        }
 
         var tickers = ""
-        for (stock in stocksToPurchase) {
-            val change = (100 * stock.stock.getPriceNow(volume, true)) / stock.tazikEndlessPrice - 100
-            if (change >= -0.01 && stock.status == PurchaseStatus.WAITING && stocksToPurchase.size > 5) continue
+        for (pair in stocks) {
+            val purchase = pair.second
+            val priceNow = pair.first
+
+            val change = (100 * priceNow) / purchase.tazikEndlessPrice - 100
+            if (change >= -0.01 && purchase.status == PurchaseStatus.WAITING && stocksToPurchase.size > 5) continue
 
             var vol = 0
-            if (stock.stock.minuteCandles.isNotEmpty()) {
-                vol = stock.stock.minuteCandles.last().volume
+            if (purchase.stock.minuteCandles.isNotEmpty()) {
+                vol = purchase.stock.minuteCandles.last().volume
             }
-            tickers += "${stock.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
-                    "${stock.tazikEndlessPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceNow(volume, true).toMoney(stock.stock)} = " +
-                    "${change.toPercent()} ${stock.getStatusString()} v=${vol}\n"
+            tickers += "${purchase.ticker} ${purchase.percentLimitPriceChange.toPercent()} = " +
+                    "${purchase.tazikEndlessPrice.toMoney(purchase.stock)} ➡ ${priceNow.toMoney(purchase.stock)} = " +
+                    "${change.toPercent()} ${purchase.getStatusString()} v=${vol}\n"
         }
         if (tickers == "") tickers = "только отрицательные бумаги ⏳"
 

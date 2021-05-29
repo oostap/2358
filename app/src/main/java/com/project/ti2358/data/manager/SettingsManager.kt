@@ -50,16 +50,6 @@ class SettingsManager {
             return token ?: "TODO"
         }
 
-        fun getActiveBrokerType(): String {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tinkoff_iis)
-            val iis = preferences.getBoolean(key, false)
-
-            return if (iis) {
-                "TinkoffIis"
-            } else {
-                "Tinkoff"
-            }
-        }
 
         fun isAllowCurrency(currency: Currency?): Boolean {
             if (currency == Currency.USD) return true
@@ -535,6 +525,11 @@ class SettingsManager {
             return preferences.getBoolean(key, true)
         }
 
+        fun getTazikExcludeFDA(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_exclude_fda)
+            return preferences.getBoolean(key, true)
+        }
+
         fun getTazikExcludeDepo(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_exclude_depo)
             return preferences.getBoolean(key, true)
@@ -669,6 +664,11 @@ class SettingsManager {
 
         fun getTazikEndlessExcludeDivs(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_exclude_divs)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getTazikEndlessExcludeFDA(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_exclude_fda)
             return preferences.getBoolean(key, true)
         }
 

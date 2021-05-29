@@ -158,6 +158,11 @@ class StrategyTazik : KoinComponent {
             stocksToPurchase.removeAll { it.stock.dividend != null }
         }
 
+        // удалить все бумаги, у которых скоро FDA фаза
+        if (SettingsManager.getTazikExcludeFDA()) {
+            stocksToPurchase.removeAll { it.stock.fda != null }
+        }
+
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         if (SettingsManager.getTazikExcludeDepo()) {
             stocksToPurchase.removeAll { p -> depositManager.portfolioPositions.any { it.ticker == p.ticker } }
@@ -233,22 +238,28 @@ class StrategyTazik : KoinComponent {
 
     fun getNotificationTextLong(): String {
         val volume = 0
-        stocksToPurchase.sortBy { abs(it.stock.getPriceNow(volume) / it.tazikPrice * 100 - 100) }
-        stocksToPurchase.sortBy { it.stock.getPriceNow(volume) / it.tazikPrice * 100 - 100 }
-        stocksToPurchase.sortBy { it.status }
+
+        val stocks = stocksToPurchase.map {
+            Pair(it.stock.getPriceNow(volume), it)
+        }.sortedBy {
+            it.first / it.second.tazikEndlessPrice * 100 - 100
+        }
 
         var tickers = ""
-        for (stock in stocksToPurchase) {
-            val change = (100 * stock.stock.getPriceNow(volume)) / stock.tazikPrice - 100
-            if (change >= -0.01 && stock.status == PurchaseStatus.WAITING && stocksToPurchase.size > 5) continue
+        for (pair in stocks) {
+            val purchase = pair.second
+            val priceNow = pair.first
+
+            val change = (100 * priceNow) / purchase.tazikPrice - 100
+            if (change >= -0.01 && purchase.status == PurchaseStatus.WAITING && stocksToPurchase.size > 5) continue
 
             var vol = 0
-            if (stock.stock.minuteCandles.isNotEmpty()) {
-                vol = stock.stock.minuteCandles.last().volume
+            if (purchase.stock.minuteCandles.isNotEmpty()) {
+                vol = purchase.stock.minuteCandles.last().volume
             }
-            tickers += "${stock.ticker} ${stock.percentLimitPriceChange.toPercent()} = " +
-                    "${stock.tazikPrice.toMoney(stock.stock)} ➡ ${stock.stock.getPriceNow(volume).toMoney(stock.stock)} = " +
-                    "${change.toPercent()} ${stock.getStatusString()} v=${vol}\n"
+            tickers += "${purchase.ticker} ${purchase.percentLimitPriceChange.toPercent()} = " +
+                    "${purchase.tazikPrice.toMoney(purchase.stock)} ➡ ${priceNow.toMoney(purchase.stock)} = " +
+                    "${change.toPercent()} ${purchase.getStatusString()} v=${vol}\n"
         }
         if (tickers == "") tickers = "только отрицательные бумаги ⏳"
 

@@ -1,4 +1,4 @@
-package com.project.ti2358.ui.strategyReports
+package com.project.ti2358.ui.reports
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -57,6 +57,10 @@ class ReportsFragment : Fragment(R.layout.fragment_reports) {
             divButton.setOnClickListener {
                 updateDataDivs()
             }
+
+            fdaButton.setOnClickListener {
+                updateDataFDA()
+            }
         }
 
         updateDataReport()
@@ -73,8 +77,10 @@ class ReportsFragment : Fragment(R.layout.fragment_reports) {
         stocks = strategyReports.resortReport()
         adapterList.setData(stocks)
 
-        val act = requireActivity() as AppCompatActivity
-        act.supportActionBar?.title = getString(R.string.menu_reports)
+        if (isAdded) {
+            val act = requireActivity() as AppCompatActivity
+            act.supportActionBar?.title = getString(R.string.menu_reports)
+        }
     }
 
     private fun updateDataDivs() {
@@ -82,8 +88,21 @@ class ReportsFragment : Fragment(R.layout.fragment_reports) {
         stocks = strategyReports.resortDivs()
         adapterList.setData(stocks)
 
-        val act = requireActivity() as AppCompatActivity
-        act.supportActionBar?.title = getString(R.string.menu_divindens)
+        if (isAdded) {
+            val act = requireActivity() as AppCompatActivity
+            act.supportActionBar?.title = getString(R.string.menu_divindens)
+        }
+    }
+
+    private fun updateDataFDA() {
+        stocks = strategyReports.process()
+        stocks = strategyReports.resortFDA()
+        adapterList.setData(stocks)
+
+        if (isAdded) {
+            val act = requireActivity() as AppCompatActivity
+            act.supportActionBar?.title = getString(R.string.menu_fda)
+        }
     }
 
     inner class ItemReportsRecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<ItemReportsRecyclerViewAdapter.ViewHolder>() {
@@ -119,7 +138,7 @@ class ReportsFragment : Fragment(R.layout.fragment_reports) {
 
                     stock.dividend?.let {
                         val emoji = if (it.profit > 1.0) " 🤑" else ""
-                        revView.text = "+${it.profit}%$emoji"
+                        revView.text = "+${it.profit.toPercent()} $emoji"
                         revView.setTextColor(Utils.GREEN)
                         epsView.visibility = View.GONE
 

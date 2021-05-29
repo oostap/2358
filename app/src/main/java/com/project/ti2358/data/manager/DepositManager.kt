@@ -1,5 +1,9 @@
 package com.project.ti2358.data.manager
 
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
+import com.project.ti2358.R
+import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.service.OrdersService
@@ -70,13 +74,31 @@ class DepositManager : KoinComponent {
     }
 
     fun getActiveBrokerAccountId(): String {
-        val accountType = SettingsManager.getActiveBrokerType()
-        for (acc in accounts) {
-            if (acc.brokerAccountType == accountType) {
-                return acc.brokerAccountId
-            }
+        SettingsManager.preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
+        val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tinkoff_account_id)
+        val value: String? = SettingsManager.preferences.getString(key, "")
+
+        if (value == "" && accounts.isNotEmpty()) return accounts.first().brokerAccountId
+
+        return value ?: ""
+    }
+
+    fun setActiveBrokerAccountId(id: String) {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
+        val editor: SharedPreferences.Editor = preferences.edit()
+        val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tinkoff_account_id)
+        editor.putString(key, id)
+        editor.apply()
+    }
+
+    suspend fun refreshAccounts(): Boolean {
+        try {
+            accounts = synchronizedList(portfolioService.accounts().accounts)
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        return accounts.first().brokerAccountId
+        return false
     }
 
     suspend fun refreshOrders(): Boolean {

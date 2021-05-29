@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.View
 import android.view.WindowManager
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -66,7 +67,6 @@ class MainActivity : AppCompatActivity() {
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
         val navController = findNavController(R.id.nav_host_fragment)
-
         // угловая круглая кнопка
         val fab: FloatingActionButton = findViewById(R.id.fab)
         fab.setOnClickListener { view ->
@@ -104,7 +104,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
-            if (destination.id in listOf(R.id.nav_settings, R.id.nav_orderbook, R.id.nav_orders, R.id.nav_chart, R.id.nav_donate, R.id.nav_reports, R.id.nav_premarket)) {
+            if (destination.id in listOf(R.id.nav_settings, R.id.nav_orderbook, R.id.nav_orders,
+                    R.id.nav_chart, R.id.nav_donate, R.id.nav_reports, R.id.nav_premarket, R.id.nav_accounts)) {
                 fab.visibility = View.INVISIBLE
             } else {
                 fab.visibility = View.VISIBLE
@@ -113,6 +114,7 @@ class MainActivity : AppCompatActivity() {
 
         val header = navView.getHeaderView(0)
         val freeCashView: TextView = header.findViewById(R.id.free_cash)
+        val activeAccountView: TextView = header.findViewById(R.id.active_account)
 
         val index1NameView: TextView = header.findViewById(R.id.index_1_name)
         val index2NameView: TextView = header.findViewById(R.id.index_2_name)
@@ -140,6 +142,12 @@ class MainActivity : AppCompatActivity() {
         val index4EmojiView: TextView = header.findViewById(R.id.index_4_emoji)
         val index5EmojiView: TextView = header.findViewById(R.id.index_5_emoji)
         val index6EmojiView: TextView = header.findViewById(R.id.index_6_emoji)
+
+        val accountView: LinearLayout = header.findViewById(R.id.account_view)
+        accountView.setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            navController.navigate(R.id.nav_accounts)
+        }
 
         val versionView: TextView = header.findViewById(R.id.version)
         val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(
@@ -174,6 +182,8 @@ class MainActivity : AppCompatActivity() {
                 val cash = depositManager.getFreeCashEUR() + "\n" + depositManager.getFreeCashRUB() + "\n" + depositManager.getFreeCashUSD()
                 freeCashView.text = cash
 
+                activeAccountView.text = depositManager.getActiveBrokerAccountId()
+
                 val indices = stockManager.indices
 
                 if (indices.size >= 5) {
@@ -188,7 +198,7 @@ class MainActivity : AppCompatActivity() {
                     index1ChangeView.text = "%.2f%%".format(Locale.US, superChange)
 
                     index1EmojiView.text = Utils.getEmojiSuperIndex(superChange)
-                    index1ChangeView.setTextColor(Utils.getColorForValue(superChange))
+                    index1ChangeView.setTextColor(Utils.getColorForValue(superChange, false))
                 }
             }
 
@@ -211,8 +221,11 @@ class MainActivity : AppCompatActivity() {
                             emoji.text = if (invertedEmoji) "😰" else "😍"
                         }
                     }
-                    change.setTextColor(Utils.getColorForValue(it.change_per))
-                    value.setTextColor(Utils.getColorForValue(it.change_per))
+
+                    val sign = if (invertedEmoji) -1 else 1
+
+                    change.setTextColor(Utils.getColorForValue(it.change_per * sign, false))
+                    value.setTextColor(Utils.getColorForValue(it.change_per * sign, false))
 
                     if (abs(it.change_per) <= 0.15) {
                         emoji.text = "😐"

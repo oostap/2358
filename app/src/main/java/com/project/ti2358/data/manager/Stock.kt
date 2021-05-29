@@ -15,8 +15,11 @@ data class Stock(var instrument: Instrument) {
     var figi = instrument.figi
 
     var alterName: String = ""
-    var report: Report? = null
-    var dividend: Dividend? = null
+
+    var report: Report? = null      // отчёт
+    var dividend: Dividend? = null  // дивы
+    var fda: FDA? = null            // fda фаза
+
     var short: StockShort? = null
     var stockIndices: Map<String, Double>? = null
     var morning: Any? = null

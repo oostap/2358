@@ -8,12 +8,6 @@
             app:useSimpleSummaryProvider="true" />
 
         <SwitchPreferenceCompat
-            app:key="@string/setting_key_tinkoff_iis"
-            app:title="@string/tinkoff_iis_title"
-            app:defaultValue="false" />
-
-
-        <SwitchPreferenceCompat
             app:key="@string/setting_key_alor_quotes"
             app:title="@string/alor_qoutes_title"
             app:defaultValue="false" />
@@ -334,6 +328,11 @@
             app:defaultValue="true" />
 
         <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_exclude_fda"
+            app:title="@string/stocks_tazik_exclude_fda"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
             app:key="@string/setting_key_tazik_exclude_depo"
             app:title="@string/stocks_tazik_exclude_depo"
             app:defaultValue="true" />
@@ -432,6 +431,11 @@
         <SwitchPreferenceCompat
             app:key="@string/setting_key_tazik_endless_exclude_divs"
             app:title="@string/stocks_tazik_endless_exclude_divs"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_endless_exclude_fda"
+            app:title="@string/stocks_tazik_endless_exclude_fda"
             app:defaultValue="true" />
 
         <SwitchPreferenceCompat

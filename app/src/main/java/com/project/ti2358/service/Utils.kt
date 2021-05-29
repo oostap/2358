@@ -92,30 +92,16 @@ class Utils {
 
         val TEAL: Int = Color.parseColor("#4903DAC5")
 
-        fun isNightTheme(): Boolean {
-            when (TheApplication.application.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    return true
-                }
-            }
-            return false
-        }
-
         @KoinApiExtension
         fun getNeutralColor(): Int {
             return if (SettingsManager.getDarkTheme()) WHITE else BLACK
         }
 
         @KoinApiExtension
-        fun getChartTextColor(): Int {
-            return if (SettingsManager.getDarkTheme()) WHITE else BLACK
-        }
-
-        @KoinApiExtension
-        fun getColorForValue(value: Double): Int {
+        fun getColorForValue(value: Double, black: Boolean = true): Int {
             if (value > 0) return GREEN
             if (value < 0) return RED
-            return getNeutralColor()
+            return if (black) getNeutralColor() else WHITE
         }
 
         @KoinApiExtension
