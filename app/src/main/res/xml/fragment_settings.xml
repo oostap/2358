@@ -628,6 +628,11 @@
             app:defaultValue="true" />
 
         <SwitchPreferenceCompat
+            app:key="@string/setting_key_telegram_send_spikes"
+            app:title="@string/stocks_telegram_send_spikes"
+            app:defaultValue="false" />
+
+        <SwitchPreferenceCompat
             app:key="@string/setting_key_telegram_send_trends"
             app:title="@string/stocks_telegram_send_trends"
             app:defaultValue="true" />

@@ -404,7 +404,7 @@ class StrategyTelegram : KoinComponent {
     }
 
     fun sendTazikSpike(purchase: PurchaseStock, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
-        if (started && SettingsManager.getTelegramSendTaziks()) {
+        if (started && SettingsManager.getTelegramSendSpikes()) {
             val text = "спайк! 🛁$%s B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(locale = Locale.US, purchase.ticker, buyPrice, priceFrom, priceTo, change, tazikUsed, tazikTotal)
             sendMessageToChats(text)
         }

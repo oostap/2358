@@ -225,6 +225,7 @@
     <string name="stocks_telegram_send_orders">Ордеры</string>
     <string name="stocks_telegram_send_rockets">Ракеты</string>
     <string name="stocks_telegram_send_taziks">Тазики</string>
+    <string name="stocks_telegram_send_spikes">Спайки</string>
     <string name="stocks_telegram_send_trends">Тренды</string>
 
     <!-- follower settings -->
@@ -377,6 +378,7 @@
     <string name="setting_key_telegram_send_orders">telegram_send_orders</string>
     <string name="setting_key_telegram_send_rockets">telegram_send_rockets</string>
     <string name="setting_key_telegram_send_taziks">telegram_send_taziks</string>
+    <string name="setting_key_telegram_send_spikes">telegram_send_spikes</string>
     <string name="setting_key_telegram_send_trends">telegram_send_trends</string>
 
     <!-- follower settings -->

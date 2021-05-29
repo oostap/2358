@@ -224,6 +224,7 @@ class StrategyTazikEndless : KoinComponent {
 
     fun getNotificationTextLong(): String {
         val volume = SettingsManager.getTazikEndlessMinVolume()
+
         stocksToPurchase.sortBy { abs(it.stock.getPriceNow(volume, true) / it.tazikEndlessPrice * 100 - 100) }
         stocksToPurchase.sortBy { it.stock.getPriceNow(volume, true) / it.tazikEndlessPrice * 100 - 100 }
         stocksToPurchase.sortBy { it.status }

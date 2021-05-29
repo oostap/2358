@@ -805,6 +805,11 @@ class SettingsManager {
             return preferences.getBoolean(key, true)
         }
 
+        fun getTelegramSendSpikes(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_spikes)
+            return preferences.getBoolean(key, false)
+        }
+
         fun getTelegramSendTrends(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_trends)
             return preferences.getBoolean(key, true)
