@@ -440,10 +440,9 @@ class StrategyTazikEndless : KoinComponent {
         // вычисляем процент профита после сдвига лимитки ниже
         var finalProfit = SettingsManager.getTazikEndlessTakeProfit()
 
-        // если мы усредняем, то нужно поставить лимитку продажу выше первого закупа, иначе может получится, что мы сами у себя купим/продадим
+        // если мы усредняем, то не нужно выставлять ТП, потому что неизвестно какие заявки из усреднения выполнятся и какая будет в итоге средняя
         if (stock.ticker in stocksTickerInProcess && SettingsManager.getTazikEndlessAllowAveraging()) {
-            delta *= SettingsManager.getTazikEndlessApproximationFactor()
-            finalProfit += abs(delta)
+            finalProfit = 0.0
         }
 
         val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikEndlessOrderLifeTimeSeconds())

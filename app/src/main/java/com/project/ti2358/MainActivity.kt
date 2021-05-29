@@ -29,6 +29,7 @@ import com.project.ti2358.data.manager.WorkflowManager
 import com.project.ti2358.data.model.dto.daager.Index
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
+import com.project.ti2358.service.toPercent
 import com.project.ti2358.ui.settings.SettingsFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -195,7 +196,7 @@ class MainActivity : AppCompatActivity() {
 
                     index1NameView.text = "SUPER"
                     val superChange = indices[0].change_per + indices[1].change_per + indices[2].change_per + indices[3].change_per
-                    index1ChangeView.text = "%.2f%%".format(Locale.US, superChange)
+                    index1ChangeView.text = superChange.toPercent()
 
                     index1EmojiView.text = Utils.getEmojiSuperIndex(superChange)
                     index1ChangeView.setTextColor(Utils.getColorForValue(superChange, false))
@@ -207,14 +208,14 @@ class MainActivity : AppCompatActivity() {
                     name.text = it.short
                     value.text = "${it.value}"
                     if (it.change_per < 0) {
-                        change.text = "${it.change_per}%"
+                        change.text = "${it.change_per.toPercent()}"
                         if (it.change_per < -1) {
                             emoji.text = if (invertedEmoji) "🤑" else "😱"
                         } else {
                             emoji.text = if (invertedEmoji) "😍" else "😰"
                         }
                     } else {
-                        change.text = "+${it.change_per}%"
+                        change.text = "+${it.change_per.toPercent()}"
                         if (it.change_per > 1) {
                             emoji.text = if (invertedEmoji) "😱" else "🤑"
                         } else {

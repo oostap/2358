@@ -383,7 +383,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
     fun buyFromAsk1728(): Job? {
         if (lots == 0) return null
 
-        return GlobalScope.launch(Dispatchers.Main) {
+        return GlobalScope.launch(StockManager.stockContext) {
             try {
                 val ticker = stock.ticker
                 val figi = stock.figi
@@ -524,7 +524,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
     fun buyFromAsk2358(): Job? {
         if (lots == 0) return null
 
-        return GlobalScope.launch(Dispatchers.Main) {
+        return GlobalScope.launch(StockManager.stockContext) {
             try {
                 val ticker = stock.ticker
                 val figi = stock.figi
@@ -914,7 +914,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
             return null
         }
 
-        return GlobalScope.launch(Dispatchers.Main) {
+        return GlobalScope.launch(StockManager.stockContext) {
             try {
                 position = pos
                 currentTrailingStop = TrailingStop(stock, stock.getPriceNow(), trailingStopTakeProfitPercentActivation, trailingStopTakeProfitPercentDelta, trailingStopStopLossPercent)

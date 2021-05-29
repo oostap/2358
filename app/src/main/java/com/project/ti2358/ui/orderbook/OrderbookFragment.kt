@@ -194,7 +194,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             positionView.setOnClickListener {
                 activeStock?.let {
                     depositManager.getPositionForFigi(it.figi)?.let { p ->
-                        volumeEditText.setText(abs(p.lots - p.blocked).toString())
+                        volumeEditText.setText(abs(p.lots - p.blocked).toInt().toString())
                     }
                 }
             }

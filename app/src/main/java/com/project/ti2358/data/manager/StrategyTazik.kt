@@ -480,6 +480,12 @@ class StrategyTazik : KoinComponent {
         var finalProfit = baseProfit + abs(delta)                           // 0.9% + 0.125% = 1.025%
 
         if (baseProfit == 0.0) finalProfit = 0.0
+
+        // если мы усредняем, то не нужно выставлять ТП, потому что неизвестно какие заявки из усреднения выполнятся и какая будет в итоге средняя
+        if (stock.ticker in stocksTickerInProcess && SettingsManager.getTazikAllowAveraging()) {
+            finalProfit = 0.0
+        }
+
         val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikOrderLifeTimeSeconds())
         if (job != null) {
             stocksTickerInProcess[stock.ticker] = job

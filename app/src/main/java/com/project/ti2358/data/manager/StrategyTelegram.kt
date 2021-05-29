@@ -6,6 +6,8 @@ import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.*
 import com.github.kotlintelegrambot.entities.ChatId
+import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
+import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.network.fold
 import com.project.ti2358.data.model.dto.*
 
@@ -138,7 +140,7 @@ class StrategyTelegram : KoinComponent {
             dispatch {
                 command("start") {
                     val chatId = update.message?.chat?.id ?: 0
-                    val result = bot.sendMessage(chatId = ChatId.fromId(chatId), text = "Привет! Чтобы все операции приходили в нужный чат или канал, нужно прописать его айди в приложении. Чтобы узнать айди чата или канала напиши в нём: chat_id")
+                    val result = bot.sendMessage(chatId = ChatId.fromId(chatId), text = "Привет! Чтобы все операции приходили в нужный чат, нужно прописать его айди в приложении. Чтобы узнать айди чата напиши в нём: chat_id")
                     result.fold({
                         // do something here with the response
                     },{
@@ -198,6 +200,8 @@ class StrategyTelegram : KoinComponent {
         }
         telegramBot?.startPolling()
         sendMessageToChats(SettingsManager.getTelegramHello(), deleteAfterSeconds = 10)
+
+        sendTest()
     }
 
     fun stopStrategy() {
@@ -410,7 +414,7 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    private fun sendMessageToChats(text: String, deleteAfterSeconds: Int = -1, stop: Boolean = false) {
+    private fun sendMessageToChats(text: String, deleteAfterSeconds: Int = -1, stop: Boolean = false, replyMarkup: InlineKeyboardMarkup? = null) {
         GlobalScope.launch(Dispatchers.Default) {
             try {
                 val chatIds = SettingsManager.getTelegramChatID()
@@ -418,7 +422,7 @@ class StrategyTelegram : KoinComponent {
                     if (text == "") break
 
                     while (true) {
-                        val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text)
+                        val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text, replyMarkup = replyMarkup)
                         if (result?.first?.isSuccessful != true) {
                             delay(2500)
                             continue
@@ -446,5 +450,14 @@ class StrategyTelegram : KoinComponent {
                 e.printStackTrace()
             }
         }
+    }
+
+    fun sendTest() {
+        val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(InlineKeyboardButton.Url(
+                text = "SPCE",
+                url = "https://www.tinkoff.ru/invest/stocks/SPCE/"
+            )
+        )
+        sendMessageToChats("12345", deleteAfterSeconds = 5, replyMarkup = replyMarkup)
     }
 }

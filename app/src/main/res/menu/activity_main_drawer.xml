@@ -70,7 +70,7 @@
             android:title="@string/menu_rocket" />
         <item
             android:id="@+id/nav_trends"
-            android:icon="@drawable/ic_rocket"
+            android:icon="@drawable/ic_trends"
             android:title="@string/menu_trends" />
         <item
             android:id="@+id/nav_fixprice"
