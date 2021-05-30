@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
             if (destination.id in listOf(R.id.nav_settings, R.id.nav_orderbook, R.id.nav_orders,
-                    R.id.nav_chart, R.id.nav_donate, R.id.nav_reports, R.id.nav_premarket, R.id.nav_accounts)) {
+                    R.id.nav_chart, R.id.nav_donate, R.id.nav_reports, R.id.nav_premarket, R.id.nav_accounts, R.id.nav_chat)) {
                 fab.visibility = View.INVISIBLE
             } else {
                 fab.visibility = View.VISIBLE
@@ -259,7 +259,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_donate,
                 R.id.nav_tazik_start,
                 R.id.nav_tazik_endless_start,
-                R.id.nav_telegram
+                R.id.nav_telegram,
+                R.id.nav_chat
             ),
             drawerLayout
         )

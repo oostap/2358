@@ -341,8 +341,14 @@
         android:label="@string/menu_donate_description"
         tools:layout="@layout/fragment_donate" />
 
-    <!-- Chart -->
+    <!-- chat -->
+    <fragment
+        android:id="@+id/nav_chat"
+        android:name="com.project.ti2358.ui.chat.ChatFragment"
+        android:label="@string/menu_chat"
+        tools:layout="@layout/fragment_chat" />
 
+    <!-- Chart -->
     <fragment
         android:id="@+id/nav_chart"
         android:name="com.project.ti2358.ui.chart.ChartFragment"
@@ -350,7 +356,6 @@
         tools:layout="@layout/fragment_chart" />
 
     <!-- Telegram -->
-
     <fragment
         android:id="@+id/nav_telegram"
         android:name="com.project.ti2358.ui.telegram.TelegramFragment"

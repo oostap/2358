@@ -518,6 +518,16 @@
             app:defaultValue="false" />
 
         <SwitchPreferenceCompat
+            app:key="@string/setting_key_trend_long"
+            app:title="@string/stocks_trend_long"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_trend_short"
+            app:title="@string/stocks_trend_short"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
             app:key="@string/setting_key_trend_voice"
             app:title="@string/stocks_trend_voice"
             app:defaultValue="true" />
@@ -639,6 +649,11 @@
         <SwitchPreferenceCompat
             app:key="@string/setting_key_telegram_send_trends"
             app:title="@string/stocks_telegram_send_trends"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_telegram_send_goto_terminal"
+            app:title="@string/stocks_telegram_send_goto_terminal"
             app:defaultValue="true" />
 
     </PreferenceCategory>

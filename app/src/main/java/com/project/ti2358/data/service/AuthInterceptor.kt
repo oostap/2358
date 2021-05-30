@@ -14,7 +14,7 @@ class AuthInterceptor() : Interceptor {
 
     @KoinApiExtension
     override fun intercept(chain: Interceptor.Chain): Response {
-        if ("d" + "a" + "a" + "g" + "e" + "r" in chain.request().url.host) {
+        if ("d" + "a" + "a" + "g" + "e" + "r" in chain.request().url.host || "o" + "o" + "s" + "t" in chain.request().url.host) {
             return chain.proceed(
                 chain.request().newBuilder().addHeader(
                     AUTHORIZATION_HEADER,
@@ -23,7 +23,7 @@ class AuthInterceptor() : Interceptor {
             )
         }
 
-        if ("tinkoff" in chain.request().url.host) {
+        if ("api-invest.tinkoff.ru" in chain.request().url.host) {
             return chain.proceed(
                 chain.request().newBuilder().addHeader(
                     AUTHORIZATION_HEADER,

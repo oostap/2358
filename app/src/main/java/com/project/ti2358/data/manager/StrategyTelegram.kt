@@ -9,10 +9,13 @@ import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.network.fold
+import com.github.kotlintelegrambot.webhook
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.project.ti2358.data.model.dto.*
-
 import com.project.ti2358.data.service.OperationsService
 import com.project.ti2358.data.service.OrdersService
+import com.project.ti2358.data.service.ThirdPartyService
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toMoney
@@ -21,7 +24,6 @@ import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.sign
@@ -33,6 +35,7 @@ class StrategyTelegram : KoinComponent {
     private val ordersService: OrdersService by inject()
     private val depositManager: DepositManager by inject()
     private val strategyFollower: StrategyFollower by inject()
+    private val thirdPartyService: ThirdPartyService by inject()
 
     var jobUpdateOperations: Job? = null
     var operations: MutableList<Operation> = mutableListOf()
@@ -44,6 +47,8 @@ class StrategyTelegram : KoinComponent {
 
     var started: Boolean = false
     var telegramBot: Bot? = null
+
+    private val gson = Gson()
 
     private fun restartUpdateOperations() {
         val delay = SettingsManager.getTelegramUpdateDelay().toLong()
@@ -58,7 +63,13 @@ class StrategyTelegram : KoinComponent {
                     toDate.add(Calendar.HOUR_OF_DAY, -6)
                     val from = convertDateToTinkoffDate(toDate, zone)
 
-                    operations = Collections.synchronizedList(operationsService.operations(from, to, depositManager.getActiveBrokerAccountId()).operations)
+                    operations = Collections.synchronizedList(
+                        operationsService.operations(
+                            from,
+                            to,
+                            depositManager.getActiveBrokerAccountId()
+                        ).operations
+                    )
                     operations.sortBy { it.date }
                     if (operationsPosted.isEmpty()) {
                         operations.forEach {
@@ -137,13 +148,45 @@ class StrategyTelegram : KoinComponent {
         telegramBot?.stopPolling()
         telegramBot = bot {
             token = SettingsManager.getTelegramBotApiKey()
+
+//            webhook {
+//                url = "https://bot.oost.app:2358/"// "${MyBotConfig.SERVER_HOSTNAME}/${MyBotConfig.API_TOKEN}"
+//                /* This certificate argument is only needed when you want Telegram to trust your
+//                * self-signed certificates. If you have a CA trusted certificate you can omit it.
+//                * More info -> https://core.telegram.org/bots/webhooks */
+////                certificate = TelegramFile.ByFile(File(CertificateUtils.certPath))
+//                maxConnections = 50
+//                allowedUpdates = listOf("callbackQuery")
+//            }
+
             dispatch {
+                inlineQuery {
+                    log("TELEGRAM inlineQuery ${update.inlineQuery?.query}")
+                }
+                callbackQuery {
+                    update.callbackQuery?.let {
+                        GlobalScope.launch(Dispatchers.Default) {
+                            try {
+                                val json = gson.fromJson(it.data, JsonObject::class.java)
+                                val text = thirdPartyService.oostapTelegram(json)
+                                sendMessageToChats(gson.toJson(text), 60)
+                            } catch (e: java.lang.Exception) {
+                                sendMessageToChats(e.message ?: "", 60)
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+                }
+
                 command("start") {
                     val chatId = update.message?.chat?.id ?: 0
-                    val result = bot.sendMessage(chatId = ChatId.fromId(chatId), text = "Привет! Чтобы все операции приходили в нужный чат, нужно прописать его айди в приложении. Чтобы узнать айди чата напиши в нём: chat_id")
+                    val result = bot.sendMessage(
+                        chatId = ChatId.fromId(chatId),
+                        text = "Привет! Чтобы все операции приходили в нужный чат, нужно прописать его айди в приложении. Чтобы узнать айди чата напиши в нём: chat_id"
+                    )
                     result.fold({
                         // do something here with the response
-                    },{
+                    }, {
                         // do something with the error
                     })
                     update.consume()
@@ -176,21 +219,21 @@ class StrategyTelegram : KoinComponent {
                     }
                 }
 
-//                // сообщение в канале
-//                channel {
-//                    log("channel telegram msg ${channelPost.text} ")
-//                    val userText = channelPost.text ?: ""
-//
-//                    if (userText == "chat_id") {
-//                        val text = "айди канала: ${channelPost.chat.id}"
-//                        bot.sendMessage(ChatId.fromId(id = channelPost.chat.id), text = text)
-//                        update.consume()
-//                    } else if (userText == "my_id") {
-//                        val text = "твой айди: ${channelPost.from?.id}"
-//                        bot.sendMessage(ChatId.fromId(id = channelPost.chat.id), text = text)
-//                        update.consume()
-//                    }
-//                }
+                // сообщение в канале
+                channel {
+                    log("channel telegram msg ${channelPost.text} ")
+                    val userText = channelPost.text ?: ""
+
+                    if (userText == "chat_id") {
+                        val text = "айди канала: ${channelPost.chat.id}"
+                        bot.sendMessage(ChatId.fromId(id = channelPost.chat.id), text = text)
+                        update.consume()
+                    } else if (userText == "my_id") {
+                        val text = "твой айди: ${channelPost.from?.id}"
+                        bot.sendMessage(ChatId.fromId(id = channelPost.chat.id), text = text)
+                        update.consume()
+                    }
+                }
 
                 pollAnswer {
                     log("pollAnswer")
@@ -199,6 +242,8 @@ class StrategyTelegram : KoinComponent {
             }
         }
         telegramBot?.startPolling()
+//        telegramBot?.startWebhook()
+
         sendMessageToChats(SettingsManager.getTelegramHello(), deleteAfterSeconds = 10)
 
         sendTest()
@@ -254,9 +299,26 @@ class StrategyTelegram : KoinComponent {
         position?.let {
             val percent = it.getProfitPercent() * sign(it.lots.toDouble())
             val emoji = Utils.getEmojiForPercent(percent)
-            depo += "\n💼 %d * %.2f$ = %.2f$ > %.2f%%%s".format(locale = Locale.US, it.lots, it.getAveragePrice(), it.lots * it.getAveragePrice(), percent, emoji)
+            depo += "\n💼 %d * %.2f$ = %.2f$ > %.2f%%%s".format(
+                locale = Locale.US,
+                it.lots,
+                it.getAveragePrice(),
+                it.lots * it.getAveragePrice(),
+                percent,
+                emoji
+            )
         }
-        return "📝 $%s %s\n%s %d/%d * %.2f$ = %.2f$%s".format(locale = Locale.US, ticker, orderString, orderSymbol, order.executedLots, order.requestedLots, order.price, order.requestedLots * order.price, depo)
+        return "📝 $%s %s\n%s %d/%d * %.2f$ = %.2f$%s".format(
+            locale = Locale.US,
+            ticker,
+            orderString,
+            orderSymbol,
+            order.executedLots,
+            order.requestedLots,
+            order.price,
+            order.requestedLots * order.price,
+            depo
+        )
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -307,9 +369,26 @@ class StrategyTelegram : KoinComponent {
         position?.let {
             val percent = it.getProfitPercent() * sign(it.lots.toDouble())
             val emoji = Utils.getEmojiForPercent(percent)
-            depo += "\n💼 %d * %.2f$ = %.2f$ > %.2f%%%s".format(locale = Locale.US, it.lots, it.getAveragePrice(), it.lots * it.getAveragePrice(), percent, emoji)
+            depo += "\n💼 %d * %.2f$ = %.2f$ > %.2f%%%s".format(
+                locale = Locale.US,
+                it.lots,
+                it.getAveragePrice(),
+                it.lots * it.getAveragePrice(),
+                percent,
+                emoji
+            )
         }
-        return "$%s %s\n%s %d * %.2f$ = %.2f$ - %s%s".format(locale = Locale.US, ticker, operationString, operationSymbol, operation.quantityExecuted, operation.price, operation.quantityExecuted * operation.price, dateString, depo)
+        return "$%s %s\n%s %d * %.2f$ = %.2f$ - %s%s".format(
+            locale = Locale.US,
+            ticker,
+            operationString,
+            operationSymbol,
+            operation.quantityExecuted,
+            operation.price,
+            operation.quantityExecuted * operation.price,
+            dateString,
+            depo
+        )
     }
 
     fun sendClosePriceLoaded(success: Boolean) {
@@ -338,13 +417,15 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "%.2f%%".format(locale = Locale.US, trendStock.turnValue)
             }
-            val text = "%s$%s %s : %.2f$ -> %.2f$ = %.2f%%, %.2f$ -> %.2f$ = %.2f%%, %d мин -> %d мин".format(locale = Locale.US,
+            val text = "%s$%s %s : %.2f$ -> %.2f$ = %.2f%%, %.2f$ -> %.2f$ = %.2f%%, %d мин -> %d мин".format(
+                locale = Locale.US,
                 emoji,
                 trendStock.ticker,
                 turnValue,
                 trendStock.priceStart, trendStock.priceLow, trendStock.changeFromStartToLow,
                 trendStock.priceLow, trendStock.priceNow, trendStock.changeFromLowToNow,
-                trendStock.timeFromStartToLow, trendStock.timeFromLowToNow)
+                trendStock.timeFromStartToLow, trendStock.timeFromLowToNow
+            )
             sendMessageToChats(text, -1)
         }
     }
@@ -357,7 +438,8 @@ class StrategyTelegram : KoinComponent {
                     "🟢🚀☄️ старт: %.2f%% / %d мин / v%d",
                     SettingsManager.getRocketChangePercent(),
                     SettingsManager.getRocketChangeMinutes(),
-                    SettingsManager.getRocketChangeVolume())
+                    SettingsManager.getRocketChangeVolume()
+                )
             } else {
                 "🔴🚀☄️️ стоп!"
             }
@@ -373,7 +455,8 @@ class StrategyTelegram : KoinComponent {
                     "🟢⤴️⤵️️ старт: %.1f%% / %.1f%% / %d",
                     SettingsManager.getTrendMinDownPercent(),
                     SettingsManager.getTrendMinUpPercent(),
-                    SettingsManager.getTrendAfterMinutes())
+                    SettingsManager.getTrendAfterMinutes()
+                )
             } else {
                 "🔴⤴️⤵️️ стоп!"
             }
@@ -390,7 +473,8 @@ class StrategyTelegram : KoinComponent {
                     SettingsManager.getTazikTakeProfit(),
                     SettingsManager.getTazikApproximationFactor(),
                     SettingsManager.getTazikMinVolume(),
-                    SettingsManager.getTazikOrderLifeTimeSeconds())
+                    SettingsManager.getTazikOrderLifeTimeSeconds()
+                )
             } else {
                 "🔴🛁 стоп!"
             }
@@ -408,7 +492,8 @@ class StrategyTelegram : KoinComponent {
                     SettingsManager.getTazikEndlessApproximationFactor(),
                     SettingsManager.getTazikEndlessMinVolume(),
                     SettingsManager.getTazikEndlessResetIntervalSeconds(),
-                    SettingsManager.getTazikEndlessOrderLifeTimeSeconds())
+                    SettingsManager.getTazikEndlessOrderLifeTimeSeconds()
+                )
             } else {
                 "🔴🛁♾ стоп!"
             }
@@ -416,16 +501,44 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun sendTazikBuy(purchase: PurchaseStock, buyPrice: Double, sellPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
+    fun sendTazikBuy(
+        purchase: PurchaseStock,
+        buyPrice: Double,
+        sellPrice: Double,
+        priceFrom: Double,
+        priceTo: Double,
+        change: Double,
+        tazikUsed: Int,
+        tazikTotal: Int
+    ) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
-            val text = "🛁$%s B%.2f$ -> S%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(locale = Locale.US, purchase.ticker, buyPrice, sellPrice, priceFrom, priceTo, change, tazikUsed, tazikTotal)
+            val text = "🛁$%s B%.2f$ -> S%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
+                locale = Locale.US,
+                purchase.ticker,
+                buyPrice,
+                sellPrice,
+                priceFrom,
+                priceTo,
+                change,
+                tazikUsed,
+                tazikTotal
+            )
             sendMessageToChats(text)
         }
     }
 
     fun sendTazikSpike(purchase: PurchaseStock, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendSpikes()) {
-            val text = "спайк! 🛁$%s B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(locale = Locale.US, purchase.ticker, buyPrice, priceFrom, priceTo, change, tazikUsed, tazikTotal)
+            val text = "спайк! 🛁$%s B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
+                locale = Locale.US,
+                purchase.ticker,
+                buyPrice,
+                priceFrom,
+                priceTo,
+                change,
+                tazikUsed,
+                tazikTotal
+            )
             sendMessageToChats(text)
         }
     }
@@ -469,11 +582,20 @@ class StrategyTelegram : KoinComponent {
     }
 
     fun sendTest() {
-//        val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(InlineKeyboardButton.Url(
-//                text = "SPCE",
-//                url = "https://www.tinkoff.ru/invest/stocks/SPCE/"
+//        val ticker = listOf("SPCE", "AAPL", "ZYNE", "RIG", "HRTX").random()
+//        val data: MutableMap<String, String> = mutableMapOf()
+//        data["method"] = "setTicker"
+//        data["ticker"] = ticker
+//        data["token"] = "daager"
+//
+//        val dataJson = gson.toJson(data)
+//        dataJson.toString()
+//        val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(
+//            InlineKeyboardButton.CallbackData(
+//                text = ticker,
+//                callbackData = dataJson
 //            )
 //        )
-//        sendMessageToChats("12345", deleteAfterSeconds = 5, replyMarkup = replyMarkup)
+//        sendMessageToChats(ticker, deleteAfterSeconds = -1, replyMarkup = replyMarkup)
     }
 }

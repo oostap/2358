@@ -4,6 +4,7 @@ import com.google.gson.JsonObject
 import com.project.ti2358.data.model.dto.Instrument
 import com.project.ti2358.data.model.dto.daager.*
 import com.project.ti2358.data.model.response.Response
+import retrofit2.http.Body
 
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -36,6 +37,12 @@ interface ThirdPartyApi {
 
     @GET
     suspend fun daagerStocks(@Url url: String): Map<String, Instrument>
+
+    @POST
+    suspend fun oostapTelegram(@Url url: String, @Body data: JsonObject): JsonObject
+
+    @GET
+    suspend fun tinkoffPulse(@Url url: String): Response<Map<String, Any>>
 
     @GET
     suspend fun githubVersion(@Url url: String): JsonObject

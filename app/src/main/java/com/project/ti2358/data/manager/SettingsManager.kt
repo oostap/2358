@@ -814,6 +814,12 @@ class SettingsManager {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_trends)
             return preferences.getBoolean(key, true)
         }
+
+        fun getTelegramSendGotoTerminal(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_goto_terminal)
+            return preferences.getBoolean(key, true)
+        }
+
         /******************** 2225 short *************************/
 
         fun get2225ChangePercent(): Double {
@@ -949,6 +955,16 @@ class SettingsManager {
         fun getTrendLove(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_trend_only_love)
             return preferences.getBoolean(key, false)
+        }
+
+        fun getTrendLong(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_trend_long)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getTrendShort(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_trend_short)
+            return preferences.getBoolean(key, true)
         }
 
         fun getTrendVoice(): Boolean {

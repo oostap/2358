@@ -19,7 +19,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.2358"
         android:largeHeap="true"
-        android:hardwareAccelerated="true">
+        android:hardwareAccelerated="true"
+        android:usesCleartextTraffic="true">
 
         <service
             android:name=".service.Strategy2358Service"

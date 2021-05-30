@@ -152,25 +152,32 @@ class StrategyTrend : KoinComponent {
             fromLowToNowCandles.last().time.time
         )
 
-        if (changeFromStart > 0) {
-            val last = trendDownStocks.find { it.stock.ticker == stock.ticker }
-            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 4) return }
+        stock.resetTrendPrice()
+
+        var fire = false
+        if (changeFromStart > 0 && SettingsManager.getTrendShort()) {
+//            val last = trendDownStocks.find { it.stock.ticker == stock.ticker }
+//            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return }
 
             trendDownStocks.add(0, trendStock)
-        } else {
-            val last = trendUpStocks.find { it.stock.ticker == stock.ticker }
-            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 4) return}
+            fire = true
+        }
+
+        if (changeFromStart < 0 && SettingsManager.getTrendLong()) {
+//            val last = trendUpStocks.find { it.stock.ticker == stock.ticker }
+//            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return }
 
             trendUpStocks.add(0, trendStock)
+            fire = true
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
-            strategySpeaker.speakTrend(trendStock)
-            strategyTelegram.sendTrend(trendStock)
-            createTrend(trendStock)
+        if (fire) {
+            GlobalScope.launch(Dispatchers.Main) {
+                strategySpeaker.speakTrend(trendStock)
+                strategyTelegram.sendTrend(trendStock)
+                createTrend(trendStock)
+            }
         }
-
-        stock.resetTrendPrice()
     }
 
     private fun createTrend(trendStock: TrendStock) {

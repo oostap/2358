@@ -103,6 +103,9 @@ dependencies {
     // telega
     implementation 'io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:6.0.3'
 
-    // ta
+    // techanal
     implementation 'com.icechao.klinelib:klinelib:2.0.5'
+
+    // chat
+    implementation 'com.github.bassaer:chatmessageview:2.0.1'
 }

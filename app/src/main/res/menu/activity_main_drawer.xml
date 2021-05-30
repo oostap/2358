@@ -103,6 +103,12 @@
     <group
         android:checkableBehavior="single"
         android:id="@+id/group4">
+
+        <item
+            android:id="@+id/nav_chat"
+            android:icon="@drawable/ic_hammer"
+            android:title="@string/menu_chat" />
+
         <item
             android:id="@+id/nav_diagnostics"
             android:icon="@drawable/ic_diagnostics"
@@ -112,6 +118,6 @@
             android:id="@+id/nav_donate"
             android:icon="@drawable/ic_donate"
             android:title="@string/menu_donate" />
-
     </group>
+
 </menu>

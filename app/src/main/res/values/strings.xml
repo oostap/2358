@@ -14,7 +14,7 @@
     <string name="restart">Рестарт</string>
     <string name="title_hour_1">1 час</string>
     <string name="title_hour_2">2 часа</string>
-    <string name="active_account">Счёт:</string>
+    <string name="active_account">Счёт: ✏️</string>
     <string name="accounts">Счета</string>
 
     <string name="sell_bid">продать в\nлучший бид</string>
@@ -85,6 +85,7 @@
     <string name="menu_tazik_endless">Бесконечный таз</string>
     <string name="menu_telegram">Телеграм бот</string>
     <string name="menu_trends">Тренды</string>
+    <string name="menu_chat">Что купить?</string>
 
     <string name="reports">ОТЧЁТЫ</string>
     <string name="dividends">ДИВЫ</string>
@@ -231,6 +232,7 @@
     <string name="stocks_telegram_send_taziks">Тазики</string>
     <string name="stocks_telegram_send_spikes">Спайки</string>
     <string name="stocks_telegram_send_trends">Тренды</string>
+    <string name="stocks_telegram_send_goto_terminal">Кнопки перехода в терминал</string>
 
     <!-- follower settings -->
     <string name="stocks_follower_pastuh_id">Айди торговцев через пробел</string>
@@ -252,6 +254,8 @@
     <string name="stocks_trend_change_min_up_change_percent">Подъём с лоя от % со старта в %</string>
     <string name="stocks_trend_after_minutes">Сигналы спустя время в мин</string>
     <string name="stocks_trend_only_love">Только избранные</string>
+    <string name="stocks_trend_long">Отскоки вверх</string>
+    <string name="stocks_trend_short">Отскоки вниз</string>
     <string name="stocks_trend_voice">Озвучка трендов</string>
 
     <string name="position_line">position_line</string>
@@ -386,6 +390,7 @@
     <string name="setting_key_telegram_send_taziks">telegram_send_taziks</string>
     <string name="setting_key_telegram_send_spikes">telegram_send_spikes</string>
     <string name="setting_key_telegram_send_trends">telegram_send_trends</string>
+    <string name="setting_key_telegram_send_goto_terminal">telegram_send_goto_terminal</string>
 
     <!-- follower settings -->
     <string name="setting_key_follower_pastuh_id">follower_pastuh_id</string>
@@ -407,6 +412,8 @@
     <string name="setting_key_trend_change_min_up_change_percent">trend_change_min_up_change_percent</string>
     <string name="setting_key_trend_after_minutes">trend_after_minutes</string>
     <string name="setting_key_trend_only_love">trend_only_love</string>
+    <string name="setting_key_trend_long">trend_long</string>
+    <string name="setting_key_trend_short">trend_short</string>
     <string name="setting_key_trend_voice">trend_voice</string>
 
 </resources>

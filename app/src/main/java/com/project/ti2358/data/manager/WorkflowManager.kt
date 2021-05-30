@@ -1,5 +1,6 @@
 package com.project.ti2358.data.manager
 
+import com.google.gson.GsonBuilder
 import com.project.ti2358.BuildConfig
 import com.project.ti2358.data.service.*
 import okhttp3.OkHttpClient
@@ -10,6 +11,7 @@ import org.koin.core.component.inject
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+
 
 @KoinApiExtension
 class WorkflowManager() : KoinComponent {
