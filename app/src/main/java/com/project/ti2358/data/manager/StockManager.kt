@@ -7,10 +7,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.project.ti2358.TheApplication
-import com.project.ti2358.data.model.dto.Candle
-import com.project.ti2358.data.model.dto.Interval
-import com.project.ti2358.data.model.dto.Instrument
-import com.project.ti2358.data.model.dto.OrderbookStream
+import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.daager.*
 import com.project.ti2358.data.service.MarketService
 import com.project.ti2358.data.service.StreamingAlorService
@@ -293,9 +290,13 @@ class StockManager : KoinComponent {
             stocksStream = synchronizedList(stocksAll.filter { SettingsManager.isAllowCurrency(it.instrument.currency) }.toMutableList())
         }
 
-        var mins = stocksStream.map { it.instrument.minPriceIncrement }
+        val stock = getStockByTicker("PHOR")
+        log("PHOR PRICE = ${Utils.makeNicePrice(4666.48, stock)}")
+
+        val list = stocksAll.filter { it.instrument.currency == Currency.RUB }
+        var mins = list.map { it.instrument.minPriceIncrement }
         mins = mins.distinct()
-        log("MIN PRICE = $mins")
+        log("MIN PRICE = ${mins}")
 
         strategyLove.process(stocksStream)
         strategyBlacklist.process(stocksStream)

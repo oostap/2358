@@ -152,8 +152,16 @@ class StrategyTelegram : KoinComponent {
                     update.callbackQuery?.let {
                         GlobalScope.launch(Dispatchers.Default) {
                             try {
-                                val json = gson.fromJson(it.data, JsonObject::class.java)
-                                val text = thirdPartyService.oostapTelegram(json)
+                                val json: JsonObject = gson.fromJson(it.data, JsonObject::class.java)
+
+                                val newJson: JsonObject = JsonObject()
+                                newJson.addProperty("method", json["m"].asString)
+                                newJson.addProperty("token", json["tkn"].asString)
+                                newJson.addProperty("ticker", json["t"].asString)
+
+                                log("data = ${newJson}")
+//                                json.addProperty("user_id", it.from.id)
+                                val text = thirdPartyService.oostapTelegram(newJson)
                                 sendMessageToChats(gson.toJson(text), 60)
                             } catch (e: java.lang.Exception) {
                                 sendMessageToChats(e.message ?: "", 60)
@@ -230,7 +238,7 @@ class StrategyTelegram : KoinComponent {
 
         sendMessageToChats(SettingsManager.getTelegramHello(), deleteAfterSeconds = 10)
 
-        sendTest()
+//        sendTest()
     }
 
     fun stopStrategy() {
@@ -559,35 +567,41 @@ class StrategyTelegram : KoinComponent {
     }
 
     fun getButtonsMarkup(stock: Stock): ReplyMarkup? {
-        if (!SettingsManager.getTelegramSendGotoTerminal()) return null
-
-        val ticker = stock.ticker
-        val data: MutableMap<String, String> = mutableMapOf()
-        data["method"] = "setTicker"
-        data["ticker"] = ticker
-        data["token"] = SettingsManager.getToken2358()
-
-        val dataJson = gson.toJson(data)
-        val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(
-            InlineKeyboardButton.CallbackData(
-                text = ticker,
-                callbackData = dataJson
-            )
-        )
-        return replyMarkup
+        return null
+//        if (!SettingsManager.getTelegramSendGotoTerminal()) return null
+//
+//        val ticker = stock.ticker
+//        val data: MutableMap<String, String> = mutableMapOf()
+//        data["method"] = "setTicker"
+//        data["ticker"] = ticker
+//        data["token"] = SettingsManager.getToken2358()
+//
+//        val dataJson = gson.toJson(data)
+//        val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(
+//            InlineKeyboardButton.CallbackData(
+//                text = ticker,
+//                callbackData = dataJson
+//            )
+//        )
+//        return replyMarkup
     }
 
     fun sendTest() {
-        val ticker = stockManager.stocksStream.random().ticker
-        val data: MutableMap<String, String> = mutableMapOf()
-        data["method"] = "setTicker"
-        data["ticker"] = ticker
-        data["token"] = SettingsManager.getToken2358()
+        GlobalScope.launch(Dispatchers.Default) {
+            delay(1000)
+            val ticker = stockManager.stocksStream.random().ticker
+            val data: MutableMap<String, String> = mutableMapOf()
+            data["m"] = "setTicker"
+            data["t"] = ticker
+            data["tkn"] = SettingsManager.getToken2358()
 
-        val dataJson = gson.toJson(data)
-        val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(
-            InlineKeyboardButton.CallbackData(text = ticker, callbackData = dataJson))
+            val dataJson = gson.toJson(data)
+            log("data = ${dataJson} = ${dataJson.length}")
+            val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(
+                InlineKeyboardButton.CallbackData(text = ticker, callbackData = dataJson)
+            )
 
-        sendMessageToChats(ticker, deleteAfterSeconds = -1, replyMarkup = replyMarkup)
+            sendMessageToChats(ticker, deleteAfterSeconds = -1, replyMarkup = replyMarkup)
+        }
     }
 }

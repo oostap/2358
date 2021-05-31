@@ -9,10 +9,7 @@ import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.data.service.PortfolioService
 import com.project.ti2358.service.Utils
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -211,7 +208,7 @@ class DepositManager : KoinComponent {
         return orders.filter { it.figi == figi && it.operation == operation }
     }
 
-    private fun baseSortPortfolio() {
+    private suspend fun baseSortPortfolio() = withContext(StockManager.stockContext) {
         portfolioPositions.forEach { it.stock = stocksManager.getStockByFigi(it.figi) }
 
         portfolioPositions.sortByDescending {

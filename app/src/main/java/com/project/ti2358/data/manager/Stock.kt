@@ -306,7 +306,7 @@ data class Stock(var instrument: Instrument) {
         if (instrument.currency == Currency.USD) {
             return closePrices?.os ?: 0.0
         } else {
-            return getPriceNow()
+            return getPrice1000() * instrument.lot
         }
     }
 
@@ -334,10 +334,8 @@ data class Stock(var instrument: Instrument) {
     }
 
     fun updateChange2300() {
-        closePrices?.let {
-            changePrice2300DayAbsolute = getPriceNow() - it.os
-            changePrice2300DayPercent = (100 * getPriceNow()) / it.os - 100
-        }
+        changePrice2300DayAbsolute = getPriceNow() - getPrice2300()
+        changePrice2300DayPercent = (100.0 * getPriceNow()) / getPrice2300() - 100.0
     }
 
     private fun updateChangeFixPrice() {

@@ -91,7 +91,7 @@ class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
     }
 
     fun updateInfoText() {
-        val percent = if (strategyTazik.started) strategyTazik.basicPercentLimitPriceChange else SettingsManager.getTazikChangePercent()
+        val percent = "%.2f".format(if (strategyTazik.started) strategyTazik.basicPercentLimitPriceChange else SettingsManager.getTazikChangePercent())
         val volume = SettingsManager.getTazikPurchaseVolume().toDouble()
         val p = SettingsManager.getTazikPurchaseParts()
         val parts = "%d по %.2f$".format(p, volume / p)

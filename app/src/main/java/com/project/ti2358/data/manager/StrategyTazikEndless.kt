@@ -403,7 +403,7 @@ class StrategyTazikEndless : KoinComponent {
         val percent = abs(purchase.percentLimitPriceChange) + delta
 
         // вычислияем финальную цену лимитки
-        val buyPrice = purchase.tazikEndlessPrice - abs(purchase.tazikEndlessPrice / 100.0 * percent)
+        var buyPrice = purchase.tazikEndlessPrice - abs(purchase.tazikEndlessPrice / 100.0 * percent)
 
         // защита от спайков - сколько минут цена была выше цены покупки, начиная с предыдущей
         var minutes = SettingsManager.getTazikEndlessSpikeProtection()
@@ -430,9 +430,15 @@ class StrategyTazikEndless : KoinComponent {
         }
 
         // проверка на цену закрытия (выше не тарить)
-        if (SettingsManager.getTazikEndlessClosePriceProtection() && stock.instrument.currency == Currency.USD) {
-            if (buyPrice >= stock.getPrice2300()) {
-                return
+        if (SettingsManager.getTazikEndlessClosePriceProtection()) {
+            if (stock.instrument.currency == Currency.USD) {
+                if (buyPrice >= stock.getPrice2300()) {
+                    return
+                }
+            } else {
+                if (buyPrice >= stock.getPrice1000()) {
+                    return
+                }
             }
         }
 
@@ -444,6 +450,7 @@ class StrategyTazikEndless : KoinComponent {
             finalProfit = 0.0
         }
 
+        buyPrice = Utils.makeNicePrice(buyPrice, stock)
         val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikEndlessOrderLifeTimeSeconds())
         if (job != null) {
             stocksTickerInProcess[stock.ticker] = job

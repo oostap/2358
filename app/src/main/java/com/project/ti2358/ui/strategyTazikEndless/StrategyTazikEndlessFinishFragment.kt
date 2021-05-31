@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -62,6 +63,14 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
 
         updateInfoText()
         updateServiceButtonText()
+        updateTitle()
+    }
+
+    private fun updateTitle() {
+        if (isAdded) {
+            val act = requireActivity() as AppCompatActivity
+            act.supportActionBar?.title = "Бесконечный таз (${positions.size} шт.)"
+        }
     }
 
     fun tryStartTazik() {
@@ -83,7 +92,7 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
     }
 
     fun updateInfoText() {
-        val percent = if (strategyTazikEndless.started) strategyTazikEndless.basicPercentLimitPriceChange else SettingsManager.getTazikEndlessChangePercent()
+        val percent = "%.2f".format(if (strategyTazikEndless.started) strategyTazikEndless.basicPercentLimitPriceChange else SettingsManager.getTazikEndlessChangePercent())
         val volume = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
         val p = SettingsManager.getTazikEndlessPurchaseParts()
         val parts = "%d по %.2f$".format(p, volume / p)
