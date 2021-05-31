@@ -370,9 +370,16 @@ class Utils {
             return builder.build()
         }
 
-        fun makeNicePrice(price: Double): Double {
+        fun makeNicePrice(price: Double, stock: Stock?): Double {
             if (price.isNaN()) return 0.0
-            return (price * 100.0).roundToInt() / 100.0
+
+            if (stock == null || stock.instrument.minPriceIncrement == 0.01) {
+                return (price * 100.0).roundToInt() / 100.0
+            }
+
+            val minIncrement = stock.instrument.minPriceIncrement
+            val mult = (price / minIncrement).roundToInt()
+            return mult * minIncrement
         }
 
         fun getTimezoneCurrent(): String {

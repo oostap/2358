@@ -77,7 +77,7 @@ class StrategyTelegramService : Service() {
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Телеграм бот запущено", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Телеграм бот запущен!", Toast.LENGTH_LONG).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
@@ -98,7 +98,7 @@ class StrategyTelegramService : Service() {
     }
 
     private fun stopService() {
-        Toast.makeText(this, "Телеграм бот остановлен", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Телеграм бот остановлен!", Toast.LENGTH_SHORT).show()
         try {
             wakeLock?.let {
                 if (it.isHeld) {

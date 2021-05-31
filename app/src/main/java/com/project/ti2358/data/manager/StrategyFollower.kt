@@ -109,7 +109,7 @@ class StrategyFollower : KoinComponent {
                 val buyOrders = depositManager.getOrderAllOrdersForFigi(figi, operationType)
                 buyOrders.forEach { order ->
                     val newIntPrice = ((order.price + change) * 100).roundToInt()
-                    val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0)
+                    val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, order.stock)
                     orderbookManager.replaceOrder(order, newPrice, operationType)
                 }
             }

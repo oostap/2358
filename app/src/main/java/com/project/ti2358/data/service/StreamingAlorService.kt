@@ -275,7 +275,7 @@ class StreamingAlorService : KoinComponent {
 
     fun unsubscribeOrderBookEventsStream(stock: Stock, depth: Int) {
         log("StreamingAlorService :: unsubscribe from order book events: ticker: ${stock.ticker}, depth: $depth")
-        val cancel = CancelEventBody(SettingsManager.getActiveTokenAlor(), "unsubscribe", "${stock.ticker}_orderbook")
+        val cancel = CancelEventBody(SettingsManager.getTokenALOR(), "unsubscribe", "${stock.ticker}_orderbook")
         webSocket?.send(Gson().toJson(cancel))
         activeOrderSubscriptions.remove(stock)
     }
@@ -342,7 +342,7 @@ class StreamingAlorService : KoinComponent {
     public fun unsubscribeCandleEventsStream(stock: Stock, interval: Interval) {
         log("StreamingAlorService :: unsubscribe from candle events: ticker: ${stock.ticker}, interval: $interval")
         val timeName = Utils.convertIntervalToString(interval)
-        val cancel = CancelEventBody(SettingsManager.getActiveTokenAlor(), "unsubscribe", "${stock.ticker}_$timeName")
+        val cancel = CancelEventBody(SettingsManager.getTokenALOR(), "unsubscribe", "${stock.ticker}_$timeName")
         webSocket?.send(Gson().toJson(cancel))
         activeCandleSubscriptions[stock]?.remove(interval)
     }

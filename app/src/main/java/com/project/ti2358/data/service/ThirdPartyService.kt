@@ -8,14 +8,13 @@ import com.project.ti2358.service.log
 import org.koin.core.component.KoinApiExtension
 import retrofit2.Retrofit
 import retrofit2.http.Url
-import java.lang.Exception
 
 class ThirdPartyService(retrofit: Retrofit) {
     private val thirdPartyApi: ThirdPartyApi = retrofit.create(ThirdPartyApi::class.java)
 
     @KoinApiExtension
     suspend fun alorRefreshToken(@Url url: String): String {
-        val urlToken = url + "?token=${SettingsManager.getActiveTokenAlor()}"
+        val urlToken = url + "?token=${SettingsManager.getTokenALOR()}"
         val json = thirdPartyApi.alorRefreshToken(urlToken)
         return json["AccessToken"].toString().replace("\"", "")
     }

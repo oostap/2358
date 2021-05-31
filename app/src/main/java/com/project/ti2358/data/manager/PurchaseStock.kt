@@ -89,7 +89,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
 
     fun getLimitPriceDouble(): Double {
         val buyPrice = fixedPrice + absoluteLimitPriceChange
-        return Utils.makeNicePrice(buyPrice)
+        return Utils.makeNicePrice(buyPrice, stock)
     }
 
     fun addLots(lot: Int) {
@@ -111,7 +111,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
     fun updateAbsolutePrice() {
         fixedPrice = stock.getPriceNow()
         absoluteLimitPriceChange = fixedPrice / 100 * percentLimitPriceChange
-        absoluteLimitPriceChange = Utils.makeNicePrice(absoluteLimitPriceChange)
+        absoluteLimitPriceChange = Utils.makeNicePrice(absoluteLimitPriceChange, stock)
     }
 
     fun addPriceProfit2358Percent(change: Double) {
@@ -127,7 +127,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
     fun buyMarket(price: Double): Job? {
         if (lots == 0) return null
 
-        val sellPrice = Utils.makeNicePrice(price)
+        val sellPrice = Utils.makeNicePrice(price, stock)
 
         return GlobalScope.launch(Dispatchers.Main) {
             try {
@@ -203,10 +203,10 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
 
     fun buyLimitFromBid(price: Double, profit: Double, counter: Int, orderLifeTimeSeconds: Int): Job? {
         if (lots > 999999999 || lots == 0 || price == 0.0) return null
-        val buyPrice = Utils.makeNicePrice(price)
+        val buyPrice = Utils.makeNicePrice(price, stock)
 
         var profitPrice = buyPrice + buyPrice / 100.0 * profit
-        profitPrice = Utils.makeNicePrice(profitPrice)
+        profitPrice = Utils.makeNicePrice(profitPrice, stock)
 
         val p = depositManager.getPositionForFigi(figi)
 
@@ -456,7 +456,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
 
                         while (true) {
                             try {
-                                profitSellPrice = Utils.makeNicePrice(profitSellPrice)
+                                profitSellPrice = Utils.makeNicePrice(profitSellPrice, stock)
                                 sellLimitOrder = ordersService.placeLimitOrder(
                                     lots,
                                     figi,
@@ -477,7 +477,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                         val profit = SettingsManager.get1728TakeProfit()
                         if (profit == 0.0 || buyPrice == 0.0) return@launch
                         var profitPrice = buyPrice + buyPrice / 100.0 * profit
-                        profitPrice = Utils.makeNicePrice(profitPrice)
+                        profitPrice = Utils.makeNicePrice(profitPrice, stock)
 
                         // выставить ордер на продажу
                         while (true) {
@@ -593,7 +593,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                         if (profitSellPrice == 0.0) return@launch
 
                         try {
-                            profitSellPrice = Utils.makeNicePrice(profitSellPrice)
+                            profitSellPrice = Utils.makeNicePrice(profitSellPrice, stock)
                             sellLimitOrder = ordersService.placeLimitOrder(
                                 lots,
                                 figi,
@@ -670,7 +670,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
 
                             // вычисляем и округляем до 2 после запятой
                             var profitPrice = buyPrice + buyPrice / 100.0 * profit
-                            profitPrice = Utils.makeNicePrice(profitPrice)
+                            profitPrice = Utils.makeNicePrice(profitPrice, stock)
 
                             if (lotsStep <= 0 || profitPrice == 0.0) continue
 
@@ -838,7 +838,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
 
                 val orderbook = marketService.orderbook(figi, 5)
                 val bestBid = orderbook.getBestPriceFromBid(lots)
-                val profitSellPrice = Utils.makeNicePrice(bestBid)
+                val profitSellPrice = Utils.makeNicePrice(bestBid, stock)
 
                 try { // выставить ордер на продажу
                     sellLimitOrder = ordersService.placeLimitOrder(
@@ -879,7 +879,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
 
                 val orderbook = marketService.orderbook(figi, 10)
                 val bestAsk = orderbook.getBestPriceFromAsk(lots)
-                val profitSellPrice = Utils.makeNicePrice(bestAsk)
+                val profitSellPrice = Utils.makeNicePrice(bestAsk, stock)
 
                 try { // выставить ордер на продажу
                     sellLimitOrder = ordersService.placeLimitOrder(
@@ -929,7 +929,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                     status = PurchaseStatus.ORDER_SELL_PREPARE
                     if (profitSellPrice == 0.0) return@launch
 
-                    profitSellPrice = Utils.makeNicePrice(profitSellPrice)
+                    profitSellPrice = Utils.makeNicePrice(profitSellPrice, stock)
                     try { // выставить ордер на продажу
                         sellLimitOrder = ordersService.placeLimitOrder(
                             lots,
@@ -955,12 +955,12 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
         position?.let { // если есть поза, берём среднюю
             val avg = it.getAveragePrice()
             val priceProfit = avg + avg / 100.0 * percentProfitSellFrom
-            return Utils.makeNicePrice(priceProfit)
+            return Utils.makeNicePrice(priceProfit, stock)
         }
 
         // иначе берём текущую цену бумаги
         val priceProfit = stock.getPriceNow() + stock.getPriceNow() / 100.0 * percentProfitSellFrom
-        return Utils.makeNicePrice(priceProfit)
+        return Utils.makeNicePrice(priceProfit, stock)
     }
 
     fun processInitialProfit() {
@@ -1132,7 +1132,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
 
                             // вычисляем и округляем до 2 после запятой
                             var profitPrice = sellPrice - sellPrice / 100.0 * profit
-                            profitPrice = Utils.makeNicePrice(profitPrice)
+                            profitPrice = Utils.makeNicePrice(profitPrice, stock)
 
                             if (lotsStep <= 0 || profitPrice == 0.0) continue
 

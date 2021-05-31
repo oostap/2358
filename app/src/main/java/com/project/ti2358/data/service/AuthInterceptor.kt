@@ -27,7 +27,7 @@ class AuthInterceptor() : Interceptor {
             return chain.proceed(
                 chain.request().newBuilder().addHeader(
                     AUTHORIZATION_HEADER,
-                    BEARER_PREFIX + SettingsManager.getActiveTokenTinkoff()
+                    BEARER_PREFIX + SettingsManager.getTokenTinkoff()
                 ).build()
             )
         }

@@ -119,7 +119,7 @@ class WorkflowManager() : KoinComponent {
             fun provideRetrofit(): Retrofit {
                 var level = HttpLoggingInterceptor.Level.NONE
                 if (BuildConfig.DEBUG) {
-                    level = HttpLoggingInterceptor.Level.BASIC
+                    level = HttpLoggingInterceptor.Level.BODY// BASIC
                 }
 
                 val httpClient = OkHttpClient.Builder()

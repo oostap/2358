@@ -269,7 +269,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             val buyOrders = depositManager.getOrderAllOrdersForFigi(it.figi, operationType)
             buyOrders.forEach { order ->
                 val newIntPrice = (order.price * 100).roundToInt() + delta
-                val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0)
+                val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, order.stock)
                 orderbookManager.replaceOrder(order, newPrice, operationType)
             }
         }
@@ -322,7 +322,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         alert.setIcon(R.drawable.ic_hammer).setTitle(title).setView(layout).setPositiveButton("ок",
             DialogInterface.OnClickListener { dialog, whichButton ->
                 try {
-                    val price = Utils.makeNicePrice(priceBox.text.toString().toDouble())
+                    val price = Utils.makeNicePrice(priceBox.text.toString().toDouble(), orderbookLine.stock)
                     val lots = lotsBox.text.toString().toInt()
                     orderbookManager.createOrder(orderbookLine.stock, price, lots, operationType)
                 } catch (e: Exception) {

@@ -136,10 +136,8 @@ class StrategyTazik : KoinComponent {
                     }
                 }
 
-                if (stock.instrument.currency == Currency.RUB) {
-                    onePiece *= Utils.getUSDRUB()
-                }
-                lots = (onePiece / (stock.getPriceNow() * stock.instrument.lot)).roundToInt()
+                val total = if (it.instrument.currency == Currency.RUB) onePiece * Utils.getUSDRUB() else onePiece
+                lots = (total / (stock.getPriceNow() * stock.instrument.lot)).roundToInt()
                 updateAbsolutePrice()
                 status = PurchaseStatus.WAITING
             }
@@ -489,13 +487,13 @@ class StrategyTazik : KoinComponent {
         val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikOrderLifeTimeSeconds())
         if (job != null) {
             stocksTickerInProcess[stock.ticker] = job
+
+            var sellPrice = buyPrice + buyPrice / 100.0 * finalProfit
+            sellPrice = Utils.makeNicePrice(sellPrice, stock)
+
+            strategySpeaker.speakTazik(purchase, change)
+            strategyTelegram.sendTazikBuy(purchase, buyPrice, sellPrice, purchase.tazikPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
+            purchase.tazikPrice = candle.closingPrice
         }
-
-        var sellPrice = buyPrice + buyPrice / 100.0 * finalProfit
-        sellPrice = Utils.makeNicePrice(sellPrice)
-
-        strategySpeaker.speakTazik(purchase, change)
-        strategyTelegram.sendTazikBuy(purchase, buyPrice, sellPrice, purchase.tazikPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
-        purchase.tazikPrice = candle.closingPrice
     }
 }

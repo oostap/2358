@@ -116,7 +116,7 @@ class StrategyTazikEndless : KoinComponent {
     fun getPurchaseStock(): MutableList<PurchaseStock> = runBlocking(StockManager.stockContext) {
         val percent = SettingsManager.getTazikEndlessChangePercent()
         val totalMoney: Double = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
-        var onePiece: Double = totalMoney / SettingsManager.getTazikEndlessPurchaseParts()
+        val onePiece: Double = totalMoney / SettingsManager.getTazikEndlessPurchaseParts()
 
         val purchases: MutableList<PurchaseStock> = mutableListOf()
         for (stock in stocksSelected) {
@@ -137,18 +137,17 @@ class StrategyTazikEndless : KoinComponent {
                 it.percentLimitPriceChange = percent
             }
 
-            if (it.stock.instrument.currency == Currency.RUB) {
-                onePiece *= Utils.getUSDRUB()
-            }
+            val total = if (it.stock.instrument.currency == Currency.RUB) onePiece * Utils.getUSDRUB() else onePiece
+
             if (it.stock.getPriceNow() != 0.0) {
-                it.lots = (onePiece / (it.stock.getPriceNow() * it.stock.instrument.lot)).roundToInt()
+                it.lots = (total / it.stock.getPriceNow()).roundToInt()
             }
             it.updateAbsolutePrice()
             it.status = PurchaseStatus.WAITING
         }
 
         // удалить все бумаги, у которых 0 лотов = не хватает на покупку одной части
-        stocksToPurchase.removeAll { it.lots == 0 }
+        stocksToPurchase.removeAll { it.lots == 0 || it.lots > 99999999 }
 
         // удалить все бумаги, у которых недавно или скоро отчёты
         if (SettingsManager.getTazikEndlessExcludeReports()) {
@@ -431,7 +430,7 @@ class StrategyTazikEndless : KoinComponent {
         }
 
         // проверка на цену закрытия (выше не тарить)
-        if (SettingsManager.getTazikEndlessClosePriceProtection()) {
+        if (SettingsManager.getTazikEndlessClosePriceProtection() && stock.instrument.currency == Currency.USD) {
             if (buyPrice >= stock.getPrice2300()) {
                 return
             }
@@ -448,12 +447,13 @@ class StrategyTazikEndless : KoinComponent {
         val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikEndlessOrderLifeTimeSeconds())
         if (job != null) {
             stocksTickerInProcess[stock.ticker] = job
-        }
-        var sellPrice = buyPrice + buyPrice / 100.0 * finalProfit
-        sellPrice = Utils.makeNicePrice(sellPrice)
 
-        strategySpeaker.speakTazik(purchase, change)
-        strategyTelegram.sendTazikBuy(purchase, buyPrice, sellPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
-        purchase.tazikEndlessPrice = candle.closingPrice
+            var sellPrice = buyPrice + buyPrice / 100.0 * finalProfit
+            sellPrice = Utils.makeNicePrice(sellPrice, stock)
+
+            strategySpeaker.speakTazik(purchase, change)
+            strategyTelegram.sendTazikBuy(purchase, buyPrice, sellPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
+            purchase.tazikEndlessPrice = candle.closingPrice
+        }
     }
 }

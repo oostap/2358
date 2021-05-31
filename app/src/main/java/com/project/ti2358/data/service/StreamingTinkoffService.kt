@@ -59,7 +59,7 @@ class StreamingTinkoffService {
             .url(STREAMING_URL)
             .addHeader(
                 AuthInterceptor.AUTHORIZATION_HEADER,
-                AuthInterceptor.BEARER_PREFIX + SettingsManager.getActiveTokenTinkoff()
+                AuthInterceptor.BEARER_PREFIX + SettingsManager.getTokenTinkoff()
             )
             .build()
         webSocket?.close(1002, null)

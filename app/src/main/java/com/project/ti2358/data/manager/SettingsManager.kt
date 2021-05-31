@@ -26,10 +26,10 @@ class SettingsManager {
             return preferences.getBoolean(key, false)
         }
 
-        fun getActiveTokenTinkoff(): String {
+        fun getTokenTinkoff(): String {
             val tokenKey = TheApplication.application.applicationContext.getString(R.string.setting_key_token_market)
             val token: String? = preferences.getString(tokenKey, "")?.trim()
-            return token ?: "TODO"
+            return token ?: ""
         }
 
         fun getActiveBaseUrlTinkoff(): String = "https://api-invest.tinkoff.ru/openapi/"
@@ -44,12 +44,17 @@ class SettingsManager {
             return preferences.getBoolean(key, false)
         }
 
-        fun getActiveTokenAlor(): String {
+        fun getTokenALOR(): String {
             val tokenKey = TheApplication.application.applicationContext.getString(R.string.setting_key_token_market_alor)
             val token: String? = preferences.getString(tokenKey, "")?.trim()
             return token ?: "TODO"
         }
 
+        fun getToken2358(): String {
+            val tokenKey = TheApplication.application.applicationContext.getString(R.string.setting_key_token_2358)
+            val token: String? = preferences.getString(tokenKey, "")?.trim()
+            return token ?: ""
+        }
 
         fun isAllowCurrency(currency: Currency?): Boolean {
             if (currency == Currency.USD) return true

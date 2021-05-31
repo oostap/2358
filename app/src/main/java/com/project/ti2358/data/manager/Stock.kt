@@ -295,7 +295,7 @@ data class Stock(var instrument: Instrument) {
             }
         }
 
-        return value
+        return value * instrument.lot
     }
 
     fun getPrice0300(): Double {
@@ -303,7 +303,11 @@ data class Stock(var instrument: Instrument) {
     }
 
     fun getPrice2300(): Double {
-        return closePrices?.os ?: 0.0
+        if (instrument.currency == Currency.USD) {
+            return closePrices?.os ?: 0.0
+        } else {
+            return getPriceNow()
+        }
     }
 
     fun getPrice1000(): Double {
@@ -319,10 +323,7 @@ data class Stock(var instrument: Instrument) {
     }
 
     fun getPrice2359String(): String {
-        closePrices?.let {
-            return it.os.toMoney(this)
-        }
-        return "0$"
+        return getPrice2300().toMoney(this)
     }
 
     private fun updateChangeToday() {

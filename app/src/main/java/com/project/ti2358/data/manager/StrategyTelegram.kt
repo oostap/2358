@@ -7,9 +7,9 @@ import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.*
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
+import com.github.kotlintelegrambot.entities.ReplyMarkup
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.network.fold
-import com.github.kotlintelegrambot.webhook
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.project.ti2358.data.model.dto.*
@@ -63,13 +63,7 @@ class StrategyTelegram : KoinComponent {
                     toDate.add(Calendar.HOUR_OF_DAY, -6)
                     val from = convertDateToTinkoffDate(toDate, zone)
 
-                    operations = Collections.synchronizedList(
-                        operationsService.operations(
-                            from,
-                            to,
-                            depositManager.getActiveBrokerAccountId()
-                        ).operations
-                    )
+                    operations = Collections.synchronizedList(operationsService.operations(from, to, depositManager.getActiveBrokerAccountId()).operations)
                     operations.sortBy { it.date }
                     if (operationsPosted.isEmpty()) {
                         operations.forEach {
@@ -95,7 +89,8 @@ class StrategyTelegram : KoinComponent {
                                 continue
                             }
 
-                            sendMessageToChats(operationToString(operation))
+                            val buttons = getButtonsMarkup(operation.stock!!)
+                            sendMessageToChats(operationToString(operation), replyMarkup = buttons)
                         }
                     }
                 } catch (e: Exception) {
@@ -148,16 +143,6 @@ class StrategyTelegram : KoinComponent {
         telegramBot?.stopPolling()
         telegramBot = bot {
             token = SettingsManager.getTelegramBotApiKey()
-
-//            webhook {
-//                url = "https://bot.oost.app:2358/"// "${MyBotConfig.SERVER_HOSTNAME}/${MyBotConfig.API_TOKEN}"
-//                /* This certificate argument is only needed when you want Telegram to trust your
-//                * self-signed certificates. If you have a CA trusted certificate you can omit it.
-//                * More info -> https://core.telegram.org/bots/webhooks */
-////                certificate = TelegramFile.ByFile(File(CertificateUtils.certPath))
-//                maxConnections = 50
-//                allowedUpdates = listOf("callbackQuery")
-//            }
 
             dispatch {
                 inlineQuery {
@@ -242,7 +227,6 @@ class StrategyTelegram : KoinComponent {
             }
         }
         telegramBot?.startPolling()
-//        telegramBot?.startWebhook()
 
         sendMessageToChats(SettingsManager.getTelegramHello(), deleteAfterSeconds = 10)
 
@@ -405,7 +389,8 @@ class StrategyTelegram : KoinComponent {
                 "%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
             }
             val text = "$emoji$${rocketStock.ticker} ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин, v = ${rocketStock.volume}"
-            sendMessageToChats(text, 180)
+            val buttons = getButtonsMarkup(rocketStock.stock)
+            sendMessageToChats(text, 180, replyMarkup = buttons)
         }
     }
 
@@ -426,7 +411,8 @@ class StrategyTelegram : KoinComponent {
                 trendStock.priceLow, trendStock.priceNow, trendStock.changeFromLowToNow,
                 trendStock.timeFromStartToLow, trendStock.timeFromLowToNow
             )
-            sendMessageToChats(text, -1)
+            val buttons = getButtonsMarkup(trendStock.stock)
+            sendMessageToChats(text, -1, replyMarkup = buttons)
         }
     }
 
@@ -501,16 +487,7 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun sendTazikBuy(
-        purchase: PurchaseStock,
-        buyPrice: Double,
-        sellPrice: Double,
-        priceFrom: Double,
-        priceTo: Double,
-        change: Double,
-        tazikUsed: Int,
-        tazikTotal: Int
-    ) {
+    fun sendTazikBuy(purchase: PurchaseStock, buyPrice: Double, sellPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
             val text = "🛁$%s B%.2f$ -> S%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
                 locale = Locale.US,
@@ -543,7 +520,7 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    private fun sendMessageToChats(text: String, deleteAfterSeconds: Int = -1, stop: Boolean = false, replyMarkup: InlineKeyboardMarkup? = null) {
+    private fun sendMessageToChats(text: String, deleteAfterSeconds: Int = -1, stop: Boolean = false, replyMarkup: ReplyMarkup? = null) {
         GlobalScope.launch(Dispatchers.Default) {
             try {
                 val chatIds = SettingsManager.getTelegramChatID()
@@ -581,21 +558,36 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
+    fun getButtonsMarkup(stock: Stock): ReplyMarkup? {
+        if (!SettingsManager.getTelegramSendGotoTerminal()) return null
+
+        val ticker = stock.ticker
+        val data: MutableMap<String, String> = mutableMapOf()
+        data["method"] = "setTicker"
+        data["ticker"] = ticker
+        data["token"] = SettingsManager.getToken2358()
+
+        val dataJson = gson.toJson(data)
+        val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(
+            InlineKeyboardButton.CallbackData(
+                text = ticker,
+                callbackData = dataJson
+            )
+        )
+        return replyMarkup
+    }
+
     fun sendTest() {
-//        val ticker = listOf("SPCE", "AAPL", "ZYNE", "RIG", "HRTX").random()
-//        val data: MutableMap<String, String> = mutableMapOf()
-//        data["method"] = "setTicker"
-//        data["ticker"] = ticker
-//        data["token"] = "daager"
-//
-//        val dataJson = gson.toJson(data)
-//        dataJson.toString()
-//        val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(
-//            InlineKeyboardButton.CallbackData(
-//                text = ticker,
-//                callbackData = dataJson
-//            )
-//        )
-//        sendMessageToChats(ticker, deleteAfterSeconds = -1, replyMarkup = replyMarkup)
+        val ticker = stockManager.stocksStream.random().ticker
+        val data: MutableMap<String, String> = mutableMapOf()
+        data["method"] = "setTicker"
+        data["ticker"] = ticker
+        data["token"] = SettingsManager.getToken2358()
+
+        val dataJson = gson.toJson(data)
+        val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(
+            InlineKeyboardButton.CallbackData(text = ticker, callbackData = dataJson))
+
+        sendMessageToChats(ticker, deleteAfterSeconds = -1, replyMarkup = replyMarkup)
     }
 }

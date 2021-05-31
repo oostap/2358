@@ -292,6 +292,11 @@ class StockManager : KoinComponent {
         } else {
             stocksStream = synchronizedList(stocksAll.filter { SettingsManager.isAllowCurrency(it.instrument.currency) }.toMutableList())
         }
+
+        var mins = stocksStream.map { it.instrument.minPriceIncrement }
+        mins = mins.distinct()
+        log("MIN PRICE = $mins")
+
         strategyLove.process(stocksStream)
         strategyBlacklist.process(stocksStream)
         strategyFixPrice.restartStrategy()
