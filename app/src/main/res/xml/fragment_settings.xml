@@ -22,11 +22,6 @@
             app:title="@string/alor_token_title"
             app:useSimpleSummaryProvider="true" />
 
-        <EditTextPreference
-            app:key="@string/setting_key_token_2358"
-            app:title="@string/token_2358"
-            app:useSimpleSummaryProvider="true" />
-
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/stocks_header">

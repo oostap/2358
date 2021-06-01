@@ -114,7 +114,6 @@
     <string name="alor_token_title">ALOR OpenAPI токен</string>
     <string name="alor_qoutes_title">Котировки ALOR</string>
     <string name="alor_orderbook_title">Стакан ALOR</string>
-    <string name="token_2358">2358 токен от @the2358_bot</string>
 
     <!-- common settings -->
     <string name="stocks_header">Общий фильтр на все экраны</string>
@@ -276,8 +275,6 @@
     <string name="setting_key_token_market_alor">token_market_alor</string>
     <string name="setting_key_alor_quotes">alor_quotes</string>
     <string name="setting_key_alor_orderbook">alor_orderbook</string>
-
-    <string name="setting_key_token_2358">token_2358</string>
 
     <!-- common settings -->
     <string name="setting_key_stocks_usd_price_min">stocks_usd_price_min</string>

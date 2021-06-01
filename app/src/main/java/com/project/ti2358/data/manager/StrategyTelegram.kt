@@ -154,15 +154,15 @@ class StrategyTelegram : KoinComponent {
                             try {
                                 val json: JsonObject = gson.fromJson(it.data, JsonObject::class.java)
 
-                                val newJson: JsonObject = JsonObject()
+                                val newJson = JsonObject()
                                 newJson.addProperty("method", json["m"].asString)
-                                newJson.addProperty("token", json["tkn"].asString)
                                 newJson.addProperty("ticker", json["t"].asString)
+                                newJson.addProperty("uid", it.from.id)
 
                                 log("data = ${newJson}")
-//                                json.addProperty("user_id", it.from.id)
                                 val text = thirdPartyService.oostapTelegram(newJson)
-                                sendMessageToChats(gson.toJson(text), 60)
+
+//                                sendMessageToChats(gson.toJson(text), 60)
                             } catch (e: java.lang.Exception) {
                                 sendMessageToChats(e.message ?: "", 60)
                                 e.printStackTrace()
@@ -508,7 +508,8 @@ class StrategyTelegram : KoinComponent {
                 tazikUsed,
                 tazikTotal
             )
-            sendMessageToChats(text)
+            val buttons = getButtonsMarkup(purchase.stock)
+            sendMessageToChats(text, -1, replyMarkup = buttons)
         }
     }
 
@@ -567,23 +568,21 @@ class StrategyTelegram : KoinComponent {
     }
 
     fun getButtonsMarkup(stock: Stock): ReplyMarkup? {
-        return null
-//        if (!SettingsManager.getTelegramSendGotoTerminal()) return null
-//
-//        val ticker = stock.ticker
-//        val data: MutableMap<String, String> = mutableMapOf()
-//        data["method"] = "setTicker"
-//        data["ticker"] = ticker
-//        data["token"] = SettingsManager.getToken2358()
-//
-//        val dataJson = gson.toJson(data)
-//        val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(
-//            InlineKeyboardButton.CallbackData(
-//                text = ticker,
-//                callbackData = dataJson
-//            )
-//        )
-//        return replyMarkup
+        if (!SettingsManager.getTelegramSendGotoTerminal()) return null
+
+        val ticker = stock.ticker
+        val data: MutableMap<String, String> = mutableMapOf()
+        data["m"] = "setTicker"
+        data["t"] = ticker
+
+        val dataJson = gson.toJson(data)
+        val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(
+            InlineKeyboardButton.CallbackData(
+                text = ticker,
+                callbackData = dataJson
+            )
+        )
+        return replyMarkup
     }
 
     fun sendTest() {
@@ -593,10 +592,8 @@ class StrategyTelegram : KoinComponent {
             val data: MutableMap<String, String> = mutableMapOf()
             data["m"] = "setTicker"
             data["t"] = ticker
-            data["tkn"] = SettingsManager.getToken2358()
 
             val dataJson = gson.toJson(data)
-            log("data = ${dataJson} = ${dataJson.length}")
             val replyMarkup: InlineKeyboardMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(
                 InlineKeyboardButton.CallbackData(text = ticker, callbackData = dataJson)
             )
