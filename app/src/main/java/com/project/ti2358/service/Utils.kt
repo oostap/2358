@@ -378,6 +378,10 @@ class Utils {
             }
 
             val minIncrement = stock.instrument.minPriceIncrement
+
+            if (minIncrement == 0.0) return 0.0
+            if ((price / minIncrement).isNaN()) return 0.0
+
             val mult = (price / minIncrement).roundToInt()
             return mult * minIncrement
         }

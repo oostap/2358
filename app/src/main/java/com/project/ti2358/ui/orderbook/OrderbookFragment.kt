@@ -226,29 +226,31 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     }
 
     private fun updatePosition() {
-        fragmentOrderbookBinding?.apply {
-            activeStock?.let { stock ->
-                positionView.visibility = GONE
-                depositManager.getPositionForFigi(stock.figi)?.let { p ->
-                    val avg = p.getAveragePrice()
-                    priceView.text = "${avg.toMoney(stock)} ➡ ${stock.getPriceString()}"
+        GlobalScope.launch(Dispatchers.Default) {
+            fragmentOrderbookBinding?.apply {
+                activeStock?.let { stock ->
+                    positionView.visibility = GONE
+                    depositManager.getPositionForFigi(stock.figi)?.let { p ->
+                        val avg = p.getAveragePrice()
+                        priceView.text = "${avg.toMoney(stock)} ➡ ${stock.getPriceString()}"
 
-                    val profit = p.getProfitAmount()
-                    priceChangeAbsoluteView.text = profit.toMoney(stock)
+                        val profit = p.getProfitAmount()
+                        priceChangeAbsoluteView.text = profit.toMoney(stock)
 
-                    val percent = p.getProfitPercent() * sign(p.lots.toDouble())   // инвертировать доходность шорта
-                    val totalCash = p.balance * avg + profit
-                    cashView.text = totalCash.toMoney(stock)
+                        val percent = p.getProfitPercent() * sign(p.lots.toDouble())   // инвертировать доходность шорта
+                        val totalCash = p.balance * avg + profit
+                        cashView.text = totalCash.toMoney(stock)
 
-                    lotsView.text = "${p.lots}"
-                    lotsBlockedView.text = "${p.blocked.toInt()}🔒"
+                        lotsView.text = "${p.lots}"
+                        lotsBlockedView.text = "${p.blocked.toInt()}🔒"
 
-                    priceChangePercentView.text = percent.toPercent()
+                        priceChangePercentView.text = percent.toPercent()
 
-                    priceView.setTextColor(Utils.getColorForValue(percent))
-                    priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
-                    priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
-                    positionView.visibility = VISIBLE
+                        priceView.setTextColor(Utils.getColorForValue(percent))
+                        priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
+                        priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
+                        positionView.visibility = VISIBLE
+                    }
                 }
             }
         }

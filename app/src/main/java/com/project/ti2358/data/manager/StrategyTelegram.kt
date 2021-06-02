@@ -160,9 +160,7 @@ class StrategyTelegram : KoinComponent {
                                 newJson.addProperty("uid", it.from.id)
 
                                 log("data = ${newJson}")
-                                val text = thirdPartyService.oostapTelegram(newJson)
-
-//                                sendMessageToChats(gson.toJson(text), 60)
+                                thirdPartyService.oostapTelegram(newJson)
                             } catch (e: java.lang.Exception) {
                                 sendMessageToChats(e.message ?: "", 60)
                                 e.printStackTrace()

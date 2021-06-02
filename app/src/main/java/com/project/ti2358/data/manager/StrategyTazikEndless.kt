@@ -85,14 +85,13 @@ class StrategyTazikEndless : KoinComponent {
         }
     }
 
-    suspend fun resort(): MutableList<Stock> {
-        withContext(StockManager.stockContext) {
-            currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
-            stocks.sortBy {
-                val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-                val multiplier = if (it in stocksSelected) 100 else 1
-                it.changePrice2300DayPercent * sign - multiplier
-            }
+    fun resort(): MutableList<Stock> {
+        currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
+        stocks.sortBy {
+            val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
+            val multiplier = if (it in stocksSelected) 100 else 1
+            val final = it.changePrice2300DayPercent * sign - multiplier
+            if (final.isNaN()) 0.0 else final
         }
         return stocks
     }

@@ -93,7 +93,8 @@ class StrategyTazik : KoinComponent {
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
             val multiplier = if (it in stocksSelected) 100 else 1
-            it.changePrice2300DayPercent * sign - multiplier
+            val final = it.changePrice2300DayPercent * sign - multiplier
+            if (final.isNaN()) 0.0 else final
         }
         return stocks
     }
@@ -277,7 +278,9 @@ class StrategyTazik : KoinComponent {
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
         val dayTime = time.split(":").toTypedArray()
         if (dayTime.size < 3) {
-            Utils.showToastAlert("Неверный формат времени $time")
+            GlobalScope.launch(Dispatchers.Main) {
+                Utils.showToastAlert("Неверный формат времени $time")
+            }
             return@runBlocking
         }
 
@@ -296,7 +299,9 @@ class StrategyTazik : KoinComponent {
             val now = Calendar.getInstance(TimeZone.getDefault())
             val scheduleDelay = it.timeInMillis - now.timeInMillis
             if (scheduleDelay < 0) {
-                Utils.showToastAlert("Ошибка! Отрицательное время!? втф = $scheduleDelay")
+                GlobalScope.launch(Dispatchers.Main) {
+                    Utils.showToastAlert("Ошибка! Отрицательное время!? втф = $scheduleDelay")
+                }
             }
         }
     }
