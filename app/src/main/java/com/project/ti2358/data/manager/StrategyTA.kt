@@ -35,10 +35,16 @@ class StrategyTA : KoinComponent {
                     analyticsAdapter.resetData(candles)
                     val macd = processTurnMACD(it, candles)
                     val volume = processTurnUpVolume(it, candles)
+                    val rsi = processRSI(it, candles)
+
+//                    if (rsi) {
+//                        log("TURN UP RSI ${it.ticker}")
+//                    }
 
                     if (macd && volume) {
                         log("TURN UP ${it.ticker} VOLUME + MACD")
                     }
+
 
                     delay(400)
                 }
@@ -46,6 +52,25 @@ class StrategyTA : KoinComponent {
                 e.printStackTrace()
             }
         }
+    }
+
+    private fun processRSI(stock: Stock, candles: List<Candle>) : Boolean {
+        if (candles.size > 10) {
+            var days = 9
+            for (i in candles.indices.reversed()) {
+                if (candles[i].rsiOne > 75 && stock.short != null) {
+                    log("TURN DOWN RSI ${stock.ticker}")
+                    return true
+                }
+                if (candles[i].rsiOne < 25) {
+                    log("TURN UP RSI ${stock.ticker}")
+                    return true
+                }
+                days--
+                if (days <= 0) break
+            }
+        }
+        return false
     }
 
     private fun processTurnUpVolume(stock: Stock, candles: List<Candle>) : Boolean {

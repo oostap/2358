@@ -226,7 +226,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     }
 
     private fun updatePosition() {
-        GlobalScope.launch(Dispatchers.Default) {
+        GlobalScope.launch(Dispatchers.Main) {
             fragmentOrderbookBinding?.apply {
                 activeStock?.let { stock ->
                     positionView.visibility = GONE

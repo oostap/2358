@@ -388,7 +388,17 @@ class StrategyTelegram : KoinComponent {
 
     fun sendRocket(rocketStock: RocketStock) {
         if (started && SettingsManager.getTelegramSendRockets()) {
-            val emoji = if (rocketStock.changePercent > 0) "🚀" else "☄️"
+            val emoji = when {
+                rocketStock.changePercent >=  7.0 -> "‼️‼️‼️️🚀"
+                rocketStock.changePercent >=  5.0 -> "❗️🚀"
+                rocketStock.changePercent >=  3.0 -> "🚀🚀"
+                rocketStock.changePercent >   0.0 -> "🚀"
+                rocketStock.changePercent <= -7.0 -> "‼️‼️‼️️☄️"
+                rocketStock.changePercent <= -5.0 -> "❗️☄️"
+                rocketStock.changePercent <= -3.0 -> "☄️☄️"
+                rocketStock.changePercent <   0.0 -> "☄️"
+                else -> ""
+            }
             val changePercent = if (rocketStock.changePercent > 0) {
                 "+%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
             } else {
@@ -396,7 +406,7 @@ class StrategyTelegram : KoinComponent {
             }
             val text = "$emoji$${rocketStock.ticker} ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин, v = ${rocketStock.volume}"
             val buttons = getButtonsMarkup(rocketStock.stock)
-            sendMessageToChats(text, 180, replyMarkup = buttons)
+            sendMessageToChats(text, -1, replyMarkup = buttons)
         }
     }
 

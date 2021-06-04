@@ -11,7 +11,6 @@ import android.widget.Toast
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.Strategy2358
 import kotlinx.coroutines.*
-import okhttp3.internal.notify
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.lang.Integer.parseInt
@@ -20,8 +19,11 @@ import java.util.*
 @KoinApiExtension
 class Strategy2358Service : Service() {
 
-    private val NOTIFICATION_ACTION = "event.2358"
+
+
+    private val NOTIFICATION_ACTION_FILTER = "event.2358"
     private val NOTIFICATION_CANCEL_ACTION = "event.2358.cancel"
+    private val NOTIFICATION_ACTION_START = "event.2358.start_now"
     private val NOTIFICATION_CHANNEL_ID = "2358 CHANNEL NOTIFICATION"
     private val NOTIFICATION_ID = 2358
 
@@ -41,7 +43,7 @@ class Strategy2358Service : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val intentFilter = IntentFilter(NOTIFICATION_ACTION)
+        val intentFilter = IntentFilter(NOTIFICATION_ACTION_FILTER)
         notificationButtonReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val type = intent.getStringExtra("type")
@@ -49,6 +51,12 @@ class Strategy2358Service : Service() {
                     if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
                     notificationButtonReceiver = null
                     context.stopService(Intent(context, Strategy2358Service::class.java))
+                }
+
+                if (type == NOTIFICATION_ACTION_START) {
+                    strategy2358.startStrategy()
+                    updateTitle = false
+                    updateNotification()
                 }
             }
         }
@@ -162,13 +170,15 @@ class Strategy2358Service : Service() {
             } else {
                 title = "Покупка через %02d:%02d:%02d".format(hours, minutes, seconds)
             }
+        } else {
+            title = "Покупка!"
         }
 
         val shortText: String = strategy2358.getNotificationTextShort()
         val longText: String = strategy2358.getNotificationTextLong()
         val longTitleText: String = "~" + strategy2358.getTotalPurchaseString() + " ="
 
-        val cancelIntent = Intent(NOTIFICATION_ACTION).apply { putExtra("type", NOTIFICATION_CANCEL_ACTION) }
+        val cancelIntent = Intent(NOTIFICATION_ACTION_FILTER).apply { putExtra("type", NOTIFICATION_CANCEL_ACTION) }
         val pendingCancelIntent = PendingIntent.getBroadcast(this, 1, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         val actionCancel: Notification.Action = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             Notification.Action.Builder(null, "СТОП", pendingCancelIntent).build()
@@ -176,7 +186,15 @@ class Strategy2358Service : Service() {
             Notification.Action.Builder(0, "СТОП", pendingCancelIntent).build()
         }
 
-        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, title, shortText, longText, longTitleText, actionCancel)
+        val startIntent = Intent(NOTIFICATION_ACTION_FILTER).apply { putExtra("type", NOTIFICATION_ACTION_START) }
+        val pendingBuyIntent = PendingIntent.getBroadcast(this, 2, startIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val actionStart: Notification.Action = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            Notification.Action.Builder(null, "СТАРТ СЕЙЧАС", pendingBuyIntent).build()
+        } else {
+            Notification.Action.Builder(0, "СТАРТ СЕЙЧАС", pendingBuyIntent).build()
+        }
+
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, title, shortText, longText, longTitleText, actionCancel, actionStart)
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(NOTIFICATION_ID, notification)
 

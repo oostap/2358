@@ -232,7 +232,7 @@
     <string name="stocks_telegram_send_taziks">Тазики</string>
     <string name="stocks_telegram_send_spikes">Спайки</string>
     <string name="stocks_telegram_send_trends">Тренды</string>
-    <string name="stocks_telegram_send_goto_terminal">Кнопки перехода в терминал</string>
+    <string name="stocks_telegram_send_goto_terminal">Переход в терминал</string>
 
     <!-- follower settings -->
     <string name="stocks_follower_pastuh_id">Айди торговцев через пробел</string>

@@ -18,9 +18,13 @@ import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.OperationType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import java.text.SimpleDateFormat
 import java.util.*
@@ -162,7 +166,9 @@ class Utils {
         }
 
         fun showToastAlert(text: String) {
-            Toast.makeText(TheApplication.application.applicationContext, text, LENGTH_LONG).show()
+            GlobalScope.launch(Dispatchers.Main) {
+                Toast.makeText(TheApplication.application.applicationContext, text, LENGTH_LONG).show()
+            }
         }
 
         fun showMessageAlert(context: Context, text: String) {
