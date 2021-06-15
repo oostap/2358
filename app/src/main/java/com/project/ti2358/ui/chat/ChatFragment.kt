@@ -93,103 +93,17 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         val yourName = "Пульсянин"
         val you = ChatUser(yourId, yourName, yourIcon)
         GlobalScope.launch(Dispatchers.Main) {
-            try {
-                while (true) {
-                    val stock = stockManager.stocksStream.random()
-                    val ticker = stock.ticker
-                    val data = thirdPartyService.tinkoffPulse(ticker)
-                    val items = data["items"] as ArrayList<*>
+            val phrase = stockManager.getPulsePhrase()
 
-                    var count = 10
-                    while (true) {
-                        if (count <= 0) break
-                        count--
+            val receivedMessage: Message = Message.Builder()
+                .setUser(you)
+                .setRight(false)
+                .hideIcon(false)
+                .setText(phrase)
+                .setDateCell(false)
+                .build()
 
-                        val random = kotlin.random.Random.nextInt(0, items.size)
-                        val item = items[random] as LinkedTreeMap<*, *>
-                        val likes = item["likesCount"] as Double
-                        if (likes > 7) {
-                            delay(50)
-                            continue
-                        }
-
-                        val text = item["text"] as String
-                        if (text.length > 700 || text.length < 10) continue
-
-                        val stopWords = listOf(
-                            "www",
-                            "enterprise",
-                            "💼",
-                            "🔴",
-                            "🟢",
-                            "владелец",
-                            "приобретает",
-                            "Отчет",
-                            "Прибыль на акцию",
-                            "Портфель",
-                            "НАСТРОЕНИЕ РЫНКА",
-                            "P/E",
-                            "рекомендаци",
-                            "Целевая цена",
-                            "ДО ОТКРЫТИЯ",
-                            "после закрытия",
-                            "канал",
-                            "чистая прибыль",
-                            "подписывайтесь",
-                            "Подписывайтесь",
-                            "подписывайся",
-                            "отчеты",
-                            "отчёты",
-                            "Отчеты",
-                            "Отчёты",
-                            "ПОДПИСЫВАЙСЯ",
-                            "важнейшие",
-                            "лидеры",
-                            "Фьючерсы",
-                            "аналитик",
-                            "Аналитик",
-                            "\"Держать\"",
-                            "\"Покупать\"",
-                            "купил по",
-                            "сообщает о"
-                        )
-
-                        var contains = false
-                        stopWords.forEach {
-                            if (it in text) {
-                                contains = true
-                                return@forEach
-                            }
-                        }
-                        if (contains) continue
-                        log("text = $text")
-                        log("text size = ${text.length}")
-
-                        val words = text.split(" ", "\n").toMutableList()
-                        val originSize = words.size
-                        words.removeAll { it.startsWith("{") || it.startsWith("$") || it.startsWith("#") || it.startsWith("http") }
-
-                        if (originSize - words.size > 5) continue
-
-                        val final = words.joinToString(" ").trim()
-
-                        if (final.length < 10) continue
-
-                        val receivedMessage: Message = Message.Builder()
-                            .setUser(you)
-                            .setRight(false)
-                            .hideIcon(false)
-                            .setText(final)
-                            .setDateCell(false)
-                            .build()
-
-                        fragmentChatBinding?.chatView?.receive(receivedMessage)
-                        return@launch
-                    }
-                }
-            } catch (e: java.lang.Exception) {
-                e.printStackTrace()
-            }
+            fragmentChatBinding?.chatView?.receive(receivedMessage)
         }
     }
 }

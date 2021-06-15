@@ -85,6 +85,7 @@
     <string name="menu_tazik_endless">Бесконечный таз</string>
     <string name="menu_telegram">Телеграм бот</string>
     <string name="menu_trends">Тренды</string>
+    <string name="menu_limits">Лимиты</string>
     <string name="menu_chat">Что купить?</string>
 
     <string name="reports">ОТЧЁТЫ</string>
@@ -232,6 +233,7 @@
     <string name="stocks_telegram_send_taziks">Тазики</string>
     <string name="stocks_telegram_send_spikes">Спайки</string>
     <string name="stocks_telegram_send_trends">Тренды</string>
+    <string name="stocks_telegram_send_limits">Лимиты</string>
     <string name="stocks_telegram_send_goto_terminal">Переход в терминал</string>
 
     <!-- follower settings -->
@@ -257,6 +259,13 @@
     <string name="stocks_trend_long">Отскоки вверх</string>
     <string name="stocks_trend_short">Отскоки вниз</string>
     <string name="stocks_trend_voice">Озвучка трендов</string>
+
+    <!-- limits settings -->
+    <string name="stocks_limits_change_up">Сигнал на % до лимита сверху</string>
+    <string name="stocks_limits_change_down">Сигнал на % до лимита снизу</string>
+    <string name="stocks_limits_up">Верхние лимиты</string>
+    <string name="stocks_limits_down">Нижние лимиты</string>
+    <string name="stocks_limits_voice">Озвучка лимитов</string>
 
     <string name="position_line">position_line</string>
     <string name="action_type">drag_type</string>
@@ -390,6 +399,7 @@
     <string name="setting_key_telegram_send_taziks">telegram_send_taziks</string>
     <string name="setting_key_telegram_send_spikes">telegram_send_spikes</string>
     <string name="setting_key_telegram_send_trends">telegram_send_trends</string>
+    <string name="setting_key_telegram_send_limits">telegram_send_limits</string>
     <string name="setting_key_telegram_send_goto_terminal">telegram_send_goto_terminal</string>
 
     <!-- follower settings -->
@@ -415,5 +425,12 @@
     <string name="setting_key_trend_long">trend_long</string>
     <string name="setting_key_trend_short">trend_short</string>
     <string name="setting_key_trend_voice">trend_voice</string>
+
+    <!-- limits settings -->
+    <string name="setting_key_limits_change_up">limits_change_up</string>
+    <string name="setting_key_limits_change_down">limits_change_down</string>
+    <string name="setting_key_limits_up">limits_up</string>
+    <string name="setting_key_limits_down">limits_down</string>
+    <string name="setting_key_limits_voice">limits_voice</string>
 
 </resources>

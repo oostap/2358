@@ -534,6 +534,36 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/menu_limits">
+        <EditTextPreference
+            app:key="@string/setting_key_limits_change_up"
+            app:title="@string/stocks_limits_change_up"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="4.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_limits_change_down"
+            app:title="@string/stocks_limits_change_down"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="20"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_limits_up"
+            app:title="@string/stocks_limits_up"
+            app:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_limits_down"
+            app:title="@string/stocks_limits_down"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_limits_voice"
+            app:title="@string/stocks_limits_voice"
+            app:defaultValue="true" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/settings_header_2225">
         <EditTextPreference
             app:key="@string/setting_key_2225_price_change_percent"
@@ -649,6 +679,11 @@
         <SwitchPreferenceCompat
             app:key="@string/setting_key_telegram_send_trends"
             app:title="@string/stocks_telegram_send_trends"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_telegram_send_limits"
+            app:title="@string/stocks_telegram_send_limits"
             app:defaultValue="true" />
 
         <SwitchPreferenceCompat

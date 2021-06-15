@@ -814,6 +814,11 @@ class SettingsManager {
             return preferences.getBoolean(key, true)
         }
 
+        fun getTelegramSendLimits(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_limits)
+            return preferences.getBoolean(key, true)
+        }
+
         fun getTelegramSendGotoTerminal(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_goto_terminal)
             return preferences.getBoolean(key, true)
@@ -968,6 +973,42 @@ class SettingsManager {
 
         fun getTrendVoice(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_trend_voice)
+            return preferences.getBoolean(key, true)
+        }
+
+        /******************** limits *************************/
+        fun getLimitsChangeUp(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_limits_change_up)
+            val value: String? = preferences.getString(key, "2.0")
+            return try {
+                (value ?: "2.0").toDouble()
+            } catch (e: Exception) {
+                2.0
+            }
+        }
+
+        fun getLimitsChangeDown(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_limits_change_down)
+            val value: String? = preferences.getString(key, "2.0")
+            return try {
+                (value ?: "2.0").toDouble()
+            } catch (e: Exception) {
+                2.0
+            }
+        }
+
+        fun getLimitsUp(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_limits_up)
+            return preferences.getBoolean(key, false)
+        }
+
+        fun getLimitsDown(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_limits_down)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getLimitsVoice(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_limits_voice)
             return preferences.getBoolean(key, true)
         }
     }

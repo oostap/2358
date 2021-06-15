@@ -1,12 +1,9 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.model.dto.LimitOrder
 import com.project.ti2358.data.model.dto.OperationType
-import com.project.ti2358.data.service.OperationsService
 import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.service.Utils
 import kotlinx.coroutines.*
-import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -20,42 +17,87 @@ class StrategyFollower : KoinComponent {
     private val depositManager: DepositManager by inject()
     private val ordersService: OrdersService by inject()
     private val orderbookManager: OrderbookManager by inject()
+    private val strategyTelegram: StrategyTelegram by inject()
     private var moneySpent: Double = 0.0
 
     private var jobRefreshDeposit: Job? = null
 
     var started: Boolean = false
 
-    fun processStrategy(userId: Long, command: String): Boolean {
-        if (!started) return false
+    fun processInfoCommand(command: String, messageId: Long) {
+        try {
+            val list = command.split(" ")
 
-        val followIds = SettingsManager.getFollowerIds()
-        if (userId !in followIds) return false
+            val pulseWords = listOf("пульс", "резать", "лося", "лось", "хомяк", "пастух", "аллигатор", "профит", "трейд")
+            var contains = false
+            pulseWords.forEach {
+                if (it in command) {
+                    contains = true
+                    return@forEach
+                }
+            }
+            if (contains) {
+                strategyTelegram.sendPulse(messageId)
+                return
+            } else if (list.size == 1) {
+                val ticker = list[0].toUpperCase()
+                val stock = stockManager.getStockByTicker(ticker)
+                if (stock != null) { // просто тикер
+                    strategyTelegram.sendStock(stock)
+                    return
+                }
+            } else if (list.size == 2) {
+                val ticker = list[0].toUpperCase()
+                val operation = list[1].toLowerCase()
+                val stock = stockManager.getStockByTicker(ticker) ?: return
+
+                if (operation == "limits") { // # LIMIT UP/DOWN
+                    strategyTelegram.sendStockInfo(stock)
+                    return
+                }
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun processActiveCommand(userId: Long, command: String): Int {
+        if (!started) return 0
 
         val list = command.split(" ")
 
+        val followIds = SettingsManager.getFollowerIds()
+        if (userId !in followIds) return 0
+
         try {
-            val operation = list[1]
-            val ticker = list[2]
+            val oneStock = stockManager.getStockByTicker(command.toUpperCase())
+            if (oneStock != null) {
+                strategyTelegram.sendStock(oneStock)
+                return 2
+            }
+
+            val operation = list[1].toLowerCase()
+            val ticker = list[2].toUpperCase()
             val stock = stockManager.getStockByTicker(ticker)
             val figi = stock?.figi ?: ""
-            if (figi == "") return false
+            if (figi == "") return 0
 
             if (operation in listOf("BUY", "SELL")) {
-                if (list.size != 5) return false
+                if (list.size != 5) return 0
                 val price = list[3].toDouble()
                 val percent = list[4].toInt()
-                if (price == 0.0 || percent == 0) return false
+                if (price == 0.0 || percent == 0) return 0
 
-                if (operation == "BUY") {   // # BUY VIPS 29.46 1
+                if (operation == "buy") {   // # BUY VIPS 29.46 1
                     val moneyPart = SettingsManager.getFollowerPurchaseVolume() / 100.0 * percent
                     val lots = (moneyPart / price).toInt()
 
                     // недостаточно для покупки даже одного лота
-                    if (lots == 0 || moneyPart == 0.0) return false
+                    if (lots == 0 || moneyPart == 0.0) return 0
 
                     // превышен лимит торговли по сигналам
-                    if (abs(moneySpent - lots * price) > SettingsManager.getFollowerPurchaseVolume()) return false
+                    if (abs(moneySpent - lots * price) > SettingsManager.getFollowerPurchaseVolume()) return 0
 
                     GlobalScope.launch(Dispatchers.Main) {
                         try {
@@ -74,14 +116,14 @@ class StrategyFollower : KoinComponent {
                     moneySpent -= lots * price
                 }
 
-                if (operation == "SELL") {  // # SELL VIPS 29.46 1
-                    val position = depositManager.getPositionForFigi(figi) ?: return false
+                if (operation == "sell") {  // # SELL VIPS 29.46 1
+                    val position = depositManager.getPositionForFigi(figi) ?: return 0
                     val lots = (position.lots / 100.0 * percent).toInt()
 
-                    if (lots == 0) return false
+                    if (lots == 0) return 0
 
                     // сильно большая поза, не сдавать
-                    if (lots * price > SettingsManager.getFollowerPurchaseVolume() || position.lots * price > SettingsManager.getFollowerPurchaseVolume()) return false
+                    if (lots * price > SettingsManager.getFollowerPurchaseVolume() || position.lots * price > SettingsManager.getFollowerPurchaseVolume()) return 0
 
                     GlobalScope.launch(Dispatchers.Main) {
                         try {
@@ -101,11 +143,11 @@ class StrategyFollower : KoinComponent {
                 }
             }
 
-            if (operation in listOf("BUY_MOVE", "SELL_MOVE")) { // # BUY_MOVE VIPS 0.01
-                if (list.size != 4) return false
+            if (operation in listOf("buy_move", "sell_move")) { // # BUY_MOVE VIPS 0.01
+                if (list.size != 4) return 0
 
                 val change = list[3].toDouble()
-                val operationType = if ("SELL" in operation) OperationType.SELL else OperationType.BUY
+                val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
                 val buyOrders = depositManager.getOrderAllOrdersForFigi(figi, operationType)
                 buyOrders.forEach { order ->
                     val newIntPrice = ((order.price + change) * 100).roundToInt()
@@ -114,10 +156,10 @@ class StrategyFollower : KoinComponent {
                 }
             }
 
-            if (operation in listOf("BUY_CANCEL", "SELL_CANCEL")) { // # BUY_CANCEL VIPS
-                if (list.size != 3) return false
+            if (operation in listOf("buy_cancel", "sell_cancel")) { // # BUY_CANCEL VIPS
+                if (list.size != 3) return 0
 
-                val operationType = if ("SELL" in operation) OperationType.SELL else OperationType.BUY
+                val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
                 val buyOrders = depositManager.getOrderAllOrdersForFigi(figi, operationType)
                 buyOrders.forEach { order ->
                     orderbookManager.cancelOrder(order)
@@ -131,17 +173,12 @@ class StrategyFollower : KoinComponent {
                 }
             }
 
-//            if (operation == "STATUS") { // # STATUS VIPS
-//                val position = depositManager.getPositionForFigi(figi) ?: return false
-//
-//            }
-
-            return true
+            return 1
         } catch (e: Exception) {
             e.printStackTrace()
         }
 
-        return false
+        return 0
     }
 
     fun startStrategy() {

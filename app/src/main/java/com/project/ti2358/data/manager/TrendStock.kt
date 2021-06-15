@@ -17,9 +17,4 @@ data class TrendStock(
 ) {
     var ticker = stock.ticker
     var figi = stock.figi
-
-    fun process() {
-//        changePriceRocketAbsolute = priceTo - priceFrom
-//        changePriceRocketPercent = priceTo / priceFrom * 100.0 - 100.0
-    }
 }

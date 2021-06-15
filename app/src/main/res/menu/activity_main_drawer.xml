@@ -73,6 +73,10 @@
             android:icon="@drawable/ic_trends"
             android:title="@string/menu_trends" />
         <item
+            android:id="@+id/nav_limits"
+            android:icon="@drawable/ic_trends"
+            android:title="@string/menu_limits" />
+        <item
             android:id="@+id/nav_fixprice"
             android:icon="@drawable/ic_fix_price"
             android:title="@string/menu_fixprice" />

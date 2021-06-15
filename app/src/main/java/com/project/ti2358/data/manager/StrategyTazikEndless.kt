@@ -113,6 +113,8 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     fun getPurchaseStock(): MutableList<PurchaseStock> = runBlocking(StockManager.stockContext) {
+        if (started) return@runBlocking stocksToPurchase
+
         val percent = SettingsManager.getTazikEndlessChangePercent()
         val totalMoney: Double = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
         val onePiece: Double = totalMoney / SettingsManager.getTazikEndlessPurchaseParts()

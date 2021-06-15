@@ -40,6 +40,15 @@
         android:label="@string/accounts"
         tools:layout="@layout/fragment_accounts" />
 
+    <!-- лимиты -->
+    <fragment
+        android:id="@+id/nav_limits"
+        android:name="com.project.ti2358.ui.limits.LimitsFragment"
+        android:label="@string/menu_limits"
+        tools:layout="@layout/fragment_limits" />
+
+    <!-- позиция в депо -->
+
     <fragment
         android:id="@+id/nav_portfolio_position"
         android:name="com.project.ti2358.ui.portfolio.PortfolioPositionFragment"

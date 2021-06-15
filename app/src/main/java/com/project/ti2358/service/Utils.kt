@@ -11,6 +11,8 @@ import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
+import com.github.bassaer.chatmessageview.model.Message
+import com.google.gson.internal.LinkedTreeMap
 import com.project.ti2358.BuildConfig
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
@@ -24,6 +26,7 @@ import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.OperationType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import java.text.SimpleDateFormat

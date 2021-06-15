@@ -2,11 +2,14 @@ package com.project.ti2358.data.service
 
 import com.google.gson.Gson
 import com.project.ti2358.data.manager.SettingsManager
+import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.model.streamTinkoff.OrderEventBody
 import com.project.ti2358.data.model.dto.Candle
+import com.project.ti2358.data.model.dto.InstrumentInfo
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.OrderbookStream
 import com.project.ti2358.data.model.streamTinkoff.CandleEventBody
+import com.project.ti2358.data.model.streamTinkoff.InstrumentInfoEventBody
 import com.project.ti2358.service.log
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
@@ -40,6 +43,7 @@ class StreamingTinkoffService {
     private val publishProcessor: PublishProcessor<Any> = PublishProcessor.create()
     private val activeCandleSubscriptions: MutableMap<String, MutableList<Interval>> = ConcurrentHashMap()
     private val activeOrderSubscriptions: MutableMap<String, MutableList<Int>> = ConcurrentHashMap()
+    private val activeStockInfoSubscriptions: MutableMap<String, Boolean> = ConcurrentHashMap()
     private val threadPoolExecutor = Executors.newSingleThreadExecutor()
 
     var connectedStatus: Boolean = false
@@ -100,6 +104,9 @@ class StreamingTinkoffService {
                 "orderbook" -> {
                     publishProcessor.onNext(gson.fromJson(payload, OrderbookStream::class.java))
                 }
+                "instrument_info" -> {
+                    publishProcessor.onNext(gson.fromJson(payload, InstrumentInfo::class.java))
+                }
             }
         }
 
@@ -140,15 +147,43 @@ class StreamingTinkoffService {
                     }
                 }
 
+                activeStockInfoSubscriptions.forEach { infoEntry ->
+                    subscribeStockInfoEventsStream(infoEntry.key, addSubscription = false)
+                }
+
                 emitter.onSuccess(true)
             }
             .subscribeOn(Schedulers.from(threadPoolExecutor))
     }
 
-    fun getOrderEventStream(
-        figis: List<String>,
-        depth: Int
-    ): Flowable<OrderbookStream> {
+    fun getStockInfoEventStream(figis: List<String>): Flowable<InstrumentInfo> {
+        return Single
+            .create<Boolean> { emitter ->
+                val excessFigis = activeStockInfoSubscriptions.keys - figis
+
+                figis.forEach { figi ->
+                    if (!isStockInfoSubscribedAlready(figi)) {
+                        subscribeStockInfoEventsStream(figi)
+                    }
+                }
+
+                excessFigis.forEach { figi ->
+                    if (isStockInfoSubscribedAlready(figi)) {
+                        unsubscribeStockInfoEventsStream(figi)
+                    }
+                }
+
+                emitter.onSuccess(true)
+            }
+            .subscribeOn(Schedulers.from(threadPoolExecutor))
+            .flatMapPublisher {
+                publishProcessor.filter {
+                    it is InstrumentInfo
+                } as Flowable<InstrumentInfo>
+            }
+    }
+
+    fun getOrderEventStream(figis: List<String>, depth: Int): Flowable<OrderbookStream> {
         return Single
             .create<Boolean> { emitter ->
                 val excessFigis = activeOrderSubscriptions.keys - figis
@@ -213,6 +248,10 @@ class StreamingTinkoffService {
         return activeCandleSubscriptions[figi]?.contains(interval) ?: false
     }
 
+    private fun isStockInfoSubscribedAlready(figi: String): Boolean {
+        return activeStockInfoSubscriptions[figi] ?: false
+    }
+
     private fun subscribeOrderEventsStream(figi: String, depth: Int, addSubscription: Boolean = true) {
 //        Log.d("StreamingService", "subscribe for order events: figi: $figi, depth: $depth")
         webSocket?.send(Gson().toJson(OrderEventBody("orderbook:subscribe", figi, depth)))
@@ -229,6 +268,18 @@ class StreamingTinkoffService {
         activeOrderSubscriptions[figi]?.remove(depth)
     }
 
+    private fun subscribeStockInfoEventsStream(figi: String, addSubscription: Boolean = true) {
+//        Log.d("StreamingService", "subscribe for order events: figi: $figi, depth: $depth")
+        webSocket?.send(Gson().toJson(InstrumentInfoEventBody("instrument_info:subscribe", figi)))
+        if (addSubscription) {
+            activeStockInfoSubscriptions[figi] = true
+        }
+    }
+
+    public fun unsubscribeStockInfoEventsStream(figi: String) {
+        webSocket?.send(Gson().toJson(InstrumentInfoEventBody("instrument_info:unsubscribe", figi)))
+        activeStockInfoSubscriptions[figi] = false
+    }
 
     private fun subscribeCandleEventsStream(figi: String, interval: Interval, addSubscription: Boolean = true) {
 //        Log.d("StreamingService", "subscribe for candle events: figi: $figi, interval: $interval")

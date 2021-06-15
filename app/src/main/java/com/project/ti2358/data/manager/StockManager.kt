@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.preference.PreferenceManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.gson.Gson
+import com.google.gson.internal.LinkedTreeMap
 import com.google.gson.reflect.TypeToken
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.*
@@ -24,6 +25,7 @@ import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.util.ArrayList
 import java.util.Collections.synchronizedList
 import java.util.Collections.synchronizedMap
 import java.util.concurrent.Executor
@@ -42,6 +44,7 @@ class StockManager : KoinComponent {
     private val strategyRocket: StrategyRocket by inject()
     private val strategyFixPrice: StrategyFixPrice by inject()
     private val strategyTrend: StrategyTrend by inject()
+    private val strategyLimits: StrategyLimits by inject()
     private val strategyTelegram: StrategyTelegram by inject()
 
     private var stocksAll: MutableList<Stock> = mutableListOf()
@@ -64,6 +67,7 @@ class StockManager : KoinComponent {
         val candleScheduler: Scheduler = Schedulers.from(Executors.newSingleThreadExecutor())
         val rocketContext = newSingleThreadContext("computationRocketThread")
         val trendContext = newSingleThreadContext("computationTrendThread")
+        val limitsContext = newSingleThreadContext("computationLimitsThread")
     }
 
     fun getWhiteStocks(): MutableList<Stock> {
@@ -340,6 +344,7 @@ class StockManager : KoinComponent {
                 .onBackpressureBuffer()
                 .subscribeOn(Schedulers.computation())
                 .observeOn(candleScheduler)
+//                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
                         runBlocking {
@@ -360,6 +365,7 @@ class StockManager : KoinComponent {
                 .onBackpressureBuffer()
                 .subscribeOn(Schedulers.computation())
                 .observeOn(candleScheduler)
+//                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
                         runBlocking {
@@ -382,6 +388,7 @@ class StockManager : KoinComponent {
             .onBackpressureBuffer()
             .subscribeOn(Schedulers.computation())
             .observeOn(candleScheduler)
+//            .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {
                     runBlocking {
@@ -393,6 +400,8 @@ class StockManager : KoinComponent {
                     FirebaseCrashlytics.getInstance().recordException(it)
                 }
             )
+
+        subscribeStockInfo()
     }
 
     fun subscribeStockOrderbook(stock: Stock) {
@@ -439,12 +448,44 @@ class StockManager : KoinComponent {
         }
     }
 
+    private fun subscribeStockInfo() {
+        streamingTinkoffService
+            .getStockInfoEventStream(
+                stocksAll.map { it.figi },
+            )
+            .onBackpressureBuffer()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onNext = {
+                    GlobalScope.launch {
+                        addStockInfo(it)
+                    }
+                },
+                onError = {
+                    it.printStackTrace()
+                    FirebaseCrashlytics.getInstance().recordException(it)
+                }
+            )
+    }
+
     fun unsubscribeStockOrderbook(stock: Stock) {
         if (SettingsManager.getAlorOrdebook()) {
             streamingAlorService.unsubscribeOrderBookEventsStream(stock, 20)
         } else {
             streamingTinkoffService.unsubscribeOrderEventsStream(stock.figi, 20)
         }
+    }
+
+    private suspend fun addStockInfo(stockInfo: InstrumentInfo) = withContext(stockContext) {
+        val stock = stocksStream.find { it.figi == stockInfo.figi || it.ticker == stockInfo.figi }
+        stock?.processStockInfo(stockInfo)
+
+//        log("LIMIT ${stockInfo.figi} = ${stockInfo.limit_up}")
+//        if (stock != null) {
+//            strategyTelegram.sendStockInfo(stock, stockInfo)
+//            streamingTinkoffService.unsubscribeStockInfoEventsStream(stock.figi)
+//        }
     }
 
     private suspend fun addOrderbook(orderbookStream: OrderbookStream) = withContext(stockContext) {
@@ -458,10 +499,13 @@ class StockManager : KoinComponent {
             it.processCandle(candle)
 
             if (candle.interval == Interval.MINUTE) {
-                strategyTazik.processStrategy(it, candle)
                 strategyTazikEndless.processStrategy(it, candle)
+
+                strategyTazik.processStrategy(it, candle)
                 strategyRocket.processStrategy(it)
                 strategyTrend.processStrategy(it, candle)
+
+                strategyLimits.processStrategy(it)
             }
 
             if (candle.interval == Interval.DAY) { // получить дневные свечи 1 раз по всем тикерам и отключиться
@@ -470,5 +514,98 @@ class StockManager : KoinComponent {
                 }
             }
         }
+    }
+
+    suspend fun getPulsePhrase(): String {
+        try {
+            while (true) {
+                val stock = stocksStream.random()
+                val ticker = stock.ticker
+                val data = thirdPartyService.tinkoffPulse(ticker)
+                val items = data["items"] as ArrayList<*>
+
+                var count = 10
+                while (true) {
+                    if (count <= 0) break
+                    count--
+
+                    val random = kotlin.random.Random.nextInt(0, items.size)
+                    val item = items[random] as LinkedTreeMap<*, *>
+                    val likes = item["likesCount"] as Double
+                    if (likes > 7) {
+                        delay(50)
+                        continue
+                    }
+
+                    val text = item["text"] as String
+                    if (text.length > 700 || text.length < 10) continue
+
+                    val stopWords = listOf(
+                        "www",
+                        "enterprise",
+                        "💼",
+                        "🔴",
+                        "🟢",
+                        "владелец",
+                        "приобретает",
+                        "Отчет",
+                        "Прибыль на акцию",
+                        "Портфель",
+                        "НАСТРОЕНИЕ РЫНКА",
+                        "P/E",
+                        "рекомендаци",
+                        "Целевая цена",
+                        "ДО ОТКРЫТИЯ",
+                        "после закрытия",
+                        "канал",
+                        "чистая прибыль",
+                        "подписывайтесь",
+                        "Подписывайтесь",
+                        "подписывайся",
+                        "отчеты",
+                        "отчёты",
+                        "Отчеты",
+                        "Отчёты",
+                        "ПОДПИСЫВАЙСЯ",
+                        "важнейшие",
+                        "лидеры",
+                        "Фьючерсы",
+                        "аналитик",
+                        "Аналитик",
+                        "\"Держать\"",
+                        "\"Покупать\"",
+                        "купил по",
+                        "сообщает о"
+                    )
+
+                    var contains = false
+                    stopWords.forEach {
+                        if (it in text) {
+                            contains = true
+                            return@forEach
+                        }
+                    }
+                    if (contains) continue
+                    log("text = $text")
+                    log("text size = ${text.length}")
+
+                    val words = text.split(" ", "\n").toMutableList()
+                    val originSize = words.size
+                    words.removeAll { it.startsWith("{") || it.startsWith("$") || it.startsWith("#") || it.startsWith("http") }
+
+                    if (originSize - words.size > 5) continue
+
+                    val final = words.joinToString(" ").trim()
+
+                    if (final.length < 10) continue
+
+                    return final
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+
+        return ""
     }
 }

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.Context
 import android.content.DialogInterface
+import android.content.DialogInterface.OnShowListener
 import android.os.Bundle
 import android.text.InputType
 import android.view.DragEvent
@@ -40,6 +41,7 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.sign
+
 
 @KoinApiExtension
 class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
@@ -314,26 +316,35 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         lotsBox.hint = "количество"
         layout.addView(lotsBox)
 
-        var title = if (operationType == OperationType.BUY) "КУПИТЬ!" else "ПРОДАТЬ!"
         val position = depositManager.getPositionForFigi(orderbookLine.stock.figi)
         val depoCount = position?.lots ?: 0
         val avg = position?.getAveragePrice() ?: 0
-        title += " депо: $depoCount, $avg"
+        val title = "В депо: $depoCount по $avg"
 
         val alert: android.app.AlertDialog.Builder = android.app.AlertDialog.Builder(requireContext())
-        alert.setIcon(R.drawable.ic_hammer).setTitle(title).setView(layout).setPositiveButton("ок",
+        alert.setIcon(R.drawable.ic_hammer).setTitle(title).setView(layout).setPositiveButton("ПРОДАТЬ",
             DialogInterface.OnClickListener { dialog, whichButton ->
                 try {
                     val price = Utils.makeNicePrice(priceBox.text.toString().toDouble(), orderbookLine.stock)
                     val lots = lotsBox.text.toString().toInt()
-                    orderbookManager.createOrder(orderbookLine.stock, price, lots, operationType)
+                    orderbookManager.createOrder(orderbookLine.stock, price, lots, OperationType.SELL)
                 } catch (e: Exception) {
                     Utils.showMessageAlert(requireContext(), "Неверный формат чисел!")
                 }
-            }).setNegativeButton("отмена",
+            }).setNegativeButton("ОТМЕНА",
             DialogInterface.OnClickListener { dialog, whichButton ->
 
+            }).setNeutralButton("КУПИТЬ",
+            DialogInterface.OnClickListener { dialog, whichButton ->
+                try {
+                    val price = Utils.makeNicePrice(priceBox.text.toString().toDouble(), orderbookLine.stock)
+                    val lots = lotsBox.text.toString().toInt()
+                    orderbookManager.createOrder(orderbookLine.stock, price, lots, OperationType.BUY)
+                } catch (e: Exception) {
+                    Utils.showMessageAlert(requireContext(), "Неверный формат чисел!")
+                }
             })
+
         alert.show()
     }
 
@@ -359,7 +370,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         override fun onDrag(v: View, event: DragEvent): Boolean {
             log("onDrag")
             when (event.action) {
-                DragEvent.ACTION_DRAG_STARTED -> { }
+                DragEvent.ACTION_DRAG_STARTED -> {
+                }
                 DragEvent.ACTION_DRAG_ENTERED -> {
                     val view = event.localState as View
                     val actionType = v.getTag(R.string.action_type) as String
@@ -405,7 +417,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     fragmentOrderbookBinding?.scalperPanelView?.visibility = VISIBLE
                     fragmentOrderbookBinding?.trashButton?.visibility = GONE
                 }
-                DragEvent.ACTION_DRAG_ENDED -> { }
+                DragEvent.ACTION_DRAG_ENDED -> {
+                }
                 else -> { }
             }
             return true

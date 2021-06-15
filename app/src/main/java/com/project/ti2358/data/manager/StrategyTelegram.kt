@@ -196,17 +196,27 @@ class StrategyTelegram : KoinComponent {
                         val text = "твой айди: ${update.message!!.from?.id}"
                         bot.sendMessage(ChatId.fromId(id = update.message!!.chat.id), text = text)
                         update.consume()
-                    } else if (command.startsWith("#")) {
+                    } else if (command.startsWith("!")) {
                         if (strategyFollower.started) {
-                            val success = strategyFollower.processStrategy(update.message!!.from?.id ?: 0, command)
-                            val status = if (success) "+" else "-"
-                            bot.sendMessage(
-                                ChatId.fromId(id = update.message!!.chat.id),
-                                text = status,
-                                replyToMessageId = update.message!!.messageId
-                            )
+                            val success = strategyFollower.processActiveCommand(update.message!!.from?.id ?: 0, command)
+                            val status = when (success) {
+                                0 -> "-"
+                                1 -> "+"
+                                else -> ""
+                            }
+                            if (status != "") {
+                                bot.sendMessage(
+                                    ChatId.fromId(id = update.message!!.chat.id),
+                                    text = status,
+                                    replyToMessageId = update.message!!.messageId
+                                )
+                            }
                         }
                         update.consume()
+                    } else {
+                        if (strategyFollower.started) {
+                            strategyFollower.processInfoCommand(command, update.message!!.messageId)
+                        }
                     }
                 }
 
@@ -404,6 +414,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
             }
+            val change2300 = "%.2f".format(rocketStock.stock.changePrice2300DayPercent)
             val text = "$emoji$${rocketStock.ticker} ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин, v = ${rocketStock.volume}"
             val buttons = getButtonsMarkup(rocketStock.stock)
             sendMessageToChats(text, -1, replyMarkup = buttons)
@@ -447,6 +458,23 @@ class StrategyTelegram : KoinComponent {
             }
             sendMessageToChats(text, -1)
         }
+    }
+
+    fun sendLimitsStart(start: Boolean) {
+//        if (started && SettingsManager.getTelegramSendRockets()) {
+//            val text = if (start) {
+//                String.format(
+//                    locale = Locale.US,
+//                    "🟢⬆️⬇️️ старт: %.2f%% / %d мин / v%d",
+//                    SettingsManager.getRocketChangePercent(),
+//                    SettingsManager.getRocketChangeMinutes(),
+//                    SettingsManager.getRocketChangeVolume()
+//                )
+//            } else {
+//                "🔴⬆️⬇️️ стоп!"
+//            }
+//            sendMessageToChats(text, -1)
+//        }
     }
 
     fun sendTrendStart(start: Boolean) {
@@ -537,7 +565,7 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    private fun sendMessageToChats(text: String, deleteAfterSeconds: Int = -1, stop: Boolean = false, replyMarkup: ReplyMarkup? = null) {
+    private fun sendMessageToChats(text: String, deleteAfterSeconds: Int = -1, stop: Boolean = false, replyMarkup: ReplyMarkup? = null, replyToMessageId: Long? = null) {
         GlobalScope.launch(Dispatchers.Default) {
             try {
                 val chatIds = SettingsManager.getTelegramChatID()
@@ -545,7 +573,7 @@ class StrategyTelegram : KoinComponent {
                     if (text == "") break
 
                     while (true) {
-                        val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text, replyMarkup = replyMarkup)
+                        val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text, replyMarkup = replyMarkup, replyToMessageId = replyToMessageId)
                         if (result?.first?.isSuccessful != true) {
                             delay(2500)
                             continue
@@ -591,6 +619,33 @@ class StrategyTelegram : KoinComponent {
             )
         )
         return replyMarkup
+    }
+
+    fun sendStock(stock: Stock) {
+        val buttons = getButtonsMarkup(stock)
+        val price = stock.getPriceRaw()
+        val change2300 = "%.2f".format(stock.changePrice2300DayPercent)
+        sendMessageToChats("$${stock.ticker} ${price}$ / ${change2300}%", replyMarkup = buttons)
+    }
+
+    fun sendStockInfo(stock: Stock) {
+        val stockInfo = stock.stockInfo
+        val buttons = getButtonsMarkup(stock)
+        if (stockInfo != null) {
+            val price = stock.getPriceRaw()
+            val percentUp = "%.2f".format(Utils.getPercentFromTo(stockInfo.limit_up, price))
+            val percentDown = "%.2f".format(Utils.getPercentFromTo(stockInfo.limit_down, price))
+            sendMessageToChats("$${stock.ticker} ${price}$ - ⬆️${stockInfo.limit_up}$ / ${percentUp}% ⬇️${stockInfo.limit_down}$ / ${percentDown}%", replyMarkup = buttons)
+        } else {
+            sendMessageToChats("$${stock.ticker} нет лимитов, current = ${stock.getPriceNow()}", replyMarkup = buttons)
+        }
+    }
+
+    fun sendPulse(messageId: Long) {
+        GlobalScope.launch(Dispatchers.Main) {
+            val phrase = stockManager.getPulsePhrase()
+            sendMessageToChats(phrase, replyToMessageId = messageId)
+        }
     }
 
     fun sendTest() {

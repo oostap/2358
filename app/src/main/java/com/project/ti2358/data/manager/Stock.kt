@@ -24,7 +24,8 @@ data class Stock(var instrument: Instrument) {
     var stockIndices: Map<String, Double>? = null
     var morning: Any? = null
 
-    var orderbookStream: OrderbookStream? = null
+    var stockInfo: InstrumentInfo? = null        // инфа
+    var orderbookStream: OrderbookStream? = null        // стакан
 
     var dayVolumeCash: Double = 0.0
 
@@ -160,6 +161,10 @@ data class Stock(var instrument: Instrument) {
 
     fun processOrderbook(orderbook: OrderbookStream) {
         orderbookStream = orderbook
+    }
+
+    fun processStockInfo(instrumentInfo: InstrumentInfo) {
+        stockInfo = instrumentInfo
     }
 
     @KoinApiExtension
@@ -338,9 +343,25 @@ data class Stock(var instrument: Instrument) {
         changePrice2300DayPercent = (100.0 * getPriceNow()) / getPrice2300() - 100.0
     }
 
+    fun getPriceRaw(): Double {
+        if (minuteCandles.isNotEmpty()) {
+            return minuteCandles.last().closingPrice
+        }
+
+        if (candleToday != null) {
+            return candleToday?.closingPrice ?: 0.0
+        }
+
+        if (closePrices != null) {
+            return closePrices?.post ?: 0.0
+        }
+
+        return 0.0
+    }
+
     private fun updateChangeFixPrice() {
-        if (priceFixed == 0.0) priceFixed = getPriceNow()
-        val currentPrice = getPriceNow()
+        if (priceFixed == 0.0) priceFixed = getPriceRaw()
+        val currentPrice = getPriceRaw()
         changePriceFixDayAbsolute = currentPrice - priceFixed
         changePriceFixDayPercent = currentPrice / priceFixed * 100.0 - 100.0
     }
@@ -348,14 +369,14 @@ data class Stock(var instrument: Instrument) {
     fun resetFixPrice() {
         changePriceFixDayAbsolute = 0.0
         changePriceFixDayPercent = 0.0
-        priceFixed = getPriceNow()
+        priceFixed = getPriceRaw()
         if (minuteCandles.isNotEmpty()) {
             minuteCandleFixed = minuteCandles.last()
         }
     }
 
     fun resetTrendPrice() {
-        priceTrend = getPriceNow()
+        priceTrend = getPriceRaw()
         trendStartTime = Calendar.getInstance()
         trendStartTime.set(Calendar.SECOND, 0)
     }

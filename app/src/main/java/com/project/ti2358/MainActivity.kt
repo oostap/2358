@@ -260,7 +260,9 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_tazik_start,
                 R.id.nav_tazik_endless_start,
                 R.id.nav_telegram,
-                R.id.nav_chat
+                R.id.nav_chat,
+                R.id.nav_trends,
+                R.id.nav_limits
             ),
             drawerLayout
         )
