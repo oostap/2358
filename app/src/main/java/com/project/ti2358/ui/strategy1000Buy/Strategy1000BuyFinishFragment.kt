@@ -157,7 +157,7 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
                 }
             }
 
-            fun refreshPercent(purchaseStock: PurchaseStock) {
+            private fun refreshPercent(purchaseStock: PurchaseStock) {
                 with (binding) {
                     val percent = purchaseStock.percentLimitPriceChange
 
@@ -175,6 +175,8 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
 
                     updateInfoText()
                 }
+
+                strategy1000Buy.saveSelectedStocks()
             }
         }
     }

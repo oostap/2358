@@ -443,6 +443,33 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
+    fun sendLimit(limitStock: LimitStock) {
+        if (started && SettingsManager.getTelegramSendLimits()) {
+            val emoji = when (limitStock.type)  {
+                LimitType.ON_UP -> "⬆️ на лимите"
+                LimitType.ON_DOWN -> "⬇️️ на лимите"
+
+                LimitType.ABOVE_UP -> "⬆️ выше лимита"
+                LimitType.UNDER_DOWN -> "⬇️️ ниже лимита"
+
+                LimitType.NEAR_UP -> "⬆️ рядом с лимитом"
+                LimitType.NEAR_DOWN -> "⬇️️ рядом с лимитом"
+            }
+            val text = "$%s %s %.2f%% / %.2f$ : %.2f$ -> %.2f$".format(
+                locale = Locale.US,
+                emoji,
+                limitStock.ticker,
+                limitStock.percentFire,
+                limitStock.priceFire,
+
+                limitStock.stock.getPrice2300(),
+                limitStock.stock.getPriceRaw()
+            )
+            val buttons = getButtonsMarkup(limitStock.stock)
+            sendMessageToChats(text, -1, replyMarkup = buttons)
+        }
+    }
+
     fun sendRocketStart(start: Boolean) {
         if (started && SettingsManager.getTelegramSendRockets()) {
             val text = if (start) {
@@ -461,20 +488,20 @@ class StrategyTelegram : KoinComponent {
     }
 
     fun sendLimitsStart(start: Boolean) {
-//        if (started && SettingsManager.getTelegramSendRockets()) {
-//            val text = if (start) {
-//                String.format(
-//                    locale = Locale.US,
-//                    "🟢⬆️⬇️️ старт: %.2f%% / %d мин / v%d",
-//                    SettingsManager.getRocketChangePercent(),
-//                    SettingsManager.getRocketChangeMinutes(),
-//                    SettingsManager.getRocketChangeVolume()
-//                )
-//            } else {
-//                "🔴⬆️⬇️️ стоп!"
-//            }
-//            sendMessageToChats(text, -1)
-//        }
+        if (started && SettingsManager.getTelegramSendRockets()) {
+            val text = if (start) {
+                String.format(
+                    locale = Locale.US,
+                    "🟢⬆️⬇️️ старт: %.2f%% / %d мин / v%d",
+                    SettingsManager.getRocketChangePercent(),
+                    SettingsManager.getRocketChangeMinutes(),
+                    SettingsManager.getRocketChangeVolume()
+                )
+            } else {
+                "🔴⬆️⬇️️ стоп!"
+            }
+            sendMessageToChats(text, -1)
+        }
     }
 
     fun sendTrendStart(start: Boolean) {

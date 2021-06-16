@@ -92,6 +92,14 @@
             app:defaultValue="SPCE RIG"/>
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/menu_blacklist">
+        <EditTextPreference
+            app:key="@string/setting_key_black_set"
+            app:title="@string/stocks_black_set"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="LPL ACH"/>
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/settings_header_1005">
         <EditTextPreference
             app:key="@string/setting_key_premarket_price_change_percent"
@@ -181,6 +189,29 @@
 
     <PreferenceCategory app:title="@string/settings_header_1000_sell">
         <EditTextPreference
+            app:key="@string/setting_key_1000_sell_set_1"
+            app:title="@string/stocks_1000_sell_set_1"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="SPCE 1.0 1"/>
+        <EditTextPreference
+            app:key="@string/setting_key_1000_sell_set_2"
+            app:title="@string/stocks_1000_sell_set_2"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="SPCE 1.0 1"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_sell_set_3"
+            app:title="@string/stocks_1000_sell_set_3"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="SPCE 1.0 1"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_sell_set_4"
+            app:title="@string/stocks_1000_sell_set_4"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="SPCE 1.0 1"/>
+
+        <EditTextPreference
             app:key="@string/setting_key_1000_sell_take_profit"
             app:title="@string/stocks_1000_sell_take_profit"
             app:useSimpleSummaryProvider="true"
@@ -188,6 +219,29 @@
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_1000_buy">
+        <EditTextPreference
+            app:key="@string/setting_key_1000_buy_set_1"
+            app:title="@string/stocks_1000_buy_set_1"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="SPCE -1.0 1"/>
+        <EditTextPreference
+            app:key="@string/setting_key_1000_buy_set_2"
+            app:title="@string/stocks_1000_buy_set_2"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="SPCE -1.0 1"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_buy_set_3"
+            app:title="@string/stocks_1000_buy_set_3"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="SPCE -1.0 1"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_buy_set_4"
+            app:title="@string/stocks_1000_buy_set_4"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="SPCE -1.0 1"/>
+
         <EditTextPreference
             app:key="@string/setting_key_1000_buy_take_profit"
             app:title="@string/stocks_1000_buy_take_profit"
@@ -539,13 +593,13 @@
             app:key="@string/setting_key_limits_change_up"
             app:title="@string/stocks_limits_change_up"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="4.0"/>
+            app:defaultValue="1.0"/>
 
         <EditTextPreference
             app:key="@string/setting_key_limits_change_down"
             app:title="@string/stocks_limits_change_down"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="20"/>
+            app:defaultValue="1.0"/>
 
         <SwitchPreferenceCompat
             app:key="@string/setting_key_limits_up"

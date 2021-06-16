@@ -234,6 +234,7 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                         percentProfitFutureTotalView.setTextColor(Utils.getColorForValue(futureProfitPrice))
                     }
                 }
+                strategy1000Sell.saveSelectedStocks()
 
                 updateInfoText()
             }

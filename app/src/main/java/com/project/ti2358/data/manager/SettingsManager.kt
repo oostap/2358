@@ -2,10 +2,12 @@ package com.project.ti2358.data.manager
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.contentValuesOf
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Currency
+import com.project.ti2358.data.model.dto.daager.PresetStock
 import com.project.ti2358.service.Utils
 import org.koin.core.component.KoinApiExtension
 import java.lang.Integer.parseInt
@@ -220,7 +222,16 @@ class SettingsManager {
 
         fun getLoveSet(): List<String> {
             val key = TheApplication.application.applicationContext.getString(R.string.setting_key_love_set)
-            val value: String? = preferences.getString(key, "")?.trim()
+            val value: String? = preferences.getString(key, "SPCE TAL")?.trim()
+            val array = value?.split(" ")
+            return array ?: emptyList()
+        }
+
+        /******************** Black *************************/
+
+        fun getBlackSet(): List<String> {
+            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_black_set)
+            val value: String? = preferences.getString(key, "LPL ACH")?.trim()
             val array = value?.split(" ")
             return array ?: emptyList()
         }
@@ -268,6 +279,22 @@ class SettingsManager {
         }
         /******************** 1000 sell *************************/
 
+        fun stringToPresetStocks(value: String): List<PresetStock> {
+            val array = value.split("\n")
+            val presetStocks: MutableList<PresetStock> = mutableListOf()
+            array.forEach {
+                val params = it.split(" ")
+                if (params.size == 3) {
+                    val preset = PresetStock(params[0], params[1].toDouble(), params[2].toInt())
+                    presetStocks.add(preset)
+                } else if (params.size == 2) {
+                    val preset = PresetStock(params[0], params[1].toDouble(), 0)
+                    presetStocks.add(preset)
+                }
+            }
+            return presetStocks
+        }
+
         fun get1000SellTakeProfit(): Double {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_take_profit)
             val value: String? = preferences.getString(key, "1.0")
@@ -278,7 +305,31 @@ class SettingsManager {
             }
         }
 
+        fun get1000SellSet(numberSet: Int): List<PresetStock> {
+            val key = when (numberSet) {
+                1 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_set_1)
+                2 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_set_2)
+                3 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_set_3)
+                4 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_set_4)
+                else -> ""
+            }
+            val value: String = preferences.getString(key, "SPCE -1.0 10\nTAL -1.0 10")?.trim() ?: ""
+            return stringToPresetStocks(value)
+        }
+
         /******************** 1000 buy *************************/
+
+        fun get1000BuySet(numberSet: Int): List<PresetStock> {
+            val key = when (numberSet) {
+                1 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_set_1)
+                2 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_set_2)
+                3 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_set_3)
+                4 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_set_4)
+                else -> ""
+            }
+            val value: String = preferences.getString(key, "SPCE -1.0 10\nTAL -1.0 10")?.trim() ?: ""
+            return stringToPresetStocks(value)
+        }
 
         fun get1000BuyTakeProfit(): Double {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_take_profit)

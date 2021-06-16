@@ -82,9 +82,9 @@ class MainActivity : AppCompatActivity() {
                 } else if (it.id in listOf(R.id.nav_2358_start, R.id.nav_2358_finish)) {
                     key = "2358_price_change_percent"
                 } else if (it.id in listOf(R.id.nav_1000_buy_start, R.id.nav_1000_buy_finish)) {
-                    key = "1000_buy_take_profit"
+                    key = "1000_sell_buy_1"
                 } else if (it.id in listOf(R.id.nav_1000_sell_start, R.id.nav_1000_sell_finish)) {
-                    key = "1000_take_sell_profit"
+                    key = "1000_sell_set_1"
                 } else if (it.id in listOf(R.id.nav_2225_start, R.id.nav_2225_finish)) {
                     key = "2225_price_change_percent"
                 } else if (it.id in listOf(R.id.nav_1728_up, R.id.nav_1728_down)) {
@@ -97,6 +97,10 @@ class MainActivity : AppCompatActivity() {
                     key = "telegram_autostart"
                 } else if (it.id in listOf(R.id.nav_favorites)) {
                     key = "love_set"
+                } else if (it.id in listOf(R.id.nav_blacklist)) {
+                    key = "black_set"
+                } else if (it.id in listOf(R.id.nav_limits)) {
+                    key = "limits_change_up"
                 }
             }
 

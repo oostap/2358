@@ -17,6 +17,9 @@ import com.project.ti2358.data.manager.StrategyBlacklist
 import com.project.ti2358.databinding.FragmentBlacklistBinding
 import com.project.ti2358.databinding.FragmentBlacklistItemBinding
 import com.project.ti2358.service.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.util.*
@@ -73,10 +76,12 @@ class BlacklistFragment : Fragment(R.layout.fragment_blacklist) {
     }
 
     private fun updateData(query: String = "") {
-        stocks = strategyBlacklist.process(stockManager.stocksStream)
-        stocks = strategyBlacklist.resort()
-        stocks = Utils.search(stocks, query)
-        adapterList.setData(stocks)
+        GlobalScope.launch(Dispatchers.Main) {
+            stocks = strategyBlacklist.process(stockManager.stocksStream)
+            stocks = strategyBlacklist.resort()
+            if (query != "") stocks = Utils.search(stocks, query)
+            adapterList.setData(stocks)
+        }
     }
 
     private fun updateTitle() {

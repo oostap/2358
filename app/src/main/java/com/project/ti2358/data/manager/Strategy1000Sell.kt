@@ -1,8 +1,14 @@
 package com.project.ti2358.data.manager
 
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
+import com.project.ti2358.R
+import com.project.ti2358.TheApplication
+import com.project.ti2358.data.model.dto.daager.PresetStock
 import com.project.ti2358.service.Sorting
 import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -16,7 +22,8 @@ class Strategy1000Sell() : KoinComponent {
     private val stockManager: StockManager by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
-    var stocksSelected: MutableList<Stock> = mutableListOf()
+    var presetStocksSelected: MutableList<PresetStock> = mutableListOf()
+
     private var purchaseToSell: MutableList<PurchaseStock> = mutableListOf()
 
     var positionsToSell700: MutableList<PurchaseStock> = mutableListOf()
@@ -29,64 +36,112 @@ class Strategy1000Sell() : KoinComponent {
     var started700: Boolean = false
     var started1000: Boolean = false
 
-    fun process(): MutableList<Stock> {
+    var currentNumberSet: Int = 0
+
+    suspend fun process(numberSet: Int) = withContext(StockManager.stockContext) {
         val all = stockManager.getWhiteStocks()
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks = all.filter { (it.getPriceNow() > min && it.getPriceNow() < max) || it.getPriceNow() == 0.0 }.toMutableList()
+        stocks = all.filter { (it.getPriceNow() > min && it.getPriceNow() < max) || it.getPriceNow() == 0.0 || it.getPrice2300() == 0.0  }.toMutableList()
         stocks.sortBy { it.changePrice2300DayPercent }
 
         // удалить все бумаги, по которым нет шорта в ТИ
-        stocks.removeAll { it.short == null && depositManager.getPositions().find { p -> p.ticker == it.ticker } == null}
-        return stocks
+        stocks.removeAll { it.short == null && depositManager.getPositions().find { p -> p.ticker == it.ticker } == null }
+
+        loadSelectedStocks(numberSet)
     }
 
-    fun resort(): MutableList<Stock> {
+    private fun loadSelectedStocks(numberSet: Int) {
+        presetStocksSelected = SettingsManager.get1000SellSet(numberSet).toMutableList()
+    }
+
+    fun saveSelectedStocks(numberSet: Int = currentNumberSet) {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
+        val editor: SharedPreferences.Editor = preferences.edit()
+
+        val key = when (numberSet) {
+            1 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_set_1)
+            2 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_set_2)
+            3 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_set_3)
+            4 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_set_4)
+            else -> ""
+        }
+
+        // сохранить лоты и проценты из PurchaseStock
+        for (purchase in purchaseToSell) {
+            val preset = presetStocksSelected.find { it.ticker == purchase.ticker}
+            preset?.let {
+                it.percent = purchase.percentProfitSellFrom
+                it.lots = purchase.lots
+            }
+        }
+
+        if (key != "") {
+            var data = ""
+            for (preset in presetStocksSelected) {
+                data += "%s %.2f %d\n".format(locale = Locale.US, preset.ticker, preset.percent, preset.lots)
+            }
+            editor.putString(key, data)
+            editor.apply()
+        }
+    }
+
+    suspend fun resort(): MutableList<Stock> = withContext(StockManager.stockContext) {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy { stock ->
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
             val position = depositManager.getPositions().find { it.ticker == stock.ticker }
             val multiplier1 = if (position != null) (abs(position.lots * position.getAveragePrice())).toInt() else 1
-            val multiplier3 = if (stock in stocksSelected) 1000 else 1
+            val multiplier3 = if (presetStocksSelected.find { it.ticker == stock.ticker } != null) 1000 else 1
             stock.changePrice2300DayPercent * sign - multiplier1 - multiplier3
         }
-        return stocks
+        return@withContext stocks
     }
 
-    fun setSelected(stock: Stock, value: Boolean) {
+    fun setSelected(stock: Stock, value: Boolean, numberSet: Int) {
         if (value) {
-            if (stock !in stocksSelected)
-                stocksSelected.add(stock)
+            if (presetStocksSelected.find { it.ticker == stock.ticker } == null) {
+                presetStocksSelected.add(PresetStock(stock.ticker, 1.0, 0))
+            }
         } else {
-            stocksSelected.remove(stock)
+            presetStocksSelected.removeAll { it.ticker == stock.ticker }
         }
-        stocksSelected.sortBy { it.changePrice2300DayPercent }
+        saveSelectedStocks(numberSet)
     }
 
     fun isSelected(stock: Stock): Boolean {
-        return stock in stocksSelected
+        return presetStocksSelected.find { it.ticker == stock.ticker } != null
     }
 
     fun processSellPosition(): MutableList<PurchaseStock> {
         val purchases: MutableList<PurchaseStock> = mutableListOf()
 
-        for (stock in stocksSelected) {
-            val purchase = PurchaseStock(stock)
-            for (p in purchaseToSell) {
-                if (p.ticker == stock.ticker) {
-                    purchase.apply {
-                        percentProfitSellFrom = p.percentProfitSellFrom
-                        lots = p.lots
-                    }
-                    break
-                }
-            }
+        for (preset in presetStocksSelected) {
+            val stock = stocks.find { it.ticker == preset.ticker }
+            if (stock != null) {
+                val purchase = PurchaseStock(stock)
 
-            purchase.apply {
-                position = depositManager.getPositionForFigi(stock.figi)
+                // из настроек
+                purchase.percentProfitSellFrom = preset.percent
+                purchase.lots = preset.lots
+
+                // уже заданные
+                for (p in purchaseToSell) {
+                    if (p.ticker == stock.ticker) {
+                        purchase.apply {
+                            percentProfitSellFrom = p.percentProfitSellFrom
+                            lots = p.lots
+                        }
+                        break
+                    }
+                }
+
+                purchase.apply {
+                    position = depositManager.getPositionForFigi(stock.figi)
+                }
+                purchases.add(purchase)
             }
-            purchases.add(purchase)
         }
         purchaseToSell = purchases
 

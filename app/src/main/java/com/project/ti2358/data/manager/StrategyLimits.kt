@@ -8,10 +8,7 @@ import android.os.Build
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.service.ScreenerType
-import com.project.ti2358.service.Sorting
-import com.project.ti2358.service.Utils
-import com.project.ti2358.service.toMoney
+import com.project.ti2358.service.*
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -55,7 +52,6 @@ class StrategyLimits : KoinComponent {
         temp.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
             Utils.getPercentFromTo(it.stockInfo?.limit_up ?: 0.0, it.getPriceRaw()) * sign
-//            it.changePriceScreenerPercent * sign
         }
 
         return stocks
@@ -77,33 +73,86 @@ class StrategyLimits : KoinComponent {
     }
 
     fun processStrategy(stock: Stock) {
-        if (!started) return
+        if (!started || stock.stockInfo == null) return
         if (stocks.isEmpty()) runBlocking { process() }
         if (stock !in stocks) return
 
-        if (SettingsManager.getRocketOnlyLove()) {
-            if (StrategyLove.stocksSelected.find { it.ticker == stock.ticker } == null) return
-        }
-
-        val percentRocket = SettingsManager.getRocketChangePercent()
-        var minutesRocket = SettingsManager.getRocketChangeMinutes()
-        val volumeRocket = SettingsManager.getRocketChangeVolume()
+        val changeUpLimit = SettingsManager.getLimitsChangeDown()
+        val changeDownLimit = SettingsManager.getLimitsChangeUp()
+        val allowDown = SettingsManager.getLimitsDown()
+        val allowUp = SettingsManager.getLimitsUp()
 
         if (stock.minuteCandles.isEmpty()) return
 
+        val fireTime = stock.minuteCandles.last().time.time
 
+        stock.stockInfo?.let {
+            var limitStock: LimitStock? = null
 
-        GlobalScope.launch(Dispatchers.Main) {
-//            strategySpeaker.speakRocket(rocketStock)
-//            strategyTelegram.sendRocket(rocketStock)
-//            createRocket(rocketStock)
+            val allDistance = it.limit_up - it.limit_down
+            val center = it.limit_down + allDistance / 2.0
+            val price = stock.getPriceRaw()
+
+            val upLimitChange = Utils.getPercentFromTo(it.limit_up, price)
+            val downLimitChange = Utils.getPercentFromTo(it.limit_down, price)
+
+            if (price == it.limit_up && allowUp) { // на верхних
+
+                limitStock = LimitStock(stock, LimitType.ON_UP, upLimitChange, price, fireTime)
+                upLimitStocks.add(limitStock)
+
+            } else if (price == it.limit_down && allowDown) { // на нижних
+
+                limitStock = LimitStock(stock, LimitType.ON_DOWN, downLimitChange, price, fireTime)
+                downLimitStocks.add(limitStock)
+
+            } else if (price > it.limit_up && allowUp) { // выше верхних
+
+                limitStock = LimitStock(stock, LimitType.ABOVE_UP, upLimitChange, price, fireTime)
+                upLimitStocks.add(limitStock)
+
+            } else if (price > center && allowUp) { // близко к верхним
+                val percentUpLeft = 100.0 - 100.0 * (stock.getPriceRaw() - center) / (it.limit_up - center)
+
+                if (percentUpLeft < changeUpLimit) { // если близко к лимиту - сигналим!
+                    limitStock = LimitStock(stock, LimitType.NEAR_UP, upLimitChange, price, fireTime)
+                    upLimitStocks.add(limitStock)
+                } else {
+
+                }
+
+            } else if (price < it.limit_down && allowDown) { // ниже нижних
+
+                limitStock = LimitStock(stock, LimitType.UNDER_DOWN, downLimitChange, price, fireTime)
+                downLimitStocks.add(limitStock)
+
+            } else if (price < center && allowDown) { // ближе к нижнему
+                val percentDownLeft = 100.0 - 100.0 * (center - stock.getPriceRaw()) / (center - it.limit_down)
+                if (percentDownLeft < changeDownLimit) { // если близко к лимиту - сигналим!
+                    limitStock = LimitStock(stock, LimitType.NEAR_DOWN, downLimitChange, price, fireTime)
+                    downLimitStocks.add(limitStock)
+                } else {
+
+                }
+            } else {
+
+            }
+
+            if (limitStock != null) {
+                GlobalScope.launch(Dispatchers.Main) {
+                    strategySpeaker.speakLimit(limitStock)
+                    strategyTelegram.sendLimit(limitStock)
+                    createLimit(limitStock)
+                }
+            }
         }
+
     }
 
-    private fun createRocket(rocketStock: RocketStock) {
+    private fun createLimit(limitStock: LimitStock) {
         val context: Context = TheApplication.application.applicationContext
 
-        val ticker = rocketStock.ticker
+        val ticker = limitStock.ticker
         val notificationChannelId = ticker
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -111,7 +160,7 @@ class StrategyLimits : KoinComponent {
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val channel = NotificationChannel(
                 notificationChannelId,
-                "Rocket notifications channel $ticker",
+                "Limits notifications channel $ticker",
                 NotificationManager.IMPORTANCE_HIGH
             ).let {
                 it.description = notificationChannelId
@@ -129,16 +178,21 @@ class StrategyLimits : KoinComponent {
 
         val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(context, notificationChannelId) else Notification.Builder(context)
 
-        val changePercent = if (rocketStock.changePercent > 0) {
-            "+%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
-        } else {
-            "%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
+        val emoji = when (limitStock.type)  {
+            LimitType.ON_UP -> "⬆️ на лимите"
+            LimitType.ON_DOWN -> "⬇️️ на лимите"
+
+            LimitType.ABOVE_UP -> "⬆️ выше лимита"
+            LimitType.UNDER_DOWN -> "⬇️️ ниже лимита"
+
+            LimitType.NEAR_UP -> "⬆️ рядом с лимитом"
+            LimitType.NEAR_DOWN -> "⬇️️ рядом с лимитом"
         }
 
-        val title = "$ticker: ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин"
+        val title = "$ticker: $emoji"
 
         val notification = builder
-            .setSubText("$$ticker $changePercent")
+            .setSubText("$$ticker $emoji")
             .setContentTitle(title)
             .setShowWhen(true)
             .setContentIntent(pendingIntent)

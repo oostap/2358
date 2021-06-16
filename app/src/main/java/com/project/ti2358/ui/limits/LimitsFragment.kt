@@ -200,19 +200,19 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
                     val deltaMinutes = ((Calendar.getInstance().time.time - limitStock.fireTime) / 60.0 / 1000.0).toInt()
                     minutesView.text = "$deltaMinutes мин"
 
-                    priceView.text = "${limitStock.stock.getPrice2300().toMoney(limitStock.stock)} ➡ ${limitStock.priceNow.toMoney(limitStock.stock)}"
+                    priceView.text = "${limitStock.stock.getPrice2300().toMoney(limitStock.stock)} ➡ ${limitStock.priceFire.toMoney(limitStock.stock)}"
 
-                    if (limitStock.up) {
-                        val upLimitChange = Utils.getPercentFromTo(limitStock.stock.stockInfo?.limit_up ?: 0.0, limitStock.priceNow)
+                    if (limitStock.type in listOf(LimitType.NEAR_UP, LimitType.ABOVE_UP, LimitType.ON_UP)) {
+                        val upLimitChange = Utils.getPercentFromTo(limitStock.stock.stockInfo?.limit_up ?: 0.0, limitStock.priceFire)
                         leftChangePercentView.text = upLimitChange.toPercent()
-                        leftChangeAbsoluteView.text = (limitStock.stock.stockInfo?.limit_up ?: 0.0 - limitStock.priceNow).toMoney(limitStock.stock)
+                        leftChangeAbsoluteView.text = (limitStock.stock.stockInfo?.limit_up ?: 0.0 - limitStock.priceFire).toMoney(limitStock.stock)
                         leftChangeAbsoluteView.setTextColor(Utils.getColorForValue(upLimitChange))
 
                         limitView.text = "⬆️%.2f$".format(limitStock.stock.stockInfo?.limit_up ?: 0.0)
                     } else {
-                        val downLimitChange = Utils.getPercentFromTo(limitStock.stock.stockInfo?.limit_down ?: 0.0, limitStock.priceNow)
+                        val downLimitChange = Utils.getPercentFromTo(limitStock.stock.stockInfo?.limit_down ?: 0.0, limitStock.priceFire)
                         leftChangePercentView.text = downLimitChange.toPercent()
-                        leftChangeAbsoluteView.text = (limitStock.stock.stockInfo?.limit_up ?: 0.0 - limitStock.priceNow).toMoney(limitStock.stock)
+                        leftChangeAbsoluteView.text = (limitStock.stock.stockInfo?.limit_up ?: 0.0 - limitStock.priceFire).toMoney(limitStock.stock)
                         leftChangeAbsoluteView.setTextColor(Utils.getColorForValue(downLimitChange))
 
                         limitView.text = "⬇️️%.2f$".format(limitStock.stock.stockInfo?.limit_down ?: 0.0)

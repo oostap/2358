@@ -1,7 +1,13 @@
 package com.project.ti2358.data.manager
 
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
+import com.project.ti2358.R
+import com.project.ti2358.TheApplication
+import com.project.ti2358.data.model.dto.daager.PresetStock
 import com.project.ti2358.service.Sorting
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -14,7 +20,7 @@ class Strategy1000Buy : KoinComponent {
     private val stockManager: StockManager by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
-    var stocksSelected: MutableList<Stock> = mutableListOf()
+    var presetStocksSelected: MutableList<PresetStock> = mutableListOf()
     var purchaseToBuy: MutableList<PurchaseStock> = mutableListOf()
     var currentSort: Sorting = Sorting.DESCENDING
 
@@ -27,56 +33,104 @@ class Strategy1000Buy : KoinComponent {
     var job1000: MutableList<Job?> = mutableListOf()
     var job700: MutableList<Job?> = mutableListOf()
 
-    fun process(): MutableList<Stock> {
+    var currentNumberSet: Int = 0
+
+    suspend fun process(numberSet: Int) = withContext(StockManager.stockContext) {
         val all = stockManager.getWhiteStocks()
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks = all.filter { (it.getPriceNow() > min && it.getPriceNow() < max) || it.getPriceNow() == 0.0 }.toMutableList()
+        stocks = all.filter { (it.getPriceNow() > min && it.getPriceNow() < max) || it.getPriceNow() == 0.0 || it.getPrice2300() == 0.0 }.toMutableList()
         stocks.sortBy { it.changePrice2300DayPercent }
-        return stocks
+        loadSelectedStocks(numberSet)
+    }
+
+    private fun loadSelectedStocks(numberSet: Int) {
+        presetStocksSelected = SettingsManager.get1000BuySet(numberSet).toMutableList()
+    }
+
+    public fun saveSelectedStocks(numberSet: Int = currentNumberSet) {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
+        val editor: SharedPreferences.Editor = preferences.edit()
+
+        val key = when (numberSet) {
+            1 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_set_1)
+            2 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_set_2)
+            3 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_set_3)
+            4 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_set_4)
+            else -> ""
+        }
+
+        // сохранить лоты и проценты из PurchaseStock
+        for (purchase in purchaseToBuy) {
+            val preset = presetStocksSelected.find { it.ticker == purchase.ticker}
+            preset?.let {
+                it.percent = purchase.percentLimitPriceChange
+                it.lots = purchase.lots
+            }
+        }
+
+        if (key != "") {
+            var data = ""
+            for (preset in presetStocksSelected) {
+                data += "%s %.2f %d\n".format(locale = Locale.US, preset.ticker, preset.percent, preset.lots)
+            }
+            editor.putString(key, data)
+            editor.apply()
+        }
     }
 
     fun resort(): MutableList<Stock> {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
-        stocks.sortBy {
+        stocks.sortBy { stock ->
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-            it.changePrice2300DayPercent * sign
+            val multiplier3 = if (presetStocksSelected.find { it.ticker == stock.ticker } != null) 1000 else 1
+            stock.changePrice2300DayPercent * sign - multiplier3
         }
         return stocks
     }
 
-    fun setSelected(stock: Stock, value: Boolean) {
+    fun setSelected(stock: Stock, value: Boolean, numberSet: Int) {
         if (value) {
-            if (stock !in stocksSelected)
-                stocksSelected.add(stock)
+            if (presetStocksSelected.find { it.ticker == stock.ticker } == null) {
+                presetStocksSelected.add(PresetStock(stock.ticker, -1.0, 0))
+            }
         } else {
-            stocksSelected.remove(stock)
+            presetStocksSelected.removeAll { it.ticker == stock.ticker }
         }
-        stocksSelected.sortBy { it.changePrice2300DayPercent }
+        saveSelectedStocks(numberSet)
     }
 
     fun isSelected(stock: Stock): Boolean {
-        return stock in stocksSelected
+        return presetStocksSelected.find { it.ticker == stock.ticker } != null
     }
 
     fun getPurchaseStock(): MutableList<PurchaseStock> {
         val totalMoney: Double = SettingsManager.get1000BuyPurchaseVolume().toDouble()
-        val onePiece: Double = totalMoney / stocksSelected.size
+        val onePiece: Double = totalMoney / presetStocksSelected.size
 
         val purchases: MutableList<PurchaseStock> = mutableListOf()
-        for (stock in stocksSelected) {
-            val purchase = PurchaseStock(stock)
-            for (p in purchaseToBuy) {
-                if (p.ticker == stock.ticker) {
-                    purchase.apply {
-                        percentLimitPriceChange = p.percentLimitPriceChange
-                        lots = p.lots
+        for (preset in presetStocksSelected) {
+            val stock = stocks.find { it.ticker == preset.ticker }
+            if (stock != null) {
+                val purchase = PurchaseStock(stock)
+
+                // из настроек
+                purchase.percentLimitPriceChange = preset.percent
+                purchase.lots = preset.lots
+
+                // уже заданные
+                for (p in purchaseToBuy) {
+                    if (p.ticker == stock.ticker) {
+                        purchase.apply {
+                            percentLimitPriceChange = p.percentLimitPriceChange
+                            lots = p.lots
+                        }
+                        break
                     }
-                    break
                 }
+                purchases.add(purchase)
             }
-            purchases.add(purchase)
         }
         purchaseToBuy = purchases
 

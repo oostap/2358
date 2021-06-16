@@ -26,6 +26,7 @@
     <string name="set_1">1</string>
     <string name="set_2">2</string>
     <string name="set_3">3</string>
+    <string name="set_4">4</string>
     <string name="set_love">❤️</string>
 
     <string name="start_telegram">Включить телеграм бота</string>
@@ -146,9 +147,17 @@
     <string name="stocks_2358_protect_stock_up">Защита от раннего откупа</string>
 
     <!-- 1000 sell settings -->
+    <string name="stocks_1000_sell_set_1">Набор 1 (SPCE -1.0 5 ентер)</string>
+    <string name="stocks_1000_sell_set_2">Набор 2 (SPCE -1.0 5 ентер)</string>
+    <string name="stocks_1000_sell_set_3">Набор 3 (SPCE -1.0 5 ентер)</string>
+    <string name="stocks_1000_sell_set_4">Набор 4 (SPCE -1.0 5 ентер)</string>
     <string name="stocks_1000_sell_take_profit">Базовый % заявки на продажу</string>
 
     <!-- 1000 buy settings -->
+    <string name="stocks_1000_buy_set_1">Набор 1 (SPCE -1.0 5 ентер)</string>
+    <string name="stocks_1000_buy_set_2">Набор 2 (SPCE -1.0 5 ентер)</string>
+    <string name="stocks_1000_buy_set_3">Набор 3 (SPCE -1.0 5 ентер)</string>
+    <string name="stocks_1000_buy_set_4">Набор 4 (SPCE -1.0 5 ентер)</string>
     <string name="stocks_1000_buy_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
     <string name="stocks_1000_buy_purchase_volume">Общая сумма покупки в $</string>
     <string name="stocks_1000_buy_order_lifetime_seconds">Время жизни заявки в секундах</string>
@@ -170,6 +179,9 @@
 
     <!-- love settings -->
     <string name="stocks_love_set">Набор избранных (тикеры через пробел)</string>
+
+    <!-- black settings -->
+    <string name="stocks_black_set">Чёрный список (тикеры через пробел)</string>
 
     <!-- tazik settings -->
     <string name="stocks_tazik_set_1">Набор 1 (тикеры через пробел)</string>
@@ -313,15 +325,26 @@
     <string name="setting_key_2358_protect_stock_up">2358_protect_stock_up</string>
 
     <!-- 1000 sell settings -->
+    <string name="setting_key_1000_sell_set_1">1000_sell_set_1</string>
+    <string name="setting_key_1000_sell_set_2">1000_sell_set_2</string>
+    <string name="setting_key_1000_sell_set_3">1000_sell_set_3</string>
+    <string name="setting_key_1000_sell_set_4">1000_sell_set_4</string>
     <string name="setting_key_1000_sell_take_profit">1000_take_sell_profit</string>
 
     <!-- 1000 buy settings -->
+    <string name="setting_key_1000_buy_set_1">1000_buy_set_1</string>
+    <string name="setting_key_1000_buy_set_2">1000_buy_set_2</string>
+    <string name="setting_key_1000_buy_set_3">1000_buy_set_3</string>
+    <string name="setting_key_1000_buy_set_4">1000_buy_set_4</string>
     <string name="setting_key_1000_buy_take_profit">1000_buy_take_profit</string>
     <string name="setting_key_1000_buy_purchase_volume">1000_buy_purchase_volume</string>
     <string name="setting_key_1000_buy_order_lifetime_seconds">1000_buy_order_lifetime_seconds</string>
 
     <!-- love settings -->
     <string name="setting_key_love_set">love_set</string>
+
+    <!-- blacklist settings -->
+    <string name="setting_key_black_set">black_set</string>
 
     <!-- premarket settings -->
     <string name="setting_key_premarket_price_change_percent">premarket_price_change_percent</string>

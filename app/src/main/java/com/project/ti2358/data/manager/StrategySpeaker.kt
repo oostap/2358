@@ -72,6 +72,24 @@ class StrategySpeaker : KoinComponent, TextToSpeech.OnInitListener {
         }
     }
 
+    fun speakLimit(limitStock: LimitStock) {
+        if (SettingsManager.getLimitsVoice()) {
+            val tickerLetters = limitStock.stock.ticker.split("")
+            var text = tickerLetters.joinToString(" ")
+            text += when (limitStock.type)  {
+                LimitType.ON_UP -> " на лимите"
+                LimitType.ON_DOWN -> " на лимите"
+
+                LimitType.ABOVE_UP -> " выше лимита"
+                LimitType.UNDER_DOWN -> "️️ ниже лимита"
+
+                LimitType.NEAR_UP -> " рядом с лимитом"
+                LimitType.NEAR_DOWN -> "️️ рядом с лимитом"
+            }
+            speak(text)
+        }
+    }
+
     private fun makeNiceChange(ticker: String, change: Double) : String {
         val tickerLetters = ticker.split("")
         val tickerSpaced = tickerLetters.joinToString(" ")

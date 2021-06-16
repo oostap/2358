@@ -79,7 +79,7 @@ class LoveFragment : Fragment(R.layout.fragment_love) {
         GlobalScope.launch(Dispatchers.Main) {
             strategyLove.process(stockManager.stocksStream)
             stocks = strategyLove.resort()
-            stocks = Utils.search(stocks, query)
+            if (query != "") stocks = Utils.search(stocks, query)
             adapterList.setData(stocks)
         }
     }

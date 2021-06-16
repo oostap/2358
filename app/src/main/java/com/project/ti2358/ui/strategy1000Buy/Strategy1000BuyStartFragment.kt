@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -16,6 +17,9 @@ import com.project.ti2358.data.manager.Strategy1000Buy
 import com.project.ti2358.databinding.Fragment1000BuyStartBinding
 import com.project.ti2358.databinding.Fragment1000BuyStartItemBinding
 import com.project.ti2358.service.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.util.*
@@ -28,6 +32,7 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
 
     var adapterList: Item1005RecyclerViewAdapter = Item1005RecyclerViewAdapter(emptyList())
     var stocks: MutableList<Stock> = mutableListOf()
+    var numberSet: Int = 1
 
     override fun onDestroy() {
         fragment1000BuyStartBinding = null
@@ -45,7 +50,8 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
             list.adapter = adapterList
 
             startButton.setOnClickListener {
-                if (strategy1000Buy.stocksSelected.isNotEmpty()) {
+                if (strategy1000Buy.presetStocksSelected.isNotEmpty()) {
+                    strategy1000Buy.currentNumberSet = numberSet
                     view.findNavController().navigate(R.id.action_nav_1000_buy_start_to_nav_1000_buy_finish)
                 } else {
                     Utils.showErrorAlert(requireContext())
@@ -53,6 +59,26 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
             }
 
             updateButton.setOnClickListener {
+                updateData()
+            }
+
+            set1Button.setOnClickListener {
+                numberSet = 1
+                updateData()
+            }
+
+            set2Button.setOnClickListener {
+                numberSet = 2
+                updateData()
+            }
+
+            set3Button.setOnClickListener {
+                numberSet = 3
+                updateData()
+            }
+
+            set4Button.setOnClickListener {
+                numberSet = 4
                 updateData()
             }
 
@@ -68,15 +94,11 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
                 }
 
                 fun processText(text: String) {
-                    updateData()
-
-                    stocks = Utils.search(stocks, text)
-                    adapterList.setData(stocks)
+                    updateData(text)
                 }
             })
             searchView.setOnCloseListener {
-                stocks = strategy1000Buy.process()
-                adapterList.setData(stocks)
+                updateData()
                 false
             }
         }
@@ -84,10 +106,41 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
         updateData()
     }
 
-    private fun updateData() {
-        stocks = strategy1000Buy.process()
-        stocks = strategy1000Buy.resort()
-        adapterList.setData(stocks)
+    private fun updateData(search: String = "") {
+        GlobalScope.launch(Dispatchers.Main) {
+            strategy1000Buy.process(numberSet)
+            if (search != "") {
+                stocks = Utils.search(stocks, search)
+            }
+            stocks = strategy1000Buy.resort()
+            adapterList.setData(stocks)
+            updateTitle()
+
+            fragment1000BuyStartBinding?.let {
+                val colorDefault = Utils.DARK_BLUE
+                val colorSelect = Utils.RED
+
+                it.set1Button.setBackgroundColor(colorDefault)
+                it.set2Button.setBackgroundColor(colorDefault)
+                it.set3Button.setBackgroundColor(colorDefault)
+                it.set4Button.setBackgroundColor(colorDefault)
+
+                when (numberSet) {
+                    1 -> it.set1Button.setBackgroundColor(colorSelect)
+                    2 -> it.set2Button.setBackgroundColor(colorSelect)
+                    3 -> it.set3Button.setBackgroundColor(colorSelect)
+                    4 -> it.set4Button.setBackgroundColor(colorSelect)
+                    else -> { }
+                }
+            }
+        }
+    }
+
+    private fun updateTitle() {
+        if (isAdded) {
+            val act = requireActivity() as AppCompatActivity
+            act.supportActionBar?.title = "700/1000 BUY - $numberSet (${strategy1000Buy.presetStocksSelected.size} шт.)"
+        }
     }
 
     inner class Item1005RecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<Item1005RecyclerViewAdapter.ViewHolder>() {
@@ -123,7 +176,8 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
                     priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
 
                     chooseView.setOnCheckedChangeListener { _, checked ->
-                        strategy1000Buy.setSelected(stock, checked)
+                        strategy1000Buy.setSelected(stock, checked, numberSet)
+                        updateData()
                     }
 
                     itemView.setOnClickListener {

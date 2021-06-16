@@ -31,8 +31,7 @@ class StrategyTazikStartFragment : Fragment(R.layout.fragment_tazik_start) {
     private var fragmentTazikStartBinding: FragmentTazikStartBinding? = null
 
     var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
-    lateinit var stocks: MutableList<Stock>
-
+    var stocks: MutableList<Stock> = mutableListOf()
     var numberSet: Int = 1
 
     override fun onDestroy() {
