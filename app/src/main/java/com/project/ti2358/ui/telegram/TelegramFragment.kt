@@ -45,6 +45,7 @@ class TelegramFragment : Fragment(R.layout.fragment_telegram) {
                 }
                 updateServiceButtonText()
             }
+            updateServiceButtonText()
         }
     }
 

@@ -44,7 +44,7 @@ class StrategyRocket : KoinComponent {
     }
 
     suspend fun restartStrategy() = withContext(StockManager.rocketContext) {
-        stopStrategy()
+        if (started) stopStrategy()
         delay(500)
         startStrategy()
     }

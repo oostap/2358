@@ -58,7 +58,7 @@ class StrategyLimits : KoinComponent {
     }
 
     suspend fun restartStrategy() = withContext(StockManager.limitsContext) {
-        stopStrategy()
+        if (started) stopStrategy()
         delay(500)
         startStrategy()
     }

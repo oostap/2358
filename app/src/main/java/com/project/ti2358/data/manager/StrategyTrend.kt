@@ -43,7 +43,7 @@ class StrategyTrend : KoinComponent {
     }
 
     suspend fun restartStrategy() = withContext(StockManager.trendContext) {
-        stopStrategy()
+        if (started) stopStrategy()
         delay(500)
         startStrategy()
     }

@@ -42,6 +42,27 @@ class StrategyFollower : KoinComponent {
                     return@forEach
                 }
             }
+            val operation = list[0].toLowerCase()
+
+            if (operation == "top") { // топ отросших бумаг от закрытия
+                var count = 10
+                if (list.size == 2) count = list[1].toInt()
+                val all = stockManager.stocksStream.toMutableList()
+                all.removeAll { it.getPrice2300() == 0.0 }
+                all.sortByDescending { it.changePrice2300DayPercent }
+                strategyTelegram.sendTop(all, count)
+                return
+            } else {
+                if (operation == "bot") { // топ отросших бумаг от закрытия
+                    var count = 10
+                    if (list.size == 2) count = list[1].toInt()
+                    val all = stockManager.stocksStream.toMutableList()
+                    all.sortBy { it.changePrice2300DayPercent }
+                    strategyTelegram.sendTop(all, count)
+                    return
+                }
+            }
+
             if (contains) {
                 strategyTelegram.sendPulse(messageId)
                 return
@@ -78,17 +99,13 @@ class StrategyFollower : KoinComponent {
 
         try {
             val operation = list[1].toLowerCase()
-            val ticker = list[2].toUpperCase()
+            var ticker = ""
 
-            if (operation == "top") { // топ отросших бумаг от закрытия
-                var count = 10
-                if (list.size == 3) {
-                    count = list[2].toInt()
-                }
-                val all = stockManager.stocksStream.toMutableList()
-                all.sortBy { it.changePrice2300DayPercent }
-                strategyTelegram.sendTop(all, count)
-            } else if (operation == "restart") {
+            if (list.size > 2) {
+                ticker = list[2].toUpperCase()
+            }
+
+            if (operation == "restart") {
                 if (ticker == "ALL") {
                     GlobalScope.launch(Dispatchers.Main) {
                         stockManager.reloadClosePrices()
@@ -145,6 +162,7 @@ class StrategyFollower : KoinComponent {
                         strategyLimits.stopStrategy()
                     }
                 }
+                return 2
             }
 
 

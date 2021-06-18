@@ -648,6 +648,35 @@ class StrategyTelegram : KoinComponent {
         return replyMarkup
     }
 
+    fun getButtonsMarkupMany(stocks: List<Stock>): ReplyMarkup? {
+        if (!SettingsManager.getTelegramSendGotoTerminal()) return null
+
+        val rows = stocks.size / 4 + 1
+        var index = 0
+        val buttons: MutableList<MutableList<InlineKeyboardButton>> = mutableListOf()
+        for (i in 0 until rows) {
+            val rowButtons: MutableList<InlineKeyboardButton> = mutableListOf()
+            for (j in 0 until 4) {
+                if (index >= stocks.size) break
+
+                val stock = stocks[index]
+                val ticker = stock.ticker
+                val data: MutableMap<String, String> = mutableMapOf()
+                data["m"] = "setTicker"
+                data["t"] = ticker
+
+                val dataJson = gson.toJson(data)
+                val b = InlineKeyboardButton.CallbackData(text = ticker, callbackData = dataJson)
+                rowButtons.add(b)
+                index++
+            }
+            buttons.add(rowButtons)
+        }
+
+
+        return InlineKeyboardMarkup.create(buttons)
+    }
+
     fun sendStock(stock: Stock) {
         val buttons = getButtonsMarkup(stock)
         val price = stock.getPriceRaw()
@@ -676,27 +705,13 @@ class StrategyTelegram : KoinComponent {
     }
 
     fun sendTop(stocks: List<Stock>, count: Int) {
-        // TODO: вывести топ отросших бумаг
         var text = ""
-        for (i in 0..count) {
+        for (i in 0 until count) {
             val stock = stocks[i]
-            text = "$%s"
+            text += "$%s %4.2f$ -> %4.2f$ = %4.2f%%\n".format(stock.ticker, stock.getPrice2300(), stock.getPriceRaw(), stock.changePrice2300DayPercent)
         }
-//        if (started && SettingsManager.getTelegramSendTaziks()) {
-//            val text = "🛁$%s B%.2f$ -> S%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
-//                locale = Locale.US,
-//                purchase.ticker,
-//                buyPrice,
-//                sellPrice,
-//                priceFrom,
-//                priceTo,
-//                change,
-//                tazikUsed,
-//                tazikTotal
-//            )
-//            val buttons = getButtonsMarkup(purchase.stock)
-//            sendMessageToChats(text, -1, replyMarkup = buttons)
-//        }
+        val buttons = getButtonsMarkupMany(stocks.subList(0, count))
+        sendMessageToChats(text, -1, replyMarkup = buttons)
     }
 
     fun sendTest() {

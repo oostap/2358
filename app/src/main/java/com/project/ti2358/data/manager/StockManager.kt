@@ -248,6 +248,9 @@ class StockManager : KoinComponent {
         "PBI" to "пибай",
         
         "BIDU" to "байда беда",
+
+        "CLOV" to "плов",
+        "TAL" to "талый",
     )
 
     private suspend fun afterLoadInstruments(instrumentsAll: MutableList<Instrument>) = withContext(stockContext){
@@ -284,7 +287,7 @@ class StockManager : KoinComponent {
     }
 
     fun getStockByTicker(ticker: String): Stock? {
-        return stocksAll.find { it.ticker == ticker }
+        return stocksAll.find { it.ticker == ticker || ticker.toLowerCase() in it.alterName}
     }
 
     private suspend fun processStocks() = withContext(stockContext) {

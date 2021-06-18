@@ -262,7 +262,7 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     suspend fun restartStrategy(newPercent: Double = 0.0) = withContext(StockManager.stockContext) {
-        stopStrategy()
+        if (started) stopStrategy()
 
         if (newPercent != 0.0) {
             val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
