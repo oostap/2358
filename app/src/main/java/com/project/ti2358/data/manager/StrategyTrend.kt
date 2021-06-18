@@ -42,6 +42,12 @@ class StrategyTrend : KoinComponent {
         return@withContext stocks
     }
 
+    suspend fun restartStrategy() = withContext(StockManager.trendContext) {
+        stopStrategy()
+        delay(500)
+        startStrategy()
+    }
+
     suspend fun startStrategy() = withContext(StockManager.trendContext) {
         trendUpStocks.clear()
         trendDownStocks.clear()
@@ -154,18 +160,25 @@ class StrategyTrend : KoinComponent {
 
         stock.resetTrendPrice()
 
+        val toCandle = stock.minuteCandles.last()
         var fire = false
         if (changeFromStart > 0 && SettingsManager.getTrendShort()) {
-//            val last = trendDownStocks.find { it.stock.ticker == stock.ticker }
-//            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return }
+            val last = trendDownStocks.find { it.stock.ticker == stock.ticker }
+            if (last != null) {
+                val deltaTime = ((toCandle.time.time - last.fireTime) / 60.0 / 1000.0).toInt()
+                if (deltaTime < 5) return
+            }
 
             trendDownStocks.add(0, trendStock)
             fire = true
         }
 
         if (changeFromStart < 0 && SettingsManager.getTrendLong()) {
-//            val last = trendUpStocks.find { it.stock.ticker == stock.ticker }
-//            if (last != null) { if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return }
+            val last = trendUpStocks.find { it.stock.ticker == stock.ticker }
+            if (last != null) {
+                val deltaTime = ((toCandle.time.time - last.fireTime) / 60.0 / 1000.0).toInt()
+                if (deltaTime < 5) return
+            }
 
             trendUpStocks.add(0, trendStock)
             fire = true

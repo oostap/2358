@@ -112,8 +112,8 @@ class StrategyTazikEndless : KoinComponent {
         return stock in stocksSelected
     }
 
-    fun getPurchaseStock(): MutableList<PurchaseStock> = runBlocking(StockManager.stockContext) {
-        if (started) return@runBlocking stocksToPurchase
+    suspend fun getPurchaseStock(): MutableList<PurchaseStock> = withContext(StockManager.stockContext) {
+        if (started) return@withContext stocksToPurchase
 
         val percent = SettingsManager.getTazikEndlessChangePercent()
         val totalMoney: Double = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
@@ -134,9 +134,7 @@ class StrategyTazikEndless : KoinComponent {
         }
         stocksToPurchase = purchases
         stocksToPurchase.forEach {
-            if (it.percentLimitPriceChange == 0.0) {
-                it.percentLimitPriceChange = percent
-            }
+            it.percentLimitPriceChange = percent
 
             val total = if (it.stock.instrument.currency == Currency.RUB) onePiece * Utils.getUSDRUB() else onePiece
 
@@ -176,7 +174,7 @@ class StrategyTazikEndless : KoinComponent {
 
         stocksToPurchaseClone = stocksToPurchase.toMutableList()
 
-        return@runBlocking stocksToPurchase
+        return@withContext stocksToPurchase
     }
 
     fun getNotificationTitle(): String {
@@ -261,6 +259,22 @@ class StrategyTazikEndless : KoinComponent {
         for (purchase in stocksToPurchaseClone) {
             purchase.tazikEndlessPrice = purchase.stock.getPriceNow(SettingsManager.getTazikEndlessMinVolume(), true)
         }
+    }
+
+    suspend fun restartStrategy(newPercent: Double = 0.0) = withContext(StockManager.stockContext) {
+        stopStrategy()
+
+        if (newPercent != 0.0) {
+            val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
+            val editor: SharedPreferences.Editor = preferences.edit()
+            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_min_percent_to_buy)
+            editor.putString(key, "%.2f".format(newPercent))
+            editor.apply()
+        }
+
+        getPurchaseStock()
+        delay(500)
+        startStrategy()
     }
 
     suspend fun startStrategy() = withContext(StockManager.stockContext) {

@@ -197,7 +197,7 @@ class StrategyTelegram : KoinComponent {
                         bot.sendMessage(ChatId.fromId(id = update.message!!.chat.id), text = text)
                         update.consume()
                     } else if (command.startsWith("!")) {
-                        if (strategyFollower.started) {
+                        if (strategyFollower.started && SettingsManager.getTelegramAllowCommandHandle()) {
                             val success = strategyFollower.processActiveCommand(update.message!!.from?.id ?: 0, command)
                             val status = when (success) {
                                 0 -> "-"
@@ -214,7 +214,7 @@ class StrategyTelegram : KoinComponent {
                         }
                         update.consume()
                     } else {
-                        if (strategyFollower.started) {
+                        if (strategyFollower.started && SettingsManager.getTelegramAllowCommandInform()) {
                             strategyFollower.processInfoCommand(command, update.message!!.messageId)
                         }
                     }
@@ -446,19 +446,19 @@ class StrategyTelegram : KoinComponent {
     fun sendLimit(limitStock: LimitStock) {
         if (started && SettingsManager.getTelegramSendLimits()) {
             val emoji = when (limitStock.type)  {
-                LimitType.ON_UP -> "⬆️ на лимите"
-                LimitType.ON_DOWN -> "⬇️️ на лимите"
+                LimitType.ON_UP -> "⬆️ на лимите ${limitStock.stock.stockInfo?.limit_up}"
+                LimitType.ON_DOWN -> "⬇️️ на лимите ${limitStock.stock.stockInfo?.limit_down}"
 
-                LimitType.ABOVE_UP -> "⬆️ выше лимита"
-                LimitType.UNDER_DOWN -> "⬇️️ ниже лимита"
+                LimitType.ABOVE_UP -> "⬆️ выше лимита ${limitStock.stock.stockInfo?.limit_up}"
+                LimitType.UNDER_DOWN -> "⬇️️ ниже лимита ${limitStock.stock.stockInfo?.limit_down}"
 
-                LimitType.NEAR_UP -> "⬆️ рядом с лимитом"
-                LimitType.NEAR_DOWN -> "⬇️️ рядом с лимитом"
+                LimitType.NEAR_UP -> "⬆️ рядом с лимитом ${limitStock.stock.stockInfo?.limit_up}"
+                LimitType.NEAR_DOWN -> "⬇️️ рядом с лимитом ${limitStock.stock.stockInfo?.limit_down}"
             }
-            val text = "$%s %s %.2f%% / %.2f$ : %.2f$ -> %.2f$".format(
+            val text = "$%s %s / %.2f%% / %.2f$ -- %.2f$ -> %.2f$".format(
                 locale = Locale.US,
-                emoji,
                 limitStock.ticker,
+                emoji,
                 limitStock.percentFire,
                 limitStock.priceFire,
 
@@ -673,6 +673,30 @@ class StrategyTelegram : KoinComponent {
             val phrase = stockManager.getPulsePhrase()
             sendMessageToChats(phrase, replyToMessageId = messageId)
         }
+    }
+
+    fun sendTop(stocks: List<Stock>, count: Int) {
+        // TODO: вывести топ отросших бумаг
+        var text = ""
+        for (i in 0..count) {
+            val stock = stocks[i]
+            text = "$%s"
+        }
+//        if (started && SettingsManager.getTelegramSendTaziks()) {
+//            val text = "🛁$%s B%.2f$ -> S%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
+//                locale = Locale.US,
+//                purchase.ticker,
+//                buyPrice,
+//                sellPrice,
+//                priceFrom,
+//                priceTo,
+//                change,
+//                tazikUsed,
+//                tazikTotal
+//            )
+//            val buttons = getButtonsMarkup(purchase.stock)
+//            sendMessageToChats(text, -1, replyMarkup = buttons)
+//        }
     }
 
     fun sendTest() {

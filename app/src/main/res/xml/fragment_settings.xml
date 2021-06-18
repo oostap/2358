@@ -745,6 +745,16 @@
             app:title="@string/stocks_telegram_send_goto_terminal"
             app:defaultValue="true" />
 
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_telegram_allow_command_inform"
+            app:title="@string/stocks_telegram_allow_command_inform"
+            app:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_telegram_allow_command_handle"
+            app:title="@string/stocks_telegram_allow_command_handle"
+            app:defaultValue="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_follower">

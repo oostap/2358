@@ -9,7 +9,6 @@ import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.databinding.FragmentTelegramBinding
-import com.project.ti2358.service.StrategyFollowerService
 import com.project.ti2358.service.StrategyTelegramService
 import com.project.ti2358.service.Utils
 import org.koin.android.ext.android.inject
@@ -46,20 +45,6 @@ class TelegramFragment : Fragment(R.layout.fragment_telegram) {
                 }
                 updateServiceButtonText()
             }
-
-            startFollowerButton.setOnClickListener {
-                if (SettingsManager.getTelegramBotApiKey() == "") {
-                    Utils.showMessageAlert(requireContext(), "API KEY телеграм бота не задан")
-                    return@setOnClickListener
-                }
-
-                if (Utils.isServiceRunning(requireContext(), StrategyFollowerService::class.java)) {
-                    requireContext().stopService(Intent(context, StrategyFollowerService::class.java))
-                } else {
-                    Utils.startService(requireContext(), StrategyFollowerService::class.java)
-                }
-                updateServiceButtonText()
-            }
         }
     }
 
@@ -68,12 +53,6 @@ class TelegramFragment : Fragment(R.layout.fragment_telegram) {
             fragmentTelegramBinding?.startButton?.text = getString(R.string.stop)
         } else {
             fragmentTelegramBinding?.startButton?.text = getString(R.string.start_telegram)
-        }
-
-        if (Utils.isServiceRunning(requireContext(), StrategyFollowerService::class.java)) {
-            fragmentTelegramBinding?.startFollowerButton?.text = getString(R.string.stop)
-        } else {
-            fragmentTelegramBinding?.startFollowerButton?.text = getString(R.string.start_follower)
         }
     }
 }

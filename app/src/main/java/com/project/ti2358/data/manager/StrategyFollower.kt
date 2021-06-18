@@ -18,6 +18,12 @@ class StrategyFollower : KoinComponent {
     private val ordersService: OrdersService by inject()
     private val orderbookManager: OrderbookManager by inject()
     private val strategyTelegram: StrategyTelegram by inject()
+
+    private val strategyTazikEndless: StrategyTazikEndless by inject()
+    private val strategyRocket: StrategyRocket by inject()
+    private val strategyTrend: StrategyTrend by inject()
+    private val strategyLimits: StrategyLimits by inject()
+
     private var moneySpent: Double = 0.0
 
     private var jobRefreshDeposit: Job? = null
@@ -28,7 +34,7 @@ class StrategyFollower : KoinComponent {
         try {
             val list = command.split(" ")
 
-            val pulseWords = listOf("пульс", "резать", "лося", "лось", "хомяк", "пастух", "аллигатор", "профит", "трейд")
+            val pulseWords = listOf("пульс", "резать", "лось", "хомяк", "пастух", "аллигатор", "профит", "трейд")
             var contains = false
             pulseWords.forEach {
                 if (it in command) {
@@ -71,19 +77,82 @@ class StrategyFollower : KoinComponent {
         if (userId !in followIds) return 0
 
         try {
-            val oneStock = stockManager.getStockByTicker(command.toUpperCase())
-            if (oneStock != null) {
-                strategyTelegram.sendStock(oneStock)
-                return 2
-            }
-
             val operation = list[1].toLowerCase()
             val ticker = list[2].toUpperCase()
+
+            if (operation == "top") { // топ отросших бумаг от закрытия
+                var count = 10
+                if (list.size == 3) {
+                    count = list[2].toInt()
+                }
+                val all = stockManager.stocksStream.toMutableList()
+                all.sortBy { it.changePrice2300DayPercent }
+                strategyTelegram.sendTop(all, count)
+            } else if (operation == "restart") {
+                if (ticker == "ALL") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        stockManager.reloadClosePrices()
+                        strategyTazikEndless.restartStrategy()
+                        strategyRocket.restartStrategy()
+                        strategyTrend.restartStrategy()
+                        strategyLimits.restartStrategy()
+                    }
+                } else if (ticker == "TAZ") {
+                    var percent = 0.0
+                    if (list.size == 4) {
+                        percent = list[3].toDouble()
+                    }
+
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategyTazikEndless.restartStrategy(percent)
+                    }
+                } else if (ticker == "ROCKET") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategyRocket.restartStrategy()
+                    }
+                } else if (ticker == "TREND") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategyTrend.restartStrategy()
+                    }
+                } else if (ticker == "LIMIT") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategyLimits.restartStrategy()
+                    }
+                }
+                return 2
+            } else if (operation == "stop") {
+                if (ticker == "ALL") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategyTazikEndless.stopStrategy()
+                        strategyRocket.stopStrategy()
+                        strategyTrend.stopStrategy()
+                        strategyLimits.stopStrategy()
+                    }
+                } else if (ticker == "TAZ") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategyTazikEndless.stopStrategy()
+                    }
+                } else if (ticker == "ROCKET") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategyRocket.stopStrategy()
+                    }
+                } else if (ticker == "TREND") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategyTrend.stopStrategy()
+                    }
+                } else if (ticker == "LIMIT") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategyLimits.stopStrategy()
+                    }
+                }
+            }
+
+
             val stock = stockManager.getStockByTicker(ticker)
             val figi = stock?.figi ?: ""
             if (figi == "") return 0
 
-            if (operation in listOf("BUY", "SELL")) {
+            if (operation in listOf("buy", "sell")) {
                 if (list.size != 5) return 0
                 val price = list[3].toDouble()
                 val percent = list[4].toInt()

@@ -109,10 +109,8 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
     private fun updateData(search: String = "") {
         GlobalScope.launch(Dispatchers.Main) {
             strategy1000Buy.process(numberSet)
-            if (search != "") {
-                stocks = Utils.search(stocks, search)
-            }
             stocks = strategy1000Buy.resort()
+            if (search != "") stocks = Utils.search(stocks, search)
             adapterList.setData(stocks)
             updateTitle()
 

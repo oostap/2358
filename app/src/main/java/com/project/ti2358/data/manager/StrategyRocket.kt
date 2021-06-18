@@ -43,6 +43,12 @@ class StrategyRocket : KoinComponent {
         return@withContext stocks
     }
 
+    suspend fun restartStrategy() = withContext(StockManager.rocketContext) {
+        stopStrategy()
+        delay(500)
+        startStrategy()
+    }
+
     suspend fun startStrategy() = withContext(StockManager.rocketContext) {
         rocketStocks.clear()
         cometStocks.clear()
@@ -103,14 +109,16 @@ class StrategyRocket : KoinComponent {
         if (changePercent > 0) {
             val last = rocketStocks.firstOrNull { it.stock.ticker == stock.ticker }
             if (last != null) {
-                if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return
+                val deltaTime = ((toCandle.time.time - last.fireTime) / 60.0 / 1000.0).toInt()
+                if (deltaTime < 5) return
             }
 
             rocketStocks.add(0, rocketStock)
         } else {
             val last = cometStocks.firstOrNull { it.stock.ticker == stock.ticker }
             if (last != null) {
-                if (((Calendar.getInstance().time.time - last.fireTime) / 60.0 / 1000.0).toInt() < 5) return
+                val deltaTime = ((toCandle.time.time - last.fireTime) / 60.0 / 1000.0).toInt()
+                if (deltaTime < 5) return
             }
 
             cometStocks.add(0, rocketStock)

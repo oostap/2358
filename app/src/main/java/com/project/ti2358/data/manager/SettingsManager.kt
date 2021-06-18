@@ -223,7 +223,7 @@ class SettingsManager {
         fun getLoveSet(): List<String> {
             val key = TheApplication.application.applicationContext.getString(R.string.setting_key_love_set)
             val value: String? = preferences.getString(key, "SPCE TAL")?.trim()
-            val array = value?.split(" ")
+            val array = value?.toUpperCase()?.split(" ")
             return array ?: emptyList()
         }
 
@@ -232,7 +232,7 @@ class SettingsManager {
         fun getBlackSet(): List<String> {
             val key = TheApplication.application.applicationContext.getString(R.string.setting_key_black_set)
             val value: String? = preferences.getString(key, "LPL ACH")?.trim()
-            val array = value?.split(" ")
+            val array = value?.toUpperCase()?.split(" ")
             return array ?: emptyList()
         }
 
@@ -280,7 +280,7 @@ class SettingsManager {
         /******************** 1000 sell *************************/
 
         fun stringToPresetStocks(value: String): List<PresetStock> {
-            val array = value.split("\n")
+            val array = value.toUpperCase().split("\n")
             val presetStocks: MutableList<PresetStock> = mutableListOf()
             array.forEach {
                 val params = it.split(" ")
@@ -873,6 +873,16 @@ class SettingsManager {
         fun getTelegramSendGotoTerminal(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_goto_terminal)
             return preferences.getBoolean(key, true)
+        }
+
+        fun getTelegramAllowCommandInform(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_allow_command_inform)
+            return preferences.getBoolean(key, false)
+        }
+
+        fun getTelegramAllowCommandHandle(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_allow_command_handle)
+            return preferences.getBoolean(key, false)
         }
 
         /******************** 2225 short *************************/

@@ -2,9 +2,11 @@ package com.project.ti2358.ui.strategy1000Buy
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -123,6 +125,8 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
         override fun getItemCount(): Int = values.size
 
         inner class ViewHolder(private val binding: Fragment1000BuyFinishItemBinding) : RecyclerView.ViewHolder(binding.root) {
+            var watcher: TextWatcher? = null
+
             fun bind(index: Int) {
                 val purchaseStock = values[index]
 
@@ -136,32 +140,51 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
                     pricePlusButton.setOnClickListener {
                         purchaseStock.addPriceLimitPercent(0.05)
                         refreshPercent(purchaseStock)
+                        lotsEditText.setText("${purchaseStock.lots}")
                     }
 
                     priceMinusButton.setOnClickListener {
                         purchaseStock.addPriceLimitPercent(-0.05)
                         refreshPercent(purchaseStock)
+                        lotsEditText.setText("${purchaseStock.lots}")
                     }
 
                     lotsPlusButton.setOnClickListener {
                         purchaseStock.addLots(1)
                         refreshPercent(purchaseStock)
+                        lotsEditText.setText("${purchaseStock.lots}")
                     }
 
                     lotsMinusButton.setOnClickListener {
                         purchaseStock.addLots(-1)
                         refreshPercent(purchaseStock)
+                        lotsEditText.setText("${purchaseStock.lots}")
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                    refreshPercent(purchaseStock)
+
+                    lotsEditText.clearFocus()
+                    lotsEditText.removeCallbacks {  }
+                    lotsEditText.removeTextChangedListener(watcher)
+                    lotsEditText.setText("${purchaseStock.lots}")
+                    watcher = lotsEditText.addTextChangedListener { v ->
+                        if (lotsEditText.hasFocus()) {
+                            val value = try {
+                                (v.toString()).toInt()
+                            } catch (e: Exception) {
+                                1
+                            }
+                            purchaseStock.lots = value
+                            refreshPercent(purchaseStock)
+                        }
+                    }
                 }
             }
 
             private fun refreshPercent(purchaseStock: PurchaseStock) {
                 with (binding) {
                     val percent = purchaseStock.percentLimitPriceChange
-
-                    lotsView.text = "${purchaseStock.lots} шт."
 
                     priceChangePercentView.text = percent.toPercent()
                     priceChangeAbsoluteView.text = purchaseStock.absoluteLimitPriceChange.toMoney(purchaseStock.stock)

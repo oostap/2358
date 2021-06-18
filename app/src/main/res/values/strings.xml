@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">2358</string>
-    <string name="title_activity_main">2358</string>
+    <string name="app_name">oost.app</string>
+    <string name="title_activity_main">oost.app</string>
     <string name="nav_header_subtitle">Котлета:</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
@@ -246,10 +246,13 @@
     <string name="stocks_telegram_send_spikes">Спайки</string>
     <string name="stocks_telegram_send_trends">Тренды</string>
     <string name="stocks_telegram_send_limits">Лимиты</string>
+
+    <string name="stocks_telegram_allow_command_inform">Информационные команды</string>
+    <string name="stocks_telegram_allow_command_handle">Команды управления</string>
     <string name="stocks_telegram_send_goto_terminal">Переход в терминал</string>
 
     <!-- follower settings -->
-    <string name="stocks_follower_pastuh_id">Айди торговцев через пробел</string>
+    <string name="stocks_follower_pastuh_id">Чьи команды исполнять? Телеграм айди через пробел</string>
     <string name="stocks_follower_purchase_volume">Общая сумма для торговли</string>
 
     <!-- 2225 short settings -->
@@ -423,6 +426,9 @@
     <string name="setting_key_telegram_send_spikes">telegram_send_spikes</string>
     <string name="setting_key_telegram_send_trends">telegram_send_trends</string>
     <string name="setting_key_telegram_send_limits">telegram_send_limits</string>
+    <string name="setting_key_telegram_allow_command_inform">telegram_allow_command_inform</string>
+    <string name="setting_key_telegram_allow_command_handle">telegram_allow_command_handle</string>
+
     <string name="setting_key_telegram_send_goto_terminal">telegram_send_goto_terminal</string>
 
     <!-- follower settings -->

@@ -12,6 +12,7 @@ import android.os.PowerManager
 import android.widget.Toast
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.StrategyFollower
 import com.project.ti2358.data.manager.StrategyRocket
 import com.project.ti2358.data.manager.StrategyTelegram
 import kotlinx.coroutines.*
@@ -28,6 +29,7 @@ class StrategyTelegramService : Service() {
     private val NOTIFICATION_ID = 17001131
 
     private val strategyTelegram: StrategyTelegram by inject()
+    private val strategyFollower: StrategyFollower by inject()
 
     private var wakeLock: PowerManager.WakeLock? = null
     private var isServiceRunning = false
@@ -63,6 +65,7 @@ class StrategyTelegramService : Service() {
         val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "TELEGRAM","",  "", "")
         startForeground(NOTIFICATION_ID, notification)
         strategyTelegram.startStrategy()
+        strategyFollower.startStrategy()
         scheduleUpdate()
     }
 
@@ -73,6 +76,7 @@ class StrategyTelegramService : Service() {
         isServiceRunning = false
         job?.cancel()
         strategyTelegram.stopStrategy()
+        strategyFollower.stopStrategy()
         super.onDestroy()
     }
 

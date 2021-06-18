@@ -19,6 +19,7 @@ import com.project.ti2358.data.manager.StrategyTazikEndless
 import com.project.ti2358.databinding.FragmentTazikEndlessFinishBinding
 import com.project.ti2358.databinding.FragmentTazikEndlessFinishItemBinding
 import com.project.ti2358.service.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -58,12 +59,14 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
             }
         }
 
-        positions = strategyTazikEndless.getPurchaseStock()
-        adapterList.setData(positions)
+        GlobalScope.launch(Dispatchers.Main) {
+            positions = strategyTazikEndless.getPurchaseStock()
+            adapterList.setData(positions)
 
-        updateInfoText()
-        updateServiceButtonText()
-        updateTitle()
+            updateInfoText()
+            updateServiceButtonText()
+            updateTitle()
+        }
     }
 
     private fun updateTitle() {

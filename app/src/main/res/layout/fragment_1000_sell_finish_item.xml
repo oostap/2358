@@ -52,7 +52,6 @@
         android:layout_weight="10.6"
         android:orientation="vertical">
 
-
         <EditText
             android:id="@+id/lots_edit_text"
             android:layout_width="match_parent"
