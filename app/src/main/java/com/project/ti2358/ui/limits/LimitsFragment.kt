@@ -158,7 +158,7 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
 
                     orderbookButton.setOnClickListener {
                         orderbookManager.start(stock)
-                        orderbookButton.findNavController().navigate(R.id.action_nav_trend_to_nav_orderbook)
+                        orderbookButton.findNavController().navigate(R.id.action_nav_limits_to_nav_orderbook)
                     }
 
                     sectorView.text = stock.getSectorName()

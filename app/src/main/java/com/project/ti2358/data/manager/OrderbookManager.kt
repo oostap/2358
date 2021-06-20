@@ -13,8 +13,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.lang.Exception
 import kotlin.math.max
-import kotlin.random.Random.Default.nextDouble
-import kotlin.random.Random.Default.nextInt
 
 @KoinApiExtension
 class OrderbookManager() : KoinComponent {

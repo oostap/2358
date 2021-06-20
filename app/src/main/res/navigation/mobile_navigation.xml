@@ -45,7 +45,11 @@
         android:id="@+id/nav_limits"
         android:name="com.project.ti2358.ui.limits.LimitsFragment"
         android:label="@string/menu_limits"
-        tools:layout="@layout/fragment_limits" />
+        tools:layout="@layout/fragment_limits" >
+        <action
+            android:id="@+id/action_nav_limits_to_nav_orderbook"
+            app:destination="@id/nav_orderbook" />
+    </fragment>
 
     <!-- позиция в депо -->
 

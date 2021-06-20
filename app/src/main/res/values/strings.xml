@@ -110,12 +110,15 @@
 
     <string name="dark_theme">Ночная тема</string>
 
-    <!-- tinkoff settings -->
+    <!-- token settings -->
     <string name="token_header">Токены</string>
     <string name="tinkoff_token_title">Tinkoff OpenAPI токен</string>
     <string name="alor_token_title">ALOR OpenAPI токен</string>
     <string name="alor_qoutes_title">Котировки ALOR</string>
     <string name="alor_orderbook_title">Стакан ALOR</string>
+
+    <string name="pantini_telegram_id">Pantini: Телеграм ID</string>
+    <string name="pantini_warden_token">Pantini: Warden Token</string>
 
     <!-- common settings -->
     <string name="stocks_header">Общий фильтр на все экраны</string>
@@ -461,5 +464,9 @@
     <string name="setting_key_limits_up">limits_up</string>
     <string name="setting_key_limits_down">limits_down</string>
     <string name="setting_key_limits_voice">limits_voice</string>
+
+    <!-- pantini -->
+    <string name="setting_key_pantini_telegram_id">pantini_telegram_id</string>
+    <string name="setting_key_pantini_warden_token">pantini_warden_token</string>
 
 </resources>

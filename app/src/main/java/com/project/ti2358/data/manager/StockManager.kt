@@ -1,7 +1,6 @@
 package com.project.ti2358.data.manager
 
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.preference.PreferenceManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.gson.Gson
@@ -10,10 +9,9 @@ import com.google.gson.reflect.TypeToken
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.daager.*
-import com.project.ti2358.data.service.MarketService
-import com.project.ti2358.data.service.StreamingAlorService
-import com.project.ti2358.data.service.StreamingTinkoffService
-import com.project.ti2358.data.service.ThirdPartyService
+import com.project.ti2358.data.model.dto.pantini.PantiniLenta
+import com.project.ti2358.data.model.dto.pantini.PantiniOrderbook
+import com.project.ti2358.data.service.*
 import com.project.ti2358.service.StrategyTelegramService
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
@@ -28,7 +26,6 @@ import org.koin.core.component.inject
 import java.util.ArrayList
 import java.util.Collections.synchronizedList
 import java.util.Collections.synchronizedMap
-import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 @KoinApiExtension
@@ -37,6 +34,7 @@ class StockManager : KoinComponent {
     private val marketService: MarketService by inject()
     private val streamingTinkoffService: StreamingTinkoffService by inject()
     private val streamingAlorService: StreamingAlorService by inject()
+    private val streamingPantiniService: StreamingPantiniService by inject()
     private val strategyTazik: StrategyTazik by inject()
     private val strategyTazikEndless: StrategyTazikEndless by inject()
     private val strategyBlacklist: StrategyBlacklist by inject()
@@ -405,9 +403,32 @@ class StockManager : KoinComponent {
             )
 
         subscribeStockInfo()
+
+        if (SettingsManager.getPantiniWardenToken() != "" && SettingsManager.getPantiniTelegramID() != "") {
+            streamingPantiniService.connect()
+        }
     }
 
     fun subscribeStockOrderbook(stock: Stock) {
+        if (SettingsManager.getPantiniWardenToken() != "" && SettingsManager.getPantiniTelegramID() != "") {
+            streamingPantiniService
+                .getOrderbookEventStream(stock)
+                .onBackpressureBuffer()
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = {
+                        GlobalScope.launch {
+                            addOrderbookUS(it)
+                        }
+                    },
+                    onError = {
+                        it.printStackTrace()
+                        FirebaseCrashlytics.getInstance().recordException(it)
+                    }
+                )
+        }
+
         if (SettingsManager.getAlorOrdebook()) {
             streamingAlorService
                 .getOrderEventStream(
@@ -451,6 +472,25 @@ class StockManager : KoinComponent {
         }
     }
 
+    fun subscribeStockLenta(stock: Stock) {
+        streamingPantiniService
+            .getLentaEventStream(stock)
+            .onBackpressureBuffer()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onNext = {
+                    GlobalScope.launch {
+                        addLentaUS(it)
+                    }
+                },
+                onError = {
+                    it.printStackTrace()
+                    FirebaseCrashlytics.getInstance().recordException(it)
+                }
+            )
+    }
+
     private fun subscribeStockInfo() {
         streamingTinkoffService
             .getStockInfoEventStream(
@@ -478,6 +518,16 @@ class StockManager : KoinComponent {
         } else {
             streamingTinkoffService.unsubscribeOrderEventsStream(stock.figi, 20)
         }
+
+        if (SettingsManager.getPantiniWardenToken() != "" && SettingsManager.getPantiniTelegramID() != "") {
+            streamingPantiniService.unsubscribeOrderbookEventsStream(stock)
+        }
+    }
+
+    fun unsubscribeStockLenta(stock: Stock) {
+        if (SettingsManager.getPantiniWardenToken() != "" && SettingsManager.getPantiniTelegramID() != "") {
+            streamingPantiniService.unsubscribeLentaEventsStream(stock)
+        }
     }
 
     private suspend fun addStockInfo(stockInfo: InstrumentInfo) = withContext(stockContext) {
@@ -494,6 +544,25 @@ class StockManager : KoinComponent {
     private suspend fun addOrderbook(orderbookStream: OrderbookStream) = withContext(stockContext) {
         val stock = stocksStream.find { it.figi == orderbookStream.figi || it.ticker == orderbookStream.figi }
         stock?.processOrderbook(orderbookStream)
+    }
+
+    private suspend fun addOrderbookUS(orderbookPantini: PantiniOrderbook) = withContext(stockContext) {
+        val stock = stocksStream.find { it.figi == orderbookPantini.ticker || it.ticker == orderbookPantini.ticker }
+        if (stock?.lentaUS != null) {
+            stock.processOrderbookUS(orderbookPantini)
+            log("LENTA ${stock.ticker} = ${stock.lentaUS}")
+
+            stock.lentaUS?.let {
+                strategyTelegram.sendLentaUS(stock, it)
+            }
+
+            unsubscribeStockLenta(stock)
+        }
+    }
+
+    private suspend fun addLentaUS(lentaPantini: PantiniLenta) = withContext(stockContext) {
+        val stock = stocksStream.find { it.figi == lentaPantini.ticker || it.ticker == lentaPantini.ticker }
+        stock?.processLentaUS(lentaPantini)
     }
 
     private suspend fun addCandle(candle: Candle) = withContext(stockContext) {

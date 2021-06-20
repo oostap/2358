@@ -4,7 +4,6 @@ import com.google.gson.JsonObject
 import com.project.ti2358.data.api.ThirdPartyApi
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.model.dto.daager.*
-import com.project.ti2358.service.log
 import org.koin.core.component.KoinApiExtension
 import retrofit2.Retrofit
 import retrofit2.http.Url

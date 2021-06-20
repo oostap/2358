@@ -25,13 +25,17 @@ class StrategyTA : KoinComponent {
         return all
     }
 
+    fun processALL() {
+        processMACD()
+    }
+
     fun processMACD() {
         GlobalScope.launch(Dispatchers.Main) {
             try {
                 val all = process()
 
                 all.forEach {
-                    val candles = chartManager.loadCandlesForInterval(it, Interval.DAY)
+                    val candles = chartManager.loadCandlesForInterval(it, Interval.HOUR)
                     analyticsAdapter.resetData(candles)
                     val macd = processTurnMACD(it, candles)
                     val volume = processTurnUpVolume(it, candles)
@@ -41,8 +45,8 @@ class StrategyTA : KoinComponent {
 //                        log("TURN UP RSI ${it.ticker}")
 //                    }
 
-                    if (macd && volume) {
-                        log("TURN UP ${it.ticker} VOLUME + MACD")
+                    if (macd && volume && rsi > 0) {
+                        log("TURN UP RSI + VOLUME + MACD ${it.ticker} ")
                     }
 
 
@@ -54,23 +58,23 @@ class StrategyTA : KoinComponent {
         }
     }
 
-    private fun processRSI(stock: Stock, candles: List<Candle>) : Boolean {
+    private fun processRSI(stock: Stock, candles: List<Candle>) : Int {
         if (candles.size > 10) {
             var days = 9
             for (i in candles.indices.reversed()) {
                 if (candles[i].rsiOne > 75 && stock.short != null) {
                     log("TURN DOWN RSI ${stock.ticker}")
-                    return true
+                    return -1
                 }
                 if (candles[i].rsiOne < 25) {
                     log("TURN UP RSI ${stock.ticker}")
-                    return true
+                    return 1
                 }
                 days--
                 if (days <= 0) break
             }
         }
-        return false
+        return 0
     }
 
     private fun processTurnUpVolume(stock: Stock, candles: List<Candle>) : Boolean {
@@ -88,7 +92,7 @@ class StrategyTA : KoinComponent {
             for (i in candles.indices.reversed()) {
                 val change = candles[i].closingPrice / candles[i].openingPrice * 100.0 - 100.0
                 if (candles[i].volume > avgVolume * 6 && change > -5) {
-                    log("${stock.ticker} VOLUME TURN UP ! v = ${candles[i].volume}, date = ${candles[i].time}")
+                    log("TURN UP VOLUME ${stock.ticker} v = ${candles[i].volume}, date = ${candles[i].time}")
                     return true
                 }
                 days--
@@ -99,6 +103,8 @@ class StrategyTA : KoinComponent {
     }
 
     private fun processTurnMACD(stock: Stock, candles: List<Candle>) : Boolean  {
+        if (candles.isEmpty()) return false
+
         var steps = 3
         var afterBearishDays = 0
 
@@ -131,7 +137,7 @@ class StrategyTA : KoinComponent {
         }
 
         if (steps == 0 && afterBearishDays < 3 && lastMacd > 0) {
-            log("${stock.ticker} MACD TURN UP $lastMacd")
+            log("TURN UP MACD ${stock.ticker}  $lastMacd")
             return true
         }
         return false

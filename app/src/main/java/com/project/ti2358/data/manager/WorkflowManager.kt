@@ -106,6 +106,7 @@ class WorkflowManager() : KoinComponent {
             fun provideOperationsService(retrofit: Retrofit): OperationsService = OperationsService(retrofit)
             fun provideStreamingTinkoffService(): StreamingTinkoffService = StreamingTinkoffService()
             fun provideStreamingAlorService(): StreamingAlorService = StreamingAlorService()
+            fun provideStreamingPantiniService(): StreamingPantiniService = StreamingPantiniService()
             fun provideThirdPartyService(retrofit: Retrofit): ThirdPartyService = ThirdPartyService(retrofit)
 
             single { provideMarketService(get()) }
@@ -114,6 +115,7 @@ class WorkflowManager() : KoinComponent {
             single { provideOperationsService(get()) }
             single { provideStreamingTinkoffService() }
             single { provideStreamingAlorService() }
+            single { provideStreamingPantiniService() }
             single { provideThirdPartyService(get()) }
         }
 

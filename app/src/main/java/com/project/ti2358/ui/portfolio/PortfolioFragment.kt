@@ -66,7 +66,7 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
             updateButton.setOnClickListener {
                 updateData()
 
-//                strategyTA.processMACD()
+//                strategyTA.processALL()
             }
 
             ordersButton.setOnClickListener {

@@ -13,6 +13,7 @@ import com.github.kotlintelegrambot.network.fold
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.project.ti2358.data.model.dto.*
+import com.project.ti2358.data.model.dto.pantini.PantiniLenta
 import com.project.ti2358.data.service.OperationsService
 import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.data.service.ThirdPartyService
@@ -695,6 +696,19 @@ class StrategyTelegram : KoinComponent {
         } else {
             sendMessageToChats("$${stock.ticker} нет лимитов, current = ${stock.getPriceNow()}", replyMarkup = buttons)
         }
+    }
+
+    fun sendLentaUS(stock: Stock, lenta: PantiniLenta) {
+//        val stockInfo = stock.stockInfo
+//        val buttons = getButtonsMarkup(stock)
+//        if (stockInfo != null) {
+//            val price = stock.getPriceRaw()
+//            val percentUp = "%.2f".format(Utils.getPercentFromTo(stockInfo.limit_up, price))
+//            val percentDown = "%.2f".format(Utils.getPercentFromTo(stockInfo.limit_down, price))
+//            sendMessageToChats("$${stock.ticker} ${price}$ - ⬆️${stockInfo.limit_up}$ / ${percentUp}% ⬇️${stockInfo.limit_down}$ / ${percentDown}%", replyMarkup = buttons)
+//        } else {
+//            sendMessageToChats("$${stock.ticker} нет лимитов, current = ${stock.getPriceNow()}", replyMarkup = buttons)
+//        }
     }
 
     fun sendPulse(messageId: Long) {

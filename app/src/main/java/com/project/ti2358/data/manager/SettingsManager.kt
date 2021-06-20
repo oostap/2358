@@ -2,7 +2,6 @@ package com.project.ti2358.data.manager
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.core.content.contentValuesOf
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
@@ -30,8 +29,7 @@ class SettingsManager {
 
         fun getTokenTinkoff(): String {
             val tokenKey = TheApplication.application.applicationContext.getString(R.string.setting_key_token_market)
-            val token: String? = preferences.getString(tokenKey, "")?.trim()
-            return token ?: ""
+            return preferences.getString(tokenKey, "")?.trim() ?: ""
         }
 
         fun getActiveBaseUrlTinkoff(): String = "https://api-invest.tinkoff.ru/openapi/"
@@ -48,13 +46,22 @@ class SettingsManager {
 
         fun getTokenALOR(): String {
             val tokenKey = TheApplication.application.applicationContext.getString(R.string.setting_key_token_market_alor)
-            val token: String? = preferences.getString(tokenKey, "")?.trim()
-            return token ?: "TODO"
+            return preferences.getString(tokenKey, "")?.trim() ?: ""
         }
 
         fun isAllowCurrency(currency: Currency?): Boolean {
             if (currency == Currency.USD) return true
             return false
+        }
+
+        fun getPantiniTelegramID(): String {
+            val tokenKey = TheApplication.application.applicationContext.getString(R.string.setting_key_pantini_telegram_id)
+            return preferences.getString(tokenKey, "")?.trim() ?: ""
+        }
+
+        fun getPantiniWardenToken(): String {
+            val tokenKey = TheApplication.application.applicationContext.getString(R.string.setting_key_pantini_warden_token)
+            return preferences.getString(tokenKey, "")?.trim() ?: ""
         }
 
         /******************** common *************************/

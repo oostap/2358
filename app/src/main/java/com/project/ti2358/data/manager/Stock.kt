@@ -3,6 +3,8 @@ package com.project.ti2358.data.manager
 import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.model.dto.daager.*
+import com.project.ti2358.data.model.dto.pantini.PantiniLenta
+import com.project.ti2358.data.model.dto.pantini.PantiniOrderbook
 import com.project.ti2358.service.ScreenerType
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
@@ -24,8 +26,10 @@ data class Stock(var instrument: Instrument) {
     var stockIndices: Map<String, Double>? = null
     var morning: Any? = null
 
-    var stockInfo: InstrumentInfo? = null        // инфа
-    var orderbookStream: OrderbookStream? = null        // стакан
+    var stockInfo: InstrumentInfo? = null           // инфа
+    var orderbookStream: OrderbookStream? = null    // стакан
+    var orderbookUS: PantiniOrderbook? = null       // стакан US
+    var lentaUS: PantiniLenta? = null                 // лента принтов
 
     var dayVolumeCash: Double = 0.0
 
@@ -161,6 +165,14 @@ data class Stock(var instrument: Instrument) {
 
     fun processOrderbook(orderbook: OrderbookStream) {
         orderbookStream = orderbook
+    }
+
+    fun processOrderbookUS(pantiniOrderbook: PantiniOrderbook) {
+        orderbookUS = pantiniOrderbook
+    }
+
+    fun processLentaUS(pantiniLenta: PantiniLenta) {
+        lentaUS = pantiniLenta
     }
 
     fun processStockInfo(instrumentInfo: InstrumentInfo) {
