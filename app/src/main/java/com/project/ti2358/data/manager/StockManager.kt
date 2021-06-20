@@ -410,25 +410,6 @@ class StockManager : KoinComponent {
     }
 
     fun subscribeStockOrderbook(stock: Stock) {
-        if (SettingsManager.getPantiniWardenToken() != "" && SettingsManager.getPantiniTelegramID() != "") {
-            streamingPantiniService
-                .getOrderbookEventStream(stock)
-                .onBackpressureBuffer()
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onNext = {
-                        GlobalScope.launch {
-                            addOrderbookUS(it)
-                        }
-                    },
-                    onError = {
-                        it.printStackTrace()
-                        FirebaseCrashlytics.getInstance().recordException(it)
-                    }
-                )
-        }
-
         if (SettingsManager.getAlorOrdebook()) {
             streamingAlorService
                 .getOrderEventStream(
@@ -469,6 +450,26 @@ class StockManager : KoinComponent {
                         FirebaseCrashlytics.getInstance().recordException(it)
                     }
                 )
+        }
+
+        if (SettingsManager.getPantiniWardenToken() != "" && SettingsManager.getPantiniTelegramID() != "") {
+            streamingPantiniService
+                .getOrderbookEventStream(stock)
+                .onBackpressureBuffer()
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = {
+                        GlobalScope.launch {
+                            addOrderbookUS(it)
+                        }
+                    },
+                    onError = {
+                        it.printStackTrace()
+                        FirebaseCrashlytics.getInstance().recordException(it)
+                    }
+                )
+//            subscribeStockLenta(stock)
         }
     }
 
@@ -548,21 +549,20 @@ class StockManager : KoinComponent {
 
     private suspend fun addOrderbookUS(orderbookPantini: PantiniOrderbook) = withContext(stockContext) {
         val stock = stocksStream.find { it.figi == orderbookPantini.ticker || it.ticker == orderbookPantini.ticker }
-        if (stock?.lentaUS != null) {
-            stock.processOrderbookUS(orderbookPantini)
-            log("LENTA ${stock.ticker} = ${stock.lentaUS}")
-
-            stock.lentaUS?.let {
-                strategyTelegram.sendLentaUS(stock, it)
-            }
-
-            unsubscribeStockLenta(stock)
-        }
+        stock?.processOrderbookUS(orderbookPantini)
     }
 
     private suspend fun addLentaUS(lentaPantini: PantiniLenta) = withContext(stockContext) {
         val stock = stocksStream.find { it.figi == lentaPantini.ticker || it.ticker == lentaPantini.ticker }
         stock?.processLentaUS(lentaPantini)
+
+//        log("LENTA ${stock.ticker} = ${stock.lentaUS}")
+//
+//        stock.lentaUS?.let {
+//            strategyTelegram.sendLentaUS(stock, it)
+//        }
+//
+//        unsubscribeStockLenta(stock)
     }
 
     private suspend fun addCandle(candle: Candle) = withContext(stockContext) {

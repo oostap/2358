@@ -22,6 +22,7 @@ class OrderbookManager() : KoinComponent {
 
     var activeStock: Stock? = null
     var orderbook: MutableList<OrderbookLine> = mutableListOf()
+    var orderbookUS: MutableList<OrderbookLine> = mutableListOf()
 
     fun start(stock: Stock) {
         activeStock = stock
@@ -197,5 +198,41 @@ class OrderbookManager() : KoinComponent {
             }
         }
         return orderbook
+    }
+
+    fun processUS(): MutableList<OrderbookLine> {
+        orderbookUS.clear()
+
+        activeStock?.let {
+            val orderbookLocalUS = it.orderbookUS
+
+            orderbookLocalUS?.let { book ->
+                for (key in book.orderbook.keys) {
+                    val pair = book.orderbook[key]
+                    if (pair != null) {
+                        val bidUS = pair.first
+                        val askUS = pair.second
+
+                        val line = OrderbookLine(it)
+                        if (bidUS.quantity != 0) {
+                            line.bidPrice = bidUS.price
+                            line.bidCount = bidUS.quantity
+                        }
+
+                        if (askUS.quantity != 0) {
+                            line.askPrice = askUS.price
+                            line.askCount = askUS.quantity
+                        }
+
+                        line.askPercent = 100.0
+                        line.bidPercent = 100.0
+                        line.exchange = key
+
+                        orderbookUS.add(line)
+                    }
+                }
+            }
+        }
+        return orderbookUS
     }
 }

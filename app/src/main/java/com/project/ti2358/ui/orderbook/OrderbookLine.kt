@@ -16,4 +16,6 @@ class OrderbookLine(
 
     var ordersBuy: MutableList<Order> = mutableListOf()
     var ordersSell: MutableList<Order> = mutableListOf()
+
+    var exchange: String = ""
 }

@@ -4,7 +4,7 @@ import com.project.ti2358.data.model.dto.BidAsk
 import com.project.ti2358.service.log
 import org.json.JSONObject
 
-//    пул: bid|bidSize|ask|askSize
+// пул: bid|bidSize|ask|askSize
 data class PantiniOrderbook (
     val ticker: String,
 ) {
@@ -18,7 +18,7 @@ data class PantiniOrderbook (
                 val ask = BidAsk(bidask[2].toDouble(), bidask[3].toInt())
                 orderbook[key] = Pair(bid, ask)
             } else {
-                log("PantiniOrderbook ERROR!!!!!!! $value")
+                log("PantiniOrderbook ERROR! $value")
             }
         }
     }

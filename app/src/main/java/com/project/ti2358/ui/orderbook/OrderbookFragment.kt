@@ -5,6 +5,7 @@ import android.content.ClipData
 import android.content.Context
 import android.content.DialogInterface
 import android.content.DialogInterface.OnShowListener
+import android.graphics.Color
 import android.os.Bundle
 import android.text.InputType
 import android.view.DragEvent
@@ -53,8 +54,11 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     private var fragmentOrderbookBinding: FragmentOrderbookBinding? = null
 
     var orderlinesViews: MutableList<OrderlineHolder> = mutableListOf()
+    var orderlinesUSViews: MutableList<OrderlineHolder> = mutableListOf()
+
     var activeStock: Stock? = null
     var orderbookLines: MutableList<OrderbookLine> = mutableListOf()
+    var orderbookUSLines: MutableList<OrderbookLine> = mutableListOf()
     var jobRefreshOrders: Job? = null
     var jobRefreshOrderbook: Job? = null
 
@@ -75,12 +79,21 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         with(binding) {
             // создать лист руками
             orderlinesViews.clear()
+            orderlinesUSViews.clear()
+
             orderbookLinesView.removeAllViews()
+            orderbookUsLinesView.removeAllViews()
 
             for (i in 0..20) {
                 val orderlineHolder = OrderlineHolder(FragmentOrderbookItemBinding.inflate(LayoutInflater.from(context), null, false))
                 orderbookLinesView.addView(orderlineHolder.binding.root)
                 orderlinesViews.add(orderlineHolder)
+            }
+
+            for (i in 0..5) {
+                val orderlineHolder = OrderlineHolder(FragmentOrderbookItemBinding.inflate(LayoutInflater.from(context), null, false))
+                orderbookUsLinesView.addView(orderlineHolder.binding.root)
+                orderlinesUSViews.add(orderlineHolder)
             }
 
             volumesView.children.forEach { it.visibility = GONE }
@@ -351,13 +364,23 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     private fun updateData() {
         if (!isVisible) return
         orderbookLines = orderbookManager.process()
+        orderbookUSLines = orderbookManager.processUS()
 
         fragmentOrderbookBinding?.apply {
+            // SPB
             orderbookLinesView.children.forEach { it.visibility = GONE }
-            val size = min(orderbookLines.size, orderbookLinesView.childCount)
+            var size = min(orderbookLines.size, orderbookLinesView.childCount)
             for (i in 0 until size) {
                 orderbookLinesView.getChildAt(i).visibility = VISIBLE
                 orderlinesViews[i].updateData(orderbookLines[i], i)
+            }
+
+            // US
+            orderbookUsLinesView.children.forEach { it.visibility = GONE }
+            size = min(orderbookUSLines.size, orderbookUsLinesView.childCount)
+            for (i in 0 until size) {
+                orderbookUsLinesView.getChildAt(i).visibility = VISIBLE
+                orderlinesUSViews[i].updateData(orderbookUSLines[i], i)
             }
         }
 
@@ -430,22 +453,6 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         @SuppressLint("ClickableViewAccessibility")
         fun updateData(item: OrderbookLine, index: Int) {
             with(binding) {
-                dragToBuyView.setBackgroundColor(Utils.getColorForIndex(index))
-                dragToSellView.setBackgroundColor(Utils.getColorForIndex(index))
-
-                dragToBuyView.setOnDragListener(ChoiceDragListener())
-                dragToSellView.setOnDragListener(ChoiceDragListener())
-
-                dragToBuyView.setTag(R.string.position_line, index)
-                dragToBuyView.setTag(R.string.order_line, item)
-                dragToBuyView.setTag(R.string.order_type, OperationType.BUY)
-                dragToBuyView.setTag(R.string.action_type, "replace")
-
-                dragToSellView.setTag(R.string.position_line, index)
-                dragToSellView.setTag(R.string.order_line, item)
-                dragToSellView.setTag(R.string.order_type, OperationType.SELL)
-                dragToSellView.setTag(R.string.action_type, "replace")
-
                 countBidView.text = "${item.bidCount}"
                 priceBidView.text = item.bidPrice.toMoney(item.stock, false)
 
@@ -456,13 +463,15 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 var targetPriceBid = 0.0
                 var portfolioPosition: PortfolioPosition? = null
                 activeStock?.let {
-                    targetPriceAsk = orderbookLines.first().askPrice
-                    targetPriceBid = orderbookLines.first().bidPrice
+                    if (orderbookLines.isNotEmpty()) {
+                        targetPriceAsk = orderbookLines.first().askPrice
+                        targetPriceBid = orderbookLines.first().bidPrice
 
-                    portfolioPosition = depositManager.getPositionForFigi(it.figi)
-                    portfolioPosition?.let { p ->
-                        targetPriceAsk = p.getAveragePrice()
-                        targetPriceBid = p.getAveragePrice()
+                        portfolioPosition = depositManager.getPositionForFigi(it.figi)
+                        portfolioPosition?.let { p ->
+                            targetPriceAsk = p.getAveragePrice()
+                            targetPriceBid = p.getAveragePrice()
+                        }
                     }
                 }
 
@@ -492,6 +501,20 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 } else {
                     priceAskPercentView.visibility = GONE
                     priceBidPercentView.visibility = GONE
+                }
+
+                if (item.exchange != "") { // US line
+                    priceAskPercentView.text = item.exchange
+                    priceBidPercentView.text = item.exchange
+
+                    priceAskPercentView.setTextColor(Color.BLACK)
+                    priceBidPercentView.setTextColor(Color.BLACK)
+
+                    backgroundBidView.alpha = 0.4f
+                    backgroundAskView.alpha = 0.4f
+                } else {
+                    backgroundBidView.alpha = 1.0f
+                    backgroundAskView.alpha = 1.0f
                 }
 
                 backgroundBidView.startAnimation(ResizeWidthAnimation(backgroundBidView, (item.bidPercent * 1000).toInt()).apply { duration = 250 })
@@ -530,6 +553,23 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     ordersSell[i].setTag(R.string.order_item, item.ordersSell[i])
                 }
 
+                if (item.exchange == "") {
+                    dragToBuyView.setBackgroundColor(Utils.getColorForIndex(index))
+                    dragToSellView.setBackgroundColor(Utils.getColorForIndex(index))
+
+                    dragToBuyView.setOnDragListener(ChoiceDragListener())
+                    dragToSellView.setOnDragListener(ChoiceDragListener())
+
+                    dragToBuyView.setTag(R.string.position_line, index)
+                    dragToBuyView.setTag(R.string.order_line, item)
+                    dragToBuyView.setTag(R.string.order_type, OperationType.BUY)
+                    dragToBuyView.setTag(R.string.action_type, "replace")
+
+                    dragToSellView.setTag(R.string.position_line, index)
+                    dragToSellView.setTag(R.string.order_line, item)
+                    dragToSellView.setTag(R.string.order_type, OperationType.SELL)
+                    dragToSellView.setTag(R.string.action_type, "replace")
+                }
                 dragToSellView.setOnTouchListener { v, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
                         v.setBackgroundColor(Utils.LIGHT)
