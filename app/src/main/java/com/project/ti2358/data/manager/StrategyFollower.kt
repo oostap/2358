@@ -34,7 +34,7 @@ class StrategyFollower : KoinComponent {
         try {
             val list = command.split(" ")
 
-            val pulseWords = listOf("пульс", "резать", "лось", "хомяк", "пастух", "аллигатор", "профит", "трейд")
+            val pulseWords = listOf("пульс", "резать", "лось", "хомяк", "пастух", "аллигатор", "профит", "трейд", "бабло", "теханал")
             var contains = false
             pulseWords.forEach {
                 if (it in command) {
@@ -47,17 +47,28 @@ class StrategyFollower : KoinComponent {
             if (operation == "top") { // топ отросших бумаг от закрытия
                 var count = 10
                 if (list.size == 2) count = list[1].toInt()
-                val all = stockManager.stocksStream.toMutableList()
+                val all = stockManager.getWhiteStocks()
                 all.removeAll { it.getPrice2300() == 0.0 }
                 all.sortByDescending { it.changePrice2300DayPercent }
+
+                if (Utils.isMorningSession()) {
+                    all.removeAll { it.morning == null }
+                }
+
                 strategyTelegram.sendTop(all, count)
                 return
             } else {
                 if (operation == "bot") { // топ отросших бумаг от закрытия
                     var count = 10
                     if (list.size == 2) count = list[1].toInt()
-                    val all = stockManager.stocksStream.toMutableList()
+                    val all = stockManager.getWhiteStocks()
+                    all.removeAll { it.getPrice2300() == 0.0 }
                     all.sortBy { it.changePrice2300DayPercent }
+
+                    if (Utils.isMorningSession()) {
+                        all.removeAll { it.morning == null }
+                    }
+
                     strategyTelegram.sendTop(all, count)
                     return
                 }

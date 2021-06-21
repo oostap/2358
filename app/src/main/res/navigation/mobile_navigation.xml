@@ -51,6 +51,17 @@
             app:destination="@id/nav_orderbook" />
     </fragment>
 
+    <!-- сектора -->
+    <fragment
+        android:id="@+id/nav_sectors"
+        android:name="com.project.ti2358.ui.sectors.SectorsFragment"
+        android:label="@string/menu_limits"
+        tools:layout="@layout/fragment_limits" >
+        <action
+            android:id="@+id/action_nav_sectors_to_nav_orderbook"
+            app:destination="@id/nav_orderbook" />
+    </fragment>
+
     <!-- позиция в депо -->
 
     <fragment
@@ -282,43 +293,13 @@
         android:label="@string/menu_1000_buy"
         tools:layout="@layout/fragment_1000_buy_start" />
 
-    <!-- tazik -->
-
-    <fragment
-        android:id="@+id/nav_tazik_start"
-        android:name="com.project.ti2358.ui.strategyTazik.StrategyTazikStartFragment"
-        android:label="@string/menu_tazik"
-        tools:layout="@layout/fragment_tazik_start">
-        <action
-            android:id="@+id/action_nav_tazik_start_to_nav_tazik_finish"
-            app:destination="@id/nav_tazik_finish"
-            app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/nav_tazik_finish"
-        android:name="com.project.ti2358.ui.strategyTazik.StrategyTazikFinishFragment"
-        android:label="@string/menu_tazik"
-        tools:layout="@layout/fragment_tazik_finish" >
-        <action
-            android:id="@+id/action_nav_tazik_finish_to_nav_tazik_status"
-            app:destination="@id/nav_tazik_status" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/nav_tazik_status"
-        android:name="com.project.ti2358.ui.strategyTazik.StrategyTazikStatusFragment"
-        android:label="@string/menu_tazik"
-        tools:layout="@layout/fragment_tazik_status" />
-
     <!-- endless tazik -->
 
     <fragment
         android:id="@+id/nav_tazik_endless_start"
         android:name="com.project.ti2358.ui.strategyTazikEndless.StrategyTazikEndlessStartFragment"
         android:label="@string/menu_tazik_endless"
-        tools:layout="@layout/fragment_tazik_start">
+        tools:layout="@layout/fragment_tazik_endless_start">
         <action
             android:id="@+id/action_nav_tazik_endless_start_to_nav_tazik_endless_finish"
             app:destination="@id/nav_tazik_endless_finish" />

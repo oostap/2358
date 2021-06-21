@@ -11,6 +11,7 @@ import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -32,6 +33,7 @@ class StrategyTazikEndless : KoinComponent {
 
     var basicPercentLimitPriceChange: Double = 0.0
     var started: Boolean = false
+    var scheduledStartTime: Calendar? = null
 
     var jobResetPrice: Job? = null
 
@@ -49,6 +51,9 @@ class StrategyTazikEndless : KoinComponent {
 
         stocks = all.filter { (it.getPriceNow() > min && it.getPriceNow() < max) || it.getPriceNow() == 0.0 }.toMutableList()
         stocks.sortBy { it.changePrice2300DayPercent }
+
+        stocks.removeAll { it.instrument.currency == Currency.USD && it.getPrice2300() == 0.0 }
+
         loadSelectedStocks(numberSet)
     }
 
@@ -177,10 +182,28 @@ class StrategyTazikEndless : KoinComponent {
         return@withContext stocksToPurchase
     }
 
-    fun getNotificationTitle(): String {
-        if (started) return "Работает бесконечный таз!"
+    fun getNotificationTitle(): String = runBlocking(StockManager.stockContext) {
+        if (started) return@runBlocking "Работает бесконечный таз!"
 
-        return "Бесконечный таз приостановлен"
+        if (scheduledStartTime == null) {
+            return@runBlocking "Старт бесконечного таза через ???"
+        } else {
+            val now = Calendar.getInstance(TimeZone.getDefault())
+            val current = scheduledStartTime?.timeInMillis ?: 0
+            val scheduleDelay = current - now.timeInMillis
+
+            val allSeconds = scheduleDelay / 1000
+            val hours = allSeconds / 3600
+            val minutes = (allSeconds - hours * 3600) / 60
+            val seconds = allSeconds % 60
+
+            fixPrice()
+            if (hours + minutes + seconds <= 0) {
+                startStrategy(true)
+            }
+
+            return@runBlocking "Старт тазика через %02d:%02d:%02d".format(hours, minutes, seconds)
+        }
     }
 
     fun getTotalPurchaseString(): String {
@@ -274,13 +297,65 @@ class StrategyTazikEndless : KoinComponent {
 
         getPurchaseStock()
         delay(500)
-        startStrategy()
+        startStrategy(false)
     }
 
-    suspend fun startStrategy() = withContext(StockManager.stockContext) {
+    fun prepareStrategy(scheduled : Boolean, time: String) = runBlocking (StockManager.stockContext) {
         basicPercentLimitPriceChange = SettingsManager.getTazikEndlessChangePercent()
 
-        fixPrice()
+        if (!scheduled) {
+            startStrategy(scheduled)
+            return@runBlocking
+        }
+
+        started = false
+
+        val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
+        val dayTime = time.split(":").toTypedArray()
+        if (dayTime.size < 3) {
+            GlobalScope.launch(Dispatchers.Main) {
+                Utils.showToastAlert("Неверный формат времени $time")
+            }
+            return@runBlocking
+        }
+
+        val hours = Integer.parseInt(dayTime[0])
+        val minutes = Integer.parseInt(dayTime[1])
+        val seconds = Integer.parseInt(dayTime[2])
+
+        scheduledStartTime = Calendar.getInstance(TimeZone.getDefault())
+        scheduledStartTime?.let {
+            it.add(Calendar.HOUR_OF_DAY, -differenceHours)
+            it.set(Calendar.HOUR_OF_DAY, hours)
+            it.set(Calendar.MINUTE, minutes)
+            it.set(Calendar.SECOND, seconds)
+            it.add(Calendar.HOUR_OF_DAY, differenceHours)
+
+            val now = Calendar.getInstance(TimeZone.getDefault())
+            val scheduleDelay = it.timeInMillis - now.timeInMillis
+            if (scheduleDelay < 0) {
+                GlobalScope.launch(Dispatchers.Main) {
+                    Utils.showToastAlert("Ошибка! Отрицательное время!? втф = $scheduleDelay")
+                }
+            }
+        }
+    }
+
+    suspend fun startStrategy(scheduled: Boolean) = withContext(StockManager.stockContext) {
+        basicPercentLimitPriceChange = SettingsManager.getTazikEndlessChangePercent()
+
+        if (scheduled) {
+            GlobalScope.launch(Dispatchers.Main) {
+                stockManager.reloadClosePrices()
+
+                // костыль!
+                started = false
+                fixPrice()
+                started = true
+            }
+        } else {
+            fixPrice()
+        }
 
         stocksTickerInProcess.forEach {
             try {
@@ -422,25 +497,35 @@ class StrategyTazikEndless : KoinComponent {
 
         // защита от спайков - сколько минут цена была выше цены покупки, начиная с предыдущей
         var minutes = SettingsManager.getTazikEndlessSpikeProtection()
-        for (i in purchase.stock.minuteCandles.indices.reversed()) {
+        if (purchase.stock.minuteCandles.size >= minutes) { // не считать спайки на открытии и на старте таза - мало доступных свечей
+            for (i in purchase.stock.minuteCandles.indices.reversed()) {
 
-            // пропустить текущую свечу, по которой у нас просадка
-            if (i == purchase.stock.minuteCandles.size - 1) continue
+                // пропустить текущую свечу, по которой у нас просадка
+                if (i == purchase.stock.minuteCandles.size - 1) continue
 
-            // проверить цены закрытия нескольких предыдущих свечей
-            if (purchase.stock.minuteCandles[i].closingPrice > buyPrice) { // если цена выше, отнимаем счётчик, проверяем дальше
-                minutes--
+                // проверить цены закрытия нескольких предыдущих свечей
+                if (purchase.stock.minuteCandles[i].closingPrice > buyPrice) { // если цена выше, отнимаем счётчик, проверяем дальше
+                    minutes--
 
-                // если несколько свечей подряд с ценой выше, то всё ок - тарим!
-                if (minutes == 0) {
-                    break
+                    // если несколько свечей подряд с ценой выше, то всё ок - тарим!
+                    if (minutes == 0) {
+                        break
+                    }
+                } else { // был спайк на несколько свечек - тарить опасно!
+                    // обновить цену, чтобы не затарить на следующей свече, возможен нож ступенькой
+                    purchase.tazikEndlessPrice = candle.closingPrice
+                    strategySpeaker.speakTazikSpikeSkip(purchase, change)
+                    strategyTelegram.sendTazikSpike(
+                        purchase,
+                        buyPrice,
+                        purchase.tazikEndlessPrice,
+                        candle.closingPrice,
+                        change,
+                        stocksTickerInProcess.size,
+                        parts
+                    )
+                    return
                 }
-            } else { // был спайк на несколько свечек - тарить опасно!
-                // обновить цену, чтобы не затарить на следующей свече, возможен нож ступенькой
-                purchase.tazikEndlessPrice = candle.closingPrice
-                strategySpeaker.speakTazikSpikeSkip(purchase, change)
-                strategyTelegram.sendTazikSpike(purchase, buyPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
-                return
             }
         }
 

@@ -522,29 +522,11 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun sendTazikStart(start: Boolean) {
-        if (started && SettingsManager.getTelegramSendTaziks()) {
-            val text = if (start) {
-                String.format(
-                    "🟢🛁️️ старт: %.2f%% / %.2f%% / %.2f / v%d / %ds",
-                    SettingsManager.getTazikChangePercent(),
-                    SettingsManager.getTazikTakeProfit(),
-                    SettingsManager.getTazikApproximationFactor(),
-                    SettingsManager.getTazikMinVolume(),
-                    SettingsManager.getTazikOrderLifeTimeSeconds()
-                )
-            } else {
-                "🔴🛁 стоп!"
-            }
-            sendMessageToChats(text, -1)
-        }
-    }
-
     fun sendTazikEndlessStart(start: Boolean) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
             val text = if (start) {
                 String.format(
-                    "🟢🛁♾ старт: %.2f%% / %.2f%% / %.2f / v%d / %ds / %ds",
+                    "🟢🛁 старт: %.2f%% / %.2f%% / %.2f / v%d / %ds / %ds",
                     SettingsManager.getTazikEndlessChangePercent(),
                     SettingsManager.getTazikEndlessTakeProfit(),
                     SettingsManager.getTazikEndlessApproximationFactor(),
@@ -553,7 +535,7 @@ class StrategyTelegram : KoinComponent {
                     SettingsManager.getTazikEndlessOrderLifeTimeSeconds()
                 )
             } else {
-                "🔴🛁♾ стоп!"
+                "🔴🛁 стоп!"
             }
             sendMessageToChats(text, -1)
         }

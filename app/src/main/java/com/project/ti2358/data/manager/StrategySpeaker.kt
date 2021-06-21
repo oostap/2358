@@ -51,14 +51,14 @@ class StrategySpeaker : KoinComponent, TextToSpeech.OnInitListener {
     }
 
     fun speakTazik(purchaseStock: PurchaseStock, change: Double) {
-        if (SettingsManager.getTazikVoice()) {
+        if (SettingsManager.getTazikEndlessVoice()) {
             val text = makeNiceChange(purchaseStock.stock.ticker, change)
             speak(text)
         }
     }
 
     fun speakTazikSpikeSkip(purchaseStock: PurchaseStock, change: Double) {
-        if (SettingsManager.getTazikVoice() && SettingsManager.getTelegramSendSpikes()) {
+        if (SettingsManager.getTazikEndlessVoice() && SettingsManager.getTelegramSendSpikes()) {
             val text = makeNiceChange(purchaseStock.stock.ticker, change)
             speak("спайк. $text")
         }

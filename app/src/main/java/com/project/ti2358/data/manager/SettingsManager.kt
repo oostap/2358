@@ -426,176 +426,6 @@ class SettingsManager {
             }
         }
 
-        /******************** THE TAZIK *************************/
-
-        fun getTazikSet1(): List<String> {
-            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_set_1)
-            val value: String? = preferences.getString(key, "")?.trim()
-            val array = value?.split(" ")
-            return array ?: emptyList()
-        }
-
-        fun getTazikSet2(): List<String> {
-            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_set_2)
-            val value: String? = preferences.getString(key, "")?.trim()
-            val array = value?.split(" ")
-            return array ?: emptyList()
-        }
-
-        fun getTazikSet3(): List<String> {
-            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_set_3)
-            val value: String? = preferences.getString(key, "")?.trim()
-            val array = value?.split(" ")
-            return array ?: emptyList()
-        }
-
-        fun getTazikChangePercent(): Double {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_min_percent_to_buy)
-            val value: String? = preferences.getString(key, "-1.0")
-            return try {
-                (value ?: "-1.0").toDouble()
-            } catch (e: Exception) {
-                -1.0
-            }
-        }
-
-        fun getTazikMinVolume(): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_min_volume)
-            val value: String? = preferences.getString(key, "100")
-            return try {
-                parseInt(value ?: "100")
-            } catch (e: Exception) {
-                100
-            }
-        }
-
-        fun getTazikOrderLifeTimeSeconds(): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_order_lifetime_seconds)
-            val value: String? = preferences.getString(key, "120")
-            return try {
-                parseInt(value ?: "120")
-            } catch (e: Exception) {
-                120
-            }
-        }
-
-        fun getTazikPurchaseVolume(): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_purchase_volume)
-            val value: String? = preferences.getString(key, "500")
-            return try {
-                parseInt(value ?: "500")
-            } catch (e: Exception) {
-                500
-            }
-        }
-
-        fun getTazikPurchaseParts(): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_purchase_parts)
-            val value: String? = preferences.getString(key, "2")
-            return try {
-                (value ?: "2").toInt()
-            } catch (e: Exception) {
-                2
-            }
-        }
-
-        fun getTazikTakeProfit(): Double {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_take_profit)
-            val value: String? = preferences.getString(key, "1.0")
-            return try {
-                (value ?: "1.0").toDouble()
-            } catch (e: Exception) {
-                1.0
-            }
-        }
-
-        fun getTazikApproximationFactor(): Double {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_approximation_factor)
-            val value: String? = preferences.getString(key, "0.65")
-            return try {
-                (value ?: "0.65").toDouble()
-            } catch (e: Exception) {
-                0.65
-            }
-        }
-
-        fun getTazikAllowAveraging(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_allow_averaging)
-            return preferences.getBoolean(key, false)
-        }
-
-        fun getTazikNearestTime(): String {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_times2)
-            var time = preferences.getString(key, "06:59:50")
-
-            time = time?.replace(" ", "")
-            time = time?.replace("\n", "")
-
-            if (time != null && time != "") {
-                val times = time.split(",").toTypedArray()
-
-                // отсортировать по возрастанию
-                times.sortBy { t ->
-                    val dayTime = t.split(":").toTypedArray()
-                    parseInt(dayTime[0]) * 3600 + parseInt(dayTime[1]) * 60 + parseInt(dayTime[2])
-                }
-
-                for (t in times) {
-                    val dayTime = t.split(":").toTypedArray()
-                    if (dayTime.size < 3) continue
-
-                    val hours: Int
-                    val minutes: Int
-                    val seconds: Int
-                    try {
-                        hours = parseInt(dayTime[0])
-                        minutes = parseInt(dayTime[1])
-                        seconds = parseInt(dayTime[2])
-                    } catch (e: Exception) {
-                        Utils.showToastAlert("Неверный формат времени в настройках!")
-                        continue
-                    }
-                    val currentMskTime = Utils.getTimeMSK()
-
-                    val hoursMsk = currentMskTime.get(Calendar.HOUR_OF_DAY)
-                    val minutesMsk = currentMskTime.get(Calendar.MINUTE)
-                    val secondsMsk = currentMskTime.get(Calendar.SECOND)
-
-                    val total = hours * 3600 + minutes * 60 + seconds
-                    val totalMsk = hoursMsk * 3600 + minutesMsk * 60 + secondsMsk
-                    if (totalMsk < total) {
-                        return t
-                    }
-                }
-            }
-
-            return ""
-        }
-
-        fun getTazikExcludeReports(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_exclude_report)
-            return preferences.getBoolean(key, true)
-        }
-
-        fun getTazikExcludeDivs(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_exclude_divs)
-            return preferences.getBoolean(key, true)
-        }
-
-        fun getTazikExcludeFDA(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_exclude_fda)
-            return preferences.getBoolean(key, true)
-        }
-
-        fun getTazikExcludeDepo(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_exclude_depo)
-            return preferences.getBoolean(key, true)
-        }
-
-        fun getTazikVoice(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_voice)
-            return preferences.getBoolean(key, true)
-        }
         /******************** THE TAZIK ENDLESS *************************/
 
         fun getTazikEndlessSet1(): List<String> {
@@ -747,6 +577,66 @@ class SettingsManager {
         fun getTazikEndlessClosePriceProtection(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_close_price_protection)
             return preferences.getBoolean(key, false)
+        }
+
+        fun getTazikEndlessLifeTimeMinutes(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_taz_lifetime_minutes)
+            val value: String? = preferences.getString(key, "1000")
+            return try {
+                parseInt(value ?: "1000")
+            } catch (e: Exception) {
+                1000
+            }
+        }
+
+        fun getTazikEndlessNearestTime(): String {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_schedule)
+            var time = preferences.getString(key, "06:59:50")
+
+            if (time != null && time != "") {
+                val times = time.split(" ").toTypedArray()
+
+                // отсортировать по возрастанию
+                times.sortBy { t ->
+                    val dayTime = t.split(":").toTypedArray()
+                    parseInt(dayTime[0]) * 3600 + parseInt(dayTime[1]) * 60 + parseInt(dayTime[2])
+                }
+
+                for (t in times) {
+                    val dayTime = t.split(":").toTypedArray()
+                    if (dayTime.size < 3) continue
+
+                    val hours: Int
+                    val minutes: Int
+                    val seconds: Int
+                    try {
+                        hours = parseInt(dayTime[0])
+                        minutes = parseInt(dayTime[1])
+                        seconds = parseInt(dayTime[2])
+                    } catch (e: Exception) {
+                        Utils.showToastAlert("Неверный формат времени в настройках!")
+                        continue
+                    }
+                    val currentMskTime = Utils.getTimeMSK()
+
+                    val hoursMsk = currentMskTime.get(Calendar.HOUR_OF_DAY)
+                    val minutesMsk = currentMskTime.get(Calendar.MINUTE)
+                    val secondsMsk = currentMskTime.get(Calendar.SECOND)
+
+                    val total = hours * 3600 + minutes * 60 + seconds
+                    val totalMsk = hoursMsk * 3600 + minutesMsk * 60 + secondsMsk
+                    if (totalMsk < total) {
+                        return t
+                    }
+                }
+            }
+
+            return "???"
+        }
+
+        fun getTazikEndlessVoice(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_voice)
+            return preferences.getBoolean(key, true)
         }
 
         /******************** Rockets *************************/

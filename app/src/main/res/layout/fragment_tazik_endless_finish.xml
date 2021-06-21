@@ -25,7 +25,7 @@
         android:layout_marginRight="10dp"
         android:layout_marginBottom="70dp"
         android:text="Запуск таймера на покупку: \nВремя МСК: 2358: \nБумаг: 5\nСумма: ~1000$\nещё строка"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:textStyle="bold" />
 
     <LinearLayout
@@ -39,11 +39,22 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/start_button"
+            android:id="@+id/start_now_button"
             android:layout_marginRight="5dp"
-            android:text="@string/start"
-            android:layout_weight="3"
-            android:textSize="14dp"
+            android:text="@string/start_now"
+            android:layout_weight="1.5"
+            android:textSize="12dp"
+            android:padding="0dp"
+            android:layout_width="0dp" />
+
+        <Button
+            android:layout_height="70dp"
+            android:id="@+id/start_later_button"
+            android:layout_marginRight="5dp"
+            android:text="@string/start_later"
+            android:layout_weight="1.5"
+            android:textSize="12dp"
+            android:padding="0dp"
             android:layout_width="0dp" />
 
         <Button

@@ -12,11 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
-import androidx.core.view.marginBottom
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -30,7 +27,6 @@ import com.project.ti2358.data.model.dto.daager.Index
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toPercent
-import com.project.ti2358.ui.settings.SettingsFragment
 import com.rbddevs.splashy.Splashy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -38,9 +34,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-import java.util.*
 import kotlin.math.abs
-
 
 @KoinApiExtension
 class MainActivity : AppCompatActivity() {
@@ -80,8 +74,6 @@ class MainActivity : AppCompatActivity() {
                     key = "premarket_price_change_percent"
                 } else if (it.id in listOf(R.id.nav_tazik_endless_start, R.id.nav_tazik_endless_finish, R.id.nav_tazik_endless_status)) {
                     key = "tazik_endless_set"
-                } else if (it.id in listOf(R.id.nav_tazik_start, R.id.nav_tazik_finish, R.id.nav_tazik_status)) {
-                    key = "tazik_set_1"
                 } else if (it.id in listOf(R.id.nav_2358_start, R.id.nav_2358_finish)) {
                     key = "2358_price_change_percent"
                 } else if (it.id in listOf(R.id.nav_1000_buy_start, R.id.nav_1000_buy_finish)) {
@@ -113,7 +105,7 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
             if (destination.id in listOf(R.id.nav_settings, R.id.nav_orderbook, R.id.nav_orders,
-                    R.id.nav_chart, R.id.nav_donate, R.id.nav_reports, R.id.nav_premarket, R.id.nav_accounts, R.id.nav_chat)) {
+                    R.id.nav_chart, R.id.nav_donate, R.id.nav_reports, R.id.nav_premarket, R.id.nav_accounts, R.id.nav_chat, R.id.nav_sectors)) {
                 fab.visibility = View.INVISIBLE
             } else {
                 fab.visibility = View.VISIBLE
@@ -264,12 +256,12 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_diagnostics,
                 R.id.nav_favorites,
                 R.id.nav_donate,
-                R.id.nav_tazik_start,
                 R.id.nav_tazik_endless_start,
                 R.id.nav_telegram,
                 R.id.nav_chat,
                 R.id.nav_trends,
-                R.id.nav_limits
+                R.id.nav_limits,
+                R.id.nav_sectors
             ),
             drawerLayout
         )

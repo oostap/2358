@@ -34,6 +34,7 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
     var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
     var positions: MutableList<PurchaseStock> = mutableListOf()
     var startTime: String = ""
+    var scheduledStart: Boolean = false
 
     override fun onDestroy() {
         fragmentTazikEndlessFinishBinding = null
@@ -50,8 +51,16 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
             list.layoutManager = LinearLayoutManager(context)
             list.adapter = adapterList
 
-            startButton.setOnClickListener {
-                tryStartTazik()
+            startNowButton.setOnClickListener {
+                tryStartTazik(false)
+            }
+
+            startLaterButton.setOnClickListener {
+                if (startTime == "???") {
+                    Utils.showMessageAlert(requireContext(),"Ближайшего времени на сегодня нет, добавьте время или попробуйте запустить после 00:00")
+                    return@setOnClickListener
+                }
+                tryStartTazik(true)
             }
 
             statusButton.setOnClickListener {
@@ -76,7 +85,7 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
         }
     }
 
-    fun tryStartTazik() {
+    fun tryStartTazik(scheduled : Boolean) {
         if (SettingsManager.getTazikEndlessPurchaseVolume() <= 0 || SettingsManager.getTazikEndlessPurchaseParts() == 0) {
             Utils.showMessageAlert(requireContext(),"В настройках не задана общая сумма покупки или количество частей, раздел Бесконечный таз")
         } else {
@@ -86,11 +95,12 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
                 if (strategyTazikEndless.stocksToPurchase.size > 0) {
                     Utils.startService(requireContext(), StrategyTazikEndlessService::class.java)
                     GlobalScope.launch {
-                        strategyTazikEndless.startStrategy()
+                        strategyTazikEndless.prepareStrategy(scheduled, startTime)
                     }
                 }
             }
         }
+        scheduledStart = scheduled
         updateServiceButtonText()
     }
 
@@ -99,7 +109,7 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
         val volume = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
         val p = SettingsManager.getTazikEndlessPurchaseParts()
         val parts = "%d по %.2f$".format(p, volume / p)
-        startTime = "сейчас"
+        startTime = SettingsManager.getTazikEndlessNearestTime()
 
         val prepareText: String = TheApplication.application.applicationContext.getString(R.string.prepare_start_tazik_buy_text)
         fragmentTazikEndlessFinishBinding?.infoTextView?.text = String.format(
@@ -114,9 +124,17 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
 
     private fun updateServiceButtonText() {
         if (Utils.isServiceRunning(requireContext(), StrategyTazikEndlessService::class.java)) {
-            fragmentTazikEndlessFinishBinding?.startButton?.text = getString(R.string.stop)
+            if (scheduledStart) {
+                fragmentTazikEndlessFinishBinding?.startLaterButton?.text = getString(R.string.stop)
+            } else {
+                fragmentTazikEndlessFinishBinding?.startNowButton?.text = getString(R.string.stop)
+            }
         } else {
-            fragmentTazikEndlessFinishBinding?.startButton?.text = getString(R.string.start_now)
+            if (scheduledStart) {
+                fragmentTazikEndlessFinishBinding?.startLaterButton?.text = getString(R.string.start_later)
+            } else {
+                fragmentTazikEndlessFinishBinding?.startNowButton?.text = getString(R.string.start_now)
+            }
         }
     }
 

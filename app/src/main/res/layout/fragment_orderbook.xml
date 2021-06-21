@@ -160,6 +160,11 @@
             android:layout_marginBottom="0dp">
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">

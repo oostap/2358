@@ -145,6 +145,17 @@ data class Stock(var instrument: Instrument) {
         return sector
     }
 
+    fun processSector() {
+        val sector = closePrices?.sector ?: ""
+        if (sector == "Industrials") {
+            closePrices?.sector = "Industrial"
+        }
+
+        if (sector == "Healthcare") {
+            closePrices?.sector = "HealthCare"
+        }
+    }
+
     fun getReportInfo(): String {
         var info = ""
         report?.let {
@@ -275,7 +286,7 @@ data class Stock(var instrument: Instrument) {
             closePrices?.let {
                 value = it.post
             }
-        } else if (hour > 2 && hour < 10 && morning == null) { // если с 7 до 10 и бумага не торгуется с утра, то берём post
+        } else if (hour >= 7 && hour < 10 && morning == null) { // если с 7 до 10 и бумага не торгуется с утра, то берём post
             closePrices?.let {
                 value = it.post
             }

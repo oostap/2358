@@ -35,7 +35,6 @@ class StockManager : KoinComponent {
     private val streamingTinkoffService: StreamingTinkoffService by inject()
     private val streamingAlorService: StreamingAlorService by inject()
     private val streamingPantiniService: StreamingPantiniService by inject()
-    private val strategyTazik: StrategyTazik by inject()
     private val strategyTazikEndless: StrategyTazikEndless by inject()
     private val strategyBlacklist: StrategyBlacklist by inject()
     private val strategyLove: StrategyLove by inject()
@@ -56,6 +55,8 @@ class StockManager : KoinComponent {
     var stockShorts: Map<String, StockShort> = mutableMapOf()
     var stockPrice1728: Map<String, StockPrice1728>? = mutableMapOf()
     var stockMorning: Map<String, Any> = mutableMapOf()
+
+    var stockSectors: MutableList<String> = mutableListOf()
 
     private val gson = Gson()
 
@@ -142,9 +143,12 @@ class StockManager : KoinComponent {
                 stocksAll.forEach {
                     it.apply {
                         it.closePrices = stockClosePrices[it.ticker]
+                        it.processSector()
                         it.updateChange2300()
                     }
                 }
+                stockSectors = stockClosePrices.map { it.value.sector }.distinct().toMutableList()
+                stockSectors.removeAll { it == "no" }
                 break
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -245,7 +249,7 @@ class StockManager : KoinComponent {
         "ARCT" to "конь скотина",
         "PBI" to "пибай",
         
-        "BIDU" to "байда беда",
+//        "BIDU" to "байда беда",
 
         "CLOV" to "плов",
         "TAL" to "талый",
@@ -573,7 +577,6 @@ class StockManager : KoinComponent {
             if (candle.interval == Interval.MINUTE) {
                 strategyTazikEndless.processStrategy(it, candle)
 
-                strategyTazik.processStrategy(it, candle)
                 strategyRocket.processStrategy(it)
                 strategyTrend.processStrategy(it, candle)
 
