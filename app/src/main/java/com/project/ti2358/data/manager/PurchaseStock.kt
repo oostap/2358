@@ -38,8 +38,10 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
     var figi = stock.figi
 
     var position: PortfolioPosition? = null
-    var tazikPrice: Double = 0.0                      // зафиксированная цена, от которой считаем тазы
+
     var tazikEndlessPrice: Double = 0.0               // обновляемая фиксированная цена, от которой считаем бесконечные тазы
+    var zontikEndlessPrice: Double = 0.0               // обновляемая фиксированная цена, от которой считаем бесконечные зонты
+
     var fixedPrice: Double = 0.0                      // зафиксированная цена, от которой шагаем лимитками
     var percentLimitPriceChange: Double = 0.0         // разница в % с текущей ценой для создания лимитки
     var absoluteLimitPriceChange: Double = 0.0        // если лимитка, то по какой цене

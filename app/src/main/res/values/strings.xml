@@ -84,6 +84,8 @@
     <string name="menu_favorites">Избранные</string>
     <string name="menu_chart">График</string>
     <string name="menu_tazik_endless">Бесконечный таз</string>
+    <string name="menu_zontik_endless">Бесконечный зонт (шорт ⚠️⚠️⚠️)</string>
+
     <string name="menu_telegram">Телеграм бот</string>
     <string name="menu_trends">Тренды</string>
     <string name="menu_limits">Лимиты</string>
@@ -199,8 +201,8 @@
     <string name="stocks_tazik_endless_purchase_volume">Общая сумма покупки</string>
     <string name="stocks_tazik_endless_purchase_parts">Сколько тазиков? (заявок)</string>
     <string name="stocks_tazik_endless_order_lifetime_seconds">Время жизни заявки в секундах</string>
-    <string name="stocks_tazik_endless_schedule">Время старта тазиков МСК (через пробел)</string>
-    <string name="stocks_tazik_endless_taz_lifetime_minutes">Время жизни таза (в минутах)</string>
+    <string name="stocks_tazik_endless_schedule">Расписание старта, время МСК (через пробел)</string>
+    <string name="stocks_tazik_endless_taz_lifetime_minutes">Автовыключение через (в минутах)</string>
     <string name="stocks_tazik_endless_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
     <string name="stocks_tazik_endless_approximation_factor">Приближение к низу свечи [0.0, 1.0]</string>
     <string name="stocks_tazik_endless_allow_averaging">Разрешить усреднение</string>
@@ -208,9 +210,36 @@
     <string name="stocks_tazik_endless_exclude_divs">Исключать дивы</string>
     <string name="stocks_tazik_endless_exclude_fda">Исключать FDA</string>
     <string name="stocks_tazik_endless_exclude_depo">Исключать бумаги из депо</string>
-    <string name="stocks_tazik_endless_spike_protection">Защита от спайков в минутах (0 = без защиты)</string>
-    <string name="stocks_tazik_endless_close_price_protection">Не выше цены закрытия</string>
+    <string name="stocks_tazik_endless_spike_protection">Защита от спайков вверх в минутах (0 = без защиты)</string>
+    <string name="stocks_tazik_endless_close_price_protection_percent">Допустимая просадка от закрытия ОС (0.25 выше ОС, -0.25 ниже ОС, 0.0 = игнорировать)</string>
     <string name="stocks_tazik_endless_voice">Озвучка тазов</string>
+
+    <!-- endless zontik settings -->
+    <string name="stocks_zontik_endless_set">Набор 1 (тикеры через пробел)</string>
+    <string name="stocks_zontik_endless_set_2">Набор 2 (тикеры через пробел)</string>
+    <string name="stocks_zontik_endless_set_3">Набор 3 (тикеры через пробел)</string>
+    <string name="stocks_zontik_endless_reset_interval_seconds">Интервал сброса цены в секундах</string>
+    <string name="stocks_zontik_endless_day_min_volume">Общий дневной объём от шт.</string>
+    <string name="stocks_zontik_endless_min_volume">Реагировать на объём от шт.</string>
+    <string name="stocks_zontik_endless_min_percent_to_buy">Минимальный спайк вверх в %</string>
+    <string name="stocks_zontik_endless_purchase_volume">Общая сумма продажи</string>
+    <string name="stocks_zontik_endless_purchase_parts">Сколько зонтиков? (заявок)</string>
+    <string name="stocks_zontik_endless_order_lifetime_seconds">Время жизни заявки в секундах</string>
+    <string name="stocks_zontik_endless_schedule">Расписание старта, время МСК (через пробел)</string>
+    <string name="stocks_zontik_endless_taz_lifetime_minutes">Автовыключение через (в минутах)</string>
+    <string name="stocks_zontik_endless_take_profit">Заявка на профит в % (0.0 = не создавать)</string>
+    <string name="stocks_zontik_endless_approximation_factor">Приближение к верху свечи [0.0, 1.0]</string>
+    <string name="stocks_zontik_endless_allow_averaging">Разрешить усреднение</string>
+    <string name="stocks_zontik_endless_exclude_report">Исключать отчёты</string>
+    <string name="stocks_zontik_endless_exclude_divs">Исключать дивы</string>
+    <string name="stocks_zontik_endless_exclude_fda">Исключать FDA</string>
+    <string name="stocks_zontik_endless_exclude_depo">Исключать бумаги из депо</string>
+    <string name="stocks_zontik_endless_spike_protection">Защита от спайков вниз в минутах (0 = без защиты)</string>
+    <string name="stocks_zontik_endless_close_price_protection_percent">Допустимый рост от закрытия ОС (0.25 выше ОС, -0.25 ниже ОС, 0.0 = игнорировать)</string>
+    <string name="stocks_zontik_endless_voice">Озвучка зонтов</string>
+
+    <!-- fixprice settings -->
+    <string name="stocks_fixprice_schedule">Время автофикса цен МСК (через пробел)</string>
 
     <!-- rocket settings -->
     <string name="stocks_rocket_change_percent">Изменение в %</string>
@@ -371,10 +400,37 @@
     <string name="setting_key_tazik_endless_exclude_fda">endless_exclude_fda</string>
     <string name="setting_key_tazik_endless_exclude_depo">endless_exclude_depo</string>
     <string name="setting_key_tazik_endless_spike_protection">tazik_endless_spike_protection</string>
-    <string name="setting_key_tazik_endless_close_price_protection">tazik_endless_close_price_protection</string>
+    <string name="setting_key_tazik_endless_close_price_protection_percent">tazik_endless_close_price_protection_percent</string>
     <string name="setting_key_tazik_endless_schedule">tazik_endless_schedule</string>
     <string name="setting_key_tazik_endless_taz_lifetime_minutes">tazik_endless_taz_lifetime_minutes</string>
     <string name="setting_key_tazik_endless_voice">tazik_endless_voice</string>
+
+    <!-- endless zontik settings -->
+    <string name="setting_key_zontik_endless_set">zontik_endless_set</string>
+    <string name="setting_key_zontik_endless_set_2">zontik_endless_set_2</string>
+    <string name="setting_key_zontik_endless_set_3">zontik_endless_set_3</string>
+    <string name="setting_key_zontik_endless_reset_interval_seconds">zontik_endless_reset_interval_seconds</string>
+    <string name="setting_key_zontik_endless_day_min_volume">zontik_endless_day_min_volume</string>
+    <string name="setting_key_zontik_endless_min_volume">zontik_endless_min_volume</string>
+    <string name="setting_key_zontik_endless_min_percent_to_buy">zontik_endless_min_percent_to_buy</string>
+    <string name="setting_key_zontik_endless_purchase_volume">zontik_endless_purchase_volume</string>
+    <string name="setting_key_zontik_endless_purchase_parts">zontik_endless_purchase_parts</string>
+    <string name="setting_key_zontik_endless_order_lifetime_seconds">zontik_endless_order_lifetime_seconds</string>
+    <string name="setting_key_zontik_endless_schedule">zontik_endless_schedule</string>
+    <string name="setting_key_zontik_endless_taz_lifetime_minutes">zontik_endless_taz_lifetime_minutes</string>
+    <string name="setting_key_zontik_endless_take_profit">zontik_endless_take_profit</string>
+    <string name="setting_key_zontik_endless_approximation_factor">zontik_endless_approximation_factor</string>
+    <string name="setting_key_zontik_endless_allow_averaging">zontik_endless_allow_averaging</string>
+    <string name="setting_key_zontik_endless_exclude_report">endless_exclude_report</string>
+    <string name="setting_key_zontik_endless_exclude_divs">endless_exclude_divs</string>
+    <string name="setting_key_zontik_endless_exclude_fda">endless_exclude_fda</string>
+    <string name="setting_key_zontik_endless_exclude_depo">endless_exclude_depo</string>
+    <string name="setting_key_zontik_endless_spike_protection">endless_spike_protection</string>
+    <string name="setting_key_zontik_endless_close_price_protection_percent">zontik_endless_close_price_protection_percent</string>
+    <string name="setting_key_zontik_endless_voice">zontik_endless_voice</string>
+
+    <!-- fixprice settings -->
+    <string name="setting_key_fixprice_schedule">fixprice_schedule</string>
 
     <!-- rocket settings -->
     <string name="setting_key_rocket_change_percent">rocket_change_percent</string>

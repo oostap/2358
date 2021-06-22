@@ -321,6 +321,34 @@
         android:label="@string/menu_tazik_endless"
         tools:layout="@layout/fragment_tazik_endless_status" />
 
+    <!-- endless zonitk -->
+
+    <fragment
+        android:id="@+id/nav_zontik_endless_start"
+        android:name="com.project.ti2358.ui.strategyZontikEndless.StrategyZontikEndlessStartFragment"
+        android:label="@string/menu_zontik_endless"
+        tools:layout="@layout/fragment_zontik_endless_start">
+        <action
+            android:id="@+id/action_nav_zontik_endless_start_to_nav_zontik_endless_finish"
+            app:destination="@id/nav_zontik_endless_finish" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_zontik_endless_finish"
+        android:name="com.project.ti2358.ui.strategyZontikEndless.StrategyZontikEndlessFinishFragment"
+        android:label="@string/menu_zontik_endless"
+        tools:layout="@layout/fragment_zontik_endless_finish" >
+        <action
+            android:id="@+id/action_nav_zontik_endless_finish_to_nav_zontik_endless_status"
+            app:destination="@id/nav_zontik_endless_status" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_zontik_endless_status"
+        android:name="com.project.ti2358.ui.strategyZontikEndless.StrategyZontikEndlessStatusFragment"
+        android:label="@string/menu_zontik_endless"
+        tools:layout="@layout/fragment_zontik_endless_status" />
+
     <!-- diagnostics -->
     <fragment
         android:id="@+id/nav_diagnostics"

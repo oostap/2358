@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:divider="?android:dividerHorizontal"
+    android:dividerPadding="10dp"
+    android:showDividers="middle"
+    android:weightSum="40" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="9.5"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/ticker_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:text="1. TSLA 10 шт."
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/price_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:gravity="center_vertical"
+            android:text="700$ -> 650$"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/price_total_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:gravity="center_vertical"
+            android:text="6500$"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="10.7"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/unused"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:text=""
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/price_buy_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:gravity="center_vertical"
+            android:text="640$"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/price_buy_total_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:gravity="center_vertical"
+            android:text="6400$"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="10.8"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/price_change_percent_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:text="-0.2%"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/price_change_absolute_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:gravity="center_vertical"
+            android:text="-10$"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/price_change_absolute_total_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:gravity="center_vertical"
+            android:text="-100$"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="9"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_weight="2"
+            android:id="@+id/percent_minus_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:textSize="30dp"
+            android:text="-" />
+
+        <Button
+            android:layout_weight="2"
+            android:id="@+id/percent_plus_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginRight="3dp"
+            android:layout_marginLeft="3dp"
+            android:textSize="30dp"
+            android:text="+" />
+    </LinearLayout>
+
+</LinearLayout>

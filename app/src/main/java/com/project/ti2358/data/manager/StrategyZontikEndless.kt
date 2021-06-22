@@ -17,7 +17,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @KoinApiExtension
-class StrategyTazikEndless : KoinComponent {
+class StrategyZontikEndless : KoinComponent {
     private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
@@ -61,9 +61,9 @@ class StrategyTazikEndless : KoinComponent {
         stocksSelected.clear()
 
         val setList: List<String> = when (numberSet) {
-            1 -> SettingsManager.getTazikEndlessSet1()
-            2 -> SettingsManager.getTazikEndlessSet2()
-            3 -> SettingsManager.getTazikEndlessSet3()
+            1 -> SettingsManager.getZontikEndlessSet1()
+            2 -> SettingsManager.getZontikEndlessSet2()
+            3 -> SettingsManager.getZontikEndlessSet3()
             4 -> SettingsManager.getLoveSet()
             else -> emptyList()
         }
@@ -77,9 +77,9 @@ class StrategyTazikEndless : KoinComponent {
         val editor: SharedPreferences.Editor = preferences.edit()
 
         val key = when (numberSet) {
-            1 -> TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_set)
-            2 -> TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_set_2)
-            3 -> TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_set_3)
+            1 -> TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_set)
+            2 -> TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_set_2)
+            3 -> TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_set_3)
             4 -> TheApplication.application.applicationContext.getString(R.string.setting_key_love_set)
             else -> ""
         }
@@ -120,9 +120,9 @@ class StrategyTazikEndless : KoinComponent {
     suspend fun getPurchaseStock(): MutableList<PurchaseStock> = withContext(StockManager.stockContext) {
         if (started) return@withContext stocksToPurchase
 
-        val percent = SettingsManager.getTazikEndlessChangePercent()
-        val totalMoney: Double = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
-        val onePiece: Double = totalMoney / SettingsManager.getTazikEndlessPurchaseParts()
+        val percent = SettingsManager.getZontikEndlessChangePercent()
+        val totalMoney: Double = SettingsManager.getZontikEndlessPurchaseVolume().toDouble()
+        val onePiece: Double = totalMoney / SettingsManager.getZontikEndlessPurchaseParts()
 
         val purchases: MutableList<PurchaseStock> = mutableListOf()
         for (stock in stocksSelected) {
@@ -154,22 +154,22 @@ class StrategyTazikEndless : KoinComponent {
         stocksToPurchase.removeAll { it.lots == 0 || it.lots > 99999999 }
 
         // удалить все бумаги, у которых недавно или скоро отчёты
-        if (SettingsManager.getTazikEndlessExcludeReports()) {
+        if (SettingsManager.getZontikEndlessExcludeReports()) {
             stocksToPurchase.removeAll { it.stock.report != null }
         }
 
         // удалить все бумаги, у которых скоро дивы
-        if (SettingsManager.getTazikEndlessExcludeDivs()) {
+        if (SettingsManager.getZontikEndlessExcludeDivs()) {
             stocksToPurchase.removeAll { it.stock.dividend != null }
         }
 
         // удалить все бумаги, у которых скоро FDA фаза
-        if (SettingsManager.getTazikEndlessExcludeFDA()) {
+        if (SettingsManager.getZontikEndlessExcludeFDA()) {
             stocksToPurchase.removeAll { it.stock.fda != null }
         }
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
-        if (SettingsManager.getTazikEndlessExcludeDepo()) {
+        if (SettingsManager.getZontikEndlessExcludeDepo()) {
             stocksToPurchase.removeAll { p -> depositManager.portfolioPositions.any { it.ticker == p.ticker } }
         }
 
@@ -207,17 +207,17 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     fun getTotalPurchaseString(): String {
-        val volume = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
-        val p = SettingsManager.getTazikEndlessPurchaseParts()
-        val volumeShares = SettingsManager.getTazikEndlessMinVolume()
+        val volume = SettingsManager.getZontikEndlessPurchaseVolume().toDouble()
+        val p = SettingsManager.getZontikEndlessPurchaseParts()
+        val volumeShares = SettingsManager.getZontikEndlessMinVolume()
         return String.format(
             "%d из %d по %.2f$, просадка %.2f / %.2f / %.2f / %d",
             stocksTickerInProcess.size,
             p,
             volume / p,
             basicPercentLimitPriceChange,
-            SettingsManager.getTazikEndlessTakeProfit(),
-            SettingsManager.getTazikEndlessApproximationFactor(),
+            SettingsManager.getZontikEndlessTakeProfit(),
+            SettingsManager.getZontikEndlessApproximationFactor(),
             volumeShares
         )
     }
@@ -235,25 +235,25 @@ class StrategyTazikEndless : KoinComponent {
         currentPurchaseSort = if (currentPurchaseSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
 
         val local = stocksToPurchase.toMutableList()
-        local.removeAll { it.tazikEndlessPrice == 0.0 }
+        local.removeAll { it.zontikEndlessPrice == 0.0 }
 
-        val volume = SettingsManager.getTazikEndlessMinVolume()
+        val volume = SettingsManager.getZontikEndlessMinVolume()
         if (currentPurchaseSort == Sorting.ASCENDING) {
-            local.sortBy { it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100 }
+            local.sortBy { it.stock.getPriceNow(volume) / it.zontikEndlessPrice * 100 - 100 }
         } else {
-            local.sortByDescending { it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100 }
+            local.sortByDescending { it.stock.getPriceNow(volume) / it.zontikEndlessPrice * 100 - 100 }
         }
 
         return local
     }
 
     fun getNotificationTextLong(): String {
-        val volume = SettingsManager.getTazikEndlessMinVolume()
+        val volume = SettingsManager.getZontikEndlessMinVolume()
 
         val stocks = stocksToPurchase.map {
             Pair(it.stock.getPriceNow(volume, true), it)
         }.sortedBy {
-            it.first / it.second.tazikEndlessPrice * 100 - 100
+            it.first / it.second.zontikEndlessPrice * 100 - 100
         }
 
         var tickers = ""
@@ -261,7 +261,7 @@ class StrategyTazikEndless : KoinComponent {
             val purchase = pair.second
             val priceNow = pair.first
 
-            val change = (100 * priceNow) / purchase.tazikEndlessPrice - 100
+            val change = (100 * priceNow) / purchase.zontikEndlessPrice - 100
             if (change >= -0.01 && purchase.status == PurchaseStatus.WAITING && stocksToPurchase.size > 5) continue
 
             var vol = 0
@@ -269,7 +269,7 @@ class StrategyTazikEndless : KoinComponent {
                 vol = purchase.stock.minuteCandles.last().volume
             }
             tickers += "${purchase.ticker} ${purchase.percentLimitPriceChange.toPercent()} = " +
-                    "${purchase.tazikEndlessPrice.toMoney(purchase.stock)} ➡ ${priceNow.toMoney(purchase.stock)} = " +
+                    "${purchase.zontikEndlessPrice.toMoney(purchase.stock)} ➡ ${priceNow.toMoney(purchase.stock)} = " +
                     "${change.toPercent()} ${purchase.getStatusString()} v=${vol}\n"
         }
         if (tickers == "") tickers = "только отрицательные бумаги ⏳"
@@ -280,7 +280,7 @@ class StrategyTazikEndless : KoinComponent {
     private fun fixPrice() {
         // зафикировать цену, чтобы change считать от неё
         for (purchase in stocksToPurchaseClone) {
-            purchase.tazikEndlessPrice = purchase.stock.getPriceNow(SettingsManager.getTazikEndlessMinVolume(), true)
+            purchase.zontikEndlessPrice = purchase.stock.getPriceNow(SettingsManager.getZontikEndlessMinVolume(), true)
         }
     }
 
@@ -290,7 +290,7 @@ class StrategyTazikEndless : KoinComponent {
         if (newPercent != 0.0) {
             val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
             val editor: SharedPreferences.Editor = preferences.edit()
-            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_min_percent_to_buy)
+            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_min_percent_to_buy)
             editor.putString(key, "%.2f".format(newPercent))
             editor.apply()
         }
@@ -301,7 +301,7 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     fun prepareStrategy(scheduled : Boolean, time: String) = runBlocking (StockManager.stockContext) {
-        basicPercentLimitPriceChange = SettingsManager.getTazikEndlessChangePercent()
+        basicPercentLimitPriceChange = SettingsManager.getZontikEndlessChangePercent()
 
         if (!scheduled) {
             startStrategy(scheduled)
@@ -342,7 +342,7 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     suspend fun startStrategy(scheduled: Boolean) = withContext(StockManager.stockContext) {
-        basicPercentLimitPriceChange = SettingsManager.getTazikEndlessChangePercent()
+        basicPercentLimitPriceChange = SettingsManager.getZontikEndlessChangePercent()
 
         if (scheduled) {
             GlobalScope.launch(Dispatchers.Main) {
@@ -372,13 +372,13 @@ class StrategyTazikEndless : KoinComponent {
         jobResetPrice?.cancel()
         jobResetPrice = GlobalScope.launch(Dispatchers.Main) {
             while (true) {
-                val seconds = SettingsManager.getTazikEndlessResetIntervalSeconds().toLong()
+                val seconds = SettingsManager.getZontikEndlessResetIntervalSeconds().toLong()
                 delay(1000 * seconds)
                 fixPrice()
             }
         }
 
-        strategyTelegram.sendTazikEndlessStart(true)
+        strategyTelegram.sendZontikEndlessStart(true)
     }
 
     fun stopStrategy() {
@@ -394,7 +394,7 @@ class StrategyTazikEndless : KoinComponent {
         }
         stocksTickerInProcess.clear()
         jobResetPrice?.cancel()
-        strategyTelegram.sendTazikEndlessStart(false)
+        strategyTelegram.sendZontikEndlessStart(false)
     }
 
     fun addBasicPercentLimitPriceChange(sign: Int) = runBlocking (StockManager.stockContext) {
@@ -409,12 +409,12 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     private fun isAllowToBuy(purchase: PurchaseStock, change: Double, volume: Int): Boolean {
-        if (purchase.tazikEndlessPrice == 0.0 ||                    // стартовая цена нулевая = не загрузились цены
+        if (purchase.zontikEndlessPrice == 0.0 ||                    // стартовая цена нулевая = не загрузились цены
             abs(change) > 50 ||                                     // конечная цена нулевая или просто огромная просадка
             change > 0 ||                                           // изменение положительное
             change > purchase.percentLimitPriceChange ||            // изменение не в пределах наших настроек
-            volume < SettingsManager.getTazikEndlessMinVolume() ||  // если объём свечи меньше настроек
-            purchase.stock.getTodayVolume() < SettingsManager.getTazikEndlessDayMinVolume() // дневной объём меньше, чем нужно
+            volume < SettingsManager.getZontikEndlessMinVolume() ||  // если объём свечи меньше настроек
+            purchase.stock.getTodayVolume() < SettingsManager.getZontikEndlessDayMinVolume() // дневной объём меньше, чем нужно
         ) {
             return false
         }
@@ -422,10 +422,10 @@ class StrategyTazikEndless : KoinComponent {
         val ticker = purchase.ticker
 
         // лимит на заявки исчерпан?
-        if (stocksTickerInProcess.size >= SettingsManager.getTazikEndlessPurchaseParts()) return false
+        if (stocksTickerInProcess.size >= SettingsManager.getZontikEndlessPurchaseParts()) return false
 
         // проверить, если бумага в депо и усреднение отключено, то запретить тарить
-        if (depositManager.portfolioPositions.find { it.ticker == purchase.ticker } != null && !SettingsManager.getTazikEndlessAllowAveraging()) {
+        if (depositManager.portfolioPositions.find { it.ticker == purchase.ticker } != null && !SettingsManager.getZontikEndlessAllowAveraging()) {
             return false
         }
 
@@ -435,7 +435,7 @@ class StrategyTazikEndless : KoinComponent {
         }
 
         // разрешить усреднение?
-        if (SettingsManager.getTazikEndlessAllowAveraging()) {
+        if (SettingsManager.getZontikEndlessAllowAveraging()) {
             return true
         }
 
@@ -462,7 +462,7 @@ class StrategyTazikEndless : KoinComponent {
         // если бумага не в списке скана - игнорируем
         val sorted = stocksToPurchaseClone.find { it.ticker == ticker }
         sorted?.let { purchase ->
-            val change = candle.closingPrice / purchase.tazikEndlessPrice * 100.0 - 100.0
+            val change = candle.closingPrice / purchase.zontikEndlessPrice * 100.0 - 100.0
             val volume = candle.volume
 
             if (isAllowToBuy(purchase, change, volume)) {
@@ -473,30 +473,30 @@ class StrategyTazikEndless : KoinComponent {
 
     private fun processBuy(purchase: PurchaseStock, stock: Stock, candle: Candle) {
         // завершение стратегии
-        val parts = SettingsManager.getTazikEndlessPurchaseParts()
+        val parts = SettingsManager.getZontikEndlessPurchaseParts()
         if (stocksTickerInProcess.size >= parts) { // останавливить стратегию автоматически
             stopStrategy()
             return
         }
 
-        if (purchase.tazikEndlessPrice == 0.0) return
+        if (purchase.zontikEndlessPrice == 0.0) return
 
-        val change = candle.closingPrice / purchase.tazikEndlessPrice * 100.0 - 100.0
+        val change = candle.closingPrice / purchase.zontikEndlessPrice * 100.0 - 100.0
 
         // ищем цену максимально близкую к просадке
         var delta = abs(change) - abs(purchase.percentLimitPriceChange)
 
         // 0.80 коэф приближения к нижней точке, в самом низу могут не налить
-        delta *= SettingsManager.getTazikEndlessApproximationFactor()
+        delta *= SettingsManager.getZontikEndlessApproximationFactor()
 
         // корректируем % падения для покупки
         val percent = abs(purchase.percentLimitPriceChange) + delta
 
         // вычислияем финальную цену лимитки
-        var buyPrice = purchase.tazikEndlessPrice - abs(purchase.tazikEndlessPrice / 100.0 * percent)
+        var buyPrice = purchase.zontikEndlessPrice - abs(purchase.zontikEndlessPrice / 100.0 * percent)
 
         // защита от спайков - сколько минут цена была выше цены покупки, начиная с предыдущей
-        var minutes = SettingsManager.getTazikEndlessSpikeProtection()
+        var minutes = SettingsManager.getZontikEndlessSpikeProtection()
         if (purchase.stock.minuteCandles.size >= minutes) { // не считать спайки на открытии и на старте таза - мало доступных свечей
             for (i in purchase.stock.minuteCandles.indices.reversed()) {
 
@@ -513,12 +513,12 @@ class StrategyTazikEndless : KoinComponent {
                     }
                 } else { // был спайк на несколько свечек - тарить опасно!
                     // обновить цену, чтобы не затарить на следующей свече, возможен нож ступенькой
-                    purchase.tazikEndlessPrice = candle.closingPrice
+                    purchase.zontikEndlessPrice = candle.closingPrice
                     strategySpeaker.speakTazikSpikeSkip(purchase, change)
                     strategyTelegram.sendTazikSpike(
                         purchase,
                         buyPrice,
-                        purchase.tazikEndlessPrice,
+                        purchase.zontikEndlessPrice,
                         candle.closingPrice,
                         change,
                         stocksTickerInProcess.size,
@@ -530,9 +530,9 @@ class StrategyTazikEndless : KoinComponent {
         }
 
         // проверка на цену закрытия (выше не тарить)
-        if (SettingsManager.getTazikEndlessClosePriceProtectionPercent() != 0.0) {
+        if (SettingsManager.getZontikEndlessClosePriceProtectionPercent() != 0.0) {
             if (stock.instrument.currency == Currency.USD) {
-                val finalPrice = stock.getPrice2300() + stock.getPrice2300() * SettingsManager.getTazikEndlessClosePriceProtectionPercent()
+                val finalPrice = stock.getPrice2300() + stock.getPrice2300() * SettingsManager.getZontikEndlessClosePriceProtectionPercent()
                 if (buyPrice >= finalPrice) {
                     return
                 }
@@ -544,15 +544,15 @@ class StrategyTazikEndless : KoinComponent {
         }
 
         // вычисляем процент профита после сдвига лимитки ниже
-        var finalProfit = SettingsManager.getTazikEndlessTakeProfit()
+        var finalProfit = SettingsManager.getZontikEndlessTakeProfit()
 
         // если мы усредняем, то не нужно выставлять ТП, потому что неизвестно какие заявки из усреднения выполнятся и какая будет в итоге средняя
-        if (stock.ticker in stocksTickerInProcess && SettingsManager.getTazikEndlessAllowAveraging()) {
+        if (stock.ticker in stocksTickerInProcess && SettingsManager.getZontikEndlessAllowAveraging()) {
             finalProfit = 0.0
         }
 
         buyPrice = Utils.makeNicePrice(buyPrice, stock)
-        val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikEndlessOrderLifeTimeSeconds())
+        val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getZontikEndlessOrderLifeTimeSeconds())
         if (job != null) {
             stocksTickerInProcess[stock.ticker] = job
 
@@ -560,8 +560,8 @@ class StrategyTazikEndless : KoinComponent {
             sellPrice = Utils.makeNicePrice(sellPrice, stock)
 
             strategySpeaker.speakTazik(purchase, change)
-            strategyTelegram.sendTazikBuy(purchase, buyPrice, sellPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
-            purchase.tazikEndlessPrice = candle.closingPrice
+            strategyTelegram.sendTazikBuy(purchase, buyPrice, sellPrice, purchase.zontikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
+            purchase.zontikEndlessPrice = candle.closingPrice
         }
     }
 }

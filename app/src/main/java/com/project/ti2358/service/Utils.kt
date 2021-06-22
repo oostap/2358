@@ -71,7 +71,11 @@ fun Double.toMoney(stock: Stock?, showSymbol: Boolean = true): String {
         symbol = ""
     }
     if (stock?.instrument?.currency == Currency.RUB) {
-        return "%.4f%s".format(locale = Locale.US, this, symbol)
+        if (stock.instrument.minPriceIncrement == 0.01) {
+            return "%.2f%s".format(locale = Locale.US, this, symbol)
+        } else {
+            return "%.4f%s".format(locale = Locale.US, this, symbol)
+        }
     } else {
         return "%.2f%s".format(locale = Locale.US, this, symbol)
     }

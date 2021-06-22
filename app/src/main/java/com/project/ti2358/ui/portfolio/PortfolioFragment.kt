@@ -135,10 +135,15 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
                     tickerView.text = "${index + 1}) ${portfolioPosition.stock?.getTickerLove()}"
 
                     lotsBlockedView.text = if (portfolioPosition.blocked.toInt() > 0) "(${portfolioPosition.blocked.toInt()}🔒)" else ""
-                    lotsView.text = "${portfolioPosition.lots}"
 
                     val avg = portfolioPosition.getAveragePrice()
-                    priceView.text = "${avg.toMoney(portfolioPosition.stock)} ➡ ${portfolioPosition.stock?.getPriceString()}"
+                    var priceNow = "0.0$"
+                    portfolioPosition.stock?.let {
+                        lotsView.text = "${portfolioPosition.lots * it.instrument.lot}"
+                        priceNow = (it.getPriceNow() / it.instrument.lot).toMoney(it)
+                    }
+
+                    priceView.text = "${avg.toMoney(portfolioPosition.stock)} ➡ $priceNow"
 
                     val profit = portfolioPosition.getProfitAmount()
                     priceChangeAbsoluteView.text = profit.toMoney(portfolioPosition.stock)
@@ -159,7 +164,7 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
                     priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
                     orderbookButton.setOnClickListener {
                         if (portfolioPosition.stock == null) {
-                            Utils.showMessageAlert(requireContext(), "Какая-то странная бумага, нет такой в каталоге!")
+                            Utils.showMessageAlert(requireContext(), "Какая-то странная бумага, нет такой в каталоге у ТИ!")
                         } else {
                             portfolioPosition.stock?.let {
                                 orderbookManager.start(it)
@@ -170,7 +175,7 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
 
                     itemView.setOnClickListener {
                         if (portfolioPosition.stock == null) {
-                            Utils.showMessageAlert(requireContext(), "Какая-то странная бумага, нет такой в каталоге!")
+                            Utils.showMessageAlert(requireContext(), "Какая-то странная бумага, нет такой в каталоге у ТИ!")
                         } else {
                             positionManager.start(portfolioPosition)
                             itemView.findNavController().navigate(R.id.action_nav_portfolio_to_nav_portfolio_position)

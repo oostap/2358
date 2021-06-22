@@ -58,6 +58,10 @@
             android:id="@+id/nav_2225_start"
             android:icon="@drawable/ic_2358"
             android:title="@string/menu_2225" />
+        <item
+            android:id="@+id/nav_zontik_endless_start"
+            android:icon="@drawable/ic_tazik_endless"
+            android:title="@string/menu_zontik_endless" />
     </group>
 
     <group

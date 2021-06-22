@@ -430,16 +430,155 @@
             app:useSimpleSummaryProvider="true"
             app:defaultValue="1"/>
 
-        <SwitchPreferenceCompat
-            app:key="@string/setting_key_tazik_endless_close_price_protection"
-            app:title="@string/stocks_tazik_endless_close_price_protection"
-            app:defaultValue="false" />
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_endless_close_price_protection_percent"
+            app:title="@string/stocks_tazik_endless_close_price_protection_percent"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="-0.1" />
 
         <SwitchPreferenceCompat
             app:key="@string/setting_key_tazik_endless_voice"
             app:title="@string/stocks_tazik_endless_voice"
             app:defaultValue="true" />
 
+    </PreferenceCategory>
+
+
+    <PreferenceCategory app:title="@string/menu_zontik_endless">
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_set"
+            app:title="@string/stocks_zontik_endless_set"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="SPCE GTHX"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_set_2"
+            app:title="@string/stocks_zontik_endless_set_2"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="VIPS BABA JD BIDU"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_set_3"
+            app:title="@string/stocks_zontik_endless_set_3"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue=""/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_reset_interval_seconds"
+            app:title="@string/stocks_zontik_endless_reset_interval_seconds"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="300"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_min_percent_to_buy"
+            app:title="@string/stocks_zontik_endless_min_percent_to_buy"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="-1.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_min_volume"
+            app:title="@string/stocks_zontik_endless_min_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="100"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_day_min_volume"
+            app:title="@string/stocks_zontik_endless_day_min_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="100"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_purchase_volume"
+            app:title="@string/stocks_zontik_endless_purchase_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="500"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_purchase_parts"
+            app:title="@string/stocks_zontik_endless_purchase_parts"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="2"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_order_lifetime_seconds"
+            app:title="@string/stocks_zontik_endless_order_lifetime_seconds"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="120"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_schedule"
+            app:title="@string/stocks_zontik_endless_schedule"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="06:59:50 09:59:50 10:59:50 15:29:50"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_taz_lifetime_minutes"
+            app:title="@string/stocks_zontik_endless_taz_lifetime_minutes"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1000"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_take_profit"
+            app:title="@string/stocks_zontik_endless_take_profit"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_approximation_factor"
+            app:title="@string/stocks_zontik_endless_approximation_factor"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0.65"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_zontik_endless_allow_averaging"
+            app:title="@string/stocks_zontik_endless_allow_averaging"
+            app:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_zontik_endless_exclude_report"
+            app:title="@string/stocks_zontik_endless_exclude_report"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_zontik_endless_exclude_divs"
+            app:title="@string/stocks_zontik_endless_exclude_divs"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_zontik_endless_exclude_fda"
+            app:title="@string/stocks_zontik_endless_exclude_fda"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_zontik_endless_exclude_depo"
+            app:title="@string/stocks_zontik_endless_exclude_depo"
+            app:defaultValue="true" />
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_spike_protection"
+            app:title="@string/stocks_zontik_endless_spike_protection"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_zontik_endless_close_price_protection_percent"
+            app:title="@string/stocks_zontik_endless_close_price_protection_percent"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="-0.1" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_zontik_endless_voice"
+            app:title="@string/stocks_zontik_endless_voice"
+            app:defaultValue="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/menu_fixprice">
+        <EditTextPreference
+            app:key="@string/setting_key_fixprice_schedule"
+            app:title="@string/stocks_fixprice_schedule"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="07:00:00 10:00:00 11:00:00 16:30:00"/>
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_rocket">

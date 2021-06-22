@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:divider="?android:dividerHorizontal"
+        android:dividerPadding="10dp"
+        android:showDividers="middle"
+        android:paddingStart="10dp"
+        android:weightSum="3.5" >
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.4"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/ticker_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:paddingTop="8dp"
+            android:text="1. TSLA"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/price_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:gravity="center_vertical"
+            android:text="700$"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.9"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/volume_shares_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingTop="8dp"
+            android:gravity="center_vertical"
+            android:text="80k"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/volume_cash_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingTop="8dp"
+            android:gravity="center_vertical"
+            android:text=""
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.9"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/price_change_percent_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingTop="8dp"
+            android:gravity="center_vertical"
+            android:text="+5%"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/price_change_absolute_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingTop="8dp"
+            android:gravity="center_vertical"
+            android:text="+20$"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/choose_view"
+        android:layout_height="match_parent"
+        android:layout_weight="0.5"
+        android:layout_gravity="center"
+        android:layout_width="0dp" />
+</LinearLayout>

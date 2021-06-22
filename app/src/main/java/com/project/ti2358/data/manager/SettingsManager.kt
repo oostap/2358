@@ -574,9 +574,14 @@ class SettingsManager {
             }
         }
 
-        fun getTazikEndlessClosePriceProtection(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_close_price_protection)
-            return preferences.getBoolean(key, false)
+        fun getTazikEndlessClosePriceProtectionPercent(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_close_price_protection_percent)
+            val value: String? = preferences.getString(key, "-0.1")
+            return try {
+                (value ?: "-0.1").toDouble()
+            } catch (e: Exception) {
+                -0.1
+            }
         }
 
         fun getTazikEndlessLifeTimeMinutes(): Int {
@@ -636,6 +641,224 @@ class SettingsManager {
 
         fun getTazikEndlessVoice(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_voice)
+            return preferences.getBoolean(key, true)
+        }
+
+        /******************** THE ZONTIK ENDLESS *************************/
+
+        fun getZontikEndlessSet1(): List<String> {
+            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_set)
+            val value: String? = preferences.getString(key, "SPCE GTHX")?.trim()
+            val array = value?.split(" ")
+            return array ?: emptyList()
+        }
+
+        fun getZontikEndlessSet2(): List<String> {
+            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_set_2)
+            val value: String? = preferences.getString(key, "VIPS BABA JD BIDU")?.trim()
+            val array = value?.split(" ")
+            return array ?: emptyList()
+        }
+
+        fun getZontikEndlessSet3(): List<String> {
+            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_set_3)
+            val value: String? = preferences.getString(key, "VTBR OZON MGNT BELU")?.trim()
+            val array = value?.split(" ")
+            return array ?: emptyList()
+        }
+
+        fun getZontikEndlessResetIntervalSeconds(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_reset_interval_seconds)
+            val value: String? = preferences.getString(key, "60")
+            return try {
+                parseInt(value ?: "60")
+            } catch (e: Exception) {
+                60
+            }
+        }
+
+        fun getZontikEndlessMinVolume(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_min_volume)
+            val value: String? = preferences.getString(key, "100")
+            return try {
+                parseInt(value ?: "100")
+            } catch (e: Exception) {
+                100
+            }
+        }
+
+        fun getZontikEndlessDayMinVolume(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_day_min_volume)
+            val value: String? = preferences.getString(key, "100")
+            return try {
+                parseInt(value ?: "100")
+            } catch (e: Exception) {
+                100
+            }
+        }
+
+        fun getZontikEndlessOrderLifeTimeSeconds(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_order_lifetime_seconds)
+            val value: String? = preferences.getString(key, "120")
+            return try {
+                parseInt(value ?: "120")
+            } catch (e: Exception) {
+                120
+            }
+        }
+
+        fun getZontikEndlessChangePercent(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_min_percent_to_buy)
+            val value: String? = preferences.getString(key, "-1.0")
+            return try {
+                (value ?: "-1.0").toDouble()
+            } catch (e: Exception) {
+                -1.0
+            }
+        }
+
+        fun getZontikEndlessPurchaseVolume(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_purchase_volume)
+            val value: String? = preferences.getString(key, "500")
+            return try {
+                parseInt(value ?: "500")
+            } catch (e: Exception) {
+                500
+            }
+        }
+
+        fun getZontikEndlessPurchaseParts(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_purchase_parts)
+            val value: String? = preferences.getString(key, "2")
+            return try {
+                (value ?: "2").toInt()
+            } catch (e: Exception) {
+                2
+            }
+        }
+
+        fun getZontikEndlessTakeProfit(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_take_profit)
+            val value: String? = preferences.getString(key, "1.0")
+            return try {
+                (value ?: "1.0").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun getZontikEndlessApproximationFactor(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_approximation_factor)
+            val value: String? = preferences.getString(key, "0.65")
+            return try {
+                (value ?: "0.65").toDouble()
+            } catch (e: Exception) {
+                0.65
+            }
+        }
+
+        fun getZontikEndlessAllowAveraging(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_allow_averaging)
+            return preferences.getBoolean(key, false)
+        }
+
+        fun getZontikEndlessExcludeReports(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_exclude_report)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getZontikEndlessExcludeDivs(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_exclude_divs)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getZontikEndlessExcludeFDA(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_exclude_fda)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getZontikEndlessExcludeDepo(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_exclude_depo)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getZontikEndlessSpikeProtection(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_spike_protection)
+            val value: String? = preferences.getString(key, "1")
+            return try {
+                parseInt(value ?: "1")
+            } catch (e: Exception) {
+                1
+            }
+        }
+
+        fun getZontikEndlessClosePriceProtectionPercent(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_close_price_protection_percent)
+            val value: String? = preferences.getString(key, "-0.1")
+            return try {
+                (value ?: "-0.1").toDouble()
+            } catch (e: Exception) {
+                -0.1
+            }
+        }
+
+        fun getZontikEndlessLifeTimeMinutes(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_taz_lifetime_minutes)
+            val value: String? = preferences.getString(key, "1000")
+            return try {
+                parseInt(value ?: "1000")
+            } catch (e: Exception) {
+                1000
+            }
+        }
+
+        fun getZontikEndlessNearestTime(): String {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_schedule)
+            var time = preferences.getString(key, "06:59:50")
+
+            if (time != null && time != "") {
+                val times = time.split(" ").toTypedArray()
+
+                // отсортировать по возрастанию
+                times.sortBy { t ->
+                    val dayTime = t.split(":").toTypedArray()
+                    parseInt(dayTime[0]) * 3600 + parseInt(dayTime[1]) * 60 + parseInt(dayTime[2])
+                }
+
+                for (t in times) {
+                    val dayTime = t.split(":").toTypedArray()
+                    if (dayTime.size < 3) continue
+
+                    val hours: Int
+                    val minutes: Int
+                    val seconds: Int
+                    try {
+                        hours = parseInt(dayTime[0])
+                        minutes = parseInt(dayTime[1])
+                        seconds = parseInt(dayTime[2])
+                    } catch (e: Exception) {
+                        Utils.showToastAlert("Неверный формат времени в настройках!")
+                        continue
+                    }
+                    val currentMskTime = Utils.getTimeMSK()
+
+                    val hoursMsk = currentMskTime.get(Calendar.HOUR_OF_DAY)
+                    val minutesMsk = currentMskTime.get(Calendar.MINUTE)
+                    val secondsMsk = currentMskTime.get(Calendar.SECOND)
+
+                    val total = hours * 3600 + minutes * 60 + seconds
+                    val totalMsk = hoursMsk * 3600 + minutesMsk * 60 + secondsMsk
+                    if (totalMsk < total) {
+                        return t
+                    }
+                }
+            }
+
+            return "???"
+        }
+
+        fun getZontikEndlessVoice(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_voice)
             return preferences.getBoolean(key, true)
         }
 
@@ -969,5 +1192,51 @@ class SettingsManager {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_limits_voice)
             return preferences.getBoolean(key, true)
         }
+    }
+
+    /******************** fixprice *************************/
+    fun getFixPriceNearestTime(): String {
+        val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_fixprice_schedule)
+        val time = preferences.getString(key, "07:00:00 10:00:00 11:00:00 16:30:00")
+
+        if (time != null && time != "") {
+            val times = time.split(" ").toTypedArray()
+
+            // отсортировать по возрастанию
+            times.sortBy { t ->
+                val dayTime = t.split(":").toTypedArray()
+                parseInt(dayTime[0]) * 3600 + parseInt(dayTime[1]) * 60 + parseInt(dayTime[2])
+            }
+
+            for (t in times) {
+                val dayTime = t.split(":").toTypedArray()
+                if (dayTime.size < 3) continue
+
+                val hours: Int
+                val minutes: Int
+                val seconds: Int
+                try {
+                    hours = parseInt(dayTime[0])
+                    minutes = parseInt(dayTime[1])
+                    seconds = parseInt(dayTime[2])
+                } catch (e: Exception) {
+                    Utils.showToastAlert("Неверный формат времени в настройках!")
+                    continue
+                }
+                val currentMskTime = Utils.getTimeMSK()
+
+                val hoursMsk = currentMskTime.get(Calendar.HOUR_OF_DAY)
+                val minutesMsk = currentMskTime.get(Calendar.MINUTE)
+                val secondsMsk = currentMskTime.get(Calendar.SECOND)
+
+                val total = hours * 3600 + minutes * 60 + seconds
+                val totalMsk = hoursMsk * 3600 + minutesMsk * 60 + secondsMsk
+                if (totalMsk < total) {
+                    return t
+                }
+            }
+        }
+
+        return "???"
     }
 }

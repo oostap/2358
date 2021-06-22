@@ -541,6 +541,25 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
+    fun sendZontikEndlessStart(start: Boolean) {
+        if (started && SettingsManager.getTelegramSendTaziks()) {
+            val text = if (start) {
+                String.format(
+                    "🟢☂️ старт: %.2f%% / %.2f%% / %.2f / v%d / %ds / %ds",
+                    SettingsManager.getZontikEndlessChangePercent(),
+                    SettingsManager.getZontikEndlessTakeProfit(),
+                    SettingsManager.getZontikEndlessApproximationFactor(),
+                    SettingsManager.getZontikEndlessMinVolume(),
+                    SettingsManager.getZontikEndlessResetIntervalSeconds(),
+                    SettingsManager.getZontikEndlessOrderLifeTimeSeconds()
+                )
+            } else {
+                "🔴☂️ стоп!"
+            }
+            sendMessageToChats(text, -1)
+        }
+    }
+
     fun sendTazikBuy(purchase: PurchaseStock, buyPrice: Double, sellPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
             val text = "🛁$%s B%.2f$ -> S%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
