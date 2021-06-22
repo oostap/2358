@@ -74,6 +74,8 @@ class MainActivity : AppCompatActivity() {
                     key = "premarket_price_change_percent"
                 } else if (it.id in listOf(R.id.nav_tazik_endless_start, R.id.nav_tazik_endless_finish, R.id.nav_tazik_endless_status)) {
                     key = "tazik_endless_set"
+                } else if (it.id in listOf(R.id.nav_zontik_endless_start, R.id.nav_zontik_endless_finish, R.id.nav_zontik_endless_status)) {
+                    key = "zontik_endless_set"
                 } else if (it.id in listOf(R.id.nav_2358_start, R.id.nav_2358_finish)) {
                     key = "2358_price_change_percent"
                 } else if (it.id in listOf(R.id.nav_1000_buy_start, R.id.nav_1000_buy_finish)) {
@@ -261,7 +263,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_chat,
                 R.id.nav_trends,
                 R.id.nav_limits,
-                R.id.nav_sectors
+                R.id.nav_sectors,
+                R.id.nav_zontik_endless_start
             ),
             drawerLayout
         )

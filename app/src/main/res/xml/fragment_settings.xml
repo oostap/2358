@@ -473,7 +473,7 @@
             app:key="@string/setting_key_zontik_endless_min_percent_to_buy"
             app:title="@string/stocks_zontik_endless_min_percent_to_buy"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="-1.0"/>
+            app:defaultValue="1.0"/>
 
         <EditTextPreference
             app:key="@string/setting_key_zontik_endless_min_volume"

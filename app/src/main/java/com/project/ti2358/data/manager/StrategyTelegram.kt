@@ -578,6 +578,24 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
+    fun sendZontikSell(purchase: PurchaseStock, sellPrice: Double, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
+        if (started && SettingsManager.getTelegramSendTaziks()) {
+            val text = "🛁$%s B%.2f$ -> S%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
+                locale = Locale.US,
+                purchase.ticker,
+                buyPrice,
+                sellPrice,
+                priceFrom,
+                priceTo,
+                change,
+                tazikUsed,
+                tazikTotal
+            )
+            val buttons = getButtonsMarkup(purchase.stock)
+            sendMessageToChats(text, -1, replyMarkup = buttons)
+        }
+    }
+
     fun sendTazikSpike(purchase: PurchaseStock, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendSpikes()) {
             val text = "спайк! 🛁$%s B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(

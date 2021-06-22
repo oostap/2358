@@ -709,11 +709,11 @@ class SettingsManager {
 
         fun getZontikEndlessChangePercent(): Double {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_min_percent_to_buy)
-            val value: String? = preferences.getString(key, "-1.0")
+            val value: String? = preferences.getString(key, "1.0")
             return try {
-                (value ?: "-1.0").toDouble()
+                (value ?: "1.0").toDouble()
             } catch (e: Exception) {
-                -1.0
+                1.0
             }
         }
 

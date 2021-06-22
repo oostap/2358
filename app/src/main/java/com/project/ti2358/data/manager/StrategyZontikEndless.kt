@@ -560,8 +560,8 @@ class StrategyZontikEndless : KoinComponent {
             var buyPrice = sellPrice + sellPrice / 100.0 * finalProfit
             buyPrice = Utils.makeNicePrice(buyPrice, stock)
 
-            strategySpeaker.speakTazik(purchase, change)
-            strategyTelegram.sendTazikBuy(purchase, sellPrice, buyPrice, purchase.zontikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
+            strategySpeaker.speakZontik(purchase, change)
+            strategyTelegram.sendZontikSell(purchase, sellPrice, buyPrice, purchase.zontikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
             purchase.zontikEndlessPrice = candle.closingPrice
         }
     }

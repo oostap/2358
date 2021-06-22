@@ -57,6 +57,13 @@ class StrategySpeaker : KoinComponent, TextToSpeech.OnInitListener {
         }
     }
 
+    fun speakZontik(purchaseStock: PurchaseStock, change: Double) {
+        if (SettingsManager.getTazikEndlessVoice()) {
+            val text = makeNiceChange(purchaseStock.stock.ticker, change)
+            speak("шорт. $text")
+        }
+    }
+
     fun speakTazikSpikeSkip(purchaseStock: PurchaseStock, change: Double) {
         if (SettingsManager.getTazikEndlessVoice() && SettingsManager.getTelegramSendSpikes()) {
             val text = makeNiceChange(purchaseStock.stock.ticker, change)
