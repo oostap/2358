@@ -382,6 +382,185 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
         }
     }
 
+    fun sellLimitFromAsk(price: Double, profit: Double, counter: Int, orderLifeTimeSeconds: Int): Job? {
+        if (lots > 999999999 || lots == 0 || price == 0.0) return null
+        val sellPrice = Utils.makeNicePrice(price, stock)
+
+        var profitPrice = sellPrice - sellPrice / 100.0 * profit
+        profitPrice = Utils.makeNicePrice(profitPrice, stock)
+
+        val p = depositManager.getPositionForFigi(figi)
+
+        val lotsPortfolio = abs(p?.lots ?: 0)
+        var lotsToSell = lots
+
+        status = PurchaseStatus.WAITING
+        return GlobalScope.launch(Dispatchers.Main) {
+            try {
+                val figi = stock.figi
+                val ticker = stock.ticker
+
+                // счётчик на количество повторов (возможно просто нет депо) = примерно 1 минуту
+                var tries = counter
+                while (tries >= 0) { // выставить ордер на покупку
+                    try {
+                        status = PurchaseStatus.ORDER_BUY_PREPARE
+                        sellLimitOrder = ordersService.placeLimitOrder(
+                            lotsToSell,
+                            figi,
+                            sellPrice,
+                            OperationType.SELL,
+                            depositManager.getActiveBrokerAccountId()
+                        )
+                        delay(DelayFast)
+
+                        if (sellLimitOrder!!.status == OrderStatus.NEW || sellLimitOrder!!.status == OrderStatus.PENDING_NEW) {
+                            status = PurchaseStatus.ORDER_SELL
+                            break
+                        }
+
+                        depositManager.refreshOrders()
+                        depositManager.refreshDeposit()
+
+                        // если нет ни ордера, ни позиции, значит чета не так, повторяем
+                        if (depositManager.getOrderAllOrdersForFigi(figi, OperationType.SELL).isNotEmpty()) {
+                            status = PurchaseStatus.ORDER_SELL
+                            break
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    delay(DelaySuperFast)
+                    tries--
+                }
+                if (tries < 0) { // заявка не выставилась, сворачиваем лавочку, можно вернуть один таз
+                    Utils.showToastAlert("$ticker: не смогли выставить ордер на шорт по $sellPrice")
+                    status = PurchaseStatus.CANCELED
+                    return@launch
+                }
+
+                Utils.showToastAlert("$ticker: ордер на шорт по $sellPrice")
+
+                if (profit == 0.0) {
+                    delay(orderLifeTimeSeconds * 1000L)
+                    status = PurchaseStatus.CANCELED
+                    try {
+                        sellLimitOrder?.let {
+                            ordersService.cancel(it.orderId, depositManager.getActiveBrokerAccountId())
+                        }
+                    } catch (e: Exception) {
+
+                    }
+                } else {
+                    // проверяем появился ли в портфеле тикер
+                    var position: PortfolioPosition?
+                    var iterations = 0
+
+                    while (true) {
+                        iterations++
+                        try {
+                            depositManager.refreshDeposit()
+                            depositManager.refreshOrders()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            delay(DelayLong)
+                            continue
+                        }
+
+                        if (iterations * DelayLong / 1000.0 > orderLifeTimeSeconds) { // отменить заявку на покупку
+                            status = PurchaseStatus.CANCELED
+                            sellLimitOrder?.let {
+                                ordersService.cancel(it.orderId, depositManager.getActiveBrokerAccountId())
+                            }
+                            Utils.showToastAlert("$ticker: заявка отменена по $sellPrice")
+                            return@launch
+                        }
+
+                        val orderSell = depositManager.getOrderForFigi(figi, OperationType.SELL)
+                        position = depositManager.getPositionForFigi(figi)
+
+                        // проверка на большое количество лотов
+                        val orders = depositManager.getOrderAllOrdersForFigi(figi, OperationType.BUY)
+                        var totalBuyingLots = 0
+                        orders.forEach { totalBuyingLots += it.requestedLots }
+                        if (totalBuyingLots >= lots) break
+
+                        // заявка стоит, ничего не куплено
+                        if (orderSell != null && position == null) {
+                            status = PurchaseStatus.ORDER_SELL
+                            delay(DelayLong)
+                            continue
+                        }
+
+                        if (orderSell == null && position == null) { // заявка отменена, ничего не куплено
+                            status = PurchaseStatus.CANCELED
+                            Utils.showToastAlert("$ticker: не налили по $sellPrice")
+                            return@launch
+                        }
+
+                        position?.let { // появилась позиция, проверить есть ли что продать
+                            // выставить ордер на продажу
+                            try {
+                                val lotsToBuy = it.lots - it.blocked.toInt() - lotsPortfolio
+                                if (lotsToBuy <= 0) {  // если свободных лотов нет, продолжаем
+                                    return@let
+                                }
+
+                                lotsToSell -= lotsToBuy
+                                if (lotsToSell < 0) {    // если вся купленная позиция распродана, продолжаем
+                                    return@let
+                                }
+
+                                Utils.showToastAlert("$ticker: куплено по $sellPrice")
+
+                                buyLimitOrder = ordersService.placeLimitOrder(
+                                    lotsToSell,
+                                    figi,
+                                    profitPrice,
+                                    OperationType.BUY,
+                                    depositManager.getActiveBrokerAccountId()
+                                )
+
+                                if (buyLimitOrder!!.status == OrderStatus.NEW || buyLimitOrder!!.status == OrderStatus.PENDING_NEW) {
+                                    status = PurchaseStatus.ORDER_BUY
+                                    Utils.showToastAlert("$ticker: ордер на откуп шорта по $profitPrice")
+                                } else { // заявка отклонена, вернуть лоты
+                                    lotsToSell += lotsToBuy
+                                }
+
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+
+                        if (orderSell == null) { // если ордер исчез - удалён вручную или весь заполнился - завершаем
+                            status = PurchaseStatus.ORDER_BUY
+                            break
+                        }
+
+                        delay(DelayLong)
+                    }
+                }
+
+                if (status == PurchaseStatus.ORDER_BUY) {
+                    while (true) {
+                        delay(DelayLong)
+                        val position = depositManager.getPositionForFigi(figi)
+                        if (position == null || position.lots == lotsPortfolio) { // продано!
+                            status = PurchaseStatus.SOLD
+                            Utils.showToastAlert("$ticker: продано!?")
+                            break
+                        }
+                    }
+                }
+
+            } catch (e: Exception) {
+                status = PurchaseStatus.CANCELED
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun buyFromAsk1728(): Job? {
         if (lots == 0) return null
 

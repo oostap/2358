@@ -79,12 +79,11 @@
     <string name="menu_1728_down">1628 вниз</string>
     <string name="menu_fixprice">Fix Price</string>
     <string name="menu_rocket">Ракеты</string>
-    <string name="menu_tazik">Автотазик</string>
     <string name="menu_blacklist">Чёрный список</string>
     <string name="menu_favorites">Избранные</string>
     <string name="menu_chart">График</string>
     <string name="menu_tazik_endless">Бесконечный таз</string>
-    <string name="menu_zontik_endless">Бесконечный зонт (шорт ⚠️⚠️⚠️)</string>
+    <string name="menu_zontik_endless">Бесконечный зонт (шорт ️⚠️)</string>
 
     <string name="menu_telegram">Телеграм бот</string>
     <string name="menu_trends">Тренды</string>
