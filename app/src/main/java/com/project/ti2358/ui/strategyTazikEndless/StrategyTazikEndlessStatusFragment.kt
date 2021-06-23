@@ -116,10 +116,8 @@ class StrategyTazikEndlessStatusFragment : Fragment(R.layout.fragment_tazik_endl
                 val purchase = values[index]
 
                 with(binding) {
-                    val volume = SettingsManager.getTazikEndlessMinVolume()
-
                     tickerView.text = "${index + 1}) ${purchase.stock.getTickerLove()} ${purchase.percentLimitPriceChange.toPercent()}"
-                    priceView.text = "${purchase.tazikEndlessPrice} ➡ ${purchase.stock.getPriceNow(volume, true).toMoney(purchase.stock)}"
+                    priceView.text = "${purchase.tazikEndlessPrice} ➡ ${purchase.stock.getPriceNow().toMoney(purchase.stock)}"
 
                     val volumeToday = purchase.stock.getTodayVolume() / 1000f
                     volumeSharesView.text = "%.1fk".format(volumeToday)
@@ -130,8 +128,8 @@ class StrategyTazikEndlessStatusFragment : Fragment(R.layout.fragment_tazik_endl
                     }
                     volumeCashView.text = "$vol"
 
-                    val changePercent = (100 * purchase.stock.getPriceNow(volume, true)) / purchase.tazikEndlessPrice - 100
-                    val changeAbsolute = purchase.stock.getPriceNow(volume, true) - purchase.tazikEndlessPrice
+                    val changePercent = (100 * purchase.stock.getPriceNow()) / purchase.tazikEndlessPrice - 100
+                    val changeAbsolute = purchase.stock.getPriceNow() - purchase.tazikEndlessPrice
 
                     priceChangeAbsoluteView.text = changeAbsolute.toMoney(purchase.stock)
                     priceChangePercentView.text = changePercent.toPercent()

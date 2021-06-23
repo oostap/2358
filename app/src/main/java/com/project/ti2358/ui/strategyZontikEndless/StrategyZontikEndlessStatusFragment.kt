@@ -116,10 +116,8 @@ class StrategyZontikEndlessStatusFragment : Fragment(R.layout.fragment_zontik_en
                 val purchase = values[index]
 
                 with(binding) {
-                    val volume = SettingsManager.getZontikEndlessMinVolume()
-
                     tickerView.text = "${index + 1}) ${purchase.stock.getTickerLove()} ${purchase.percentLimitPriceChange.toPercent()}"
-                    priceView.text = "${purchase.zontikEndlessPrice} ➡ ${purchase.stock.getPriceNow(volume, true).toMoney(purchase.stock)}"
+                    priceView.text = "${purchase.zontikEndlessPrice} ➡ ${purchase.stock.getPriceNow().toMoney(purchase.stock)}"
 
                     val volumeToday = purchase.stock.getTodayVolume() / 1000f
                     volumeSharesView.text = "%.1fk".format(volumeToday)
@@ -130,8 +128,8 @@ class StrategyZontikEndlessStatusFragment : Fragment(R.layout.fragment_zontik_en
                     }
                     volumeCashView.text = "$vol"
 
-                    val changePercent = (100 * purchase.stock.getPriceNow(volume, true)) / purchase.zontikEndlessPrice - 100
-                    val changeAbsolute = purchase.stock.getPriceNow(volume, true) - purchase.zontikEndlessPrice
+                    val changePercent = (100 * purchase.stock.getPriceNow()) / purchase.zontikEndlessPrice - 100
+                    val changeAbsolute = purchase.stock.getPriceNow() - purchase.zontikEndlessPrice
 
                     priceChangeAbsoluteView.text = changeAbsolute.toMoney(purchase.stock)
                     priceChangePercentView.text = changePercent.toPercent()

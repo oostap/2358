@@ -23,6 +23,7 @@ class StrategyFollower : KoinComponent {
     private val strategyRocket: StrategyRocket by inject()
     private val strategyTrend: StrategyTrend by inject()
     private val strategyLimits: StrategyLimits by inject()
+    private val strategy2358: Strategy2358 by inject()
 
     private var moneySpent: Double = 0.0
 
@@ -127,12 +128,16 @@ class StrategyFollower : KoinComponent {
                     }
                 } else if (ticker == "TAZ") {
                     var percent = 0.0
-                    if (list.size == 4) {
+                    var profit = 0.0
+                    if (list.size >= 4) {
                         percent = list[3].toDouble()
+                    }
+                    if (list.size >= 5) {
+                        profit = list[4].toDouble()
                     }
 
                     GlobalScope.launch(Dispatchers.Main) {
-                        strategyTazikEndless.restartStrategy(percent)
+                        strategyTazikEndless.restartStrategy(percent, profit)
                     }
                 } else if (ticker == "ROCKET") {
                     GlobalScope.launch(Dispatchers.Main) {
@@ -172,8 +177,23 @@ class StrategyFollower : KoinComponent {
                     GlobalScope.launch(Dispatchers.Main) {
                         strategyLimits.stopStrategy()
                     }
+                } else if (ticker == "2358") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategy2358.stopStrategy()
+                    }
                 }
                 return 2
+            } else if (operation == "start") {
+                if (ticker == "2358") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        val tickers = mutableListOf<String>()
+                        for (i in 2 until list.size) {
+                            tickers.add(list[i])
+                        }
+                        strategy2358.prepareStrategy(tickers)
+                    }
+                    return 2
+                }
             }
 
 

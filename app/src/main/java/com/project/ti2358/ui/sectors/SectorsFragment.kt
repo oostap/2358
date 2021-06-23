@@ -216,7 +216,7 @@ class SectorsFragment : Fragment(R.layout.fragment_sector) {
 
                     orderbookButton.setOnClickListener {
                         orderbookManager.start(stock)
-                        orderbookButton.findNavController().navigate(R.id.action_nav_premarket_to_nav_orderbook)
+                        orderbookButton.findNavController().navigate(R.id.action_nav_sectors_to_nav_orderbook)
                     }
 
                     sectorView.text = stock.getSectorName()

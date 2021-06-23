@@ -238,21 +238,18 @@ class StrategyZontikEndless : KoinComponent {
         val local = stocksToPurchase.toMutableList()
         local.removeAll { it.zontikEndlessPrice == 0.0 }
 
-        val volume = SettingsManager.getZontikEndlessMinVolume()
         if (currentPurchaseSort == Sorting.ASCENDING) {
-            local.sortBy { it.stock.getPriceNow(volume) / it.zontikEndlessPrice * 100 - 100 }
+            local.sortBy { it.stock.getPriceNow() / it.zontikEndlessPrice * 100 - 100 }
         } else {
-            local.sortByDescending { it.stock.getPriceNow(volume) / it.zontikEndlessPrice * 100 - 100 }
+            local.sortByDescending { it.stock.getPriceNow() / it.zontikEndlessPrice * 100 - 100 }
         }
 
         return local
     }
 
     fun getNotificationTextLong(): String {
-        val volume = SettingsManager.getZontikEndlessMinVolume()
-
         val stocks = stocksToPurchase.map {
-            Pair(it.stock.getPriceNow(volume, true), it)
+            Pair(it.stock.getPriceNow(), it)
         }.sortedBy {
             it.first / it.second.zontikEndlessPrice * 100 - 100
         }
@@ -263,7 +260,7 @@ class StrategyZontikEndless : KoinComponent {
             val priceNow = pair.first
 
             val change = (100 * priceNow) / purchase.zontikEndlessPrice - 100
-            if (change >= -0.01 && purchase.status == PurchaseStatus.WAITING && stocksToPurchase.size > 5) continue
+            if (change <= 0.01 && purchase.status == PurchaseStatus.WAITING && stocksToPurchase.size > 5) continue
 
             var vol = 0
             if (purchase.stock.minuteCandles.isNotEmpty()) {
@@ -273,7 +270,7 @@ class StrategyZontikEndless : KoinComponent {
                     "${purchase.zontikEndlessPrice.toMoney(purchase.stock)} ➡ ${priceNow.toMoney(purchase.stock)} = " +
                     "${change.toPercent()} ${purchase.getStatusString()} v=${vol}\n"
         }
-        if (tickers == "") tickers = "только отрицательные бумаги ⏳"
+        if (tickers == "") tickers = "только положительные бумаги ⏳"
 
         return tickers
     }
@@ -281,7 +278,7 @@ class StrategyZontikEndless : KoinComponent {
     private fun fixPrice() {
         // зафикировать цену, чтобы change считать от неё
         for (purchase in stocksToPurchaseClone) {
-            purchase.zontikEndlessPrice = purchase.stock.getPriceNow(SettingsManager.getZontikEndlessMinVolume(), true)
+            purchase.zontikEndlessPrice = purchase.stock.getPriceNow()
         }
     }
 
@@ -292,7 +289,7 @@ class StrategyZontikEndless : KoinComponent {
             val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
             val editor: SharedPreferences.Editor = preferences.edit()
             val key = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_min_percent_to_buy)
-            editor.putString(key, "%.2f".format(newPercent))
+            editor.putString(key, "%.2f".format(locale = Locale.US, newPercent))
             editor.apply()
         }
 
@@ -401,6 +398,12 @@ class StrategyZontikEndless : KoinComponent {
     fun addBasicPercentLimitPriceChange(sign: Int) = runBlocking (StockManager.stockContext) {
         basicPercentLimitPriceChange += sign * PercentLimitChangeDelta
 
+        val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
+        val editor: SharedPreferences.Editor = preferences.edit()
+        val key = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_min_percent_to_buy)
+        editor.putString(key, "%.2f".format(locale = Locale.US, basicPercentLimitPriceChange))
+        editor.apply()
+
         for (purchase in stocksToPurchase) {
             purchase.percentLimitPriceChange += sign * PercentLimitChangeDelta
             if (purchase.stock.minuteCandles.isNotEmpty()) {
@@ -504,8 +507,8 @@ class StrategyZontikEndless : KoinComponent {
                 // пропустить текущую свечу, по которой у нас просадка
                 if (i == purchase.stock.minuteCandles.size - 1) continue
 
-                // проверить цены закрытия нескольких предыдущих свечей
-                if (purchase.stock.minuteCandles[i].closingPrice < sellPrice) { // если цена выше, отнимаем счётчик, проверяем дальше
+                // проверить цены закрытия нескольких предыдущих свечей, нужно чтобы они были ниже
+                if (purchase.stock.minuteCandles[i].closingPrice < sellPrice) { // если цена ниже, отнимаем счётчик, проверяем дальше
                     minutes--
 
                     // если несколько свечей подряд с ценой выше, то всё ок - тарим!
@@ -515,8 +518,8 @@ class StrategyZontikEndless : KoinComponent {
                 } else { // был спайк на несколько свечек - тарить опасно!
                     // обновить цену, чтобы не затарить на следующей свече, возможен нож ступенькой
                     purchase.zontikEndlessPrice = candle.closingPrice
-                    strategySpeaker.speakTazikSpikeSkip(purchase, change)
-                    strategyTelegram.sendTazikSpike(
+                    strategySpeaker.speakZontikSpikeSkip(purchase, change)
+                    strategyTelegram.sendZontikSpike(
                         purchase,
                         sellPrice,
                         purchase.zontikEndlessPrice,
@@ -533,7 +536,7 @@ class StrategyZontikEndless : KoinComponent {
         // проверка на цену закрытия (выше не тарить)
         if (SettingsManager.getZontikEndlessClosePriceProtectionPercent() != 0.0) {
             if (stock.instrument.currency == Currency.USD) {
-                val finalPrice = stock.getPrice2300() + stock.getPrice2300() * SettingsManager.getZontikEndlessClosePriceProtectionPercent()
+                val finalPrice = stock.getPrice2300() + stock.getPrice2300() / 100.0 * SettingsManager.getZontikEndlessClosePriceProtectionPercent()
                 if (sellPrice <= finalPrice) {
                     return
                 }
@@ -557,7 +560,7 @@ class StrategyZontikEndless : KoinComponent {
         if (job != null) {
             stocksTickerInProcess[stock.ticker] = job
 
-            var buyPrice = sellPrice + sellPrice / 100.0 * finalProfit
+            var buyPrice = sellPrice - sellPrice / 100.0 * finalProfit
             buyPrice = Utils.makeNicePrice(buyPrice, stock)
 
             strategySpeaker.speakZontik(purchase, change)

@@ -1,5 +1,6 @@
 package com.project.ti2358.data.service
 
+import android.annotation.SuppressLint
 import com.google.gson.Gson
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.Stock
@@ -10,6 +11,7 @@ import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.OrderbookStream
 import com.project.ti2358.data.model.streamTinkoff.CandleEventBody
 import com.project.ti2358.data.model.streamTinkoff.InstrumentInfoEventBody
+import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
@@ -23,6 +25,10 @@ import okhttp3.*
 import okio.ByteString
 import org.json.JSONObject
 import org.koin.core.component.KoinApiExtension
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
@@ -91,15 +97,28 @@ class StreamingTinkoffService {
             log("StreamingTinkoffService :: onMessage")
         }
 
+        @SuppressLint("SimpleDateFormat")
         override fun onMessage(webSocket: WebSocket, text: String) {
             messagesStatus = true
 //            log("StreamingTinkoffService::onMessage, text: $text")
             val jsonObject = JSONObject(text)
             val eventType = jsonObject.getString("event")
             val payload = jsonObject.getString("payload")
+            val data = jsonObject.getJSONObject("payload")
             when (eventType) {
                 "candle" -> {
-                    publishProcessor.onNext(gson.fromJson(payload, Candle::class.java))
+                    val interval: Interval? = Utils.convertStringToInterval(data.getString("interval"))
+
+                    val dateString = data.getString("time").replace("T", " ").replace("Z", "")
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss") //2021-06-22 20:55:00
+                    val date = dateFormat.parse(dateString)
+
+                    if (interval != null && date != null) {
+                        val candle = Candle(
+                            data.getDouble("o"), data.getDouble("c"), data.getDouble("h"),
+                            data.getDouble("l"), data.getInt("v"), date, interval, data.getString("figi"))
+                        publishProcessor.onNext(candle)
+                    }
                 }
                 "orderbook" -> {
                     publishProcessor.onNext(gson.fromJson(payload, OrderbookStream::class.java))

@@ -78,22 +78,22 @@ class StrategyLimits : KoinComponent {
         strategyTelegram.sendLimitsStart(false)
     }
 
-    suspend fun processStrategy(stock: Stock) = withContext(StockManager.limitsContext) {
-        if (!started || stock.stockInfo == null) return@withContext
+    fun processStrategy(stock: Stock) {
+        if (!started || stock.stockInfo == null) return
         if (stocks.isEmpty()) runBlocking { process() }
-        if (stock !in stocks) return@withContext
+        if (stock !in stocks) return
 
         val changeUpLimit = SettingsManager.getLimitsChangeDown()
         val changeDownLimit = SettingsManager.getLimitsChangeUp()
         val allowDown = SettingsManager.getLimitsDown()
         val allowUp = SettingsManager.getLimitsUp()
 
-        if (stock.minuteCandles.isEmpty()) return@withContext
+        if (stock.minuteCandles.isEmpty()) return
 
         val lastCandle = stock.minuteCandles.last()
 
         // минимальный объём
-        if (lastCandle.volume < 50) return@withContext
+        if (lastCandle.volume < 50) return
 
         val fireTime = lastCandle.time.time
 
@@ -140,14 +140,14 @@ class StrategyLimits : KoinComponent {
                     val last = upLimitStocks.firstOrNull { stock -> stock.stock.ticker == stock.ticker }
                     if (last != null) {
                         val deltaTime = ((fireTime - last.fireTime) / 60.0 / 1000.0).toInt()
-                        if (deltaTime < 5) return@withContext
+                        if (deltaTime < 5) return
                     }
                     upLimitStocks.add(0, limitStock)
                 } else {
                     val last = downLimitStocks.firstOrNull { stock -> stock.stock.ticker == stock.ticker }
                     if (last != null) {
                         val deltaTime = ((fireTime - last.fireTime) / 60.0 / 1000.0).toInt()
-                        if (deltaTime < 5) return@withContext
+                        if (deltaTime < 5) return
                     }
                     downLimitStocks.add(0, limitStock)
                 }

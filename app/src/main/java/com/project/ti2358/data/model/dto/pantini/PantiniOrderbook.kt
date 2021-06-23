@@ -3,6 +3,7 @@ package com.project.ti2358.data.model.dto.pantini
 import com.project.ti2358.data.model.dto.BidAsk
 import com.project.ti2358.service.log
 import org.json.JSONObject
+import java.lang.Exception
 
 // пул: bid|bidSize|ask|askSize
 data class PantiniOrderbook (
@@ -14,8 +15,33 @@ data class PantiniOrderbook (
             val value = json.getString(key)
             val bidask = value.split("|")
             if (bidask.size == 4) {
-                val bid = BidAsk(bidask[0].toDouble(), bidask[1].toInt())
-                val ask = BidAsk(bidask[2].toDouble(), bidask[3].toInt())
+                val bidPrice = try {
+                    bidask[0].toDouble()
+                } catch (e: Exception) {
+                    0.0
+                }
+
+                val bidCount = try {
+                    bidask[1].toInt()
+                } catch (e: Exception) {
+                    0
+                }
+
+                val askPrice = try {
+                    bidask[2].toDouble()
+                } catch (e: Exception) {
+                    0.0
+                }
+
+                val askCount = try {
+                    bidask[3].toInt()
+                } catch (e: Exception) {
+                    0
+                }
+
+                val bid = BidAsk(bidPrice, bidCount)
+                val ask = BidAsk(askPrice, askCount)
+
                 orderbook[key] = Pair(bid, ask)
             } else {
                 log("PantiniOrderbook ERROR! $value")

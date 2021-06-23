@@ -91,7 +91,7 @@ class StrategyTazikEndlessService : Service() {
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Запущены тазики на покупку просадок", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Подставлены тазики на выкуп просадок", Toast.LENGTH_LONG).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {

@@ -60,7 +60,7 @@
             android:title="@string/menu_2225" />
         <item
             android:id="@+id/nav_zontik_endless_start"
-            android:icon="@drawable/ic_tazik_endless"
+            android:icon="@drawable/ic_zontik_endless"
             android:title="@string/menu_zontik_endless" />
     </group>
 
@@ -78,11 +78,11 @@
             android:title="@string/menu_trends" />
         <item
             android:id="@+id/nav_limits"
-            android:icon="@drawable/ic_trends"
+            android:icon="@drawable/ic_limits"
             android:title="@string/menu_limits" />
         <item
             android:id="@+id/nav_sectors"
-            android:icon="@drawable/ic_reports"
+            android:icon="@drawable/ic_sectors"
             android:title="@string/menu_sectors" />
         <item
             android:id="@+id/nav_fixprice"

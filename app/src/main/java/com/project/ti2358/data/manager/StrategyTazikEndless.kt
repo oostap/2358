@@ -177,7 +177,7 @@ class StrategyTazikEndless : KoinComponent {
         val blacklist = strategyBlacklist.getBlacklistStocks()
         stocksToPurchase.removeAll { it.ticker in blacklist.map { stock -> stock.ticker } }
 
-        stocksToPurchaseClone = stocksToPurchase.toMutableList()
+        stocksToPurchaseClone = stocksToPurchase.distinctBy { it.ticker }.toMutableList()
 
         return@withContext stocksToPurchase
     }
@@ -237,21 +237,18 @@ class StrategyTazikEndless : KoinComponent {
         val local = stocksToPurchase.toMutableList()
         local.removeAll { it.tazikEndlessPrice == 0.0 }
 
-        val volume = SettingsManager.getTazikEndlessMinVolume()
         if (currentPurchaseSort == Sorting.ASCENDING) {
-            local.sortBy { it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100 }
+            local.sortBy { it.stock.getPriceNow() / it.tazikEndlessPrice * 100 - 100 }
         } else {
-            local.sortByDescending { it.stock.getPriceNow(volume) / it.tazikEndlessPrice * 100 - 100 }
+            local.sortByDescending { it.stock.getPriceNow() / it.tazikEndlessPrice * 100 - 100 }
         }
 
         return local
     }
 
     fun getNotificationTextLong(): String {
-        val volume = SettingsManager.getTazikEndlessMinVolume()
-
         val stocks = stocksToPurchase.map {
-            Pair(it.stock.getPriceNow(volume, true), it)
+            Pair(it.stock.getPriceNow(), it)
         }.sortedBy {
             it.first / it.second.tazikEndlessPrice * 100 - 100
         }
@@ -280,23 +277,32 @@ class StrategyTazikEndless : KoinComponent {
     private fun fixPrice() {
         // зафикировать цену, чтобы change считать от неё
         for (purchase in stocksToPurchaseClone) {
-            purchase.tazikEndlessPrice = purchase.stock.getPriceNow(SettingsManager.getTazikEndlessMinVolume(), true)
+            purchase.tazikEndlessPrice = purchase.stock.getPriceNow()
         }
     }
 
-    suspend fun restartStrategy(newPercent: Double = 0.0) = withContext(StockManager.stockContext) {
+    suspend fun restartStrategy(newPercent: Double = 0.0, profit: Double = 0.0) = withContext(StockManager.stockContext) {
         if (started) stopStrategy()
 
         if (newPercent != 0.0) {
             val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
             val editor: SharedPreferences.Editor = preferences.edit()
             val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_min_percent_to_buy)
-            editor.putString(key, "%.2f".format(newPercent))
+            editor.putString(key, "%.2f".format(locale = Locale.US, newPercent))
             editor.apply()
         }
 
+        val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
+        val editor: SharedPreferences.Editor = preferences.edit()
+        val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_take_profit)
+        editor.putString(key, "%.2f".format(locale = Locale.US, profit))
+        editor.apply()
+
+        process(1)
         getPurchaseStock()
         delay(500)
+
+        Utils.startService(TheApplication.application.applicationContext, StrategyTazikEndlessService::class.java)
         startStrategy(false)
     }
 
@@ -399,6 +405,12 @@ class StrategyTazikEndless : KoinComponent {
 
     fun addBasicPercentLimitPriceChange(sign: Int) = runBlocking (StockManager.stockContext) {
         basicPercentLimitPriceChange += sign * PercentLimitChangeDelta
+
+        val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
+        val editor: SharedPreferences.Editor = preferences.edit()
+        val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_min_percent_to_buy)
+        editor.putString(key, "%.2f".format(locale = Locale.US, basicPercentLimitPriceChange))
+        editor.apply()
 
         for (purchase in stocksToPurchase) {
             purchase.percentLimitPriceChange += sign * PercentLimitChangeDelta
@@ -532,7 +544,7 @@ class StrategyTazikEndless : KoinComponent {
         // проверка на цену закрытия (выше не тарить)
         if (SettingsManager.getTazikEndlessClosePriceProtectionPercent() != 0.0) {
             if (stock.instrument.currency == Currency.USD) {
-                val finalPrice = stock.getPrice2300() + stock.getPrice2300() * SettingsManager.getTazikEndlessClosePriceProtectionPercent()
+                val finalPrice = stock.getPrice2300() + stock.getPrice2300() / 100.0 * SettingsManager.getTazikEndlessClosePriceProtectionPercent()
                 if (buyPrice >= finalPrice) {
                     return
                 }

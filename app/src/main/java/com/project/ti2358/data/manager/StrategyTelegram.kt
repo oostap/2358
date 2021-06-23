@@ -200,11 +200,12 @@ class StrategyTelegram : KoinComponent {
                     } else if (command.startsWith("!")) {
                         if (strategyFollower.started && SettingsManager.getTelegramAllowCommandHandle()) {
                             val success = strategyFollower.processActiveCommand(update.message!!.from?.id ?: 0, command)
-                            val status = when (success) {
-                                0 -> "-"
-                                1 -> "+"
-                                else -> ""
-                            }
+                            val status = ""
+//                            when (success) {
+//                                0 -> "-"
+//                                1 -> "+"
+//                                else -> ""
+//                            }
                             if (status != "") {
                                 bot.sendMessage(
                                     ChatId.fromId(id = update.message!!.chat.id),
@@ -541,6 +542,17 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
+    fun send2358Start(start: Boolean, tickers : List<String>) {
+        if (started) {// && SettingsManager.getTelegramSendTaziks()) {
+            val text = if (start) {
+                String.format("🟢 2358 старт: тарим ${tickers.joinToString(" ")} на ${SettingsManager.get2358PurchaseVolume()}$")
+            } else {
+                "🔴 2358 стоп!"
+            }
+            sendMessageToChats(text, -1)
+        }
+    }
+
     fun sendZontikEndlessStart(start: Boolean) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
             val text = if (start) {
@@ -562,7 +574,7 @@ class StrategyTelegram : KoinComponent {
 
     fun sendTazikBuy(purchase: PurchaseStock, buyPrice: Double, sellPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
-            val text = "🛁$%s B%.2f$ -> S%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
+            val text = "🛁 $%s B%.2f$ -> S%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
                 locale = Locale.US,
                 purchase.ticker,
                 buyPrice,
@@ -580,11 +592,11 @@ class StrategyTelegram : KoinComponent {
 
     fun sendZontikSell(purchase: PurchaseStock, sellPrice: Double, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
-            val text = "🛁$%s B%.2f$ -> S%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
+            val text = "☂️ $%s S%.2f$ -> B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
                 locale = Locale.US,
                 purchase.ticker,
-                buyPrice,
                 sellPrice,
+                buyPrice,
                 priceFrom,
                 priceTo,
                 change,
@@ -598,7 +610,7 @@ class StrategyTelegram : KoinComponent {
 
     fun sendTazikSpike(purchase: PurchaseStock, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendSpikes()) {
-            val text = "спайк! 🛁$%s B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
+            val text = "спайк! 🛁 $%s B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
                 locale = Locale.US,
                 purchase.ticker,
                 buyPrice,
@@ -608,7 +620,25 @@ class StrategyTelegram : KoinComponent {
                 tazikUsed,
                 tazikTotal
             )
-            sendMessageToChats(text)
+            val buttons = getButtonsMarkup(purchase.stock)
+            sendMessageToChats(text, replyMarkup = buttons)
+        }
+    }
+
+    fun sendZontikSpike(purchase: PurchaseStock, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
+        if (started && SettingsManager.getTelegramSendSpikes()) {
+            val text = "спайк! ☂️ $%s B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
+                locale = Locale.US,
+                purchase.ticker,
+                buyPrice,
+                priceFrom,
+                priceTo,
+                change,
+                tazikUsed,
+                tazikTotal
+            )
+            val buttons = getButtonsMarkup(purchase.stock)
+            sendMessageToChats(text, replyMarkup = buttons)
         }
     }
 

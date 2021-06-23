@@ -66,6 +66,12 @@
         </service>
 
         <service
+            android:name=".service.StrategyZontikEndlessService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
+
+        <service
             android:name=".service.StrategyRocketService"
             android:enabled="true"
             android:exported="false">

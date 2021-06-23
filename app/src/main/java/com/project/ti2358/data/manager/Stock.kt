@@ -7,6 +7,7 @@ import com.project.ti2358.data.model.dto.pantini.PantiniLenta
 import com.project.ti2358.data.model.dto.pantini.PantiniOrderbook
 import com.project.ti2358.service.ScreenerType
 import com.project.ti2358.service.Utils
+import com.project.ti2358.service.log
 import com.project.ti2358.service.toMoney
 import org.koin.core.component.KoinApiExtension
 import java.util.*
@@ -278,7 +279,7 @@ data class Stock(var instrument: Instrument) {
         return volume + (candleToday?.volume ?: 0)
     }
 
-    fun getPriceNow(volume: Int = 0, endless: Boolean = false): Double {
+    fun getPriceNow(): Double {
         var value = 0.0
 
         val hour = Utils.getTimeMSK().get(Calendar.HOUR_OF_DAY)
@@ -295,31 +296,12 @@ data class Stock(var instrument: Instrument) {
                 value = it.post
             }
 
-            // учесть объём свечи для фиксации цен в тазах
-            var minuteValue: Double = 0.0
-            for (i in minuteCandles.indices.reversed()) {
-                if (minuteCandles[i].volume >= volume) {
-                    minuteValue = minuteCandles[i].closingPrice
-                    break
-                }
+            candleToday?.let {
+                value = it.closingPrice
             }
 
-            if (minuteValue == 0.0) {
-                for (i in minuteCandles.indices.reversed()) {
-                    if (minuteCandles[i].closingPrice < value) {
-                        value = minuteCandles[i].closingPrice
-                        break
-                    }
-                }
-            } else {
-                value = minuteValue
-            }
-
-            // если нет минутных свечей, то зафиксировать на цене дневной свечи, чтобы таз внутри дня работал ок
-            if (endless && minuteCandles.isEmpty()) {
-                candleToday?.let {
-                    value = it.closingPrice
-                }
+            if (minuteCandles.isNotEmpty()) {
+                value = minuteCandles.last().closingPrice
             }
         }
 

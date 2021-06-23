@@ -353,9 +353,7 @@ class StockManager : KoinComponent {
 //                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
-                        runBlocking {
-                            addCandle(it)
-                        }
+                        addCandle(it)
                     },
                     onError = {
                         it.printStackTrace()
@@ -374,9 +372,7 @@ class StockManager : KoinComponent {
 //                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
-                        runBlocking {
-                            addCandle(it)
-                        }
+                        addCandle(it)
                     },
                     onError = {
                         it.printStackTrace()
@@ -397,9 +393,7 @@ class StockManager : KoinComponent {
 //            .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {
-                    runBlocking {
-                        addCandle(it)
-                    }
+                    addCandle(it)
                 },
                 onError = {
                     it.printStackTrace()
@@ -570,7 +564,7 @@ class StockManager : KoinComponent {
 //        unsubscribeStockLenta(stock)
     }
 
-    private suspend fun addCandle(candle: Candle) = withContext(stockContext) {
+    private fun addCandle(candle: Candle) {// = withContext(stockContext) {
         val stock: Stock? = stocksStream.find { it.ticker == candle.figi || it.figi == candle.figi }
         stock?.let {
             it.processCandle(candle)
@@ -586,9 +580,7 @@ class StockManager : KoinComponent {
             }
 
             if (candle.interval == Interval.DAY) { // получить дневные свечи 1 раз по всем тикерам и отключиться
-                withContext(Dispatchers.Main) {
-                    streamingTinkoffService.unsubscribeCandleEventsStream(stock.figi, Interval.DAY)
-                }
+                streamingTinkoffService.unsubscribeCandleEventsStream(stock.figi, Interval.DAY)
             }
         }
     }

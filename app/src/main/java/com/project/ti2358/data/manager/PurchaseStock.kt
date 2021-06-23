@@ -514,7 +514,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                                 Utils.showToastAlert("$ticker: куплено по $sellPrice")
 
                                 buyLimitOrder = ordersService.placeLimitOrder(
-                                    lotsToSell,
+                                    lotsToBuy,
                                     figi,
                                     profitPrice,
                                     OperationType.BUY,
