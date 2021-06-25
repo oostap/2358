@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StrategyZontikEndless
 import com.project.ti2358.databinding.FragmentZontikEndlessStartBinding
@@ -24,6 +25,7 @@ import org.koin.core.component.KoinApiExtension
 @KoinApiExtension
 class StrategyZontikEndlessStartFragment : Fragment(R.layout.fragment_zontik_endless_start) {
     val strategyZontikEndless: StrategyZontikEndless by inject()
+    private val orderbookManager: OrderbookManager by inject()
 
     private var fragmentZontikEndlessStartBinding: FragmentZontikEndlessStartBinding? = null
 
@@ -181,7 +183,9 @@ class StrategyZontikEndlessStartFragment : Fragment(R.layout.fragment_zontik_end
                     }
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                        view?.findNavController()?.let {
+                            Utils.openOrderbookForStock(it, orderbookManager, stock)
+                        }
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))

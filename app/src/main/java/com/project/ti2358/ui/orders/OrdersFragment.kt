@@ -7,10 +7,12 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.ChartManager
 import com.project.ti2358.data.manager.DepositManager
 import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.model.dto.Order
@@ -25,6 +27,8 @@ import org.koin.core.component.KoinApiExtension
 @KoinApiExtension
 class OrdersFragment : Fragment(R.layout.fragment_orders) {
     private val orderbookManager: OrderbookManager by inject()
+    private val chartManager: ChartManager by inject()
+
     val depositManager: DepositManager by inject()
 
     private var fragmentOrdersBinding: FragmentOrdersBinding? = null
@@ -124,10 +128,15 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
                         }
                     }
 
-                    orderbookButton.setOnClickListener {
+                    itemView.setOnClickListener {
                         order.stock?.let {
-                            orderbookManager.start(it)
-                            orderbookButton.findNavController().navigate(R.id.action_nav_orders_to_nav_orderbook)
+                            Utils.openOrderbookForStock(findNavController(), orderbookManager, it)
+                        }
+                    }
+
+                    chartButton.setOnClickListener {
+                        order.stock?.let {
+                            Utils.openChartForStock(findNavController(), chartManager, it)
                         }
                     }
                 }

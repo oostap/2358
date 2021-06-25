@@ -28,8 +28,10 @@ import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.model.dto.Order
 import com.project.ti2358.data.model.dto.PortfolioPosition
+import com.project.ti2358.data.model.dto.pantini.PantiniPrint
 import com.project.ti2358.databinding.FragmentOrderbookBinding
 import com.project.ti2358.databinding.FragmentOrderbookItemBinding
+import com.project.ti2358.databinding.FragmentOrderbookLentaItemBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toMoney
@@ -55,6 +57,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
     var orderlinesViews: MutableList<OrderlineHolder> = mutableListOf()
     var orderlinesUSViews: MutableList<OrderlineHolder> = mutableListOf()
+    var orderlentaUSViews: MutableList<OrderLentaHolder> = mutableListOf()
 
     var activeStock: Stock? = null
     var orderbookLines: MutableList<OrderbookLine> = mutableListOf()
@@ -95,6 +98,12 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 orderbookUsLinesView.addView(orderlineHolder.binding.root)
                 orderlinesUSViews.add(orderlineHolder)
             }
+
+//            for (i in 0..30) {
+//                val orderlentaHolder = OrderLentaHolder(FragmentOrderbookLentaItemBinding.inflate(LayoutInflater.from(context), null, false))
+//                orderbookUsLentaView.addView(orderlentaHolder.binding.root)
+//                orderlentaUSViews.add(orderlentaHolder)
+//            }
 
             volumesView.children.forEach { it.visibility = GONE }
             buyPlusView.children.forEach { it.visibility = GONE }
@@ -201,9 +210,18 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
             chartButton.setOnClickListener {
                 activeStock?.let {
-                    chartManager.activeStock = it
-                    view.findNavController().navigate(R.id.action_nav_orderbook_to_nav_chart)
+                    Utils.openChartForStock(view.findNavController(), chartManager, it)
                 }
+            }
+
+            tinkoffButton.setOnClickListener {
+                activeStock?.let {
+                    Utils.openTinkoffForTicker(requireContext(), it.ticker)
+                }
+            }
+
+            lentaButton.setOnClickListener {
+
             }
 
             positionView.setOnClickListener {
@@ -593,6 +611,20 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     }
                     true
                 }
+            }
+        }
+    }
+
+    inner class OrderLentaHolder(val binding: FragmentOrderbookLentaItemBinding) : RecyclerView.ViewHolder(binding.root) {
+
+        @SuppressLint("ClickableViewAccessibility")
+        fun updateData(item: PantiniPrint, index: Int) {
+            with(binding) {
+                priceView.text = item.price.toString()
+                volumeView.text = item.size.toString()
+                timeView.text = item.time.toString()
+                mmView.text = item.exchange
+                conditionView.text = item.condition
             }
         }
     }

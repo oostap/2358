@@ -27,6 +27,7 @@ import java.util.*
 @KoinApiExtension
 class LimitsFragment : Fragment(R.layout.fragment_limits) {
     val orderbookManager: OrderbookManager by inject()
+    val chartManager: ChartManager by inject()
     val strategyLimits: StrategyLimits by inject()
 
     private var fragmentLimitsBinding: FragmentLimitsBinding? = null
@@ -153,20 +154,19 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
                     downLimitPercentView.setTextColor(Utils.getColorForValue(downLimitChange))
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                        view?.findNavController()?.let {
+                            Utils.openOrderbookForStock(it, orderbookManager, stock)
+                        }
                     }
 
-                    orderbookButton.setOnClickListener {
-                        orderbookManager.start(stock)
-                        orderbookButton.findNavController().navigate(R.id.action_nav_limits_to_nav_orderbook)
+                    chartButton.setOnClickListener {
+                        view?.findNavController()?.let {
+                            Utils.openChartForStock(it, chartManager, stock)
+                        }
                     }
 
                     sectorView.text = stock.getSectorName()
                     sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))
-
-                    itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
-                    }
 
                     if (stock.report != null) {
                         reportInfoView.text = stock.getReportInfo()
@@ -219,20 +219,19 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
                     }
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), limitStock.ticker)
+                        view?.findNavController()?.let {
+                            Utils.openOrderbookForStock(it, orderbookManager, limitStock.stock)
+                        }
                     }
 
-                    orderbookButton.setOnClickListener {
-                        orderbookManager.start(limitStock.stock)
-                        orderbookButton.findNavController().navigate(R.id.action_nav_trend_to_nav_orderbook)
+                    chartButton.setOnClickListener {
+                        view?.findNavController()?.let {
+                            Utils.openChartForStock(it, chartManager, limitStock.stock)
+                        }
                     }
 
                     sectorView.text = limitStock.stock.getSectorName()
                     sectorView.setTextColor(Utils.getColorForSector(limitStock.stock.closePrices?.sector))
-
-                    itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), limitStock.ticker)
-                    }
 
                     if (limitStock.stock.report != null) {
                         reportInfoView.text = limitStock.stock.getReportInfo()

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.Strategy2358
 import com.project.ti2358.databinding.Fragment2358StartBinding
@@ -23,6 +24,7 @@ import java.util.*
 @KoinApiExtension
 class Strategy2358StartFragment : Fragment(R.layout.fragment_2358_start) {
     val strategy2358: Strategy2358 by inject()
+    private val orderbookManager: OrderbookManager by inject()
 
     private var fragment2358StartBinding: Fragment2358StartBinding? = null
 
@@ -129,7 +131,9 @@ class Strategy2358StartFragment : Fragment(R.layout.fragment_2358_start) {
                     }
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                        view?.findNavController()?.let {
+                            Utils.openOrderbookForStock(it, orderbookManager, stock)
+                        }
                     }
 
                     if (stock.report != null) {

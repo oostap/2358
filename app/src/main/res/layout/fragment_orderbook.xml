@@ -150,6 +150,17 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/orderbook_us_lenta_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="0dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginBottom="0dp">
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/orderbook_us_lines_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -192,12 +203,37 @@
         tools:ignore="NestedWeights">
 
         <ImageView
+            android:id="@+id/tinkoff_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="fitCenter"
+            android:paddingTop="7dp"
+            android:paddingBottom="7dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            app:srcCompat="@drawable/ic_tinkoff"
+            app:tint="@color/orderbook_color"/>
+
+        <ImageView
+            android:id="@+id/lenta_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="fitCenter"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginRight="45dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            app:srcCompat="@drawable/ic_list"
+            app:tint="@color/orderbook_color"/>
+
+        <ImageView
             android:id="@+id/chart_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:scaleType="fitCenter"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             app:srcCompat="@drawable/ic_stocks"

@@ -113,14 +113,14 @@
         android:orientation="vertical">
 
         <ImageView
-            android:id="@+id/orderbook_button"
+            android:id="@+id/chart_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scaleType="fitCenter"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"
             android:layout_centerInParent="true"
-            app:srcCompat="@drawable/ic_glass"
+            app:srcCompat="@drawable/ic_stocks"
             app:tint="@color/orderbook_color"/>
 
     </LinearLayout>

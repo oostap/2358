@@ -358,8 +358,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
                 priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
                 orderbookButton.setOnClickListener { _ ->
                     it.stock?.let { stock ->
-                        orderbookManager.start(stock)
-                        orderbookButton.findNavController().navigate(R.id.action_nav_portfolio_position_to_nav_orderbook)
+                        Utils.openOrderbookForStock(orderbookButton.findNavController(), orderbookManager, stock)
                     }
                 }
 

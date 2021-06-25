@@ -167,8 +167,7 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
                             Utils.showMessageAlert(requireContext(), "Какая-то странная бумага, нет такой в каталоге у ТИ!")
                         } else {
                             portfolioPosition.stock?.let {
-                                orderbookManager.start(it)
-                                itemView.findNavController().navigate(R.id.action_nav_portfolio_to_nav_orderbook)
+                                Utils.openOrderbookForStock(orderbookButton.findNavController(), orderbookManager, it)
                             }
                         }
                     }

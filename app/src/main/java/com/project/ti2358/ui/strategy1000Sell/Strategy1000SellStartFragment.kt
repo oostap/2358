@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.DepositManager
+import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.Strategy1000Sell
 import com.project.ti2358.databinding.Fragment1000SellStartBinding
@@ -28,6 +29,7 @@ import org.koin.core.component.KoinApiExtension
 class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start) {
     val strategy1000Sell: Strategy1000Sell by inject()
     val depositManager: DepositManager by inject()
+    val orderbookManager: OrderbookManager by inject()
 
     private var fragment1000SellStartBinding: Fragment1000SellStartBinding? = null
 
@@ -173,7 +175,9 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
                     }
 
                     itemView.setOnClickListener { _ ->
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                        view?.findNavController()?.let {
+                            Utils.openOrderbookForStock(it, orderbookManager, stock)
+                        }
                     }
 
                     if (portfolioPosition != null) { // если есть в депо

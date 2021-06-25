@@ -19,6 +19,10 @@ class ChartManager() : KoinComponent {
     var orderbook: MutableList<OrderbookLine> = mutableListOf()
     var activeStock: Stock? = null
 
+    fun start(stock: Stock?) {
+        activeStock = stock
+    }
+
     suspend fun loadCandlesForInterval(stock: Stock?, interval: Interval): List<Candle> {
         stock?.let {
             val figi = it.figi

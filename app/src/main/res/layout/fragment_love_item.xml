@@ -76,7 +76,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:scaleType="fitCenter"
-                android:padding="13dp"
+                android:padding="8dp"
                 app:srcCompat="@drawable/ic_stocks"
                 app:tint="@color/orderbook_color"
                 android:layout_gravity="center_horizontal|center_vertical" />

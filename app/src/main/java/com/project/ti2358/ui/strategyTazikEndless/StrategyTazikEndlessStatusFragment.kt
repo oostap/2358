@@ -7,10 +7,12 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.PurchaseStock
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.StrategyTazikEndless
@@ -24,6 +26,7 @@ import org.koin.core.component.KoinApiExtension
 @KoinApiExtension
 class StrategyTazikEndlessStatusFragment : Fragment(R.layout.fragment_tazik_endless_status) {
     private val strategyTazikEndless: StrategyTazikEndless by inject()
+    private val orderbookManager: OrderbookManager by inject()
 
     private var fragmentTazikEndlessStatusBinding: FragmentTazikEndlessStatusBinding? = null
 
@@ -138,7 +141,9 @@ class StrategyTazikEndlessStatusFragment : Fragment(R.layout.fragment_tazik_endl
                     priceChangePercentView.setTextColor(Utils.getColorForValue(changePercent))
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), purchase.ticker)
+                        view?.findNavController()?.let {
+                            Utils.openOrderbookForStock(it, orderbookManager, purchase.stock)
+                        }
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))

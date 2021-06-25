@@ -11,16 +11,15 @@ import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
+import androidx.core.os.bundleOf
+import androidx.navigation.NavController
 import com.github.bassaer.chatmessageview.model.Message
 import com.google.gson.internal.LinkedTreeMap
 import com.project.ti2358.BuildConfig
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.data.manager.PurchaseStock
-import com.project.ti2358.data.manager.SettingsManager
-import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.manager.StockManager
+import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.OperationType
@@ -29,6 +28,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
+import org.koin.core.component.KoinComponent
+import org.koin.java.KoinJavaComponent.inject
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
@@ -85,7 +86,7 @@ fun Double.toPercent(): String {
     return "%.2f%%".format(locale = Locale.US, this)
 }
 
-class Utils {
+class Utils{
     companion object {
         val DARK_BLUE: Int = Color.parseColor("#1A134C")
 
@@ -206,6 +207,18 @@ class Utils {
                 dialog.cancel() }
             alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "НЕТ.") { dialog, _ -> dialog.cancel() }
             alertDialog.show()
+        }
+
+        @KoinApiExtension
+        fun openOrderbookForStock(navController: NavController, orderbookManager: OrderbookManager, stock: Stock) {
+            orderbookManager.start(stock)
+            navController.navigate(R.id.nav_orderbook)
+        }
+
+        @KoinApiExtension
+        fun openChartForStock(navController: NavController, chartManager: ChartManager, stock: Stock) {
+            chartManager.start(stock)
+            navController.navigate(R.id.nav_chart)
         }
 
         fun openTinkoffForTicker(context: Context, ticker: String) {

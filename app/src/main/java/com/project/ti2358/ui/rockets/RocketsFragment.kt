@@ -7,10 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.ChartManager
 import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.RocketStock
 import com.project.ti2358.data.manager.StrategyRocket
@@ -24,6 +26,7 @@ import java.util.*
 @KoinApiExtension
 class RocketsFragment : Fragment(R.layout.fragment_rockets) {
     val orderbookManager: OrderbookManager by inject()
+    val chartManager: ChartManager by inject()
     val strategyRocket: StrategyRocket by inject()
 
     private var fragmentRocketsBinding: FragmentRocketsBinding? = null
@@ -110,20 +113,15 @@ class RocketsFragment : Fragment(R.layout.fragment_rockets) {
                     priceView.setTextColor(Utils.getColorForValue(rocketStock.changePriceRocketPercent))
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), rocketStock.ticker)
+                        Utils.openOrderbookForStock(findNavController(), orderbookManager, rocketStock.stock)
                     }
 
-                    orderbookButton.setOnClickListener {
-                        orderbookManager.start(rocketStock.stock)
-                        orderbookButton.findNavController().navigate(R.id.action_nav_rocket_to_nav_orderbook)
+                    chartButton.setOnClickListener {
+                        Utils.openChartForStock(findNavController(), chartManager, rocketStock.stock)
                     }
 
                     sectorView.text = rocketStock.stock.getSectorName()
                     sectorView.setTextColor(Utils.getColorForSector(rocketStock.stock.closePrices?.sector))
-
-                    itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), rocketStock.ticker)
-                    }
 
                     if (rocketStock.stock.report != null) {
                         reportInfoView.text = rocketStock.stock.getReportInfo()

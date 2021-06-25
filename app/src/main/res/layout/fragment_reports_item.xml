@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -12,7 +13,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1.4"
+        android:layout_weight="1.05"
         android:orientation="vertical">
 
         <TextView
@@ -58,7 +59,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1.2"
+        android:layout_weight="1.0"
         android:orientation="vertical"
         android:layout_gravity="center">
 
@@ -84,7 +85,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_weight="0.7"
         android:orientation="vertical"
         android:layout_gravity="center">
 
@@ -105,6 +106,25 @@
             android:gravity="center_vertical"
             android:text="+20$"
             android:textSize="14sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.85"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/chart_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="fitCenter"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"
+            android:layout_centerInParent="true"
+            app:srcCompat="@drawable/ic_stocks"
+            app:tint="@color/orderbook_color"/>
+
     </LinearLayout>
 
 </LinearLayout>

@@ -24,11 +24,6 @@
             app:enterAnim="@animator/slide_in_right"
             app:exitAnim="@animator/slide_out_left" />
         <action
-            android:id="@+id/action_nav_portfolio_to_nav_orderbook"
-            app:destination="@id/nav_orderbook"
-            app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left" />
-        <action
             android:id="@+id/action_nav_portfolio_to_nav_portfolio_position"
             app:destination="@id/nav_portfolio_position" />
     </fragment>
@@ -46,9 +41,6 @@
         android:name="com.project.ti2358.ui.limits.LimitsFragment"
         android:label="@string/menu_limits"
         tools:layout="@layout/fragment_limits" >
-        <action
-            android:id="@+id/action_nav_limits_to_nav_orderbook"
-            app:destination="@id/nav_orderbook" />
     </fragment>
 
     <!-- сектора -->
@@ -57,9 +49,6 @@
         android:name="com.project.ti2358.ui.sectors.SectorsFragment"
         android:label="@string/menu_limits"
         tools:layout="@layout/fragment_limits" >
-        <action
-            android:id="@+id/action_nav_sectors_to_nav_orderbook"
-            app:destination="@id/nav_orderbook" />
     </fragment>
 
     <!-- позиция в депо -->
@@ -69,9 +58,6 @@
         android:name="com.project.ti2358.ui.portfolio.PortfolioPositionFragment"
         android:label="@string/menu_portfolio"
         tools:layout="@layout/fragment_portfolio_position">
-        <action
-            android:id="@+id/action_nav_portfolio_position_to_nav_orderbook"
-            app:destination="@id/nav_orderbook" />
     </fragment>
 
     <!-- заявки -->
@@ -80,11 +66,6 @@
         android:name="com.project.ti2358.ui.orders.OrdersFragment"
         android:label="@string/menu_orders"
         tools:layout="@layout/fragment_orders">
-        <action
-            android:id="@+id/action_nav_orders_to_nav_orderbook"
-            app:destination="@id/nav_orderbook"
-            app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left" />
     </fragment>
 
     <!-- отчёты -->
@@ -107,22 +88,6 @@
         android:name="com.project.ti2358.ui.love.LoveFragment"
         android:label="@string/menu_favorites"
         tools:layout="@layout/fragment_love">
-        <action
-            android:id="@+id/action_nav_favorites_to_nav_orderbook"
-            app:destination="@id/nav_orderbook"
-            app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left"
-            app:popEnterAnim="@animator/slide_in_right"
-            app:popExitAnim="@animator/slide_out_left"
-            app:popUpTo="@id/nav_favorites" />
-        <action
-            android:id="@+id/action_nav_favorites_to_nav_chart"
-            app:destination="@id/nav_chart"
-            app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left"
-            app:popEnterAnim="@animator/slide_in_right"
-            app:popExitAnim="@animator/slide_out_left"
-            app:popUpTo="@id/nav_favorites" />
     </fragment>
 
     <!-- шорты -->
@@ -138,9 +103,6 @@
         android:name="com.project.ti2358.ui.orderbook.OrderbookFragment"
         android:label="@string/menu_orderbook"
         tools:layout="@layout/fragment_orderbook">
-        <action
-            android:id="@+id/action_nav_orderbook_to_nav_chart"
-            app:destination="@id/nav_chart" />
     </fragment>
 
     <!-- премаркет РФ -->
@@ -149,11 +111,6 @@
         android:name="com.project.ti2358.ui.premarket.PremarketFragment"
         android:label="@string/menu_premarket"
         tools:layout="@layout/fragment_premarket">
-        <action
-            android:id="@+id/action_nav_premarket_to_nav_orderbook"
-            app:destination="@id/nav_orderbook"
-            app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left" />
     </fragment>
 
     <!-- 2358 -->
@@ -203,11 +160,6 @@
         android:name="com.project.ti2358.ui.strategyFixPrice.StrategyFixPriceFragment"
         android:label="@string/menu_fixprice"
         tools:layout="@layout/fragment_fixprice">
-        <action
-            android:id="@+id/action_nav_fixprice_to_nav_orderbook"
-            app:destination="@id/nav_orderbook"
-            app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left" />
     </fragment>
 
     <!-- 1728 up/down -->
@@ -231,11 +183,6 @@
         android:name="com.project.ti2358.ui.rockets.RocketsFragment"
         android:label="@string/menu_rocket"
         tools:layout="@layout/fragment_rockets">
-        <action
-            android:id="@+id/action_nav_rocket_to_nav_orderbook"
-            app:destination="@id/nav_orderbook"
-            app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left" />
     </fragment>
 
     <!-- Trends -->
@@ -245,11 +192,6 @@
         android:name="com.project.ti2358.ui.trends.TrendsFragment"
         android:label="@string/menu_trends"
         tools:layout="@layout/fragment_trends">
-        <action
-            android:id="@+id/action_nav_trend_to_nav_orderbook"
-            app:destination="@id/nav_orderbook"
-            app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left" />
     </fragment>
 
     <!-- 1000 Sell -->

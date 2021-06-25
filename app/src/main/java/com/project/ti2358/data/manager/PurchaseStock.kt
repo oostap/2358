@@ -501,17 +501,17 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
                         position?.let { // появилась позиция, проверить есть ли что продать
                             // выставить ордер на продажу
                             try {
-                                val lotsToBuy = it.lots - it.blocked.toInt() - lotsPortfolio
+                                val lotsToBuy = abs(it.lots) - abs(it.blocked.toInt()) - lotsPortfolio
                                 if (lotsToBuy <= 0) {  // если свободных лотов нет, продолжаем
                                     return@let
                                 }
 
                                 lotsToSell -= lotsToBuy
-                                if (lotsToSell < 0) {    // если вся купленная позиция распродана, продолжаем
+                                if (lotsToSell < 0) {    // если вся проданная позиция выкуплена, выходим
                                     return@let
                                 }
 
-                                Utils.showToastAlert("$ticker: куплено по $sellPrice")
+                                Utils.showToastAlert("$ticker: продано по $sellPrice")
 
                                 buyLimitOrder = ordersService.placeLimitOrder(
                                     lotsToBuy,

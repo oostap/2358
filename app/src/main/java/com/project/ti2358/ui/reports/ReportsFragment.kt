@@ -6,10 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.StrategyReports
@@ -27,6 +29,7 @@ import org.koin.core.component.KoinApiExtension
 class ReportsFragment : Fragment(R.layout.fragment_reports) {
     private val stockManager: StockManager by inject()
     private val strategyReports: StrategyReports by inject()
+    private val orderbookManager: OrderbookManager by inject()
 
     private var fragmentReportsBinding: FragmentReportsBinding? = null
 
@@ -130,7 +133,9 @@ class ReportsFragment : Fragment(R.layout.fragment_reports) {
                     priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                        view?.findNavController()?.let {
+                            Utils.openOrderbookForStock(it, orderbookManager, stock)
+                        }
                     }
 
                     sectorView.text = stock.getSectorName()

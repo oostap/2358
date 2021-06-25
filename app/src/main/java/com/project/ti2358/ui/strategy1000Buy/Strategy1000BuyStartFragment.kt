@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.Strategy1000Buy
 import com.project.ti2358.databinding.Fragment1000BuyStartBinding
@@ -27,6 +28,7 @@ import java.util.*
 @KoinApiExtension
 class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) {
     val strategy1000Buy: Strategy1000Buy by inject()
+    private val orderbookManager: OrderbookManager by inject()
 
     private var fragment1000BuyStartBinding: Fragment1000BuyStartBinding? = null
 
@@ -179,7 +181,9 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
                     }
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                        view?.findNavController()?.let {
+                            Utils.openOrderbookForStock(it, orderbookManager, stock)
+                        }
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))

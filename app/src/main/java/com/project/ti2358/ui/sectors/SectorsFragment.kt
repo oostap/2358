@@ -8,6 +8,7 @@ import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,6 +32,7 @@ class SectorsFragment : Fragment(R.layout.fragment_sector) {
     val stockManager: StockManager by inject()
     val strategySector: StrategySector by inject()
     val orderbookManager: OrderbookManager by inject()
+    val chartManager: ChartManager by inject()
 
     private var fragmentSectorBinding: FragmentSectorBinding? = null
 
@@ -211,20 +213,15 @@ class SectorsFragment : Fragment(R.layout.fragment_sector) {
                     priceView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                        Utils.openOrderbookForStock(findNavController(), orderbookManager, stock)
                     }
 
-                    orderbookButton.setOnClickListener {
-                        orderbookManager.start(stock)
-                        orderbookButton.findNavController().navigate(R.id.action_nav_sectors_to_nav_orderbook)
+                    chartButton.setOnClickListener {
+                        Utils.openChartForStock(findNavController(), chartManager, stock)
                     }
 
                     sectorView.text = stock.getSectorName()
                     sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))
-
-                    itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
-                    }
 
                     if (stock.report != null) {
                         reportInfoView.text = stock.getReportInfo()

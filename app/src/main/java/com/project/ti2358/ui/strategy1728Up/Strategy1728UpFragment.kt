@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -27,6 +28,7 @@ import kotlin.math.roundToInt
 class Strategy1728UpFragment : Fragment(R.layout.fragment_1728_up) {
     val stockManager: StockManager by inject()
     val strategy1728Up: Strategy1728Up by inject()
+    private val orderbookManager: OrderbookManager by inject()
 
     private var fragment1728UpBinding: Fragment1728UpBinding? = null
 
@@ -151,7 +153,9 @@ class Strategy1728UpFragment : Fragment(R.layout.fragment_1728_up) {
                     priceChangePercentView.setTextColor(Utils.getColorForValue(changePercent))
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                        view?.findNavController()?.let {
+                            Utils.openOrderbookForStock(it, orderbookManager, stock)
+                        }
                     }
 
                     buyButton.setOnClickListener {

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.Navigation.findNavController
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -122,18 +123,18 @@ class LoveFragment : Fragment(R.layout.fragment_love) {
                         updateTitle()
                     }
 
-                    itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
-                    }
+//                    itemView.setOnClickListener {
+//                        view?.findNavController()?.let {
+//                            Utils.openOrderbookForStock(it, orderbookManager, stock)
+//                        }
+//                    }
 
                     orderbookButton.setOnClickListener {
-                        orderbookManager.start(stock)
-                        orderbookButton.findNavController().navigate(R.id.action_nav_favorites_to_nav_orderbook)
+                        Utils.openOrderbookForStock(it.findNavController(), orderbookManager, stock)
                     }
 
                     chartButton.setOnClickListener {
-                        chartManager.activeStock = stock
-                        chartButton.findNavController().navigate(R.id.action_nav_favorites_to_nav_chart)
+                        Utils.openChartForStock(it.findNavController(), chartManager, stock)
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))

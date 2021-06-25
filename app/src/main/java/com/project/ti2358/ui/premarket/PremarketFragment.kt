@@ -32,6 +32,7 @@ class PremarketFragment : Fragment(R.layout.fragment_premarket) {
     val stockManager: StockManager by inject()
     val strategyPremarket: StrategyPremarket by inject()
     val orderbookManager: OrderbookManager by inject()
+    val chartManager: ChartManager by inject()
 
     private var fragmentPremarketBinding: FragmentPremarketBinding? = null
 
@@ -221,20 +222,17 @@ class PremarketFragment : Fragment(R.layout.fragment_premarket) {
                     priceView.setTextColor(Utils.getColorForValue(stock.changePriceScreenerPercent))
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                        view?.findNavController()?.let {
+                            Utils.openOrderbookForStock(it, orderbookManager, stock)
+                        }
                     }
 
-                    orderbookButton.setOnClickListener {
-                        orderbookManager.start(stock)
-                        orderbookButton.findNavController().navigate(R.id.action_nav_premarket_to_nav_orderbook)
+                    chartButton.setOnClickListener {
+                        Utils.openChartForStock(it.findNavController(), chartManager, stock)
                     }
 
                     sectorView.text = stock.getSectorName()
                     sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))
-
-                    itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
-                    }
 
                     if (stock.report != null) {
                         reportInfoView.text = stock.getReportInfo()

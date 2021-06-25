@@ -7,10 +7,12 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.StrategyBlacklist
@@ -28,6 +30,7 @@ import java.util.*
 class BlacklistFragment : Fragment(R.layout.fragment_blacklist) {
     val strategyBlacklist: StrategyBlacklist by inject()
     val stockManager: StockManager by inject()
+    val orderbookManager: OrderbookManager by inject()
 
     private var fragmentBlacklistBinding: FragmentBlacklistBinding? = null
 
@@ -127,7 +130,9 @@ class BlacklistFragment : Fragment(R.layout.fragment_blacklist) {
                     }
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                        view?.findNavController()?.let {
+                            Utils.openOrderbookForStock(it, orderbookManager, stock)
+                        }
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))

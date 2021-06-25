@@ -93,7 +93,7 @@ class StreamingAlorService : KoinComponent {
         override fun onMessage(webSocket: WebSocket, text: String) {
             messagesStatus = true
 
-            log("StreamingAlorService::onMessage, text: $text")
+//            log("StreamingAlorService::onMessage, text: $text")
             val jsonObject = JSONObject(text)
             if (jsonObject.has("guid")) {
 

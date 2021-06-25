@@ -274,7 +274,7 @@ class StockManager : KoinComponent {
             if ("old" in instrument.ticker) continue
 
             // исключить фонды тинькова
-            if ("TCS" in instrument.figi) continue
+            if ("TCS" in instrument.figi && "TCS" != instrument.ticker) continue
 
             temp.add(Stock(instrument).apply {
                 alterName = alterNames[ticker] ?: ""
@@ -468,7 +468,8 @@ class StockManager : KoinComponent {
                         FirebaseCrashlytics.getInstance().recordException(it)
                     }
                 )
-//            subscribeStockLenta(stock)
+
+            subscribeStockLenta(stock)
         }
     }
 
@@ -521,6 +522,7 @@ class StockManager : KoinComponent {
 
         if (SettingsManager.getPantiniWardenToken() != "" && SettingsManager.getPantiniTelegramID() != "") {
             streamingPantiniService.unsubscribeOrderbookEventsStream(stock)
+            unsubscribeStockLenta(stock)
         }
     }
 

@@ -111,20 +111,17 @@ class TrendsFragment : Fragment(R.layout.fragment_trends) {
                     priceLowNowView.setTextColor(Utils.getColorForValue(trendStock.changeFromStartToLow))
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), trendStock.ticker)
+                        view?.findNavController()?.let {
+                            Utils.openOrderbookForStock(it, orderbookManager, trendStock.stock)
+                        }
                     }
 
                     orderbookButton.setOnClickListener {
-                        orderbookManager.start(trendStock.stock)
-                        orderbookButton.findNavController().navigate(R.id.action_nav_trend_to_nav_orderbook)
+                        Utils.openOrderbookForStock(it.findNavController(), orderbookManager, trendStock.stock)
                     }
 
                     sectorView.text = trendStock.stock.getSectorName()
                     sectorView.setTextColor(Utils.getColorForSector(trendStock.stock.closePrices?.sector))
-
-                    itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), trendStock.ticker)
-                    }
 
                     if (trendStock.stock.report != null) {
                         reportInfoView.text = trendStock.stock.getReportInfo()
