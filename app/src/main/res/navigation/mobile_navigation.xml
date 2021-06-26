@@ -52,7 +52,6 @@
     </fragment>
 
     <!-- позиция в депо -->
-
     <fragment
         android:id="@+id/nav_portfolio_position"
         android:name="com.project.ti2358.ui.portfolio.PortfolioPositionFragment"
@@ -234,6 +233,36 @@
         android:name="com.project.ti2358.ui.strategy1000Buy.Strategy1000BuyFinishFragment"
         android:label="@string/menu_1000_buy"
         tools:layout="@layout/fragment_1000_buy_start" />
+
+    <!-- tazik -->
+
+    <fragment
+        android:id="@+id/nav_tazik_start"
+        android:name="com.project.ti2358.ui.strategyTazik.StrategyTazikStartFragment"
+        android:label="@string/menu_tazik"
+        tools:layout="@layout/fragment_tazik_start">
+        <action
+            android:id="@+id/action_nav_tazik_start_to_nav_tazik_finish"
+            app:destination="@id/nav_tazik_finish"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_tazik_finish"
+        android:name="com.project.ti2358.ui.strategyTazik.StrategyTazikFinishFragment"
+        android:label="@string/menu_tazik"
+        tools:layout="@layout/fragment_tazik_finish" >
+        <action
+            android:id="@+id/action_nav_tazik_finish_to_nav_tazik_status"
+            app:destination="@id/nav_tazik_status" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_tazik_status"
+        android:name="com.project.ti2358.ui.strategyTazik.StrategyTazikStatusFragment"
+        android:label="@string/menu_tazik"
+        tools:layout="@layout/fragment_tazik_status" />
 
     <!-- endless tazik -->
 

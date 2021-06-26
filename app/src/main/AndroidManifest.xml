@@ -60,6 +60,12 @@
         </service>
 
         <service
+            android:name=".service.StrategyTazikService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
+
+        <service
             android:name=".service.StrategyTazikEndlessService"
             android:enabled="true"
             android:exported="false">

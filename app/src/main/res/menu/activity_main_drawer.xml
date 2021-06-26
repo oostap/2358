@@ -31,6 +31,10 @@
             android:icon="@drawable/ic_glass"
             android:title="@string/menu_premarket" />
         <item
+            android:id="@+id/nav_tazik_start"
+            android:icon="@drawable/ic_tazik"
+            android:title="@string/menu_tazik" />
+        <item
             android:id="@+id/nav_tazik_endless_start"
             android:icon="@drawable/ic_tazik_endless"
             android:title="@string/menu_tazik_endless" />

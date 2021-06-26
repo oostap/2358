@@ -314,6 +314,105 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/settings_header_tazik">
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_set_1"
+            app:title="@string/stocks_tazik_set_1"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="SPCE GTHX"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_set_2"
+            app:title="@string/stocks_tazik_set_2"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="ARCT BLUE"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_set_3"
+            app:title="@string/stocks_tazik_set_3"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="VTBR SNGS"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_min_percent_to_buy"
+            app:title="@string/stocks_tazik_min_percent_to_buy"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="-1"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_min_volume"
+            app:title="@string/stocks_tazik_min_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="100"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_purchase_volume"
+            app:title="@string/stocks_tazik_purchase_volume"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="500"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_purchase_parts"
+            app:title="@string/stocks_tazik_purchase_parts"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="2"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_order_lifetime_seconds"
+            app:title="@string/stocks_tazik_order_lifetime_seconds"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="120"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_take_profit"
+            app:title="@string/stocks_tazik_take_profit"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_approximation_factor"
+            app:title="@string/stocks_tazik_approximation_factor"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0.65"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_allow_averaging"
+            app:title="@string/stocks_tazik_allow_averaging"
+            app:defaultValue="false" />
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_times2"
+            app:title="@string/stocks_tazik_times"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="06:59:55,09:59:55,10:59:55,15:29:55"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_exclude_report"
+            app:title="@string/stocks_tazik_exclude_report"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_exclude_divs"
+            app:title="@string/stocks_tazik_exclude_divs"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_exclude_fda"
+            app:title="@string/stocks_tazik_exclude_fda"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_exclude_depo"
+            app:title="@string/stocks_tazik_exclude_depo"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_tazik_voice"
+            app:title="@string/stocks_tazik_voice"
+            app:defaultValue="true" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/menu_tazik_endless">
         <EditTextPreference
             app:key="@string/setting_key_tazik_endless_set"
@@ -376,18 +475,6 @@
             app:defaultValue="120"/>
 
         <EditTextPreference
-            app:key="@string/setting_key_tazik_endless_schedule"
-            app:title="@string/stocks_tazik_endless_schedule"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="06:59:50 09:59:50 10:59:50 15:29:50"/>
-
-        <EditTextPreference
-            app:key="@string/setting_key_tazik_endless_taz_lifetime_minutes"
-            app:title="@string/stocks_tazik_endless_taz_lifetime_minutes"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="1000"/>
-
-        <EditTextPreference
             app:key="@string/setting_key_tazik_endless_take_profit"
             app:title="@string/stocks_tazik_endless_take_profit"
             app:useSimpleSummaryProvider="true"
@@ -398,6 +485,12 @@
             app:title="@string/stocks_tazik_endless_approximation_factor"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="0.65"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_tazik_endless_schedule"
+            app:title="@string/stocks_tazik_endless_schedule"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="06:59:50 09:59:50 10:59:50 15:29:50"/>
 
         <SwitchPreferenceCompat
             app:key="@string/setting_key_tazik_endless_allow_averaging"
@@ -435,11 +528,6 @@
             app:title="@string/stocks_tazik_endless_close_price_protection_percent"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="-0.1" />
-
-        <SwitchPreferenceCompat
-            app:key="@string/setting_key_tazik_endless_voice"
-            app:title="@string/stocks_tazik_endless_voice"
-            app:defaultValue="true" />
 
     </PreferenceCategory>
 

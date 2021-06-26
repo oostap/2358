@@ -39,6 +39,7 @@ data class PurchaseStock(var stock: Stock) : KoinComponent {
 
     var position: PortfolioPosition? = null
 
+    var tazikPrice: Double = 0.0                       // обновляемая фиксированная цена, от которой считаем тазы
     var tazikEndlessPrice: Double = 0.0               // обновляемая фиксированная цена, от которой считаем бесконечные тазы
     var zontikEndlessPrice: Double = 0.0               // обновляемая фиксированная цена, от которой считаем бесконечные зонты
 
