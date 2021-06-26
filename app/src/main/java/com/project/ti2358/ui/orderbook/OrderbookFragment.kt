@@ -32,10 +32,7 @@ import com.project.ti2358.data.model.dto.pantini.PantiniPrint
 import com.project.ti2358.databinding.FragmentOrderbookBinding
 import com.project.ti2358.databinding.FragmentOrderbookItemBinding
 import com.project.ti2358.databinding.FragmentOrderbookLentaItemBinding
-import com.project.ti2358.service.Utils
-import com.project.ti2358.service.log
-import com.project.ti2358.service.toMoney
-import com.project.ti2358.service.toPercent
+import com.project.ti2358.service.*
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -62,6 +59,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     var activeStock: Stock? = null
     var orderbookLines: MutableList<OrderbookLine> = mutableListOf()
     var orderbookUSLines: MutableList<OrderbookLine> = mutableListOf()
+    var orderbookUSLenta: MutableList<PantiniPrint> = mutableListOf()
+
     var jobRefreshOrders: Job? = null
     var jobRefreshOrderbook: Job? = null
 
@@ -83,10 +82,11 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             // создать лист руками
             orderlinesViews.clear()
             orderlinesUSViews.clear()
+            orderlentaUSViews.clear()
 
             orderbookLinesView.removeAllViews()
             orderbookUsLinesView.removeAllViews()
-
+            orderbookUsLentaView.removeAllViews()
             for (i in 0..20) {
                 val orderlineHolder = OrderlineHolder(FragmentOrderbookItemBinding.inflate(LayoutInflater.from(context), null, false))
                 orderbookLinesView.addView(orderlineHolder.binding.root)
@@ -99,11 +99,12 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 orderlinesUSViews.add(orderlineHolder)
             }
 
-//            for (i in 0..30) {
-//                val orderlentaHolder = OrderLentaHolder(FragmentOrderbookLentaItemBinding.inflate(LayoutInflater.from(context), null, false))
-//                orderbookUsLentaView.addView(orderlentaHolder.binding.root)
-//                orderlentaUSViews.add(orderlentaHolder)
-//            }
+            for (i in 0..50) {
+                val orderlentaHolder = OrderLentaHolder(FragmentOrderbookLentaItemBinding.inflate(LayoutInflater.from(context), null, false))
+                orderbookUsLentaView.addView(orderlentaHolder.binding.root)
+                orderlentaUSViews.add(orderlentaHolder)
+            }
+            orderbookUsLentaView.visibility = GONE
 
             volumesView.children.forEach { it.visibility = GONE }
             buyPlusView.children.forEach { it.visibility = GONE }
@@ -220,8 +221,19 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 }
             }
 
-            lentaButton.setOnClickListener {
+            lentaButton.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    orderbookUsLentaView.visibility = VISIBLE
+                    orderbookUsLinesView.visibility = GONE
+                    orderbookLinesView.visibility = GONE
+                }
 
+                if (event.action == MotionEvent.ACTION_UP) {
+                    orderbookUsLentaView.visibility = GONE
+                    orderbookUsLinesView.visibility = VISIBLE
+                    orderbookLinesView.visibility = VISIBLE
+                }
+                true
             }
 
             positionView.setOnClickListener {
@@ -383,6 +395,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         if (!isVisible) return
         orderbookLines = orderbookManager.process()
         orderbookUSLines = orderbookManager.processUS()
+        orderbookUSLenta = orderbookManager.processUSLenta()
 
         fragmentOrderbookBinding?.apply {
             // SPB
@@ -399,6 +412,14 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             for (i in 0 until size) {
                 orderbookUsLinesView.getChildAt(i).visibility = VISIBLE
                 orderlinesUSViews[i].updateData(orderbookUSLines[i], i)
+            }
+
+            // US lenta
+            orderbookUsLentaView.children.forEach { it.visibility = GONE }
+            size = min(orderbookUSLenta.size, orderbookUsLentaView.childCount)
+            for (i in 0 until size) {
+                orderbookUsLentaView.getChildAt(i).visibility = VISIBLE
+                orderlentaUSViews[i].updateData(orderbookUSLenta[i], i)
             }
         }
 
@@ -622,9 +643,18 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             with(binding) {
                 priceView.text = item.price.toString()
                 volumeView.text = item.size.toString()
-                timeView.text = item.time.toString()
+                timeView.text = item.time.toString("dd-MM HH:mm:ss")
                 mmView.text = item.exchange
                 conditionView.text = item.condition
+
+                // цвета
+                printView.setBackgroundColor(Utils.getColorBackgroundForPrint(item.hit))
+                val textColor = Utils.getColorTextForPrint(item.hit)
+                priceView.setTextColor(textColor)
+                volumeView.setTextColor(textColor)
+                timeView.setTextColor(textColor)
+                mmView.setTextColor(textColor)
+                conditionView.setTextColor(textColor)
             }
         }
     }

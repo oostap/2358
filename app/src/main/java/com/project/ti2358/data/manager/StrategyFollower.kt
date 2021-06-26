@@ -20,6 +20,7 @@ class StrategyFollower : KoinComponent {
     private val strategyTelegram: StrategyTelegram by inject()
 
     private val strategyTazikEndless: StrategyTazikEndless by inject()
+    private val strategyZontikEndless: StrategyZontikEndless by inject()
     private val strategyRocket: StrategyRocket by inject()
     private val strategyTrend: StrategyTrend by inject()
     private val strategyLimits: StrategyLimits by inject()
@@ -151,6 +152,19 @@ class StrategyFollower : KoinComponent {
                     GlobalScope.launch(Dispatchers.Main) {
                         strategyLimits.restartStrategy()
                     }
+                } else if (ticker == "ZONT") {
+                    var percent = 0.0
+                    var profit = 0.0
+                    if (list.size >= 4) {
+                        percent = list[3].toDouble()
+                    }
+                    if (list.size >= 5) {
+                        profit = list[4].toDouble()
+                    }
+
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategyZontikEndless.restartStrategy(percent, profit)
+                    }
                 }
                 return 2
             } else if (operation == "stop") {
@@ -164,6 +178,10 @@ class StrategyFollower : KoinComponent {
                 } else if (ticker == "TAZ") {
                     GlobalScope.launch(Dispatchers.Main) {
                         strategyTazikEndless.stopStrategy()
+                    }
+                } else if (ticker == "ZONT") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategyZontikEndless.stopStrategy()
                     }
                 } else if (ticker == "ROCKET") {
                     GlobalScope.launch(Dispatchers.Main) {

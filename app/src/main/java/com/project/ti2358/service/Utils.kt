@@ -102,6 +102,9 @@ class Utils{
         val EMPTY: Int = Color.parseColor("#00FFFFFF")
         val PURPLE: Int = Color.parseColor("#C400AB")
 
+        val PRINT_RED: Int = Color.parseColor("#e16f8e")
+        val PRINT_BLUE: Int = Color.parseColor("#4f8fc4")
+
         val TEAL: Int = Color.parseColor("#4903DAC5")
 
         @KoinApiExtension
@@ -134,6 +137,31 @@ class Utils{
                 Configuration.UI_MODE_NIGHT_UNDEFINED -> {}
             }
             return EMPTY
+        }
+
+        fun getColorBackgroundForPrint(hit: Int): Int {
+            return when (hit) {
+                0 -> Color.TRANSPARENT
+                1 -> PRINT_RED
+                2 -> PRINT_BLUE
+                3 -> PRINT_BLUE
+                4 -> PRINT_RED
+                5 -> Color.TRANSPARENT
+                else -> Color.TRANSPARENT
+            }
+        }
+
+        @KoinApiExtension
+        fun getColorTextForPrint(hit: Int): Int {
+            return when (hit) {
+                0 -> getNeutralColor()
+                1 -> getNeutralColor()
+                2 -> getNeutralColor()
+                3 -> Color.CYAN
+                4 -> Color.CYAN
+                5 -> getNeutralColor()
+                else -> getNeutralColor()
+            }
         }
 
         fun getColorForSector(sector: String?): Int {

@@ -477,7 +477,7 @@ class StrategyTelegram : KoinComponent {
             val text = if (start) {
                 String.format(
                     locale = Locale.US,
-                    "🟢🚀☄️ - %.2f%% / %d мин / v%d",
+                    "🟢🚀☄️ %.2f%% / %d мин / v%d",
                     SettingsManager.getRocketChangePercent(),
                     SettingsManager.getRocketChangeMinutes(),
                     SettingsManager.getRocketChangeVolume()
@@ -494,7 +494,7 @@ class StrategyTelegram : KoinComponent {
             val text = if (start) {
                 String.format(
                     locale = Locale.US,
-                    "🟢⬆️⬇️️ - %.2f%% / %d мин / v%d",
+                    "🟢⬆️⬇️️ %.2f%% / %d мин / v%d",
                     SettingsManager.getRocketChangePercent(),
                     SettingsManager.getRocketChangeMinutes(),
                     SettingsManager.getRocketChangeVolume()
@@ -511,7 +511,7 @@ class StrategyTelegram : KoinComponent {
             val text = if (start) {
                 String.format(
                     locale = Locale.US,
-                    "🟢⤴️⤵️️ - %.1f%% / %.1f%% / %d",
+                    "🟢⤴️⤵️️ %.1f%% / %.1f%% / %d",
                     SettingsManager.getTrendMinDownPercent(),
                     SettingsManager.getTrendMinUpPercent(),
                     SettingsManager.getTrendAfterMinutes()
@@ -527,7 +527,7 @@ class StrategyTelegram : KoinComponent {
         if (started && SettingsManager.getTelegramSendTaziks()) {
             val text = if (start) {
                 String.format(
-                    "🟢🛁 - %.2f%% / %.2f%% / %.2f / v%d / %ds / %ds / %.2f%%",
+                    "🟢🛁 %.2f%% / %.2f%% / %.2f / v%d / %ds / %ds / %.2f%%",
                     SettingsManager.getTazikEndlessChangePercent(),
                     SettingsManager.getTazikEndlessTakeProfit(),
                     SettingsManager.getTazikEndlessApproximationFactor(),
@@ -546,7 +546,7 @@ class StrategyTelegram : KoinComponent {
     fun send2358Start(start: Boolean, tickers : List<String>) {
         if (started) {// && SettingsManager.getTelegramSendTaziks()) {
             val text = if (start) {
-                String.format("🟢 2358 - тарим ${tickers.joinToString(" ")} на ${SettingsManager.get2358PurchaseVolume()}$")
+                String.format("🟢 2358 тарим ${tickers.joinToString(" ")} на ${SettingsManager.get2358PurchaseVolume()}$")
             } else {
                 "🔴 2358 !"
             }
@@ -558,7 +558,7 @@ class StrategyTelegram : KoinComponent {
         if (started && SettingsManager.getTelegramSendTaziks()) {
             val text = if (start) {
                 String.format(
-                    "🟢☂️ - %.2f%% / %.2f%% / %.2f / v%d / %ds / %ds / %.2f%%",
+                    "🟢☂️ %.2f%% / %.2f%% / %.2f / v%d / %ds / %ds / %.2f%%",
                     SettingsManager.getZontikEndlessChangePercent(),
                     SettingsManager.getZontikEndlessTakeProfit(),
                     SettingsManager.getZontikEndlessApproximationFactor(),

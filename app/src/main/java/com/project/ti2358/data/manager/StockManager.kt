@@ -468,8 +468,6 @@ class StockManager : KoinComponent {
                         FirebaseCrashlytics.getInstance().recordException(it)
                     }
                 )
-
-            subscribeStockLenta(stock)
         }
     }
 
@@ -522,7 +520,6 @@ class StockManager : KoinComponent {
 
         if (SettingsManager.getPantiniWardenToken() != "" && SettingsManager.getPantiniTelegramID() != "") {
             streamingPantiniService.unsubscribeOrderbookEventsStream(stock)
-            unsubscribeStockLenta(stock)
         }
     }
 

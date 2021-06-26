@@ -30,7 +30,7 @@ data class Stock(var instrument: Instrument) {
     var stockInfo: InstrumentInfo? = null           // инфа
     var orderbookStream: OrderbookStream? = null    // стакан
     var orderbookUS: PantiniOrderbook? = null       // стакан US
-    var lentaUS: PantiniLenta? = null                 // лента принтов
+    var lentaUS: PantiniLenta? = null               // лента принтов
 
     var dayVolumeCash: Double = 0.0
 
@@ -184,7 +184,12 @@ data class Stock(var instrument: Instrument) {
     }
 
     fun processLentaUS(pantiniLenta: PantiniLenta) {
-        lentaUS = pantiniLenta
+        log("PANTINI PRINTS = ${pantiniLenta.prints.size}")
+        if (lentaUS == null) {
+            lentaUS = pantiniLenta
+        } else {
+            lentaUS?.prints?.addAll(0, pantiniLenta.prints)
+        }
     }
 
     fun processStockInfo(instrumentInfo: InstrumentInfo) {

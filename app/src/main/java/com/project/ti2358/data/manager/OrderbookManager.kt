@@ -2,8 +2,10 @@ package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.model.dto.OperationType
 import com.project.ti2358.data.model.dto.Order
+import com.project.ti2358.data.model.dto.pantini.PantiniPrint
 import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.service.Utils
+import com.project.ti2358.service.log
 import com.project.ti2358.ui.orderbook.OrderbookLine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -22,18 +24,22 @@ class OrderbookManager() : KoinComponent {
 
     var activeStock: Stock? = null
     var orderbook: MutableList<OrderbookLine> = mutableListOf()
+
     var orderbookUS: MutableList<OrderbookLine> = mutableListOf()
+    var lentaUS: MutableList<PantiniPrint> = mutableListOf()
 
     fun start(stock: Stock) {
         activeStock = stock
         activeStock?.let {
             stockManager.subscribeStockOrderbook(it)
+            stockManager.subscribeStockLenta(it)
         }
     }
 
     fun stop() {
         activeStock?.let {
             stockManager.unsubscribeStockOrderbook(it)
+            stockManager.unsubscribeStockLenta(it)
         }
         activeStock = null
     }
@@ -234,5 +240,14 @@ class OrderbookManager() : KoinComponent {
             }
         }
         return orderbookUS
+    }
+
+    fun processUSLenta(): MutableList<PantiniPrint> {
+        lentaUS.clear()
+
+        activeStock?.let {
+            lentaUS = it.lentaUS?.prints?.toMutableList() ?: mutableListOf()
+        }
+        return lentaUS
     }
 }
