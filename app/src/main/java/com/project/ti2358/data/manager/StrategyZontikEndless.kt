@@ -292,7 +292,7 @@ class StrategyZontikEndless : KoinComponent {
                     "${purchase.zontikEndlessPrice.toMoney(purchase.stock)} ➡ ${priceNow.toMoney(purchase.stock)} = " +
                     "${change.toPercent()} ${purchase.getStatusString()} v=${vol}\n"
         }
-        if (tickers == "") tickers = "только положительные бумаги ⏳"
+        if (tickers == "") tickers = "отображаются положительные бумаги ⏳"
 
         return tickers
     }

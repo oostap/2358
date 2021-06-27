@@ -260,8 +260,6 @@ class StrategyTazik : KoinComponent {
     }
 
     fun getNotificationTextLong(): String {
-        val volume = 0
-
         val stocks = stocksToPurchase.map {
             Pair(it.stock.getPriceNow(), it)
         }.sortedBy {
