@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.icechao.klinelib.utils.Status
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StrategyTazik
@@ -27,6 +28,7 @@ import java.util.*
 @KoinApiExtension
 class StrategyTazikStartFragment : Fragment(R.layout.fragment_tazik_start) {
     val strategyTazik: StrategyTazik by inject()
+    val orderbookManager: OrderbookManager by inject()
 
     private var fragmentTazikStartBinding: FragmentTazikStartBinding? = null
 
@@ -184,7 +186,7 @@ class StrategyTazikStartFragment : Fragment(R.layout.fragment_tazik_start) {
                     }
 
                     itemView.setOnClickListener {
-                        Utils.openTinkoffForTicker(requireContext(), stock.ticker)
+                        Utils.openOrderbookForStock(it.findNavController(), orderbookManager, stock)
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))

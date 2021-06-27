@@ -126,6 +126,7 @@ class StrategyFollower : KoinComponent {
                         strategyRocket.restartStrategy()
                         strategyTrend.restartStrategy()
                         strategyLimits.restartStrategy()
+                        strategyZontikEndless.restartStrategy()
                     }
                 } else if (ticker == "TAZ") {
                     var percent = 0.0
@@ -174,6 +175,7 @@ class StrategyFollower : KoinComponent {
                         strategyRocket.stopStrategy()
                         strategyTrend.stopStrategy()
                         strategyLimits.stopStrategy()
+                        strategyZontikEndless.stopStrategy()
                     }
                 } else if (ticker == "TAZ") {
                     GlobalScope.launch(Dispatchers.Main) {

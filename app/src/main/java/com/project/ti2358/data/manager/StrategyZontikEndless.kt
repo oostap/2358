@@ -324,6 +324,8 @@ class StrategyZontikEndless : KoinComponent {
         process(1)
         getPurchaseStock()
         delay(500)
+
+        Utils.startService(TheApplication.application.applicationContext, StrategyZontikEndlessService::class.java)
         startStrategy(false)
     }
 

@@ -969,11 +969,11 @@ class SettingsManager {
 
         fun getZontikEndlessClosePriceProtectionPercent(): Double {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_close_price_protection_percent)
-            val value: String? = preferences.getString(key, "-0.1")
+            val value: String? = preferences.getString(key, "0.1")
             return try {
-                (value ?: "-0.1").toDouble()
+                (value ?: "0.1").toDouble()
             } catch (e: Exception) {
-                -0.1
+                0.1
             }
         }
 

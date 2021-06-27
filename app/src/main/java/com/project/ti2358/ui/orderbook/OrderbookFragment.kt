@@ -655,6 +655,10 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 timeView.setTextColor(textColor)
                 mmView.setTextColor(textColor)
                 conditionView.setTextColor(textColor)
+
+                if (item.condition == "M") {
+                    printView.setBackgroundColor(Utils.PURPLE)
+                }
             }
         }
     }

@@ -646,7 +646,7 @@
             app:key="@string/setting_key_zontik_endless_close_price_protection_percent"
             app:title="@string/stocks_zontik_endless_close_price_protection_percent"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="-0.1" />
+            app:defaultValue="0.1" />
 
         <SwitchPreferenceCompat
             app:key="@string/setting_key_zontik_endless_voice"

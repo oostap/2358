@@ -362,25 +362,26 @@ class StockManager : KoinComponent {
                     }
                 )
         } else {
-            streamingTinkoffService
-                .getCandleEventStream(
-                    if (minute) stocksStream.map { it.figi } else emptyList(),
-                    Interval.MINUTE
-                )
-                .onBackpressureBuffer()
-                .subscribeOn(Schedulers.computation())
-                .observeOn(candleScheduler)
-//                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onNext = {
-                        addCandle(it)
-                    },
-                    onError = {
-                        it.printStackTrace()
-                        FirebaseCrashlytics.getInstance().recordException(it)
-                    }
-                )
+
         }
+        streamingTinkoffService
+            .getCandleEventStream(
+                if (minute) stocksStream.map { it.figi } else emptyList(),
+                Interval.MINUTE
+            )
+            .onBackpressureBuffer()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(candleScheduler)
+//                .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onNext = {
+                    addCandle(it)
+                },
+                onError = {
+                    it.printStackTrace()
+                    FirebaseCrashlytics.getInstance().recordException(it)
+                }
+            )
 
         // дневные лучше всегда брать с ТИ, алор отдаёт очень долго, нужны только для объёмы и когда минутных ещё нет
         streamingTinkoffService
