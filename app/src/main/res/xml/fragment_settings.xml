@@ -381,10 +381,10 @@
             app:defaultValue="false" />
 
         <EditTextPreference
-            app:key="@string/setting_key_tazik_times2"
+            app:key="@string/setting_key_tazik_schedule_from_to"
             app:title="@string/stocks_tazik_times"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="06:59:55,09:59:55,10:59:55,15:29:55"/>
+            app:defaultValue="06:59:50-07:15:00 09:59:50-10:15:00 10:59:50-11:15:00 15:29:50-15:45:00"/>
 
         <SwitchPreferenceCompat
             app:key="@string/setting_key_tazik_exclude_report"
@@ -487,10 +487,10 @@
             app:defaultValue="0.65"/>
 
         <EditTextPreference
-            app:key="@string/setting_key_tazik_endless_schedule"
+            app:key="@string/setting_key_tazik_endless_schedule_from_to"
             app:title="@string/stocks_tazik_endless_schedule"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="06:59:50 09:59:50 10:59:50 15:29:50"/>
+            app:defaultValue="06:59:50-07:15:00 09:59:50-10:15:00 10:59:50-11:15:00 15:29:50-15:45:00"/>
 
         <SwitchPreferenceCompat
             app:key="@string/setting_key_tazik_endless_allow_averaging"
@@ -594,16 +594,10 @@
             app:defaultValue="120"/>
 
         <EditTextPreference
-            app:key="@string/setting_key_zontik_endless_schedule"
+            app:key="@string/setting_key_zontik_endless_schedule_from_to"
             app:title="@string/stocks_zontik_endless_schedule"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="06:59:50 09:59:50 10:59:50 15:29:50"/>
-
-        <EditTextPreference
-            app:key="@string/setting_key_zontik_endless_taz_lifetime_minutes"
-            app:title="@string/stocks_zontik_endless_taz_lifetime_minutes"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="1000"/>
+            app:defaultValue="06:59:50-07:15:00 09:59:50-10:15:00 10:59:50-11:15:00 15:29:50-15:45:00"/>
 
         <EditTextPreference
             app:key="@string/setting_key_zontik_endless_take_profit"
@@ -661,13 +655,13 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/menu_fixprice">
-        <EditTextPreference
-            app:key="@string/setting_key_fixprice_schedule"
-            app:title="@string/stocks_fixprice_schedule"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="07:00:00 10:00:00 11:00:00 16:30:00"/>
-    </PreferenceCategory>
+<!--    <PreferenceCategory app:title="@string/menu_fixprice">-->
+<!--        <EditTextPreference-->
+<!--            app:key="@string/setting_key_fixprice_schedule"-->
+<!--            app:title="@string/stocks_fixprice_schedule"-->
+<!--            app:useSimpleSummaryProvider="true"-->
+<!--            app:defaultValue="07:00:00 10:00:00 11:00:00 16:30:00"/>-->
+<!--    </PreferenceCategory>-->
 
     <PreferenceCategory app:title="@string/settings_header_rocket">
         <EditTextPreference

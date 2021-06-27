@@ -33,7 +33,7 @@ class StrategyZontikEndlessFinishFragment : Fragment(R.layout.fragment_zontik_en
 
     var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
     var positions: MutableList<PurchaseStock> = mutableListOf()
-    var startTime: String = ""
+    var timeStartEnd: Pair<String, String> = Pair("", "")
     var scheduledStart: Boolean = false
 
     override fun onDestroy() {
@@ -56,7 +56,7 @@ class StrategyZontikEndlessFinishFragment : Fragment(R.layout.fragment_zontik_en
             }
 
             startLaterButton.setOnClickListener {
-                if (startTime == "???") {
+                if (timeStartEnd.first == "") {
                     Utils.showMessageAlert(requireContext(),"Ближайшего времени на сегодня нет, добавьте время или попробуйте запустить после 00:00")
                     return@setOnClickListener
                 }
@@ -95,7 +95,7 @@ class StrategyZontikEndlessFinishFragment : Fragment(R.layout.fragment_zontik_en
                 if (strategyZontikEndless.stocksToPurchase.size > 0) {
                     Utils.startService(requireContext(), StrategyZontikEndlessService::class.java)
                     GlobalScope.launch {
-                        strategyZontikEndless.prepareStrategy(scheduled, startTime)
+                        strategyZontikEndless.prepareStrategy(scheduled, timeStartEnd)
                     }
                 }
             }
@@ -109,16 +109,19 @@ class StrategyZontikEndlessFinishFragment : Fragment(R.layout.fragment_zontik_en
         val volume = SettingsManager.getZontikEndlessPurchaseVolume().toDouble()
         val p = SettingsManager.getZontikEndlessPurchaseParts()
         val parts = "%d по %.2f$".format(p, volume / p)
-        startTime = SettingsManager.getZontikEndlessNearestTime()
+        timeStartEnd = SettingsManager.getZontikEndlessNearestTime()
+
+        val start = if (timeStartEnd.first != "") timeStartEnd.first else "???"
+        val end = if (timeStartEnd.second != "") timeStartEnd.second else "???"
 
         val prepareText: String = TheApplication.application.applicationContext.getString(R.string.prepare_start_tazik_buy_text)
         fragmentZontikEndlessFinishBinding?.infoTextView?.text = String.format(
             prepareText,
-            positions.size,
             percent,
             volume,
             parts,
-            startTime
+            start,
+            end
         )
     }
 
@@ -131,7 +134,7 @@ class StrategyZontikEndlessFinishFragment : Fragment(R.layout.fragment_zontik_en
             }
         } else {
             if (scheduledStart) {
-                fragmentZontikEndlessFinishBinding?.startLaterButton?.text = getString(R.string.start_later)
+                fragmentZontikEndlessFinishBinding?.startLaterButton?.text = getString(R.string.start_schedule)
             } else {
                 fragmentZontikEndlessFinishBinding?.startNowButton?.text = getString(R.string.start_now)
             }

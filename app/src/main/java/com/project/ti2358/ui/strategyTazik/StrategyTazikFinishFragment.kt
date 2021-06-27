@@ -19,10 +19,6 @@ import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.databinding.FragmentTazikFinishBinding
 import com.project.ti2358.databinding.FragmentTazikFinishItemBinding
 import com.project.ti2358.service.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -35,7 +31,7 @@ class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
 
     var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
     var positions: MutableList<PurchaseStock> = mutableListOf()
-    var startTime: String = ""
+    var timeStartEnd: Pair<String, String> = Pair("", "")
     var scheduledStart: Boolean = false
 
     override fun onDestroy() {
@@ -58,6 +54,10 @@ class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
             }
 
             startLaterButton.setOnClickListener {
+                if (timeStartEnd.first == "") {
+                    Utils.showMessageAlert(requireContext(),"Ближайшего времени на сегодня нет, добавьте время или попробуйте запустить после 00:00")
+                    return@setOnClickListener
+                }
                 tryStartTazik(true)
             }
 
@@ -82,7 +82,7 @@ class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
             } else {
                 if (strategyTazik.stocksToPurchase.size > 0) {
                     Utils.startService(requireContext(), StrategyTazikService::class.java)
-                    strategyTazik.prepareStrategy(scheduled, startTime)
+                    strategyTazik.prepareStrategy(scheduled, timeStartEnd)
                 }
             }
         }
@@ -95,16 +95,20 @@ class StrategyTazikFinishFragment : Fragment(R.layout.fragment_tazik_finish) {
         val volume = SettingsManager.getTazikPurchaseVolume().toDouble()
         val p = SettingsManager.getTazikPurchaseParts()
         val parts = "%d по %.2f$".format(p, volume / p)
-        startTime = SettingsManager.getTazikNearestTime()
+
+        timeStartEnd = SettingsManager.getTazikNearestTime()
+
+        val start = if (timeStartEnd.first != "") timeStartEnd.first else "???"
+        val end = if (timeStartEnd.second != "") timeStartEnd.second else "???"
 
         val prepareText: String = TheApplication.application.applicationContext.getString(R.string.prepare_start_tazik_buy_text)
         fragmentTazikFinishBinding?.infoTextView?.text = String.format(
             prepareText,
-            positions.size,
             percent,
             volume,
             parts,
-            startTime
+            start,
+            end
         )
     }
 

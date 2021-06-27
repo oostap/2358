@@ -63,6 +63,11 @@ class StrategyLimits : KoinComponent {
         startStrategy()
     }
 
+    fun stopStrategyCommand() {
+        stopStrategy()
+        Utils.stopService(TheApplication.application.applicationContext, StrategyLimitsService::class.java)
+    }
+
     suspend fun startStrategy() = withContext(StockManager.limitsContext) {
         upLimitStocks.clear()
         downLimitStocks.clear()

@@ -524,52 +524,15 @@ class SettingsManager {
             return preferences.getBoolean(key, false)
         }
 
-        fun getTazikNearestTime(): String {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_times2)
-            var time = preferences.getString(key, "06:59:50")
-
-            time = time?.replace(" ", "")
-            time = time?.replace("\n", "")
+        fun getTazikNearestTime(): Pair<String, String> {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_schedule_from_to)
+            val time = preferences.getString(key, "06:59:50-07:15:00 09:59:50-10:15:00 10:59:50-11:15:00 15:29:50-15:45:00")
 
             if (time != null && time != "") {
-                val times = time.split(",").toTypedArray()
-
-                // отсортировать по возрастанию
-                times.sortBy { t ->
-                    val dayTime = t.split(":").toTypedArray()
-                    parseInt(dayTime[0]) * 3600 + parseInt(dayTime[1]) * 60 + parseInt(dayTime[2])
-                }
-
-                for (t in times) {
-                    val dayTime = t.split(":").toTypedArray()
-                    if (dayTime.size < 3) continue
-
-                    val hours: Int
-                    val minutes: Int
-                    val seconds: Int
-                    try {
-                        hours = parseInt(dayTime[0])
-                        minutes = parseInt(dayTime[1])
-                        seconds = parseInt(dayTime[2])
-                    } catch (e: Exception) {
-                        Utils.showToastAlert("Неверный формат времени в настройках!")
-                        continue
-                    }
-                    val currentMskTime = Utils.getTimeMSK()
-
-                    val hoursMsk = currentMskTime.get(Calendar.HOUR_OF_DAY)
-                    val minutesMsk = currentMskTime.get(Calendar.MINUTE)
-                    val secondsMsk = currentMskTime.get(Calendar.SECOND)
-
-                    val total = hours * 3600 + minutes * 60 + seconds
-                    val totalMsk = hoursMsk * 3600 + minutesMsk * 60 + secondsMsk
-                    if (totalMsk < total) {
-                        return t
-                    }
-                }
+                return processNearestTimeFromTo(time)
             }
 
-            return ""
+            return Pair("", "")
         }
 
         fun getTazikExcludeReports(): Boolean {
@@ -754,31 +717,26 @@ class SettingsManager {
             }
         }
 
-        fun getTazikEndlessLifeTimeMinutes(): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_taz_lifetime_minutes)
-            val value: String? = preferences.getString(key, "1000")
-            return try {
-                parseInt(value ?: "1000")
-            } catch (e: Exception) {
-                1000
+        fun processNearestTimeFromTo(time: String): Pair<String, String> {
+            val timesFromTo = time.split(" ").toTypedArray()
+
+            // отсортировать по возрастанию времени старта
+            timesFromTo.sortBy { t ->
+                val fromTo = t.split("-").toTypedArray()
+                val dayTimeFrom = fromTo[0].split(":").toTypedArray()
+                parseInt(dayTimeFrom[0]) * 3600 + parseInt(dayTimeFrom[1]) * 60 + parseInt(dayTimeFrom[2])
             }
-        }
 
-        fun getTazikEndlessNearestTime(): String {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_schedule)
-            var time = preferences.getString(key, "06:59:50")
+            var timeFrom = ""
+            var timeTo = ""
 
-            if (time != null && time != "") {
-                val times = time.split(" ").toTypedArray()
-
-                // отсортировать по возрастанию
-                times.sortBy { t ->
-                    val dayTime = t.split(":").toTypedArray()
-                    parseInt(dayTime[0]) * 3600 + parseInt(dayTime[1]) * 60 + parseInt(dayTime[2])
-                }
-
-                for (t in times) {
-                    val dayTime = t.split(":").toTypedArray()
+            for (t in timesFromTo) {
+                timeFrom = ""
+                timeTo = ""
+                val fromTo = t.split("-").toTypedArray()
+                if (fromTo.size > 0) { // from
+                    timeFrom = fromTo[0]
+                    val dayTime = timeFrom.split(":").toTypedArray()
                     if (dayTime.size < 3) continue
 
                     val hours: Int
@@ -801,12 +759,59 @@ class SettingsManager {
                     val total = hours * 3600 + minutes * 60 + seconds
                     val totalMsk = hoursMsk * 3600 + minutesMsk * 60 + secondsMsk
                     if (totalMsk < total) {
-                        return t
+                        timeFrom = fromTo[0]
+                    } else {
+                        continue
                     }
                 }
+
+                if (fromTo.size > 1) { // to
+                    timeTo = fromTo[1]
+                    val dayTime = timeTo.split(":").toTypedArray()
+                    if (dayTime.size < 3) {
+                        timeTo = ""
+                    }
+
+                    val hours: Int
+                    val minutes: Int
+                    val seconds: Int
+                    try {
+                        hours = parseInt(dayTime[0])
+                        minutes = parseInt(dayTime[1])
+                        seconds = parseInt(dayTime[2])
+
+                        val currentMskTime = Utils.getTimeMSK()
+
+                        val hoursMsk = currentMskTime.get(Calendar.HOUR_OF_DAY)
+                        val minutesMsk = currentMskTime.get(Calendar.MINUTE)
+                        val secondsMsk = currentMskTime.get(Calendar.SECOND)
+
+                        val total = hours * 3600 + minutes * 60 + seconds
+                        val totalMsk = hoursMsk * 3600 + minutesMsk * 60 + secondsMsk
+                        if (totalMsk < total) {
+                            timeTo = fromTo[1]
+                        }
+                    } catch (e: Exception) {
+                        Utils.showToastAlert("Неверный формат времени в настройках!")
+                        timeTo = ""
+                    }
+                }
+
+                if (timeFrom != "") break
             }
 
-            return "???"
+            return Pair(timeFrom, timeTo)
+        }
+
+        fun getTazikEndlessNearestTime(): Pair<String, String> {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_schedule_from_to)
+            val time = preferences.getString(key, "06:59:50-07:15:00 09:59:50-10:15:00 10:59:50-11:15:00 15:29:50-15:45:00")
+
+            if (time != null && time != "") {
+                return processNearestTimeFromTo(time)
+            }
+
+            return Pair("", "")
         }
 
         fun getTazikEndlessVoice(): Boolean {
@@ -972,59 +977,15 @@ class SettingsManager {
             }
         }
 
-        fun getZontikEndlessLifeTimeMinutes(): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_taz_lifetime_minutes)
-            val value: String? = preferences.getString(key, "1000")
-            return try {
-                parseInt(value ?: "1000")
-            } catch (e: Exception) {
-                1000
-            }
-        }
-
-        fun getZontikEndlessNearestTime(): String {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_schedule)
-            var time = preferences.getString(key, "06:59:50")
+        fun getZontikEndlessNearestTime(): Pair<String, String> {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_schedule_from_to)
+            val time = preferences.getString(key, "06:59:50-07:15:00 09:59:50-10:15:00 10:59:50-11:15:00 15:29:50-15:45:00")
 
             if (time != null && time != "") {
-                val times = time.split(" ").toTypedArray()
-
-                // отсортировать по возрастанию
-                times.sortBy { t ->
-                    val dayTime = t.split(":").toTypedArray()
-                    parseInt(dayTime[0]) * 3600 + parseInt(dayTime[1]) * 60 + parseInt(dayTime[2])
-                }
-
-                for (t in times) {
-                    val dayTime = t.split(":").toTypedArray()
-                    if (dayTime.size < 3) continue
-
-                    val hours: Int
-                    val minutes: Int
-                    val seconds: Int
-                    try {
-                        hours = parseInt(dayTime[0])
-                        minutes = parseInt(dayTime[1])
-                        seconds = parseInt(dayTime[2])
-                    } catch (e: Exception) {
-                        Utils.showToastAlert("Неверный формат времени в настройках!")
-                        continue
-                    }
-                    val currentMskTime = Utils.getTimeMSK()
-
-                    val hoursMsk = currentMskTime.get(Calendar.HOUR_OF_DAY)
-                    val minutesMsk = currentMskTime.get(Calendar.MINUTE)
-                    val secondsMsk = currentMskTime.get(Calendar.SECOND)
-
-                    val total = hours * 3600 + minutes * 60 + seconds
-                    val totalMsk = hoursMsk * 3600 + minutesMsk * 60 + secondsMsk
-                    if (totalMsk < total) {
-                        return t
-                    }
-                }
+                return processNearestTimeFromTo(time)
             }
 
-            return "???"
+            return Pair("", "")
         }
 
         fun getZontikEndlessVoice(): Boolean {

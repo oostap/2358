@@ -41,7 +41,7 @@
     <string name="stop_1000">СТОП 1000</string>
 
     <string name="start_now">СТАРТ СЕЙЧАС</string>
-    <string name="start_later">СТАРТ ПОЗЖЕ</string>
+    <string name="start_schedule">СТАРТ ПО РАСПИСАНИЮ</string>
 
     <string name="cancel_all">Отменить все</string>
     <string name="cancel">ОТМЕНА</string>
@@ -52,7 +52,7 @@
     <string name="prepare_start_1000_buy_text">Запуск таймера на покупку: \nВремя: %s\nБумаг: %d\nСумма: %s</string>
     <string name="sell_now_text">Создать заявки на продажу:\nБумаг: %d\nСумма: %s</string>
 
-    <string name="prepare_start_tazik_buy_text">Выкуп всех просадок, бумаг: %s\nБазовая просадка: %s%%\nОбщая сумма: %s\nКоличество частей: %s\nВремя старта: сейчас или в %s</string>
+    <string name="prepare_start_tazik_buy_text">Базовая просадка: %s%%\nОбщая сумма: %s\nКоличество частей: %s\nБлижайшее расписание: от %s до %s</string>
 
     <string name="ticker">тикер</string>
     <string name="volume">объём</string>
@@ -202,7 +202,7 @@
     <string name="stocks_tazik_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
     <string name="stocks_tazik_approximation_factor">Приближение к низу свечи [0.0, 1.0]</string>
     <string name="stocks_tazik_allow_averaging">Разрешить усреднение</string>
-    <string name="stocks_tazik_times">Время старта тазиков МСК (через ",")</string>
+    <string name="stocks_tazik_times">Раписание работы МСК (через пробел)</string>
     <string name="stocks_tazik_order_lifetime_seconds">Время жизни заявки в секундах</string>
     <string name="stocks_tazik_exclude_report">Исключать отчёты</string>
     <string name="stocks_tazik_exclude_divs">Исключать дивы</string>
@@ -221,7 +221,7 @@
     <string name="stocks_tazik_endless_purchase_volume">Общая сумма покупки</string>
     <string name="stocks_tazik_endless_purchase_parts">Сколько тазиков? (заявок)</string>
     <string name="stocks_tazik_endless_order_lifetime_seconds">Время жизни заявки в секундах</string>
-    <string name="stocks_tazik_endless_schedule">Расписание старта, время МСК (через пробел)</string>
+    <string name="stocks_tazik_endless_schedule">Расписание работы МСК (через пробел)</string>
     <string name="stocks_tazik_endless_taz_lifetime_minutes">Автовыключение через (в минутах)</string>
     <string name="stocks_tazik_endless_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
     <string name="stocks_tazik_endless_approximation_factor">Приближение к низу свечи [0.0, 1.0]</string>
@@ -245,7 +245,7 @@
     <string name="stocks_zontik_endless_purchase_volume">Общая сумма продажи</string>
     <string name="stocks_zontik_endless_purchase_parts">Сколько зонтиков? (заявок)</string>
     <string name="stocks_zontik_endless_order_lifetime_seconds">Время жизни заявки в секундах</string>
-    <string name="stocks_zontik_endless_schedule">Расписание старта, время МСК (через пробел)</string>
+    <string name="stocks_zontik_endless_schedule">Расписание работы МСК (через пробел)</string>
     <string name="stocks_zontik_endless_taz_lifetime_minutes">Автовыключение через (в минутах)</string>
     <string name="stocks_zontik_endless_take_profit">Заявка на профит в % (0.0 = не создавать)</string>
     <string name="stocks_zontik_endless_approximation_factor">Приближение к верху свечи [0.0, 1.0]</string>
@@ -410,7 +410,7 @@
     <string name="setting_key_tazik_purchase_volume">tazik_purchase_volume</string>
     <string name="setting_key_tazik_purchase_parts">tazik_purchase_parts</string>
     <string name="setting_key_tazik_take_profit">tazik_take_profit</string>
-    <string name="setting_key_tazik_times2">tazik_times2</string>
+    <string name="setting_key_tazik_schedule_from_to">tazik_schedule_from_to</string>
     <string name="setting_key_tazik_allow_averaging">tazik_allow_averaging</string>
     <string name="setting_key_tazik_approximation_factor">tazik_approximation_factor</string>
     <string name="setting_key_tazik_order_lifetime_seconds">tazik_order_lifetime_seconds</string>
@@ -440,8 +440,7 @@
     <string name="setting_key_tazik_endless_exclude_depo">tazik_endless_exclude_depo</string>
     <string name="setting_key_tazik_endless_spike_protection">tazik_endless_spike_protection</string>
     <string name="setting_key_tazik_endless_close_price_protection_percent">tazik_endless_close_price_protection_percent</string>
-    <string name="setting_key_tazik_endless_schedule">tazik_endless_schedule</string>
-    <string name="setting_key_tazik_endless_taz_lifetime_minutes">tazik_endless_taz_lifetime_minutes</string>
+    <string name="setting_key_tazik_endless_schedule_from_to">tazik_endless_schedule_from_to</string>
     <string name="setting_key_tazik_endless_voice">tazik_endless_voice</string>
 
     <!-- endless zontik settings -->
@@ -455,8 +454,7 @@
     <string name="setting_key_zontik_endless_purchase_volume">zontik_endless_purchase_volume</string>
     <string name="setting_key_zontik_endless_purchase_parts">zontik_endless_purchase_parts</string>
     <string name="setting_key_zontik_endless_order_lifetime_seconds">zontik_endless_order_lifetime_seconds</string>
-    <string name="setting_key_zontik_endless_schedule">zontik_endless_schedule</string>
-    <string name="setting_key_zontik_endless_taz_lifetime_minutes">zontik_endless_taz_lifetime_minutes</string>
+    <string name="setting_key_zontik_endless_schedule_from_to">zontik_endless_schedule_from_to</string>
     <string name="setting_key_zontik_endless_take_profit">zontik_endless_take_profit</string>
     <string name="setting_key_zontik_endless_approximation_factor">zontik_endless_approximation_factor</string>
     <string name="setting_key_zontik_endless_allow_averaging">zontik_endless_allow_averaging</string>

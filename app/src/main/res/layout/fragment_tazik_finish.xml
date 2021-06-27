@@ -38,33 +38,33 @@
         android:weightSum="5" >
 
         <Button
-            android:layout_height="70dp"
+            android:layout_height="80dp"
+            android:id="@+id/start_later_button"
+            android:layout_marginRight="5dp"
+            android:text="@string/start_schedule"
+            android:layout_weight="1.5"
+            android:textSize="12dp"
+            android:padding="0dp"
+            android:layout_width="match_parent" />
+
+        <Button
+            android:layout_height="80dp"
             android:id="@+id/start_now_button"
             android:layout_marginRight="5dp"
             android:text="@string/start_now"
-            android:layout_weight="2"
+            android:layout_weight="1.5"
             android:textSize="12dp"
             android:padding="0dp"
-            android:layout_width="0dp" />
+            android:layout_width="match_parent" />
 
         <Button
-            android:layout_height="70dp"
-            android:layout_width="0dp"
-            android:id="@+id/start_later_button"
-            android:text="@string/start_later"
-            android:padding="0dp"
-            android:layout_weight="2"
-            android:textSize="12dp" />
-
-        <Button
-            android:layout_height="70dp"
+            android:layout_height="80dp"
             android:id="@+id/status_button"
-            android:layout_marginLeft="5dp"
             android:text="📝"
+            android:layout_weight="2"
+            android:textSize="14dp"
             android:padding="0dp"
-            android:layout_weight="1"
-            android:textSize="12dp"
-            android:layout_width="0dp" />
+            android:layout_width="match_parent" />
 
     </LinearLayout>
 

@@ -9,6 +9,9 @@ import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
+import com.project.ti2358.service.StrategyTrendService
+import com.project.ti2358.service.StrategyZontikEndlessService
+import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
@@ -46,6 +49,11 @@ class StrategyTrend : KoinComponent {
         if (started) stopStrategy()
         delay(500)
         startStrategy()
+    }
+
+    suspend fun stopStrategyCommand() = withContext(StockManager.stockContext) {
+        stopStrategy()
+        Utils.stopService(TheApplication.application.applicationContext, StrategyTrendService::class.java)
     }
 
     suspend fun startStrategy() = withContext(StockManager.trendContext) {

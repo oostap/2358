@@ -201,6 +201,10 @@ class Utils{
             }
         }
 
+        fun stopService(context: Context, serviceClass: Class<*>) {
+            context.stopService(Intent(context, serviceClass))
+        }
+
         fun showToastAlert(text: String) {
             GlobalScope.launch(Dispatchers.Main) {
                 Toast.makeText(TheApplication.application.applicationContext, text, LENGTH_LONG).show()

@@ -33,7 +33,7 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
 
     var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
     var positions: MutableList<PurchaseStock> = mutableListOf()
-    var startTime: String = ""
+    var timeStartEnd: Pair<String, String> = Pair("", "")
     var scheduledStart: Boolean = false
 
     override fun onDestroy() {
@@ -56,7 +56,7 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
             }
 
             startLaterButton.setOnClickListener {
-                if (startTime == "???") {
+                if (timeStartEnd.first == "") {
                     Utils.showMessageAlert(requireContext(),"Ближайшего времени на сегодня нет, добавьте время или попробуйте запустить после 00:00")
                     return@setOnClickListener
                 }
@@ -85,7 +85,7 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
         }
     }
 
-    fun tryStartTazik(scheduled : Boolean) {
+    private fun tryStartTazik(scheduled : Boolean) {
         if (SettingsManager.getTazikEndlessPurchaseVolume() <= 0 || SettingsManager.getTazikEndlessPurchaseParts() == 0) {
             Utils.showMessageAlert(requireContext(),"В настройках не задана общая сумма покупки или количество частей, раздел Бесконечный таз")
         } else {
@@ -95,7 +95,7 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
                 if (strategyTazikEndless.stocksToPurchase.size > 0) {
                     Utils.startService(requireContext(), StrategyTazikEndlessService::class.java)
                     GlobalScope.launch {
-                        strategyTazikEndless.prepareStrategy(scheduled, startTime)
+                        strategyTazikEndless.prepareStrategy(scheduled, timeStartEnd)
                     }
                 }
             }
@@ -109,16 +109,19 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
         val volume = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
         val p = SettingsManager.getTazikEndlessPurchaseParts()
         val parts = "%d по %.2f$".format(p, volume / p)
-        startTime = SettingsManager.getTazikEndlessNearestTime()
+        timeStartEnd = SettingsManager.getTazikEndlessNearestTime()
+
+        val start = if (timeStartEnd.first != "") timeStartEnd.first else "???"
+        val end = if (timeStartEnd.second != "") timeStartEnd.second else "???"
 
         val prepareText: String = TheApplication.application.applicationContext.getString(R.string.prepare_start_tazik_buy_text)
         fragmentTazikEndlessFinishBinding?.infoTextView?.text = String.format(
             prepareText,
-            positions.size,
             percent,
             volume,
             parts,
-            startTime
+            start,
+            end
         )
     }
 
@@ -131,7 +134,7 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
             }
         } else {
             if (scheduledStart) {
-                fragmentTazikEndlessFinishBinding?.startLaterButton?.text = getString(R.string.start_later)
+                fragmentTazikEndlessFinishBinding?.startLaterButton?.text = getString(R.string.start_schedule)
             } else {
                 fragmentTazikEndlessFinishBinding?.startNowButton?.text = getString(R.string.start_now)
             }

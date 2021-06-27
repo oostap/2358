@@ -1,10 +1,7 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.TheApplication
-import com.project.ti2358.service.Strategy2358Service
-import com.project.ti2358.service.Utils
-import com.project.ti2358.service.toMoney
-import com.project.ti2358.service.toPercent
+import com.project.ti2358.service.*
 import kotlinx.coroutines.Job
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -183,7 +180,7 @@ class Strategy2358() : KoinComponent {
         return tickers
     }
 
-    fun prepareStrategy(tickers: List<String>) {
+    fun prepareStrategyCommand(tickers: List<String>) {
         stocksSelected.clear()
         tickers.forEach {
             val stock = stockManager.getStockByTicker(it)
@@ -193,10 +190,13 @@ class Strategy2358() : KoinComponent {
         }
 
         getPurchaseStock(true)
-
         strategyTelegram.send2358Start(true, purchaseToBuy.map { it.ticker })
-
         Utils.startService(TheApplication.application.applicationContext, Strategy2358Service::class.java)
+    }
+
+    fun stopStrategyCommand() {
+        stopStrategy()
+        Utils.stopService(TheApplication.application.applicationContext, Strategy2358Service::class.java)
     }
 
     fun startStrategy() {

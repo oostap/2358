@@ -177,27 +177,27 @@ class StrategyFollower : KoinComponent {
                     }
                 } else if (ticker == "TAZ") {
                     GlobalScope.launch(Dispatchers.Main) {
-                        strategyTazikEndless.stopStrategy()
+                        strategyTazikEndless.stopStrategyCommand()
                     }
                 } else if (ticker == "ZONT") {
                     GlobalScope.launch(Dispatchers.Main) {
-                        strategyZontikEndless.stopStrategy()
+                        strategyZontikEndless.stopStrategyCommand()
                     }
                 } else if (ticker == "ROCKET") {
                     GlobalScope.launch(Dispatchers.Main) {
-                        strategyRocket.stopStrategy()
+                        strategyRocket.stopStrategyCommand()
                     }
                 } else if (ticker == "TREND") {
                     GlobalScope.launch(Dispatchers.Main) {
-                        strategyTrend.stopStrategy()
+                        strategyTrend.stopStrategyCommand()
                     }
                 } else if (ticker == "LIMIT") {
                     GlobalScope.launch(Dispatchers.Main) {
-                        strategyLimits.stopStrategy()
+                        strategyLimits.stopStrategyCommand()
                     }
                 } else if (ticker == "2358") {
                     GlobalScope.launch(Dispatchers.Main) {
-                        strategy2358.stopStrategy()
+                        strategy2358.stopStrategyCommand()
                     }
                 }
                 return 2
@@ -208,7 +208,7 @@ class StrategyFollower : KoinComponent {
                         for (i in 2 until list.size) {
                             tickers.add(list[i])
                         }
-                        strategy2358.prepareStrategy(tickers)
+                        strategy2358.prepareStrategyCommand(tickers)
                     }
                     return 2
                 }

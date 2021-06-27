@@ -33,7 +33,9 @@ class StrategyZontikEndless : KoinComponent {
 
     var basicPercentLimitPriceChange: Double = 0.0
     var started: Boolean = false
-    var scheduledStartTime: Calendar? = null
+
+    var scheduledTimeStart: Calendar? = null
+    var scheduledTimeEnd: Calendar? = null
 
     var jobResetPrice: Job? = null
 
@@ -184,13 +186,31 @@ class StrategyZontikEndless : KoinComponent {
     }
 
     fun getNotificationTitle(): String = runBlocking(StockManager.stockContext) {
-        if (started) return@runBlocking "Работает бесконечный зонт!"
+        if (started) {
+            if (scheduledTimeEnd != null) {
+                val now = Calendar.getInstance(TimeZone.getDefault())
+                val current = scheduledTimeEnd?.timeInMillis ?: 0
+                val scheduleDelay = current - now.timeInMillis
 
-        if (scheduledStartTime == null) {
-            return@runBlocking "Старт бесконечного зонта через ???"
-        } else {
+                val allSeconds = scheduleDelay / 1000
+                val hours = allSeconds / 3600
+                val minutes = (allSeconds - hours * 3600) / 60
+                val seconds = allSeconds % 60
+
+                fixPrice()
+                if (hours + minutes + seconds <= 0) {
+                    stopStrategyCommand()
+                }
+
+                return@runBlocking "Работает зонт! Финиш через %02d:%02d:%02d".format(hours, minutes, seconds)
+            } else {
+                return@runBlocking "Работает бесконечный зонт!"
+            }
+        }
+
+        if (scheduledTimeStart != null) {
             val now = Calendar.getInstance(TimeZone.getDefault())
-            val current = scheduledStartTime?.timeInMillis ?: 0
+            val current = scheduledTimeStart?.timeInMillis ?: 0
             val scheduleDelay = current - now.timeInMillis
 
             val allSeconds = scheduleDelay / 1000
@@ -203,7 +223,9 @@ class StrategyZontikEndless : KoinComponent {
                 startStrategy(true)
             }
 
-            return@runBlocking "Старт зонтика через %02d:%02d:%02d".format(hours, minutes, seconds)
+            return@runBlocking "Старт зонта через %02d:%02d:%02d".format(hours, minutes, seconds)
+        } else {
+            return@runBlocking "Бесконечный зонт приостановлен"
         }
     }
 
@@ -305,10 +327,18 @@ class StrategyZontikEndless : KoinComponent {
         startStrategy(false)
     }
 
-    fun prepareStrategy(scheduled : Boolean, time: String) = runBlocking (StockManager.stockContext) {
+    suspend fun stopStrategyCommand() = withContext(StockManager.stockContext) {
+        stopStrategy()
+        Utils.stopService(TheApplication.application.applicationContext, StrategyZontikEndlessService::class.java)
+    }
+
+    fun prepareStrategy(scheduled : Boolean, timeFromTo: Pair<String, String>) = runBlocking (StockManager.stockContext) {
         basicPercentLimitPriceChange = SettingsManager.getZontikEndlessChangePercent()
 
         if (!scheduled) {
+            scheduledTimeStart = null
+            scheduledTimeEnd = null
+
             startStrategy(scheduled)
             return@runBlocking
         }
@@ -316,31 +346,64 @@ class StrategyZontikEndless : KoinComponent {
         started = false
 
         val differenceHours: Int = Utils.getTimeDiffBetweenMSK()
-        val dayTime = time.split(":").toTypedArray()
-        if (dayTime.size < 3) {
-            GlobalScope.launch(Dispatchers.Main) {
-                Utils.showToastAlert("Неверный формат времени $time")
+        if (timeFromTo.first != "") { // старт таза
+            val dayTimeStart = timeFromTo.first.split(":").toTypedArray()
+            if (dayTimeStart.size < 3) {
+                GlobalScope.launch(Dispatchers.Main) {
+                    Utils.showToastAlert("Неверный формат времени старта $dayTimeStart")
+                }
+                return@runBlocking
             }
-            return@runBlocking
+
+            val hours = Integer.parseInt(dayTimeStart[0])
+            val minutes = Integer.parseInt(dayTimeStart[1])
+            val seconds = Integer.parseInt(dayTimeStart[2])
+
+            scheduledTimeStart = Calendar.getInstance(TimeZone.getDefault())
+            scheduledTimeStart?.let {
+                it.add(Calendar.HOUR_OF_DAY, -differenceHours)
+                it.set(Calendar.HOUR_OF_DAY, hours)
+                it.set(Calendar.MINUTE, minutes)
+                it.set(Calendar.SECOND, seconds)
+                it.add(Calendar.HOUR_OF_DAY, differenceHours)
+
+                val now = Calendar.getInstance(TimeZone.getDefault())
+                val scheduleDelay = it.timeInMillis - now.timeInMillis
+                if (scheduleDelay < 0) {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        Utils.showToastAlert("Ошибка! Отрицательное время!? втф = $scheduleDelay")
+                    }
+                }
+            }
         }
 
-        val hours = Integer.parseInt(dayTime[0])
-        val minutes = Integer.parseInt(dayTime[1])
-        val seconds = Integer.parseInt(dayTime[2])
-
-        scheduledStartTime = Calendar.getInstance(TimeZone.getDefault())
-        scheduledStartTime?.let {
-            it.add(Calendar.HOUR_OF_DAY, -differenceHours)
-            it.set(Calendar.HOUR_OF_DAY, hours)
-            it.set(Calendar.MINUTE, minutes)
-            it.set(Calendar.SECOND, seconds)
-            it.add(Calendar.HOUR_OF_DAY, differenceHours)
-
-            val now = Calendar.getInstance(TimeZone.getDefault())
-            val scheduleDelay = it.timeInMillis - now.timeInMillis
-            if (scheduleDelay < 0) {
+        if (timeFromTo.second != "") { // старт таза
+            val dayTimeEnd = timeFromTo.second.split(":").toTypedArray()
+            if (dayTimeEnd.size < 3) {
                 GlobalScope.launch(Dispatchers.Main) {
-                    Utils.showToastAlert("Ошибка! Отрицательное время!? втф = $scheduleDelay")
+                    Utils.showToastAlert("Неверный формат времени финиша $dayTimeEnd")
+                }
+                return@runBlocking
+            }
+
+            val hours = Integer.parseInt(dayTimeEnd[0])
+            val minutes = Integer.parseInt(dayTimeEnd[1])
+            val seconds = Integer.parseInt(dayTimeEnd[2])
+
+            scheduledTimeEnd = Calendar.getInstance(TimeZone.getDefault())
+            scheduledTimeEnd?.let {
+                it.add(Calendar.HOUR_OF_DAY, -differenceHours)
+                it.set(Calendar.HOUR_OF_DAY, hours)
+                it.set(Calendar.MINUTE, minutes)
+                it.set(Calendar.SECOND, seconds)
+                it.add(Calendar.HOUR_OF_DAY, differenceHours)
+
+                val now = Calendar.getInstance(TimeZone.getDefault())
+                val scheduleDelay = it.timeInMillis - now.timeInMillis
+                if (scheduleDelay < 0) {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        Utils.showToastAlert("Ошибка! Отрицательное время!? втф = $scheduleDelay")
+                    }
                 }
             }
         }
