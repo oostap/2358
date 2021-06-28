@@ -483,7 +483,7 @@ class StrategyTelegram : KoinComponent {
                     SettingsManager.getRocketChangeVolume()
                 )
             } else {
-                "🔴🚀☄️️"
+                "🔴🚀☄️️ стоп!"
             }
             sendMessageToChats(text, -1)
         }
@@ -500,7 +500,7 @@ class StrategyTelegram : KoinComponent {
                     SettingsManager.getRocketChangeVolume()
                 )
             } else {
-                "🔴⬆️⬇️️"
+                "🔴⬆️⬇️️ стоп!"
             }
             sendMessageToChats(text, -1)
         }
@@ -517,7 +517,7 @@ class StrategyTelegram : KoinComponent {
                     SettingsManager.getTrendAfterMinutes()
                 )
             } else {
-                "🔴⤴️⤵️️"
+                "🔴⤴️⤵️️ стоп!"
             }
             sendMessageToChats(text, -1)
         }
@@ -555,7 +555,7 @@ class StrategyTelegram : KoinComponent {
                     SettingsManager.getTazikEndlessClosePriceProtectionPercent()
                 )
             } else {
-                "🔴🛁"
+                "🔴🛁 стоп!"
             }
             sendMessageToChats(text, -1)
         }
@@ -586,7 +586,7 @@ class StrategyTelegram : KoinComponent {
                     SettingsManager.getZontikEndlessClosePriceProtectionPercent()
                 )
             } else {
-                "🔴☂️"
+                "🔴☂️ стоп!"
             }
             sendMessageToChats(text, -1)
         }

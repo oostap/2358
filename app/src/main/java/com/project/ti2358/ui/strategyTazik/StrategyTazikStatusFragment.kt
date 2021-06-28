@@ -97,7 +97,7 @@ class StrategyTazikStatusFragment : Fragment(R.layout.fragment_tazik_status) {
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            act.supportActionBar?.title = "Статус: ${strategyTazik.stocksSelected.size} шт."
+            act.supportActionBar?.title = "Статус 🛁: ${strategyTazik.stocksSelected.size} шт."
         }
     }
 

@@ -37,6 +37,7 @@ import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.lang.StrictMath.min
+import java.time.ZoneId
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -63,6 +64,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
     var jobRefreshOrders: Job? = null
     var jobRefreshOrderbook: Job? = null
+
+    var lenta: Boolean = false
 
     override fun onDestroy() {
         jobRefreshOrders?.cancel()
@@ -99,12 +102,11 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 orderlinesUSViews.add(orderlineHolder)
             }
 
-            for (i in 0..50) {
+            for (i in 0..100) {
                 val orderlentaHolder = OrderLentaHolder(FragmentOrderbookLentaItemBinding.inflate(LayoutInflater.from(context), null, false))
                 orderbookUsLentaView.addView(orderlentaHolder.binding.root)
                 orderlentaUSViews.add(orderlentaHolder)
             }
-            orderbookUsLentaView.visibility = GONE
 
             volumesView.children.forEach { it.visibility = GONE }
             buyPlusView.children.forEach { it.visibility = GONE }
@@ -221,19 +223,13 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 }
             }
 
-            lentaButton.setOnTouchListener { v, event ->
-                if (event.action == MotionEvent.ACTION_DOWN) {
-                    orderbookUsLentaView.visibility = VISIBLE
-                    orderbookUsLinesView.visibility = GONE
-                    orderbookLinesView.visibility = GONE
-                }
+            scrollOrderbookUsLinesView.visibility = GONE
+            lentaButton.setOnClickListener {
+                lenta = !lenta
 
-                if (event.action == MotionEvent.ACTION_UP) {
-                    orderbookUsLentaView.visibility = GONE
-                    orderbookUsLinesView.visibility = VISIBLE
-                    orderbookLinesView.visibility = VISIBLE
-                }
-                true
+                scrollOrderbookUsLinesView.visibility = if (lenta) VISIBLE else GONE
+                scrollOrderbookLinesView.visibility = if (lenta) GONE else VISIBLE
+                orderbookUsLinesView.visibility = if (lenta) GONE else VISIBLE
             }
 
             positionView.setOnClickListener {
@@ -643,7 +639,9 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             with(binding) {
                 priceView.text = item.price.toString()
                 volumeView.text = item.size.toString()
-                timeView.text = item.time.toString("dd-MM HH:mm:ss")
+
+                timeView.text = item.time.time.toString("dd-MM HH:mm:ss")
+
                 mmView.text = item.exchange
                 conditionView.text = item.condition
 

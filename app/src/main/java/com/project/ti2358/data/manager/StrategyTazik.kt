@@ -538,6 +538,20 @@ class StrategyTazik : KoinComponent {
 
         // вычисляем процент профита после сдвига лимитки ниже
 
+        // проверка на цену закрытия (выше не тарить)
+        if (SettingsManager.getTazikEndlessClosePriceProtectionPercent() != 0.0) {
+            if (stock.instrument.currency == Currency.USD) {
+                val finalPrice = stock.getPrice2300() + stock.getPrice2300() / 100.0 * SettingsManager.getTazikEndlessClosePriceProtectionPercent()
+                if (buyPrice >= finalPrice) {
+                    return
+                }
+            } else {
+                if (buyPrice >= stock.getPrice1000()) {
+                    return
+                }
+            }
+        }
+
         // финальный профит
         delta *= factor                                                     // 0.5% * 0.25% = 0.125%
         var finalProfit = baseProfit + abs(delta)                           // 0.9% + 0.125% = 1.025%

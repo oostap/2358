@@ -149,19 +149,31 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/orderbook_us_lenta_view"
+        <ScrollView
+            android:id="@+id/scroll_orderbook_us_lines_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginLeft="0dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginRight="0dp"
-            android:layout_marginBottom="0dp"
-            android:divider="?android:dividerHorizontal"
-            android:dividerPadding="2dp"
-            android:showDividers="middle">
-        </LinearLayout>
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/orderbook_us_lenta_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginLeft="0dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginRight="0dp"
+                android:layout_marginBottom="0dp"
+                android:divider="?android:dividerHorizontal"
+                android:dividerPadding="2dp"
+                android:showDividers="middle">
+            </LinearLayout>
+
+        </ScrollView>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
 
         <LinearLayout
             android:id="@+id/orderbook_us_lines_view"
@@ -174,14 +186,11 @@
             android:layout_marginBottom="0dp">
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
-
         <ScrollView
+            android:id="@+id/scroll_orderbook_lines_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <LinearLayout
                 android:id="@+id/orderbook_lines_view"
                 android:layout_width="match_parent"

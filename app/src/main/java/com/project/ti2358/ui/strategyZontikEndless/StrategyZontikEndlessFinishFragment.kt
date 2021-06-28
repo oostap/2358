@@ -81,13 +81,13 @@ class StrategyZontikEndlessFinishFragment : Fragment(R.layout.fragment_zontik_en
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            act.supportActionBar?.title = "Бесконечный таз (${positions.size} шт.)"
+            act.supportActionBar?.title = "Бесконечный ☂️ (${positions.size} шт.)"
         }
     }
 
     private fun tryStartZontik(scheduled : Boolean) {
         if (SettingsManager.getZontikEndlessPurchaseVolume() <= 0 || SettingsManager.getZontikEndlessPurchaseParts() == 0) {
-            Utils.showMessageAlert(requireContext(),"В настройках не задана общая сумма покупки или количество частей, раздел Бесконечный таз")
+            Utils.showMessageAlert(requireContext(),"В настройках не задана общая сумма покупки или количество частей, раздел Бесконечный зонт")
         } else {
             if (Utils.isServiceRunning(requireContext(), StrategyZontikEndlessService::class.java)) {
                 requireContext().stopService(Intent(context, StrategyZontikEndlessService::class.java))

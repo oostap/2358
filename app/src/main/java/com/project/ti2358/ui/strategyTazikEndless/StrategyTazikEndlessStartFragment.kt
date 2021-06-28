@@ -137,7 +137,7 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            act.supportActionBar?.title = "Бесконечный таз (${strategyTazikEndless.stocksSelected.size} шт.)"
+            act.supportActionBar?.title = "Бесконечный 🛁 (${strategyTazikEndless.stocksSelected.size} шт.)"
         }
     }
 

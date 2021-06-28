@@ -727,17 +727,20 @@ class SettingsManager {
                 parseInt(dayTimeFrom[0]) * 3600 + parseInt(dayTimeFrom[1]) * 60 + parseInt(dayTimeFrom[2])
             }
 
-            var timeFrom = ""
-            var timeTo = ""
+            var finalTimeFrom = ""
+            var finalTimeTo = ""
 
             for (t in timesFromTo) {
-                timeFrom = ""
-                timeTo = ""
+                var timeFrom = ""
+                var timeTo = ""
                 val fromTo = t.split("-").toTypedArray()
                 if (fromTo.size > 0) { // from
                     timeFrom = fromTo[0]
                     val dayTime = timeFrom.split(":").toTypedArray()
-                    if (dayTime.size < 3) continue
+                    if (dayTime.size < 3) {
+                        finalTimeFrom = ""
+                        continue
+                    }
 
                     val hours: Int
                     val minutes: Int
@@ -759,7 +762,7 @@ class SettingsManager {
                     val total = hours * 3600 + minutes * 60 + seconds
                     val totalMsk = hoursMsk * 3600 + minutesMsk * 60 + secondsMsk
                     if (totalMsk < total) {
-                        timeFrom = fromTo[0]
+                        finalTimeFrom = fromTo[0]
                     } else {
                         continue
                     }
@@ -769,7 +772,7 @@ class SettingsManager {
                     timeTo = fromTo[1]
                     val dayTime = timeTo.split(":").toTypedArray()
                     if (dayTime.size < 3) {
-                        timeTo = ""
+                        finalTimeTo = ""
                     }
 
                     val hours: Int
@@ -789,18 +792,18 @@ class SettingsManager {
                         val total = hours * 3600 + minutes * 60 + seconds
                         val totalMsk = hoursMsk * 3600 + minutesMsk * 60 + secondsMsk
                         if (totalMsk < total) {
-                            timeTo = fromTo[1]
+                            finalTimeTo = fromTo[1]
                         }
                     } catch (e: Exception) {
                         Utils.showToastAlert("Неверный формат времени в настройках!")
-                        timeTo = ""
+                        finalTimeTo = ""
                     }
                 }
 
                 if (timeFrom != "") break
             }
 
-            return Pair(timeFrom, timeTo)
+            return Pair(finalTimeFrom, finalTimeTo)
         }
 
         fun getTazikEndlessNearestTime(): Pair<String, String> {

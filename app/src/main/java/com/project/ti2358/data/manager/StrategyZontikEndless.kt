@@ -202,9 +202,9 @@ class StrategyZontikEndless : KoinComponent {
                     stopStrategyCommand()
                 }
 
-                return@runBlocking "Работает зонт! Финиш через %02d:%02d:%02d".format(hours, minutes, seconds)
+                return@runBlocking "Работает ☂️! Финиш через %02d:%02d:%02d".format(hours, minutes, seconds)
             } else {
-                return@runBlocking "Работает бесконечный зонт!"
+                return@runBlocking "Работает бесконечный ☂️!"
             }
         }
 
@@ -223,9 +223,9 @@ class StrategyZontikEndless : KoinComponent {
                 startStrategy(true)
             }
 
-            return@runBlocking "Старт зонта через %02d:%02d:%02d".format(hours, minutes, seconds)
+            return@runBlocking "Старт ☂️ через %02d:%02d:%02d".format(hours, minutes, seconds)
         } else {
-            return@runBlocking "Бесконечный зонт приостановлен"
+            return@runBlocking "Бесконечный ☂️ приостановлен"
         }
     }
 
@@ -272,7 +272,7 @@ class StrategyZontikEndless : KoinComponent {
     fun getNotificationTextLong(): String {
         val stocks = stocksToPurchase.map {
             Pair(it.stock.getPriceNow(), it)
-        }.sortedBy {
+        }.sortedByDescending {
             it.first / it.second.zontikEndlessPrice * 100 - 100
         }
 

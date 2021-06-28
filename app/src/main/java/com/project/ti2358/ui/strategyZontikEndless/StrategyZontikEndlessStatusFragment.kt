@@ -100,7 +100,7 @@ class StrategyZontikEndlessStatusFragment : Fragment(R.layout.fragment_zontik_en
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            act.supportActionBar?.title = "Статус: ${strategyZontikEndless.stocksSelected.size} шт."
+            act.supportActionBar?.title = "Статус ☂️: ${strategyZontikEndless.stocksSelected.size} шт."
         }
     }
 

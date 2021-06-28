@@ -17,7 +17,9 @@ data class PantiniLenta (
             val data = item.split("|")
 
             if (data.size == 6) {
-                val print = PantiniPrint(Date(data[0].toLong()), data[1].toDouble(), data[2], data[3], data[4].toInt(), data[5].toInt())
+                val date = Calendar.getInstance()
+                date.time.time = data[0].toLong()
+                val print = PantiniPrint(date, data[1].toDouble(), data[2], data[3], data[4].toInt(), data[5].toInt())
                 prints.add(print)
             }
             prints.sortByDescending { it.time }

@@ -200,9 +200,9 @@ class StrategyTazikEndless : KoinComponent {
                     stopStrategyCommand()
                 }
 
-                return@runBlocking "Работает таз! Финиш через %02d:%02d:%02d".format(hours, minutes, seconds)
+                return@runBlocking "Работает 🛁! Финиш через %02d:%02d:%02d".format(hours, minutes, seconds)
             } else {
-                return@runBlocking "Работает бесконечный таз!"
+                return@runBlocking "Работает бесконечный 🛁!"
             }
         }
 
@@ -221,9 +221,9 @@ class StrategyTazikEndless : KoinComponent {
                 startStrategy(true)
             }
 
-            return@runBlocking "Старт таза через %02d:%02d:%02d".format(hours, minutes, seconds)
+            return@runBlocking "Старт 🛁 через %02d:%02d:%02d".format(hours, minutes, seconds)
         } else {
-            return@runBlocking "Бесконечный таз приостановлен"
+            return@runBlocking "Бесконечный 🛁 приостановлен"
         }
     }
 

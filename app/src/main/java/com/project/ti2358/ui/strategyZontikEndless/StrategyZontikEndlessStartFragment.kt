@@ -136,7 +136,7 @@ class StrategyZontikEndlessStartFragment : Fragment(R.layout.fragment_zontik_end
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            act.supportActionBar?.title = "Бесконечный зонт (${strategyZontikEndless.stocksSelected.size} шт.)"
+            act.supportActionBar?.title = "Бесконечный ☂️ (${strategyZontikEndless.stocksSelected.size} шт.)"
         }
     }
 
