@@ -290,13 +290,17 @@ class SettingsManager {
             val array = value.toUpperCase().split("\n")
             val presetStocks: MutableList<PresetStock> = mutableListOf()
             array.forEach {
-                val params = it.split(" ")
-                if (params.size == 3) {
-                    val preset = PresetStock(params[0], params[1].toDouble(), params[2].toInt())
-                    presetStocks.add(preset)
-                } else if (params.size == 2) {
-                    val preset = PresetStock(params[0], params[1].toDouble(), 0)
-                    presetStocks.add(preset)
+                try {
+                    val params = it.split(" ")
+                    if (params.size == 3) {
+                        val preset = PresetStock(params[0], params[1].toDouble(), params[2].toInt())
+                        presetStocks.add(preset)
+                    } else if (params.size == 2) {
+                        val preset = PresetStock(params[0], params[1].toDouble(), 0)
+                        presetStocks.add(preset)
+                    }
+                } catch (e: java.lang.Exception) {
+
                 }
             }
             return presetStocks

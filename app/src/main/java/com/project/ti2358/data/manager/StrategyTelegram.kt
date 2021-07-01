@@ -35,7 +35,7 @@ class StrategyTelegram : KoinComponent {
     private val operationsService: OperationsService by inject()
     private val ordersService: OrdersService by inject()
     private val depositManager: DepositManager by inject()
-    private val strategyFollower: StrategyFollower by inject()
+    private val strategyTelegramCommands: StrategyTelegramCommands by inject()
     private val thirdPartyService: ThirdPartyService by inject()
 
     var jobUpdateOperations: Job? = null
@@ -198,8 +198,8 @@ class StrategyTelegram : KoinComponent {
                         bot.sendMessage(ChatId.fromId(id = update.message!!.chat.id), text = text)
                         update.consume()
                     } else if (command.startsWith("!")) {
-                        if (strategyFollower.started && SettingsManager.getTelegramAllowCommandHandle()) {
-                            val success = strategyFollower.processActiveCommand(update.message!!.from?.id ?: 0, command)
+                        if (strategyTelegramCommands.started && SettingsManager.getTelegramAllowCommandHandle()) {
+                            val success = strategyTelegramCommands.processActiveCommand(update.message!!.from?.id ?: 0, command)
                             val status = ""
 //                            when (success) {
 //                                0 -> "-"
@@ -216,8 +216,8 @@ class StrategyTelegram : KoinComponent {
                         }
                         update.consume()
                     } else {
-                        if (strategyFollower.started && SettingsManager.getTelegramAllowCommandInform()) {
-                            strategyFollower.processInfoCommand(command, update.message!!.messageId)
+                        if (strategyTelegramCommands.started && SettingsManager.getTelegramAllowCommandInform()) {
+                            strategyTelegramCommands.processInfoCommand(command, update.message!!.messageId)
                         }
                     }
                 }
@@ -395,7 +395,7 @@ class StrategyTelegram : KoinComponent {
 
     fun sendClosePriceLoaded(success: Boolean) {
         val status = if (success) "🟢" else "🔴"
-        sendMessageToChats("Статус цен закрытия $status")
+        sendMessageToChats("Статус цен закрытия $status", deleteAfterSeconds = 15)
     }
 
     fun sendRocket(rocketStock: RocketStock) {
@@ -419,7 +419,7 @@ class StrategyTelegram : KoinComponent {
             val change2300 = "%.2f".format(rocketStock.stock.changePrice2300DayPercent)
             val text = "$emoji$${rocketStock.ticker} ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин, v = ${rocketStock.volume}"
             val buttons = getButtonsMarkup(rocketStock.stock)
-            sendMessageToChats(text, -1, replyMarkup = buttons)
+            sendMessageToChats(text, 120, replyMarkup = buttons)
         }
     }
 
@@ -441,7 +441,7 @@ class StrategyTelegram : KoinComponent {
                 trendStock.timeFromStartToLow, trendStock.timeFromLowToNow
             )
             val buttons = getButtonsMarkup(trendStock.stock)
-            sendMessageToChats(text, -1, replyMarkup = buttons)
+            sendMessageToChats(text, 120, replyMarkup = buttons)
         }
     }
 
@@ -468,7 +468,7 @@ class StrategyTelegram : KoinComponent {
                 limitStock.stock.getPriceRaw()
             )
             val buttons = getButtonsMarkup(limitStock.stock)
-            sendMessageToChats(text, -1, replyMarkup = buttons)
+            sendMessageToChats(text, 120, replyMarkup = buttons)
         }
     }
 
@@ -485,7 +485,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴🚀☄️️ стоп!"
             }
-            sendMessageToChats(text, -1)
+            sendMessageToChats(text, 30)
         }
     }
 
@@ -502,7 +502,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴⬆️⬇️️ стоп!"
             }
-            sendMessageToChats(text, -1)
+            sendMessageToChats(text, 30)
         }
     }
 
@@ -519,7 +519,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴⤴️⤵️️ стоп!"
             }
-            sendMessageToChats(text, -1)
+            sendMessageToChats(text, 30)
         }
     }
 
@@ -537,7 +537,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴🛁 стоп!"
             }
-            sendMessageToChats(text, -1)
+            sendMessageToChats(text, 30)
         }
     }
 
@@ -557,7 +557,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴🛁 стоп!"
             }
-            sendMessageToChats(text, -1)
+            sendMessageToChats(text, 30)
         }
     }
 
@@ -566,7 +566,18 @@ class StrategyTelegram : KoinComponent {
             val text = if (start) {
                 String.format("🟢 2358 тарим ${tickers.joinToString(" ")} на ${SettingsManager.get2358PurchaseVolume()}$")
             } else {
-                "🔴 2358 !"
+                "🔴 2358 не тарим ${tickers.joinToString(" ")}"
+            }
+            sendMessageToChats(text, -1)
+        }
+    }
+
+    fun send2225Start(start: Boolean, tickers : List<String>) {
+        if (started) {// && SettingsManager.getTelegramSendTaziks()) {
+            val text = if (start) {
+                String.format("🟢 2225 шортим ${tickers.joinToString(" ")} на ${SettingsManager.get2225PurchaseVolume()}$")
+            } else {
+                "🔴 2225 отмена шорта ${tickers.joinToString(" ")}"
             }
             sendMessageToChats(text, -1)
         }
@@ -588,7 +599,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴☂️ стоп!"
             }
-            sendMessageToChats(text, -1)
+            sendMessageToChats(text, 30)
         }
     }
 
@@ -641,7 +652,7 @@ class StrategyTelegram : KoinComponent {
                 tazikTotal
             )
             val buttons = getButtonsMarkup(purchase.stock)
-            sendMessageToChats(text, replyMarkup = buttons)
+            sendMessageToChats(text, deleteAfterSeconds = 30, replyMarkup = buttons)
         }
     }
 
@@ -658,7 +669,7 @@ class StrategyTelegram : KoinComponent {
                 tazikTotal
             )
             val buttons = getButtonsMarkup(purchase.stock)
-            sendMessageToChats(text, replyMarkup = buttons)
+            sendMessageToChats(text, deleteAfterSeconds = 30, replyMarkup = buttons)
         }
     }
 
@@ -751,7 +762,7 @@ class StrategyTelegram : KoinComponent {
         val buttons = getButtonsMarkup(stock)
         val price = stock.getPriceRaw()
         val change2300 = "%.2f".format(stock.changePrice2300DayPercent)
-        sendMessageToChats("$${stock.ticker} ${price}$ / ${change2300}%", replyMarkup = buttons)
+        sendMessageToChats("$${stock.ticker} ${price}$ / ${change2300}%", deleteAfterSeconds = 60, replyMarkup = buttons)
     }
 
     fun sendStockInfo(stock: Stock) {
@@ -761,9 +772,9 @@ class StrategyTelegram : KoinComponent {
             val price = stock.getPriceRaw()
             val percentUp = "%.2f".format(Utils.getPercentFromTo(stockInfo.limit_up, price))
             val percentDown = "%.2f".format(Utils.getPercentFromTo(stockInfo.limit_down, price))
-            sendMessageToChats("$${stock.ticker} ${price}$ - ⬆️${stockInfo.limit_up}$ / ${percentUp}% ⬇️${stockInfo.limit_down}$ / ${percentDown}%", replyMarkup = buttons)
+            sendMessageToChats("$${stock.ticker} ${price}$ - ⬆️${stockInfo.limit_up}$ / ${percentUp}% ⬇️${stockInfo.limit_down}$ / ${percentDown}%", deleteAfterSeconds = 60, replyMarkup = buttons)
         } else {
-            sendMessageToChats("$${stock.ticker} нет лимитов, current = ${stock.getPriceNow()}", replyMarkup = buttons)
+            sendMessageToChats("$${stock.ticker} нет лимитов, current = ${stock.getPriceNow()}", deleteAfterSeconds = 60, replyMarkup = buttons)
         }
     }
 
@@ -783,7 +794,7 @@ class StrategyTelegram : KoinComponent {
     fun sendPulse(messageId: Long) {
         GlobalScope.launch(Dispatchers.Main) {
             val phrase = stockManager.getPulsePhrase()
-            sendMessageToChats(phrase, replyToMessageId = messageId)
+            sendMessageToChats(phrase, deleteAfterSeconds = 30, replyToMessageId = messageId)
         }
     }
 
@@ -794,7 +805,7 @@ class StrategyTelegram : KoinComponent {
             text += "$%s %4.2f$ -> %4.2f$ = %4.2f%%\n".format(stock.ticker, stock.getPrice2300(), stock.getPriceRaw(), stock.changePrice2300DayPercent)
         }
         val buttons = getButtonsMarkupMany(stocks.subList(0, count))
-        sendMessageToChats(text, -1, replyMarkup = buttons)
+        sendMessageToChats(text, deleteAfterSeconds = 300, replyMarkup = buttons)
     }
 
     fun sendTest() {

@@ -1,6 +1,5 @@
 package com.project.ti2358.data.manager
 
-import com.google.gson.GsonBuilder
 import com.project.ti2358.BuildConfig
 import com.project.ti2358.data.service.*
 import okhttp3.OkHttpClient
@@ -58,10 +57,11 @@ class WorkflowManager() : KoinComponent {
             fun provideStrategyZontikEndless(): StrategyZontikEndless = StrategyZontikEndless()
             fun provideStrategySpeaker(): StrategySpeaker = StrategySpeaker()
             fun provideStrategyTelegram(): StrategyTelegram = StrategyTelegram()
-            fun provideStrategyFollower(): StrategyFollower = StrategyFollower()
+            fun provideStrategyFollower(): StrategyTelegramCommands = StrategyTelegramCommands()
             fun provideStrategyTrend(): StrategyTrend = StrategyTrend()
             fun provideStrategyLimits(): StrategyLimits = StrategyLimits()
             fun provideStrategySector(): StrategySector = StrategySector()
+            fun provideStrategyArbitration(): StrategyArbitration = StrategyArbitration()
 
             // unused yet
             fun provideStrategyShorts(): StrategyShorts = StrategyShorts()
@@ -97,6 +97,7 @@ class WorkflowManager() : KoinComponent {
             single { provideStrategyTrend() }
             single { provideStrategyLimits() }
             single { provideStrategySector() }
+            single { provideStrategyArbitration() }
 
             // unused yet
             single { provideStrategyShorts() }

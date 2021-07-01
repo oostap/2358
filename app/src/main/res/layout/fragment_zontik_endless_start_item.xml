@@ -33,6 +33,16 @@
             android:gravity="center_vertical"
             android:text="700$"
             android:textSize="14sp" />
+
+
+        <TextView
+            android:id="@+id/sectorView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="2dp"
+            android:gravity="center_vertical"
+            android:text="700$"
+            android:textSize="10sp" />
     </LinearLayout>
 
     <LinearLayout

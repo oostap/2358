@@ -96,7 +96,8 @@ class StrategyTazikEndless : KoinComponent {
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
             val multiplier = if (it in stocksSelected) 100 else 1
-            val final = it.changePrice2300DayPercent * sign - multiplier
+            val change = if (it.changePrice2300DayPercent.isInfinite()) 100.0 else it.changePrice2300DayPercent
+            val final = change * sign - multiplier
             if (final.isNaN()) 0.0 else final
         }
         return stocks
@@ -328,7 +329,6 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     suspend fun stopStrategyCommand() = withContext(StockManager.stockContext) {
-        stopStrategy()
         Utils.stopService(TheApplication.application.applicationContext, StrategyTazikEndlessService::class.java)
     }
 

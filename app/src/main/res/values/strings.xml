@@ -89,6 +89,7 @@
     <string name="menu_telegram">Телеграм бот</string>
     <string name="menu_trends">Тренды</string>
     <string name="menu_limits">Лимиты</string>
+    <string name="menu_arbitration">Арбитраж</string>
     <string name="menu_sectors">Сектора</string>
     <string name="menu_chat">Что купить?</string>
 

@@ -5,6 +5,7 @@ import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.data.model.dto.daager.*
 import com.project.ti2358.data.model.dto.pantini.PantiniLenta
 import com.project.ti2358.data.model.dto.pantini.PantiniOrderbook
+import com.project.ti2358.data.model.dto.pantini.PantiniPrint
 import com.project.ti2358.service.ScreenerType
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
@@ -38,6 +39,7 @@ data class Stock(var instrument: Instrument) {
 
     var closePrices: ClosePrice? = null
     var candleToday: Candle? = null                               // реалтайм, дневная свеча
+    var minutesVolume: Int = 0
 
     // разница с ценой закрытия ОС
     var changePrice2300DayAbsolute: Double = 0.0
@@ -184,11 +186,11 @@ data class Stock(var instrument: Instrument) {
     }
 
     fun processLentaUS(pantiniLenta: PantiniLenta) {
-        log("PANTINI PRINTS = ${pantiniLenta.prints.size}")
-        if (lentaUS == null) {
-            lentaUS = pantiniLenta
-        } else {
+        if (lentaUS != null) {
             lentaUS?.prints?.addAll(0, pantiniLenta.prints)
+            lentaUS?.prints = (lentaUS?.prints?.subList(0, 100) ?: emptyList()) as MutableList<PantiniPrint>
+        } else {
+            lentaUS = pantiniLenta
         }
     }
 
@@ -240,11 +242,13 @@ data class Stock(var instrument: Instrument) {
     private fun processMinuteCandle(candle: Candle) {
         var exists = false
         synchronized(minuteCandles) {
+            minutesVolume = 0
             for ((index, c) in minuteCandles.withIndex()) {
                 if (c.time == candle.time) {
                     minuteCandles[index] = candle
                     exists = true
                 }
+                minutesVolume += minuteCandles[index].volume
             }
             if (!exists) {
                 minuteCandles.add(candle)
@@ -277,11 +281,7 @@ data class Stock(var instrument: Instrument) {
     }
 
     fun getTodayVolume(): Int {
-        var volume = 0
-        minuteCandles.forEach {
-            volume += it.volume
-        }
-        return volume + (candleToday?.volume ?: 0)
+        return minutesVolume + (candleToday?.volume ?: 0)
     }
 
     fun getPriceNow(): Double {

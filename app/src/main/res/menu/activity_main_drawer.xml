@@ -101,6 +101,11 @@
             android:icon="@drawable/ic_reports"
             android:title="@string/menu_reports" />
 
+        <item
+            android:id="@+id/nav_arbitration"
+            android:icon="@drawable/ic_reports"
+            android:title="@string/menu_arbitration" />
+
 <!--        <item-->
 <!--            android:id="@+id/nav_shorts"-->
 <!--            android:icon="@drawable/ic_stocks"-->

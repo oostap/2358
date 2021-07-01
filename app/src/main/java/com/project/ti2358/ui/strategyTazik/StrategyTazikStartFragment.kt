@@ -176,6 +176,9 @@ class StrategyTazikStartFragment : Fragment(R.layout.fragment_tazik_start) {
                     priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
                     priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
 
+                    sectorView.text = stock.getSectorName()
+                    sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))
+
                     chooseView.setOnCheckedChangeListener { _, checked ->
                         GlobalScope.launch {
                             strategyTazik.setSelected(stock, checked, numberSet)

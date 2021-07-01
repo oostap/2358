@@ -195,7 +195,6 @@ class Strategy2358() : KoinComponent {
     }
 
     fun stopStrategyCommand() {
-        stopStrategy()
         Utils.stopService(TheApplication.application.applicationContext, Strategy2358Service::class.java)
     }
 

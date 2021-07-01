@@ -1,7 +1,7 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.service.toMoney
-import com.project.ti2358.service.toPercent
+import com.project.ti2358.TheApplication
+import com.project.ti2358.service.*
 import kotlinx.coroutines.Job
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -14,6 +14,7 @@ import kotlin.math.roundToInt
 class Strategy2225() : KoinComponent {
     private val stockManager: StockManager by inject()
     private val depositManager: DepositManager by inject()
+    private val strategyTelegram: StrategyTelegram by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
@@ -172,6 +173,24 @@ class Strategy2225() : KoinComponent {
         return tickers
     }
 
+    fun prepareStrategyCommand(tickers: List<String>) {
+        stocksSelected.clear()
+        tickers.forEach {
+            val stock = stockManager.getStockByTicker(it)
+            if (stock != null) {
+                setSelected(stock, true)
+            }
+        }
+
+        getPurchaseStock(true)
+        strategyTelegram.send2225Start(true, purchaseToBuy.map { it.ticker })
+        Utils.startService(TheApplication.application.applicationContext, Strategy2225Service::class.java)
+    }
+
+    fun stopStrategyCommand() {
+        Utils.stopService(TheApplication.application.applicationContext, Strategy2225Service::class.java)
+    }
+
     fun startStrategy() {
         if (started) return
         started = true
@@ -193,5 +212,7 @@ class Strategy2225() : KoinComponent {
             }
         }
         jobs.clear()
+
+        strategyTelegram.send2225Start(false, purchaseToBuy.map { it.ticker })
     }
 }

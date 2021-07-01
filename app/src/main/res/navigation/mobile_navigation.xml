@@ -43,6 +43,14 @@
         tools:layout="@layout/fragment_limits" >
     </fragment>
 
+    <!-- simple арбитраж -->
+    <fragment
+        android:id="@+id/nav_arbitration"
+        android:name="com.project.ti2358.ui.arbitration.ArbitrationFragment"
+        android:label="@string/menu_arbitration"
+        tools:layout="@layout/fragment_arbitration" >
+    </fragment>
+
     <!-- сектора -->
     <fragment
         android:id="@+id/nav_sectors"

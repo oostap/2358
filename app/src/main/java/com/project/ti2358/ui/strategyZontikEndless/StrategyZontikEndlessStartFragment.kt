@@ -173,6 +173,9 @@ class StrategyZontikEndlessStartFragment : Fragment(R.layout.fragment_zontik_end
                     priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
                     priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
 
+                    sectorView.text = stock.getSectorName()
+                    sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))
+
                     chooseView.setOnCheckedChangeListener { _, checked ->
                         GlobalScope.launch {
                             strategyZontikEndless.setSelected(stock, checked, numberSet)
