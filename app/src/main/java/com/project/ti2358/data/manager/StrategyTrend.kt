@@ -10,7 +10,6 @@ import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.service.StrategyTrendService
-import com.project.ti2358.service.StrategyZontikEndlessService
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import kotlinx.coroutines.*
@@ -29,8 +28,8 @@ class StrategyTrend : KoinComponent {
     private val strategyTelegram: StrategyTelegram by inject()
 
     private var stocks: MutableList<Stock> = mutableListOf()
-    var trendUpStocks: MutableList<TrendStock> = synchronizedList(mutableListOf())
-    var trendDownStocks: MutableList<TrendStock> = synchronizedList(mutableListOf())
+    var upStockTrends: MutableList<StockTrend> = synchronizedList(mutableListOf())
+    var downStockTrends: MutableList<StockTrend> = synchronizedList(mutableListOf())
 
     private var started: Boolean = false
 
@@ -57,8 +56,8 @@ class StrategyTrend : KoinComponent {
     }
 
     suspend fun startStrategy() = withContext(StockManager.trendContext) {
-        trendUpStocks.clear()
-        trendDownStocks.clear()
+        upStockTrends.clear()
+        downStockTrends.clear()
 
         process()
         stocks.forEach {
@@ -159,7 +158,7 @@ class StrategyTrend : KoinComponent {
 
         log("СМЕНА ТРЕНДА ${stock.ticker} = $changeFromStartToLow -> $changeFromLowToNow, total = $changeStartPercent, turnout = $turnValue")
 
-        val trendStock = TrendStock(stock,
+        val trendStock = StockTrend(stock,
             stock.priceTrend, extremumValue, fromLowToNowCandles.last().closingPrice,
             changeFromStartToLow, changeFromLowToNow, turnValue,
             fromStartToLowCandles.size, fromLowToNowCandles.size,
@@ -171,24 +170,24 @@ class StrategyTrend : KoinComponent {
         val toCandle = stock.minuteCandles.last()
         var fire = false
         if (changeFromStart > 0 && SettingsManager.getTrendShort()) {
-            val last = trendDownStocks.find { it.stock.ticker == stock.ticker }
+            val last = downStockTrends.find { it.stock.ticker == stock.ticker }
             if (last != null) {
                 val deltaTime = ((toCandle.time.time - last.fireTime) / 60.0 / 1000.0).toInt()
                 if (deltaTime < 5) return
             }
 
-            trendDownStocks.add(0, trendStock)
+            downStockTrends.add(0, trendStock)
             fire = true
         }
 
         if (changeFromStart < 0 && SettingsManager.getTrendLong()) {
-            val last = trendUpStocks.find { it.stock.ticker == stock.ticker }
+            val last = upStockTrends.find { it.stock.ticker == stock.ticker }
             if (last != null) {
                 val deltaTime = ((toCandle.time.time - last.fireTime) / 60.0 / 1000.0).toInt()
                 if (deltaTime < 5) return
             }
 
-            trendUpStocks.add(0, trendStock)
+            upStockTrends.add(0, trendStock)
             fire = true
         }
 
@@ -201,10 +200,10 @@ class StrategyTrend : KoinComponent {
         }
     }
 
-    private fun createTrend(trendStock: TrendStock) {
+    private fun createTrend(stockTrend: StockTrend) {
         val context: Context = TheApplication.application.applicationContext
 
-        val ticker = trendStock.ticker
+        val ticker = stockTrend.ticker
         val notificationChannelId = ticker + ticker
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -225,20 +224,20 @@ class StrategyTrend : KoinComponent {
 
         val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(context, notificationChannelId) else Notification.Builder(context)
 
-        val changePercent = if (trendStock.changeFromStartToLow > 0) {
-            "+%.2f%%".format(locale = Locale.US, trendStock.changeFromStartToLow)
+        val changePercent = if (stockTrend.changeFromStartToLow > 0) {
+            "+%.2f%%".format(locale = Locale.US, stockTrend.changeFromStartToLow)
         } else {
-            "%.2f%%".format(locale = Locale.US, trendStock.changeFromStartToLow)
+            "%.2f%%".format(locale = Locale.US, stockTrend.changeFromStartToLow)
         }
 
-        val emoji = if (trendStock.changeFromStartToLow < 0) "⤴️" else "⤵️️"
+        val emoji = if (stockTrend.changeFromStartToLow < 0) "⤴️" else "⤵️️"
         val text = "%s$%s %.2f%% - %.2f$ -> %.2f$ = %.2f%%, %.2f$ -> %.2f$ = %.2f%%, %d мин -> %d мин".format(locale = Locale.US,
             emoji,
-            trendStock.ticker,
-            trendStock.turnValue,
-            trendStock.priceStart, trendStock.priceLow, trendStock.changeFromStartToLow,
-            trendStock.priceLow, trendStock.priceNow, trendStock.changeFromLowToNow,
-            trendStock.timeFromStartToLow, trendStock.timeFromLowToNow)
+            stockTrend.ticker,
+            stockTrend.turnValue,
+            stockTrend.priceStart, stockTrend.priceLow, stockTrend.changeFromStartToLow,
+            stockTrend.priceLow, stockTrend.priceNow, stockTrend.changeFromLowToNow,
+            stockTrend.timeFromStartToLow, stockTrend.timeFromLowToNow)
 
         val title = text
 

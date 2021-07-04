@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.PurchaseStock
+import com.project.ti2358.data.manager.StockPurchase
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.StrategyTazik
 import com.project.ti2358.databinding.FragmentTazikStatusBinding
@@ -28,7 +28,7 @@ class StrategyTazikStatusFragment : Fragment(R.layout.fragment_tazik_status) {
     private var fragmentTazikStatusBinding: FragmentTazikStatusBinding? = null
 
     var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
-    lateinit var stocks: MutableList<PurchaseStock>
+    lateinit var stockPurchases: MutableList<StockPurchase>
 
     override fun onDestroy() {
         fragmentTazikStatusBinding = null
@@ -87,9 +87,9 @@ class StrategyTazikStatusFragment : Fragment(R.layout.fragment_tazik_status) {
     private fun updateData(search: String = "") {
         GlobalScope.launch(Dispatchers.Main) {
             fragmentTazikStatusBinding?.currentChangeView?.text = strategyTazik.basicPercentLimitPriceChange.toPercent()
-            stocks = strategyTazik.getSortedPurchases().toMutableList()
-            if (search != "") stocks = Utils.search(stocks, search)
-            adapterList.setData(stocks)
+            stockPurchases = strategyTazik.getSortedPurchases().toMutableList()
+            if (search != "") stockPurchases = Utils.search(stockPurchases, search)
+            adapterList.setData(stockPurchases)
             updateTitle()
         }
     }
@@ -101,8 +101,8 @@ class StrategyTazikStatusFragment : Fragment(R.layout.fragment_tazik_status) {
         }
     }
 
-    inner class ItemTazikRecyclerViewAdapter(private var values: List<PurchaseStock>) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<PurchaseStock>) {
+    inner class ItemTazikRecyclerViewAdapter(private var values: List<StockPurchase>) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<StockPurchase>) {
             values = newValues
             notifyDataSetChanged()
         }

@@ -174,10 +174,8 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
                         updateData()
                     }
 
-                    itemView.setOnClickListener { _ ->
-                        view?.findNavController()?.let {
-                            Utils.openOrderbookForStock(it, orderbookManager, stock)
-                        }
+                    itemView.setOnClickListener { v ->
+                        Utils.openOrderbookForStock(v.findNavController(), orderbookManager, stock)
                     }
 
                     if (portfolioPosition != null) { // если есть в депо

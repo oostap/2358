@@ -222,9 +222,7 @@ class PremarketFragment : Fragment(R.layout.fragment_premarket) {
                     priceView.setTextColor(Utils.getColorForValue(stock.changePriceScreenerPercent))
 
                     itemView.setOnClickListener {
-                        view?.findNavController()?.let {
-                            Utils.openOrderbookForStock(it, orderbookManager, stock)
-                        }
+                        Utils.openOrderbookForStock(it.findNavController(), orderbookManager, stock)
                     }
 
                     chartButton.setOnClickListener {

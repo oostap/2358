@@ -7,10 +7,12 @@ import android.view.ViewGroup
 import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.ChartManager
 import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.Strategy2358
@@ -25,6 +27,7 @@ import java.util.*
 class Strategy2358StartFragment : Fragment(R.layout.fragment_2358_start) {
     val strategy2358: Strategy2358 by inject()
     private val orderbookManager: OrderbookManager by inject()
+    private val chartManager: ChartManager by inject()
 
     private var fragment2358StartBinding: Fragment2358StartBinding? = null
 
@@ -131,9 +134,11 @@ class Strategy2358StartFragment : Fragment(R.layout.fragment_2358_start) {
                     }
 
                     itemView.setOnClickListener {
-                        view?.findNavController()?.let {
-                            Utils.openOrderbookForStock(it, orderbookManager, stock)
-                        }
+                        Utils.openOrderbookForStock(findNavController(), orderbookManager, stock)
+                    }
+
+                    chartButton.setOnClickListener {
+                        Utils.openChartForStock(findNavController(), chartManager, stock)
                     }
 
                     if (stock.report != null) {

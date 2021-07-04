@@ -14,7 +14,6 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.*
-import kotlin.math.abs
 import kotlin.random.Random
 
 @KoinApiExtension
@@ -24,8 +23,8 @@ class StrategyLimits : KoinComponent {
     private val strategyTelegram: StrategyTelegram by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
-    var upLimitStocks: MutableList<LimitStock> = Collections.synchronizedList(mutableListOf())
-    var downLimitStocks: MutableList<LimitStock> = Collections.synchronizedList(mutableListOf())
+    var upStockLimits: MutableList<StockLimit> = Collections.synchronizedList(mutableListOf())
+    var downStockLimits: MutableList<StockLimit> = Collections.synchronizedList(mutableListOf())
     private var currentSort: Sorting = Sorting.DESCENDING
 
     private var started: Boolean = false
@@ -64,27 +63,26 @@ class StrategyLimits : KoinComponent {
     }
 
     fun stopStrategyCommand() {
-        stopStrategy()
         Utils.stopService(TheApplication.application.applicationContext, StrategyLimitsService::class.java)
     }
 
     suspend fun startStrategy() = withContext(StockManager.limitsContext) {
-        upLimitStocks.clear()
-        downLimitStocks.clear()
+        upStockLimits.clear()
+        downStockLimits.clear()
 
         process()
 
         started = true
         strategyTelegram.sendLimitsStart(true)
 
-        stockManager.subscribeStockInfo()
+        stockManager.subscribeStockInfoAll()
     }
 
     fun stopStrategy() {
         started = false
         strategyTelegram.sendLimitsStart(false)
 
-        stockManager.unsubscribeStockInfo()
+        stockManager.unsubscribeStockInfoAll()
     }
 
     fun processStrategy(stock: Stock) {
@@ -107,7 +105,7 @@ class StrategyLimits : KoinComponent {
         val fireTime = lastCandle.time.time
 
         stock.stockInfo?.let {
-            var limitStock: LimitStock? = null
+            var stockLimit: StockLimit? = null
 
             val allDistance = it.limit_up - it.limit_down
             if (allDistance == 0.0 || it.limit_up == 0.0 || it.limit_down == 0.0) return@let
@@ -118,26 +116,26 @@ class StrategyLimits : KoinComponent {
             val downLimitChange = Utils.getPercentFromTo(it.limit_down, price)
 
             if (price == it.limit_up && allowUp) { // на верхних
-                limitStock = LimitStock(stock, LimitType.ON_UP, upLimitChange, price, fireTime)
+                stockLimit = StockLimit(stock, LimitType.ON_UP, upLimitChange, price, fireTime)
             } else if (price == it.limit_down && allowDown) { // на нижних
-                limitStock = LimitStock(stock, LimitType.ON_DOWN, downLimitChange, price, fireTime)
+                stockLimit = StockLimit(stock, LimitType.ON_DOWN, downLimitChange, price, fireTime)
             } else if (price > it.limit_up && allowUp) { // выше верхних
-                limitStock = LimitStock(stock, LimitType.ABOVE_UP, upLimitChange, price, fireTime)
+                stockLimit = StockLimit(stock, LimitType.ABOVE_UP, upLimitChange, price, fireTime)
             } else if (price > center && allowUp) { // близко к верхним
                 val percentUpLeft = 100.0 - 100.0 * (stock.getPriceRaw() - center) / (it.limit_up - center)
 
                 if (percentUpLeft < changeUpLimit) { // если близко к лимиту - сигналим!
-                    limitStock = LimitStock(stock, LimitType.NEAR_UP, upLimitChange, price, fireTime)
+                    stockLimit = StockLimit(stock, LimitType.NEAR_UP, upLimitChange, price, fireTime)
                 } else {
 
                 }
 
             } else if (price < it.limit_down && allowDown) { // ниже нижних
-                limitStock = LimitStock(stock, LimitType.UNDER_DOWN, downLimitChange, price, fireTime)
+                stockLimit = StockLimit(stock, LimitType.UNDER_DOWN, downLimitChange, price, fireTime)
             } else if (price < center && allowDown) { // ближе к нижнему
                 val percentDownLeft = 100.0 - 100.0 * (center - stock.getPriceRaw()) / (center - it.limit_down)
                 if (percentDownLeft < changeDownLimit) { // если близко к лимиту - сигналим!
-                    limitStock = LimitStock(stock, LimitType.NEAR_DOWN, downLimitChange, price, fireTime)
+                    stockLimit = StockLimit(stock, LimitType.NEAR_DOWN, downLimitChange, price, fireTime)
                 } else {
 
                 }
@@ -145,37 +143,37 @@ class StrategyLimits : KoinComponent {
 
             }
 
-            if (limitStock != null) {
-                if (limitStock.type in listOf(LimitType.NEAR_UP, LimitType.ABOVE_UP, LimitType.ON_UP)) {
-                    val last = upLimitStocks.firstOrNull { stock -> stock.stock.ticker == stock.ticker }
+            if (stockLimit != null) {
+                if (stockLimit.type in listOf(LimitType.NEAR_UP, LimitType.ABOVE_UP, LimitType.ON_UP)) {
+                    val last = upStockLimits.firstOrNull { stock -> stock.stock.ticker == stock.ticker }
                     if (last != null) {
                         val deltaTime = ((fireTime - last.fireTime) / 60.0 / 1000.0).toInt()
                         if (deltaTime < 5) return
                     }
-                    upLimitStocks.add(0, limitStock)
+                    upStockLimits.add(0, stockLimit)
                 } else {
-                    val last = downLimitStocks.firstOrNull { stock -> stock.stock.ticker == stock.ticker }
+                    val last = downStockLimits.firstOrNull { stock -> stock.stock.ticker == stock.ticker }
                     if (last != null) {
                         val deltaTime = ((fireTime - last.fireTime) / 60.0 / 1000.0).toInt()
                         if (deltaTime < 5) return
                     }
-                    downLimitStocks.add(0, limitStock)
+                    downStockLimits.add(0, stockLimit)
                 }
 
                 GlobalScope.launch(Dispatchers.Main) {
-                    strategySpeaker.speakLimit(limitStock)
-                    strategyTelegram.sendLimit(limitStock)
-                    createLimit(limitStock)
+                    strategySpeaker.speakLimit(stockLimit)
+                    strategyTelegram.sendLimit(stockLimit)
+                    createLimit(stockLimit)
                 }
             }
         }
 
     }
 
-    private fun createLimit(limitStock: LimitStock) {
+    private fun createLimit(stockLimit: StockLimit) {
         val context: Context = TheApplication.application.applicationContext
 
-        val ticker = limitStock.ticker
+        val ticker = stockLimit.ticker
         val notificationChannelId = ticker
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -201,7 +199,7 @@ class StrategyLimits : KoinComponent {
 
         val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(context, notificationChannelId) else Notification.Builder(context)
 
-        val emoji = when (limitStock.type)  {
+        val emoji = when (stockLimit.type)  {
             LimitType.ON_UP -> "⬆️ на лимите"
             LimitType.ON_DOWN -> "⬇️️ на лимите"
 

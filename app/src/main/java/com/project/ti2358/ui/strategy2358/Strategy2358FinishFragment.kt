@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.data.manager.PurchaseStock
+import com.project.ti2358.data.manager.StockPurchase
 import com.project.ti2358.data.manager.Strategy2358
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.databinding.Fragment2358FinishBinding
@@ -28,7 +28,7 @@ class Strategy2358FinishFragment : Fragment(R.layout.fragment_2358_finish) {
     private var fragment2358FinishBinding: Fragment2358FinishBinding? = null
 
     var adapterList: Item2358RecyclerViewAdapter = Item2358RecyclerViewAdapter(emptyList())
-    var stocks: MutableList<PurchaseStock> = mutableListOf()
+    var stockPurchases: MutableList<StockPurchase> = mutableListOf()
 
     override fun onDestroy() {
         fragment2358FinishBinding = null
@@ -66,8 +66,8 @@ class Strategy2358FinishFragment : Fragment(R.layout.fragment_2358_finish) {
             }
         }
 
-        stocks = strategy2358.getPurchaseStock(true)
-        adapterList.setData(stocks)
+        stockPurchases = strategy2358.getPurchaseStock(true)
+        adapterList.setData(stockPurchases)
 
         updateInfoText()
 
@@ -79,8 +79,8 @@ class Strategy2358FinishFragment : Fragment(R.layout.fragment_2358_finish) {
         fragment2358FinishBinding?.chooseView?.isChecked = newValue
 
         if (newValue) {
-            stocks = strategy2358.getPurchaseStock(true)
-            adapterList.setData(stocks)
+            stockPurchases = strategy2358.getPurchaseStock(true)
+            adapterList.setData(stockPurchases)
             updateInfoText()
         }
     }
@@ -91,7 +91,7 @@ class Strategy2358FinishFragment : Fragment(R.layout.fragment_2358_finish) {
         fragment2358FinishBinding?.infoTextView?.text = String.format(
             prepareText,
             time,
-            stocks.size,
+            stockPurchases.size,
             strategy2358.getTotalPurchaseString()
         )
     }
@@ -104,8 +104,8 @@ class Strategy2358FinishFragment : Fragment(R.layout.fragment_2358_finish) {
         }
     }
 
-    inner class Item2358RecyclerViewAdapter(private var values: List<PurchaseStock>) : RecyclerView.Adapter<Item2358RecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<PurchaseStock>) {
+    inner class Item2358RecyclerViewAdapter(private var values: List<StockPurchase>) : RecyclerView.Adapter<Item2358RecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<StockPurchase>) {
             values = newValues
             notifyDataSetChanged()
         }
@@ -152,28 +152,28 @@ class Strategy2358FinishFragment : Fragment(R.layout.fragment_2358_finish) {
                 }
             }
 
-            private fun refreshPercent(purchaseStock: PurchaseStock, delta: Double) {
+            private fun refreshPercent(stockPurchase: StockPurchase, delta: Double) {
                 with(binding) {
-                    chooseView.isChecked = purchaseStock.trailingStop
-                    lotsView.text = "${purchaseStock.lots} шт."
+                    chooseView.isChecked = stockPurchase.trailingStop
+                    lotsView.text = "${stockPurchase.lots} шт."
 
-                    if (purchaseStock.trailingStop) {
-                        purchaseStock.addPriceProfit2358TrailingTakeProfit(delta)
-                        profitPercentFromView.text = purchaseStock.trailingStopTakeProfitPercentActivation.toPercent()
-                        profitPercentToView.text = purchaseStock.trailingStopTakeProfitPercentDelta.toPercent()
+                    if (stockPurchase.trailingStop) {
+                        stockPurchase.addPriceProfit2358TrailingTakeProfit(delta)
+                        profitPercentFromView.text = stockPurchase.trailingStopTakeProfitPercentActivation.toPercent()
+                        profitPercentToView.text = stockPurchase.trailingStopTakeProfitPercentDelta.toPercent()
 
                         profitPercentFromView.setTextColor(Utils.PURPLE)
                         profitPercentToView.setTextColor(Utils.PURPLE)
                     } else {
-                        purchaseStock.addPriceProfit2358Percent(delta)
-                        profitPercentFromView.text = purchaseStock.percentProfitSellFrom.toPercent()
-                        profitPercentToView.text = purchaseStock.percentProfitSellTo.toPercent()
+                        stockPurchase.addPriceProfit2358Percent(delta)
+                        profitPercentFromView.text = stockPurchase.percentProfitSellFrom.toPercent()
+                        profitPercentToView.text = stockPurchase.percentProfitSellTo.toPercent()
 
                         profitPercentFromView.setTextColor(Utils.GREEN)
                         profitPercentToView.setTextColor(Utils.GREEN)
                     }
 
-                    priceBuyView.text = "%.2f$".format(locale = Locale.US, purchaseStock.stock.getPriceNow() * purchaseStock.lots)
+                    priceBuyView.text = "%.2f$".format(locale = Locale.US, stockPurchase.stock.getPriceNow() * stockPurchase.lots)
                     updateInfoText()
                 }
             }

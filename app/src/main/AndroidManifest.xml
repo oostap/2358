@@ -107,6 +107,12 @@
             android:exported="false">
         </service>
 
+        <service
+            android:name=".service.StrategyArbitrationService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
+
         <activity
             android:name=".SplashActivity"
             android:label="@string/new_title_activity_main"

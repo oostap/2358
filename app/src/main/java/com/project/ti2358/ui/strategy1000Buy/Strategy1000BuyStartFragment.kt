@@ -181,9 +181,7 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
                     }
 
                     itemView.setOnClickListener {
-                        view?.findNavController()?.let {
-                            Utils.openOrderbookForStock(it, orderbookManager, stock)
-                        }
+                        Utils.openOrderbookForStock(it.findNavController(), orderbookManager, stock)
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))

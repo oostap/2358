@@ -1,6 +1,6 @@
 package com.project.ti2358.data.manager
 
-data class TrendStock(
+data class StockTrend(
     val stock: Stock,
     val priceStart: Double,
     val priceLow: Double,

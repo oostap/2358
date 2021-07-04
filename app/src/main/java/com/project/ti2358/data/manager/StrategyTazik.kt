@@ -6,7 +6,6 @@ import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.Candle
 import com.project.ti2358.data.model.dto.Currency
-import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.service.*
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
@@ -29,8 +28,8 @@ class StrategyTazik : KoinComponent {
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
 
-    var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
-    var stocksToPurchaseClone: MutableList<PurchaseStock> = mutableListOf()
+    var stocksToPurchase: MutableList<StockPurchase> = mutableListOf()
+    var stocksToClonePurchase: MutableList<StockPurchase> = mutableListOf()
     var stocksTickerInProcess: MutableMap<String, Job> = ConcurrentHashMap()
 
     var basicPercentLimitPriceChange: Double = 0.0
@@ -120,7 +119,7 @@ class StrategyTazik : KoinComponent {
         return stock in stocksSelected
     }
 
-    fun getPurchaseStock(): MutableList<PurchaseStock> = runBlocking(StockManager.stockContext) {
+    fun getPurchaseStock(): MutableList<StockPurchase> = runBlocking(StockManager.stockContext) {
         if (started) return@runBlocking stocksToPurchase
 
         stocksToPurchase.clear()
@@ -131,7 +130,7 @@ class StrategyTazik : KoinComponent {
         val before11 = Utils.isSessionBefore11()
 
         stocksToPurchase = stocksSelected.map {
-            PurchaseStock(it).apply {
+            StockPurchase(it).apply {
                 percentLimitPriceChange = -abs(percent)
 
                 // отнять процент роста с начала премаркета, если мы запускаем в 10
@@ -176,7 +175,7 @@ class StrategyTazik : KoinComponent {
         val blacklist = strategyBlacklist.getBlacklistStocks()
         stocksToPurchase.removeAll { it.ticker in blacklist.map { stock -> stock.ticker } }
 
-        stocksToPurchaseClone = stocksToPurchase.toMutableList()
+        stocksToClonePurchase = stocksToPurchase.toMutableList()
 
         return@runBlocking stocksToPurchase
     }
@@ -243,7 +242,7 @@ class StrategyTazik : KoinComponent {
         return "$price:\n$tickers"
     }
 
-    fun getSortedPurchases(): List<PurchaseStock> {
+    fun getSortedPurchases(): List<StockPurchase> {
         currentPurchaseSort = if (currentPurchaseSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
 
         val local = stocksToPurchase.toMutableList()
@@ -428,7 +427,7 @@ class StrategyTazik : KoinComponent {
         }
     }
 
-    private fun isAllowToBuy(purchase: PurchaseStock, change: Double, volume: Int): Boolean {
+    private fun isAllowToBuy(purchase: StockPurchase, change: Double, volume: Int): Boolean {
         if (purchase.tazikPrice == 0.0 ||                   // стартовая цена нулевая = не загрузились цены
             abs(change) > 50 ||                             // конечная цена нулевая или просто огромная просадка
             change > 0 ||                                   // изменение положительное
@@ -498,7 +497,7 @@ class StrategyTazik : KoinComponent {
         val ticker = stock.ticker
 
         // если бумага не в списке скана - игнорируем
-        val sorted = stocksToPurchaseClone.find { it.ticker == ticker }
+        val sorted = stocksToClonePurchase.find { it.ticker == ticker }
         sorted?.let { purchase ->
             val change = candle.closingPrice / purchase.tazikPrice * 100.0 - 100.0
             val volume = candle.volume
@@ -509,7 +508,7 @@ class StrategyTazik : KoinComponent {
         }
     }
 
-    private fun processBuy(purchase: PurchaseStock, stock: Stock, candle: Candle) {
+    private fun processBuy(purchase: StockPurchase, stock: Stock, candle: Candle) {
         // завершение стратегии
         val parts = SettingsManager.getTazikPurchaseParts()
         if (stocksTickerInProcess.size >= parts) {

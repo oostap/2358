@@ -89,13 +89,13 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
             upButton.setOnClickListener {
                 listAll.visibility = View.GONE
                 listLimits.visibility = View.VISIBLE
-                adapterListLimits.setData(strategyLimits.upLimitStocks)
+                adapterListLimits.setData(strategyLimits.upStockLimits)
             }
 
             downButton.setOnClickListener {
                 listAll.visibility = View.GONE
                 listLimits.visibility = View.VISIBLE
-                adapterListLimits.setData(strategyLimits.downLimitStocks)
+                adapterListLimits.setData(strategyLimits.downStockLimits)
             }
 
             listAll.visibility = View.VISIBLE
@@ -154,15 +154,11 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
                     downLimitPercentView.setTextColor(Utils.getColorForValue(downLimitChange))
 
                     itemView.setOnClickListener {
-                        view?.findNavController()?.let {
-                            Utils.openOrderbookForStock(it, orderbookManager, stock)
-                        }
+                        Utils.openOrderbookForStock(it.findNavController(), orderbookManager, stock)
                     }
 
                     chartButton.setOnClickListener {
-                        view?.findNavController()?.let {
-                            Utils.openChartForStock(it, chartManager, stock)
-                        }
+                        Utils.openChartForStock(it.findNavController(), chartManager, stock)
                     }
 
                     sectorView.text = stock.getSectorName()
@@ -181,8 +177,8 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
         }
     }
 
-    inner class ItemLimitsRecyclerViewAdapter(private var values: List<LimitStock>) : RecyclerView.Adapter<ItemLimitsRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<LimitStock>) {
+    inner class ItemLimitsRecyclerViewAdapter(private var values: List<StockLimit>) : RecyclerView.Adapter<ItemLimitsRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<StockLimit>) {
             values = newValues
             notifyDataSetChanged()
         }
@@ -219,15 +215,11 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
                     }
 
                     itemView.setOnClickListener {
-                        view?.findNavController()?.let {
-                            Utils.openOrderbookForStock(it, orderbookManager, limitStock.stock)
-                        }
+                        Utils.openOrderbookForStock(it.findNavController(), orderbookManager, limitStock.stock)
                     }
 
                     chartButton.setOnClickListener {
-                        view?.findNavController()?.let {
-                            Utils.openChartForStock(it, chartManager, limitStock.stock)
-                        }
+                        Utils.openChartForStock(it.findNavController(), chartManager, limitStock.stock)
                     }
 
                     sectorView.text = limitStock.stock.getSectorName()

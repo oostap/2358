@@ -1,4 +1,4 @@
-package com.project.ti2358.ui.arbitration
+package com.project.ti2358.data.manager
 
 import android.app.*
 import android.content.Context
@@ -9,7 +9,7 @@ import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.*
-import com.project.ti2358.service.StrategyRocketService
+import com.project.ti2358.service.StrategyArbitrationService
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.*
@@ -29,12 +29,12 @@ class StrategyArbitration : KoinComponent {
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = synchronizedList(mutableListOf())
-    var longStocks: MutableList<RocketStock> = synchronizedList(mutableListOf())
-    var shortStocks: MutableList<RocketStock> = synchronizedList(mutableListOf())
+    var longStockRockets: MutableList<StockRocket> = synchronizedList(mutableListOf())
+    var shortStockRockets: MutableList<StockRocket> = synchronizedList(mutableListOf())
 
-    private var started: Boolean = false
+    var started: Boolean = false
 
-    suspend fun process(): MutableList<Stock> = withContext(StockManager.rocketContext) {
+    suspend fun process(): MutableList<Stock> = withContext(StockManager.stockContext) {
         val all = stockManager.getWhiteStocks()
 
         val min = SettingsManager.getCommonPriceMin()
@@ -46,30 +46,32 @@ class StrategyArbitration : KoinComponent {
         return@withContext stocks
     }
 
-    suspend fun restartStrategy() = withContext(StockManager.rocketContext) {
+    suspend fun restartStrategy() = withContext(StockManager.stockContext) {
         if (started) stopStrategy()
         delay(500)
         startStrategy()
     }
 
-    suspend fun stopStrategyCommand() = withContext(StockManager.rocketContext) {
-        stopStrategy()
-        Utils.stopService(TheApplication.application.applicationContext, StrategyRocketService::class.java)
+    suspend fun stopStrategyCommand() = withContext(StockManager.stockContext) {
+        Utils.stopService(TheApplication.application.applicationContext, StrategyArbitrationService::class.java)
     }
 
-    suspend fun startStrategy() = withContext(StockManager.rocketContext) {
-        longStocks.clear()
-        shortStocks.clear()
+    suspend fun startStrategy() = withContext(StockManager.stockContext) {
+        longStockRockets.clear()
+        shortStockRockets.clear()
 
         process()
 
+        stockManager.subscribeOrderbookRU(stockManager.stocksStream)
+
         started = true
-        strategyTelegram.sendRocketStart(true)
+        strategyTelegram.sendArbitrationStart(true)
     }
 
     fun stopStrategy() {
         started = false
-        strategyTelegram.sendRocketStart(false)
+        strategyTelegram.sendArbitrationStart(false)
+        stockManager.unsubscribeOrderbookAllRU()
     }
 
     fun processStrategy(stock: Stock) {
@@ -111,7 +113,7 @@ class StrategyArbitration : KoinComponent {
         val changePercent = toCandle.closingPrice / fromCandle.openingPrice * 100.0 - 100.0
         if (volume < volumeRocket || abs(changePercent) < abs(percentRocket)) return
 
-        val rocketStock = RocketStock(stock, fromCandle.openingPrice, toCandle.closingPrice, deltaMinutes, volume, changePercent, toCandle.time.time)
+        val rocketStock = StockRocket(stock, fromCandle.openingPrice, toCandle.closingPrice, deltaMinutes, volume, changePercent, toCandle.time.time)
         rocketStock.process()
 
 //        if (changePercent > 0) {
@@ -139,10 +141,10 @@ class StrategyArbitration : KoinComponent {
         }
     }
 
-    private fun createRocket(rocketStock: RocketStock) {
+    private fun createRocket(stockRocket: StockRocket) {
         val context: Context = TheApplication.application.applicationContext
 
-        val ticker = rocketStock.ticker
+        val ticker = stockRocket.ticker
         val notificationChannelId = ticker
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -168,13 +170,13 @@ class StrategyArbitration : KoinComponent {
 
         val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(context, notificationChannelId) else Notification.Builder(context)
 
-        val changePercent = if (rocketStock.changePercent > 0) {
-            "+%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
+        val changePercent = if (stockRocket.changePercent > 0) {
+            "+%.2f%%".format(locale = Locale.US, stockRocket.changePercent)
         } else {
-            "%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
+            "%.2f%%".format(locale = Locale.US, stockRocket.changePercent)
         }
 
-        val title = "$ticker: ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин"
+        val title = "$ticker: ${stockRocket.priceFrom.toMoney(stockRocket.stock)} -> ${stockRocket.priceTo.toMoney(stockRocket.stock)} = $changePercent за ${stockRocket.time} мин"
 
         val notification = builder
             .setSubText("$$ticker $changePercent")

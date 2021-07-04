@@ -153,16 +153,14 @@ class Strategy1728DownFragment : Fragment(R.layout.fragment_1728_down) {
                     priceChangePercentView.setTextColor(Utils.getColorForValue(changePercent))
 
                     itemView.setOnClickListener {
-                        view?.findNavController()?.let {
-                            Utils.openOrderbookForStock(it, orderbookManager, stock)
-                        }
+                        Utils.openOrderbookForStock(it.findNavController(), orderbookManager, stock)
                     }
 
                     buyButton.setOnClickListener {
                         if (SettingsManager.get1728PurchaseVolume() <= 0) {
                             Utils.showMessageAlert(requireContext(), "В настройках не задана сумма покупки для позиции, раздел 1728.")
                         } else {
-                            val purchase = PurchaseStock(stock)
+                            val purchase = StockPurchase(stock)
 
                             // считаем лоты
                             purchase.lots = (SettingsManager.get1728PurchaseVolume() / purchase.stock.getPriceNow()).roundToInt()

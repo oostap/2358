@@ -398,74 +398,74 @@ class StrategyTelegram : KoinComponent {
         sendMessageToChats("Статус цен закрытия $status", deleteAfterSeconds = 15)
     }
 
-    fun sendRocket(rocketStock: RocketStock) {
+    fun sendRocket(stockRocket: StockRocket) {
         if (started && SettingsManager.getTelegramSendRockets()) {
             val emoji = when {
-                rocketStock.changePercent >=  7.0 -> "‼️‼️‼️️🚀"
-                rocketStock.changePercent >=  5.0 -> "❗️🚀"
-                rocketStock.changePercent >=  3.0 -> "🚀🚀"
-                rocketStock.changePercent >   0.0 -> "🚀"
-                rocketStock.changePercent <= -7.0 -> "‼️‼️‼️️☄️"
-                rocketStock.changePercent <= -5.0 -> "❗️☄️"
-                rocketStock.changePercent <= -3.0 -> "☄️☄️"
-                rocketStock.changePercent <   0.0 -> "☄️"
+                stockRocket.changePercent >=  7.0 -> "‼️‼️‼️️🚀"
+                stockRocket.changePercent >=  5.0 -> "❗️🚀"
+                stockRocket.changePercent >=  3.0 -> "🚀🚀"
+                stockRocket.changePercent >   0.0 -> "🚀"
+                stockRocket.changePercent <= -7.0 -> "‼️‼️‼️️☄️"
+                stockRocket.changePercent <= -5.0 -> "❗️☄️"
+                stockRocket.changePercent <= -3.0 -> "☄️☄️"
+                stockRocket.changePercent <   0.0 -> "☄️"
                 else -> ""
             }
-            val changePercent = if (rocketStock.changePercent > 0) {
-                "+%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
+            val changePercent = if (stockRocket.changePercent > 0) {
+                "+%.2f%%".format(locale = Locale.US, stockRocket.changePercent)
             } else {
-                "%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
+                "%.2f%%".format(locale = Locale.US, stockRocket.changePercent)
             }
-            val change2300 = "%.2f".format(rocketStock.stock.changePrice2300DayPercent)
-            val text = "$emoji$${rocketStock.ticker} ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин, v = ${rocketStock.volume}"
-            val buttons = getButtonsMarkup(rocketStock.stock)
+            val change2300 = "%.2f".format(stockRocket.stock.changePrice2300DayPercent)
+            val text = "$emoji$${stockRocket.ticker} ${stockRocket.priceFrom.toMoney(stockRocket.stock)} -> ${stockRocket.priceTo.toMoney(stockRocket.stock)} = $changePercent за ${stockRocket.time} мин, v = ${stockRocket.volume}"
+            val buttons = getButtonsMarkup(stockRocket.stock)
             sendMessageToChats(text, 120, replyMarkup = buttons)
         }
     }
 
-    fun sendTrend(trendStock: TrendStock) {
+    fun sendTrend(stockTrend: StockTrend) {
         if (started && SettingsManager.getTelegramSendTrends()) {
-            val emoji = if (trendStock.changeFromStartToLow < 0) "⤴️" else "⤵️️"
-            val turnValue = if (trendStock.turnValue > 0) {
-                "+%.2f%%".format(locale = Locale.US, trendStock.turnValue)
+            val emoji = if (stockTrend.changeFromStartToLow < 0) "⤴️" else "⤵️️"
+            val turnValue = if (stockTrend.turnValue > 0) {
+                "+%.2f%%".format(locale = Locale.US, stockTrend.turnValue)
             } else {
-                "%.2f%%".format(locale = Locale.US, trendStock.turnValue)
+                "%.2f%%".format(locale = Locale.US, stockTrend.turnValue)
             }
             val text = "%s$%s %s : %.2f$ -> %.2f$ = %.2f%%, %.2f$ -> %.2f$ = %.2f%%, %d мин -> %d мин".format(
                 locale = Locale.US,
                 emoji,
-                trendStock.ticker,
+                stockTrend.ticker,
                 turnValue,
-                trendStock.priceStart, trendStock.priceLow, trendStock.changeFromStartToLow,
-                trendStock.priceLow, trendStock.priceNow, trendStock.changeFromLowToNow,
-                trendStock.timeFromStartToLow, trendStock.timeFromLowToNow
+                stockTrend.priceStart, stockTrend.priceLow, stockTrend.changeFromStartToLow,
+                stockTrend.priceLow, stockTrend.priceNow, stockTrend.changeFromLowToNow,
+                stockTrend.timeFromStartToLow, stockTrend.timeFromLowToNow
             )
-            val buttons = getButtonsMarkup(trendStock.stock)
+            val buttons = getButtonsMarkup(stockTrend.stock)
             sendMessageToChats(text, 120, replyMarkup = buttons)
         }
     }
 
-    fun sendLimit(limitStock: LimitStock) {
+    fun sendLimit(stockLimit: StockLimit) {
         if (started && SettingsManager.getTelegramSendLimits()) {
-            var emoji = when (limitStock.type)  {
-                LimitType.ON_UP -> "⬆️ на лимите ${limitStock.stock.stockInfo?.limit_up}$"
-                LimitType.ON_DOWN -> "⬇️️ на лимите ${limitStock.stock.stockInfo?.limit_down}$"
+            var emoji = when (stockLimit.type)  {
+                LimitType.ON_UP -> "⬆️ на лимите ${stockLimit.stock.stockInfo?.limit_up}$"
+                LimitType.ON_DOWN -> "⬇️️ на лимите ${stockLimit.stock.stockInfo?.limit_down}$"
 
-                LimitType.ABOVE_UP -> "⬆️ выше лимита ${limitStock.stock.stockInfo?.limit_up}$"
-                LimitType.UNDER_DOWN -> "⬇️️ ниже лимита ${limitStock.stock.stockInfo?.limit_down}$"
+                LimitType.ABOVE_UP -> "⬆️ выше лимита ${stockLimit.stock.stockInfo?.limit_up}$"
+                LimitType.UNDER_DOWN -> "⬇️️ ниже лимита ${stockLimit.stock.stockInfo?.limit_down}$"
 
-                LimitType.NEAR_UP -> "⬆️ рядом с лимитом ${limitStock.stock.stockInfo?.limit_up}$"
-                LimitType.NEAR_DOWN -> "⬇️️ рядом с лимитом ${limitStock.stock.stockInfo?.limit_down}$"
+                LimitType.NEAR_UP -> "⬆️ рядом с лимитом ${stockLimit.stock.stockInfo?.limit_up}$"
+                LimitType.NEAR_DOWN -> "⬇️️ рядом с лимитом ${stockLimit.stock.stockInfo?.limit_down}$"
             }
 
-            emoji += " / %.2f%%".format(limitStock.percentFire)
+            emoji += " / %.2f%%".format(stockLimit.percentFire)
             val text = "$%s %.2f$ - %s".format(
                 locale = Locale.US,
-                limitStock.ticker,
-                limitStock.priceFire,
+                stockLimit.ticker,
+                stockLimit.priceFire,
                 emoji
             )
-            val buttons = getButtonsMarkup(limitStock.stock)
+            val buttons = getButtonsMarkup(stockLimit.stock)
             sendMessageToChats(text, 120, replyMarkup = buttons)
         }
     }
@@ -482,6 +482,23 @@ class StrategyTelegram : KoinComponent {
                 )
             } else {
                 "🔴🚀☄️️ стоп!"
+            }
+            sendMessageToChats(text, 30)
+        }
+    }
+
+    fun sendArbitrationStart(start: Boolean) {
+        if (started) {// && SettingsManager.getTelegramSendRockets()) {
+            val text = if (start) {
+                String.format(
+                    locale = Locale.US,
+                    "🟢🏴‍☠️ %.2f%% / %d мин / v%d",
+                    SettingsManager.getRocketChangePercent(),
+                    SettingsManager.getRocketChangeMinutes(),
+                    SettingsManager.getRocketChangeVolume()
+                )
+            } else {
+                "🔴🏴‍☠️ стоп!"
             }
             sendMessageToChats(text, 30)
         }
@@ -601,7 +618,7 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun sendTazikBuy(purchase: PurchaseStock, buyPrice: Double, sellPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
+    fun sendTazikBuy(purchase: StockPurchase, buyPrice: Double, sellPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
             val text = "🛁 $%s B%.2f$ -> S%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
                 locale = Locale.US,
@@ -619,7 +636,7 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun sendZontikSell(purchase: PurchaseStock, sellPrice: Double, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
+    fun sendZontikSell(purchase: StockPurchase, sellPrice: Double, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
             val text = "☂️ $%s S%.2f$ -> B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
                 locale = Locale.US,
@@ -637,7 +654,7 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun sendTazikSpike(purchase: PurchaseStock, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
+    fun sendTazikSpike(purchase: StockPurchase, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendSpikes()) {
             val text = "спайк! 🛁 $%s B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
                 locale = Locale.US,
@@ -654,7 +671,7 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun sendZontikSpike(purchase: PurchaseStock, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
+    fun sendZontikSpike(purchase: StockPurchase, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendSpikes()) {
             val text = "спайк! ☂️ $%s B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
                 locale = Locale.US,

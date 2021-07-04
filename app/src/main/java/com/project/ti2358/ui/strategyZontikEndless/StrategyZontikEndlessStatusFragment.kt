@@ -13,8 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.OrderbookManager
-import com.project.ti2358.data.manager.PurchaseStock
-import com.project.ti2358.data.manager.SettingsManager
+import com.project.ti2358.data.manager.StockPurchase
 import com.project.ti2358.data.manager.StrategyZontikEndless
 import com.project.ti2358.databinding.FragmentZontikEndlessStatusBinding
 import com.project.ti2358.databinding.FragmentZontikEndlessStatusItemBinding
@@ -31,7 +30,7 @@ class StrategyZontikEndlessStatusFragment : Fragment(R.layout.fragment_zontik_en
     private var fragmentZontikEndlessStatusBinding: FragmentZontikEndlessStatusBinding? = null
 
     var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
-    lateinit var stocks: MutableList<PurchaseStock>
+    lateinit var stockPurchases: MutableList<StockPurchase>
 
     override fun onDestroy() {
         fragmentZontikEndlessStatusBinding = null
@@ -90,9 +89,9 @@ class StrategyZontikEndlessStatusFragment : Fragment(R.layout.fragment_zontik_en
     private fun updateData(search: String = "") {
         GlobalScope.launch(Dispatchers.Main) {
             fragmentZontikEndlessStatusBinding?.currentChangeView?.text = strategyZontikEndless.basicPercentLimitPriceChange.toPercent()
-            stocks = strategyZontikEndless.getSortedPurchases().toMutableList()
-            if (search != "") stocks = Utils.search(stocks, search)
-            adapterList.setData(stocks)
+            stockPurchases = strategyZontikEndless.getSortedPurchases().toMutableList()
+            if (search != "") stockPurchases = Utils.search(stockPurchases, search)
+            adapterList.setData(stockPurchases)
             updateTitle()
         }
     }
@@ -104,8 +103,8 @@ class StrategyZontikEndlessStatusFragment : Fragment(R.layout.fragment_zontik_en
         }
     }
 
-    inner class ItemTazikRecyclerViewAdapter(private var values: List<PurchaseStock>) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<PurchaseStock>) {
+    inner class ItemTazikRecyclerViewAdapter(private var values: List<StockPurchase>) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<StockPurchase>) {
             values = newValues
             notifyDataSetChanged()
         }
@@ -140,9 +139,7 @@ class StrategyZontikEndlessStatusFragment : Fragment(R.layout.fragment_zontik_en
                     priceChangePercentView.setTextColor(Utils.getColorForValue(changePercent))
 
                     itemView.setOnClickListener {
-                        view?.findNavController()?.let {
-                            Utils.openOrderbookForStock(it, orderbookManager, purchase.stock)
-                        }
+                        Utils.openOrderbookForStock(it.findNavController(), orderbookManager, purchase.stock)
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))

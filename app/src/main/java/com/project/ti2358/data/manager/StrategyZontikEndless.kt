@@ -27,8 +27,8 @@ class StrategyZontikEndless : KoinComponent {
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
 
-    var stocksToPurchase: MutableList<PurchaseStock> = mutableListOf()
-    var stocksToPurchaseClone: MutableList<PurchaseStock> = mutableListOf()
+    var stocksToPurchase: MutableList<StockPurchase> = mutableListOf()
+    var stocksToClonePurchase: MutableList<StockPurchase> = mutableListOf()
     var stocksTickerInProcess: MutableMap<String, Job> = ConcurrentHashMap()
 
     var basicPercentLimitPriceChange: Double = 0.0
@@ -120,16 +120,16 @@ class StrategyZontikEndless : KoinComponent {
         return stock in stocksSelected
     }
 
-    suspend fun getPurchaseStock(): MutableList<PurchaseStock> = withContext(StockManager.stockContext) {
+    suspend fun getPurchaseStock(): MutableList<StockPurchase> = withContext(StockManager.stockContext) {
         if (started) return@withContext stocksToPurchase
 
         val percent = SettingsManager.getZontikEndlessChangePercent()
         val totalMoney: Double = SettingsManager.getZontikEndlessPurchaseVolume().toDouble()
         val onePiece: Double = totalMoney / SettingsManager.getZontikEndlessPurchaseParts()
 
-        val purchases: MutableList<PurchaseStock> = mutableListOf()
+        val purchases: MutableList<StockPurchase> = mutableListOf()
         for (stock in stocksSelected) {
-            val purchase = PurchaseStock(stock)
+            val purchase = StockPurchase(stock)
             for (p in stocksToPurchase) {
                 if (p.ticker == stock.ticker) {
                     purchase.apply {
@@ -180,7 +180,7 @@ class StrategyZontikEndless : KoinComponent {
         val blacklist = strategyBlacklist.getBlacklistStocks()
         stocksToPurchase.removeAll { it.ticker in blacklist.map { stock -> stock.ticker } }
 
-        stocksToPurchaseClone = stocksToPurchase.toMutableList()
+        stocksToClonePurchase = stocksToPurchase.toMutableList()
 
         return@withContext stocksToPurchase
     }
@@ -254,7 +254,7 @@ class StrategyZontikEndless : KoinComponent {
         return "$price:\n$tickers"
     }
 
-    fun getSortedPurchases(): List<PurchaseStock> {
+    fun getSortedPurchases(): List<StockPurchase> {
         currentPurchaseSort = if (currentPurchaseSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
 
         val local = stocksToPurchase.toMutableList()
@@ -299,7 +299,7 @@ class StrategyZontikEndless : KoinComponent {
 
     private fun fixPrice() {
         // зафикировать цену, чтобы change считать от неё
-        for (purchase in stocksToPurchaseClone) {
+        for (purchase in stocksToClonePurchase) {
             purchase.zontikEndlessPrice = purchase.stock.getPriceNow()
         }
     }
@@ -484,7 +484,7 @@ class StrategyZontikEndless : KoinComponent {
         }
     }
 
-    private fun isAllowToSell(purchase: PurchaseStock, change: Double, volume: Int): Boolean {
+    private fun isAllowToSell(purchase: StockPurchase, change: Double, volume: Int): Boolean {
         if (purchase.zontikEndlessPrice == 0.0 ||                   // стартовая цена нулевая = не загрузились цены
             abs(change) > 50 ||                                     // конечная цена нулевая или просто огромная просадка
             change < 0 ||                                           // изменение ОТРИЦАТЕЛЬНОЕ
@@ -537,7 +537,7 @@ class StrategyZontikEndless : KoinComponent {
         val ticker = stock.ticker
 
         // если бумага не в списке скана - игнорируем
-        val sorted = stocksToPurchaseClone.find { it.ticker == ticker }
+        val sorted = stocksToClonePurchase.find { it.ticker == ticker }
         sorted?.let { purchase ->
             val change = candle.closingPrice / purchase.zontikEndlessPrice * 100.0 - 100.0
             val volume = candle.volume
@@ -548,7 +548,7 @@ class StrategyZontikEndless : KoinComponent {
         }
     }
 
-    private fun processSell(purchase: PurchaseStock, stock: Stock, candle: Candle) {
+    private fun processSell(purchase: StockPurchase, stock: Stock, candle: Candle) {
         // завершение стратегии
         val parts = SettingsManager.getZontikEndlessPurchaseParts()
         if (stocksTickerInProcess.size >= parts) { // останавливить стратегию автоматически

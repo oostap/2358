@@ -42,55 +42,55 @@ class StrategySpeaker : KoinComponent, TextToSpeech.OnInitListener {
         }
     }
 
-    fun speakRocket(rocketStock: RocketStock) {
+    fun speakRocket(stockRocket: StockRocket) {
         if (SettingsManager.getRocketVoice()) {
-            val text = makeNiceChange(rocketStock.stock.ticker, rocketStock.changePercent)
-            val type = if (rocketStock.changePercent > 0) "ракета" else "комета"
-            speak("$type $text ${rocketStock.time} мин")
+            val text = makeNiceChange(stockRocket.stock.ticker, stockRocket.changePercent)
+            val type = if (stockRocket.changePercent > 0) "ракета" else "комета"
+            speak("$type $text ${stockRocket.time} мин")
         }
     }
 
-    fun speakTazik(purchaseStock: PurchaseStock, change: Double) {
+    fun speakTazik(stockPurchase: StockPurchase, change: Double) {
         if (SettingsManager.getTazikVoice()) {
-            val text = makeNiceChange(purchaseStock.stock.ticker, change)
+            val text = makeNiceChange(stockPurchase.stock.ticker, change)
             speak(text)
         }
     }
 
-    fun speakZontik(purchaseStock: PurchaseStock, change: Double) {
+    fun speakZontik(stockPurchase: StockPurchase, change: Double) {
         if (SettingsManager.getTazikEndlessVoice()) {
-            val text = makeNiceChange(purchaseStock.stock.ticker, change)
+            val text = makeNiceChange(stockPurchase.stock.ticker, change)
             speak("шорт. $text")
         }
     }
 
-    fun speakTazikSpikeSkip(purchaseStock: PurchaseStock, change: Double) {
+    fun speakTazikSpikeSkip(stockPurchase: StockPurchase, change: Double) {
         if (SettingsManager.getTazikVoice() && SettingsManager.getTelegramSendSpikes()) {
-            val text = makeNiceChange(purchaseStock.stock.ticker, change)
+            val text = makeNiceChange(stockPurchase.stock.ticker, change)
             speak("спайк. $text")
         }
     }
 
-    fun speakZontikSpikeSkip(purchaseStock: PurchaseStock, change: Double) {
+    fun speakZontikSpikeSkip(stockPurchase: StockPurchase, change: Double) {
         if (SettingsManager.getTazikEndlessVoice() && SettingsManager.getTelegramSendSpikes()) {
-            val text = makeNiceChange(purchaseStock.stock.ticker, change)
+            val text = makeNiceChange(stockPurchase.stock.ticker, change)
             speak("спайк. шорт. $text")
         }
     }
 
-    fun speakTrend(trendStock: TrendStock) {
+    fun speakTrend(stockTrend: StockTrend) {
         if (SettingsManager.getTrendVoice()) {
-            val text = makeNiceChange(trendStock.stock.ticker, trendStock.changeFromStartToLow)
-            val type = if (trendStock.changeFromStartToLow < 0) "Отскок вверх️" else "Отскок вниз"
+            val text = makeNiceChange(stockTrend.stock.ticker, stockTrend.changeFromStartToLow)
+            val type = if (stockTrend.changeFromStartToLow < 0) "Отскок вверх️" else "Отскок вниз"
             speak("$type $text") // ${trendStock.timeFromStartToLow} -> ${trendStock.timeFromStartToLow} мин -> ")
         }
     }
 
-    fun speakLimit(limitStock: LimitStock) {
+    fun speakLimit(stockLimit: StockLimit) {
         if (SettingsManager.getLimitsVoice()) {
-            val tickerLetters = limitStock.stock.ticker.split("")
+            val tickerLetters = stockLimit.stock.ticker.split("")
             var text = tickerLetters.joinToString(" ")
-            text += when (limitStock.type)  {
+            text += when (stockLimit.type)  {
                 LimitType.ON_UP -> " на лимите"
                 LimitType.ON_DOWN -> " на лимите"
 

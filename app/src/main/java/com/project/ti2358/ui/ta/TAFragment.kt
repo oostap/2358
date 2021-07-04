@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.StrategyTrend
-import com.project.ti2358.data.manager.TrendStock
+import com.project.ti2358.data.manager.StockTrend
 import com.project.ti2358.databinding.FragmentTrendsBinding
 import com.project.ti2358.databinding.FragmentTrendsItemBinding
 import com.project.ti2358.service.*
@@ -56,15 +56,15 @@ class TAFragment : Fragment(R.layout.fragment_ta) {
             updateServiceButtonText()
 
             upButton.setOnClickListener {
-                adapterList.setData(strategyTrend.trendUpStocks)
+                adapterList.setData(strategyTrend.upStockTrends)
             }
 
             downButton.setOnClickListener {
-                adapterList.setData(strategyTrend.trendDownStocks)
+                adapterList.setData(strategyTrend.downStockTrends)
             }
         }
 
-        adapterList.setData(strategyTrend.trendUpStocks)
+        adapterList.setData(strategyTrend.upStockTrends)
     }
 
     private fun updateServiceButtonText() {
@@ -75,8 +75,8 @@ class TAFragment : Fragment(R.layout.fragment_ta) {
         }
     }
 
-    inner class ItemRocketRecyclerViewAdapter(private var values: List<TrendStock>) : RecyclerView.Adapter<ItemRocketRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<TrendStock>) {
+    inner class ItemRocketRecyclerViewAdapter(private var values: List<StockTrend>) : RecyclerView.Adapter<ItemRocketRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<StockTrend>) {
             values = newValues
             notifyDataSetChanged()
         }
@@ -111,9 +111,7 @@ class TAFragment : Fragment(R.layout.fragment_ta) {
                     priceLowNowView.setTextColor(Utils.getColorForValue(trendStock.changeFromStartToLow))
 
                     itemView.setOnClickListener {
-                        view?.findNavController()?.let {
-                            Utils.openOrderbookForStock(it, orderbookManager, trendStock.stock)
-                        }
+                        Utils.openOrderbookForStock(it.findNavController(), orderbookManager, trendStock.stock)
                     }
 
                     orderbookButton.setOnClickListener {

@@ -123,12 +123,6 @@ class LoveFragment : Fragment(R.layout.fragment_love) {
                         updateTitle()
                     }
 
-//                    itemView.setOnClickListener {
-//                        view?.findNavController()?.let {
-//                            Utils.openOrderbookForStock(it, orderbookManager, stock)
-//                        }
-//                    }
-
                     orderbookButton.setOnClickListener {
                         Utils.openOrderbookForStock(it.findNavController(), orderbookManager, stock)
                     }

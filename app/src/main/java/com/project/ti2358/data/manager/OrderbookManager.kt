@@ -5,7 +5,6 @@ import com.project.ti2358.data.model.dto.Order
 import com.project.ti2358.data.model.dto.pantini.PantiniPrint
 import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.log
 import com.project.ti2358.ui.orderbook.OrderbookLine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -31,14 +30,22 @@ class OrderbookManager() : KoinComponent {
     fun start(stock: Stock) {
         activeStock = stock
         activeStock?.let {
-            stockManager.subscribeStockOrderbook(it)
-            stockManager.subscribeStockLenta(it)
+            // РФ стакан
+            stockManager.subscribeOrderbookRU(listOf(it))
+
+            // US стакан/лента
+            stockManager.subscribeLentaUS(it)
+            stockManager.subscribeOrderbookUS(it)
         }
     }
 
     fun stop() {
         activeStock?.let {
-            stockManager.unsubscribeStockOrderbook(it)
+            // РФ стакан
+            stockManager.unsubscribeOrderbookAllRU()
+
+            // US стакан/лента
+            stockManager.unsubscribeOrderbookUS(it)
             stockManager.unsubscribeStockLenta(it)
         }
         activeStock = null

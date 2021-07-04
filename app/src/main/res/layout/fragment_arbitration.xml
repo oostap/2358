@@ -39,7 +39,7 @@
             android:layout_height="70dp"
             android:id="@+id/rocket_button"
             android:layout_marginRight="5dp"
-            android:text="🚀"
+            android:text="LONG"
             android:layout_weight="1"
             android:padding="0dp"
             android:textSize="20dp"
@@ -49,7 +49,7 @@
             android:layout_height="70dp"
             android:id="@+id/comet_button"
             android:padding="0dp"
-            android:text="☄️"
+            android:text="SHORT️"
             android:layout_weight="1"
             android:textSize="20dp"
             android:layout_width="0dp" />

@@ -1,6 +1,6 @@
 package com.project.ti2358.data.manager
 
-data class RocketStock(
+data class StockRocket(
     val stock: Stock,
     val priceFrom: Double,
     val priceTo: Double,

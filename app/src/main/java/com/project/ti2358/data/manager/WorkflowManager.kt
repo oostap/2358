@@ -2,7 +2,6 @@ package com.project.ti2358.data.manager
 
 import com.project.ti2358.BuildConfig
 import com.project.ti2358.data.service.*
-import com.project.ti2358.ui.arbitration.StrategyArbitration
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.component.KoinApiExtension

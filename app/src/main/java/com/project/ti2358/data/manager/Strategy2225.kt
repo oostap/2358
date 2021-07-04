@@ -18,7 +18,7 @@ class Strategy2225() : KoinComponent {
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = mutableListOf()
-    var purchaseToBuy: MutableList<PurchaseStock> = mutableListOf()
+    var toBuyPurchase: MutableList<StockPurchase> = mutableListOf()
     var jobs: MutableList<Job?> = mutableListOf()
     var started: Boolean = false
 
@@ -63,7 +63,7 @@ class Strategy2225() : KoinComponent {
         return stock in stocksSelected
     }
 
-    fun getPurchaseStock(reset: Boolean): MutableList<PurchaseStock> {
+    fun getPurchaseStock(reset: Boolean): MutableList<StockPurchase> {
         process()
 
         if (reset) started = false
@@ -95,12 +95,12 @@ class Strategy2225() : KoinComponent {
             depositManager.portfolioPositions.any { it.ticker == stock.ticker }
         }
 
-        val purchases: MutableList<PurchaseStock> = mutableListOf()
+        val purchases: MutableList<StockPurchase> = mutableListOf()
         for (stock in stocksSelected) {
-            val purchase = PurchaseStock(stock)
+            val purchase = StockPurchase(stock)
 
             var exists = false
-            for (p in purchaseToBuy) {
+            for (p in toBuyPurchase) {
                 if (p.ticker == stock.ticker) {
                     purchase.apply {
                         percentProfitSellFrom = p.percentProfitSellFrom
@@ -121,12 +121,12 @@ class Strategy2225() : KoinComponent {
 
             purchases.add(purchase)
         }
-        purchaseToBuy = purchases
+        toBuyPurchase = purchases
 
         val totalMoney: Double = SettingsManager.get2225PurchaseVolume().toDouble()
-        val onePiece: Double = totalMoney / purchaseToBuy.size
+        val onePiece: Double = totalMoney / toBuyPurchase.size
 
-        for (purchase in purchaseToBuy) {
+        for (purchase in toBuyPurchase) {
             if (purchase.lots == 0 || equalParts) { // если уже настраивали количество, то не трогаем
                 purchase.lots = (onePiece / purchase.stock.getPriceNow()).roundToInt()
             }
@@ -137,30 +137,30 @@ class Strategy2225() : KoinComponent {
             }
         }
 
-        return purchaseToBuy
+        return toBuyPurchase
     }
 
     fun getTotalPurchaseString(): String {
         var value = 0.0
-        purchaseToBuy.forEach { value += it.lots * it.stock.getPriceNow() }
+        toBuyPurchase.forEach { value += it.lots * it.stock.getPriceNow() }
         return value.toMoney(null)
     }
 
     fun getTotalPurchasePieces(): Int {
         var value = 0
-        purchaseToBuy.forEach { value += it.lots }
+        toBuyPurchase.forEach { value += it.lots }
         return value
     }
 
     fun getNotificationTextShort(): String {
         var tickers = ""
-        purchaseToBuy.forEach { tickers += "${it.lots}*${it.ticker} " }
+        toBuyPurchase.forEach { tickers += "${it.lots}*${it.ticker} " }
         return "${getTotalPurchaseString()}:\n$tickers"
     }
 
     fun getNotificationTextLong(): String {
         var tickers = ""
-        for (purchase in purchaseToBuy) {
+        for (purchase in toBuyPurchase) {
             val p = "%.2f$".format(locale = Locale.US, purchase.lots * purchase.stock.getPriceNow())
             tickers += "${purchase.ticker}*${purchase.lots} = ${p}, "
             tickers += if (purchase.trailingStop) {
@@ -183,7 +183,7 @@ class Strategy2225() : KoinComponent {
         }
 
         getPurchaseStock(true)
-        strategyTelegram.send2225Start(true, purchaseToBuy.map { it.ticker })
+        strategyTelegram.send2225Start(true, toBuyPurchase.map { it.ticker })
         Utils.startService(TheApplication.application.applicationContext, Strategy2225Service::class.java)
     }
 
@@ -213,6 +213,6 @@ class Strategy2225() : KoinComponent {
         }
         jobs.clear()
 
-        strategyTelegram.send2225Start(false, purchaseToBuy.map { it.ticker })
+        strategyTelegram.send2225Start(false, toBuyPurchase.map { it.ticker })
     }
 }

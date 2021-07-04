@@ -131,9 +131,7 @@ class Strategy2225StartFragment : Fragment(R.layout.fragment_2225_start) {
                     }
 
                     itemView.setOnClickListener {
-                        view?.findNavController()?.let {
-                            Utils.openOrderbookForStock(it, orderbookManager, stock)
-                        }
+                        Utils.openOrderbookForStock(it.findNavController(), orderbookManager, stock)
                     }
 
                     if (stock.report != null) {

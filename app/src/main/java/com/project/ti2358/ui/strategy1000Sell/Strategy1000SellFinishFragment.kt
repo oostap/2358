@@ -5,12 +5,8 @@ import android.os.Bundle
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
-import androidx.core.widget.doAfterTextChanged
-import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -18,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.data.manager.PurchaseStock
+import com.project.ti2358.data.manager.StockPurchase
 import com.project.ti2358.data.manager.Strategy1000Sell
 import com.project.ti2358.databinding.Fragment1000SellFinishBinding
 import com.project.ti2358.databinding.Fragment1000SellFinishItemBinding
@@ -33,7 +29,7 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
     private var fragment1000SellFinishBinding: Fragment1000SellFinishBinding? = null
 
     var adapterListSell: Item1000SellRecyclerViewAdapter = Item1000SellRecyclerViewAdapter(emptyList())
-    var positions: MutableList<PurchaseStock> = mutableListOf()
+    var positions: MutableList<StockPurchase> = mutableListOf()
 
     override fun onDestroy() {
         fragment1000SellFinishBinding = null
@@ -112,8 +108,8 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
         )
     }
 
-    inner class Item1000SellRecyclerViewAdapter(private var values: List<PurchaseStock>) : RecyclerView.Adapter<Item1000SellRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<PurchaseStock>) {
+    inner class Item1000SellRecyclerViewAdapter(private var values: List<StockPurchase>) : RecyclerView.Adapter<Item1000SellRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<StockPurchase>) {
             values = newValues
             notifyDataSetChanged()
         }
@@ -210,23 +206,23 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                 }
             }
 
-            private fun refreshPercent(purchaseStock: PurchaseStock) {
+            private fun refreshPercent(stockPurchase: StockPurchase) {
                 with(binding) {
-                    percentProfitFutureView.text = purchaseStock.percentProfitSellFrom.toPercent()
-                    percentProfitFutureView.setTextColor(Utils.getColorForValue(purchaseStock.percentProfitSellFrom))
+                    percentProfitFutureView.text = stockPurchase.percentProfitSellFrom.toPercent()
+                    percentProfitFutureView.setTextColor(Utils.getColorForValue(stockPurchase.percentProfitSellFrom))
 
-                    val sellPrice = purchaseStock.getProfitPriceForSell()
-                    val totalSellPrice = sellPrice * purchaseStock.lots
-                    priceTotalView.text = "${sellPrice.toMoney(purchaseStock.stock)} ➡ ${totalSellPrice.toMoney(purchaseStock.stock)}"
-                    priceTotalView.setTextColor(Utils.getColorForValue(purchaseStock.percentProfitSellFrom))
+                    val sellPrice = stockPurchase.getProfitPriceForSell()
+                    val totalSellPrice = sellPrice * stockPurchase.lots
+                    priceTotalView.text = "${sellPrice.toMoney(stockPurchase.stock)} ➡ ${totalSellPrice.toMoney(stockPurchase.stock)}"
+                    priceTotalView.setTextColor(Utils.getColorForValue(stockPurchase.percentProfitSellFrom))
 
                     priceProfitFutureView.text = ""
                     percentProfitFutureTotalView.text = ""
 
-                    purchaseStock.position?.let {
+                    stockPurchase.position?.let {
                         val futureProfitPrice = sellPrice - it.getAveragePrice()
-                        priceProfitFutureView.text = futureProfitPrice.toMoney(purchaseStock.stock)
-                        percentProfitFutureTotalView.text = (futureProfitPrice * purchaseStock.lots).toMoney(purchaseStock.stock)
+                        priceProfitFutureView.text = futureProfitPrice.toMoney(stockPurchase.stock)
+                        percentProfitFutureTotalView.text = (futureProfitPrice * stockPurchase.lots).toMoney(stockPurchase.stock)
 
                         priceTotalView.setTextColor(Utils.getColorForValue(futureProfitPrice))
                         percentProfitFutureView.setTextColor(Utils.getColorForValue(futureProfitPrice))

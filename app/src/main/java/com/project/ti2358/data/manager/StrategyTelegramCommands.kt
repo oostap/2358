@@ -26,6 +26,7 @@ class StrategyTelegramCommands : KoinComponent {
     private val strategyLimits: StrategyLimits by inject()
     private val strategy2358: Strategy2358 by inject()
     private val strategy2225: Strategy2225 by inject()
+    private val strategyArbitration: StrategyArbitration by inject()
 
     private var moneySpent: Double = 0.0
 
@@ -156,6 +157,10 @@ class StrategyTelegramCommands : KoinComponent {
                     GlobalScope.launch(Dispatchers.Main) {
                         strategyLimits.restartStrategy()
                     }
+                } else if (ticker == "ARB") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategyArbitration.restartStrategy()
+                    }
                 } else if (ticker == "ZONT") {
                     var percent = 0.0
                     var profit = 0.0
@@ -199,6 +204,10 @@ class StrategyTelegramCommands : KoinComponent {
                 } else if (ticker == "LIMIT") {
                     GlobalScope.launch(Dispatchers.Main) {
                         strategyLimits.stopStrategyCommand()
+                    }
+                } else if (ticker == "ARB") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategyArbitration.stopStrategyCommand()
                     }
                 } else if (ticker == "2358") {
                     GlobalScope.launch(Dispatchers.Main) {

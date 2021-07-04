@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.ChartManager
 import com.project.ti2358.data.manager.OrderbookManager
-import com.project.ti2358.data.manager.RocketStock
+import com.project.ti2358.data.manager.StockRocket
 import com.project.ti2358.data.manager.StrategyRocket
 import com.project.ti2358.databinding.FragmentRocketsBinding
 import com.project.ti2358.databinding.FragmentRocketsItemBinding
@@ -59,15 +58,15 @@ class RocketsFragment : Fragment(R.layout.fragment_rockets) {
             updateServiceButtonText()
 
             rocketButton.setOnClickListener {
-                adapterList.setData(strategyRocket.rocketStocks)
+                adapterList.setData(strategyRocket.stockRockets)
             }
 
             cometButton.setOnClickListener {
-                adapterList.setData(strategyRocket.cometStocks)
+                adapterList.setData(strategyRocket.cometStockRockets)
             }
         }
 
-        adapterList.setData(strategyRocket.rocketStocks)
+        adapterList.setData(strategyRocket.stockRockets)
     }
 
     private fun updateServiceButtonText() {
@@ -78,8 +77,8 @@ class RocketsFragment : Fragment(R.layout.fragment_rockets) {
         }
     }
 
-    inner class ItemRocketRecyclerViewAdapter(private var values: List<RocketStock>) : RecyclerView.Adapter<ItemRocketRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<RocketStock>) {
+    inner class ItemRocketRecyclerViewAdapter(private var values: List<StockRocket>) : RecyclerView.Adapter<ItemRocketRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<StockRocket>) {
             values = newValues
             notifyDataSetChanged()
         }

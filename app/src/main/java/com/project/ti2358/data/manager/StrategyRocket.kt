@@ -8,7 +8,6 @@ import android.os.Build
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.service.StrategyLimitsService
 import com.project.ti2358.service.StrategyRocketService
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
@@ -29,8 +28,8 @@ class StrategyRocket : KoinComponent {
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = synchronizedList(mutableListOf())
-    var rocketStocks: MutableList<RocketStock> = synchronizedList(mutableListOf())
-    var cometStocks: MutableList<RocketStock> = synchronizedList(mutableListOf())
+    var stockRockets: MutableList<StockRocket> = synchronizedList(mutableListOf())
+    var cometStockRockets: MutableList<StockRocket> = synchronizedList(mutableListOf())
 
     private var started: Boolean = false
 
@@ -53,13 +52,12 @@ class StrategyRocket : KoinComponent {
     }
 
     suspend fun stopStrategyCommand() = withContext(StockManager.rocketContext) {
-        stopStrategy()
         Utils.stopService(TheApplication.application.applicationContext, StrategyRocketService::class.java)
     }
 
     suspend fun startStrategy() = withContext(StockManager.rocketContext) {
-        rocketStocks.clear()
-        cometStocks.clear()
+        stockRockets.clear()
+        cometStockRockets.clear()
 
         process()
 
@@ -111,25 +109,25 @@ class StrategyRocket : KoinComponent {
         val changePercent = toCandle.closingPrice / fromCandle.openingPrice * 100.0 - 100.0
         if (volume < volumeRocket || abs(changePercent) < abs(percentRocket)) return
 
-        val rocketStock = RocketStock(stock, fromCandle.openingPrice, toCandle.closingPrice, deltaMinutes, volume, changePercent, toCandle.time.time)
+        val rocketStock = StockRocket(stock, fromCandle.openingPrice, toCandle.closingPrice, deltaMinutes, volume, changePercent, toCandle.time.time)
         rocketStock.process()
 
         if (changePercent > 0) {
-            val last = rocketStocks.firstOrNull { it.stock.ticker == stock.ticker }
+            val last = stockRockets.firstOrNull { it.stock.ticker == stock.ticker }
             if (last != null) {
                 val deltaTime = ((toCandle.time.time - last.fireTime) / 60.0 / 1000.0).toInt()
                 if (deltaTime < 5) return
             }
 
-            rocketStocks.add(0, rocketStock)
+            stockRockets.add(0, rocketStock)
         } else {
-            val last = cometStocks.firstOrNull { it.stock.ticker == stock.ticker }
+            val last = cometStockRockets.firstOrNull { it.stock.ticker == stock.ticker }
             if (last != null) {
                 val deltaTime = ((toCandle.time.time - last.fireTime) / 60.0 / 1000.0).toInt()
                 if (deltaTime < 5) return
             }
 
-            cometStocks.add(0, rocketStock)
+            cometStockRockets.add(0, rocketStock)
         }
 
         GlobalScope.launch(Dispatchers.Main) {
@@ -139,10 +137,10 @@ class StrategyRocket : KoinComponent {
         }
     }
 
-    private fun createRocket(rocketStock: RocketStock) {
+    private fun createRocket(stockRocket: StockRocket) {
         val context: Context = TheApplication.application.applicationContext
 
-        val ticker = rocketStock.ticker
+        val ticker = stockRocket.ticker
         val notificationChannelId = ticker
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -168,13 +166,13 @@ class StrategyRocket : KoinComponent {
 
         val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(context, notificationChannelId) else Notification.Builder(context)
 
-        val changePercent = if (rocketStock.changePercent > 0) {
-            "+%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
+        val changePercent = if (stockRocket.changePercent > 0) {
+            "+%.2f%%".format(locale = Locale.US, stockRocket.changePercent)
         } else {
-            "%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
+            "%.2f%%".format(locale = Locale.US, stockRocket.changePercent)
         }
 
-        val title = "$ticker: ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин"
+        val title = "$ticker: ${stockRocket.priceFrom.toMoney(stockRocket.stock)} -> ${stockRocket.priceTo.toMoney(stockRocket.stock)} = $changePercent за ${stockRocket.time} мин"
 
         val notification = builder
             .setSubText("$$ticker $changePercent")

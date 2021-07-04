@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.data.manager.PurchaseStock
+import com.project.ti2358.data.manager.StockPurchase
 import com.project.ti2358.data.manager.Strategy1000Buy
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.databinding.Fragment1000BuyFinishBinding
@@ -29,7 +29,7 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
     private var fragment1000BuyFinishBinding: Fragment1000BuyFinishBinding? = null
 
     var adapterList: Item1005RecyclerViewAdapter = Item1005RecyclerViewAdapter(emptyList())
-    var positions: MutableList<PurchaseStock> = mutableListOf()
+    var positions: MutableList<StockPurchase> = mutableListOf()
 
     override fun onDestroy() {
         fragment1000BuyFinishBinding = null
@@ -94,7 +94,7 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
             prepareText,
             time,
             positions.size,
-            strategy1000Buy.getTotalPurchaseString(strategy1000Buy.purchaseToBuy)
+            strategy1000Buy.getTotalPurchaseString(strategy1000Buy.toBuyPurchase)
         )
     }
 
@@ -114,8 +114,8 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
         }
     }
 
-    inner class Item1005RecyclerViewAdapter(private var values: List<PurchaseStock>) : RecyclerView.Adapter<Item1005RecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<PurchaseStock>) {
+    inner class Item1005RecyclerViewAdapter(private var values: List<StockPurchase>) : RecyclerView.Adapter<Item1005RecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<StockPurchase>) {
             values = newValues
             notifyDataSetChanged()
         }
@@ -182,15 +182,15 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
                 }
             }
 
-            private fun refreshPercent(purchaseStock: PurchaseStock) {
+            private fun refreshPercent(stockPurchase: StockPurchase) {
                 with (binding) {
-                    val percent = purchaseStock.percentLimitPriceChange
+                    val percent = stockPurchase.percentLimitPriceChange
 
                     priceChangePercentView.text = percent.toPercent()
-                    priceChangeAbsoluteView.text = purchaseStock.absoluteLimitPriceChange.toMoney(purchaseStock.stock)
-                    priceChangeAbsoluteTotalView.text = (purchaseStock.absoluteLimitPriceChange * purchaseStock.lots).toMoney(purchaseStock.stock)
+                    priceChangeAbsoluteView.text = stockPurchase.absoluteLimitPriceChange.toMoney(stockPurchase.stock)
+                    priceChangeAbsoluteTotalView.text = (stockPurchase.absoluteLimitPriceChange * stockPurchase.lots).toMoney(stockPurchase.stock)
 
-                    priceBuyView.text = "${purchaseStock.getLimitPriceDouble().toMoney(purchaseStock.stock)} > ${(purchaseStock.getLimitPriceDouble() * purchaseStock.lots).toMoney(purchaseStock.stock)}"
+                    priceBuyView.text = "${stockPurchase.getLimitPriceDouble().toMoney(stockPurchase.stock)} > ${(stockPurchase.getLimitPriceDouble() * stockPurchase.lots).toMoney(stockPurchase.stock)}"
 
                     priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
                     priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))

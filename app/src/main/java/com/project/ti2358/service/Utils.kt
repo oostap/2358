@@ -11,10 +11,7 @@ import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
-import androidx.core.os.bundleOf
 import androidx.navigation.NavController
-import com.github.bassaer.chatmessageview.model.Message
-import com.google.gson.internal.LinkedTreeMap
 import com.project.ti2358.BuildConfig
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
@@ -25,11 +22,8 @@ import com.project.ti2358.data.model.dto.Interval
 import com.project.ti2358.data.model.dto.OperationType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.KoinComponent
-import org.koin.java.KoinJavaComponent.inject
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
@@ -525,9 +519,9 @@ class Utils{
 
         @KoinApiExtension
         @JvmName("searchStocks")
-        fun search(stocks: List<PurchaseStock>, text: String): MutableList<PurchaseStock> {
+        fun search(stockPurchases: List<StockPurchase>, text: String): MutableList<StockPurchase> {
             if (text.isNotEmpty()) {
-                val list = stocks.filter {
+                val list = stockPurchases.filter {
                     it.ticker.contains(text, ignoreCase = true) ||
                             it.stock.instrument.name.contains(text, ignoreCase = true) ||
                             it.stock.alterName.contains(text, ignoreCase = true)
@@ -535,7 +529,7 @@ class Utils{
                 list.sortBy { it.ticker.length }
                 return list
             }
-            return stocks.toMutableList()
+            return stockPurchases.toMutableList()
         }
 
         fun search(stocks: List<Stock>, text: String): MutableList<Stock> {

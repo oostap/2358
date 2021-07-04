@@ -186,9 +186,7 @@ class StrategyZontikEndlessStartFragment : Fragment(R.layout.fragment_zontik_end
                     }
 
                     itemView.setOnClickListener {
-                        view?.findNavController()?.let {
-                            Utils.openOrderbookForStock(it, orderbookManager, stock)
-                        }
+                        Utils.openOrderbookForStock(it.findNavController(), orderbookManager, stock)
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))

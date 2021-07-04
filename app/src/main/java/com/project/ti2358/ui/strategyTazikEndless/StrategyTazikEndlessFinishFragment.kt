@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.data.manager.PurchaseStock
+import com.project.ti2358.data.manager.StockPurchase
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.StrategyTazikEndless
 import com.project.ti2358.databinding.FragmentTazikEndlessFinishBinding
@@ -32,7 +32,7 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
     private var fragmentTazikEndlessFinishBinding: FragmentTazikEndlessFinishBinding? = null
 
     var adapterList: ItemTazikRecyclerViewAdapter = ItemTazikRecyclerViewAdapter(emptyList())
-    var positions: MutableList<PurchaseStock> = mutableListOf()
+    var positions: MutableList<StockPurchase> = mutableListOf()
     var timeStartEnd: Pair<String, String> = Pair("", "")
     var scheduledStart: Boolean = false
 
@@ -141,8 +141,8 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
         }
     }
 
-    inner class ItemTazikRecyclerViewAdapter(private var values: List<PurchaseStock>) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<PurchaseStock>) {
+    inner class ItemTazikRecyclerViewAdapter(private var values: List<StockPurchase>) : RecyclerView.Adapter<ItemTazikRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<StockPurchase>) {
             values = newValues
             notifyDataSetChanged()
         }
@@ -179,16 +179,16 @@ class StrategyTazikEndlessFinishFragment : Fragment(R.layout.fragment_tazik_endl
                 }
             }
 
-            private fun refreshPercent(purchaseStock: PurchaseStock) {
-                val percent = purchaseStock.percentLimitPriceChange
+            private fun refreshPercent(stockPurchase: StockPurchase) {
+                val percent = stockPurchase.percentLimitPriceChange
 
                 with(binding) {
                     priceChangePercentView.text = percent.toPercent()
-                    priceChangeAbsoluteView.text = purchaseStock.absoluteLimitPriceChange.toMoney(purchaseStock.stock)
-                    priceChangeAbsoluteTotalView.text = (purchaseStock.absoluteLimitPriceChange * purchaseStock.lots).toMoney(purchaseStock.stock)
+                    priceChangeAbsoluteView.text = stockPurchase.absoluteLimitPriceChange.toMoney(stockPurchase.stock)
+                    priceChangeAbsoluteTotalView.text = (stockPurchase.absoluteLimitPriceChange * stockPurchase.lots).toMoney(stockPurchase.stock)
 
-                    priceBuyView.text = purchaseStock.getLimitPriceDouble().toMoney(purchaseStock.stock)
-                    priceBuyTotalView.text = (purchaseStock.getLimitPriceDouble() * purchaseStock.lots).toMoney(purchaseStock.stock)
+                    priceBuyView.text = stockPurchase.getLimitPriceDouble().toMoney(stockPurchase.stock)
+                    priceBuyTotalView.text = (stockPurchase.getLimitPriceDouble() * stockPurchase.lots).toMoney(stockPurchase.stock)
 
                     priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
                     priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))

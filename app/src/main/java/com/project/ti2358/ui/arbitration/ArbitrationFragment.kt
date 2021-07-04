@@ -13,7 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.ChartManager
 import com.project.ti2358.data.manager.OrderbookManager
-import com.project.ti2358.data.manager.RocketStock
+import com.project.ti2358.data.manager.StockRocket
+import com.project.ti2358.data.manager.StrategyArbitration
 import com.project.ti2358.databinding.FragmentArbitrationBinding
 import com.project.ti2358.databinding.FragmentArbitrationItemBinding
 import com.project.ti2358.service.*
@@ -47,25 +48,25 @@ class ArbitrationFragment : Fragment(R.layout.fragment_arbitration) {
             list.adapter = adapterList
 
             startButton.setOnClickListener {
-                if (Utils.isServiceRunning(requireContext(), StrategyRocketService::class.java)) {
-                    requireContext().stopService(Intent(context, StrategyRocketService::class.java))
+                if (Utils.isServiceRunning(requireContext(), StrategyArbitrationService::class.java)) {
+                    requireContext().stopService(Intent(context, StrategyArbitrationService::class.java))
                 } else {
-                    Utils.startService(requireContext(), StrategyRocketService::class.java)
+                    Utils.startService(requireContext(), StrategyArbitrationService::class.java)
                 }
                 updateServiceButtonText()
             }
             updateServiceButtonText()
 
             rocketButton.setOnClickListener {
-                adapterList.setData(strategyArbitration.longStocks)
+                adapterList.setData(strategyArbitration.longStockRockets)
             }
 
             cometButton.setOnClickListener {
-                adapterList.setData(strategyArbitration.shortStocks)
+                adapterList.setData(strategyArbitration.shortStockRockets)
             }
         }
 
-        adapterList.setData(strategyArbitration.longStocks)
+        adapterList.setData(strategyArbitration.longStockRockets)
     }
 
     private fun updateServiceButtonText() {
@@ -76,8 +77,8 @@ class ArbitrationFragment : Fragment(R.layout.fragment_arbitration) {
         }
     }
 
-    inner class ItemRocketRecyclerViewAdapter(private var values: List<RocketStock>) : RecyclerView.Adapter<ItemRocketRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<RocketStock>) {
+    inner class ItemRocketRecyclerViewAdapter(private var values: List<StockRocket>) : RecyclerView.Adapter<ItemRocketRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<StockRocket>) {
             values = newValues
             notifyDataSetChanged()
         }

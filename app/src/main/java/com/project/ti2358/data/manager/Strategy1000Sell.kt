@@ -24,10 +24,10 @@ class Strategy1000Sell() : KoinComponent {
     var stocks: MutableList<Stock> = mutableListOf()
     var presetStocksSelected: MutableList<PresetStock> = mutableListOf()
 
-    private var purchaseToSell: MutableList<PurchaseStock> = mutableListOf()
+    private var toSellPurchase: MutableList<StockPurchase> = mutableListOf()
 
-    var positionsToSell700: MutableList<PurchaseStock> = mutableListOf()
-    var positionsToSell1000: MutableList<PurchaseStock> = mutableListOf()
+    var positionsToSell700: MutableList<StockPurchase> = mutableListOf()
+    var positionsToSell1000: MutableList<StockPurchase> = mutableListOf()
     var currentSort: Sorting = Sorting.DESCENDING
 
     var job1000: MutableList<Job?> = mutableListOf()
@@ -69,7 +69,7 @@ class Strategy1000Sell() : KoinComponent {
         }
 
         // сохранить лоты и проценты из PurchaseStock
-        for (purchase in purchaseToSell) {
+        for (purchase in toSellPurchase) {
             val preset = presetStocksSelected.find { it.ticker == purchase.ticker}
             preset?.let {
                 it.percent = purchase.percentProfitSellFrom
@@ -114,20 +114,20 @@ class Strategy1000Sell() : KoinComponent {
         return presetStocksSelected.find { it.ticker == stock.ticker } != null
     }
 
-    fun processSellPosition(): MutableList<PurchaseStock> {
-        val purchases: MutableList<PurchaseStock> = mutableListOf()
+    fun processSellPosition(): MutableList<StockPurchase> {
+        val purchases: MutableList<StockPurchase> = mutableListOf()
 
         for (preset in presetStocksSelected) {
             val stock = stocks.find { it.ticker == preset.ticker }
             if (stock != null) {
-                val purchase = PurchaseStock(stock)
+                val purchase = StockPurchase(stock)
 
                 // из настроек
                 purchase.percentProfitSellFrom = preset.percent
                 purchase.lots = preset.lots
 
                 // уже заданные
-                for (p in purchaseToSell) {
+                for (p in toSellPurchase) {
                     if (p.ticker == stock.ticker) {
                         purchase.apply {
                             percentProfitSellFrom = p.percentProfitSellFrom
@@ -143,9 +143,9 @@ class Strategy1000Sell() : KoinComponent {
                 purchases.add(purchase)
             }
         }
-        purchaseToSell = purchases
+        toSellPurchase = purchases
 
-        purchaseToSell.forEach {
+        toSellPurchase.forEach {
             if (it.percentProfitSellFrom == 0.0) {
                 it.processInitialProfit()
             }
@@ -154,12 +154,12 @@ class Strategy1000Sell() : KoinComponent {
             }
             it.status = PurchaseStatus.WAITING
         }
-        return purchaseToSell
+        return toSellPurchase
     }
 
     fun getTotalPurchasePieces(): Int {
         var value = 0
-        for (purchaseStock in purchaseToSell) {
+        for (purchaseStock in toSellPurchase) {
             value += purchaseStock.lots
         }
         return value
@@ -167,13 +167,13 @@ class Strategy1000Sell() : KoinComponent {
 
     fun getTotalSellString(): String {
         var value = 0.0
-        for (purchaseStock in purchaseToSell) {
+        for (purchaseStock in toSellPurchase) {
             value += purchaseStock.getProfitPriceForSell() * purchaseStock.lots
         }
         return value.toMoney(null)
     }
 
-    fun getTotalSellString(purchases: MutableList<PurchaseStock>): String {
+    fun getTotalSellString(purchases: MutableList<StockPurchase>): String {
         var value = 0.0
         for (purchaseStock in purchases) {
             value += purchaseStock.getProfitPriceForSell() * purchaseStock.lots
@@ -181,7 +181,7 @@ class Strategy1000Sell() : KoinComponent {
         return value.toMoney(null)
     }
 
-    fun getNotificationTextShort(purchases: MutableList<PurchaseStock>): String {
+    fun getNotificationTextShort(purchases: MutableList<StockPurchase>): String {
         val price = getTotalSellString(purchases)
         var tickers = ""
         for (purchaseStock in purchases) {
@@ -191,7 +191,7 @@ class Strategy1000Sell() : KoinComponent {
         return "$price:\n$tickers"
     }
 
-    fun getNotificationTextLong(purchases: MutableList<PurchaseStock>): String {
+    fun getNotificationTextLong(purchases: MutableList<StockPurchase>): String {
         var tickers = ""
         for (purchaseStock in purchases) {
             val p = "%d*%.2f$=%.2f$ > %.2f%%".format(locale = Locale.US, purchaseStock.lots, purchaseStock.getProfitPriceForSell(), purchaseStock.lots * purchaseStock.getProfitPriceForSell(), purchaseStock.percentProfitSellFrom)
@@ -202,12 +202,12 @@ class Strategy1000Sell() : KoinComponent {
 
     fun prepareSell700() {
         started700 = false
-        positionsToSell700 = purchaseToSell
+        positionsToSell700 = toSellPurchase
     }
 
     fun prepareSell1000() {
         started1000 = false
-        positionsToSell1000 = purchaseToSell
+        positionsToSell1000 = toSellPurchase
     }
 
     fun startStrategy700Sell() {

@@ -11,7 +11,7 @@ enum class LimitType {
     UNDER_DOWN
 }
 
-data class LimitStock(
+data class StockLimit(
     val stock: Stock,
     val type: LimitType,
 

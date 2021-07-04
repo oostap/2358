@@ -15,7 +15,6 @@ import com.project.ti2358.data.service.*
 import com.project.ti2358.service.StrategyTelegramService
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
-import com.project.ti2358.ui.arbitration.StrategyArbitration
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -410,49 +409,47 @@ class StockManager : KoinComponent {
         }
     }
 
-    fun subscribeStockOrderbook(stock: Stock) {
-        if (SettingsManager.getAlorOrdebook()) {
-            streamingAlorService
-                .getOrderEventStream(
-                    listOf(stock),
-                    20
-                )
-                .onBackpressureBuffer()
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onNext = {
-                        GlobalScope.launch {
-                            addOrderbook(it)
+    fun subscribeOrderbookRU(stocks: List<Stock>) {
+        if (!strategyArbitration.started) { // если арбитраж не запущен, то подписаться на один стакан
+            if (SettingsManager.getAlorOrdebook()) {
+                streamingAlorService
+                    .getOrderEventStream(stocks, 20)
+                    .onBackpressureBuffer()
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                        onNext = {
+                            GlobalScope.launch {
+                                addOrderbook(it)
+                            }
+                        },
+                        onError = {
+                            it.printStackTrace()
+                            FirebaseCrashlytics.getInstance().recordException(it)
                         }
-                    },
-                    onError = {
-                        it.printStackTrace()
-                        FirebaseCrashlytics.getInstance().recordException(it)
-                    }
-                )
-        } else {
-            streamingTinkoffService
-                .getOrderEventStream(
-                    listOf(stock.figi),
-                    20
-                )
-                .onBackpressureBuffer()
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onNext = {
-                        GlobalScope.launch {
-                            addOrderbook(it)
+                    )
+            } else {
+                streamingTinkoffService
+                    .getOrderEventStream(stocks.map { it.figi }, 20)
+                    .onBackpressureBuffer()
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                        onNext = {
+                            GlobalScope.launch {
+                                addOrderbook(it)
+                            }
+                        },
+                        onError = {
+                            it.printStackTrace()
+                            FirebaseCrashlytics.getInstance().recordException(it)
                         }
-                    },
-                    onError = {
-                        it.printStackTrace()
-                        FirebaseCrashlytics.getInstance().recordException(it)
-                    }
-                )
+                    )
+            }
         }
+    }
 
+    fun subscribeOrderbookUS(stock: Stock) {
         if (SettingsManager.getPantiniWardenToken() != "" && SettingsManager.getPantiniTelegramID() != "") {
             streamingPantiniService
                 .getOrderbookEventStream(stock)
@@ -473,72 +470,106 @@ class StockManager : KoinComponent {
         }
     }
 
-    fun subscribeStockLenta(stock: Stock) {
-        streamingPantiniService
-            .getLentaEventStream(stock)
-            .onBackpressureBuffer()
-            .subscribeOn(Schedulers.computation())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(
-                onNext = {
-                    GlobalScope.launch {
-                        addLentaUS(it)
+    fun subscribeLentaUS(stock: Stock) {
+        if (SettingsManager.getPantiniWardenToken() != "" && SettingsManager.getPantiniTelegramID() != "") {
+            streamingPantiniService
+                .getLentaEventStream(stock)
+                .onBackpressureBuffer()
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = {
+                        GlobalScope.launch {
+                            addLentaUS(it)
+                        }
+                    },
+                    onError = {
+                        it.printStackTrace()
+                        FirebaseCrashlytics.getInstance().recordException(it)
                     }
-                },
-                onError = {
-                    it.printStackTrace()
-                    FirebaseCrashlytics.getInstance().recordException(it)
-                }
-            )
-    }
-
-    fun subscribeStockInfo() {
-        streamingTinkoffService
-            .getStockInfoEventStream(
-                stocksAll.map { it.figi },
-            )
-            .onBackpressureBuffer()
-            .subscribeOn(Schedulers.computation())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(
-                onNext = {
-                    GlobalScope.launch {
-                        addStockInfo(it)
-                    }
-                },
-                onError = {
-                    it.printStackTrace()
-                    FirebaseCrashlytics.getInstance().recordException(it)
-                }
-            )
-    }
-
-    fun unsubscribeStockInfo() {
-        streamingTinkoffService
-            .getStockInfoEventStream(emptyList(),)
-            .onBackpressureBuffer()
-            .subscribeOn(Schedulers.computation())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(
-                onNext = {
-                    GlobalScope.launch {
-                        addStockInfo(it)
-                    }
-                },
-                onError = {
-                    it.printStackTrace()
-                    FirebaseCrashlytics.getInstance().recordException(it)
-                }
-            )
-    }
-
-    fun unsubscribeStockOrderbook(stock: Stock) {
-        if (SettingsManager.getAlorOrdebook()) {
-            streamingAlorService.unsubscribeOrderBookEventsStream(stock, 20)
-        } else {
-            streamingTinkoffService.unsubscribeOrderEventsStream(stock.figi, 20)
+                )
         }
+    }
 
+    fun subscribeStockInfoAll() {
+        streamingTinkoffService
+            .getStockInfoEventStream(stocksAll.map { it.figi })
+            .onBackpressureBuffer()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onNext = {
+                    GlobalScope.launch {
+                        addStockInfo(it)
+                    }
+                },
+                onError = {
+                    it.printStackTrace()
+                    FirebaseCrashlytics.getInstance().recordException(it)
+                }
+            )
+    }
+
+    fun unsubscribeStockInfoAll() {
+        streamingTinkoffService
+            .getStockInfoEventStream(emptyList())
+            .onBackpressureBuffer()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onNext = {
+                    GlobalScope.launch {
+                        addStockInfo(it)
+                    }
+                },
+                onError = {
+                    it.printStackTrace()
+                    FirebaseCrashlytics.getInstance().recordException(it)
+                }
+            )
+    }
+
+    fun unsubscribeOrderbookAllRU() {
+        if (!strategyArbitration.started) {
+            if (SettingsManager.getAlorOrdebook()) {
+                streamingAlorService
+                    .getOrderEventStream(emptyList(), 20)
+                    .onBackpressureBuffer()
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                        onNext = {
+                            GlobalScope.launch {
+                                addOrderbook(it)
+                            }
+                        },
+                        onError = {
+                            it.printStackTrace()
+                            FirebaseCrashlytics.getInstance().recordException(it)
+                        }
+                    )
+            } else {
+                streamingTinkoffService
+                    .getOrderEventStream(emptyList(), 20)
+                    .onBackpressureBuffer()
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                        onNext = {
+                            GlobalScope.launch {
+                                addOrderbook(it)
+                            }
+                        },
+                        onError = {
+                            it.printStackTrace()
+                            FirebaseCrashlytics.getInstance().recordException(it)
+                        }
+                    )
+            }
+        }
+    }
+
+    fun unsubscribeOrderbookUS(stock: Stock) {
         if (SettingsManager.getPantiniWardenToken() != "" && SettingsManager.getPantiniTelegramID() != "") {
             streamingPantiniService.unsubscribeOrderbookEventsStream(stock)
         }
@@ -553,12 +584,6 @@ class StockManager : KoinComponent {
     private suspend fun addStockInfo(stockInfo: InstrumentInfo) = withContext(stockContext) {
         val stock = stocksStream.find { it.figi == stockInfo.figi || it.ticker == stockInfo.figi }
         stock?.processStockInfo(stockInfo)
-
-//        log("LIMIT ${stockInfo.figi} = ${stockInfo.limit_up}")
-//        if (stock != null) {
-//            strategyTelegram.sendStockInfo(stock, stockInfo)
-//            streamingTinkoffService.unsubscribeStockInfoEventsStream(stock.figi)
-//        }
     }
 
     private suspend fun addOrderbook(orderbookStream: OrderbookStream) = withContext(stockContext) {
@@ -579,17 +604,9 @@ class StockManager : KoinComponent {
     private suspend fun addLentaUS(lentaPantini: PantiniLenta) = withContext(stockContext) {
         val stock = stocksStream.find { it.figi == lentaPantini.ticker || it.ticker == lentaPantini.ticker }
         stock?.processLentaUS(lentaPantini)
-
-//        log("LENTA ${stock.ticker} = ${stock.lentaUS}")
-//
-//        stock.lentaUS?.let {
-//            strategyTelegram.sendLentaUS(stock, it)
-//        }
-//
-//        unsubscribeStockLenta(stock)
     }
 
-    private fun addCandle(candle: Candle) {// = withContext(stockContext) {
+    private fun addCandle(candle: Candle) {  // = withContext(stockContext) {
         val stock: Stock? = stocksStream.find { it.ticker == candle.figi || it.figi == candle.figi }
         stock?.let {
             it.processCandle(candle)

@@ -130,9 +130,7 @@ class BlacklistFragment : Fragment(R.layout.fragment_blacklist) {
                     }
 
                     itemView.setOnClickListener {
-                        view?.findNavController()?.let {
-                            Utils.openOrderbookForStock(it, orderbookManager, stock)
-                        }
+                        Utils.openOrderbookForStock(it.findNavController(), orderbookManager, stock)
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))

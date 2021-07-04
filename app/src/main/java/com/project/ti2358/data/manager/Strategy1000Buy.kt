@@ -21,11 +21,11 @@ class Strategy1000Buy : KoinComponent {
 
     var stocks: MutableList<Stock> = mutableListOf()
     var presetStocksSelected: MutableList<PresetStock> = mutableListOf()
-    var purchaseToBuy: MutableList<PurchaseStock> = mutableListOf()
+    var toBuyPurchase: MutableList<StockPurchase> = mutableListOf()
     var currentSort: Sorting = Sorting.DESCENDING
 
-    var stocksToBuy700: MutableList<PurchaseStock> = mutableListOf()
-    var stocksToBuy1000: MutableList<PurchaseStock> = mutableListOf()
+    var stocksToBuy700: MutableList<StockPurchase> = mutableListOf()
+    var stocksToBuy1000: MutableList<StockPurchase> = mutableListOf()
 
     var started700: Boolean = false
     var started1000: Boolean = false
@@ -62,7 +62,7 @@ class Strategy1000Buy : KoinComponent {
         }
 
         // сохранить лоты и проценты из PurchaseStock
-        for (purchase in purchaseToBuy) {
+        for (purchase in toBuyPurchase) {
             val preset = presetStocksSelected.find { it.ticker == purchase.ticker}
             preset?.let {
                 it.percent = purchase.percentLimitPriceChange
@@ -105,22 +105,22 @@ class Strategy1000Buy : KoinComponent {
         return presetStocksSelected.find { it.ticker == stock.ticker } != null
     }
 
-    fun getPurchaseStock(): MutableList<PurchaseStock> {
+    fun getPurchaseStock(): MutableList<StockPurchase> {
         val totalMoney: Double = SettingsManager.get1000BuyPurchaseVolume().toDouble()
         val onePiece: Double = totalMoney / presetStocksSelected.size
 
-        val purchases: MutableList<PurchaseStock> = mutableListOf()
+        val purchases: MutableList<StockPurchase> = mutableListOf()
         for (preset in presetStocksSelected) {
             val stock = stocks.find { it.ticker == preset.ticker }
             if (stock != null) {
-                val purchase = PurchaseStock(stock)
+                val purchase = StockPurchase(stock)
 
                 // из настроек
                 purchase.percentLimitPriceChange = preset.percent
                 purchase.lots = preset.lots
 
                 // уже заданные
-                for (p in purchaseToBuy) {
+                for (p in toBuyPurchase) {
                     if (p.ticker == stock.ticker) {
                         purchase.apply {
                             percentLimitPriceChange = p.percentLimitPriceChange
@@ -132,9 +132,9 @@ class Strategy1000Buy : KoinComponent {
                 purchases.add(purchase)
             }
         }
-        purchaseToBuy = purchases
+        toBuyPurchase = purchases
 
-        purchaseToBuy.forEach {
+        toBuyPurchase.forEach {
             if (it.percentLimitPriceChange == 0.0) {
                 it.percentLimitPriceChange = -1.0
             }
@@ -147,10 +147,10 @@ class Strategy1000Buy : KoinComponent {
             it.status = PurchaseStatus.WAITING
         }
 
-        return purchaseToBuy
+        return toBuyPurchase
     }
 
-    fun getTotalPurchaseString(purchases: MutableList<PurchaseStock>): String {
+    fun getTotalPurchaseString(purchases: MutableList<StockPurchase>): String {
         var value = 0.0
         for (p in purchases) {
             value += p.lots * p.getLimitPriceDouble()
@@ -160,13 +160,13 @@ class Strategy1000Buy : KoinComponent {
 
     fun getTotalPurchasePieces(): Int {
         var value = 0
-        for (stock in purchaseToBuy) {
+        for (stock in toBuyPurchase) {
             value += stock.lots
         }
         return value
     }
 
-    fun getNotificationTextShort(purchases: MutableList<PurchaseStock>): String {
+    fun getNotificationTextShort(purchases: MutableList<StockPurchase>): String {
         val price = getTotalPurchaseString(purchases)
         var tickers = ""
         for (p in purchases) {
@@ -176,7 +176,7 @@ class Strategy1000Buy : KoinComponent {
         return "$price:\n$tickers"
     }
 
-    fun getNotificationTextLong(purchases: MutableList<PurchaseStock>): String {
+    fun getNotificationTextLong(purchases: MutableList<StockPurchase>): String {
         var tickers = ""
         for (p in purchases) {
             val text = "%.1f$ > %.2f$ > %.2f%%".format(locale = Locale.US,
@@ -192,12 +192,12 @@ class Strategy1000Buy : KoinComponent {
 
     fun prepareBuy700() {
         started700 = false
-        stocksToBuy700 = purchaseToBuy
+        stocksToBuy700 = toBuyPurchase
     }
 
     fun prepareBuy1000() {
         started1000 = false
-        stocksToBuy1000 = purchaseToBuy
+        stocksToBuy1000 = toBuyPurchase
     }
 
     fun startStrategy700Buy() {

@@ -28,7 +28,7 @@ enum class PurchaseStatus {
 }
 
 @KoinApiExtension
-data class PurchaseStock(var stock: Stock) : KoinComponent {
+data class StockPurchase(var stock: Stock) : KoinComponent {
     private val ordersService: OrdersService by inject()
     private val depositManager: DepositManager by inject()
     private val marketService: MarketService by inject()
