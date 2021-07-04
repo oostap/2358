@@ -19,7 +19,7 @@ import java.util.Collections.synchronizedList
 import kotlin.math.abs
 
 @KoinApiExtension
-class DepositManager : KoinComponent {
+class PortfolioManager : KoinComponent {
     private val stocksManager: StockManager by inject()
 
     private val portfolioService: PortfolioService by inject()
@@ -234,9 +234,9 @@ class DepositManager : KoinComponent {
     }
 
     fun getPositions() : List<PortfolioPosition> {
-        val list = portfolioPositions
-        val blacklist = strategyBlacklist.getBlacklistStocks()
-        list.removeAll { it.ticker in blacklist.map { stock -> stock.ticker } }
-        return list
+//        val list = portfolioPositions
+//        val blacklist = strategyBlacklist.getBlacklistStocks()
+//        list.removeAll { it.ticker in blacklist.map { stock -> stock.ticker } }
+        return portfolioPositions
     }
 }

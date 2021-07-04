@@ -1,15 +1,6 @@
 package com.project.ti2358.data.manager
 
-enum class LimitType {
-    ON_UP,
-    ON_DOWN,
-
-    NEAR_UP,
-    NEAR_DOWN,
-
-    ABOVE_UP,
-    UNDER_DOWN
-}
+import com.project.ti2358.service.LimitType
 
 data class StockLimit(
     val stock: Stock,

@@ -80,14 +80,6 @@
             android:text="80k"
             android:textSize="14sp" />
 
-        <TextView
-            android:id="@+id/volume_shares_from_start_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:gravity="center_vertical"
-            android:text="5k"
-            android:textSize="14sp" />
     </LinearLayout>
 
     <LinearLayout

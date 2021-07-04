@@ -284,9 +284,11 @@
     <string name="stocks_telegram_send_spikes">Спайки</string>
     <string name="stocks_telegram_send_trends">Тренды</string>
     <string name="stocks_telegram_send_limits">Лимиты</string>
+    <string name="stocks_telegram_send_arbitration">Арбитраж</string>
 
-    <string name="stocks_telegram_allow_command_inform">Информационные команды</string>
-    <string name="stocks_telegram_allow_command_handle">Команды управления</string>
+    <string name="stocks_telegram_allow_command_inform">Команды информирования</string>
+    <string name="stocks_telegram_allow_command_handle">Команды управления стратегиями</string>
+    <string name="stocks_telegram_allow_command_buy_sell">Команды покупки/продажи</string>
     <string name="stocks_telegram_send_goto_terminal">Переход в терминал</string>
 
     <!-- follower settings -->
@@ -319,6 +321,14 @@
     <string name="stocks_limits_up">Верхние лимиты</string>
     <string name="stocks_limits_down">Нижние лимиты</string>
     <string name="stocks_limits_voice">Озвучка лимитов</string>
+
+    <!-- arbitration settings -->
+    <string name="stocks_arbitration_min_percent">Минимальный %</string>
+    <string name="stocks_arbitration_interval">Интервал повторения сигнала (в минутах)</string>
+    <string name="stocks_arbitration_volume_day_from">Объём в день от шт.</string>
+    <string name="stocks_arbitration_volume_day_to">Объём в день до шт.</string>
+    <string name="stocks_arbitration_long">Лонг</string>
+    <string name="stocks_arbitration_short">Шорт</string>
 
     <string name="position_line">position_line</string>
     <string name="action_type">drag_type</string>
@@ -476,7 +486,7 @@
     <string name="setting_key_rocket_change_volume">rocket_change_volume</string>
     <string name="setting_key_rocket_notify_alive_seconds">notify_alive_seconds</string>
     <string name="setting_key_rocket_voice">rocket_voice</string>
-    <string name="setting_key_rocket_only_love">Только избранные</string>
+    <string name="setting_key_rocket_only_love">rocket_only_love</string>
 
     <!-- telegram settings -->
     <string name="setting_key_telegram_autostart">telegram_autostart</string>
@@ -492,9 +502,10 @@
     <string name="setting_key_telegram_send_spikes">telegram_send_spikes</string>
     <string name="setting_key_telegram_send_trends">telegram_send_trends</string>
     <string name="setting_key_telegram_send_limits">telegram_send_limits</string>
+    <string name="setting_key_telegram_send_arbitration">telegram_send_arbitration</string>
     <string name="setting_key_telegram_allow_command_inform">telegram_allow_command_inform</string>
     <string name="setting_key_telegram_allow_command_handle">telegram_allow_command_handle</string>
-
+    <string name="setting_key_telegram_allow_command_buy_sell">telegram_allow_command_buy_sell</string>
     <string name="setting_key_telegram_send_goto_terminal">telegram_send_goto_terminal</string>
 
     <!-- follower settings -->
@@ -527,6 +538,14 @@
     <string name="setting_key_limits_up">limits_up</string>
     <string name="setting_key_limits_down">limits_down</string>
     <string name="setting_key_limits_voice">limits_voice</string>
+
+    <!-- arbitration settings -->
+    <string name="setting_key_arbitration_min_percent">arbitration_min_percent</string>
+    <string name="setting_key_arbitration_interval">arbitration_interval</string>
+    <string name="setting_key_arbitration_volume_day_from">arbitration_volume_day_from</string>
+    <string name="setting_key_arbitration_volume_day_to">arbitration_volume_day_to</string>
+    <string name="setting_key_arbitration_long">arbitration_long</string>
+    <string name="setting_key_arbitration_short">arbitration_short</string>
 
     <!-- pantini -->
     <string name="setting_key_pantini_telegram_id">pantini_telegram_id</string>

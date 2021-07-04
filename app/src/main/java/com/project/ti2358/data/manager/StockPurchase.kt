@@ -2,6 +2,7 @@ package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.model.dto.*
 import com.project.ti2358.data.service.*
+import com.project.ti2358.service.PurchaseStatus
 import com.project.ti2358.service.Utils
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
@@ -11,26 +12,10 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.math.ceil
 
-enum class PurchaseStatus {
-    NONE,
-    ORDER_BUY_PREPARE,
-    ORDER_BUY,
-    BOUGHT,
-    ORDER_SELL_TRAILING,
-    ORDER_SELL_PREPARE,
-    ORDER_SELL,
-    WAITING,
-    SOLD,
-    CANCELED,
-    PART_FILLED,
-
-    ERROR_NEED_WATCH,
-}
-
 @KoinApiExtension
 data class StockPurchase(var stock: Stock) : KoinComponent {
     private val ordersService: OrdersService by inject()
-    private val depositManager: DepositManager by inject()
+    private val portfolioManager: PortfolioManager by inject()
     private val marketService: MarketService by inject()
     private val strategyTrailingStop: StrategyTrailingStop by inject()
 
@@ -141,7 +126,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                             lots,
                             stock.figi,
                             OperationType.BUY,
-                            depositManager.getActiveBrokerAccountId()
+                            portfolioManager.getActiveBrokerAccountId()
                         )
                         status = PurchaseStatus.ORDER_BUY
                         break
@@ -155,9 +140,9 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 var position: PortfolioPosition? = null
                 var counter = 50
                 while (counter > 0) {
-                    depositManager.refreshDeposit()
+                    portfolioManager.refreshDeposit()
 
-                    position = depositManager.getPositionForFigi(stock.figi)
+                    position = portfolioManager.getPositionForFigi(stock.figi)
                     if (position != null && position.lots >= lots) { // куплено!
                         status = PurchaseStatus.BOUGHT
                         break
@@ -178,7 +163,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                             stock.figi,
                             sellPrice,
                             OperationType.SELL,
-                            depositManager.getActiveBrokerAccountId()
+                            portfolioManager.getActiveBrokerAccountId()
                         )
                     }
                     status = PurchaseStatus.ORDER_SELL
@@ -190,7 +175,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 while (true) {
                     delay(DelayLong)
 
-                    position = depositManager.getPositionForFigi(stock.figi)
+                    position = portfolioManager.getPositionForFigi(stock.figi)
                     if (position == null) { // продано!
                         status = PurchaseStatus.SOLD
                         break
@@ -211,7 +196,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
         var profitPrice = buyPrice + buyPrice / 100.0 * profit
         profitPrice = Utils.makeNicePrice(profitPrice, stock)
 
-        val p = depositManager.getPositionForFigi(figi)
+        val p = portfolioManager.getPositionForFigi(figi)
 
         val lotsPortfolio = p?.lots ?: 0
         var lotsToBuy = lots
@@ -232,7 +217,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                             figi,
                             buyPrice,
                             OperationType.BUY,
-                            depositManager.getActiveBrokerAccountId()
+                            portfolioManager.getActiveBrokerAccountId()
                         )
                         delay(DelayFast)
 
@@ -241,11 +226,11 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                             break
                         }
 
-                        depositManager.refreshOrders()
-                        depositManager.refreshDeposit()
+                        portfolioManager.refreshOrders()
+                        portfolioManager.refreshDeposit()
 
                         // если нет ни ордера, ни позиции, значит чета не так, повторяем
-                        if (depositManager.getOrderAllOrdersForFigi(figi, OperationType.BUY).isNotEmpty()) {
+                        if (portfolioManager.getOrderAllOrdersForFigi(figi, OperationType.BUY).isNotEmpty()) {
                             status = PurchaseStatus.ORDER_BUY
                             break
                         }
@@ -268,7 +253,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                     status = PurchaseStatus.CANCELED
                     try {
                         buyLimitOrder?.let {
-                            ordersService.cancel(it.orderId, depositManager.getActiveBrokerAccountId())
+                            ordersService.cancel(it.orderId, portfolioManager.getActiveBrokerAccountId())
                         }
                     } catch (e: Exception) {
 
@@ -281,8 +266,8 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                     while (true) {
                         iterations++
                         try {
-                            depositManager.refreshDeposit()
-                            depositManager.refreshOrders()
+                            portfolioManager.refreshDeposit()
+                            portfolioManager.refreshOrders()
                         } catch (e: Exception) {
                             e.printStackTrace()
                             delay(DelayLong)
@@ -292,17 +277,17 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         if (iterations * DelayLong / 1000.0 > orderLifeTimeSeconds) { // отменить заявку на покупку
                             status = PurchaseStatus.CANCELED
                             buyLimitOrder?.let {
-                                ordersService.cancel(it.orderId, depositManager.getActiveBrokerAccountId())
+                                ordersService.cancel(it.orderId, portfolioManager.getActiveBrokerAccountId())
                             }
                             Utils.showToastAlert("$ticker: заявка отменена по $buyPrice")
                             return@launch
                         }
 
-                        val orderBuy = depositManager.getOrderForFigi(figi, OperationType.BUY)
-                        position = depositManager.getPositionForFigi(figi)
+                        val orderBuy = portfolioManager.getOrderForFigi(figi, OperationType.BUY)
+                        position = portfolioManager.getPositionForFigi(figi)
 
                         // проверка на большое количество лотов
-                        val orders = depositManager.getOrderAllOrdersForFigi(figi, OperationType.SELL)
+                        val orders = portfolioManager.getOrderAllOrdersForFigi(figi, OperationType.SELL)
                         var totalSellingLots = 0
                         orders.forEach { totalSellingLots += it.requestedLots }
                         if (totalSellingLots >= lots) break
@@ -340,7 +325,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                                     figi,
                                     profitPrice,
                                     OperationType.SELL,
-                                    depositManager.getActiveBrokerAccountId()
+                                    portfolioManager.getActiveBrokerAccountId()
                                 )
 
                                 if (sellLimitOrder!!.status == OrderStatus.NEW || sellLimitOrder!!.status == OrderStatus.PENDING_NEW) {
@@ -367,7 +352,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 if (status == PurchaseStatus.ORDER_SELL) {
                     while (true) {
                         delay(DelayLong)
-                        val position = depositManager.getPositionForFigi(figi)
+                        val position = portfolioManager.getPositionForFigi(figi)
                         if (position == null || position.lots == lotsPortfolio) { // продано!
                             status = PurchaseStatus.SOLD
                             Utils.showToastAlert("$ticker: продано!?")
@@ -390,7 +375,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
         var profitPrice = sellPrice - sellPrice / 100.0 * profit
         profitPrice = Utils.makeNicePrice(profitPrice, stock)
 
-        val p = depositManager.getPositionForFigi(figi)
+        val p = portfolioManager.getPositionForFigi(figi)
 
         val lotsPortfolio = abs(p?.lots ?: 0)
         var lotsToSell = lots
@@ -411,7 +396,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                             figi,
                             sellPrice,
                             OperationType.SELL,
-                            depositManager.getActiveBrokerAccountId()
+                            portfolioManager.getActiveBrokerAccountId()
                         )
                         delay(DelayFast)
 
@@ -420,11 +405,11 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                             break
                         }
 
-                        depositManager.refreshOrders()
-                        depositManager.refreshDeposit()
+                        portfolioManager.refreshOrders()
+                        portfolioManager.refreshDeposit()
 
                         // если нет ни ордера, ни позиции, значит чета не так, повторяем
-                        if (depositManager.getOrderAllOrdersForFigi(figi, OperationType.SELL).isNotEmpty()) {
+                        if (portfolioManager.getOrderAllOrdersForFigi(figi, OperationType.SELL).isNotEmpty()) {
                             status = PurchaseStatus.ORDER_SELL
                             break
                         }
@@ -447,7 +432,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                     status = PurchaseStatus.CANCELED
                     try {
                         sellLimitOrder?.let {
-                            ordersService.cancel(it.orderId, depositManager.getActiveBrokerAccountId())
+                            ordersService.cancel(it.orderId, portfolioManager.getActiveBrokerAccountId())
                         }
                     } catch (e: Exception) {
 
@@ -460,8 +445,8 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                     while (true) {
                         iterations++
                         try {
-                            depositManager.refreshDeposit()
-                            depositManager.refreshOrders()
+                            portfolioManager.refreshDeposit()
+                            portfolioManager.refreshOrders()
                         } catch (e: Exception) {
                             e.printStackTrace()
                             delay(DelayLong)
@@ -471,17 +456,17 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         if (iterations * DelayLong / 1000.0 > orderLifeTimeSeconds) { // отменить заявку на покупку
                             status = PurchaseStatus.CANCELED
                             sellLimitOrder?.let {
-                                ordersService.cancel(it.orderId, depositManager.getActiveBrokerAccountId())
+                                ordersService.cancel(it.orderId, portfolioManager.getActiveBrokerAccountId())
                             }
                             Utils.showToastAlert("$ticker: заявка отменена по $sellPrice")
                             return@launch
                         }
 
-                        val orderSell = depositManager.getOrderForFigi(figi, OperationType.SELL)
-                        position = depositManager.getPositionForFigi(figi)
+                        val orderSell = portfolioManager.getOrderForFigi(figi, OperationType.SELL)
+                        position = portfolioManager.getPositionForFigi(figi)
 
                         // проверка на большое количество лотов
-                        val orders = depositManager.getOrderAllOrdersForFigi(figi, OperationType.BUY)
+                        val orders = portfolioManager.getOrderAllOrdersForFigi(figi, OperationType.BUY)
                         var totalBuyingLots = 0
                         orders.forEach { totalBuyingLots += it.requestedLots }
                         if (totalBuyingLots >= lots) break
@@ -519,7 +504,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                                     figi,
                                     profitPrice,
                                     OperationType.BUY,
-                                    depositManager.getActiveBrokerAccountId()
+                                    portfolioManager.getActiveBrokerAccountId()
                                 )
 
                                 if (buyLimitOrder!!.status == OrderStatus.NEW || buyLimitOrder!!.status == OrderStatus.PENDING_NEW) {
@@ -546,7 +531,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 if (status == PurchaseStatus.ORDER_BUY) {
                     while (true) {
                         delay(DelayLong)
-                        val position = depositManager.getPositionForFigi(figi)
+                        val position = portfolioManager.getPositionForFigi(figi)
                         if (position == null || position.lots == lotsPortfolio) { // продано!
                             status = PurchaseStatus.SOLD
                             Utils.showToastAlert("$ticker: продано!?")
@@ -583,7 +568,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         figi,
                         buyPrice,
                         OperationType.BUY,
-                        depositManager.getActiveBrokerAccountId()
+                        portfolioManager.getActiveBrokerAccountId()
                     )
                     status = PurchaseStatus.ORDER_BUY
                 } catch (e: Exception) {
@@ -600,12 +585,12 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 var position: PortfolioPosition?
                 while (true) {
                     try {
-                        depositManager.refreshDeposit()
+                        portfolioManager.refreshDeposit()
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
 
-                    position = depositManager.getPositionForFigi(figi)
+                    position = portfolioManager.getPositionForFigi(figi)
                     if (position != null && position.lots >= lots) {
                         status = PurchaseStatus.BOUGHT
                         Utils.showToastAlert("$ticker: куплено!")
@@ -644,7 +629,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                                     figi,
                                     profitSellPrice,
                                     OperationType.SELL,
-                                    depositManager.getActiveBrokerAccountId()
+                                    portfolioManager.getActiveBrokerAccountId()
                                 )
                                 status = PurchaseStatus.ORDER_SELL
                                 break
@@ -670,7 +655,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                                     figi,
                                     profitPrice,
                                     OperationType.SELL,
-                                    depositManager.getActiveBrokerAccountId()
+                                    portfolioManager.getActiveBrokerAccountId()
                                 )
                                 status = PurchaseStatus.ORDER_SELL
                                 break
@@ -685,7 +670,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 }
 
                 while (true) {
-                    position = depositManager.getPositionForFigi(figi)
+                    position = portfolioManager.getPositionForFigi(figi)
                     if (position == null) { // продано!
                         status = PurchaseStatus.SOLD
                         Utils.showToastAlert("$ticker: продано!")
@@ -723,7 +708,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         figi,
                         buyPrice,
                         OperationType.BUY,
-                        depositManager.getActiveBrokerAccountId()
+                        portfolioManager.getActiveBrokerAccountId()
                     )
                     status = PurchaseStatus.ORDER_BUY
                 } catch (e: Exception) {
@@ -740,12 +725,12 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 var position: PortfolioPosition?
                 while (true) {
                     try {
-                        depositManager.refreshDeposit()
+                        portfolioManager.refreshDeposit()
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
 
-                    position = depositManager.getPositionForFigi(figi)
+                    position = portfolioManager.getPositionForFigi(figi)
                     if (position != null && position.lots >= lots) {
                         status = PurchaseStatus.BOUGHT
                         Utils.showToastAlert("$ticker: куплено!")
@@ -781,7 +766,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                                 figi,
                                 profitSellPrice,
                                 OperationType.SELL,
-                                depositManager.getActiveBrokerAccountId()
+                                portfolioManager.getActiveBrokerAccountId()
                             )
                             status = PurchaseStatus.ORDER_SELL
                         } catch (e: Exception) {
@@ -863,7 +848,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                                     figi,
                                     profitPrice,
                                     OperationType.SELL,
-                                    depositManager.getActiveBrokerAccountId()
+                                    portfolioManager.getActiveBrokerAccountId()
                                 )
                                 status = PurchaseStatus.ORDER_SELL
                             } catch (e: Exception) {
@@ -878,7 +863,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
 
                 while (true) {
                     delay(DelayLong * 5)
-                    if (depositManager.getPositionForFigi(figi) == null) { // продано!
+                    if (portfolioManager.getPositionForFigi(figi) == null) { // продано!
                         status = PurchaseStatus.SOLD
                         Utils.showToastAlert("$ticker: продано!")
                         break
@@ -896,7 +881,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
 
     fun sellMorning(): Job? {
         val figi = stock.figi
-        val pos = depositManager.getPositionForFigi(figi)
+        val pos = portfolioManager.getPositionForFigi(figi)
         if (lots == 0 || percentProfitSellFrom == 0.0) {
             status = PurchaseStatus.CANCELED
             return null
@@ -921,7 +906,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                             figi,
                             profitPrice,
                             OperationType.SELL,
-                            depositManager.getActiveBrokerAccountId()
+                            portfolioManager.getActiveBrokerAccountId()
                         )
                         delay(DelayFast)
 
@@ -930,8 +915,8 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                             break
                         }
 
-                        depositManager.refreshOrders()
-                        if (depositManager.getOrderAllOrdersForFigi(figi, OperationType.SELL).isEmpty()) continue
+                        portfolioManager.refreshOrders()
+                        if (portfolioManager.getOrderAllOrdersForFigi(figi, OperationType.SELL).isEmpty()) continue
 
                         status = PurchaseStatus.ORDER_SELL
                         Utils.showToastAlert("$ticker: ордер на продажу по $profitPrice")
@@ -946,7 +931,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 // проверяем продалось или нет
                 while (true) {
                     delay(DelayLong + DelayLong)
-                    val p = depositManager.getPositionForFigi(figi)
+                    val p = portfolioManager.getPositionForFigi(figi)
                     if (!short) {
                         if (p == null || p.lots == 0) { // продано
                             status = PurchaseStatus.SOLD
@@ -969,7 +954,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
     fun sellWithLimit(): Job? {
         val figi = stock.figi
         val ticker = stock.ticker
-        val pos = depositManager.getPositionForFigi(figi)
+        val pos = portfolioManager.getPositionForFigi(figi)
         if (pos == null || lots == 0 || percentProfitSellFrom == 0.0) {
             status = PurchaseStatus.CANCELED
             return null
@@ -989,7 +974,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         figi,
                         profitPrice,
                         OperationType.SELL,
-                        depositManager.getActiveBrokerAccountId()
+                        portfolioManager.getActiveBrokerAccountId()
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -1007,7 +992,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
         val figi = stock.figi
         val ticker = stock.ticker
 
-        val pos = depositManager.getPositionForFigi(figi)
+        val pos = portfolioManager.getPositionForFigi(figi)
         if (pos == null || pos.lots == 0) {
             status = PurchaseStatus.CANCELED
             return null
@@ -1028,7 +1013,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         figi,
                         profitSellPrice,
                         OperationType.SELL,
-                        depositManager.getActiveBrokerAccountId()
+                        portfolioManager.getActiveBrokerAccountId()
                     )
                 } catch (e: Exception) {
                     status = PurchaseStatus.CANCELED
@@ -1047,7 +1032,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
 
     fun sellToBestAsk(): Job? {
         val figi = stock.figi
-        val pos = depositManager.getPositionForFigi(figi)
+        val pos = portfolioManager.getPositionForFigi(figi)
         if (pos == null || pos.lots == 0) {
             status = PurchaseStatus.CANCELED
             return null
@@ -1069,7 +1054,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         figi,
                         profitSellPrice,
                         OperationType.SELL,
-                        depositManager.getActiveBrokerAccountId()
+                        portfolioManager.getActiveBrokerAccountId()
                     )
                 } catch (e: Exception) {
                     status = PurchaseStatus.CANCELED
@@ -1090,7 +1075,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
         val figi = stock.figi
         val ticker = stock.ticker
 
-        val pos = depositManager.getPositionForFigi(figi)
+        val pos = portfolioManager.getPositionForFigi(figi)
         if (pos == null || pos.lots == 0 || percentProfitSellFrom == 0.0) {
             status = PurchaseStatus.CANCELED
             return null
@@ -1118,7 +1103,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                             figi,
                             profitSellPrice,
                             OperationType.SELL,
-                            depositManager.getActiveBrokerAccountId()
+                            portfolioManager.getActiveBrokerAccountId()
                         )
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -1185,7 +1170,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         figi,
                         sellPrice,
                         OperationType.SELL,
-                        depositManager.getActiveBrokerAccountId()
+                        portfolioManager.getActiveBrokerAccountId()
                     )
                     status = PurchaseStatus.ORDER_SELL
                 } catch (e: Exception) {
@@ -1202,12 +1187,12 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 var position: PortfolioPosition?
                 while (true) {
                     try {
-                        depositManager.refreshDeposit()
+                        portfolioManager.refreshDeposit()
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
 
-                    position = depositManager.getPositionForFigi(figi)
+                    position = portfolioManager.getPositionForFigi(figi)
                     if (position != null && abs(position.lots) >= lots) {
                         status = PurchaseStatus.BOUGHT
                         Utils.showToastAlert("$ticker: продано!")
@@ -1325,7 +1310,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                                     figi,
                                     profitPrice,
                                     OperationType.BUY,
-                                    depositManager.getActiveBrokerAccountId()
+                                    portfolioManager.getActiveBrokerAccountId()
                                 )
                                 status = PurchaseStatus.ORDER_BUY
                             } catch (e: Exception) {
@@ -1340,7 +1325,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
 
                 while (true) {
                     delay(DelayLong * 5)
-                    if (depositManager.getPositionForFigi(figi) == null) { // продано!
+                    if (portfolioManager.getPositionForFigi(figi) == null) { // продано!
                         status = PurchaseStatus.SOLD
                         Utils.showToastAlert("$ticker: зашорчено!")
                         break

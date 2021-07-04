@@ -4,10 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,7 +24,7 @@ import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
 class AccountsFragment : Fragment(R.layout.fragment_accounts) {
-    val depositManager: DepositManager by inject()
+    val portfolioManager: PortfolioManager by inject()
 
     private var fragmentAccountsBinding: FragmentAccountsBinding? = null
 
@@ -60,10 +58,10 @@ class AccountsFragment : Fragment(R.layout.fragment_accounts) {
     private fun updateData() {
         job?.cancel()
         job = GlobalScope.launch(Dispatchers.Main) {
-            depositManager.refreshAccounts()
-            depositManager.refreshDeposit()
-            depositManager.refreshKotleta()
-            accounts = depositManager.accounts
+            portfolioManager.refreshAccounts()
+            portfolioManager.refreshDeposit()
+            portfolioManager.refreshKotleta()
+            accounts = portfolioManager.accounts
             adapterList.setData(accounts)
             updateTitle()
         }
@@ -91,13 +89,13 @@ class AccountsFragment : Fragment(R.layout.fragment_accounts) {
                 val account = values[index]
                 with(binding) {
                     chooseView.setOnCheckedChangeListener(null)
-                    chooseView.isChecked = depositManager.getActiveBrokerAccountId() == account.brokerAccountId
+                    chooseView.isChecked = portfolioManager.getActiveBrokerAccountId() == account.brokerAccountId
 
                     nameView.text = account.brokerAccountId
                     typeView.text = account.brokerAccountType
 
                     chooseView.setOnCheckedChangeListener { _, checked ->
-                        depositManager.setActiveBrokerAccountId(account.brokerAccountId)
+                        portfolioManager.setActiveBrokerAccountId(account.brokerAccountId)
                         updateData()
                     }
 

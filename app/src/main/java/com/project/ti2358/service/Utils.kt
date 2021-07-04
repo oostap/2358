@@ -55,6 +55,33 @@ enum class ScreenerType {
     screenerNow,
 }
 
+enum class PurchaseStatus {
+    NONE,
+    ORDER_BUY_PREPARE,
+    ORDER_BUY,
+    BOUGHT,
+    ORDER_SELL_TRAILING,
+    ORDER_SELL_PREPARE,
+    ORDER_SELL,
+    WAITING,
+    SOLD,
+    CANCELED,
+    PART_FILLED,
+
+    ERROR_NEED_WATCH,
+}
+
+enum class LimitType {
+    ON_UP,
+    ON_DOWN,
+
+    NEAR_UP,
+    NEAR_DOWN,
+
+    ABOVE_UP,
+    UNDER_DOWN
+}
+
 fun Date.toString(format: String, locale: Locale = Locale.getDefault()): String {
     val formatter = SimpleDateFormat(format, locale)
     return formatter.format(this)

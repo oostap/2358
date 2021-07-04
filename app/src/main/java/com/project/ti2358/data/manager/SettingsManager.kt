@@ -1128,6 +1128,11 @@ class SettingsManager {
             return preferences.getBoolean(key, true)
         }
 
+        fun getTelegramSendArbitration(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_arbitration)
+            return preferences.getBoolean(key, true)
+        }
+
         fun getTelegramSendGotoTerminal(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_goto_terminal)
             return preferences.getBoolean(key, true)
@@ -1140,6 +1145,11 @@ class SettingsManager {
 
         fun getTelegramAllowCommandHandle(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_allow_command_handle)
+            return preferences.getBoolean(key, false)
+        }
+
+        fun getTelegramAllowCommandBuySell(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_allow_command_buy_sell)
             return preferences.getBoolean(key, false)
         }
 
@@ -1330,51 +1340,102 @@ class SettingsManager {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_limits_voice)
             return preferences.getBoolean(key, true)
         }
-    }
 
-    /******************** fixprice *************************/
-    fun getFixPriceNearestTime(): String {
-        val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_fixprice_schedule)
-        val time = preferences.getString(key, "07:00:00 10:00:00 11:00:00 16:30:00")
-
-        if (time != null && time != "") {
-            val times = time.split(" ").toTypedArray()
-
-            // отсортировать по возрастанию
-            times.sortBy { t ->
-                val dayTime = t.split(":").toTypedArray()
-                parseInt(dayTime[0]) * 3600 + parseInt(dayTime[1]) * 60 + parseInt(dayTime[2])
-            }
-
-            for (t in times) {
-                val dayTime = t.split(":").toTypedArray()
-                if (dayTime.size < 3) continue
-
-                val hours: Int
-                val minutes: Int
-                val seconds: Int
-                try {
-                    hours = parseInt(dayTime[0])
-                    minutes = parseInt(dayTime[1])
-                    seconds = parseInt(dayTime[2])
-                } catch (e: Exception) {
-                    Utils.showToastAlert("Неверный формат времени в настройках!")
-                    continue
-                }
-                val currentMskTime = Utils.getTimeMSK()
-
-                val hoursMsk = currentMskTime.get(Calendar.HOUR_OF_DAY)
-                val minutesMsk = currentMskTime.get(Calendar.MINUTE)
-                val secondsMsk = currentMskTime.get(Calendar.SECOND)
-
-                val total = hours * 3600 + minutes * 60 + seconds
-                val totalMsk = hoursMsk * 3600 + minutesMsk * 60 + secondsMsk
-                if (totalMsk < total) {
-                    return t
-                }
+        /******************** Arbitration *************************/
+        fun getArbitrationMinPercent(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_arbitration_min_percent)
+            val value: String? = preferences.getString(key, "0.5")
+            return try {
+                (value ?: "0.5").toDouble()
+            } catch (e: Exception) {
+                0.5
             }
         }
 
-        return "???"
+        fun getArbitrationRepeatInterval(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_arbitration_interval)
+            val value: String? = preferences.getString(key, "5")
+            return try {
+                parseInt(value ?: "5")
+            } catch (e: Exception) {
+                5
+            }
+        }
+
+        fun getArbitrationVolumeDayFrom(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_arbitration_volume_day_from)
+            val value: String? = preferences.getString(key, "0")
+            return try {
+                parseInt(value ?: "0")
+            } catch (e: Exception) {
+                0
+            }
+        }
+
+        fun getArbitrationVolumeDayTo(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_arbitration_volume_day_to)
+            val value: String? = preferences.getString(key, "1000000")
+            return try {
+                parseInt(value ?: "1000000")
+            } catch (e: Exception) {
+                1000000
+            }
+        }
+
+        fun getArbitrationLong(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_arbitration_long)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getArbitrationShort(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_arbitration_short)
+            return preferences.getBoolean(key, true)
+        }
+
+        /******************** fixprice *************************/
+        fun getFixPriceNearestTime(): String { // TODO: unused yet
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_fixprice_schedule)
+            val time = preferences.getString(key, "07:00:00 10:00:00 11:00:00 16:30:00")
+
+            if (time != null && time != "") {
+                val times = time.split(" ").toTypedArray()
+
+                // отсортировать по возрастанию
+                times.sortBy { t ->
+                    val dayTime = t.split(":").toTypedArray()
+                    parseInt(dayTime[0]) * 3600 + parseInt(dayTime[1]) * 60 + parseInt(dayTime[2])
+                }
+
+                for (t in times) {
+                    val dayTime = t.split(":").toTypedArray()
+                    if (dayTime.size < 3) continue
+
+                    val hours: Int
+                    val minutes: Int
+                    val seconds: Int
+                    try {
+                        hours = parseInt(dayTime[0])
+                        minutes = parseInt(dayTime[1])
+                        seconds = parseInt(dayTime[2])
+                    } catch (e: Exception) {
+                        Utils.showToastAlert("Неверный формат времени в настройках!")
+                        continue
+                    }
+                    val currentMskTime = Utils.getTimeMSK()
+
+                    val hoursMsk = currentMskTime.get(Calendar.HOUR_OF_DAY)
+                    val minutesMsk = currentMskTime.get(Calendar.MINUTE)
+                    val secondsMsk = currentMskTime.get(Calendar.SECOND)
+
+                    val total = hours * 3600 + minutes * 60 + seconds
+                    val totalMsk = hoursMsk * 3600 + minutesMsk * 60 + secondsMsk
+                    if (totalMsk < total) {
+                        return t
+                    }
+                }
+            }
+
+            return "???"
+        }
     }
 }

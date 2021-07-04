@@ -16,12 +16,12 @@ import retrofit2.converter.gson.GsonConverterFactory
 class WorkflowManager() : KoinComponent {
     private val alorManager: AlorManager by inject()
     private val stockManager: StockManager by inject()
-    private val depositManager: DepositManager by inject()
+    private val portfolioManager: PortfolioManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
 
     fun startApp() {
         stockManager.loadStocks()
-        depositManager.startUpdatePortfolio()
+        portfolioManager.startUpdatePortfolio()
         stockManager.startUpdateIndices()
 
         if (SettingsManager.getAlorQuotes() || SettingsManager.getAlorOrdebook()) alorManager.refreshToken()
@@ -33,7 +33,7 @@ class WorkflowManager() : KoinComponent {
         private val processingModule = module {
             fun provideWorkflowManager(): WorkflowManager = WorkflowManager()
             fun provideStocksManager(): StockManager = StockManager()
-            fun provideDepoManager(): DepositManager = DepositManager()
+            fun provideDepoManager(): PortfolioManager = PortfolioManager()
             fun provideAlorManager(): AlorManager = AlorManager()
             fun provideOrderbookManager(): OrderbookManager = OrderbookManager()
             fun provideChartManager(): ChartManager = ChartManager()

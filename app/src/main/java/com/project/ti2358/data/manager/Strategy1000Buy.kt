@@ -5,6 +5,7 @@ import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.daager.PresetStock
+import com.project.ti2358.service.PurchaseStatus
 import com.project.ti2358.service.Sorting
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext

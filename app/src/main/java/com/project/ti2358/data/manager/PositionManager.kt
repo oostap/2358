@@ -12,7 +12,7 @@ import org.koin.core.component.inject
 class PositionManager() : KoinComponent {
     private val marketService: MarketService by inject()
     private val stockManager: StockManager by inject()
-    private val depositManager: DepositManager by inject()
+    private val portfolioManager: PortfolioManager by inject()
     private val ordersService: OrdersService by inject()
 
     var activePosition: PortfolioPosition? = null

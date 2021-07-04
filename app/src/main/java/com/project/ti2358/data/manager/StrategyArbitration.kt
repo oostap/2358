@@ -29,8 +29,8 @@ class StrategyArbitration : KoinComponent {
 
     var stocks: MutableList<Stock> = mutableListOf()
     var stocksSelected: MutableList<Stock> = synchronizedList(mutableListOf())
-    var longStockRockets: MutableList<StockRocket> = synchronizedList(mutableListOf())
-    var shortStockRockets: MutableList<StockRocket> = synchronizedList(mutableListOf())
+    var longStocks: MutableList<StockArbitration> = synchronizedList(mutableListOf())
+    var shortStocks: MutableList<StockArbitration> = synchronizedList(mutableListOf())
 
     var started: Boolean = false
 
@@ -57,8 +57,8 @@ class StrategyArbitration : KoinComponent {
     }
 
     suspend fun startStrategy() = withContext(StockManager.stockContext) {
-        longStockRockets.clear()
-        shortStockRockets.clear()
+        longStocks.clear()
+        shortStocks.clear()
 
         process()
 
@@ -79,72 +79,77 @@ class StrategyArbitration : KoinComponent {
         if (stocks.isEmpty()) runBlocking { process() }
         if (stock !in stocks) return
 
-        if (SettingsManager.getRocketOnlyLove()) {
-            if (StrategyLove.stocksSelected.find { it.ticker == stock.ticker } == null) return
-        }
+        if (stock.orderbookStream == null) return
 
-        val percentRocket = SettingsManager.getRocketChangePercent()
-        var minutesRocket = SettingsManager.getRocketChangeMinutes()
-        val volumeRocket = SettingsManager.getRocketChangeVolume()
+        if (stock.orderbookStream == null || stock.orderbookStream?.asks?.isEmpty() == true || stock.orderbookStream?.bids?.isEmpty() == true) return
 
-        if (stock.minuteCandles.isEmpty()) return
+        val minPercent = SettingsManager.getArbitrationMinPercent()
+        val repeatInterval = SettingsManager.getArbitrationRepeatInterval()
+        val long = SettingsManager.getArbitrationLong()
+        val short = SettingsManager.getArbitrationShort()
+        val volumeFrom = SettingsManager.getArbitrationVolumeDayFrom()
+        val volumeTo = SettingsManager.getArbitrationVolumeDayTo()
 
-        var fromCandle = stock.minuteCandles.last()
-        val toCandle = stock.minuteCandles.last()
+        if (stock.getTodayVolume() < volumeFrom || stock.getTodayVolume() > volumeTo) return
 
-        var fromIndex = 0
-        for (i in stock.minuteCandles.indices.reversed()) {
-            if (stock.minuteCandles[i].lowestPrice < fromCandle.lowestPrice) {
-                fromCandle = stock.minuteCandles[i]
-                fromIndex = i
+        val askRU = stock.orderbookStream?.asks?.first()?.get(0) ?: 0.0
+        if (askRU == 0.0) return
+
+        val bidRU = stock.orderbookStream?.bids?.first()?.get(0) ?: 0.0
+        if (bidRU == 0.0) return
+
+        val priceUS = stock.closePrices?.yahoo ?: 0.0
+        if (priceUS == 0.0) return
+
+        val time = Calendar.getInstance().time
+
+        var arbStock: StockArbitration? = null
+
+        if (askRU < priceUS && long) { // long
+            val changePercent = priceUS / askRU * 100.0 - 100.0
+            if (abs(changePercent) < abs(minPercent)) return
+
+            arbStock = StockArbitration(stock, askRU, bidRU, priceUS, true, time.time)
+            arbStock.changePricePercent = changePercent
+            arbStock.changePriceAbsolute = priceUS - askRU
+
+            val last = longStocks.firstOrNull { it.stock.ticker == stock.ticker }
+            if (last != null) {
+                val deltaTime = ((time.time - last.fireTime) / 60.0 / 1000.0).toInt()
+                if (deltaTime < repeatInterval) return
             }
 
-            minutesRocket--
-            if (minutesRocket == 0) break
+            longStocks.add(0, arbStock)
+        } else if (bidRU > priceUS && stock.short != null && short) { // short
+            val changePercent = priceUS / bidRU * 100.0 - 100.0
+            if (abs(changePercent) < abs(minPercent)) return
+
+            arbStock = StockArbitration(stock, askRU, bidRU, priceUS, false, time.time)
+            arbStock.changePricePercent = changePercent
+            arbStock.changePriceAbsolute = bidRU - priceUS
+
+            val last = shortStocks.firstOrNull { it.stock.ticker == stock.ticker }
+            if (last != null) {
+                val deltaTime = ((time.time - last.fireTime) / 60.0 / 1000.0).toInt()
+                if (deltaTime < repeatInterval) return
+            }
+
+            shortStocks.add(0, arbStock)
         }
 
-        val deltaMinutes = ((toCandle.time.time - fromCandle.time.time) / 60.0 / 1000.0).toInt()
-
-        var volume = 0
-        for (i in fromIndex until stock.minuteCandles.size) {
-            volume += stock.minuteCandles[i].volume
-        }
-
-        val changePercent = toCandle.closingPrice / fromCandle.openingPrice * 100.0 - 100.0
-        if (volume < volumeRocket || abs(changePercent) < abs(percentRocket)) return
-
-        val rocketStock = StockRocket(stock, fromCandle.openingPrice, toCandle.closingPrice, deltaMinutes, volume, changePercent, toCandle.time.time)
-        rocketStock.process()
-
-//        if (changePercent > 0) {
-//            val last = rocketStocks.firstOrNull { it.stock.ticker == stock.ticker }
-//            if (last != null) {
-//                val deltaTime = ((toCandle.time.time - last.fireTime) / 60.0 / 1000.0).toInt()
-//                if (deltaTime < 5) return
-//            }
-//
-//            rocketStocks.add(0, rocketStock)
-//        } else {
-//            val last = cometStocks.firstOrNull { it.stock.ticker == stock.ticker }
-//            if (last != null) {
-//                val deltaTime = ((toCandle.time.time - last.fireTime) / 60.0 / 1000.0).toInt()
-//                if (deltaTime < 5) return
-//            }
-//
-//            cometStocks.add(0, rocketStock)
-//        }
-
-        GlobalScope.launch(Dispatchers.Main) {
-            strategySpeaker.speakRocket(rocketStock)
-            strategyTelegram.sendRocket(rocketStock)
-            createRocket(rocketStock)
+        if (arbStock != null) {
+            GlobalScope.launch(Dispatchers.Main) {
+//            strategySpeaker.speakRocket(arbStock)
+                strategyTelegram.sendArbitration(arbStock)
+                createArbitration(arbStock)
+            }
         }
     }
 
-    private fun createRocket(stockRocket: StockRocket) {
+    private fun createArbitration(stockArbitration: StockArbitration) {
         val context: Context = TheApplication.application.applicationContext
 
-        val ticker = stockRocket.ticker
+        val ticker = stockArbitration.ticker
         val notificationChannelId = ticker
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -170,13 +175,13 @@ class StrategyArbitration : KoinComponent {
 
         val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(context, notificationChannelId) else Notification.Builder(context)
 
-        val changePercent = if (stockRocket.changePercent > 0) {
-            "+%.2f%%".format(locale = Locale.US, stockRocket.changePercent)
+        val changePercent = if (stockArbitration.changePricePercent > 0) {
+            "+%.2f%%".format(locale = Locale.US, stockArbitration.changePricePercent)
         } else {
-            "%.2f%%".format(locale = Locale.US, stockRocket.changePercent)
+            "%.2f%%".format(locale = Locale.US, stockArbitration.changePricePercent)
         }
 
-        val title = "$ticker: ${stockRocket.priceFrom.toMoney(stockRocket.stock)} -> ${stockRocket.priceTo.toMoney(stockRocket.stock)} = $changePercent за ${stockRocket.time} мин"
+        val title = "$ticker: ${stockArbitration.askRU.toMoney(stockArbitration.stock)} -> ${stockArbitration.priceUS.toMoney(stockArbitration.stock)} = $changePercent"
 
         val notification = builder
             .setSubText("$$ticker $changePercent")

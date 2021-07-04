@@ -26,7 +26,7 @@ import java.util.*
 @KoinApiExtension
 class ChartFragment : Fragment(R.layout.fragment_chart) {
     private val chartManager: ChartManager by inject()
-    val depositManager: DepositManager by inject()
+    val portfolioManager: PortfolioManager by inject()
     val stockManager: StockManager by inject()
 
     private var fragmentChartBinding: FragmentChartBinding? = null

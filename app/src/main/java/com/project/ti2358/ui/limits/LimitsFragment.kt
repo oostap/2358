@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -35,6 +36,11 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
     var adapterListAll = ItemLimitsAllRecyclerViewAdapter(emptyList())
     var adapterListLimits = ItemLimitsRecyclerViewAdapter(emptyList())
     lateinit var stocks: MutableList<Stock>
+
+    val colorDefault = Utils.DARK_BLUE
+    val colorSelect = Utils.RED
+
+    var status: Int = 0
 
     override fun onDestroy() {
         fragmentLimitsBinding = null
@@ -83,19 +89,39 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
             }
 
             allButton.setOnClickListener {
+                allButton.setBackgroundColor(colorDefault)
+                upButton.setBackgroundColor(colorDefault)
+                downButton.setBackgroundColor(colorDefault)
+                allButton.setBackgroundColor(colorSelect)
+
                 updateData()
+                status = 0
             }
 
             upButton.setOnClickListener {
+                allButton.setBackgroundColor(colorDefault)
+                upButton.setBackgroundColor(colorDefault)
+                downButton.setBackgroundColor(colorDefault)
+
                 listAll.visibility = View.GONE
                 listLimits.visibility = View.VISIBLE
+                status = 1
                 adapterListLimits.setData(strategyLimits.upStockLimits)
+                upButton.setBackgroundColor(colorSelect)
+                updateTitle()
             }
 
             downButton.setOnClickListener {
+                allButton.setBackgroundColor(colorDefault)
+                upButton.setBackgroundColor(colorDefault)
+                downButton.setBackgroundColor(colorDefault)
+
                 listAll.visibility = View.GONE
                 listLimits.visibility = View.VISIBLE
+                status = 2
                 adapterListLimits.setData(strategyLimits.downStockLimits)
+                downButton.setBackgroundColor(colorSelect)
+                updateTitle()
             }
 
             listAll.visibility = View.VISIBLE
@@ -112,6 +138,8 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
                 stocks = Utils.search(stocks, search)
             }
             adapterListAll.setData(stocks)
+
+            updateTitle()
         }
     }
 
@@ -120,6 +148,14 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
             fragmentLimitsBinding?.startButton?.text = getString(R.string.stop)
         } else {
             fragmentLimitsBinding?.startButton?.text = getString(R.string.start)
+        }
+    }
+
+    private fun updateTitle() {
+        if (isAdded) {
+            val act = requireActivity() as AppCompatActivity
+            act.supportActionBar?.title = "Лимиты - " + if (status == 0) "Все" else if (status == 1) "Верхние" else "Нижние"
+
         }
     }
 

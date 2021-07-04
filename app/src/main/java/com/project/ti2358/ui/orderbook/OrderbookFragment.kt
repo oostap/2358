@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.Context
 import android.content.DialogInterface
-import android.content.DialogInterface.OnShowListener
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputType
@@ -37,7 +36,6 @@ import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.lang.StrictMath.min
-import java.time.ZoneId
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -49,7 +47,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     val chartManager: ChartManager by inject()
     val stockManager: StockManager by inject()
     val orderbookManager: OrderbookManager by inject()
-    val depositManager: DepositManager by inject()
+    val portfolioManager: PortfolioManager by inject()
 
     private var fragmentOrderbookBinding: FragmentOrderbookBinding? = null
 
@@ -234,7 +232,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
             positionView.setOnClickListener {
                 activeStock?.let {
-                    depositManager.getPositionForFigi(it.figi)?.let { p ->
+                    portfolioManager.getPositionForFigi(it.figi)?.let { p ->
                         volumeEditText.setText(abs(p.lots - p.blocked).toInt().toString())
                     }
                 }
@@ -244,15 +242,15 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             jobRefreshOrders = GlobalScope.launch(Dispatchers.Main) {
                 while (true) {
                     delay(5000)
-                    depositManager.refreshOrders()
-                    depositManager.refreshDeposit()
+                    portfolioManager.refreshOrders()
+                    portfolioManager.refreshDeposit()
                     updatePosition()
                 }
             }
 
             jobRefreshOrderbook?.cancel()
             jobRefreshOrderbook = GlobalScope.launch(Dispatchers.Main) {
-                depositManager.refreshOrders()
+                portfolioManager.refreshOrders()
 
                 while (true) {
                     delay(1000)
@@ -271,7 +269,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             fragmentOrderbookBinding?.apply {
                 activeStock?.let { stock ->
                     positionView.visibility = GONE
-                    depositManager.getPositionForFigi(stock.figi)?.let { p ->
+                    portfolioManager.getPositionForFigi(stock.figi)?.let { p ->
                         val avg = p.getAveragePrice()
                         priceView.text = "${avg.toMoney(stock)} ➡ ${stock.getPriceString()}"
 
@@ -309,7 +307,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
     private fun moveAllBuyOrders(delta: Int, operationType: OperationType) {
         activeStock?.let {
-            val buyOrders = depositManager.getOrderAllOrdersForFigi(it.figi, operationType)
+            val buyOrders = portfolioManager.getOrderAllOrdersForFigi(it.figi, operationType)
             buyOrders.forEach { order ->
                 val newIntPrice = (order.price * 100).roundToInt() + delta
                 val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, order.stock)
@@ -355,7 +353,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         lotsBox.hint = "количество"
         layout.addView(lotsBox)
 
-        val position = depositManager.getPositionForFigi(orderbookLine.stock.figi)
+        val position = portfolioManager.getPositionForFigi(orderbookLine.stock.figi)
         val depoCount = position?.lots ?: 0
         val avg = position?.getAveragePrice() ?: 0
         val title = "В депо: $depoCount по $avg"
@@ -502,7 +500,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                         targetPriceAsk = orderbookLines.first().askPrice
                         targetPriceBid = orderbookLines.first().bidPrice
 
-                        portfolioPosition = depositManager.getPositionForFigi(it.figi)
+                        portfolioPosition = portfolioManager.getPositionForFigi(it.figi)
                         portfolioPosition?.let { p ->
                             targetPriceAsk = p.getAveragePrice()
                             targetPriceBid = p.getAveragePrice()

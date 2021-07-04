@@ -5,6 +5,7 @@ import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.model.dto.daager.PresetStock
+import com.project.ti2358.service.PurchaseStatus
 import com.project.ti2358.service.Sorting
 import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.Job
@@ -18,7 +19,7 @@ import kotlin.math.abs
 
 @KoinApiExtension
 class Strategy1000Sell() : KoinComponent {
-    private val depositManager: DepositManager by inject()
+    private val portfolioManager: PortfolioManager by inject()
     private val stockManager: StockManager by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
@@ -47,7 +48,7 @@ class Strategy1000Sell() : KoinComponent {
         stocks.sortBy { it.changePrice2300DayPercent }
 
         // удалить все бумаги, по которым нет шорта в ТИ
-        stocks.removeAll { it.short == null && depositManager.getPositions().find { p -> p.ticker == it.ticker } == null }
+        stocks.removeAll { it.short == null && portfolioManager.getPositions().find { p -> p.ticker == it.ticker } == null }
 
         loadSelectedStocks(numberSet)
     }
@@ -91,7 +92,7 @@ class Strategy1000Sell() : KoinComponent {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy { stock ->
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-            val position = depositManager.getPositions().find { it.ticker == stock.ticker }
+            val position = portfolioManager.getPositions().find { it.ticker == stock.ticker }
             val multiplier1 = if (position != null) (abs(position.lots * position.getAveragePrice())).toInt() else 1
             val multiplier3 = if (presetStocksSelected.find { it.ticker == stock.ticker } != null) 1000 else 1
             stock.changePrice2300DayPercent * sign - multiplier1 - multiplier3
@@ -138,7 +139,7 @@ class Strategy1000Sell() : KoinComponent {
                 }
 
                 purchase.apply {
-                    position = depositManager.getPositionForFigi(stock.figi)
+                    position = portfolioManager.getPositionForFigi(stock.figi)
                 }
                 purchases.add(purchase)
             }

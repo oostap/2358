@@ -12,32 +12,27 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
-import androidx.core.view.marginBottom
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
-import com.project.ti2358.data.manager.DepositManager
+import com.project.ti2358.data.manager.PortfolioManager
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.WorkflowManager
 import com.project.ti2358.data.model.dto.daager.Index
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toPercent
-import com.project.ti2358.ui.settings.SettingsFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-import java.util.*
 import kotlin.math.abs
 
 
@@ -47,7 +42,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     val stockManager: StockManager by inject()
-    val depositManager: DepositManager by inject()
+    val portfolioManager: PortfolioManager by inject()
     val workflowManager: WorkflowManager by inject()
 
     var job: Job? = null
@@ -104,6 +99,8 @@ class MainActivity : AppCompatActivity() {
                     key = "black_set"
                 } else if (it.id in listOf(R.id.nav_limits)) {
                     key = "limits_change_up"
+                } else if (it.id in listOf(R.id.nav_arbitration)) {
+                    key = "arbitration_min_percent"
                 }
             }
 
@@ -187,10 +184,10 @@ class MainActivity : AppCompatActivity() {
             }
 
             fun updateInfo() {
-                val cash = depositManager.getFreeCashEUR() + "\n" + depositManager.getFreeCashRUB() + "\n" + depositManager.getFreeCashUSD()
+                val cash = portfolioManager.getFreeCashEUR() + "\n" + portfolioManager.getFreeCashRUB() + "\n" + portfolioManager.getFreeCashUSD()
                 freeCashView.text = cash
 
-                activeAccountView.text = depositManager.getActiveBrokerAccountId()
+                activeAccountView.text = portfolioManager.getActiveBrokerAccountId()
 
                 val indices = stockManager.indices
 

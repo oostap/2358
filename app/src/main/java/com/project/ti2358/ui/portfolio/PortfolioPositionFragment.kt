@@ -27,7 +27,7 @@ import kotlin.math.sign
 
 @KoinApiExtension
 class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position) {
-    private val depositManager: DepositManager by inject()
+    private val portfolioManager: PortfolioManager by inject()
     private val positionManager: PositionManager by inject()
     private val orderbookManager: OrderbookManager by inject()
     private val strategyTrailingStop: StrategyTrailingStop by inject()
@@ -203,7 +203,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
             cancelAllButton.setOnClickListener {
                 // отменить все лимитки на продажу
                 GlobalScope.launch(Dispatchers.Main) {
-                    val orders = depositManager.getOrderAllOrdersForFigi(portfolioPosition.figi, OperationType.SELL)
+                    val orders = portfolioManager.getOrderAllOrdersForFigi(portfolioPosition.figi, OperationType.SELL)
                     orders.forEach {
                         orderbookManager.cancelOrder(it)
                     }
@@ -282,9 +282,9 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
         jobOrderbook?.cancel()
         jobOrderbook = GlobalScope.launch(Dispatchers.Main) {
             try {
-                depositManager.refreshDeposit()
+                portfolioManager.refreshDeposit()
 
-                val pos = depositManager.getPositionForFigi(portfolioPosition.figi)
+                val pos = portfolioManager.getPositionForFigi(portfolioPosition.figi)
                 if (pos == null) view?.findNavController()?.navigateUp()
 
                 portfolioPosition = pos!!

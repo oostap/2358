@@ -35,7 +35,7 @@ android {
 
             applicationVariants.all { variant ->
                 variant.outputs.all {
-                    outputFileName = "2358.apk"
+                    outputFileName = "oost.app.apk"
                 }
             }
         }

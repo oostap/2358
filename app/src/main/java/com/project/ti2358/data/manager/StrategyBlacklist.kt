@@ -13,8 +13,11 @@ import org.koin.core.component.KoinComponent
 @KoinApiExtension
 class StrategyBlacklist : KoinComponent {
     var stocks: MutableList<Stock> = mutableListOf()
-    var stocksSelected: MutableList<Stock> = mutableListOf()
     var currentSort: Sorting = Sorting.DESCENDING
+
+    companion object {
+        var stocksSelected: MutableList<Stock> = mutableListOf()
+    }
 
     suspend fun process(allStocks: List<Stock>): MutableList<Stock> = withContext(StockManager.stockContext) {
         stocks = allStocks.toMutableList()

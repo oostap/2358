@@ -89,7 +89,7 @@ class BlacklistFragment : Fragment(R.layout.fragment_blacklist) {
 
     private fun updateTitle() {
         val act = requireActivity() as AppCompatActivity
-        act.supportActionBar?.title = "Чёрный список (${strategyBlacklist.stocksSelected.size} шт.)"
+        act.supportActionBar?.title = "Чёрный список (${StrategyBlacklist.stocksSelected.size} шт.)"
     }
 
     inner class ItemBlacklistRecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<ItemBlacklistRecyclerViewAdapter.ViewHolder>() {

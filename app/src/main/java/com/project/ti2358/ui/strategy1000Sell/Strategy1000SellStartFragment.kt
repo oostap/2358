@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.DepositManager
+import com.project.ti2358.data.manager.PortfolioManager
 import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.Strategy1000Sell
@@ -28,7 +28,7 @@ import org.koin.core.component.KoinApiExtension
 @KoinApiExtension
 class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start) {
     val strategy1000Sell: Strategy1000Sell by inject()
-    val depositManager: DepositManager by inject()
+    val portfolioManager: PortfolioManager by inject()
     val orderbookManager: OrderbookManager by inject()
 
     private var fragment1000SellStartBinding: Fragment1000SellStartBinding? = null
@@ -110,7 +110,7 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
 
         jobUpdate?.cancel()
         jobUpdate = GlobalScope.launch(Dispatchers.Main) {
-            depositManager.refreshDeposit()
+            portfolioManager.refreshDeposit()
             updateData()
         }
         updateData()
@@ -162,7 +162,7 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
         inner class ViewHolder(private val binding: Fragment1000SellStartItemBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(index: Int) {
                 val stock = values[index]
-                val portfolioPosition = depositManager.getPositionForFigi(stock.figi)
+                val portfolioPosition = portfolioManager.getPositionForFigi(stock.figi)
 
                 with(binding) {
                     tickerView.text = "${index + 1}) ${stock.getTickerLove()}"

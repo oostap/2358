@@ -13,7 +13,7 @@ import kotlin.math.roundToInt
 @KoinApiExtension
 class Strategy2358() : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val depositManager: DepositManager by inject()
+    private val portfolioManager: PortfolioManager by inject()
     private val strategyTelegram: StrategyTelegram by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
@@ -25,7 +25,8 @@ class Strategy2358() : KoinComponent {
     var equalParts = true
 
     fun process(): MutableList<Stock> {
-        val all = stockManager.getWhiteStocks()
+//        val all = stockManager.getWhiteStocks()
+        val all = stockManager.stocksStream
         val change = SettingsManager.get2358ChangePercent()
         val volumeDayPieces = SettingsManager.get2358VolumeDayPieces()
         val volumeDayCash = SettingsManager.get2358VolumeDayCash() * 1000 * 1000
@@ -91,7 +92,7 @@ class Strategy2358() : KoinComponent {
 
         // удалить бумаги, которые уже есть в депо, иначе среднюю невозможно узнать
         stocksSelected.removeAll { stock ->
-            depositManager.portfolioPositions.any { it.ticker == stock.ticker }
+            portfolioManager.portfolioPositions.any { it.ticker == stock.ticker }
         }
 
         val purchases: MutableList<StockPurchase> = mutableListOf()

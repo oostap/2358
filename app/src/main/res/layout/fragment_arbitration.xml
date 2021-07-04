@@ -37,7 +37,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/rocket_button"
+            android:id="@+id/long_button"
             android:layout_marginRight="5dp"
             android:text="LONG"
             android:layout_weight="1"
@@ -47,7 +47,7 @@
 
         <Button
             android:layout_height="70dp"
-            android:id="@+id/comet_button"
+            android:id="@+id/short_button"
             android:padding="0dp"
             android:text="SHORT️"
             android:layout_weight="1"

@@ -112,14 +112,21 @@ data class Stock(var instrument: Instrument) {
             t += "❤️"
         }
 
+        if (StrategyBlacklist.stocksSelected.find { it.ticker == t } != null) {
+            t += "🖤️"
+        }
+
         if (morning != null) {
             t += "🕖"
         }
         if (short != null) {
             t += "👖"
         }
-        if (report != null || dividend != null) {
-            t += "❗️"
+        if (report != null) {
+            t += "️📊"
+        }
+        if (dividend != null) {
+            t += "💰"
         }
         return t
     }

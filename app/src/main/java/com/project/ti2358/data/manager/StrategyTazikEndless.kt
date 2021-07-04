@@ -19,7 +19,7 @@ import kotlin.math.roundToInt
 @KoinApiExtension
 class StrategyTazikEndless : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val depositManager: DepositManager by inject()
+    private val portfolioManager: PortfolioManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTelegram: StrategyTelegram by inject()
     private val strategyBlacklist: StrategyBlacklist by inject()
@@ -172,7 +172,7 @@ class StrategyTazikEndless : KoinComponent {
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         if (SettingsManager.getTazikEndlessExcludeDepo()) {
-            stocksToPurchase.removeAll { p -> depositManager.portfolioPositions.any { it.ticker == p.ticker } }
+            stocksToPurchase.removeAll { p -> portfolioManager.portfolioPositions.any { it.ticker == p.ticker } }
         }
 
         // удалить все бумаги из чёрного списка
@@ -499,7 +499,7 @@ class StrategyTazikEndless : KoinComponent {
         if (stocksTickerInProcess.size >= SettingsManager.getTazikEndlessPurchaseParts()) return false
 
         // проверить, если бумага в депо и усреднение отключено, то запретить тарить
-        if (depositManager.portfolioPositions.find { it.ticker == purchase.ticker } != null && !SettingsManager.getTazikEndlessAllowAveraging()) {
+        if (portfolioManager.portfolioPositions.find { it.ticker == purchase.ticker } != null && !SettingsManager.getTazikEndlessAllowAveraging()) {
             return false
         }
 

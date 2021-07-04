@@ -31,7 +31,7 @@ import kotlin.math.sign
 class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
     private val orderbookManager: OrderbookManager by inject()
     private val thirdPartyService: ThirdPartyService by inject()
-    private val depositManager: DepositManager by inject()
+    private val portfolioManager: PortfolioManager by inject()
     private val positionManager: PositionManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTA: StrategyTA by inject()
@@ -66,7 +66,7 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
             updateButton.setOnClickListener {
                 updateData()
 
-                strategyTA.processALL()
+//                strategyTA.processALL()
             }
 
             ordersButton.setOnClickListener {
@@ -103,9 +103,9 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
     fun updateData() {
         jobUpdate?.cancel()
         jobUpdate = GlobalScope.launch(Dispatchers.Main) {
-            depositManager.refreshDeposit()
-            depositManager.refreshKotleta()
-            adapterList.setData(depositManager.getPositions())
+            portfolioManager.refreshDeposit()
+            portfolioManager.refreshKotleta()
+            adapterList.setData(portfolioManager.getPositions())
             updateTitle()
         }
     }
@@ -113,7 +113,7 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            val percent = depositManager.getPercentBusyInStocks()
+            val percent = portfolioManager.getPercentBusyInStocks()
             act.supportActionBar?.title = "Депозит $percent%"
         }
     }

@@ -46,7 +46,7 @@ class StrategyLimits : KoinComponent {
         val temp = stocks
 
         // удалить все бумаги, где лимиты неизвестны
-        temp.removeAll { it.stockInfo?.limit_up == 0.0 && it.stockInfo?.limit_down == 0.0 }
+        temp.removeAll { it.stockInfo == null || it.stockInfo?.limit_up == 0.0 && it.stockInfo?.limit_down == 0.0 }
 
         temp.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1

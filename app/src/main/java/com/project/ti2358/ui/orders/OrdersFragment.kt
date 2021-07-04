@@ -6,14 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.ChartManager
-import com.project.ti2358.data.manager.DepositManager
+import com.project.ti2358.data.manager.PortfolioManager
 import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.model.dto.Order
 import com.project.ti2358.databinding.FragmentOrdersBinding
@@ -29,7 +28,7 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
     private val orderbookManager: OrderbookManager by inject()
     private val chartManager: ChartManager by inject()
 
-    val depositManager: DepositManager by inject()
+    val portfolioManager: PortfolioManager by inject()
 
     private var fragmentOrdersBinding: FragmentOrdersBinding? = null
 
@@ -61,7 +60,7 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
             updateButton.setOnClickListener {
                 jobRefresh?.cancel()
                 jobRefresh = GlobalScope.launch(Dispatchers.Main) {
-                    depositManager.refreshOrders()
+                    portfolioManager.refreshOrders()
                     updateData()
                 }
             }
@@ -78,7 +77,7 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
         jobRefreshEndless?.cancel()
         jobRefreshEndless = GlobalScope.launch(Dispatchers.Main) {
             while (true) {
-                if (depositManager.refreshOrders()) {
+                if (portfolioManager.refreshOrders()) {
                     updateData()
                     break
                 }
@@ -88,14 +87,14 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
     }
 
     fun updateData() {
-        adapterList.setData(depositManager.orders)
+        adapterList.setData(portfolioManager.orders)
         updateTitle()
     }
 
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            act.supportActionBar?.title = "Заявки ${depositManager.orders.size}"
+            act.supportActionBar?.title = "Заявки ${portfolioManager.orders.size}"
         }
     }
 

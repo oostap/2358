@@ -68,7 +68,7 @@ class StrategyArbitrationService : Service() {
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Арбитраж отменены", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Арбитраж отменен", Toast.LENGTH_LONG).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false

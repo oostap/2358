@@ -771,6 +771,43 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/menu_arbitration">
+        <EditTextPreference
+            app:key="@string/setting_key_arbitration_min_percent"
+            app:title="@string/stocks_arbitration_min_percent"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0.5"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_arbitration_interval"
+            app:title="@string/stocks_arbitration_interval"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="5"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_arbitration_volume_day_from"
+            app:title="@string/stocks_arbitration_volume_day_from"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_arbitration_volume_day_to"
+            app:title="@string/stocks_arbitration_volume_day_to"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1000000"/>
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_arbitration_long"
+            app:title="@string/stocks_arbitration_long"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_arbitration_short"
+            app:title="@string/stocks_arbitration_short"
+            app:defaultValue="true" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/settings_header_2225">
         <EditTextPreference
             app:key="@string/setting_key_2225_price_change_percent"
@@ -894,6 +931,11 @@
             app:defaultValue="true" />
 
         <SwitchPreferenceCompat
+            app:key="@string/setting_key_telegram_send_arbitration"
+            app:title="@string/stocks_telegram_send_arbitration"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
             app:key="@string/setting_key_telegram_send_goto_terminal"
             app:title="@string/stocks_telegram_send_goto_terminal"
             app:defaultValue="true" />
@@ -906,6 +948,11 @@
         <SwitchPreferenceCompat
             app:key="@string/setting_key_telegram_allow_command_handle"
             app:title="@string/stocks_telegram_allow_command_handle"
+            app:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_telegram_allow_command_buy_sell"
+            app:title="@string/stocks_telegram_allow_command_buy_sell"
             app:defaultValue="false" />
 
     </PreferenceCategory>

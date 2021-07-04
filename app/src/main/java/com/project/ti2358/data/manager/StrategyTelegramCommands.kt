@@ -14,7 +14,7 @@ import kotlin.math.roundToInt
 @KoinApiExtension
 class StrategyTelegramCommands : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val depositManager: DepositManager by inject()
+    private val portfolioManager: PortfolioManager by inject()
     private val ordersService: OrdersService by inject()
     private val orderbookManager: OrderbookManager by inject()
     private val strategyTelegram: StrategyTelegram by inject()
@@ -269,7 +269,7 @@ class StrategyTelegramCommands : KoinComponent {
                                 figi,
                                 price,
                                 OperationType.BUY,
-                                depositManager.getActiveBrokerAccountId()
+                                portfolioManager.getActiveBrokerAccountId()
                             )
                             Utils.showToastAlert("$ticker создан новый ордер: ПОКУПКА!")
                         } catch (e: Exception) {
@@ -280,7 +280,7 @@ class StrategyTelegramCommands : KoinComponent {
                 }
 
                 if (operation == "sell") {  // # SELL VIPS 29.46 1
-                    val position = depositManager.getPositionForFigi(figi) ?: return 0
+                    val position = portfolioManager.getPositionForFigi(figi) ?: return 0
                     val lots = (position.lots / 100.0 * percent).toInt()
 
                     if (lots == 0) return 0
@@ -295,7 +295,7 @@ class StrategyTelegramCommands : KoinComponent {
                                 figi,
                                 price,
                                 OperationType.SELL,
-                                depositManager.getActiveBrokerAccountId()
+                                portfolioManager.getActiveBrokerAccountId()
                             )
                             Utils.showToastAlert("$ticker создан новый ордер: ПРОДАЖА!")
                         } catch (e: Exception) {
@@ -311,7 +311,7 @@ class StrategyTelegramCommands : KoinComponent {
 
                 val change = list[3].toDouble()
                 val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
-                val buyOrders = depositManager.getOrderAllOrdersForFigi(figi, operationType)
+                val buyOrders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
                 buyOrders.forEach { order ->
                     val newIntPrice = ((order.price + change) * 100).roundToInt()
                     val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, order.stock)
@@ -323,7 +323,7 @@ class StrategyTelegramCommands : KoinComponent {
                 if (list.size != 3) return 0
 
                 val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
-                val buyOrders = depositManager.getOrderAllOrdersForFigi(figi, operationType)
+                val buyOrders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
                 buyOrders.forEach { order ->
                     orderbookManager.cancelOrder(order)
 
@@ -351,8 +351,8 @@ class StrategyTelegramCommands : KoinComponent {
         jobRefreshDeposit = GlobalScope.launch(Dispatchers.Main) {
             while (true) {
                 delay(5000)
-                depositManager.refreshDeposit()
-                depositManager.refreshOrders()
+                portfolioManager.refreshDeposit()
+                portfolioManager.refreshOrders()
             }
         }
     }

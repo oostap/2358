@@ -18,7 +18,7 @@ import kotlin.math.max
 @KoinApiExtension
 class OrderbookManager() : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val depositManager: DepositManager by inject()
+    private val portfolioManager: PortfolioManager by inject()
     private val ordersService: OrdersService by inject()
 
     var activeStock: Stock? = null
@@ -59,7 +59,7 @@ class OrderbookManager() : KoinComponent {
                     stock.figi,
                     price,
                     operationType,
-                    depositManager.getActiveBrokerAccountId()
+                    portfolioManager.getActiveBrokerAccountId()
                 )
                 val operation = if (operationType == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
                 Utils.showToastAlert("${stock.ticker} создан новый ордер: $operation")
@@ -67,7 +67,7 @@ class OrderbookManager() : KoinComponent {
 
             }
 
-            depositManager.refreshOrders()
+            portfolioManager.refreshOrders()
             process()
         }
     }
@@ -76,39 +76,39 @@ class OrderbookManager() : KoinComponent {
         GlobalScope.launch(Dispatchers.Main) {
             val operation = if (order.operation == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
             try {
-                ordersService.cancel(order.orderId, depositManager.getActiveBrokerAccountId())
+                ordersService.cancel(order.orderId, portfolioManager.getActiveBrokerAccountId())
                 Utils.showToastAlert("${order.stock?.ticker} ордер отменён: $operation")
             } catch (e: Exception) {
                 // возможно уже отменена
                 Utils.showToastAlert("${order.stock?.ticker} ордер УЖЕ отменён: $operation")
             }
 
-            depositManager.refreshOrders()
+            portfolioManager.refreshOrders()
             process()
         }
     }
 
     suspend fun cancelAllOrders() {
-        for (order in depositManager.orders) {
+        for (order in portfolioManager.orders) {
             try {
                 cancelOrder(order)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
-        depositManager.refreshOrders()
+        portfolioManager.refreshOrders()
     }
 
     fun replaceOrder(from: Order, price: Double, operationType: OperationType) {
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                ordersService.cancel(from.orderId, depositManager.getActiveBrokerAccountId())
+                ordersService.cancel(from.orderId, portfolioManager.getActiveBrokerAccountId())
 
                 val operation = if (from.operation == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
                 Utils.showToastAlert("${from.stock?.ticker} ордер отменён: $operation")
             } catch (e: Exception) {
                 // возможно уже отменена, значит двойное действие, отменить всё остальное
-                depositManager.refreshOrders()
+                portfolioManager.refreshOrders()
                 process()
                 return@launch
             }
@@ -119,7 +119,7 @@ class OrderbookManager() : KoinComponent {
                     from.figi,
                     price,
                     from.operation,
-                    depositManager.getActiveBrokerAccountId()
+                    portfolioManager.getActiveBrokerAccountId()
                 )
 
                 val operation = if (from.operation == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
@@ -128,7 +128,7 @@ class OrderbookManager() : KoinComponent {
 
             }
 
-            depositManager.refreshOrders()
+            portfolioManager.refreshOrders()
             process()
         }
     }
@@ -195,7 +195,7 @@ class OrderbookManager() : KoinComponent {
                 line.ordersBuy.clear()
                 line.ordersSell.clear()
 
-                for (order in depositManager.orders) {
+                for (order in portfolioManager.orders) {
                     if (order.figi == line.stock.figi) {
                         if (order.price == line.askPrice || order.price == line.bidPrice) {
                             if (order.operation == OperationType.BUY) {

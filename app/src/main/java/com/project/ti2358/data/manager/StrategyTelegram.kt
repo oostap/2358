@@ -17,10 +17,7 @@ import com.project.ti2358.data.model.dto.pantini.PantiniLenta
 import com.project.ti2358.data.service.OperationsService
 import com.project.ti2358.data.service.OrdersService
 import com.project.ti2358.data.service.ThirdPartyService
-import com.project.ti2358.service.Utils
-import com.project.ti2358.service.log
-import com.project.ti2358.service.toMoney
-import com.project.ti2358.service.toString
+import com.project.ti2358.service.*
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -34,7 +31,7 @@ class StrategyTelegram : KoinComponent {
     private val stockManager: StockManager by inject()
     private val operationsService: OperationsService by inject()
     private val ordersService: OrdersService by inject()
-    private val depositManager: DepositManager by inject()
+    private val portfolioManager: PortfolioManager by inject()
     private val strategyTelegramCommands: StrategyTelegramCommands by inject()
     private val thirdPartyService: ThirdPartyService by inject()
 
@@ -64,7 +61,7 @@ class StrategyTelegram : KoinComponent {
                     toDate.add(Calendar.HOUR_OF_DAY, -6)
                     val from = convertDateToTinkoffDate(toDate, zone)
 
-                    operations = Collections.synchronizedList(operationsService.operations(from, to, depositManager.getActiveBrokerAccountId()).operations)
+                    operations = Collections.synchronizedList(operationsService.operations(from, to, portfolioManager.getActiveBrokerAccountId()).operations)
                     operations.sortBy { it.date }
                     if (operationsPosted.isEmpty()) {
                         operations.forEach {
@@ -74,7 +71,7 @@ class StrategyTelegram : KoinComponent {
                         operationsPosted.add("empty")
                     }
 
-                    depositManager.refreshDeposit()
+                    portfolioManager.refreshDeposit()
 
                     for (operation in operations) {
                         if (operation.id !in operationsPosted) {
@@ -108,7 +105,7 @@ class StrategyTelegram : KoinComponent {
         jobUpdateOrders = GlobalScope.launch(Dispatchers.Default) {
             while (true) {
                 try {
-                    orders = Collections.synchronizedList(ordersService.orders(depositManager.getActiveBrokerAccountId()))
+                    orders = Collections.synchronizedList(ordersService.orders(portfolioManager.getActiveBrokerAccountId()))
                     if (ordersPosted.isEmpty()) {
                         orders.forEach {
                             ordersPosted.add(it.orderId)
@@ -264,7 +261,7 @@ class StrategyTelegram : KoinComponent {
         val ticker = order.stock?.ticker
         val orderSymbol = if (order.operation == OperationType.BUY) "🟢" else "🔴"
         var orderString = if (order.operation == OperationType.BUY) "BUY " else "SELL "
-        val position = depositManager.getPositionForFigi(order.figi)
+        val position = portfolioManager.getPositionForFigi(order.figi)
         if (position == null && order.operation == OperationType.BUY) {
             orderString += "LONG вход"
         }
@@ -328,7 +325,7 @@ class StrategyTelegram : KoinComponent {
         val ticker = operation.stock?.ticker
         val operationSymbol = if (operation.operationType == OperationType.BUY) "🟢" else "🔴"
         var operationString = if (operation.operationType == OperationType.BUY) "BUY " else "SELL "
-        val position = depositManager.getPositionForFigi(operation.figi)
+        val position = portfolioManager.getPositionForFigi(operation.figi)
         if (position == null && operation.operationType == OperationType.BUY) {
             operationString += "SHORT выход"
         }
@@ -423,6 +420,37 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
+    fun sendArbitration(stockArbitration: StockArbitration) {
+        if (started && SettingsManager.getTelegramSendArbitration()) {
+            val emoji = when {
+                stockArbitration.changePricePercent >=  5.0 -> "💚💚💚💚💚"
+                stockArbitration.changePricePercent >=  3.0 -> "💚💚💚💚"
+                stockArbitration.changePricePercent >=  2.0 -> "💚💚💚"
+                stockArbitration.changePricePercent >=  1.0 -> "💚💚"
+                stockArbitration.changePricePercent >   0.0 -> "💚"
+                stockArbitration.changePricePercent <= -5.0 -> "❤️❤️❤️❤️❤️"
+                stockArbitration.changePricePercent <= -3.0 -> "❤️❤️❤️❤️"
+                stockArbitration.changePricePercent <= -2.0 -> "❤️❤️❤️"
+                stockArbitration.changePricePercent <= -1.0 -> "❤️❤️"
+                stockArbitration.changePricePercent <   0.0 -> "❤️"
+                else -> ""
+            }
+            val changePercent = if (stockArbitration.changePricePercent > 0) {
+                "+%.2f%%".format(locale = Locale.US, stockArbitration.changePricePercent)
+            } else {
+                "%.2f%%".format(locale = Locale.US, stockArbitration.changePricePercent)
+            }
+            var text = "🏴‍☠️ $emoji $${stockArbitration.ticker} $changePercent = "
+            if (stockArbitration.long) {
+                text += "${stockArbitration.askRU.toMoney(stockArbitration.stock)} -> ${stockArbitration.priceUS.toMoney(stockArbitration.stock)}"
+            } else {
+                text += "${stockArbitration.bidRU.toMoney(stockArbitration.stock)} -> ${stockArbitration.priceUS.toMoney(stockArbitration.stock)}"
+            }
+            val buttons = getButtonsMarkup(stockArbitration.stock)
+            sendMessageToChats(text, 120, replyMarkup = buttons)
+        }
+    }
+
     fun sendTrend(stockTrend: StockTrend) {
         if (started && SettingsManager.getTelegramSendTrends()) {
             val emoji = if (stockTrend.changeFromStartToLow < 0) "⤴️" else "⤵️️"
@@ -488,14 +516,15 @@ class StrategyTelegram : KoinComponent {
     }
 
     fun sendArbitrationStart(start: Boolean) {
-        if (started) {// && SettingsManager.getTelegramSendRockets()) {
+        if (started && SettingsManager.getTelegramSendArbitration()) {
             val text = if (start) {
                 String.format(
                     locale = Locale.US,
-                    "🟢🏴‍☠️ %.2f%% / %d мин / v%d",
-                    SettingsManager.getRocketChangePercent(),
-                    SettingsManager.getRocketChangeMinutes(),
-                    SettingsManager.getRocketChangeVolume()
+                    "🟢🏴‍☠️ %.2f%% / v%d / v%d / %d мин",
+                    SettingsManager.getArbitrationMinPercent(),
+                    SettingsManager.getArbitrationVolumeDayFrom(),
+                    SettingsManager.getArbitrationVolumeDayTo(),
+                    SettingsManager.getArbitrationRepeatInterval()
                 )
             } else {
                 "🔴🏴‍☠️ стоп!"
