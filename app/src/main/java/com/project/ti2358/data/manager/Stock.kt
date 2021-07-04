@@ -108,17 +108,18 @@ data class Stock(var instrument: Instrument) {
     @KoinApiExtension
     fun getTickerLove(): String {
         var t = ticker
-        if (StrategyLove.stocksSelected.find { it.ticker == t } != null) {
+        if (StrategyLove.stocksSelected.find { it.ticker == ticker } != null) {
             t += "❤️"
         }
 
-        if (StrategyBlacklist.stocksSelected.find { it.ticker == t } != null) {
-            t += "🖤️"
+        if (StrategyBlacklist.stocksSelected.find { it.ticker == ticker } != null) {
+            t += "🖤️️"
         }
 
         if (morning != null) {
             t += "🕖"
         }
+
         if (short != null) {
             t += "👖"
         }

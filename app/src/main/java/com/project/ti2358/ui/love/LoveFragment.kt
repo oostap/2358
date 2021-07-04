@@ -78,10 +78,11 @@ class LoveFragment : Fragment(R.layout.fragment_love) {
 
     private fun updateData(query: String = "") {
         GlobalScope.launch(Dispatchers.Main) {
-            strategyLove.process(stockManager.stocksStream)
+            stocks = strategyLove.process(stockManager.stocksStream)
             stocks = strategyLove.resort()
             if (query != "") stocks = Utils.search(stocks, query)
             adapterList.setData(stocks)
+            updateTitle()
         }
     }
 

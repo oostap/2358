@@ -333,6 +333,11 @@ class StockManager : KoinComponent {
                 reloadStockIndices()
                 reloadStockPrice1728()
                 reloadMorningCompanies()
+
+                strategyLove.process(stocksStream)
+                strategyBlacklist.process(stocksStream)
+                strategyFixPrice.restartStrategy()
+
                 break
             } catch (e: Exception) {
                 e.printStackTrace()
