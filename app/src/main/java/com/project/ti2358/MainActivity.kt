@@ -31,7 +31,6 @@ import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toPercent
 import com.project.ti2358.ui.settings.SettingsFragment
-import com.rbddevs.splashy.Splashy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -56,7 +55,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSplashy()
 
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 
@@ -284,21 +282,6 @@ class MainActivity : AppCompatActivity() {
         workflowManager.startApp()
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-    }
-
-    fun setSplashy() {
-        Splashy(this)
-            .setLogo(R.drawable.ic_moose)
-            .setTitle("oost.app")
-            .setTitleColor("#FF03DAC5")
-            .setSubTitle("для Тинькофф Инвестиций")
-            .setProgressColor(R.color.white)
-            .setBackgroundResource(R.color.main_bg)
-            .setFullScreen(true)
-            .setTime(1500)
-            .setAnimation(Splashy.Animation.SLIDE_IN_TOP_BOTTOM, 750)
-            .setClickToHide(true)
-            .show()
     }
 
     override fun onResume() {

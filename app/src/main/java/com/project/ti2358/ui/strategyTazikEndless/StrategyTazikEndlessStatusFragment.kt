@@ -122,8 +122,7 @@ class StrategyTazikEndlessStatusFragment : Fragment(R.layout.fragment_tazik_endl
                     tickerView.text = "${index + 1}) ${purchase.stock.getTickerLove()} ${purchase.percentLimitPriceChange.toPercent()}"
                     priceView.text = "${purchase.tazikEndlessPrice} ➡ ${purchase.stock.getPriceNow().toMoney(purchase.stock)}"
 
-                    val volumeToday = purchase.stock.getTodayVolume() / 1000f
-                    volumeSharesView.text = "%.1fk".format(volumeToday)
+                    volumeSharesView.text = purchase.stock.getTodayVolume().toString()
 
                     var vol = 0
                     if (purchase.stock.minuteCandles.isNotEmpty()) {

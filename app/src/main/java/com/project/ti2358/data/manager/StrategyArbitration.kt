@@ -1,42 +1,199 @@
-package com.project.ti2358.data.manager
+package com.project.ti2358.ui.arbitration
 
-import com.project.ti2358.service.Sorting
+import android.app.*
+import android.content.Context
+import android.content.Intent
+import android.graphics.Color
+import android.os.Build
+import com.project.ti2358.MainActivity
+import com.project.ti2358.R
+import com.project.ti2358.TheApplication
+import com.project.ti2358.data.manager.*
+import com.project.ti2358.service.StrategyRocketService
+import com.project.ti2358.service.Utils
+import com.project.ti2358.service.toMoney
+import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.util.*
+import java.util.Collections.synchronizedList
+import kotlin.math.abs
+import kotlin.random.Random
 
 @KoinApiExtension
 class StrategyArbitration : KoinComponent {
     private val stockManager: StockManager by inject()
+    private val strategySpeaker: StrategySpeaker by inject()
+    private val strategyTelegram: StrategyTelegram by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
-    private var currentSort: Sorting = Sorting.DESCENDING
+    var stocksSelected: MutableList<Stock> = synchronizedList(mutableListOf())
+    var longStocks: MutableList<RocketStock> = synchronizedList(mutableListOf())
+    var shortStocks: MutableList<RocketStock> = synchronizedList(mutableListOf())
 
-    var sectorStocks: MutableMap<String, MutableList<Stock>> = mutableMapOf()
+    private var started: Boolean = false
 
-    fun process(): MutableList<Stock> {
+    suspend fun process(): MutableList<Stock> = withContext(StockManager.rocketContext) {
         val all = stockManager.getWhiteStocks()
+
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks = all.filter { it.getPriceNow() > min && it.getPriceNow() < max }.toMutableList()
+        stocks.clear()
+        stocks.addAll(all.filter { it.getPriceNow() > min && it.getPriceNow() < max })
 
-        val sectors = stockManager.stockSectors
-        for (sector in sectors) {
-            val s = stocks.filter { it.closePrices?.sector == sector }.toMutableList()
-            sectorStocks[sector] = s
-        }
-
-        return stocks
+        return@withContext stocks
     }
 
-    fun resort(sector: String): List<Stock> {
-        currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
-        val s = sectorStocks[sector]
-        s?.sortBy {
-            val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-            it.changePrice2300DayPercent * sign
+    suspend fun restartStrategy() = withContext(StockManager.rocketContext) {
+        if (started) stopStrategy()
+        delay(500)
+        startStrategy()
+    }
+
+    suspend fun stopStrategyCommand() = withContext(StockManager.rocketContext) {
+        stopStrategy()
+        Utils.stopService(TheApplication.application.applicationContext, StrategyRocketService::class.java)
+    }
+
+    suspend fun startStrategy() = withContext(StockManager.rocketContext) {
+        longStocks.clear()
+        shortStocks.clear()
+
+        process()
+
+        started = true
+        strategyTelegram.sendRocketStart(true)
+    }
+
+    fun stopStrategy() {
+        started = false
+        strategyTelegram.sendRocketStart(false)
+    }
+
+    fun processStrategy(stock: Stock) {
+        if (!started) return
+        if (stocks.isEmpty()) runBlocking { process() }
+        if (stock !in stocks) return
+
+        if (SettingsManager.getRocketOnlyLove()) {
+            if (StrategyLove.stocksSelected.find { it.ticker == stock.ticker } == null) return
         }
-        return s ?: emptyList()
+
+        val percentRocket = SettingsManager.getRocketChangePercent()
+        var minutesRocket = SettingsManager.getRocketChangeMinutes()
+        val volumeRocket = SettingsManager.getRocketChangeVolume()
+
+        if (stock.minuteCandles.isEmpty()) return
+
+        var fromCandle = stock.minuteCandles.last()
+        val toCandle = stock.minuteCandles.last()
+
+        var fromIndex = 0
+        for (i in stock.minuteCandles.indices.reversed()) {
+            if (stock.minuteCandles[i].lowestPrice < fromCandle.lowestPrice) {
+                fromCandle = stock.minuteCandles[i]
+                fromIndex = i
+            }
+
+            minutesRocket--
+            if (minutesRocket == 0) break
+        }
+
+        val deltaMinutes = ((toCandle.time.time - fromCandle.time.time) / 60.0 / 1000.0).toInt()
+
+        var volume = 0
+        for (i in fromIndex until stock.minuteCandles.size) {
+            volume += stock.minuteCandles[i].volume
+        }
+
+        val changePercent = toCandle.closingPrice / fromCandle.openingPrice * 100.0 - 100.0
+        if (volume < volumeRocket || abs(changePercent) < abs(percentRocket)) return
+
+        val rocketStock = RocketStock(stock, fromCandle.openingPrice, toCandle.closingPrice, deltaMinutes, volume, changePercent, toCandle.time.time)
+        rocketStock.process()
+
+//        if (changePercent > 0) {
+//            val last = rocketStocks.firstOrNull { it.stock.ticker == stock.ticker }
+//            if (last != null) {
+//                val deltaTime = ((toCandle.time.time - last.fireTime) / 60.0 / 1000.0).toInt()
+//                if (deltaTime < 5) return
+//            }
+//
+//            rocketStocks.add(0, rocketStock)
+//        } else {
+//            val last = cometStocks.firstOrNull { it.stock.ticker == stock.ticker }
+//            if (last != null) {
+//                val deltaTime = ((toCandle.time.time - last.fireTime) / 60.0 / 1000.0).toInt()
+//                if (deltaTime < 5) return
+//            }
+//
+//            cometStocks.add(0, rocketStock)
+//        }
+
+        GlobalScope.launch(Dispatchers.Main) {
+            strategySpeaker.speakRocket(rocketStock)
+            strategyTelegram.sendRocket(rocketStock)
+            createRocket(rocketStock)
+        }
+    }
+
+    private fun createRocket(rocketStock: RocketStock) {
+        val context: Context = TheApplication.application.applicationContext
+
+        val ticker = rocketStock.ticker
+        val notificationChannelId = ticker
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val channel = NotificationChannel(
+                notificationChannelId,
+                "Arbitration notifications channel $ticker",
+                NotificationManager.IMPORTANCE_HIGH
+            ).let {
+                it.description = notificationChannelId
+                it.lightColor = Color.RED
+                it.enableVibration(true)
+                it.enableLights(true)
+                it
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val pendingIntent: PendingIntent = Intent(context, MainActivity::class.java).let { notificationIntent ->
+            PendingIntent.getActivity(context, 0, notificationIntent, 0)
+        }
+
+        val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(context, notificationChannelId) else Notification.Builder(context)
+
+        val changePercent = if (rocketStock.changePercent > 0) {
+            "+%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
+        } else {
+            "%.2f%%".format(locale = Locale.US, rocketStock.changePercent)
+        }
+
+        val title = "$ticker: ${rocketStock.priceFrom.toMoney(rocketStock.stock)} -> ${rocketStock.priceTo.toMoney(rocketStock.stock)} = $changePercent за ${rocketStock.time} мин"
+
+        val notification = builder
+            .setSubText("$$ticker $changePercent")
+            .setContentTitle(title)
+            .setShowWhen(true)
+            .setContentIntent(pendingIntent)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setOnlyAlertOnce(true)
+            .setOngoing(false)
+            .build()
+
+        val manager = context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
+        val uid = Random.nextInt(0, 100000)
+        manager.notify(ticker, uid, notification)
+
+        val alive: Long = SettingsManager.getRocketNotifyAlive().toLong()
+        GlobalScope.launch(Dispatchers.Main) {
+            delay(1000 * alive)
+            manager.cancel(ticker, uid)
+        }
     }
 }

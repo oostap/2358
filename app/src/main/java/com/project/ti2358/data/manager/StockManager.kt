@@ -15,6 +15,7 @@ import com.project.ti2358.data.service.*
 import com.project.ti2358.service.StrategyTelegramService
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
+import com.project.ti2358.ui.arbitration.StrategyArbitration
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -45,6 +46,7 @@ class StockManager : KoinComponent {
     private val strategyTrend: StrategyTrend by inject()
     private val strategyLimits: StrategyLimits by inject()
     private val strategyTelegram: StrategyTelegram by inject()
+    private val strategyArbitration: StrategyArbitration by inject()
 
     private var stocksAll: MutableList<Stock> = mutableListOf()
 
@@ -301,13 +303,13 @@ class StockManager : KoinComponent {
             stocksStream = synchronizedList(stocksAll.filter { SettingsManager.isAllowCurrency(it.instrument.currency) }.toMutableList())
         }
 
-        val stock = getStockByTicker("PHOR")
-        log("PHOR PRICE = ${Utils.makeNicePrice(4666.48, stock)}")
-
-        val list = stocksAll.filter { it.instrument.currency == Currency.RUB }
-        var mins = list.map { it.instrument.minPriceIncrement }
-        mins = mins.distinct()
-        log("MIN PRICE = ${mins}")
+//        val stock = getStockByTicker("PHOR")
+//        log("PHOR PRICE = ${Utils.makeNicePrice(4666.48, stock)}")
+//
+//        val list = stocksAll.filter { it.instrument.currency == Currency.RUB }
+//        var mins = list.map { it.instrument.minPriceIncrement }
+//        mins = mins.distinct()
+//        log("MIN PRICE = ${mins}")
 
         strategyLove.process(stocksStream)
         strategyBlacklist.process(stocksStream)
@@ -403,8 +405,6 @@ class StockManager : KoinComponent {
                 }
             )
 
-        subscribeStockInfo()
-
         if (SettingsManager.getPantiniWardenToken() != "" && SettingsManager.getPantiniTelegramID() != "") {
             streamingPantiniService.connect()
         }
@@ -492,11 +492,30 @@ class StockManager : KoinComponent {
             )
     }
 
-    private fun subscribeStockInfo() {
+    fun subscribeStockInfo() {
         streamingTinkoffService
             .getStockInfoEventStream(
                 stocksAll.map { it.figi },
             )
+            .onBackpressureBuffer()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onNext = {
+                    GlobalScope.launch {
+                        addStockInfo(it)
+                    }
+                },
+                onError = {
+                    it.printStackTrace()
+                    FirebaseCrashlytics.getInstance().recordException(it)
+                }
+            )
+    }
+
+    fun unsubscribeStockInfo() {
+        streamingTinkoffService
+            .getStockInfoEventStream(emptyList(),)
             .onBackpressureBuffer()
             .subscribeOn(Schedulers.computation())
             .observeOn(AndroidSchedulers.mainThread())
@@ -544,7 +563,12 @@ class StockManager : KoinComponent {
 
     private suspend fun addOrderbook(orderbookStream: OrderbookStream) = withContext(stockContext) {
         val stock = stocksStream.find { it.figi == orderbookStream.figi || it.ticker == orderbookStream.figi }
-        stock?.processOrderbook(orderbookStream)
+
+        stock?.let {
+            it.processOrderbook(orderbookStream)
+
+            strategyArbitration.processStrategy(it)
+        }
     }
 
     private suspend fun addOrderbookUS(orderbookPantini: PantiniOrderbook) = withContext(stockContext) {

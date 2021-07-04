@@ -277,7 +277,7 @@ class StrategyTelegramCommands : KoinComponent {
                     if (lots == 0) return 0
 
                     // сильно большая поза, не сдавать
-                    if (lots * price > SettingsManager.getFollowerPurchaseVolume() || position.lots * price > SettingsManager.getFollowerPurchaseVolume()) return 0
+//                    if (lots * price > SettingsManager.getFollowerPurchaseVolume() || position.lots * price > SettingsManager.getFollowerPurchaseVolume()) return 0
 
                     GlobalScope.launch(Dispatchers.Main) {
                         try {

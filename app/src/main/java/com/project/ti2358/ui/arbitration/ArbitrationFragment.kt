@@ -14,11 +14,8 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.ChartManager
 import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.RocketStock
-import com.project.ti2358.data.manager.StrategyRocket
 import com.project.ti2358.databinding.FragmentArbitrationBinding
 import com.project.ti2358.databinding.FragmentArbitrationItemBinding
-import com.project.ti2358.databinding.FragmentRocketsBinding
-import com.project.ti2358.databinding.FragmentRocketsItemBinding
 import com.project.ti2358.service.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
@@ -28,7 +25,7 @@ import java.util.*
 class ArbitrationFragment : Fragment(R.layout.fragment_arbitration) {
     val orderbookManager: OrderbookManager by inject()
     val chartManager: ChartManager by inject()
-    val strategyRocket: StrategyRocket by inject()
+    val strategyArbitration: StrategyArbitration by inject()
 
     private var fragmentArbitrationBinding: FragmentArbitrationBinding? = null
 
@@ -60,15 +57,15 @@ class ArbitrationFragment : Fragment(R.layout.fragment_arbitration) {
             updateServiceButtonText()
 
             rocketButton.setOnClickListener {
-                adapterList.setData(strategyRocket.rocketStocks)
+                adapterList.setData(strategyArbitration.longStocks)
             }
 
             cometButton.setOnClickListener {
-                adapterList.setData(strategyRocket.cometStocks)
+                adapterList.setData(strategyArbitration.shortStocks)
             }
         }
 
-        adapterList.setData(strategyRocket.rocketStocks)
+        adapterList.setData(strategyArbitration.longStocks)
     }
 
     private fun updateServiceButtonText() {

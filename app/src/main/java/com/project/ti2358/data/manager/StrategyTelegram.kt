@@ -447,25 +447,23 @@ class StrategyTelegram : KoinComponent {
 
     fun sendLimit(limitStock: LimitStock) {
         if (started && SettingsManager.getTelegramSendLimits()) {
-            val emoji = when (limitStock.type)  {
-                LimitType.ON_UP -> "⬆️ на лимите ${limitStock.stock.stockInfo?.limit_up}"
-                LimitType.ON_DOWN -> "⬇️️ на лимите ${limitStock.stock.stockInfo?.limit_down}"
+            var emoji = when (limitStock.type)  {
+                LimitType.ON_UP -> "⬆️ на лимите ${limitStock.stock.stockInfo?.limit_up}$"
+                LimitType.ON_DOWN -> "⬇️️ на лимите ${limitStock.stock.stockInfo?.limit_down}$"
 
-                LimitType.ABOVE_UP -> "⬆️ выше лимита ${limitStock.stock.stockInfo?.limit_up}"
-                LimitType.UNDER_DOWN -> "⬇️️ ниже лимита ${limitStock.stock.stockInfo?.limit_down}"
+                LimitType.ABOVE_UP -> "⬆️ выше лимита ${limitStock.stock.stockInfo?.limit_up}$"
+                LimitType.UNDER_DOWN -> "⬇️️ ниже лимита ${limitStock.stock.stockInfo?.limit_down}$"
 
-                LimitType.NEAR_UP -> "⬆️ рядом с лимитом ${limitStock.stock.stockInfo?.limit_up}"
-                LimitType.NEAR_DOWN -> "⬇️️ рядом с лимитом ${limitStock.stock.stockInfo?.limit_down}"
+                LimitType.NEAR_UP -> "⬆️ рядом с лимитом ${limitStock.stock.stockInfo?.limit_up}$"
+                LimitType.NEAR_DOWN -> "⬇️️ рядом с лимитом ${limitStock.stock.stockInfo?.limit_down}$"
             }
-            val text = "$%s %s / %.2f%% / %.2f$ -- %.2f$ -> %.2f$".format(
+
+            emoji += " / %.2f%%".format(limitStock.percentFire)
+            val text = "$%s %.2f$ - %s".format(
                 locale = Locale.US,
                 limitStock.ticker,
-                emoji,
-                limitStock.percentFire,
                 limitStock.priceFire,
-
-                limitStock.stock.getPrice2300(),
-                limitStock.stock.getPriceRaw()
+                emoji
             )
             val buttons = getButtonsMarkup(limitStock.stock)
             sendMessageToChats(text, 120, replyMarkup = buttons)

@@ -35,19 +35,19 @@ class StrategyTA : KoinComponent {
                 val all = process()
 
                 all.forEach {
-                    val candles = chartManager.loadCandlesForInterval(it, Interval.HOUR)
+                    val candles = chartManager.loadCandlesForInterval(it, Interval.DAY)
                     analyticsAdapter.resetData(candles)
-                    val macd = processTurnMACD(it, candles)
+//                    val macd = processTurnMACD(it, candles)
                     val volume = processTurnUpVolume(it, candles)
-                    val rsi = processRSI(it, candles)
+//                    val rsi = processRSI(it, candles)
 
 //                    if (rsi) {
 //                        log("TURN UP RSI ${it.ticker}")
 //                    }
 
-                    if (macd && volume && rsi > 0) {
-                        log("TURN UP RSI + VOLUME + MACD ${it.ticker} ")
-                    }
+//                    if (macd && volume && rsi > 0) {
+//                        log("TURN UP RSI + VOLUME + MACD ${it.ticker} ")
+//                    }
 
 
                     delay(400)
@@ -79,16 +79,16 @@ class StrategyTA : KoinComponent {
 
     private fun processTurnUpVolume(stock: Stock, candles: List<Candle>) : Boolean {
         if (candles.size > 30) {
-            var days = 30
+            var days = candles.size - 1
             var totalVolume = 0
             for (i in candles.indices.reversed()) {
                 totalVolume += candles[i].volume
                 days--
                 if (days <= 0) break
             }
-            val avgVolume = totalVolume / 30
+            val avgVolume = totalVolume / candles.size
 
-            days = 30
+            days = candles.size - 1
             for (i in candles.indices.reversed()) {
                 val change = candles[i].closingPrice / candles[i].openingPrice * 100.0 - 100.0
                 if (candles[i].volume > avgVolume * 6 && change > -5) {

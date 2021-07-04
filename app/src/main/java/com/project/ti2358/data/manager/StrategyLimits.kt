@@ -42,7 +42,7 @@ class StrategyLimits : KoinComponent {
         return@withContext stocks
     }
 
-    fun resort(): MutableList<Stock> {
+    suspend fun resort(): MutableList<Stock> = withContext(StockManager.limitsContext) {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         val temp = stocks
 
@@ -54,7 +54,7 @@ class StrategyLimits : KoinComponent {
             Utils.getPercentFromTo(it.stockInfo?.limit_up ?: 0.0, it.getPriceRaw()) * sign
         }
 
-        return stocks
+        return@withContext stocks
     }
 
     suspend fun restartStrategy() = withContext(StockManager.limitsContext) {
@@ -76,11 +76,15 @@ class StrategyLimits : KoinComponent {
 
         started = true
         strategyTelegram.sendLimitsStart(true)
+
+        stockManager.subscribeStockInfo()
     }
 
     fun stopStrategy() {
         started = false
         strategyTelegram.sendLimitsStart(false)
+
+        stockManager.unsubscribeStockInfo()
     }
 
     fun processStrategy(stock: Stock) {
@@ -106,8 +110,9 @@ class StrategyLimits : KoinComponent {
             var limitStock: LimitStock? = null
 
             val allDistance = it.limit_up - it.limit_down
+            if (allDistance == 0.0 || it.limit_up == 0.0 || it.limit_down == 0.0) return@let
             val center = it.limit_down + allDistance / 2.0
-            val price = stock.getPriceRaw()
+            val price = stock.getPriceRaw() * stock.instrument.lot
 
             val upLimitChange = Utils.getPercentFromTo(it.limit_up, price)
             val downLimitChange = Utils.getPercentFromTo(it.limit_down, price)

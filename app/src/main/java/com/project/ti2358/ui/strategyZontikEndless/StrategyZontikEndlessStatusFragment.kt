@@ -122,8 +122,7 @@ class StrategyZontikEndlessStatusFragment : Fragment(R.layout.fragment_zontik_en
                     tickerView.text = "${index + 1}) ${purchase.stock.getTickerLove()} ${purchase.percentLimitPriceChange.toPercent()}"
                     priceView.text = "${purchase.zontikEndlessPrice} ➡ ${purchase.stock.getPriceNow().toMoney(purchase.stock)}"
 
-                    val volumeToday = purchase.stock.getTodayVolume() / 1000f
-                    volumeSharesView.text = "%.1fk".format(volumeToday)
+                    volumeSharesView.text = purchase.stock.getTodayVolume().toString()
 
                     var vol = 0
                     if (purchase.stock.minuteCandles.isNotEmpty()) {

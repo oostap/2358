@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.model.dto.Currency
 import com.project.ti2358.service.*
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinApiExtension
@@ -21,6 +22,7 @@ class StrategyLove : KoinComponent {
     suspend fun process(allStocks: List<Stock>): MutableList<Stock> = withContext(StockManager.stockContext) {
         stocks = allStocks.toMutableList()
         stocks.sortBy { it.changePrice2300DayPercent }
+        stocks.removeAll { it.instrument.currency == Currency.USD && it.getPrice2300() == 0.0 }
         loadSelectedStocks()
         return@withContext stocks
     }

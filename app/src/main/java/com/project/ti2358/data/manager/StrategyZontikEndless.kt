@@ -532,6 +532,7 @@ class StrategyZontikEndless : KoinComponent {
 
     fun processStrategy(stock: Stock, candle: Candle) {
         if (!started) return
+        if (stock in strategyBlacklist.getBlacklistStocks()) return
 
         val ticker = stock.ticker
 
