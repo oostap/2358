@@ -120,6 +120,26 @@
         tools:layout="@layout/fragment_premarket">
     </fragment>
 
+    <!-- DAY LOW -->
+
+    <fragment
+        android:id="@+id/nav_daylow_start"
+        android:name="com.project.ti2358.ui.strategyDayLow.StrategyDayLowStartFragment"
+        android:label="@string/menu_day_low"
+        tools:layout="@layout/fragment_daylow_start">
+        <action
+            android:id="@+id/action_nav_daylow_start_to_nav_daylow_finish"
+            app:destination="@id/nav_daylow_finish"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_daylow_finish"
+        android:name="com.project.ti2358.ui.strategyDayLow.StrategyDayLowFinishFragment"
+        android:label="@string/menu_day_low"
+        tools:layout="@layout/fragment_daylow_finish" />
+
     <!-- 2358 -->
 
     <fragment
@@ -138,7 +158,7 @@
         android:id="@+id/nav_2358_finish"
         android:name="com.project.ti2358.ui.strategy2358.Strategy2358FinishFragment"
         android:label="@string/menu_2358"
-        tools:layout="@layout/fragment_2358_start" />
+        tools:layout="@layout/fragment_2358_finish" />
 
     <!-- 2225 -->
 

@@ -270,7 +270,9 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_trends,
                 R.id.nav_limits,
                 R.id.nav_sectors,
-                R.id.nav_zontik_endless_start
+                R.id.nav_zontik_endless_start,
+                R.id.nav_daylow_start,
+                R.id.nav_arbitration
             ),
             drawerLayout
         )

@@ -85,6 +85,7 @@
     <string name="menu_tazik">Автотазик</string>
     <string name="menu_tazik_endless">Бесконечный таз</string>
     <string name="menu_zontik_endless">Бесконечный зонт (шорт ️⚠️)</string>
+    <string name="menu_day_low">2258 DAY LOW</string>
 
     <string name="menu_telegram">Телеграм бот</string>
     <string name="menu_trends">Тренды</string>

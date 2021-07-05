@@ -62,6 +62,7 @@ class WorkflowManager() : KoinComponent {
             fun provideStrategyLimits(): StrategyLimits = StrategyLimits()
             fun provideStrategySector(): StrategySector = StrategySector()
             fun provideStrategyArbitration(): StrategyArbitration = StrategyArbitration()
+            fun provideStrategyDayLow(): StrategyDayLow = StrategyDayLow()
 
             // unused yet
             fun provideStrategyShorts(): StrategyShorts = StrategyShorts()
@@ -98,6 +99,7 @@ class WorkflowManager() : KoinComponent {
             single { provideStrategyLimits() }
             single { provideStrategySector() }
             single { provideStrategyArbitration() }
+            single { provideStrategyDayLow() }
 
             // unused yet
             single { provideStrategyShorts() }

@@ -147,7 +147,7 @@ class StockManager : KoinComponent {
                     it.apply {
                         it.closePrices = stockClosePrices[it.ticker]
                         it.processSector()
-                        it.updateChange2300()
+                        it.updateChangeToday()
                     }
                 }
                 stockSectors = stockClosePrices.map { it.value.sector }.distinct().toMutableList()
@@ -252,10 +252,12 @@ class StockManager : KoinComponent {
         "ARCT" to "конь скотина",
         "PBI" to "пибай",
         
-//        "BIDU" to "байда беда",
+        "BIDU" to "байда беда",
 
         "CLOV" to "плов",
         "TAL" to "тал талый",
+
+        "SYKE" to "корп",
     )
 
     private suspend fun afterLoadInstruments(instrumentsAll: MutableList<Instrument>) = withContext(stockContext){

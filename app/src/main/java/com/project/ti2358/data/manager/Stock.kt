@@ -41,6 +41,16 @@ data class Stock(var instrument: Instrument) {
     var candleToday: Candle? = null                               // реалтайм, дневная свеча
     var minutesVolume: Int = 0
 
+    // разница с ценой low
+    var lowPrice: Double = 0.0
+    var changePriceLowDayAbsolute: Double = 0.0
+    var changePriceLowDayPercent: Double = 0.0
+
+    // разница с ценой high
+    var highPrice: Double = 0.0
+    var changePriceHighDayAbsolute: Double = 0.0
+    var changePriceHighDayPercent: Double = 0.0
+
     // разница с ценой закрытия ОС
     var changePrice2300DayAbsolute: Double = 0.0
     var changePrice2300DayPercent: Double = 0.0
@@ -234,7 +244,6 @@ data class Stock(var instrument: Instrument) {
         candleToday = candle
 
         updateChangeToday()
-        updateChange2300()
         updateChangeFixPrice()
     }
 
@@ -266,7 +275,6 @@ data class Stock(var instrument: Instrument) {
         }
 
         updateChangeToday()
-        updateChange2300()
         updateChangeFixPrice()
     }
 
@@ -349,16 +357,36 @@ data class Stock(var instrument: Instrument) {
         return getPrice2300().toMoney(this)
     }
 
-    private fun updateChangeToday() {
+    fun updateChangeToday() {
         candleToday?.let { candle ->
             val middlePrice = (candle.highestPrice + candle.lowestPrice) / 2.0
             dayVolumeCash = middlePrice * getTodayVolume()
         }
-    }
 
-    fun updateChange2300() {
-        changePrice2300DayAbsolute = getPriceNow() - getPrice2300()
-        changePrice2300DayPercent = (100.0 * getPriceNow()) / getPrice2300() - 100.0
+        changePrice2300DayAbsolute = getPriceRaw() - getPrice2300()
+        changePrice2300DayPercent = (100.0 * getPriceRaw()) / getPrice2300() - 100.0
+
+        var low = candleToday?.lowestPrice ?: getPriceRaw()
+        for (candle in minuteCandles) {
+            if (candle.lowestPrice < low) {
+                low = candle.lowestPrice
+            }
+        }
+        lowPrice = low
+        changePriceLowDayAbsolute = getPriceRaw() - lowPrice
+        changePriceLowDayPercent = (100.0 * getPriceRaw()) / lowPrice - 100.0
+
+        var high = candleToday?.highestPrice ?: getPriceRaw()
+        for (candle in minuteCandles) {
+            if (candle.highestPrice > high) {
+                high = candle.highestPrice
+            }
+        }
+        highPrice = high
+        changePriceHighDayAbsolute = getPriceRaw() - highPrice
+        changePriceHighDayPercent = (100.0 * getPriceRaw()) / highPrice - 100.0
+
+        log("$ticker low=$lowPrice=$changePriceLowDayAbsolute / $changePriceLowDayPercent, high=$highPrice=$changePriceHighDayAbsolute / $changePriceHighDayPercent")
     }
 
     fun getPriceRaw(): Double {
