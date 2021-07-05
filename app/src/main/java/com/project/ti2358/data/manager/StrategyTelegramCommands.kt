@@ -246,92 +246,94 @@ class StrategyTelegramCommands : KoinComponent {
             val figi = stock?.figi ?: ""
             if (figi == "") return 0
 
-            if (operation in listOf("buy", "sell")) {
-                if (list.size != 5) return 0
-                val price = list[3].toDouble()
-                val percent = list[4].toInt()
-                if (price == 0.0 || percent == 0) return 0
+            if (SettingsManager.getTelegramAllowCommandBuySell()) {
+                if (operation in listOf("buy", "sell")) {
+                    if (list.size != 5) return 0
+                    val price = list[3].toDouble()
+                    val percent = list[4].toInt()
+                    if (price == 0.0 || percent == 0) return 0
 
-                if (operation == "buy") {   // # BUY VIPS 29.46 1
-                    val moneyPart = SettingsManager.getFollowerPurchaseVolume() / 100.0 * percent
-                    val lots = (moneyPart / price).toInt()
+                    if (operation == "buy") {   // # BUY VIPS 29.46 1
+                        val moneyPart = SettingsManager.getFollowerPurchaseVolume() / 100.0 * percent
+                        val lots = (moneyPart / price).toInt()
 
-                    // недостаточно для покупки даже одного лота
-                    if (lots == 0 || moneyPart == 0.0) return 0
+                        // недостаточно для покупки даже одного лота
+                        if (lots == 0 || moneyPart == 0.0) return 0
 
-                    // превышен лимит торговли по сигналам
-                    if (abs(moneySpent - lots * price) > SettingsManager.getFollowerPurchaseVolume()) return 0
+                        // превышен лимит торговли по сигналам
+                        if (abs(moneySpent - lots * price) > SettingsManager.getFollowerPurchaseVolume()) return 0
 
-                    GlobalScope.launch(Dispatchers.Main) {
-                        try {
-                            ordersService.placeLimitOrder(
-                                lots,
-                                figi,
-                                price,
-                                OperationType.BUY,
-                                portfolioManager.getActiveBrokerAccountId()
-                            )
-                            Utils.showToastAlert("$ticker создан новый ордер: ПОКУПКА!")
-                        } catch (e: Exception) {
+                        GlobalScope.launch(Dispatchers.Main) {
+                            try {
+                                ordersService.placeLimitOrder(
+                                    lots,
+                                    figi,
+                                    price,
+                                    OperationType.BUY,
+                                    portfolioManager.getActiveBrokerAccountId()
+                                )
+                                Utils.showToastAlert("$ticker создан новый ордер: ПОКУПКА!")
+                            } catch (e: Exception) {
 
+                            }
                         }
+                        moneySpent -= lots * price
                     }
-                    moneySpent -= lots * price
-                }
 
-                if (operation == "sell") {  // # SELL VIPS 29.46 1
-                    val position = portfolioManager.getPositionForFigi(figi) ?: return 0
-                    val lots = (position.lots / 100.0 * percent).toInt()
+                    if (operation == "sell") {  // # SELL VIPS 29.46 1
+                        val position = portfolioManager.getPositionForFigi(figi) ?: return 0
+                        val lots = (position.lots / 100.0 * percent).toInt()
 
-                    if (lots == 0) return 0
+                        if (lots == 0) return 0
 
-                    // сильно большая поза, не сдавать
+                        // сильно большая поза, не сдавать
 //                    if (lots * price > SettingsManager.getFollowerPurchaseVolume() || position.lots * price > SettingsManager.getFollowerPurchaseVolume()) return 0
 
-                    GlobalScope.launch(Dispatchers.Main) {
-                        try {
-                            ordersService.placeLimitOrder(
-                                lots,
-                                figi,
-                                price,
-                                OperationType.SELL,
-                                portfolioManager.getActiveBrokerAccountId()
-                            )
-                            Utils.showToastAlert("$ticker создан новый ордер: ПРОДАЖА!")
-                        } catch (e: Exception) {
+                        GlobalScope.launch(Dispatchers.Main) {
+                            try {
+                                ordersService.placeLimitOrder(
+                                    lots,
+                                    figi,
+                                    price,
+                                    OperationType.SELL,
+                                    portfolioManager.getActiveBrokerAccountId()
+                                )
+                                Utils.showToastAlert("$ticker создан новый ордер: ПРОДАЖА!")
+                            } catch (e: Exception) {
 
+                            }
                         }
+                        moneySpent += lots * price
                     }
-                    moneySpent += lots * price
                 }
-            }
 
-            if (operation in listOf("buy_move", "sell_move")) { // # BUY_MOVE VIPS 0.01
-                if (list.size != 4) return 0
+                if (operation in listOf("buy_move", "sell_move")) { // # BUY_MOVE VIPS 0.01
+                    if (list.size != 4) return 0
 
-                val change = list[3].toDouble()
-                val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
-                val buyOrders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
-                buyOrders.forEach { order ->
-                    val newIntPrice = ((order.price + change) * 100).roundToInt()
-                    val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, order.stock)
-                    orderbookManager.replaceOrder(order, newPrice, operationType)
+                    val change = list[3].toDouble()
+                    val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
+                    val buyOrders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
+                    buyOrders.forEach { order ->
+                        val newIntPrice = ((order.price + change) * 100).roundToInt()
+                        val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, order.stock)
+                        orderbookManager.replaceOrder(order, newPrice, operationType)
+                    }
                 }
-            }
 
-            if (operation in listOf("buy_cancel", "sell_cancel")) { // # BUY_CANCEL VIPS
-                if (list.size != 3) return 0
+                if (operation in listOf("buy_cancel", "sell_cancel")) { // # BUY_CANCEL VIPS
+                    if (list.size != 3) return 0
 
-                val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
-                val buyOrders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
-                buyOrders.forEach { order ->
-                    orderbookManager.cancelOrder(order)
+                    val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
+                    val buyOrders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
+                    buyOrders.forEach { order ->
+                        orderbookManager.cancelOrder(order)
 
-                    val money = (order.requestedLots - order.executedLots) * order.price
-                    if (operationType == OperationType.SELL) {
-                        moneySpent += money
-                    } else {
-                        moneySpent -= money
+                        val money = (order.requestedLots - order.executedLots) * order.price
+                        if (operationType == OperationType.SELL) {
+                            moneySpent += money
+                        } else {
+                            moneySpent -= money
+                        }
                     }
                 }
             }
