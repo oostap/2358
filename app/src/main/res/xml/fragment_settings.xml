@@ -655,13 +655,13 @@
 
     </PreferenceCategory>
 
-<!--    <PreferenceCategory app:title="@string/menu_fixprice">-->
-<!--        <EditTextPreference-->
-<!--            app:key="@string/setting_key_fixprice_schedule"-->
-<!--            app:title="@string/stocks_fixprice_schedule"-->
-<!--            app:useSimpleSummaryProvider="true"-->
-<!--            app:defaultValue="07:00:00 10:00:00 11:00:00 16:30:00"/>-->
-<!--    </PreferenceCategory>-->
+    <PreferenceCategory app:title="@string/menu_fixprice">
+        <EditTextPreference
+            app:key="@string/setting_key_fixprice_schedule"
+            app:title="@string/stocks_fixprice_schedule"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="07:00:00 10:00:00 11:00:00 16:30:00"/>
+    </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_rocket">
         <EditTextPreference

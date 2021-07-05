@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.github.bassaer.chatmessageview.model.ChatUser
@@ -14,6 +15,7 @@ import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.service.ThirdPartyService
 import com.project.ti2358.databinding.FragmentChatBinding
 import com.project.ti2358.service.log
+import com.project.ti2358.service.toString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -84,6 +86,14 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                 chatView.inputText = ""
             }
             sendMessage("")
+        }
+        updateTitle()
+    }
+
+    private fun updateTitle() {
+        if (isAdded) {
+            val act = requireActivity() as AppCompatActivity
+            act.supportActionBar?.title = "Отвечают эксперты пульса"
         }
     }
 

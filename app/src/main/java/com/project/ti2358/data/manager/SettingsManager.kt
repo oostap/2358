@@ -1393,18 +1393,15 @@ class SettingsManager {
         }
 
         /******************** fixprice *************************/
-        fun getFixPriceNearestTime(): String { // TODO: unused yet
+
+        fun getFixPriceTimes(): MutableList<Calendar> {
+            val fixList = mutableListOf<Calendar>()
+
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_fixprice_schedule)
             val time = preferences.getString(key, "07:00:00 10:00:00 11:00:00 16:30:00")
 
             if (time != null && time != "") {
                 val times = time.split(" ").toTypedArray()
-
-                // отсортировать по возрастанию
-                times.sortBy { t ->
-                    val dayTime = t.split(":").toTypedArray()
-                    parseInt(dayTime[0]) * 3600 + parseInt(dayTime[1]) * 60 + parseInt(dayTime[2])
-                }
 
                 for (t in times) {
                     val dayTime = t.split(":").toTypedArray()
@@ -1421,21 +1418,17 @@ class SettingsManager {
                         Utils.showToastAlert("Неверный формат времени в настройках!")
                         continue
                     }
-                    val currentMskTime = Utils.getTimeMSK()
 
-                    val hoursMsk = currentMskTime.get(Calendar.HOUR_OF_DAY)
-                    val minutesMsk = currentMskTime.get(Calendar.MINUTE)
-                    val secondsMsk = currentMskTime.get(Calendar.SECOND)
-
-                    val total = hours * 3600 + minutes * 60 + seconds
-                    val totalMsk = hoursMsk * 3600 + minutesMsk * 60 + secondsMsk
-                    if (totalMsk < total) {
-                        return t
-                    }
+                    val fixTime = Utils.getTimeMSK()
+                    fixTime.set(Calendar.HOUR_OF_DAY, hours)
+                    fixTime.set(Calendar.MINUTE, minutes)
+                    fixTime.set(Calendar.SECOND, seconds)
+                    fixTime.set(Calendar.MILLISECOND, 0)
+                    fixList.add(fixTime)
                 }
             }
 
-            return "???"
+            return fixList
         }
     }
 }

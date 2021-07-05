@@ -447,7 +447,7 @@ class StrategyTelegram : KoinComponent {
                 text += "${stockArbitration.bidRU.toMoney(stockArbitration.stock)} -> ${stockArbitration.priceUS.toMoney(stockArbitration.stock)}"
             }
             val buttons = getButtonsMarkup(stockArbitration.stock)
-            sendMessageToChats(text, 120, replyMarkup = buttons)
+            sendMessageToChats(text, -1, replyMarkup = buttons)
         }
     }
 
@@ -806,7 +806,7 @@ class StrategyTelegram : KoinComponent {
         val buttons = getButtonsMarkup(stock)
         val price = stock.getPriceRaw()
         val change2300 = "%.2f".format(stock.changePrice2300DayPercent)
-        sendMessageToChats("$${stock.ticker} ${price}$ / ${change2300}%", deleteAfterSeconds = 60, replyMarkup = buttons)
+        sendMessageToChats("$${stock.ticker} ${price}$ / ${change2300}%", deleteAfterSeconds = -1, replyMarkup = buttons)
     }
 
     fun sendStockInfo(stock: Stock) {
@@ -818,7 +818,7 @@ class StrategyTelegram : KoinComponent {
             val percentDown = "%.2f".format(Utils.getPercentFromTo(stockInfo.limit_down, price))
             sendMessageToChats("$${stock.ticker} ${price}$ - ⬆️${stockInfo.limit_up}$ / ${percentUp}% ⬇️${stockInfo.limit_down}$ / ${percentDown}%", deleteAfterSeconds = 60, replyMarkup = buttons)
         } else {
-            sendMessageToChats("$${stock.ticker} нет лимитов, current = ${stock.getPriceNow()}", deleteAfterSeconds = 60, replyMarkup = buttons)
+            sendMessageToChats("$${stock.ticker} нет лимитов, current = ${stock.getPriceNow()}", deleteAfterSeconds = -1, replyMarkup = buttons)
         }
     }
 
@@ -838,7 +838,7 @@ class StrategyTelegram : KoinComponent {
     fun sendPulse(messageId: Long) {
         GlobalScope.launch(Dispatchers.Main) {
             val phrase = stockManager.getPulsePhrase()
-            sendMessageToChats(phrase, deleteAfterSeconds = 30, replyToMessageId = messageId)
+            sendMessageToChats(phrase, deleteAfterSeconds = 120, replyToMessageId = messageId)
         }
     }
 

@@ -132,6 +132,12 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
 
     private fun updateData(search: String = "") {
         GlobalScope.launch(Dispatchers.Main) {
+
+            fragmentLimitsBinding?.apply {
+                listAll.visibility = View.VISIBLE
+                listLimits.visibility = View.GONE
+            }
+
             stocks = strategyLimits.process()
             stocks = strategyLimits.resort()
             if (search != "") {
@@ -154,7 +160,7 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            act.supportActionBar?.title = "Лимиты - " + if (status == 0) "Все" else if (status == 1) "Верхние" else "Нижние"
+            act.supportActionBar?.title = "Лимиты - " + if (status == 0) "Все (${stocks.size} шт.)" else if (status == 1) "Верхние" else "Нижние"
 
         }
     }

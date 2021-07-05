@@ -276,7 +276,7 @@ class StreamingAlorService : KoinComponent {
     fun unsubscribeOrderBookEventsStream(stock: Stock, depth: Int) {
         log("StreamingAlorService :: unsubscribe from order book events: ticker: ${stock.ticker}, depth: $depth")
         val cancel = CancelEventBody(SettingsManager.getTokenALOR(), "unsubscribe", "${stock.ticker}_orderbook")
-        webSocket?.send(Gson().toJson(cancel))
+//        webSocket?.send(Gson().toJson(cancel))
         activeOrderSubscriptions.remove(stock)
     }
 

@@ -101,6 +101,8 @@ class MainActivity : AppCompatActivity() {
                     key = "limits_change_up"
                 } else if (it.id in listOf(R.id.nav_arbitration)) {
                     key = "arbitration_min_percent"
+                } else if (it.id in listOf(R.id.nav_fixprice)) {
+                    key = "fixprice_schedule"
                 }
             }
 

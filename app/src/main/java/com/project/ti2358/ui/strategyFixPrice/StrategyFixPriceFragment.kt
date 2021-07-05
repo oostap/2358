@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -56,6 +55,8 @@ class StrategyFixPriceFragment : Fragment(R.layout.fragment_fixprice) {
             }
         }
 
+        strategyFixPrice.reloadSchedule()
+
         updateData()
         updateTime()
     }
@@ -63,12 +64,15 @@ class StrategyFixPriceFragment : Fragment(R.layout.fragment_fixprice) {
     private fun updateData() {
         strategyFixPrice.process()
         adapterList.setData(strategyFixPrice.resort())
+        updateTime()
     }
 
     private fun updateTime() {
-        val time = strategyFixPrice.strategyStartTime.time.toString("HH:mm:ss") + " - NOW"
-        val act = requireActivity() as AppCompatActivity
-        act.supportActionBar?.title = time
+        if (isAdded) {
+            val time = strategyFixPrice.strategyStartTime.time.toString("HH:mm:ss") + " - NOW"
+            val act = requireActivity() as AppCompatActivity
+            act.supportActionBar?.title = time
+        }
     }
 
     inner class ItemFixPriceRecyclerViewAdapter(private var values: List<Stock>) : RecyclerView.Adapter<ItemFixPriceRecyclerViewAdapter.ViewHolder>() {
