@@ -8,6 +8,7 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.PortfolioManager
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.service.StreamingAlorService
+import com.project.ti2358.data.service.StreamingPantiniService
 import com.project.ti2358.data.service.StreamingTinkoffService
 import com.project.ti2358.databinding.FragmentDiagnosticsBinding
 import org.koin.android.ext.android.inject
@@ -19,6 +20,7 @@ class DiagnosticsFragment : Fragment(R.layout.fragment_diagnostics) {
     val stockManager: StockManager by inject()
     val streamingTinkoffService: StreamingTinkoffService by inject()
     val streamingAlorService: StreamingAlorService by inject()
+    val streamingPantiniService: StreamingPantiniService by inject()
 
     private var fragmentDiagnosticsBinding: FragmentDiagnosticsBinding? = null
 
@@ -55,6 +57,9 @@ class DiagnosticsFragment : Fragment(R.layout.fragment_diagnostics) {
         var daager1728Step2 = "НЕ ОК 😱"
         var daager1728Step3 = "НЕ ОК 😱"
 
+        val pantiniConnectedStatus = if (streamingPantiniService.connectedStatus) "ОК" else "НЕ ОК 😱"
+        val pantiniAuthStatus = if (streamingPantiniService.authStatus) "ОК" else "НЕ ОК 😱"
+
         stockManager.stockPrice1728?.let {
             if (it["M"] != null) {
                 if (it["M"]?.from700to1200 != null) daager1728Step1 = "OK"
@@ -78,6 +83,9 @@ class DiagnosticsFragment : Fragment(R.layout.fragment_diagnostics) {
                     "daager OpenAPI 1728: $daager1728\n" +
                     "daager OpenAPI 1728 Шаг 1: $daager1728Step1\n" +
                     "daager OpenAPI 1728 Шаг 2: $daager1728Step2\n" +
-                    "daager OpenAPI 1728 Шаг 3: $daager1728Step3\n"
+                    "daager OpenAPI 1728 Шаг 3: $daager1728Step3\n\n" +
+
+                    "pantini коннект: $pantiniConnectedStatus\n" +
+                    "pantini авторизация: $pantiniAuthStatus\n\n"
     }
 }

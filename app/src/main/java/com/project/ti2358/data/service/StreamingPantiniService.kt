@@ -48,6 +48,7 @@ class StreamingPantiniService {
 
     private val threadPoolExecutor = Executors.newSingleThreadExecutor()
 
+    var authStatus: Boolean = false
     var connectedStatus: Boolean = false
     var messagesStatus: Boolean = false
 
@@ -83,6 +84,7 @@ class StreamingPantiniService {
             authorize()
             currentAttemptCount = 0
             connectedStatus = true
+            authStatus = false
             messagesStatus = false
         }
 
@@ -98,7 +100,7 @@ class StreamingPantiniService {
                 val m: String? = jsonObject.getString("m")
                 if (m == "auth-success") {
                     currentAttemptCount = 0
-                    connectedStatus = true
+                    authStatus = true
                     messagesStatus = false
                     resubscribe().subscribe()
                 }
@@ -151,12 +153,14 @@ class StreamingPantiniService {
             log("StreamingPantiniService :: onClosed")
             connectedStatus = false
             messagesStatus = false
+            authStatus = false
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
             log("StreamingPantiniService :: onClosing")
             connectedStatus = false
             messagesStatus = false
+            authStatus = false
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
@@ -167,6 +171,7 @@ class StreamingPantiniService {
             }
             connectedStatus = false
             messagesStatus = false
+            authStatus = false
         }
     }
 

@@ -392,7 +392,7 @@ class StrategyTelegram : KoinComponent {
 
     fun sendClosePriceLoaded(success: Boolean) {
         val status = if (success) "🟢" else "🔴"
-        sendMessageToChats("Статус цен закрытия $status", deleteAfterSeconds = 15)
+        sendMessageToChats("Статус цен закрытия $status", deleteAfterSeconds = 5)
     }
 
     fun sendRocket(stockRocket: StockRocket) {
