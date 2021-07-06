@@ -64,7 +64,7 @@ class StrategyDayLowService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "DAY LOW", "", "", "")
+        val notification = Utils.createNotification(this, NOTIFICATION_CHANNEL_ID, "2358 DAY LOW", "", "", "")
         startForeground(NOTIFICATION_ID, notification)
 
         schedulePurchase()
@@ -81,7 +81,7 @@ class StrategyDayLowService : Service() {
     }
 
     private fun schedulePurchase() {
-        Toast.makeText(this, "Запущен таймер на покупку DAY LOW", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Запущен таймер на покупку 2358 DAY LOW", Toast.LENGTH_LONG).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
@@ -135,7 +135,7 @@ class StrategyDayLowService : Service() {
     }
 
     private fun stopService() {
-        Toast.makeText(this, "DAY LOW остановлена", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "2358 DAY LOW остановлена", Toast.LENGTH_SHORT).show()
         try {
             wakeLock?.let {
                 if (it.isHeld) {

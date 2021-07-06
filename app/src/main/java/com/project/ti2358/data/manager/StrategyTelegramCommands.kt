@@ -19,12 +19,14 @@ class StrategyTelegramCommands : KoinComponent {
     private val orderbookManager: OrderbookManager by inject()
     private val strategyTelegram: StrategyTelegram by inject()
 
+    private val strategyTazik: StrategyTazik by inject()
     private val strategyTazikEndless: StrategyTazikEndless by inject()
     private val strategyZontikEndless: StrategyZontikEndless by inject()
     private val strategyRocket: StrategyRocket by inject()
     private val strategyTrend: StrategyTrend by inject()
     private val strategyLimits: StrategyLimits by inject()
     private val strategy2358: Strategy2358 by inject()
+    private val strategyDayLow: StrategyDayLow by inject()
     private val strategy2225: Strategy2225 by inject()
     private val strategyArbitration: StrategyArbitration by inject()
 
@@ -61,21 +63,63 @@ class StrategyTelegramCommands : KoinComponent {
 
                 strategyTelegram.sendTop(all, count)
                 return
-            } else {
-                if (operation == "bot") { // топ отросших бумаг от закрытия
-                    var count = 10
-                    if (list.size == 2) count = list[1].toInt()
-                    val all = stockManager.getWhiteStocks()
-                    all.removeAll { it.getPrice2300() == 0.0 }
-                    all.sortBy { it.changePrice2300DayPercent }
+            } else if (operation == "bot") { // топ отросших бумаг от закрытия
+                var count = 10
+                if (list.size == 2) count = list[1].toInt()
+                val all = stockManager.getWhiteStocks()
+                all.removeAll { it.getPrice2300() == 0.0 }
+                all.sortBy { it.changePrice2300DayPercent }
 
-                    if (Utils.isMorningSession()) {
-                        all.removeAll { it.morning == null }
-                    }
-
-                    strategyTelegram.sendTop(all, count)
-                    return
+                if (Utils.isMorningSession()) {
+                    all.removeAll { it.morning == null }
                 }
+
+                strategyTelegram.sendTop(all, count)
+                return
+            } else if (operation == "arb_long") { // топ отросших бумаг от закрытия
+                var count = 10
+                if (list.size == 2) count = list[1].toInt()
+                var all = strategyArbitration.longStocks
+                all = all.distinctBy { it.stock }.toMutableList()
+                all.sortByDescending { it.changePricePercent }
+
+                if (Utils.isMorningSession()) {
+                    all.removeAll { it.stock.morning == null }
+                }
+
+                strategyTelegram.sendArb(all, count)
+                return
+            } else if (operation == "arb_short") { // топ отросших бумаг от закрытия
+                var count = 10
+                if (list.size == 2) count = list[1].toInt()
+                var all = strategyArbitration.shortStocks
+                all = all.distinctBy { it.stock }.toMutableList()
+                all.sortBy { it.changePricePercent }
+
+                if (Utils.isMorningSession()) {
+                    all.removeAll { it.stock.morning == null }
+                }
+
+                all.removeAll { it.stock.short == null }
+
+                strategyTelegram.sendArb(all, count)
+                return
+            } else if (operation == "daylow") { // топ отросших бумаг от закрытия
+                var count = 10
+                var low = 0.0
+                if (list.size >= 2) count = list[1].toInt()
+                if (list.size >= 3) low = list[2].toDouble()
+
+                val all = strategyDayLow.process()
+                all.removeAll { it.getPrice2300() == 0.0 }
+                all.removeAll { it.changePrice2300DayPercent > low }
+
+                if (Utils.isMorningSession()) {
+                    all.removeAll { it.morning == null }
+                }
+
+                strategyTelegram.sendDayLow(all, count)
+                return
             }
 
             val stock = stockManager.getStockByTicker(list[0].toUpperCase())
@@ -122,15 +166,25 @@ class StrategyTelegramCommands : KoinComponent {
                 ticker = list[2].toUpperCase()
             }
 
+            val delay = 100L
             if (operation == "restart") {
                 if (ticker == "ALL") {
                     GlobalScope.launch(Dispatchers.Main) {
                         stockManager.reloadClosePrices()
+                        delay(delay)
                         strategyTazikEndless.restartStrategy()
+                        delay(delay)
                         strategyRocket.restartStrategy()
+                        delay(delay)
                         strategyTrend.restartStrategy()
+                        delay(delay)
                         strategyLimits.restartStrategy()
+                        delay(delay)
                         strategyZontikEndless.restartStrategy()
+                        delay(delay)
+                        strategyArbitration.restartStrategy()
+                        delay(delay)
+                        strategyTazik.restartStrategy()
                     }
                 } else if (ticker == "TAZ") {
                     var percent = 0.0
@@ -179,11 +233,19 @@ class StrategyTelegramCommands : KoinComponent {
             } else if (operation == "stop") {
                 if (ticker == "ALL") {
                     GlobalScope.launch(Dispatchers.Main) {
-                        strategyTazikEndless.stopStrategy()
-                        strategyRocket.stopStrategy()
-                        strategyTrend.stopStrategy()
-                        strategyLimits.stopStrategy()
-                        strategyZontikEndless.stopStrategy()
+                        strategyTazikEndless.stopStrategyCommand()
+                        delay(delay)
+                        strategyRocket.stopStrategyCommand()
+                        delay(delay)
+                        strategyTrend.stopStrategyCommand()
+                        delay(delay)
+                        strategyLimits.stopStrategyCommand()
+                        delay(delay)
+                        strategyZontikEndless.stopStrategyCommand()
+                        delay(delay)
+                        strategyArbitration.stopStrategyCommand()
+                        delay(delay)
+                        strategyTazik.stopStrategyCommand()
                     }
                 } else if (ticker == "TAZ") {
                     GlobalScope.launch(Dispatchers.Main) {
@@ -213,6 +275,10 @@ class StrategyTelegramCommands : KoinComponent {
                     GlobalScope.launch(Dispatchers.Main) {
                         strategy2358.stopStrategyCommand()
                     }
+                } else if (ticker == "2358DL") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        strategyDayLow.stopStrategyCommand()
+                    }
                 } else if (ticker == "2225") {
                     GlobalScope.launch(Dispatchers.Main) {
                         strategy2225.stopStrategyCommand()
@@ -227,6 +293,15 @@ class StrategyTelegramCommands : KoinComponent {
                             tickers.add(list[i])
                         }
                         strategy2358.prepareStrategyCommand(tickers)
+                    }
+                    return 2
+                } else if (ticker == "2358DL") {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        val tickers = mutableListOf<String>()
+                        for (i in 2 until list.size) {
+                            tickers.add(list[i])
+                        }
+                        strategyDayLow.prepareStrategyCommand(tickers)
                     }
                     return 2
                 } else if (ticker == "2225") {
@@ -253,7 +328,7 @@ class StrategyTelegramCommands : KoinComponent {
                     val percent = list[4].toInt()
                     if (price == 0.0 || percent == 0) return 0
 
-                    if (operation == "buy") {   // # BUY VIPS 29.46 1
+                    if (operation == "buy") {   // ! buy vips 29.46 1
                         val moneyPart = SettingsManager.getFollowerPurchaseVolume() / 100.0 * percent
                         val lots = (moneyPart / price).toInt()
 

@@ -30,6 +30,12 @@
         </service>
 
         <service
+            android:name=".service.StrategyDayLowService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
+
+        <service
             android:name=".service.Strategy2225Service"
             android:enabled="true"
             android:exported="false">

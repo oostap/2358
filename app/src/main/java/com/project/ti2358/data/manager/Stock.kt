@@ -386,7 +386,7 @@ data class Stock(var instrument: Instrument) {
         changePriceHighDayAbsolute = getPriceRaw() - highPrice
         changePriceHighDayPercent = (100.0 * getPriceRaw()) / highPrice - 100.0
 
-        log("$ticker low=$lowPrice=$changePriceLowDayAbsolute / $changePriceLowDayPercent, high=$highPrice=$changePriceHighDayAbsolute / $changePriceHighDayPercent")
+//        log("$ticker low=$lowPrice=$changePriceLowDayAbsolute / $changePriceLowDayPercent, high=$highPrice=$changePriceHighDayAbsolute / $changePriceHighDayPercent")
     }
 
     fun getPriceRaw(): Double {

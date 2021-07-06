@@ -62,7 +62,7 @@ class StrategyLimits : KoinComponent {
         startStrategy()
     }
 
-    fun stopStrategyCommand() {
+    suspend fun stopStrategyCommand() = withContext(StockManager.stockContext) {
         Utils.stopService(TheApplication.application.applicationContext, StrategyLimitsService::class.java)
     }
 

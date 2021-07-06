@@ -51,7 +51,7 @@ class StrategyRocket : KoinComponent {
         startStrategy()
     }
 
-    suspend fun stopStrategyCommand() = withContext(StockManager.rocketContext) {
+    suspend fun stopStrategyCommand() = withContext(StockManager.stockContext) {
         Utils.stopService(TheApplication.application.applicationContext, StrategyRocketService::class.java)
     }
 

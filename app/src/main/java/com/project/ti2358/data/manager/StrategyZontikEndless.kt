@@ -330,7 +330,6 @@ class StrategyZontikEndless : KoinComponent {
     }
 
     suspend fun stopStrategyCommand() = withContext(StockManager.stockContext) {
-        stopStrategy()
         Utils.stopService(TheApplication.application.applicationContext, StrategyZontikEndlessService::class.java)
     }
 

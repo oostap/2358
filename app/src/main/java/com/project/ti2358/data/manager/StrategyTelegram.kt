@@ -24,6 +24,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.*
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sign
 
 @KoinApiExtension
@@ -511,7 +513,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴🚀☄️️ стоп!"
             }
-            sendMessageToChats(text, 30)
+            sendMessageToChats(text, 15)
         }
     }
 
@@ -529,7 +531,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴🏴‍☠️ стоп!"
             }
-            sendMessageToChats(text, 30)
+            sendMessageToChats(text, 15)
         }
     }
 
@@ -546,7 +548,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴⬆️⬇️️ стоп!"
             }
-            sendMessageToChats(text, 30)
+            sendMessageToChats(text, 15)
         }
     }
 
@@ -563,7 +565,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴⤴️⤵️️ стоп!"
             }
-            sendMessageToChats(text, 30)
+            sendMessageToChats(text, 15)
         }
     }
 
@@ -581,7 +583,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴🛁 стоп!"
             }
-            sendMessageToChats(text, 30)
+            sendMessageToChats(text, 15)
         }
     }
 
@@ -601,7 +603,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴🛁 стоп!"
             }
-            sendMessageToChats(text, 30)
+            sendMessageToChats(text, 15)
         }
     }
 
@@ -611,6 +613,17 @@ class StrategyTelegram : KoinComponent {
                 String.format("🟢 2358 тарим ${tickers.joinToString(" ")} на ${SettingsManager.get2358PurchaseVolume()}$")
             } else {
                 "🔴 2358 не тарим ${tickers.joinToString(" ")}"
+            }
+            sendMessageToChats(text, -1)
+        }
+    }
+
+    fun send2358DayLowStart(start: Boolean, tickers : List<String>) {
+        if (started) {// && SettingsManager.getTelegramSendTaziks()) {
+            val text = if (start) {
+                String.format("🟢 2358DL тарим ${tickers.joinToString(" ")} на ${SettingsManager.get2358PurchaseVolume()}$")
+            } else {
+                "🔴 2358DL не тарим ${tickers.joinToString(" ")}"
             }
             sendMessageToChats(text, -1)
         }
@@ -643,7 +656,7 @@ class StrategyTelegram : KoinComponent {
             } else {
                 "🔴☂️ стоп!"
             }
-            sendMessageToChats(text, 30)
+            sendMessageToChats(text, 15)
         }
     }
 
@@ -696,7 +709,7 @@ class StrategyTelegram : KoinComponent {
                 tazikTotal
             )
             val buttons = getButtonsMarkup(purchase.stock)
-            sendMessageToChats(text, deleteAfterSeconds = 30, replyMarkup = buttons)
+            sendMessageToChats(text, deleteAfterSeconds = 15, replyMarkup = buttons)
         }
     }
 
@@ -713,7 +726,7 @@ class StrategyTelegram : KoinComponent {
                 tazikTotal
             )
             val buttons = getButtonsMarkup(purchase.stock)
-            sendMessageToChats(text, deleteAfterSeconds = 30, replyMarkup = buttons)
+            sendMessageToChats(text, deleteAfterSeconds = 15, replyMarkup = buttons)
         }
     }
 
@@ -843,12 +856,62 @@ class StrategyTelegram : KoinComponent {
     }
 
     fun sendTop(stocks: List<Stock>, count: Int) {
+        val min = min(count, stocks.size - 1)
         var text = ""
-        for (i in 0 until count) {
+        for (i in 0 until min) {
             val stock = stocks[i]
             text += "$%s %4.2f$ -> %4.2f$ = %4.2f%%\n".format(stock.ticker, stock.getPrice2300(), stock.getPriceRaw(), stock.changePrice2300DayPercent)
         }
-        val buttons = getButtonsMarkupMany(stocks.subList(0, count))
+        val buttons = getButtonsMarkupMany(stocks.subList(0, min))
+        sendMessageToChats(text, deleteAfterSeconds = 300, replyMarkup = buttons)
+    }
+
+    fun sendDayLow(stocks: List<Stock>, count: Int) {
+        val min = min(count, stocks.size - 1)
+        var text = ""
+        for (i in 0 until min) {
+            val stock = stocks[i]
+            text += "$%s %4.2f$ -> %4.2f$ = %4.2f%%, ⤴️ %.2f%%\n".format(stock.ticker, stock.getPrice2300(), stock.getPriceRaw(), stock.changePrice2300DayPercent, stock.changePriceLowDayPercent)
+        }
+        val buttons = getButtonsMarkupMany(stocks.subList(0, min))
+        sendMessageToChats(text, deleteAfterSeconds = 300, replyMarkup = buttons)
+    }
+
+    fun sendArb(stocks: List<StockArbitration>, count: Int) {
+        val min = min(count, stocks.size - 1)
+        var text = "🏴‍☠️\n"
+        for (i in 0 until min) {
+            val stockArbitration = stocks[i]
+
+            val emoji = when {
+                stockArbitration.changePricePercent >=  5.0 -> "💚💚💚💚💚"
+                stockArbitration.changePricePercent >=  3.0 -> "💚💚💚💚"
+                stockArbitration.changePricePercent >=  2.0 -> "💚💚💚"
+                stockArbitration.changePricePercent >=  1.0 -> "💚💚"
+                stockArbitration.changePricePercent >   0.0 -> "💚"
+                stockArbitration.changePricePercent <= -5.0 -> "❤️❤️❤️❤️❤️"
+                stockArbitration.changePricePercent <= -3.0 -> "❤️❤️❤️❤️"
+                stockArbitration.changePricePercent <= -2.0 -> "❤️❤️❤️"
+                stockArbitration.changePricePercent <= -1.0 -> "❤️❤️"
+                stockArbitration.changePricePercent <   0.0 -> "❤️"
+                else -> ""
+            }
+            val changePercent = if (stockArbitration.changePricePercent > 0) {
+                "+%.2f%%".format(locale = Locale.US, stockArbitration.changePricePercent)
+            } else {
+                "%.2f%%".format(locale = Locale.US, stockArbitration.changePricePercent)
+            }
+            text += "$emoji $${stockArbitration.ticker} $changePercent = "
+            if (stockArbitration.long) {
+                text += "${stockArbitration.askRU.toMoney(stockArbitration.stock)} -> ${stockArbitration.priceUS.toMoney(stockArbitration.stock)}"
+            } else {
+                text += "${stockArbitration.bidRU.toMoney(stockArbitration.stock)} -> ${stockArbitration.priceUS.toMoney(stockArbitration.stock)}"
+            }
+
+            text += "\n"
+        }
+
+        val buttons = getButtonsMarkupMany(stocks.map { it.stock }.subList(0, min))
         sendMessageToChats(text, deleteAfterSeconds = 300, replyMarkup = buttons)
     }
 

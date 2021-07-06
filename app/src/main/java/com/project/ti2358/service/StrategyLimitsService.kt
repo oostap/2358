@@ -72,7 +72,9 @@ class StrategyLimitsService : Service() {
         notificationButtonReceiver = null
         isServiceRunning = false
         job?.cancel()
-        strategyLimits.stopStrategy()
+        GlobalScope.launch {
+            strategyLimits.stopStrategy()
+        }
         super.onDestroy()
     }
 

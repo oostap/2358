@@ -27,7 +27,7 @@ class StrategyDayLow : KoinComponent {
     fun process(): MutableList<Stock> {
 //        val all = stockManager.getWhiteStocks()
         val all = stockManager.stocksStream
-        val changeFromLow = 0.0       //SettingsManager.get2358ChangePercent()
+        val changeFromLow = 2.0       //SettingsManager.get2358ChangePercent()
         val changeDay = -1.0       //SettingsManager.get2358ChangePercent()
         val volumeDayPieces = 0 //SettingsManager.get2358VolumeDayPieces()
         val volumeDayCash = 0   //SettingsManager.get2358VolumeDayCash() * 1000 * 1000
@@ -45,7 +45,7 @@ class StrategyDayLow : KoinComponent {
 
         stocks.sortBy {
             val multiplier = if (it in stocksSelected) 100 else 1
-            it.changePriceLowDayPercent * multiplier
+            (it.changePriceLowDayPercent + it.changePrice2300DayPercent) * multiplier
         }
 
         return stocks
@@ -172,11 +172,11 @@ class StrategyDayLow : KoinComponent {
 
         getPurchaseStock(true)
         strategyTelegram.send2358Start(true, toBuyPurchase.map { it.ticker })
-        Utils.startService(TheApplication.application.applicationContext, Strategy2358Service::class.java)
+        Utils.startService(TheApplication.application.applicationContext, StrategyDayLowService::class.java)
     }
 
     fun stopStrategyCommand() {
-        Utils.stopService(TheApplication.application.applicationContext, Strategy2358Service::class.java)
+        Utils.stopService(TheApplication.application.applicationContext, StrategyDayLowService::class.java)
     }
 
     fun startStrategy() {
@@ -201,6 +201,6 @@ class StrategyDayLow : KoinComponent {
         }
         jobs.clear()
 
-        strategyTelegram.send2358Start(false, toBuyPurchase.map { it.ticker })
+        strategyTelegram.send2358DayLowStart(false, toBuyPurchase.map { it.ticker })
     }
 }

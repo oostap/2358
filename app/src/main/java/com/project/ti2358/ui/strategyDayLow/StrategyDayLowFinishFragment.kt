@@ -97,7 +97,7 @@ class StrategyDayLowFinishFragment : Fragment(R.layout.fragment_daylow_finish) {
     }
 
     private fun updateServiceButtonText() {
-        if (Utils.isServiceRunning(requireContext(), Strategy2358Service::class.java)) {
+        if (Utils.isServiceRunning(requireContext(), StrategyDayLowService::class.java)) {
             fragmentDaylowFinishBinding?.startButton?.text = getString(R.string.stop)
         } else {
             fragmentDaylowFinishBinding?.startButton?.text = getString(R.string.start)

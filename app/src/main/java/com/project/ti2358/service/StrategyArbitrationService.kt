@@ -74,7 +74,9 @@ class StrategyArbitrationService : Service() {
         isServiceRunning = false
         job?.cancel()
 
-        strategyArbitration.stopStrategy()
+        GlobalScope.launch {
+            strategyArbitration.stopStrategy()
+        }
         super.onDestroy()
     }
 

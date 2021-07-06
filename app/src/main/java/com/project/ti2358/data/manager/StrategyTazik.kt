@@ -262,7 +262,7 @@ class StrategyTazik : KoinComponent {
         val stocks = stocksToPurchase.map {
             Pair(it.stock.getPriceNow(), it)
         }.sortedBy {
-            it.first / it.second.tazikEndlessPrice * 100 - 100
+            it.first / it.second.tazikPrice * 100 - 100
         }
 
         var tickers = ""
@@ -284,6 +284,31 @@ class StrategyTazik : KoinComponent {
         if (tickers == "") tickers = "отображаются только просадки ⏳"
 
         return tickers
+    }
+
+    suspend fun restartStrategy(newPercent: Double = 0.0, profit: Double = 0.0) = withContext(StockManager.stockContext) {
+        if (started) stopStrategy()
+
+        if (newPercent != 0.0) {
+            val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
+            val editor: SharedPreferences.Editor = preferences.edit()
+            val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_min_percent_to_buy)
+            editor.putString(key, "%.2f".format(locale = Locale.US, newPercent))
+            editor.apply()
+        }
+
+        val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
+        val editor: SharedPreferences.Editor = preferences.edit()
+        val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_take_profit)
+        editor.putString(key, "%.2f".format(locale = Locale.US, profit))
+        editor.apply()
+
+        process(1)
+        getPurchaseStock()
+        delay(500)
+
+        Utils.startService(TheApplication.application.applicationContext, StrategyTazikService::class.java)
+        startStrategy(false)
     }
 
     suspend fun stopStrategyCommand() = withContext(StockManager.stockContext) {
