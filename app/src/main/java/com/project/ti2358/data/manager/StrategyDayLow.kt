@@ -28,7 +28,7 @@ class StrategyDayLow : KoinComponent {
     fun process(): MutableList<Stock> {
         val all = stockManager.stocksStream
         val changeFromLow = 2.0     //SettingsManager.get2358ChangePercent()
-        val changeDay = -1.0        //SettingsManager.get2358ChangePercent()
+        val changeDay = -1.0 //SettingsManager.get2358ChangePercent()
         val volumeDayPieces = SettingsManager.get2358VolumeDayPieces()
         val volumeDayCash = SettingsManager.get2358VolumeDayCash() * 1000 * 1000
         val min = SettingsManager.getCommonPriceMin()

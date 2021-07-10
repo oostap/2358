@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
                     key = "zontik_endless_set"
                 } else if (it.id in listOf(R.id.nav_tazik_start, R.id.nav_tazik_finish, R.id.nav_tazik_status)) {
                     key = "tazik_set_1"
-                } else if (it.id in listOf(R.id.nav_2358_start, R.id.nav_2358_finish)) {
+                } else if (it.id in listOf(R.id.nav_2358_start, R.id.nav_2358_finish, R.id.nav_daylow_start, R.id.nav_daylow_finish)) {
                     key = "2358_price_change_percent"
                 } else if (it.id in listOf(R.id.nav_1000_buy_start, R.id.nav_1000_buy_finish)) {
                     key = "1000_sell_buy_1"
