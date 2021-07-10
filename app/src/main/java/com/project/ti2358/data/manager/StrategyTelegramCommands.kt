@@ -36,7 +36,7 @@ class StrategyTelegramCommands : KoinComponent {
 
     var started: Boolean = false
 
-    fun processInfoCommand(command: String, messageId: Long) {
+    fun processInfoCommand(command: String, messageId: Long) : Boolean {
         try {
             val list = command.split(" ")
 
@@ -62,7 +62,7 @@ class StrategyTelegramCommands : KoinComponent {
                 }
 
                 strategyTelegram.sendTop(all, count)
-                return
+                return true
             } else if (operation == "bot") { // топ отросших бумаг от закрытия
                 var count = 10
                 if (list.size == 2) count = list[1].toInt()
@@ -75,35 +75,35 @@ class StrategyTelegramCommands : KoinComponent {
                 }
 
                 strategyTelegram.sendTop(all, count)
-                return
-            } else if (operation == "arblong") { // топ отросших бумаг от закрытия
+                return true
+            } else if (operation == "arb") { // топ отросших бумаг от закрытия
                 var count = 10
                 if (list.size == 2) count = list[1].toInt()
-                var all = strategyArbitration.longStocks
-                all = all.distinctBy { it.stock }.toMutableList()
-                all.sortByDescending { it.changePricePercent }
+                val all = strategyArbitration.stocks.toMutableList()
+                all.removeAll { it.askPriceRU == 0.0 || it.changePriceArbLongPercent <= 0.0}
+                all.sortByDescending { it.changePriceArbLongPercent }
 
                 if (Utils.isMorningSession()) {
-                    all.removeAll { it.stock.morning == null }
+                    all.removeAll { it.morning == null }
                 }
 
-                strategyTelegram.sendArb(all, count)
-                return
-            } else if (operation == "arbshort") { // топ отросших бумаг от закрытия
+                strategyTelegram.sendArb(true, all, count)
+                return true
+            } else if (operation == "arbs") { // топ отросших бумаг от закрытия
                 var count = 10
                 if (list.size == 2) count = list[1].toInt()
-                var all = strategyArbitration.shortStocks
-                all = all.distinctBy { it.stock }.toMutableList()
-                all.sortBy { it.changePricePercent }
+                val all = strategyArbitration.stocks.toMutableList()
+                all.removeAll { it.bidPriceRU == 0.0 || it.changePriceArbShortPercent <= 0.0 }
+                all.sortByDescending { it.changePriceArbShortPercent }
 
                 if (Utils.isMorningSession()) {
-                    all.removeAll { it.stock.morning == null }
+                    all.removeAll { it.morning == null }
                 }
 
-                all.removeAll { it.stock.short == null }
+                all.removeAll { it.short == null }
 
-                strategyTelegram.sendArb(all, count)
-                return
+                strategyTelegram.sendArb(false, all, count)
+                return true
             } else if (operation == "dayhigh") { // топ отросших бумаг от закрытия
                 var count = 10
                 var high = 0.0
@@ -119,7 +119,7 @@ class StrategyTelegramCommands : KoinComponent {
                 }
 
                 strategyTelegram.sendDayHigh(all, count)
-                return
+                return true
             } else if (operation == "daylow") { // топ отросших бумаг от закрытия
                 var count = 10
                 var low = 0.0
@@ -135,14 +135,14 @@ class StrategyTelegramCommands : KoinComponent {
                 }
 
                 strategyTelegram.sendDayLow(all, count)
-                return
+                return true
             }
 
             val stock = stockManager.getStockByTicker(list[0].toUpperCase())
 
             if (contains) {
                 strategyTelegram.sendPulse(messageId)
-                return
+                return false
             } else if (list.size == 2) {
                 val ticker = list[0].toUpperCase()
                 val operation = list[1].toLowerCase()
@@ -151,19 +151,20 @@ class StrategyTelegramCommands : KoinComponent {
                 if (stock != null) {
                     if (operation == "limits") { // # LIMIT UP/DOWN
                         strategyTelegram.sendStockInfo(stock)
-                        return
+                        return true
                     }
                 }
             }
 
             if (stock != null) {
                 strategyTelegram.sendStock(stock)
-                return
+                return false
             }
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        return false
     }
 
     fun processActiveCommand(userId: Long, command: String): Int {

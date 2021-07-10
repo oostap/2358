@@ -52,10 +52,12 @@ data class Stock(var instrument: Instrument) {
 
     // арбитраж по стакану
     var askPriceRU: Double = 0.0
+    var askLotsRU: Int = 0
     var changePriceArbLongPercent: Double = 0.0
     var changePriceArbLongAbsolute: Double = 0.0
 
     var bidPriceRU: Double = 0.0
+    var bidLotsRU: Int = 0
     var changePriceArbShortPercent: Double = 0.0
     var changePriceArbShortAbsolute: Double = 0.0
 
@@ -210,10 +212,12 @@ data class Stock(var instrument: Instrument) {
             val priceClose = closePrices?.os ?: 0.0
             if (orderbookStream?.asks?.size!! > 0) {
                 askPriceRU = orderbookStream?.asks?.first()?.get(0) ?: 0.0
+                askLotsRU = orderbookStream?.asks?.first()?.get(1)?.toInt() ?: 0
             }
 
             if (orderbookStream?.bids?.size!! > 0) {
                 bidPriceRU = orderbookStream?.bids?.first()?.get(0) ?: 0.0
+                bidLotsRU = orderbookStream?.bids?.first()?.get(1)?.toInt() ?: 0
             }
 
             changePriceArbLongPercent = priceClose / askPriceRU * 100.0 - 100.0

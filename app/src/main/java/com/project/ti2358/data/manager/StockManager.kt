@@ -598,8 +598,6 @@ class StockManager : KoinComponent {
 
         stock?.let {
             it.processOrderbook(orderbookStream)
-
-            strategyArbitration.processStrategy(it)
         }
     }
 
