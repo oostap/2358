@@ -324,12 +324,9 @@
     <string name="stocks_limits_voice">Озвучка лимитов</string>
 
     <!-- arbitration settings -->
-    <string name="stocks_arbitration_min_percent">Минимальный %</string>
-    <string name="stocks_arbitration_interval">Интервал повторения сигнала (в минутах)</string>
+    <string name="stocks_arbitration_only_love">Только избранные</string>
     <string name="stocks_arbitration_volume_day_from">Объём в день от шт.</string>
     <string name="stocks_arbitration_volume_day_to">Объём в день до шт.</string>
-    <string name="stocks_arbitration_long">Лонг</string>
-    <string name="stocks_arbitration_short">Шорт</string>
 
     <string name="position_line">position_line</string>
     <string name="action_type">drag_type</string>
@@ -503,7 +500,6 @@
     <string name="setting_key_telegram_send_spikes">telegram_send_spikes</string>
     <string name="setting_key_telegram_send_trends">telegram_send_trends</string>
     <string name="setting_key_telegram_send_limits">telegram_send_limits</string>
-    <string name="setting_key_telegram_send_arbitration">telegram_send_arbitration</string>
     <string name="setting_key_telegram_allow_command_inform">telegram_allow_command_inform</string>
     <string name="setting_key_telegram_allow_command_handle">telegram_allow_command_handle</string>
     <string name="setting_key_telegram_allow_command_buy_sell">telegram_allow_command_buy_sell</string>
@@ -541,12 +537,9 @@
     <string name="setting_key_limits_voice">limits_voice</string>
 
     <!-- arbitration settings -->
-    <string name="setting_key_arbitration_min_percent">arbitration_min_percent</string>
-    <string name="setting_key_arbitration_interval">arbitration_interval</string>
+    <string name="setting_key_arbitration_only_love">arbitration_only_love</string>
     <string name="setting_key_arbitration_volume_day_from">arbitration_volume_day_from</string>
     <string name="setting_key_arbitration_volume_day_to">arbitration_volume_day_to</string>
-    <string name="setting_key_arbitration_long">arbitration_long</string>
-    <string name="setting_key_arbitration_short">arbitration_short</string>
 
     <!-- pantini -->
     <string name="setting_key_pantini_telegram_id">pantini_telegram_id</string>

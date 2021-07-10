@@ -7,10 +7,7 @@ import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputType
-import android.view.DragEvent
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
+import android.view.*
 import android.view.View.*
 import android.view.animation.Animation
 import android.view.animation.Transformation
@@ -554,6 +551,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 }
 
                 if (item.exchange != "") { // US line
+
                     priceAskPercentView.text = item.exchange
                     priceBidPercentView.text = item.exchange
 

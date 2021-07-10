@@ -489,23 +489,23 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun sendArbitrationStart(start: Boolean) {
-        if (started && SettingsManager.getTelegramSendArbitration()) {
-            val text = if (start) {
-                String.format(
-                    locale = Locale.US,
-                    "🟢🏴‍☠️ %.2f%% / v%d / v%d / %d мин",
-                    SettingsManager.getArbitrationMinPercent(),
-                    SettingsManager.getArbitrationVolumeDayFrom(),
-                    SettingsManager.getArbitrationVolumeDayTo(),
-                    SettingsManager.getArbitrationRepeatInterval()
-                )
-            } else {
-                "🔴🏴‍☠️ стоп!"
-            }
-            sendMessageToChats(text, 15)
-        }
-    }
+//    fun sendArbitrationStart(start: Boolean) {
+//        if (started && SettingsManager.getTelegramSendArbitration()) {
+//            val text = if (start) {
+//                String.format(
+//                    locale = Locale.US,
+//                    "🟢🏴‍☠️ %.2f%% / v%d / v%d / %d мин",
+//                    SettingsManager.getArbitrationMinPercent(),
+//                    SettingsManager.getArbitrationVolumeDayFrom(),
+//                    SettingsManager.getArbitrationVolumeDayTo(),
+//                    SettingsManager.getArbitrationRepeatInterval()
+//                )
+//            } else {
+//                "🔴🏴‍☠️ стоп!"
+//            }
+//            sendMessageToChats(text, 15)
+//        }
+//    }
 
     fun sendLimitsStart(start: Boolean) {
         if (started && SettingsManager.getTelegramSendRockets()) {
@@ -832,7 +832,7 @@ class StrategyTelegram : KoinComponent {
         var text = ""
         for (i in 0 until min) {
             val stock = stocks[i]
-            text += "$%s %4.2f$ -> %4.2f$ = %4.2f%%\n".format(stock.getTickerLove(), stock.getPrice2300(), stock.getPriceRaw(), stock.changePrice2300DayPercent)
+            text += "<b>%4.2f%%</b> $%s %4.2f$ -> %4.2f$ \n".format(stock.changePrice2300DayPercent, stock.getTickerLove(), stock.getPrice2300(), stock.getPriceRaw())
         }
         val buttons = getButtonsMarkupMany(stocks.subList(0, min))
         sendMessageToChats(text, deleteAfterSeconds = -1, replyMarkup = buttons)
@@ -843,7 +843,7 @@ class StrategyTelegram : KoinComponent {
         var text = ""
         for (i in 0 until min) {
             val stock = stocks[i]
-            text += "$%s %4.2f$ -> %4.2f$ = %4.2f%%, ⤴️ %.2f%%\n".format(stock.getTickerLove(), stock.getPrice2300(), stock.getPriceRaw(), stock.changePrice2300DayPercent, stock.changePriceLowDayPercent)
+            text += "<b>%4.2f%%</b> ⤴️ %.2f%% $%s %4.2f$ -> %4.2f$\n".format(stock.changePrice2300DayPercent, stock.changePriceLowDayPercent, stock.getTickerLove(), stock.getPrice2300(), stock.getPriceRaw())
         }
         val buttons = getButtonsMarkupMany(stocks.subList(0, min))
         sendMessageToChats(text, deleteAfterSeconds = -1, replyMarkup = buttons)
@@ -854,7 +854,7 @@ class StrategyTelegram : KoinComponent {
         var text = ""
         for (i in 0 until min) {
             val stock = stocks[i]
-            text += "$%s %4.2f$ -> %4.2f$ = %4.2f%%, ⤵️ %.2f%%\n".format(stock.getTickerLove(), stock.getPrice2300(), stock.getPriceRaw(), stock.changePrice2300DayPercent, stock.changePriceHighDayPercent)
+            text += "<b>%4.2f%%</> ⤵️ %.2f%% $%s %4.2f$ -> %4.2f$\n".format(stock.changePrice2300DayPercent, stock.changePriceHighDayPercent, stock.getTickerLove(), stock.getPrice2300(), stock.getPriceRaw())
         }
         val buttons = getButtonsMarkupMany(stocks.subList(0, min))
         sendMessageToChats(text, deleteAfterSeconds = -1, replyMarkup = buttons)

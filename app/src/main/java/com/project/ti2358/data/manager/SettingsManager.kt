@@ -1128,11 +1128,6 @@ class SettingsManager {
             return preferences.getBoolean(key, true)
         }
 
-        fun getTelegramSendArbitration(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_arbitration)
-            return preferences.getBoolean(key, true)
-        }
-
         fun getTelegramSendGotoTerminal(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_send_goto_terminal)
             return preferences.getBoolean(key, true)
@@ -1342,26 +1337,6 @@ class SettingsManager {
         }
 
         /******************** Arbitration *************************/
-        fun getArbitrationMinPercent(): Double {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_arbitration_min_percent)
-            val value: String? = preferences.getString(key, "0.5")
-            return try {
-                (value ?: "0.5").toDouble()
-            } catch (e: Exception) {
-                0.5
-            }
-        }
-
-        fun getArbitrationRepeatInterval(): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_arbitration_interval)
-            val value: String? = preferences.getString(key, "5")
-            return try {
-                parseInt(value ?: "5")
-            } catch (e: Exception) {
-                5
-            }
-        }
-
         fun getArbitrationVolumeDayFrom(): Int {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_arbitration_volume_day_from)
             val value: String? = preferences.getString(key, "0")
@@ -1382,14 +1357,9 @@ class SettingsManager {
             }
         }
 
-        fun getArbitrationLong(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_arbitration_long)
-            return preferences.getBoolean(key, true)
-        }
-
-        fun getArbitrationShort(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_arbitration_short)
-            return preferences.getBoolean(key, true)
+        fun getArbitrationOnlyLove(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_arbitration_only_love)
+            return preferences.getBoolean(key, false)
         }
 
         /******************** fixprice *************************/

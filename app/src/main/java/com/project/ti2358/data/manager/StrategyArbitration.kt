@@ -41,8 +41,21 @@ class StrategyArbitration : KoinComponent {
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
-        stocks.clear()
-        stocks.addAll(all.filter { it.getPriceNow() > min && it.getPriceNow() < max })
+        var volumeMin = SettingsManager.getArbitrationVolumeDayFrom()
+        var volumeMax = SettingsManager.getArbitrationVolumeDayTo()
+
+        if (!Utils.isActiveSession()) { // если биржа закрыта, то показать всё
+            volumeMin = 0
+            volumeMax = 100000000
+        }
+
+        stocks = all.filter { it.getPriceNow() > min && it.getPriceNow() < max &&
+                it.getTodayVolume() >= volumeMin && it.getTodayVolume() <= volumeMax
+        }.toMutableList()
+
+        if (SettingsManager.getArbitrationOnlyLove()) {
+            stocks.removeAll { it.ticker !in StrategyLove.stocksSelected.map { stock -> stock.ticker } }
+        }
 
         return@withContext stocks
     }
@@ -101,12 +114,12 @@ class StrategyArbitration : KoinComponent {
         stockManager.subscribeOrderbookRU(stockManager.stocksStream)
 
         started = true
-        strategyTelegram.sendArbitrationStart(true)
+//        strategyTelegram.sendArbitrationStart(true)
     }
 
     fun stopStrategy() {
         started = false
-        strategyTelegram.sendArbitrationStart(false)
+//        strategyTelegram.sendArbitrationStart(false)
         stockManager.unsubscribeOrderbookAllRU()
     }
 

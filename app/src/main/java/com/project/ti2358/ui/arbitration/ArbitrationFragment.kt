@@ -68,6 +68,9 @@ class ArbitrationFragment : Fragment(R.layout.fragment_arbitration) {
             }
         }
 
+        GlobalScope.launch(Dispatchers.Main) {
+            strategyArbitration.process()
+        }
         updateDataArb(true)
         updateServiceButtonText()
     }
@@ -139,7 +142,7 @@ class ArbitrationFragment : Fragment(R.layout.fragment_arbitration) {
 
                     if (long) {
                         val sum = stock.askPriceRU * stock.askLotsRU
-                        sumView.text = "${sum.toMoney(stock)}"
+                        sumView.text = "🥛 ${sum.toMoney(stock)}"
                         priceView.text = "${stock.askPriceRU.toMoney(stock)} ➡ ${stock.getPrice2300().toMoney(stock)}"
 
                         priceChangeAbsoluteView.text = stock.changePriceArbLongAbsolute.toMoney(stock)
@@ -150,7 +153,7 @@ class ArbitrationFragment : Fragment(R.layout.fragment_arbitration) {
                         priceView.setTextColor(Utils.getColorForValue(stock.changePriceArbLongPercent))
                     } else {
                         val sum = stock.bidPriceRU * stock.bidLotsRU
-                        sumView.text = "${sum.toMoney(stock)}"
+                        sumView.text = "🥛 ${sum.toMoney(stock)}"
 
                         priceView.text = "${stock.bidPriceRU.toMoney(stock)} ➡ ${stock.getPrice2300().toMoney(stock)}"
 
