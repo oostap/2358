@@ -76,7 +76,7 @@ class StrategyTelegramCommands : KoinComponent {
 
                 strategyTelegram.sendTop(all, count)
                 return
-            } else if (operation == "arb_long") { // топ отросших бумаг от закрытия
+            } else if (operation == "arblong") { // топ отросших бумаг от закрытия
                 var count = 10
                 if (list.size == 2) count = list[1].toInt()
                 var all = strategyArbitration.longStocks
@@ -89,7 +89,7 @@ class StrategyTelegramCommands : KoinComponent {
 
                 strategyTelegram.sendArb(all, count)
                 return
-            } else if (operation == "arb_short") { // топ отросших бумаг от закрытия
+            } else if (operation == "arbshort") { // топ отросших бумаг от закрытия
                 var count = 10
                 if (list.size == 2) count = list[1].toInt()
                 var all = strategyArbitration.shortStocks
@@ -103,6 +103,22 @@ class StrategyTelegramCommands : KoinComponent {
                 all.removeAll { it.stock.short == null }
 
                 strategyTelegram.sendArb(all, count)
+                return
+            } else if (operation == "dayhigh") { // топ отросших бумаг от закрытия
+                var count = 10
+                var high = 0.0
+                if (list.size >= 2) count = list[1].toInt()
+                if (list.size >= 3) high = list[2].toDouble()
+
+                val all = strategyDayLow.processHigh()
+                all.removeAll { it.getPrice2300() == 0.0 }
+                all.removeAll { it.changePrice2300DayPercent < high }
+
+                if (Utils.isMorningSession()) {
+                    all.removeAll { it.morning == null }
+                }
+
+                strategyTelegram.sendDayHigh(all, count)
                 return
             } else if (operation == "daylow") { // топ отросших бумаг от закрытия
                 var count = 10

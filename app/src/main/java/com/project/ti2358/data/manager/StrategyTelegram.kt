@@ -24,7 +24,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.*
 import kotlin.math.abs
-import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sign
 
@@ -444,9 +443,11 @@ class StrategyTelegram : KoinComponent {
             }
             var text = "🏴‍☠️ $emoji $${stockArbitration.ticker} $changePercent = "
             if (stockArbitration.long) {
-                text += "${stockArbitration.askRU.toMoney(stockArbitration.stock)} -> ${stockArbitration.priceUS.toMoney(stockArbitration.stock)}"
+                val sum = stockArbitration.askRU * stockArbitration.lots
+                text += "${stockArbitration.askRU.toMoney(stockArbitration.stock)} -> ${stockArbitration.priceUS.toMoney(stockArbitration.stock)} ⨊ = ${sum.toMoney(stockArbitration.stock)}"
             } else {
-                text += "${stockArbitration.bidRU.toMoney(stockArbitration.stock)} -> ${stockArbitration.priceUS.toMoney(stockArbitration.stock)}"
+                val sum = stockArbitration.bidRU * stockArbitration.lots
+                text += "${stockArbitration.bidRU.toMoney(stockArbitration.stock)} -> ${stockArbitration.priceUS.toMoney(stockArbitration.stock)} ⨊ = ${sum.toMoney(stockArbitration.stock)}"
             }
             val buttons = getButtonsMarkup(stockArbitration.stock)
             sendMessageToChats(text, -1, replyMarkup = buttons)
@@ -856,29 +857,40 @@ class StrategyTelegram : KoinComponent {
     }
 
     fun sendTop(stocks: List<Stock>, count: Int) {
-        val min = min(count, stocks.size - 1)
+        val min = min(count, stocks.size)
         var text = ""
         for (i in 0 until min) {
             val stock = stocks[i]
             text += "$%s %4.2f$ -> %4.2f$ = %4.2f%%\n".format(stock.ticker, stock.getPrice2300(), stock.getPriceRaw(), stock.changePrice2300DayPercent)
         }
         val buttons = getButtonsMarkupMany(stocks.subList(0, min))
-        sendMessageToChats(text, deleteAfterSeconds = 300, replyMarkup = buttons)
+        sendMessageToChats(text, deleteAfterSeconds = -1, replyMarkup = buttons)
     }
 
     fun sendDayLow(stocks: List<Stock>, count: Int) {
-        val min = min(count, stocks.size - 1)
+        val min = min(count, stocks.size)
         var text = ""
         for (i in 0 until min) {
             val stock = stocks[i]
             text += "$%s %4.2f$ -> %4.2f$ = %4.2f%%, ⤴️ %.2f%%\n".format(stock.ticker, stock.getPrice2300(), stock.getPriceRaw(), stock.changePrice2300DayPercent, stock.changePriceLowDayPercent)
         }
         val buttons = getButtonsMarkupMany(stocks.subList(0, min))
-        sendMessageToChats(text, deleteAfterSeconds = 300, replyMarkup = buttons)
+        sendMessageToChats(text, deleteAfterSeconds = -1, replyMarkup = buttons)
+    }
+
+    fun sendDayHigh(stocks: List<Stock>, count: Int) {
+        val min = min(count, stocks.size)
+        var text = ""
+        for (i in 0 until min) {
+            val stock = stocks[i]
+            text += "$%s %4.2f$ -> %4.2f$ = %4.2f%%, ⤵️ %.2f%%\n".format(stock.ticker, stock.getPrice2300(), stock.getPriceRaw(), stock.changePrice2300DayPercent, stock.changePriceHighDayPercent)
+        }
+        val buttons = getButtonsMarkupMany(stocks.subList(0, min))
+        sendMessageToChats(text, deleteAfterSeconds = -1, replyMarkup = buttons)
     }
 
     fun sendArb(stocks: List<StockArbitration>, count: Int) {
-        val min = min(count, stocks.size - 1)
+        val min = min(count, stocks.size)
         var text = "🏴‍☠️\n"
         for (i in 0 until min) {
             val stockArbitration = stocks[i]
@@ -903,16 +915,18 @@ class StrategyTelegram : KoinComponent {
             }
             text += "$emoji $${stockArbitration.ticker} $changePercent = "
             if (stockArbitration.long) {
-                text += "${stockArbitration.askRU.toMoney(stockArbitration.stock)} -> ${stockArbitration.priceUS.toMoney(stockArbitration.stock)}"
+                val sum = stockArbitration.askRU * stockArbitration.lots
+                text += "${stockArbitration.askRU.toMoney(stockArbitration.stock)} -> ${stockArbitration.priceUS.toMoney(stockArbitration.stock)} ⨊ = ${sum.toMoney(stockArbitration.stock)}"
             } else {
-                text += "${stockArbitration.bidRU.toMoney(stockArbitration.stock)} -> ${stockArbitration.priceUS.toMoney(stockArbitration.stock)}"
+                val sum = stockArbitration.bidRU * stockArbitration.lots
+                text += "${stockArbitration.bidRU.toMoney(stockArbitration.stock)} -> ${stockArbitration.priceUS.toMoney(stockArbitration.stock)} ⨊ = ${sum.toMoney(stockArbitration.stock)}"
             }
 
             text += "\n"
         }
 
         val buttons = getButtonsMarkupMany(stocks.map { it.stock }.subList(0, min))
-        sendMessageToChats(text, deleteAfterSeconds = 300, replyMarkup = buttons)
+        sendMessageToChats(text, deleteAfterSeconds = -1, replyMarkup = buttons)
     }
 
     fun sendTest() {

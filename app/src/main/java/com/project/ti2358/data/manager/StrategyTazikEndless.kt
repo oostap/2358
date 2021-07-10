@@ -58,7 +58,7 @@ class StrategyTazikEndless : KoinComponent {
         loadSelectedStocks(numberSet)
     }
 
-    private fun loadSelectedStocks(numberSet: Int) {
+    private suspend fun loadSelectedStocks(numberSet: Int) = withContext(StockManager.stockContext) {
         stocksSelected.clear()
 
         val setList: List<String> = when (numberSet) {
@@ -71,7 +71,7 @@ class StrategyTazikEndless : KoinComponent {
         stocksSelected = stocks.filter { it.ticker in setList }.toMutableList()
     }
 
-    private fun saveSelectedStocks(numberSet: Int) {
+    private suspend fun saveSelectedStocks(numberSet: Int) = withContext(StockManager.stockContext) {
         val setList = stocksSelected.map { it.ticker }.toMutableList()
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
@@ -91,7 +91,7 @@ class StrategyTazikEndless : KoinComponent {
         }
     }
 
-    fun resort(): MutableList<Stock> {
+    suspend fun resort(): MutableList<Stock> = withContext(StockManager.stockContext) {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
@@ -100,7 +100,7 @@ class StrategyTazikEndless : KoinComponent {
             val final = change * sign - multiplier
             if (final.isNaN()) 0.0 else final
         }
-        return stocks
+        return@withContext stocks
     }
 
     suspend fun setSelected(stock: Stock, value: Boolean, numberSet: Int) = withContext(StockManager.stockContext) {
@@ -198,7 +198,9 @@ class StrategyTazikEndless : KoinComponent {
 
                 fixPrice()
                 if (hours + minutes + seconds <= 0) {
-                    stopStrategyCommand()
+                    GlobalScope.launch(Dispatchers.Main) {
+                        stopStrategyCommand()
+                    }
                 }
 
                 return@runBlocking "Работает 🛁! Финиш через %02d:%02d:%02d".format(hours, minutes, seconds)
@@ -410,6 +412,7 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     suspend fun startStrategy(scheduled: Boolean) = withContext(StockManager.stockContext) {
+        scheduledTimeStart = null
         basicPercentLimitPriceChange = SettingsManager.getTazikEndlessChangePercent()
 
         if (scheduled) {
@@ -424,6 +427,8 @@ class StrategyTazikEndless : KoinComponent {
         } else {
             fixPrice()
         }
+
+        strategyBlacklist.process(stockManager.stocksStream)
 
         stocksTickerInProcess.forEach {
             try {
@@ -450,6 +455,8 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     fun stopStrategy() {
+        scheduledTimeEnd = null
+
         started = false
         stocksTickerInProcess.forEach {
             try {
@@ -572,34 +579,36 @@ class StrategyTazikEndless : KoinComponent {
 
         // защита от спайков - сколько минут цена была выше цены покупки, начиная с предыдущей
         var minutes = SettingsManager.getTazikEndlessSpikeProtection()
-        if (purchase.stock.minuteCandles.size >= minutes) { // не считать спайки на открытии и на старте таза - мало доступных свечей
-            for (i in purchase.stock.minuteCandles.indices.reversed()) {
+        if (minutes != 0) { // 0 = без защиты
+            if (purchase.stock.minuteCandles.size >= minutes) { // не считать спайки на открытии и на старте таза - мало доступных свечей
+                for (i in purchase.stock.minuteCandles.indices.reversed()) {
 
-                // пропустить текущую свечу, по которой у нас просадка
-                if (i == purchase.stock.minuteCandles.size - 1) continue
+                    // пропустить текущую свечу, по которой у нас просадка
+                    if (i == purchase.stock.minuteCandles.size - 1) continue
 
-                // проверить цены закрытия нескольких предыдущих свечей
-                if (purchase.stock.minuteCandles[i].closingPrice > buyPrice) { // если цена выше, отнимаем счётчик, проверяем дальше
-                    minutes--
+                    // проверить цены закрытия нескольких предыдущих свечей
+                    if (purchase.stock.minuteCandles[i].closingPrice > buyPrice) { // если цена выше, отнимаем счётчик, проверяем дальше
+                        minutes--
 
-                    // если несколько свечей подряд с ценой выше, то всё ок - тарим!
-                    if (minutes == 0) {
-                        break
+                        // если несколько свечей подряд с ценой выше, то всё ок - тарим!
+                        if (minutes == 0) {
+                            break
+                        }
+                    } else { // был спайк на несколько свечек - тарить опасно!
+                        // обновить цену, чтобы не затарить на следующей свече, возможен нож ступенькой
+                        purchase.tazikEndlessPrice = candle.closingPrice
+                        strategySpeaker.speakTazikSpikeSkip(purchase, change)
+                        strategyTelegram.sendTazikSpike(
+                            purchase,
+                            buyPrice,
+                            purchase.tazikEndlessPrice,
+                            candle.closingPrice,
+                            change,
+                            stocksTickerInProcess.size,
+                            parts
+                        )
+                        return
                     }
-                } else { // был спайк на несколько свечек - тарить опасно!
-                    // обновить цену, чтобы не затарить на следующей свече, возможен нож ступенькой
-                    purchase.tazikEndlessPrice = candle.closingPrice
-                    strategySpeaker.speakTazikSpikeSkip(purchase, change)
-                    strategyTelegram.sendTazikSpike(
-                        purchase,
-                        buyPrice,
-                        purchase.tazikEndlessPrice,
-                        candle.closingPrice,
-                        change,
-                        stocksTickerInProcess.size,
-                        parts
-                    )
-                    return
                 }
             }
         }

@@ -229,11 +229,11 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         portfolioManager.refreshOrders()
                         portfolioManager.refreshDeposit()
 
-                        // если нет ни ордера, ни позиции, значит чета не так, повторяем
-                        if (portfolioManager.getOrderAllOrdersForFigi(figi, OperationType.BUY).isNotEmpty()) {
-                            status = PurchaseStatus.ORDER_BUY
-                            break
-                        }
+//                        // если нет ни ордера, ни позиции, значит чета не так, повторяем
+//                        if (portfolioManager.getOrderAllOrdersForFigi(figi, OperationType.BUY).isNotEmpty()) {
+//                            status = PurchaseStatus.ORDER_BUY
+//                            break
+//                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -283,7 +283,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                             return@launch
                         }
 
-                        val orderBuy = portfolioManager.getOrderForFigi(figi, OperationType.BUY)
+                        val orderBuy = portfolioManager.getOrderForId(buyLimitOrder?.orderId ?: "", OperationType.BUY)
                         position = portfolioManager.getPositionForFigi(figi)
 
                         // проверка на большое количество лотов
@@ -301,7 +301,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
 
                         if (orderBuy == null && position == null) { // заявка отменена, ничего не куплено
                             status = PurchaseStatus.CANCELED
-                            Utils.showToastAlert("$ticker: не налили по $buyPrice")
+                            Utils.showToastAlert("$ticker: отмена по $buyPrice")
                             return@launch
                         }
 

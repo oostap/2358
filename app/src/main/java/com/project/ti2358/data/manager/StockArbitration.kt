@@ -6,6 +6,8 @@ data class StockArbitration(
     val bidRU: Double,
     val priceUS: Double,
 
+    val lots: Int,
+
     val long: Boolean,
     val fireTime: Long
 ) {

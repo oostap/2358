@@ -60,7 +60,7 @@ class StrategyTazik : KoinComponent {
         return@withContext stocks
     }
 
-    private fun loadSelectedStocks(numberSet: Int) {
+    private suspend fun loadSelectedStocks(numberSet: Int) = withContext(StockManager.stockContext) {
         stocksSelected.clear()
 
         val setList: List<String> = when (numberSet) {
@@ -73,7 +73,7 @@ class StrategyTazik : KoinComponent {
         stocksSelected = stocks.filter { it.ticker in setList }.toMutableList()
     }
 
-    private fun saveSelectedStocks(numberSet: Int) {
+    private suspend fun saveSelectedStocks(numberSet: Int) = withContext(StockManager.stockContext) {
         val setList = stocksSelected.map { it.ticker }.toList()
         val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
         val editor: SharedPreferences.Editor = preferences.edit()
@@ -92,7 +92,7 @@ class StrategyTazik : KoinComponent {
         }
     }
 
-    fun resort(): MutableList<Stock> {
+    suspend fun resort(): MutableList<Stock> = withContext(StockManager.stockContext) {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
@@ -100,7 +100,7 @@ class StrategyTazik : KoinComponent {
             val final = it.changePrice2300DayPercent * sign - multiplier
             if (final.isNaN()) 0.0 else final
         }
-        return stocks
+        return@withContext stocks
     }
 
     suspend fun setSelected(stock: Stock, value: Boolean, numberSet: Int) = withContext(StockManager.stockContext) {
@@ -194,7 +194,9 @@ class StrategyTazik : KoinComponent {
 
                 fixPrice()
                 if (hours + minutes + seconds <= 0) {
-                    stopStrategyCommand()
+                    GlobalScope.launch(Dispatchers.Main) {
+                        stopStrategyCommand()
+                    }
                 }
 
                 return@runBlocking "Работает автотазик! Финиш через %02d:%02d:%02d".format(hours, minutes, seconds)
@@ -412,7 +414,9 @@ class StrategyTazik : KoinComponent {
         } else {
             fixPrice()
         }
-        started = true
+
+        strategyBlacklist.process(stockManager.stocksStream)
+
         stocksTickerInProcess.forEach {
             try {
                 if (it.value.isActive) {
@@ -423,6 +427,8 @@ class StrategyTazik : KoinComponent {
             }
         }
         stocksTickerInProcess.clear()
+        started = true
+
         strategyTelegram.sendTazikStart(true)
     }
 

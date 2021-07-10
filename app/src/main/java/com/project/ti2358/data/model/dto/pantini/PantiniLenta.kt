@@ -11,18 +11,23 @@ data class PantiniLenta (
 ) {
     var prints: MutableList<PantiniPrint> = mutableListOf()
 
+    fun addPrint(item: String) {
+        val data = item.split("|")
+
+        if (data.size == 6) {
+            val date = Calendar.getInstance()
+            date.time = Date(data[0].toLong())
+            date.add(Calendar.HOUR_OF_DAY, 4)
+            val print = PantiniPrint(date, data[1].toDouble(), data[2], data[3], data[4].toInt(), data[5].toInt())
+            prints.add(print)
+        }
+    }
+
     fun create(jsonArray: JSONArray) {
         for (i in 0 until jsonArray.length()) {
             val item = jsonArray.get(i).toString()
-            val data = item.split("|")
-
-            if (data.size == 6) {
-                val date = Calendar.getInstance()
-                date.time = Date(data[0].toLong())
-                val print = PantiniPrint(date, data[1].toDouble(), data[2], data[3], data[4].toInt(), data[5].toInt())
-                prints.add(print)
-            }
-            prints.sortByDescending { it.time }
+            addPrint(item)
         }
+        prints.sortByDescending { it.time }
     }
 }

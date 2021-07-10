@@ -62,6 +62,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
     var jobRefreshOrders: Job? = null
     var jobRefreshOrderbook: Job? = null
+    var jobRefreshOrderbookData: Job? = null
 
     var lenta: Boolean = false
 
@@ -254,10 +255,29 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
                 while (true) {
                     delay(1000)
+                    withContext(StockManager.stockContext) {
+
+                        orderbookLines = orderbookManager.process()
+                        orderbookUSLines = orderbookManager.processUS()
+                        orderbookUSLenta = orderbookManager.processUSLenta()
+                    }
                     updateData()
                     updatePosition()
                 }
             }
+
+//            jobRefreshOrderbookData?.cancel()
+//            jobRefreshOrderbookData = GlobalScope.launch(StockManager.stockContext) {
+//                while (true) {
+//                    delay(1000)
+//
+//                    if (!isVisible) continue
+//
+//                    orderbookLines = orderbookManager.process()
+//                    orderbookUSLines = orderbookManager.processUS()
+//                    orderbookUSLenta = orderbookManager.processUSLenta()
+//                }
+//            }
 
             updateData()
             updatePosition()
@@ -387,9 +407,6 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
     private fun updateData() {
         if (!isVisible) return
-        orderbookLines = orderbookManager.process()
-        orderbookUSLines = orderbookManager.processUS()
-        orderbookUSLenta = orderbookManager.processUSLenta()
 
         fragmentOrderbookBinding?.apply {
             // SPB

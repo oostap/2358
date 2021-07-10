@@ -8,7 +8,6 @@ import com.project.ti2358.data.model.dto.pantini.PantiniOrderbook
 import com.project.ti2358.data.model.dto.pantini.PantiniPrint
 import com.project.ti2358.service.ScreenerType
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.log
 import com.project.ti2358.service.toMoney
 import org.koin.core.component.KoinApiExtension
 import java.util.*
@@ -50,6 +49,15 @@ data class Stock(var instrument: Instrument) {
     var highPrice: Double = 0.0
     var changePriceHighDayAbsolute: Double = 0.0
     var changePriceHighDayPercent: Double = 0.0
+
+    // арбитраж по стакану
+    var askPriceRU: Double = 0.0
+    var changePriceArbLongPercent: Double = 0.0
+    var changePriceArbLongAbsolute: Double = 0.0
+
+    var bidPriceRU: Double = 0.0
+    var changePriceArbShortPercent: Double = 0.0
+    var changePriceArbShortAbsolute: Double = 0.0
 
     // разница с ценой закрытия ОС
     var changePrice2300DayAbsolute: Double = 0.0
@@ -197,6 +205,23 @@ data class Stock(var instrument: Instrument) {
 
     fun processOrderbook(orderbook: OrderbookStream) {
         orderbookStream = orderbook
+
+        if (orderbookStream != null) {
+            val priceClose = closePrices?.os ?: 0.0
+            if (orderbookStream?.asks?.size!! > 0) {
+                askPriceRU = orderbookStream?.asks?.first()?.get(0) ?: 0.0
+            }
+
+            if (orderbookStream?.bids?.size!! > 0) {
+                bidPriceRU = orderbookStream?.bids?.first()?.get(0) ?: 0.0
+            }
+
+            changePriceArbLongPercent = priceClose / askPriceRU * 100.0 - 100.0
+            changePriceArbLongAbsolute = priceClose - askPriceRU
+
+            changePriceArbShortPercent = bidPriceRU / priceClose * 100.0 - 100.0
+            changePriceArbShortAbsolute = bidPriceRU - priceClose
+        }
     }
 
     fun processOrderbookUS(pantiniOrderbook: PantiniOrderbook) {
@@ -204,12 +229,12 @@ data class Stock(var instrument: Instrument) {
     }
 
     fun processLentaUS(pantiniLenta: PantiniLenta) {
-        if (lentaUS != null) {
-            lentaUS?.prints?.addAll(0, pantiniLenta.prints)
-            lentaUS?.prints = (lentaUS?.prints?.subList(0, 100) ?: emptyList()) as MutableList<PantiniPrint>
-        } else {
-            lentaUS = pantiniLenta
+        if (lentaUS == null) {
+            lentaUS = PantiniLenta(ticker)
         }
+
+        lentaUS?.prints?.addAll(0, pantiniLenta.prints)
+        lentaUS?.prints = (lentaUS?.prints?.subList(0, 100) ?: emptyList()) as MutableList<PantiniPrint>
     }
 
     fun processStockInfo(instrumentInfo: InstrumentInfo) {

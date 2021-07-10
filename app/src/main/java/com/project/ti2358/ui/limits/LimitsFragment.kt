@@ -132,7 +132,6 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
 
     private fun updateData(search: String = "") {
         GlobalScope.launch(Dispatchers.Main) {
-
             fragmentLimitsBinding?.apply {
                 listAll.visibility = View.VISIBLE
                 listLimits.visibility = View.GONE

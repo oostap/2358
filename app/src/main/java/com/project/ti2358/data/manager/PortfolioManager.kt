@@ -200,6 +200,10 @@ class PortfolioManager : KoinComponent {
         return portfolioPositions.find { it.figi == figi }
     }
 
+    public fun getOrderForId(id: String, operation: OperationType): Order? {
+        return orders.find { it.orderId == id && it.operation == operation }
+    }
+
     public fun getOrderForFigi(figi: String, operation: OperationType): Order? {
         return orders.find { it.figi == figi && it.operation == operation }
     }

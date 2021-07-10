@@ -8,6 +8,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.lang.Exception
 import java.util.*
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @KoinApiExtension
@@ -25,12 +26,11 @@ class StrategyDayLow : KoinComponent {
     var equalParts = true
 
     fun process(): MutableList<Stock> {
-//        val all = stockManager.getWhiteStocks()
         val all = stockManager.stocksStream
-        val changeFromLow = 2.0       //SettingsManager.get2358ChangePercent()
-        val changeDay = -1.0       //SettingsManager.get2358ChangePercent()
-        val volumeDayPieces = 0 //SettingsManager.get2358VolumeDayPieces()
-        val volumeDayCash = 0   //SettingsManager.get2358VolumeDayCash() * 1000 * 1000
+        val changeFromLow = 2.0     //SettingsManager.get2358ChangePercent()
+        val changeDay = -1.0        //SettingsManager.get2358ChangePercent()
+        val volumeDayPieces = SettingsManager.get2358VolumeDayPieces()
+        val volumeDayCash = SettingsManager.get2358VolumeDayCash() * 1000 * 1000
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
@@ -46,6 +46,32 @@ class StrategyDayLow : KoinComponent {
         stocks.sortBy {
             val multiplier = if (it in stocksSelected) 100 else 1
             (it.changePriceLowDayPercent + it.changePrice2300DayPercent) * multiplier
+        }
+
+        return stocks
+    }
+
+    fun processHigh(): MutableList<Stock> {
+        val all = stockManager.stocksStream
+        val changeFromHigh = 2.0     //SettingsManager.get2358ChangePercent()
+        val changeDay = 1.0        //SettingsManager.get2358ChangePercent()
+        val volumeDayPieces = SettingsManager.get2358VolumeDayPieces()
+        val volumeDayCash = SettingsManager.get2358VolumeDayCash() * 1000 * 1000
+        val min = SettingsManager.getCommonPriceMin()
+        val max = SettingsManager.getCommonPriceMax()
+
+        stocks = all.filter { stock ->
+            abs(stock.changePriceHighDayPercent) <= changeFromHigh && // изменение с лоя
+            stock.changePrice2300DayPercent >= changeDay &&    // изменение дня
+            stock.getTodayVolume() >= volumeDayPieces &&    // объём в шт
+            stock.dayVolumeCash >= volumeDayCash &&         // объём в $
+            stock.getPriceNow() > min &&                 // мин цена
+            stock.getPriceNow() < max                    // макс цена
+        }.toMutableList()
+
+        stocks.sortByDescending {
+            val multiplier = if (it in stocksSelected) 100 else 1
+            (it.changePriceHighDayPercent + it.changePrice2300DayPercent) * multiplier
         }
 
         return stocks

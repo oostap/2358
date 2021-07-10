@@ -60,7 +60,7 @@ class StrategyZontikEndless : KoinComponent {
         loadSelectedStocks(numberSet)
     }
 
-    private fun loadSelectedStocks(numberSet: Int) {
+    private suspend fun loadSelectedStocks(numberSet: Int) = withContext(StockManager.stockContext) {
         stocksSelected.clear()
 
         val setList: List<String> = when (numberSet) {
@@ -73,7 +73,7 @@ class StrategyZontikEndless : KoinComponent {
         stocksSelected = stocks.filter { it.ticker in setList }.toMutableList()
     }
 
-    private fun saveSelectedStocks(numberSet: Int) {
+    private suspend fun saveSelectedStocks(numberSet: Int) = withContext(StockManager.stockContext) {
         val setList = stocksSelected.map { it.ticker }.toMutableList()
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
@@ -93,7 +93,7 @@ class StrategyZontikEndless : KoinComponent {
         }
     }
 
-    fun resort(): MutableList<Stock> {
+    suspend fun resort(): MutableList<Stock> = withContext(StockManager.stockContext) {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy {
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
@@ -101,7 +101,7 @@ class StrategyZontikEndless : KoinComponent {
             val final = it.changePrice2300DayPercent * sign - multiplier
             if (final.isNaN()) 0.0 else final
         }
-        return stocks
+        return@withContext stocks
     }
 
     suspend fun setSelected(stock: Stock, value: Boolean, numberSet: Int) = withContext(StockManager.stockContext) {

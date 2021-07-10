@@ -81,7 +81,7 @@ class SectorsFragment : Fragment(R.layout.fragment_sector) {
             }
 
             sectors = stockManager.stockSectors
-            currentSector = sectors.first()
+            currentSector = if (sectors.isNotEmpty()) sectors.first() else ""
 
             sector1Button.setOnClickListener {
                 updateData(0, searchView.query.toString())
@@ -128,6 +128,8 @@ class SectorsFragment : Fragment(R.layout.fragment_sector) {
     }
 
     private fun updateData(sectorIndex: Int = -1, search: String = "") {
+        sectors = stockManager.stockSectors
+
         if (sectorIndex != -1) {
             currentSectorIndex = sectorIndex
             currentSector = sectors[sectorIndex]
