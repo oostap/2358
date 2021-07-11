@@ -75,7 +75,7 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
             }
             updateServiceButtonText700()
         }
-        positions = strategy1000Sell.processSellPosition()
+        positions = strategy1000Sell.processPrepare()
         adapterListSell.setData(positions)
         updateInfoText()
     }
@@ -162,27 +162,31 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                     }
 
                     percentPlusButton.setOnClickListener {
-                        purchaseStock.percentProfitSellFrom += 0.05
+                        purchaseStock.addPriceLimitPercent(0.05)
                         refreshPercent(purchaseStock)
                         lotsEditText.setText("${purchaseStock.lots}")
+                        strategy1000Sell.saveSelectedStocks()
                     }
 
                     percentMinusButton.setOnClickListener {
-                        purchaseStock.percentProfitSellFrom += -0.05
+                        purchaseStock.addPriceLimitPercent(-0.05)
                         refreshPercent(purchaseStock)
                         lotsEditText.setText("${purchaseStock.lots}")
+                        strategy1000Sell.saveSelectedStocks()
                     }
 
                     lotsPlusButton.setOnClickListener {
                         purchaseStock.addLots(deltaLots)
                         refreshPercent(purchaseStock)
                         lotsEditText.setText("${purchaseStock.lots}")
+                        strategy1000Sell.saveSelectedStocks()
                     }
 
                     lotsMinusButton.setOnClickListener {
                         purchaseStock.addLots(-deltaLots)
                         refreshPercent(purchaseStock)
                         lotsEditText.setText("${purchaseStock.lots}")
+                        strategy1000Sell.saveSelectedStocks()
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))
@@ -208,16 +212,18 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
 
             private fun refreshPercent(stockPurchase: StockPurchase) {
                 with(binding) {
-                    percentProfitFutureView.text = stockPurchase.percentProfitSellFrom.toPercent()
-                    percentProfitFutureView.setTextColor(Utils.getColorForValue(stockPurchase.percentProfitSellFrom))
+                    percentProfitFutureView.text = stockPurchase.percentLimitPriceChange.toPercent()
+                    percentProfitFutureView.setTextColor(Utils.getColorForValue(stockPurchase.percentLimitPriceChange))
 
-                    val sellPrice = stockPurchase.getProfitPriceForSell()
+                    val sellPrice = stockPurchase.getLimitPriceDouble()
                     val totalSellPrice = sellPrice * stockPurchase.lots
                     priceTotalView.text = "${sellPrice.toMoney(stockPurchase.stock)} ➡ ${totalSellPrice.toMoney(stockPurchase.stock)}"
-                    priceTotalView.setTextColor(Utils.getColorForValue(stockPurchase.percentProfitSellFrom))
+                    priceTotalView.setTextColor(Utils.getColorForValue(stockPurchase.percentLimitPriceChange))
 
                     priceProfitFutureView.text = ""
                     percentProfitFutureTotalView.text = ""
+
+                    tickerView.text = "${stockPurchase.ticker} x ${stockPurchase.lots} = %.2f%%".format(stockPurchase.profitPercent)
 
                     stockPurchase.position?.let {
                         val futureProfitPrice = sellPrice - it.getAveragePrice()
@@ -230,8 +236,6 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                         percentProfitFutureTotalView.setTextColor(Utils.getColorForValue(futureProfitPrice))
                     }
                 }
-                strategy1000Sell.saveSelectedStocks()
-
                 updateInfoText()
             }
         }

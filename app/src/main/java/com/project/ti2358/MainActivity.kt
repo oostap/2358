@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
                 } else if (it.id in listOf(R.id.nav_2358_start, R.id.nav_2358_finish, R.id.nav_daylow_start, R.id.nav_daylow_finish)) {
                     key = "2358_price_change_percent"
                 } else if (it.id in listOf(R.id.nav_1000_buy_start, R.id.nav_1000_buy_finish)) {
-                    key = "1000_sell_buy_1"
+                    key = "1000_buy_set_1"
                 } else if (it.id in listOf(R.id.nav_1000_sell_start, R.id.nav_1000_sell_finish)) {
                     key = "1000_sell_set_1"
                 } else if (it.id in listOf(R.id.nav_2225_start, R.id.nav_2225_finish)) {

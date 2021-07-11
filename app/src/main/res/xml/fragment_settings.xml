@@ -231,6 +231,12 @@
             app:title="@string/stocks_1000_sell_take_profit"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="1.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_sell_order_lifetime_seconds"
+            app:title="@string/stocks_1000_sell_order_lifetime_seconds"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="120"/>
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_1000_buy">

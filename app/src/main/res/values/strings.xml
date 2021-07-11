@@ -156,18 +156,19 @@
     <string name="stocks_2358_protect_stock_up">Защита от раннего откупа</string>
 
     <!-- 1000 sell settings -->
-    <string name="stocks_1000_sell_set_1">Набор 1 (SPCE -1.0 5 ентер)</string>
-    <string name="stocks_1000_sell_set_2">Набор 2 (SPCE -1.0 5 ентер)</string>
-    <string name="stocks_1000_sell_set_3">Набор 3 (SPCE -1.0 5 ентер)</string>
-    <string name="stocks_1000_sell_set_4">Набор 4 (SPCE -1.0 5 ентер)</string>
-    <string name="stocks_1000_sell_take_profit">Базовый % заявки на продажу</string>
+    <string name="stocks_1000_sell_set_1">Набор 1 (SPCE -1.0 5 0.5 ентер)</string>
+    <string name="stocks_1000_sell_set_2">Набор 2 (SPCE -1.0 5 0.5 ентер)</string>
+    <string name="stocks_1000_sell_set_3">Набор 3 (SPCE -1.0 5 0.5 ентер)</string>
+    <string name="stocks_1000_sell_set_4">Набор 4 (SPCE -1.0 5 0.5 ентер)</string>
+    <string name="stocks_1000_sell_take_profit">Тейкпрофит после продажи в % (0.0 = не создавать)</string>
+    <string name="stocks_1000_sell_order_lifetime_seconds">Время жизни заявки в секундах</string>
 
     <!-- 1000 buy settings -->
-    <string name="stocks_1000_buy_set_1">Набор 1 (SPCE -1.0 5 ентер)</string>
-    <string name="stocks_1000_buy_set_2">Набор 2 (SPCE -1.0 5 ентер)</string>
-    <string name="stocks_1000_buy_set_3">Набор 3 (SPCE -1.0 5 ентер)</string>
-    <string name="stocks_1000_buy_set_4">Набор 4 (SPCE -1.0 5 ентер)</string>
-    <string name="stocks_1000_buy_take_profit">Заявка на продажу в % (0.0 = не создавать)</string>
+    <string name="stocks_1000_buy_set_1">Набор 1 (SPCE -1.0 5 0.5 ентер)</string>
+    <string name="stocks_1000_buy_set_2">Набор 2 (SPCE -1.0 5 0.5 ентер)</string>
+    <string name="stocks_1000_buy_set_3">Набор 3 (SPCE -1.0 5 0.5 ентер)</string>
+    <string name="stocks_1000_buy_set_4">Набор 4 (SPCE -1.0 5 0.5 ентер)</string>
+    <string name="stocks_1000_buy_take_profit">Тейкпрофит после покупки в % (0.0 = не создавать)</string>
     <string name="stocks_1000_buy_purchase_volume">Общая сумма покупки в $</string>
     <string name="stocks_1000_buy_order_lifetime_seconds">Время жизни заявки в секундах</string>
 
@@ -379,6 +380,7 @@
     <string name="setting_key_1000_sell_set_3">1000_sell_set_3</string>
     <string name="setting_key_1000_sell_set_4">1000_sell_set_4</string>
     <string name="setting_key_1000_sell_take_profit">1000_take_sell_profit</string>
+    <string name="setting_key_1000_sell_order_lifetime_seconds">1000_sell_order_lifetime_seconds</string>
 
     <!-- 1000 buy settings -->
     <string name="setting_key_1000_buy_set_1">1000_buy_set_1</string>

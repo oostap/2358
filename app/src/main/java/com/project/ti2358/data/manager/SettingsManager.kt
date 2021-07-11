@@ -286,17 +286,23 @@ class SettingsManager {
         }
         /******************** 1000 sell *************************/
 
-        fun stringToPresetStocks(value: String): List<PresetStock> {
+        private fun stringToPresetStocks(value: String): List<PresetStock> {
             val array = value.toUpperCase().split("\n")
             val presetStocks: MutableList<PresetStock> = mutableListOf()
             array.forEach {
                 try {
                     val params = it.split(" ")
-                    if (params.size == 3) {
-                        val preset = PresetStock(params[0], params[1].toDouble(), params[2].toInt())
+                    if (params.size == 4) {
+                        val preset = PresetStock(params[0], params[1].toDouble(), params[2].toInt(), params[3].toDouble())
+                        presetStocks.add(preset)
+                    } else if (params.size == 3) {
+                        val preset = PresetStock(params[0], params[1].toDouble(), params[2].toInt(), 0.0)
                         presetStocks.add(preset)
                     } else if (params.size == 2) {
-                        val preset = PresetStock(params[0], params[1].toDouble(), 0)
+                        val preset = PresetStock(params[0], params[1].toDouble(), 0, 0.0)
+                        presetStocks.add(preset)
+                    } else if (params.size == 1) {
+                        val preset = PresetStock(params[0], 0.0, 0, 0.0)
                         presetStocks.add(preset)
                     }
                 } catch (e: java.lang.Exception) {
@@ -324,8 +330,18 @@ class SettingsManager {
                 4 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_set_4)
                 else -> ""
             }
-            val value: String = preferences.getString(key, "SPCE -1.0 10\nTAL -1.0 10")?.trim() ?: ""
+            val value: String = preferences.getString(key, "SPCE 1.0 10 0.5\nTAL 1.0 10 0.5")?.trim() ?: ""
             return stringToPresetStocks(value)
+        }
+
+        fun get1000SellOrderLifeTimeSeconds(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_order_lifetime_seconds)
+            val value: String? = preferences.getString(key, "120")
+            return try {
+                parseInt(value ?: "120")
+            } catch (e: Exception) {
+                120
+            }
         }
 
         /******************** 1000 buy *************************/
@@ -338,7 +354,7 @@ class SettingsManager {
                 4 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_set_4)
                 else -> ""
             }
-            val value: String = preferences.getString(key, "SPCE -1.0 10\nTAL -1.0 10")?.trim() ?: ""
+            val value: String = preferences.getString(key, "SPCE -1.0 10 0.5\nTAL -1.0 10 0.5")?.trim() ?: ""
             return stringToPresetStocks(value)
         }
 

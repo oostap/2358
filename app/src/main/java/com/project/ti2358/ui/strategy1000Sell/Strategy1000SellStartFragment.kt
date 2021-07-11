@@ -12,10 +12,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.PortfolioManager
-import com.project.ti2358.data.manager.OrderbookManager
-import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.manager.Strategy1000Sell
+import com.project.ti2358.data.manager.*
 import com.project.ti2358.databinding.Fragment1000SellStartBinding
 import com.project.ti2358.databinding.Fragment1000SellStartItemBinding
 import com.project.ti2358.service.Utils
@@ -170,8 +167,12 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
                     chooseView.isChecked = strategy1000Sell.isSelected(stock)
 
                     chooseView.setOnCheckedChangeListener { _, checked ->
-                        strategy1000Sell.setSelected(stock, checked, numberSet)
-                        updateData()
+                        GlobalScope.launch {
+                            strategy1000Sell.setSelected(stock, checked, numberSet)
+                            withContext(Dispatchers.Main) {
+                                updateTitle()
+                            }
+                        }
                     }
 
                     itemView.setOnClickListener { v ->

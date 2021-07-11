@@ -81,7 +81,7 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
         updateServiceButtonText1000()
         ///////////////////////////////////////////////////////////////
 
-        positions = strategy1000Buy.getPurchaseStock()
+        positions = strategy1000Buy.processPrepare()
         adapterList.setData(positions)
         updateInfoText()
     }
@@ -141,24 +141,28 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
                         purchaseStock.addPriceLimitPercent(0.05)
                         refreshPercent(purchaseStock)
                         lotsEditText.setText("${purchaseStock.lots}")
+                        strategy1000Buy.saveSelectedStocks()
                     }
 
                     priceMinusButton.setOnClickListener {
                         purchaseStock.addPriceLimitPercent(-0.05)
                         refreshPercent(purchaseStock)
                         lotsEditText.setText("${purchaseStock.lots}")
+                        strategy1000Buy.saveSelectedStocks()
                     }
 
                     lotsPlusButton.setOnClickListener {
                         purchaseStock.addLots(1)
                         refreshPercent(purchaseStock)
                         lotsEditText.setText("${purchaseStock.lots}")
+                        strategy1000Buy.saveSelectedStocks()
                     }
 
                     lotsMinusButton.setOnClickListener {
                         purchaseStock.addLots(-1)
                         refreshPercent(purchaseStock)
                         lotsEditText.setText("${purchaseStock.lots}")
+                        strategy1000Buy.saveSelectedStocks()
                     }
 
                     itemView.setBackgroundColor(Utils.getColorForIndex(index))
@@ -196,10 +200,9 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
                     priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
                     priceChangeAbsoluteTotalView.setTextColor(Utils.getColorForValue(percent))
 
-                    updateInfoText()
+                    tickerView.text = "${stockPurchase.ticker} x ${stockPurchase.lots} = %.2f%%".format(stockPurchase.profitPercent)
                 }
-
-                strategy1000Buy.saveSelectedStocks()
+                updateInfoText()
             }
         }
     }

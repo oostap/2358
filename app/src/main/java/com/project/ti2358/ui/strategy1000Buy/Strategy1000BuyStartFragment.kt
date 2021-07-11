@@ -21,6 +21,7 @@ import com.project.ti2358.service.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.util.*
@@ -176,8 +177,12 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
                     priceChangePercentView.setTextColor(Utils.getColorForValue(stock.changePrice2300DayAbsolute))
 
                     chooseView.setOnCheckedChangeListener { _, checked ->
-                        strategy1000Buy.setSelected(stock, checked, numberSet)
-                        updateData()
+                        GlobalScope.launch {
+                            strategy1000Buy.setSelected(stock, checked, numberSet)
+                            withContext(Dispatchers.Main) {
+                                updateTitle()
+                            }
+                        }
                     }
 
                     itemView.setOnClickListener {

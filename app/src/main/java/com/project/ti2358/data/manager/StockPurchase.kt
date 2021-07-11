@@ -31,14 +31,16 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
     var fixedPrice: Double = 0.0                      // зафиксированная цена, от которой шагаем лимитками
     var percentLimitPriceChange: Double = 0.0         // разница в % с текущей ценой для создания лимитки
     var absoluteLimitPriceChange: Double = 0.0        // если лимитка, то по какой цене
-
     var lots: Int = 0                                 // сколько штук тарим / продаём
+    var profitPercent: Double = 0.0                   // процент профита лонг/шорт (> 0.0)
+
     var status: PurchaseStatus = PurchaseStatus.NONE
 
     var buyMarketOrder: MarketOrder? = null
     var buyLimitOrder: LimitOrder? = null
     var sellLimitOrder: LimitOrder? = null
 
+    // для продажи/откупа лесенкой в 2225 и 2258 и DayLOW
     var percentProfitSellFrom: Double = 0.0
     var percentProfitSellTo: Double = 0.0
 
@@ -408,11 +410,11 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         portfolioManager.refreshOrders()
                         portfolioManager.refreshDeposit()
 
-                        // если нет ни ордера, ни позиции, значит чета не так, повторяем
-                        if (portfolioManager.getOrderAllOrdersForFigi(figi, OperationType.SELL).isNotEmpty()) {
-                            status = PurchaseStatus.ORDER_SELL
-                            break
-                        }
+//                        // если нет ни ордера, ни позиции, значит чета не так, повторяем
+//                        if (portfolioManager.getOrderAllOrdersForFigi(figi, OperationType.SELL).isNotEmpty()) {
+//                            status = PurchaseStatus.ORDER_SELL
+//                            break
+//                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -462,7 +464,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                             return@launch
                         }
 
-                        val orderSell = portfolioManager.getOrderForFigi(figi, OperationType.SELL)
+                        val orderSell = portfolioManager.getOrderForId(buyLimitOrder?.orderId ?: "", OperationType.SELL)
                         position = portfolioManager.getPositionForFigi(figi)
 
                         // проверка на большое количество лотов

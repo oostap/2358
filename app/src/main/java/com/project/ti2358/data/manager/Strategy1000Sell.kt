@@ -73,15 +73,16 @@ class Strategy1000Sell() : KoinComponent {
         for (purchase in toSellPurchase) {
             val preset = presetStocksSelected.find { it.ticker == purchase.ticker}
             preset?.let {
-                it.percent = purchase.percentProfitSellFrom
+                it.percent = purchase.percentLimitPriceChange
                 it.lots = purchase.lots
+                it.profit = purchase.profitPercent
             }
         }
 
         if (key != "") {
             var data = ""
             for (preset in presetStocksSelected) {
-                data += "%s %.2f %d\n".format(locale = Locale.US, preset.ticker, preset.percent, preset.lots)
+                data += "%s %.2f %d %.2f\n".format(locale = Locale.US, preset.ticker, preset.percent, preset.lots, preset.profit)
             }
             editor.putString(key, data)
             editor.apply()
@@ -100,7 +101,7 @@ class Strategy1000Sell() : KoinComponent {
         return@withContext stocks
     }
 
-    fun setSelected(stock: Stock, value: Boolean, numberSet: Int) {
+    suspend fun setSelected(stock: Stock, value: Boolean, numberSet: Int) = withContext(StockManager.stockContext) {
         if (value) {
             if (presetStocksSelected.find { it.ticker == stock.ticker } == null) {
                 presetStocksSelected.add(PresetStock(stock.ticker, 1.0, 0))
@@ -115,7 +116,9 @@ class Strategy1000Sell() : KoinComponent {
         return presetStocksSelected.find { it.ticker == stock.ticker } != null
     }
 
-    fun processSellPosition(): MutableList<StockPurchase> {
+    fun processPrepare(): MutableList<StockPurchase> {
+        loadSelectedStocks(currentNumberSet)
+
         val purchases: MutableList<StockPurchase> = mutableListOf()
 
         for (preset in presetStocksSelected) {
@@ -123,20 +126,9 @@ class Strategy1000Sell() : KoinComponent {
             if (stock != null) {
                 val purchase = StockPurchase(stock)
 
-                // из настроек
-                purchase.percentProfitSellFrom = preset.percent
+                purchase.percentLimitPriceChange = preset.percent
                 purchase.lots = preset.lots
-
-                // уже заданные
-                for (p in toSellPurchase) {
-                    if (p.ticker == stock.ticker) {
-                        purchase.apply {
-                            percentProfitSellFrom = p.percentProfitSellFrom
-                            lots = p.lots
-                        }
-                        break
-                    }
-                }
+                purchase.profitPercent = preset.profit
 
                 purchase.apply {
                     position = portfolioManager.getPositionForFigi(stock.figi)
@@ -147,12 +139,12 @@ class Strategy1000Sell() : KoinComponent {
         toSellPurchase = purchases
 
         toSellPurchase.forEach {
-            if (it.percentProfitSellFrom == 0.0) {
-                it.processInitialProfit()
-            }
-            if (it.lots == 0) {
-                it.lots = it.position?.lots ?: 1
-            }
+            if (it.percentLimitPriceChange == 0.0) it.processInitialProfit()
+            if (it.profitPercent == 0.0) it.profitPercent = SettingsManager.get1000SellTakeProfit()
+            if (it.lots == 0) it.lots = it.position?.lots ?: 1
+
+            it.updateAbsolutePrice()
+
             it.status = PurchaseStatus.WAITING
         }
         return toSellPurchase
@@ -169,7 +161,7 @@ class Strategy1000Sell() : KoinComponent {
     fun getTotalSellString(): String {
         var value = 0.0
         for (purchaseStock in toSellPurchase) {
-            value += purchaseStock.getProfitPriceForSell() * purchaseStock.lots
+            value += purchaseStock.getLimitPriceDouble() * purchaseStock.lots
         }
         return value.toMoney(null)
     }
@@ -177,7 +169,7 @@ class Strategy1000Sell() : KoinComponent {
     fun getTotalSellString(purchases: MutableList<StockPurchase>): String {
         var value = 0.0
         for (purchaseStock in purchases) {
-            value += purchaseStock.getProfitPriceForSell() * purchaseStock.lots
+            value += purchaseStock.getLimitPriceDouble() * purchaseStock.lots
         }
         return value.toMoney(null)
     }
@@ -194,9 +186,14 @@ class Strategy1000Sell() : KoinComponent {
 
     fun getNotificationTextLong(purchases: MutableList<StockPurchase>): String {
         var tickers = ""
-        for (purchaseStock in purchases) {
-            val p = "%d*%.2f$=%.2f$ > %.2f%%".format(locale = Locale.US, purchaseStock.lots, purchaseStock.getProfitPriceForSell(), purchaseStock.lots * purchaseStock.getProfitPriceForSell(), purchaseStock.percentProfitSellFrom)
-            tickers += "${purchaseStock.ticker} $p ${purchaseStock.getStatusString()}\n"
+        for (p in purchases) {
+            val text = "%.1f$ > %.2f$ > %.2f%% > ТП%.2f%%".format(locale = Locale.US,
+                p.lots * p.getLimitPriceDouble(),
+                p.getLimitPriceDouble(),
+                p.percentLimitPriceChange,
+                p.profitPercent
+            )
+            tickers += "${p.ticker}*${p.lots} = $text ${p.getStatusString()}\n"
         }
         return tickers.trim()
     }
@@ -214,16 +211,24 @@ class Strategy1000Sell() : KoinComponent {
     fun startStrategy700Sell() {
         if (started700) return
         started700 = true
-        positionsToSell700.forEach {
-            job700.add(it.sellMorning())
+
+        for (purchase in positionsToSell700) {
+            // если позиция уже в портфеле, то НЕ выставлять ТП, а просто добрать шорт или продать позицию
+            val profit = if (purchase.position == null) purchase.profitPercent else 0.0
+            val job = purchase.sellLimitFromAsk(purchase.getLimitPriceDouble(), profit, 50, SettingsManager.get1000SellOrderLifeTimeSeconds())
+            job700.add(job)
         }
     }
 
     fun startStrategy1000Sell() {
         if (started1000) return
         started1000 = true
-        positionsToSell1000.forEach {
-            job1000.add(it.sellMorning())
+
+        for (purchase in positionsToSell1000) {
+            // если позиция уже в портфеле, то НЕ выставлять ТП, а просто добрать шорт или продать позицию
+            val profit = if (purchase.position == null) purchase.profitPercent else 0.0
+            val job = purchase.sellLimitFromAsk(purchase.getLimitPriceDouble(), profit, 50, SettingsManager.get1000SellOrderLifeTimeSeconds())
+            job1000.add(job)
         }
     }
 
