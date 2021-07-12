@@ -21,10 +21,10 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.*
-import com.project.ti2358.data.model.dto.OperationType
-import com.project.ti2358.data.model.dto.Order
-import com.project.ti2358.data.model.dto.PortfolioPosition
-import com.project.ti2358.data.model.dto.pantini.PantiniPrint
+import com.project.ti2358.data.tinkoff.model.OperationType
+import com.project.ti2358.data.tinkoff.model.Order
+import com.project.ti2358.data.tinkoff.model.PortfolioPosition
+import com.project.ti2358.data.pantini.model.PantiniPrint
 import com.project.ti2358.databinding.FragmentOrderbookBinding
 import com.project.ti2358.databinding.FragmentOrderbookItemBinding
 import com.project.ti2358.databinding.FragmentOrderbookLentaItemBinding

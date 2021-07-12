@@ -1,9 +1,9 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.model.dto.OperationType
-import com.project.ti2358.data.model.dto.Order
-import com.project.ti2358.data.model.dto.pantini.PantiniPrint
-import com.project.ti2358.data.service.OrdersService
+import com.project.ti2358.data.tinkoff.model.OperationType
+import com.project.ti2358.data.tinkoff.model.Order
+import com.project.ti2358.data.pantini.model.PantiniPrint
+import com.project.ti2358.data.tinkoff.service.OrdersService
 import com.project.ti2358.service.Utils
 import com.project.ti2358.ui.orderbook.OrderbookLine
 import kotlinx.coroutines.Dispatchers

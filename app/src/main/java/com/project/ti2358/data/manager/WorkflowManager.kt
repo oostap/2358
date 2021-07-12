@@ -1,7 +1,11 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.BuildConfig
-import com.project.ti2358.data.service.*
+import com.project.ti2358.data.alor.service.StreamingAlorService
+import com.project.ti2358.data.common.AuthInterceptor
+import com.project.ti2358.data.daager.service.ThirdPartyService
+import com.project.ti2358.data.pantini.service.StreamingPantiniService
+import com.project.ti2358.data.tinkoff.service.*
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.component.KoinApiExtension

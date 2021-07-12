@@ -4,8 +4,8 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.data.model.dto.Candle
-import com.project.ti2358.data.model.dto.Currency
+import com.project.ti2358.data.tinkoff.model.Candle
+import com.project.ti2358.data.tinkoff.model.Currency
 import com.project.ti2358.service.*
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension

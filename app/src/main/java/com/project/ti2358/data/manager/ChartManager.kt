@@ -1,11 +1,9 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.model.dto.Candle
-import com.project.ti2358.data.model.dto.Interval
-import com.project.ti2358.data.service.MarketService
-import com.project.ti2358.data.service.OrdersService
+import com.project.ti2358.data.tinkoff.model.Candle
+import com.project.ti2358.data.tinkoff.model.Interval
+import com.project.ti2358.data.tinkoff.service.MarketService
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.log
 import com.project.ti2358.service.toString
 import com.project.ti2358.ui.orderbook.OrderbookLine
 import org.koin.core.component.KoinApiExtension

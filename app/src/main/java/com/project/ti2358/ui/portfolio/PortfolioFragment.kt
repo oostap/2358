@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.*
-import com.project.ti2358.data.model.dto.PortfolioPosition
-import com.project.ti2358.data.service.ThirdPartyService
+import com.project.ti2358.data.tinkoff.model.PortfolioPosition
+import com.project.ti2358.data.daager.service.ThirdPartyService
 import com.project.ti2358.databinding.FragmentPortfolioBinding
 import com.project.ti2358.databinding.FragmentPortfolioItemBinding
 import com.project.ti2358.service.Utils

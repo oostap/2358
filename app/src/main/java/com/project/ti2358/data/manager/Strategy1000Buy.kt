@@ -4,7 +4,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.data.model.dto.daager.PresetStock
+import com.project.ti2358.data.daager.model.PresetStock
 import com.project.ti2358.service.PurchaseStatus
 import com.project.ti2358.service.Sorting
 import kotlinx.coroutines.Job
@@ -221,7 +221,7 @@ class Strategy1000Buy : KoinComponent {
         for (purchase in stocksToBuy1000) {
             // если позиция уже в портфеле, то НЕ выставлять ТП, а просто добрать лонг или откупить шорт
             val profit = if (purchase.position == null) purchase.profitPercent else 0.0
-            val job = purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), profits, 50, SettingsManager.get1000BuyOrderLifeTimeSeconds())
+            val job = purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), profit, 50, SettingsManager.get1000BuyOrderLifeTimeSeconds())
             if (job != null)
                 job1000.add(job)
         }

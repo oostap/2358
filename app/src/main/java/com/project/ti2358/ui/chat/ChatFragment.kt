@@ -9,21 +9,15 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.github.bassaer.chatmessageview.model.ChatUser
 import com.github.bassaer.chatmessageview.model.Message
-import com.google.gson.internal.LinkedTreeMap
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.StockManager
-import com.project.ti2358.data.service.ThirdPartyService
+import com.project.ti2358.data.daager.service.ThirdPartyService
 import com.project.ti2358.databinding.FragmentChatBinding
-import com.project.ti2358.service.log
-import com.project.ti2358.service.toString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-import kotlin.collections.ArrayList
 
 @KoinApiExtension
 class ChatFragment : Fragment(R.layout.fragment_chat) {

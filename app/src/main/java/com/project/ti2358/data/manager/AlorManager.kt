@@ -1,7 +1,7 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.service.StreamingAlorService
-import com.project.ti2358.data.service.ThirdPartyService
+import com.project.ti2358.data.alor.service.StreamingAlorService
+import com.project.ti2358.data.daager.service.ThirdPartyService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

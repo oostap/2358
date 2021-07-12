@@ -1,7 +1,7 @@
 package com.project.ti2358.ui.orderbook
 
 import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.model.dto.Order
+import com.project.ti2358.data.tinkoff.model.Order
 
 class OrderbookLine(
     var stock: Stock

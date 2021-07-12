@@ -13,11 +13,11 @@ import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.network.fold
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.project.ti2358.data.model.dto.*
-import com.project.ti2358.data.model.dto.pantini.PantiniLenta
-import com.project.ti2358.data.service.OperationsService
-import com.project.ti2358.data.service.OrdersService
-import com.project.ti2358.data.service.ThirdPartyService
+import com.project.ti2358.data.pantini.model.PantiniLenta
+import com.project.ti2358.data.tinkoff.service.OperationsService
+import com.project.ti2358.data.tinkoff.service.OrdersService
+import com.project.ti2358.data.daager.service.ThirdPartyService
+import com.project.ti2358.data.tinkoff.model.*
 import com.project.ti2358.service.*
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension

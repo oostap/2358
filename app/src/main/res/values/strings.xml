@@ -116,13 +116,17 @@
     <string name="dark_theme">Ночная тема</string>
 
     <!-- token settings -->
-    <string name="token_header">Токены</string>
+    <string name="tinkoff_header">Tinkoff</string>
     <string name="tinkoff_token_title">Tinkoff OpenAPI токен</string>
     <string name="tinkoff_broker_id">Номер брокерского счёта ТИ</string>
+
+    <string name="alor_header">ALOR</string>
     <string name="alor_token_title">ALOR OpenAPI токен</string>
+    <string name="alor_username">ALOR username (P123456)</string>
     <string name="alor_qoutes_title">Котировки ALOR</string>
     <string name="alor_orderbook_title">Стакан ALOR</string>
 
+    <string name="pantini_header">John Pantini</string>
     <string name="pantini_telegram_id">Pantini: Телеграм ID</string>
     <string name="pantini_warden_token">Pantini: Warden Token</string>
 
@@ -343,9 +347,15 @@
     <string name="setting_key_token_market">token_market</string>
     <string name="setting_key_tinkoff_account_id">tinkoff_account_id</string>
 
+    <!-- alor -->
+    <string name="setting_key_alor_username">alor_username</string>
     <string name="setting_key_token_market_alor">token_market_alor</string>
     <string name="setting_key_alor_quotes">alor_quotes</string>
     <string name="setting_key_alor_orderbook">alor_orderbook</string>
+
+    <!-- pantini -->
+    <string name="setting_key_pantini_telegram_id">pantini_telegram_id</string>
+    <string name="setting_key_pantini_warden_token">pantini_warden_token</string>
 
     <!-- common settings -->
     <string name="setting_key_stocks_usd_price_min">stocks_usd_price_min</string>
@@ -542,9 +552,5 @@
     <string name="setting_key_arbitration_only_love">arbitration_only_love</string>
     <string name="setting_key_arbitration_volume_day_from">arbitration_volume_day_from</string>
     <string name="setting_key_arbitration_volume_day_to">arbitration_volume_day_to</string>
-
-    <!-- pantini -->
-    <string name="setting_key_pantini_telegram_id">pantini_telegram_id</string>
-    <string name="setting_key_pantini_warden_token">pantini_warden_token</string>
 
 </resources>

@@ -1,7 +1,7 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.model.dto.OperationType
-import com.project.ti2358.data.service.OrdersService
+import com.project.ti2358.data.tinkoff.model.OperationType
+import com.project.ti2358.data.tinkoff.service.OrdersService
 import com.project.ti2358.service.Utils
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
@@ -151,7 +151,7 @@ class StrategyTelegramCommands : KoinComponent {
                 if (stock != null) {
                     if (operation == "limits") { // # LIMIT UP/DOWN
                         strategyTelegram.sendStockInfo(stock)
-                        return true
+                        return false
                     }
                 }
             }

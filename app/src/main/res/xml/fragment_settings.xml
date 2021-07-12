@@ -1,6 +1,6 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/token_header">
+    <PreferenceCategory app:title="@string/tinkoff_header">
 
         <EditTextPreference
             app:key="@string/setting_key_token_market"
@@ -10,6 +10,20 @@
         <EditTextPreference
             app:key="@string/setting_key_tinkoff_account_id"
             app:title="@string/tinkoff_broker_id"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/alor_header">
+
+        <EditTextPreference
+            app:key="@string/setting_key_token_market_alor"
+            app:title="@string/alor_token_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="@string/setting_key_alor_username"
+            app:title="@string/alor_username"
             app:useSimpleSummaryProvider="true" />
 
         <SwitchPreferenceCompat
@@ -22,10 +36,9 @@
             app:title="@string/alor_orderbook_title"
             app:defaultValue="false" />
 
-        <EditTextPreference
-            app:key="@string/setting_key_token_market_alor"
-            app:title="@string/alor_token_title"
-            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/pantini_header">
 
         <EditTextPreference
             app:key="@string/setting_key_pantini_telegram_id"

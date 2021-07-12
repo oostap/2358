@@ -1,6 +1,6 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.model.dto.Candle
+import com.project.ti2358.data.tinkoff.model.Candle
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import org.koin.core.component.KoinApiExtension

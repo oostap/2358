@@ -14,7 +14,7 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.ChartManager
 import com.project.ti2358.data.manager.PortfolioManager
 import com.project.ti2358.data.manager.OrderbookManager
-import com.project.ti2358.data.model.dto.Order
+import com.project.ti2358.data.tinkoff.model.Order
 import com.project.ti2358.databinding.FragmentOrdersBinding
 import com.project.ti2358.databinding.FragmentOrdersItemBinding
 import com.project.ti2358.service.Utils

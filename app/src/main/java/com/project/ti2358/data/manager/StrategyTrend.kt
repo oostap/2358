@@ -8,7 +8,7 @@ import android.os.Build
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.data.model.dto.Candle
+import com.project.ti2358.data.tinkoff.model.Candle
 import com.project.ti2358.service.StrategyTrendService
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log

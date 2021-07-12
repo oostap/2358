@@ -17,9 +17,9 @@ import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.*
-import com.project.ti2358.data.model.dto.Currency
-import com.project.ti2358.data.model.dto.Interval
-import com.project.ti2358.data.model.dto.OperationType
+import com.project.ti2358.data.tinkoff.model.Currency
+import com.project.ti2358.data.tinkoff.model.Interval
+import com.project.ti2358.data.tinkoff.model.OperationType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

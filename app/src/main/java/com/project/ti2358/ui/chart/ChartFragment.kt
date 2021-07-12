@@ -13,8 +13,8 @@ import com.icechao.klinelib.utils.SlidListener
 import com.icechao.klinelib.utils.Status
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.*
-import com.project.ti2358.data.model.dto.Candle
-import com.project.ti2358.data.model.dto.Interval
+import com.project.ti2358.data.tinkoff.model.Candle
+import com.project.ti2358.data.tinkoff.model.Interval
 import com.project.ti2358.databinding.FragmentChartBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log

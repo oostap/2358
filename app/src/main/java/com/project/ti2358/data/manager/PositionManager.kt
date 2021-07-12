@@ -1,8 +1,9 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.model.dto.*
-import com.project.ti2358.data.service.MarketService
-import com.project.ti2358.data.service.OrdersService
+import com.project.ti2358.data.tinkoff.model.Orderbook
+import com.project.ti2358.data.tinkoff.model.PortfolioPosition
+import com.project.ti2358.data.tinkoff.service.MarketService
+import com.project.ti2358.data.tinkoff.service.OrdersService
 import com.project.ti2358.ui.orderbook.OrderbookLine
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent

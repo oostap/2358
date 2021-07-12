@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.*
-import com.project.ti2358.data.model.dto.Account
+import com.project.ti2358.data.tinkoff.model.Account
 import com.project.ti2358.databinding.FragmentAccountsBinding
 import com.project.ti2358.databinding.FragmentAccountsItemBinding
 import com.project.ti2358.service.*

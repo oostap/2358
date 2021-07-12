@@ -1,8 +1,8 @@
 package com.project.ti2358.data.manager
 
 import com.icechao.klinelib.adapter.KLineChartAdapter
-import com.project.ti2358.data.model.dto.Candle
-import com.project.ti2358.data.model.dto.Interval
+import com.project.ti2358.data.tinkoff.model.Candle
+import com.project.ti2358.data.tinkoff.model.Interval
 import com.project.ti2358.service.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.util.*
 
 @KoinApiExtension
 class StrategyTA : KoinComponent {

@@ -9,8 +9,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.*
-import com.project.ti2358.data.model.dto.OperationType
-import com.project.ti2358.data.model.dto.PortfolioPosition
+import com.project.ti2358.data.tinkoff.model.OperationType
+import com.project.ti2358.data.tinkoff.model.PortfolioPosition
 import com.project.ti2358.databinding.FragmentPortfolioPositionBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney

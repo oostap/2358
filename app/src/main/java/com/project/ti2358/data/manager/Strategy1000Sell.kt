@@ -4,7 +4,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.data.model.dto.daager.PresetStock
+import com.project.ti2358.data.daager.model.PresetStock
 import com.project.ti2358.service.PurchaseStatus
 import com.project.ti2358.service.Sorting
 import com.project.ti2358.service.toMoney

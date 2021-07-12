@@ -4,10 +4,9 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.data.model.dto.*
-import com.project.ti2358.data.model.dto.Currency
-import com.project.ti2358.data.service.OrdersService
-import com.project.ti2358.data.service.PortfolioService
+import com.project.ti2358.data.tinkoff.model.*
+import com.project.ti2358.data.tinkoff.service.OrdersService
+import com.project.ti2358.data.tinkoff.service.PortfolioService
 import com.project.ti2358.service.Utils
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension

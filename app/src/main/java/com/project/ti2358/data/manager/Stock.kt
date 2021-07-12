@@ -1,11 +1,11 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.model.dto.*
-import com.project.ti2358.data.model.dto.Currency
-import com.project.ti2358.data.model.dto.daager.*
-import com.project.ti2358.data.model.dto.pantini.PantiniLenta
-import com.project.ti2358.data.model.dto.pantini.PantiniOrderbook
-import com.project.ti2358.data.model.dto.pantini.PantiniPrint
+import com.project.ti2358.data.daager.model.*
+import com.project.ti2358.data.pantini.model.PantiniLenta
+import com.project.ti2358.data.pantini.model.PantiniOrderbook
+import com.project.ti2358.data.pantini.model.PantiniPrint
+import com.project.ti2358.data.tinkoff.model.*
+import com.project.ti2358.data.tinkoff.model.Currency
 import com.project.ti2358.service.ScreenerType
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney

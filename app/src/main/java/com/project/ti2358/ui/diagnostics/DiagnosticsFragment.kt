@@ -7,9 +7,9 @@ import androidx.fragment.app.Fragment
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.PortfolioManager
 import com.project.ti2358.data.manager.StockManager
-import com.project.ti2358.data.service.StreamingAlorService
-import com.project.ti2358.data.service.StreamingPantiniService
-import com.project.ti2358.data.service.StreamingTinkoffService
+import com.project.ti2358.data.alor.service.StreamingAlorService
+import com.project.ti2358.data.pantini.service.StreamingPantiniService
+import com.project.ti2358.data.tinkoff.service.StreamingTinkoffService
 import com.project.ti2358.databinding.FragmentDiagnosticsBinding
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension

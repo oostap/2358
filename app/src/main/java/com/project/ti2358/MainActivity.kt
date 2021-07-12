@@ -23,7 +23,7 @@ import com.google.android.material.navigation.NavigationView
 import com.project.ti2358.data.manager.PortfolioManager
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.WorkflowManager
-import com.project.ti2358.data.model.dto.daager.Index
+import com.project.ti2358.data.daager.model.Index
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toPercent
