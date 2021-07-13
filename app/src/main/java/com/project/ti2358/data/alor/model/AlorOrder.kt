@@ -1,5 +1,6 @@
 package com.project.ti2358.data.alor.model
 
+import com.project.ti2358.data.manager.Stock
 import java.util.*
 
 //{
@@ -43,4 +44,6 @@ data class AlorOrder(
 
     // для стоп ордеров
     val stopPrice: Double?,
+
+    var stock: Stock?
 )
