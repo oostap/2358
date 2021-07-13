@@ -1,7 +1,5 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.model.dto.*
-import com.project.ti2358.data.service.*
 import com.project.ti2358.data.tinkoff.model.*
 import com.project.ti2358.data.tinkoff.service.MarketService
 import com.project.ti2358.data.tinkoff.service.OrdersService

@@ -1,7 +1,7 @@
 package com.project.ti2358.data.alor.service
 
 import com.google.gson.Gson
-import com.project.ti2358.data.manager.AlorManager
+import com.project.ti2358.data.manager.AlorAuthManager
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.tinkoff.model.Candle
@@ -39,7 +39,7 @@ class StreamingAlorService : KoinComponent {
         const val RECONNECT_ATTEMPT_LIMIT = 1000
     }
 
-    private val alorManager: AlorManager by inject()
+    private val alorAuthManager: AlorAuthManager by inject()
 
     private var webSocket: WebSocket? = null
     private val client: OkHttpClient = OkHttpClient()
@@ -161,7 +161,7 @@ class StreamingAlorService : KoinComponent {
             log("StreamingAlorService::onFailure + ${t.localizedMessage}")
             GlobalScope.launch(Dispatchers.Main) {
                 delay(1500)
-                alorManager.refreshToken()
+                alorAuthManager.refreshToken()
                 delay(1500)
                 connect()
             }
@@ -257,7 +257,7 @@ class StreamingAlorService : KoinComponent {
         }
 
         val bar = OrderBookGetEventBody(
-            AlorManager.TOKEN,
+            AlorAuthManager.TOKEN,
             "OrderBookGetAndSubscribe",
             ticker,
             exch,
@@ -275,7 +275,7 @@ class StreamingAlorService : KoinComponent {
 
     fun unsubscribeOrderBookEventsStream(stock: Stock, depth: Int) {
 //        log("StreamingAlorService :: unsubscribe from order book events: ticker: ${stock.ticker}, depth: $depth")
-        val cancel = CancelEventBody(SettingsManager.getTokenALOR(), "unsubscribe", "${stock.ticker}_orderbook")
+        val cancel = CancelEventBody(SettingsManager.getAlorToken(), "unsubscribe", "${stock.ticker}_orderbook")
 //        webSocket?.send(Gson().toJson(cancel))
         activeOrderSubscriptions.remove(stock)
     }
@@ -318,7 +318,7 @@ class StreamingAlorService : KoinComponent {
         }
 
         val bar = BarGetEventBody(
-            AlorManager.TOKEN,
+            AlorAuthManager.TOKEN,
             "BarsGetAndSubscribe",
             ticker,
             exch,
@@ -342,7 +342,7 @@ class StreamingAlorService : KoinComponent {
     public fun unsubscribeCandleEventsStream(stock: Stock, interval: Interval) {
 //        log("StreamingAlorService :: unsubscribe from candle events: ticker: ${stock.ticker}, interval: $interval")
         val timeName = Utils.convertIntervalToString(interval)
-        val cancel = CancelEventBody(SettingsManager.getTokenALOR(), "unsubscribe", "${stock.ticker}_$timeName")
+        val cancel = CancelEventBody(SettingsManager.getAlorToken(), "unsubscribe", "${stock.ticker}_$timeName")
         webSocket?.send(Gson().toJson(cancel))
         activeCandleSubscriptions[stock]?.remove(interval)
     }

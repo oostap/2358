@@ -1,5 +1,6 @@
 package com.project.ti2358.data.common
 
+import com.project.ti2358.data.manager.AlorAuthManager
 import com.project.ti2358.data.manager.SettingsManager
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -28,6 +29,15 @@ class AuthInterceptor() : Interceptor {
                 chain.request().newBuilder().addHeader(
                     AUTHORIZATION_HEADER,
                     BEARER_PREFIX + SettingsManager.getTokenTinkoff()
+                ).build()
+            )
+        }
+
+        if ("api.alor.ru" in chain.request().url.host) {
+            return chain.proceed(
+                chain.request().newBuilder().addHeader(
+                    AUTHORIZATION_HEADER,
+                    BEARER_PREFIX + AlorAuthManager.TOKEN
                 ).build()
             )
         }

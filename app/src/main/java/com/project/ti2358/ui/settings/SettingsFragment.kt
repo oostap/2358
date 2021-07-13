@@ -3,20 +3,20 @@ package com.project.ti2358.ui.settings
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.fragment.app.FragmentManager
-import androidx.navigation.findNavController
 import androidx.preference.*
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.AlorManager
+import com.project.ti2358.data.manager.AlorAuthManager
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.service.Utils
-import com.project.ti2358.service.log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
 class SettingsFragment : PreferenceFragmentCompat() {
-    private val alorManager: AlorManager by inject()
+    private val alorAuthManager: AlorAuthManager by inject()
     private val stockManager: StockManager by inject()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -68,8 +68,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val alorTokenKey: String = getString(R.string.setting_key_token_market_alor)
         val alorToken: EditTextPreference? = findPreference(alorTokenKey)
         alorToken?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, _ ->
-            alorManager.refreshToken()
-            stockManager.loadStocks(true)
+            GlobalScope.launch(Dispatchers.Default) {
+                alorAuthManager.refreshToken()
+                stockManager.loadStocks(true)
+            }
             true
         }
     }

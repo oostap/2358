@@ -1,6 +1,7 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.BuildConfig
+import com.project.ti2358.data.alor.service.AlorPortfolioService
 import com.project.ti2358.data.alor.service.StreamingAlorService
 import com.project.ti2358.data.common.AuthInterceptor
 import com.project.ti2358.data.daager.service.ThirdPartyService
@@ -18,7 +19,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 @KoinApiExtension
 class WorkflowManager() : KoinComponent {
-    private val alorManager: AlorManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
     private val stockManager: StockManager by inject()
     private val portfolioManager: PortfolioManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
@@ -28,7 +29,9 @@ class WorkflowManager() : KoinComponent {
         portfolioManager.startUpdatePortfolio()
         stockManager.startUpdateIndices()
 
-        if (SettingsManager.getAlorQuotes() || SettingsManager.getAlorOrdebook()) alorManager.refreshToken()
+        if (SettingsManager.getAlorToken() != "") {
+            alorPortfolioManager.start()
+        }
 
         strategySpeaker.start()
     }
@@ -37,11 +40,13 @@ class WorkflowManager() : KoinComponent {
         private val processingModule = module {
             fun provideWorkflowManager(): WorkflowManager = WorkflowManager()
             fun provideStocksManager(): StockManager = StockManager()
-            fun provideDepoManager(): PortfolioManager = PortfolioManager()
-            fun provideAlorManager(): AlorManager = AlorManager()
+            fun providePortfolioManager(): PortfolioManager = PortfolioManager()
             fun provideOrderbookManager(): OrderbookManager = OrderbookManager()
             fun provideChartManager(): ChartManager = ChartManager()
             fun providePositionManager(): PositionManager = PositionManager()
+
+            fun provideAlorAuthManager(): AlorAuthManager = AlorAuthManager()
+            fun provideAlorPortfolioManager(): AlorPortfolioManager = AlorPortfolioManager()
 
             fun provideStrategyFavorites(): StrategyLove = StrategyLove()
             fun provideStrategyBlacklist(): StrategyBlacklist = StrategyBlacklist()
@@ -72,13 +77,17 @@ class WorkflowManager() : KoinComponent {
             fun provideStrategyShorts(): StrategyShorts = StrategyShorts()
             fun provideStrategyTA(): StrategyTA = StrategyTA()
 
+            // tinkoff
             single { provideStocksManager() }
-            single { provideDepoManager() }
+            single { providePortfolioManager() }
             single { provideWorkflowManager() }
-            single { provideAlorManager() }
             single { provideOrderbookManager() }
             single { provideChartManager() }
             single { providePositionManager() }
+
+            // alor
+            single { provideAlorAuthManager() }
+            single { provideAlorPortfolioManager() }
 
             single { provideStrategyFavorites() }
             single { provideStrategyBlacklist() }
@@ -120,6 +129,8 @@ class WorkflowManager() : KoinComponent {
             fun provideStreamingPantiniService(): StreamingPantiniService = StreamingPantiniService()
             fun provideThirdPartyService(retrofit: Retrofit): ThirdPartyService = ThirdPartyService(retrofit)
 
+            fun provideAlorPortfolioService(retrofit: Retrofit): AlorPortfolioService = AlorPortfolioService(retrofit)
+
             single { provideMarketService(get()) }
             single { provideOrdersService(get()) }
             single { providePortfolioService(get()) }
@@ -128,13 +139,15 @@ class WorkflowManager() : KoinComponent {
             single { provideStreamingAlorService() }
             single { provideStreamingPantiniService() }
             single { provideThirdPartyService(get()) }
+
+            single { provideAlorPortfolioService(get()) }
         }
 
         private val retrofitModule = module {
             fun provideRetrofit(): Retrofit {
                 var level = HttpLoggingInterceptor.Level.NONE
                 if (BuildConfig.DEBUG) {
-                    level = HttpLoggingInterceptor.Level.BASIC
+                    level = HttpLoggingInterceptor.Level.BODY//BASIC
                 }
 
                 val httpClient = OkHttpClient.Builder()

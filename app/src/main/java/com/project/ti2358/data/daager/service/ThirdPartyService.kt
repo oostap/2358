@@ -13,7 +13,7 @@ class ThirdPartyService(retrofit: Retrofit) {
 
     @KoinApiExtension
     suspend fun alorRefreshToken(@Url url: String): String {
-        val urlToken = url + "?token=${SettingsManager.getTokenALOR()}"
+        val urlToken = url + "?token=${SettingsManager.getAlorToken()}"
         val json = daagerApi.alorRefreshToken(urlToken)
         return json["AccessToken"].toString().replace("\"", "")
     }

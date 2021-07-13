@@ -1,4 +1,4 @@
-package com.project.ti2358.ui.portfolio
+package com.project.ti2358.ui.alorPortfolio
 
 import android.content.pm.PackageInfo
 import android.os.Bundle
@@ -16,6 +16,8 @@ import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.tinkoff.model.PortfolioPosition
 import com.project.ti2358.data.daager.service.ThirdPartyService
+import com.project.ti2358.databinding.FragmentAlorPortfolioBinding
+import com.project.ti2358.databinding.FragmentAlorPortfolioItemBinding
 import com.project.ti2358.databinding.FragmentPortfolioBinding
 import com.project.ti2358.databinding.FragmentPortfolioItemBinding
 import com.project.ti2358.service.Utils
@@ -28,7 +30,7 @@ import java.lang.Exception
 import kotlin.math.sign
 
 @KoinApiExtension
-class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
+class AlorPortfolioFragment : Fragment(R.layout.fragment_alor_portfolio) {
     private val orderbookManager: OrderbookManager by inject()
     private val thirdPartyService: ThirdPartyService by inject()
     private val portfolioManager: PortfolioManager by inject()
@@ -36,7 +38,7 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTA: StrategyTA by inject()
 
-    private var fragmentPortfolioBinding: FragmentPortfolioBinding? = null
+    private var fragmentAlorPortfolioBinding: FragmentAlorPortfolioBinding? = null
 
     var adapterList: ItemPortfolioRecyclerViewAdapter = ItemPortfolioRecyclerViewAdapter(emptyList())
     var jobUpdate: Job? = null
@@ -49,14 +51,14 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
     override fun onDestroy() {
         jobUpdate?.cancel()
         jobVersion?.cancel()
-        fragmentPortfolioBinding = null
+        fragmentAlorPortfolioBinding = null
         super.onDestroy()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val binding = FragmentPortfolioBinding.bind(view)
-        fragmentPortfolioBinding = binding
+        val binding = FragmentAlorPortfolioBinding.bind(view)
+        fragmentAlorPortfolioBinding = binding
 
         with(binding) {
             list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
@@ -114,7 +116,7 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
             val percent = portfolioManager.getPercentBusyInStocks()
-            act.supportActionBar?.title = "Депозит ТИ $percent%"
+            act.supportActionBar?.title = "Депозит ALOR $percent%"
         }
     }
 
@@ -124,11 +126,11 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentPortfolioItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentAlorPortfolioItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
         override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(private val binding: FragmentPortfolioItemBinding) : RecyclerView.ViewHolder(binding.root) {
+        inner class ViewHolder(private val binding: FragmentAlorPortfolioItemBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(index: Int) {
                 val portfolioPosition = values[index]
                 with(binding) {

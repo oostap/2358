@@ -13,6 +13,7 @@ import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.network.fold
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.project.ti2358.data.tinkoff.model.Order
 import com.project.ti2358.data.pantini.model.PantiniLenta
 import com.project.ti2358.data.tinkoff.service.OperationsService
 import com.project.ti2358.data.tinkoff.service.OrdersService

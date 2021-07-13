@@ -250,7 +250,8 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_settings,
-                R.id.nav_portfolio,
+                R.id.nav_portfolio_tinkoff,
+                R.id.nav_portfolio_alor,
                 R.id.nav_premarket,
                 R.id.nav_1000_sell_start,
                 R.id.nav_1000_buy_start,

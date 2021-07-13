@@ -44,9 +44,14 @@ class SettingsManager {
             return preferences.getBoolean(key, false)
         }
 
-        fun getTokenALOR(): String {
+        fun getAlorToken(): String {
             val tokenKey = TheApplication.application.applicationContext.getString(R.string.setting_key_token_market_alor)
             return preferences.getString(tokenKey, "")?.trim() ?: ""
+        }
+
+        fun getAlorUsername(): String {
+            val value = TheApplication.application.applicationContext.getString(R.string.setting_key_alor_username)
+            return preferences.getString(value, "")?.trim() ?: ""
         }
 
         fun isAllowCurrency(currency: Currency?): Boolean {

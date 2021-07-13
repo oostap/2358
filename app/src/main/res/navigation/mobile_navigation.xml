@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_portfolio">
+    app:startDestination="@+id/nav_portfolio_tinkoff">
 
     <!-- настройки -->
     <fragment
@@ -12,11 +12,11 @@
         android:label="@string/menu_settings"
         tools:layout="@xml/fragment_settings" />
 
-    <!-- депозит -->
+    <!-- депозит tinkoff -->
     <fragment
-        android:id="@+id/nav_portfolio"
+        android:id="@+id/nav_portfolio_tinkoff"
         android:name="com.project.ti2358.ui.portfolio.PortfolioFragment"
-        android:label="@string/menu_portfolio"
+        android:label="@string/menu_portfolio_tinkoff"
         tools:layout="@layout/fragment_portfolio">
         <action
             android:id="@+id/action_nav_portfolio_to_nav_orders"
@@ -26,6 +26,14 @@
         <action
             android:id="@+id/action_nav_portfolio_to_nav_portfolio_position"
             app:destination="@id/nav_portfolio_position" />
+    </fragment>
+
+    <!-- депозит alor -->
+    <fragment
+        android:id="@+id/nav_portfolio_alor"
+        android:name="com.project.ti2358.ui.alorPortfolio.AlorPortfolioFragment"
+        android:label="@string/menu_portfolio_alor"
+        tools:layout="@layout/fragment_alor_portfolio">
     </fragment>
 
     <!-- счета -->
@@ -63,7 +71,7 @@
     <fragment
         android:id="@+id/nav_portfolio_position"
         android:name="com.project.ti2358.ui.portfolio.PortfolioPositionFragment"
-        android:label="@string/menu_portfolio"
+        android:label="@string/menu_portfolio_tinkoff"
         tools:layout="@layout/fragment_portfolio_position">
     </fragment>
 

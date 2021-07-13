@@ -1,0 +1,51 @@
+package com.project.ti2358.data.alor.model
+
+//{
+//    "symbol": "LKOH",
+//    "brokerSymbol": "MOEX:LKOH",
+//    "exchange": "MOEX",
+//    "avgPrice": 16.6,
+//    "qtyUnits": 20,
+//    "openUnits": 30,
+//    "lotSize": 1,
+//    "shortName": "ЛУКОЙЛ",
+//    "qtyT0": 20,
+//    "qtyT1": 20,
+//    "qtyT2": 20,
+//    "qtyTFuture": 20,
+//    "qtyT0Batch": 20,
+//    "qtyT1Batch": 20,
+//    "qtyT2Batch": 20,
+//    "qtyTFutureBatch": 20,
+//    "qtyBatch": 20,
+//    "openQtyBatch": 20,
+//    "qty": 20,
+//    "open": 20,
+//    "unrealisedPl": 3250,
+//    "isCurrency": false
+//}
+
+data class AlorPosition(
+    val symbol: String,
+    val brokerSymbol: String,
+    val exchange: AlorExchange,
+    val avgPrice: Double,
+    val qtyUnits: Int,
+    val openUnits: Int,
+    val lotSize: Int,
+    val shortName: String,
+    val qtyT0: Int,
+    val qtyT1: Int,
+    val qtyT2: Int,
+    val qtyTFuture: Int,
+    val qtyT0Batch: Int,
+    val qtyT1Batch: Int,
+    val qtyT2Batch: Int,
+    val qtyTFutureBatch: Int,
+    val qtyBatch: Int,
+    val openQtyBatch: Int,
+    val qty: Int,
+    val open: Int,
+    val unrealisedPl: Int,
+    val isCurrency: Boolean
+)
