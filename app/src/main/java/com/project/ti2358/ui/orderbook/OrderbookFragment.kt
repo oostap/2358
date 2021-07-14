@@ -44,7 +44,9 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     val chartManager: ChartManager by inject()
     val stockManager: StockManager by inject()
     val orderbookManager: OrderbookManager by inject()
+
     val portfolioManager: PortfolioManager by inject()
+    val alorPortfolioManager: AlorPortfolioManager by inject()
 
     private var fragmentOrderbookBinding: FragmentOrderbookBinding? = null
 
@@ -236,19 +238,33 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 }
             }
 
+            alorPositionView.setOnClickListener {
+                activeStock?.let {
+                    alorPortfolioManager.getPositionForTicker(it.ticker)?.let { p ->
+                        volumeEditText.setText(abs(p.getLots() - p.getBlocked()).toInt().toString())
+                    }
+                }
+            }
+
             jobRefreshOrders?.cancel()
             jobRefreshOrders = GlobalScope.launch(Dispatchers.Main) {
                 while (true) {
                     delay(5000)
                     portfolioManager.refreshOrders()
                     portfolioManager.refreshDeposit()
-                    updatePosition()
+
+                    alorPortfolioManager.refreshOrders()
+                    alorPortfolioManager.refreshDeposit()
+
+                    updatePositionTinkoff()
+                    updatePositionAlor()
                 }
             }
 
             jobRefreshOrderbook?.cancel()
             jobRefreshOrderbook = GlobalScope.launch(Dispatchers.Main) {
                 portfolioManager.refreshOrders()
+                alorPortfolioManager.refreshOrders()
 
                 while (true) {
                     delay(1000)
@@ -259,7 +275,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                         orderbookUSLenta = orderbookManager.processUSLenta()
                     }
                     updateData()
-                    updatePosition()
+                    updatePositionTinkoff()
+                    updatePositionAlor()
                 }
             }
 
@@ -277,11 +294,12 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 //            }
 
             updateData()
-            updatePosition()
+            updatePositionTinkoff()
+            updatePositionAlor()
         }
     }
 
-    private fun updatePosition() {
+    private fun updatePositionTinkoff() {
         GlobalScope.launch(Dispatchers.Main) {
             fragmentOrderbookBinding?.apply {
                 activeStock?.let { stock ->
@@ -306,6 +324,37 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                         priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
                         priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
                         positionView.visibility = VISIBLE
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updatePositionAlor() {
+        GlobalScope.launch(Dispatchers.Main) {
+            fragmentOrderbookBinding?.apply {
+                activeStock?.let { stock ->
+                    alorPositionView.visibility = GONE
+                    alorPortfolioManager.getPositionForTicker(stock.ticker)?.let { p ->
+                        val avg = p.avgPrice
+                        alorPriceView.text = "${avg.toMoney(stock)} ➡ ${stock.getPriceString()}"
+
+                        val profit = p.getProfitAmount()
+                        alorPriceChangeAbsoluteView.text = profit.toMoney(stock)
+
+                        val percent = p.getProfitPercent() * sign(p.getLots().toDouble())   // инвертировать доходность шорта
+                        val totalCash = p.getLots() * avg + profit
+                        alorCashView.text = totalCash.toMoney(stock)
+
+                        alorLotsView.text = "${p.getLots()}"
+                        alorLotsBlockedView.text = "${p.getBlocked().toInt()}🔒"
+
+                        alorPriceChangePercentView.text = percent.toPercent()
+
+                        alorPriceView.setTextColor(Utils.getColorForValue(percent))
+                        alorPriceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
+                        alorPriceChangePercentView.setTextColor(Utils.getColorForValue(percent))
+                        alorPositionView.visibility = VISIBLE
                     }
                 }
             }

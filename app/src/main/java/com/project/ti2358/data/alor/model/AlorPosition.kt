@@ -1,5 +1,7 @@
 package com.project.ti2358.data.alor.model
 
+import com.project.ti2358.data.manager.Stock
+
 //{
 //    "symbol": "LKOH",
 //    "brokerSymbol": "MOEX:LKOH",
@@ -30,22 +32,45 @@ data class AlorPosition(
     val brokerSymbol: String,
     val exchange: AlorExchange,
     val avgPrice: Double,
-    val qtyUnits: Int,
-    val openUnits: Int,
+    val qtyUnits: Double,
+    val openUnits: Double,
     val lotSize: Int,
     val shortName: String,
-    val qtyT0: Int,
-    val qtyT1: Int,
-    val qtyT2: Int,
-    val qtyTFuture: Int,
-    val qtyT0Batch: Int,
-    val qtyT1Batch: Int,
-    val qtyT2Batch: Int,
-    val qtyTFutureBatch: Int,
-    val qtyBatch: Int,
-    val openQtyBatch: Int,
-    val qty: Int,
-    val open: Int,
-    val unrealisedPl: Int,
-    val isCurrency: Boolean
-)
+    val qtyT0: Double,
+    val qtyT1: Double,
+    val qtyT2: Double,
+    val qtyTFuture: Double,
+    val qtyT0Batch: Double,
+    val qtyT1Batch: Double,
+    val qtyT2Batch: Double,
+    val qtyTFutureBatch: Double,
+    val qtyBatch: Double,
+    val openQtyBatch: Double,
+    val qty: Double,
+    val open: Double,
+    val unrealisedPl: Double,
+    val isCurrency: Boolean,
+
+    var stock: Stock?
+) {
+    fun getLots(): Int {
+        return qtyUnits.toInt()
+    }
+
+    fun getBlocked(): Int {
+        return openUnits.toInt()
+    }
+
+    fun getProfitAmount(): Double {
+        if (stock != null) {
+            return getLots() * (stock!!.getPriceRaw() - avgPrice)
+        }
+        return 0.0
+    }
+
+    fun getProfitPercent(): Double {
+        val profit = getProfitAmount()
+        val totalCash = getLots() * avgPrice
+        return if (totalCash == 0.0) 0.0 else (100 * profit) / totalCash
+    }
+}

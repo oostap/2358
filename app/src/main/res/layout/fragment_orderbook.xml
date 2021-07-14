@@ -19,7 +19,7 @@
             android:dividerPadding="2dp"
             android:showDividers="middle"
             android:weightSum="6"
-            android:background="@color/light">
+            android:background="@color/tinkoff">
 
             <TextView
                 android:layout_weight="1"
@@ -89,6 +89,96 @@
             <TextView
                 android:layout_weight="1"
                 android:id="@+id/price_change_absolute_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:gravity="center_vertical"
+                android:text="+20$"
+                android:textSize="12sp"
+                android:textAlignment="center"
+                tools:ignore="RtlCompat" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/alor_position_view"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:divider="?android:dividerHorizontal"
+            android:dividerPadding="2dp"
+            android:showDividers="middle"
+            android:weightSum="6"
+            android:background="@color/alor">
+
+            <TextView
+                android:layout_weight="1"
+                android:id="@+id/alor_cash_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:gravity="center_vertical"
+                android:text="1233$"
+                android:textSize="12dp"
+                android:textAlignment="center"
+                tools:ignore="RtlCompat" />
+
+            <TextView
+                android:layout_weight="1"
+                android:id="@+id/alor_price_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="4dp"
+                android:paddingTop="2dp"
+                android:gravity="center_vertical"
+                android:text="123$ = 145$"
+                android:textSize="12dp"
+                android:textAlignment="center"
+                tools:ignore="RtlCompat" />
+
+            <TextView
+                android:layout_weight="1"
+                android:id="@+id/alor_lots_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:paddingStart="2dp"
+                android:gravity="center_vertical"
+                android:text="250"
+                android:textSize="12dp"
+                android:textAlignment="center"
+                tools:ignore="RtlCompat" />
+
+            <TextView
+                android:layout_weight="1"
+                android:id="@+id/alor_lots_blocked_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="2dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:gravity="center_vertical"
+                android:textAlignment="center"
+                android:text="125🔒"
+                android:textSize="12dp"
+                tools:ignore="RtlCompat" />
+
+            <TextView
+                android:layout_weight="1"
+                android:id="@+id/alor_price_change_percent_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:gravity="center_vertical"
+                android:text="+5%"
+                android:textSize="12sp"
+                android:textAlignment="center"
+                tools:ignore="RtlCompat" />
+
+            <TextView
+                android:layout_weight="1"
+                android:id="@+id/alor_price_change_absolute_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="2dp"

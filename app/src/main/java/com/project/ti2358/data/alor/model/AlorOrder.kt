@@ -32,7 +32,6 @@ data class AlorOrder(
     val side: AlorOrderSide,
     val status: AlorOrderStatus,
     val transTime: Date,
-    val endTime: Date,
     val qtyUnits: Int,
     val qtyBatch: Int,
     val qty: Int,
@@ -44,6 +43,7 @@ data class AlorOrder(
 
     // для стоп ордеров
     val stopPrice: Double?,
+    val endTime: Date?,
 
     var stock: Stock?
 )

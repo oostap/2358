@@ -21,4 +21,7 @@
 
     <color name="menu_text_color">#1A134C</color>
     <color name="menu_icon_tint">#1A134C</color>
+
+    <color name="tinkoff">#FFf7d62c</color>
+    <color name="alor">#FF0655a4</color>
 </resources>

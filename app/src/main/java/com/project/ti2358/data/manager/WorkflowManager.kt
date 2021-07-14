@@ -1,6 +1,7 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.BuildConfig
+import com.project.ti2358.data.alor.service.AlorOrdersService
 import com.project.ti2358.data.alor.service.AlorPortfolioService
 import com.project.ti2358.data.alor.service.StreamingAlorService
 import com.project.ti2358.data.common.AuthInterceptor
@@ -130,6 +131,7 @@ class WorkflowManager() : KoinComponent {
             fun provideThirdPartyService(retrofit: Retrofit): ThirdPartyService = ThirdPartyService(retrofit)
 
             fun provideAlorPortfolioService(retrofit: Retrofit): AlorPortfolioService = AlorPortfolioService(retrofit)
+            fun provideAlorOrdersService(retrofit: Retrofit): AlorOrdersService = AlorOrdersService(retrofit)
 
             single { provideMarketService(get()) }
             single { provideOrdersService(get()) }
@@ -141,6 +143,7 @@ class WorkflowManager() : KoinComponent {
             single { provideThirdPartyService(get()) }
 
             single { provideAlorPortfolioService(get()) }
+            single { provideAlorOrdersService(get()) }
         }
 
         private val retrofitModule = module {

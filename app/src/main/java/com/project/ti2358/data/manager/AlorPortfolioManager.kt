@@ -4,15 +4,17 @@ import com.project.ti2358.data.alor.model.*
 import com.project.ti2358.data.alor.service.AlorPortfolioService
 import com.project.ti2358.data.alor.service.StreamingAlorService
 import com.project.ti2358.data.daager.service.ThirdPartyService
+import com.project.ti2358.data.tinkoff.model.Currency
+import com.project.ti2358.data.tinkoff.model.InstrumentType
+import com.project.ti2358.data.tinkoff.model.PortfolioPosition
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.util.*
 import java.util.Collections.synchronizedList
 import java.util.Collections.synchronizedMap
@@ -34,7 +36,7 @@ class AlorPortfolioManager : KoinComponent {
     private var orders: MutableList<AlorOrder> = mutableListOf()
     private var stopOrders: MutableList<AlorOrder> = mutableListOf()
 
-    private var positions: MutableList<AlorPosition> = mutableListOf()
+    private var portfolioPositions: MutableList<AlorPosition> = mutableListOf()
 
     private var money: AlorMoney? = null
     private var summary: AlorSummary? = null
@@ -144,8 +146,9 @@ class AlorPortfolioManager : KoinComponent {
     suspend fun refreshDeposit(): Boolean {
         try {
             mainServer?.let {
-                positions = synchronizedList(alorPortfolioService.positions(AlorExchange.SPBX, it.portfolio))
-                log("ALOR positions = $positions")
+                portfolioPositions = synchronizedList(alorPortfolioService.positions(AlorExchange.SPBX, it.portfolio))
+                baseSortPortfolio()
+                log("ALOR positions = $portfolioPositions")
             }
             return true
         } catch (e: Exception) {
@@ -167,6 +170,18 @@ class AlorPortfolioManager : KoinComponent {
         }
     }
 
+    private suspend fun baseSortPortfolio() = withContext(StockManager.stockContext) {
+        portfolioPositions.forEach { it.stock = stockManager.getStockByTicker(it.symbol) }
+
+        portfolioPositions.sortByDescending {
+            val multiplier = if (it.stock?.instrument?.currency == Currency.USD) 1.0 else 1.0 / Utils.getUSDRUB()
+            abs(it.getLots() * it.avgPrice * multiplier)
+        }
+
+        // удалить позицию $
+        portfolioPositions.removeAll { "USD" in it.symbol }
+    }
+
     private fun baseSortOrders() {
         orders.sortByDescending { abs(it.qty * it.price) }
 
@@ -176,4 +191,89 @@ class AlorPortfolioManager : KoinComponent {
             }
         }
     }
+
+    fun getPositions() : List<AlorPosition> {
+        return portfolioPositions
+    }
+
+    fun getFreeCashEUR(): String {
+        var total = 0.0
+//        for (currency in currencyPositions) {
+//            if (currency.currency == Currency.EUR) {
+//                total += currency.balance
+//            }
+//        }
+        val symbols = DecimalFormatSymbols.getInstance()
+        symbols.groupingSeparator = ' '
+        return DecimalFormat("###,###.##€", symbols).format(total)
+    }
+
+    fun getFreeCashUSD(): String {
+        var total = 0.0
+//        for (currency in currencyPositions) {
+//            if (currency.currency == Currency.USD) {
+//                total += currency.balance
+//            }
+//        }
+        val symbols = DecimalFormatSymbols.getInstance()
+        symbols.groupingSeparator = ' '
+        return DecimalFormat("###,###.##$", symbols).format(total)
+    }
+
+    fun getFreeCashRUB(): String {
+        var total = 0.0
+//        for (currency in currencyPositions) {
+//            if (currency.currency == Currency.RUB) {
+//                total += currency.balance
+//            }
+//        }
+        val symbols = DecimalFormatSymbols.getInstance()
+        symbols.groupingSeparator = ' '
+        return DecimalFormat("###,###.##₽", symbols).format(total)
+    }
+
+    private fun getFreeCash(): Double {
+        var total = 0.0
+//        for (currency in currencyPositions) {
+//            if (currency.currency == Currency.USD) {
+//                total += currency.balance
+//            }
+//            if (currency.currency == Currency.RUB) {
+//                total += currency.balance / Utils.getUSDRUB()
+//            }
+//        }
+        return total
+    }
+
+    fun getPercentBusyInStocks(): Int {
+        val free = getFreeCash()
+        var busy = 0.0
+
+        for (position in portfolioPositions) {
+            if (position.isCurrency) {
+                busy += abs(position.avgPrice * position.getLots())
+            }
+
+            if (!position.isCurrency) {
+                busy += abs(position.avgPrice * position.getLots() / Utils.getUSDRUB())
+            }
+        }
+
+        return (busy / (free + busy) * 100).toInt()
+    }
+
+    public fun getPositionForTicker(ticker: String): AlorPosition? {
+        return portfolioPositions.find { it.symbol == ticker }
+    }
 }
+
+
+
+
+
+
+
+
+
+
+

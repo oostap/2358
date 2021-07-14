@@ -13,13 +13,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.alor.model.AlorPosition
 import com.project.ti2358.data.manager.*
-import com.project.ti2358.data.tinkoff.model.PortfolioPosition
 import com.project.ti2358.data.daager.service.ThirdPartyService
 import com.project.ti2358.databinding.FragmentAlorPortfolioBinding
 import com.project.ti2358.databinding.FragmentAlorPortfolioItemBinding
-import com.project.ti2358.databinding.FragmentPortfolioBinding
-import com.project.ti2358.databinding.FragmentPortfolioItemBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
@@ -33,10 +31,8 @@ import kotlin.math.sign
 class AlorPortfolioFragment : Fragment(R.layout.fragment_alor_portfolio) {
     private val orderbookManager: OrderbookManager by inject()
     private val thirdPartyService: ThirdPartyService by inject()
-    private val portfolioManager: PortfolioManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
     private val positionManager: PositionManager by inject()
-    private val strategySpeaker: StrategySpeaker by inject()
-    private val strategyTA: StrategyTA by inject()
 
     private var fragmentAlorPortfolioBinding: FragmentAlorPortfolioBinding? = null
 
@@ -67,8 +63,6 @@ class AlorPortfolioFragment : Fragment(R.layout.fragment_alor_portfolio) {
 
             updateButton.setOnClickListener {
                 updateData()
-
-//                strategyTA.processALL()
             }
 
             ordersButton.setOnClickListener {
@@ -105,9 +99,9 @@ class AlorPortfolioFragment : Fragment(R.layout.fragment_alor_portfolio) {
     fun updateData() {
         jobUpdate?.cancel()
         jobUpdate = GlobalScope.launch(Dispatchers.Main) {
-            portfolioManager.refreshDeposit()
-            portfolioManager.refreshKotleta()
-            adapterList.setData(portfolioManager.getPositions())
+            alorPortfolioManager.refreshDeposit()
+            alorPortfolioManager.refreshKotleta()
+            adapterList.setData(alorPortfolioManager.getPositions())
             updateTitle()
         }
     }
@@ -115,13 +109,13 @@ class AlorPortfolioFragment : Fragment(R.layout.fragment_alor_portfolio) {
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            val percent = portfolioManager.getPercentBusyInStocks()
+            val percent = alorPortfolioManager.getPercentBusyInStocks()
             act.supportActionBar?.title = "Депозит ALOR $percent%"
         }
     }
 
-    inner class ItemPortfolioRecyclerViewAdapter(var values: List<PortfolioPosition>) : RecyclerView.Adapter<ItemPortfolioRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<PortfolioPosition>) {
+    inner class ItemPortfolioRecyclerViewAdapter(var values: List<AlorPosition>) : RecyclerView.Adapter<ItemPortfolioRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<AlorPosition>) {
             values = newValues
             notifyDataSetChanged()
         }
@@ -136,12 +130,12 @@ class AlorPortfolioFragment : Fragment(R.layout.fragment_alor_portfolio) {
                 with(binding) {
                     tickerView.text = "${index + 1}) ${portfolioPosition.stock?.getTickerLove()}"
 
-                    lotsBlockedView.text = if (portfolioPosition.blocked.toInt() > 0) "(${portfolioPosition.blocked.toInt()}🔒)" else ""
+                    lotsBlockedView.text = if (portfolioPosition.getBlocked().toInt() > 0) "(${portfolioPosition.getBlocked().toInt()}🔒)" else ""
 
-                    val avg = portfolioPosition.getAveragePrice()
+                    val avg = portfolioPosition.avgPrice
                     var priceNow = "0.0$"
                     portfolioPosition.stock?.let {
-                        lotsView.text = "${portfolioPosition.lots * it.instrument.lot}"
+                        lotsView.text = "${portfolioPosition.getLots() * it.instrument.lot}"
                         priceNow = (it.getPriceNow() / it.instrument.lot).toMoney(it)
                     }
 
@@ -153,9 +147,9 @@ class AlorPortfolioFragment : Fragment(R.layout.fragment_alor_portfolio) {
                     var percent = portfolioPosition.getProfitPercent()
 
                     // инвертировать доходность шорта
-                    percent *= sign(portfolioPosition.lots.toDouble())
+                    percent *= sign(portfolioPosition.getLots().toDouble())
 
-                    val totalCash = portfolioPosition.balance * avg + profit
+                    val totalCash = portfolioPosition.getLots() * avg + profit
                     cashView.text = totalCash.toMoney(portfolioPosition.stock)
 
                     val emoji = Utils.getEmojiForPercent(percent)
@@ -178,8 +172,8 @@ class AlorPortfolioFragment : Fragment(R.layout.fragment_alor_portfolio) {
                         if (portfolioPosition.stock == null) {
                             Utils.showMessageAlert(requireContext(), "Какая-то странная бумага, нет такой в каталоге у ТИ!")
                         } else {
-                            positionManager.start(portfolioPosition)
-                            itemView.findNavController().navigate(R.id.action_nav_portfolio_to_nav_portfolio_position)
+//                            positionManager.start(portfolioPosition)
+//                            itemView.findNavController().navigate(R.id.action_nav_portfolio_to_nav_portfolio_position)
                         }
                     }
 
