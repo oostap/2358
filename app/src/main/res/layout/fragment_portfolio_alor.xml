@@ -10,11 +10,11 @@
         android:layout_height="match_parent"
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp"
-        android:layout_marginBottom="70dp"
+        android:layout_marginBottom="65dp"
         android:layout_marginTop="0dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context=".ui.portfolio.PortfolioFragment"
-        tools:listitem="@layout/fragment_orders_item" />
+        tools:context=".ui.portfolio.PortfolioTinkoffFragment"
+        tools:listitem="@layout/fragment_portfolio_item" />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -31,17 +31,16 @@
             android:layout_marginRight="5dp"
             android:text="@string/update"
             android:layout_weight="1"
-            android:textSize="14sp"
+            android:textSize="16dp"
             android:layout_width="0dp" />
 
         <Button
-            android:layout_height="70dp"
+            android:id="@+id/orders_button"
             android:layout_width="0dp"
-            android:id="@+id/cancel_button"
+            android:layout_height="70dp"
             android:layout_marginLeft="5dp"
-            android:text="@string/cancel_all"
             android:layout_weight="1"
-            android:textSize="14sp" />
-
+            android:text="@string/orders"
+            android:textSize="16dp" />
     </LinearLayout>
 </RelativeLayout>

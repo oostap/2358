@@ -15,12 +15,12 @@
     <!-- депозит tinkoff -->
     <fragment
         android:id="@+id/nav_portfolio_tinkoff"
-        android:name="com.project.ti2358.ui.portfolio.PortfolioFragment"
+        android:name="com.project.ti2358.ui.portfolio.PortfolioTinkoffFragment"
         android:label="@string/menu_portfolio_tinkoff"
-        tools:layout="@layout/fragment_portfolio">
+        tools:layout="@layout/fragment_portfolio_tinkoff">
         <action
             android:id="@+id/action_nav_portfolio_to_nav_orders"
-            app:destination="@id/nav_orders"
+            app:destination="@id/nav_orders_tinkoff"
             app:enterAnim="@animator/slide_in_right"
             app:exitAnim="@animator/slide_out_left" />
         <action
@@ -31,9 +31,14 @@
     <!-- депозит alor -->
     <fragment
         android:id="@+id/nav_portfolio_alor"
-        android:name="com.project.ti2358.ui.alorPortfolio.AlorPortfolioFragment"
+        android:name="com.project.ti2358.ui.portfolio.PortfolioAlorFragment"
         android:label="@string/menu_portfolio_alor"
-        tools:layout="@layout/fragment_alor_portfolio">
+        tools:layout="@layout/fragment_portfolio_alor">
+        <action
+            android:id="@+id/action_nav_portfolio_alor_to_nav_orders_alor"
+            app:destination="@id/nav_orders_alor"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left" />
     </fragment>
 
     <!-- счета -->
@@ -75,12 +80,20 @@
         tools:layout="@layout/fragment_portfolio_position">
     </fragment>
 
-    <!-- заявки -->
+    <!-- заявки tinkoff -->
     <fragment
-        android:id="@+id/nav_orders"
-        android:name="com.project.ti2358.ui.orders.OrdersFragment"
-        android:label="@string/menu_orders"
-        tools:layout="@layout/fragment_orders">
+        android:id="@+id/nav_orders_tinkoff"
+        android:name="com.project.ti2358.ui.orders.OrdersTinkoffFragment"
+        android:label="@string/menu_orders_tinkoff"
+        tools:layout="@layout/fragment_orders_tinkoff">
+    </fragment>
+
+    <!-- заявки alor -->
+    <fragment
+        android:id="@+id/nav_orders_alor"
+        android:name="com.project.ti2358.ui.orders.OrdersAlorFragment"
+        android:label="@string/menu_orders_alor"
+        tools:layout="@layout/fragment_orders_alor">
     </fragment>
 
     <!-- отчёты -->

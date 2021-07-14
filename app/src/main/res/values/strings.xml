@@ -65,7 +65,8 @@
     <string name="menu_donate_description">Собираем на новые фичи</string>
     <string name="menu_portfolio_tinkoff">Депозит ТИ</string>
     <string name="menu_portfolio_alor">Депозит ALOR</string>
-    <string name="menu_orders">Заявки</string>
+    <string name="menu_orders_tinkoff">Заявки Tinkoff</string>
+    <string name="menu_orders_alor">Заявки ALOR</string>
     <string name="menu_reports">Отчёты, дивы, FDA</string>
     <string name="menu_shorts">% шорта</string>
     <string name="menu_orderbook">Стакан</string>

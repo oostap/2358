@@ -15,8 +15,8 @@ import com.project.ti2358.data.manager.ChartManager
 import com.project.ti2358.data.manager.PortfolioManager
 import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.tinkoff.model.Order
-import com.project.ti2358.databinding.FragmentOrdersBinding
-import com.project.ti2358.databinding.FragmentOrdersItemBinding
+import com.project.ti2358.databinding.FragmentOrdersTinkoffBinding
+import com.project.ti2358.databinding.FragmentOrdersTinkoffItemBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.*
@@ -24,13 +24,13 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class OrdersFragment : Fragment(R.layout.fragment_orders) {
+class OrdersTinkoffFragment : Fragment(R.layout.fragment_orders_tinkoff) {
     private val orderbookManager: OrderbookManager by inject()
     private val chartManager: ChartManager by inject()
 
     val portfolioManager: PortfolioManager by inject()
 
-    private var fragmentOrdersBinding: FragmentOrdersBinding? = null
+    private var fragmentOrdersTinkoffBinding: FragmentOrdersTinkoffBinding? = null
 
     var adapterList: ItemOrdersRecyclerViewAdapter = ItemOrdersRecyclerViewAdapter(emptyList())
     var jobRefreshEndless: Job? = null
@@ -39,7 +39,7 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
     var jobRefresh: Job? = null
 
     override fun onDestroy() {
-        fragmentOrdersBinding = null
+        fragmentOrdersTinkoffBinding = null
         jobCancelAll?.cancel()
         jobRefreshEndless?.cancel()
         jobRefresh?.cancel()
@@ -49,8 +49,8 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val binding = FragmentOrdersBinding.bind(view)
-        fragmentOrdersBinding = binding
+        val binding = FragmentOrdersTinkoffBinding.bind(view)
+        fragmentOrdersTinkoffBinding = binding
 
         with(binding) {
             list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
@@ -94,7 +94,7 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            act.supportActionBar?.title = "Заявки ${portfolioManager.orders.size}"
+            act.supportActionBar?.title = "Заявки ТИ ${portfolioManager.orders.size}"
         }
     }
 
@@ -104,11 +104,11 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentOrdersItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentOrdersTinkoffItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
         override fun onBindViewHolder(holder: ItemOrdersRecyclerViewAdapter.ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(private val binding: FragmentOrdersItemBinding) : RecyclerView.ViewHolder(binding.root) {
+        inner class ViewHolder(private val binding: FragmentOrdersTinkoffItemBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(index: Int) {
                 val order = values[index]
                 with(binding) {
