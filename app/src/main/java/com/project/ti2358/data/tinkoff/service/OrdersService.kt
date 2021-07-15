@@ -6,7 +6,7 @@ import com.project.ti2358.data.tinkoff.stream.MarketOrderBody
 import com.project.ti2358.data.tinkoff.model.LimitOrder
 import com.project.ti2358.data.tinkoff.model.MarketOrder
 import com.project.ti2358.data.tinkoff.model.OperationType
-import com.project.ti2358.data.tinkoff.model.Order
+import com.project.ti2358.data.tinkoff.model.TinkoffOrder
 import com.project.ti2358.data.common.BaseService
 import retrofit2.Retrofit
 
@@ -29,7 +29,7 @@ class OrdersService(retrofit: Retrofit) : BaseService(retrofit) {
         ).payload
     }
 
-    suspend fun orders(brokerAccountId: String): List<Order> {
+    suspend fun orders(brokerAccountId: String): List<TinkoffOrder> {
         return ordersApi.orders(brokerAccountId).payload
     }
 

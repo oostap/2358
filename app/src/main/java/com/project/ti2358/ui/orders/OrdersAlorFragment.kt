@@ -11,10 +11,10 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.alor.model.AlorOrder
+import com.project.ti2358.data.manager.AlorPortfolioManager
 import com.project.ti2358.data.manager.ChartManager
-import com.project.ti2358.data.manager.PortfolioManager
 import com.project.ti2358.data.manager.OrderbookManager
-import com.project.ti2358.data.tinkoff.model.Order
 import com.project.ti2358.databinding.FragmentOrdersAlorBinding
 import com.project.ti2358.databinding.FragmentOrdersAlorItemBinding
 import com.project.ti2358.service.Utils
@@ -28,7 +28,7 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
     private val orderbookManager: OrderbookManager by inject()
     private val chartManager: ChartManager by inject()
 
-    val portfolioManager: PortfolioManager by inject()
+    val alorPortfolioManager: AlorPortfolioManager by inject()
 
     private var fragmentOrdersAlorBinding: FragmentOrdersAlorBinding? = null
 
@@ -60,7 +60,7 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
             updateButton.setOnClickListener {
                 jobRefresh?.cancel()
                 jobRefresh = GlobalScope.launch(Dispatchers.Main) {
-                    portfolioManager.refreshOrders()
+                    alorPortfolioManager.refreshOrders()
                     updateData()
                 }
             }
@@ -68,7 +68,7 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
             cancelButton.setOnClickListener {
                 jobCancelAll?.cancel()
                 jobCancelAll = GlobalScope.launch(Dispatchers.Main) {
-                    orderbookManager.cancelAllOrders()
+                    orderbookManager.cancelAllOrdersAlor()
                     updateData()
                 }
             }
@@ -77,7 +77,7 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
         jobRefreshEndless?.cancel()
         jobRefreshEndless = GlobalScope.launch(Dispatchers.Main) {
             while (true) {
-                if (portfolioManager.refreshOrders()) {
+                if (alorPortfolioManager.refreshOrders()) {
                     updateData()
                     break
                 }
@@ -87,19 +87,19 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
     }
 
     fun updateData() {
-        adapterList.setData(portfolioManager.orders)
+        adapterList.setData(alorPortfolioManager.orders)
         updateTitle()
     }
 
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            act.supportActionBar?.title = "Заявки ALOR ${portfolioManager.orders.size}"
+            act.supportActionBar?.title = "Заявки ALOR ${alorPortfolioManager.orders.size}"
         }
     }
 
-    inner class ItemOrdersRecyclerViewAdapter(private var values: List<Order>) : RecyclerView.Adapter<ItemOrdersRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<Order>) {
+    inner class ItemOrdersRecyclerViewAdapter(private var values: List<AlorOrder>) : RecyclerView.Adapter<ItemOrdersRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<AlorOrder>) {
             values = newValues
             notifyDataSetChanged()
         }
@@ -113,16 +113,16 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
                 val order = values[index]
                 with(binding) {
                     tickerView.text = "${index + 1}) ${order.stock?.getTickerLove()}"
-                    lotsView.text = "${order.executedLots} / ${order.requestedLots} шт."
+                    lotsView.text = "${order.filled} / ${order.qtyUnits} шт."
                     priceView.text = order.price.toMoney(order.stock)
 
                     orderTypeView.text = order.getOperationStatusString()
-                    orderTypeView.setTextColor(Utils.getColorForOperation(order.operation))
+                    orderTypeView.setTextColor(Utils.getColorForOperation(order.side))
 
                     cancelButton.setOnClickListener {
                         jobCancel?.cancel()
                         jobCancel = GlobalScope.launch(Dispatchers.Main) {
-                            orderbookManager.cancelOrder(order)
+                            orderbookManager.cancelOrderAlor(order)
                             updateData()
                         }
                     }

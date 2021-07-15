@@ -11,6 +11,7 @@ import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
+import android.widget.Toast.LENGTH_SHORT
 import androidx.navigation.NavController
 import com.project.ti2358.BuildConfig
 import com.project.ti2358.MainActivity
@@ -128,6 +129,9 @@ class Utils{
 
         val TEAL: Int = Color.parseColor("#4903DAC5")
 
+        val TINKOFF: Int = Color.parseColor("#FFf1d62c")
+        val ALOR: Int = Color.parseColor("#FF0F59a9")
+
         @KoinApiExtension
         fun getNeutralColor(): Int {
             return if (SettingsManager.getDarkTheme()) WHITE else BLACK
@@ -228,7 +232,7 @@ class Utils{
 
         fun showToastAlert(text: String) {
             GlobalScope.launch(Dispatchers.Main) {
-                Toast.makeText(TheApplication.application.applicationContext, text, LENGTH_LONG).show()
+                Toast.makeText(TheApplication.application.applicationContext, text, LENGTH_SHORT).show()
             }
         }
 

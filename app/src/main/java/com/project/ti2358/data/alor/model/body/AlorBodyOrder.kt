@@ -1,7 +1,7 @@
 package com.project.ti2358.data.alor.model.body
 
-import com.project.ti2358.data.alor.model.AlorOrderSide
 import com.project.ti2358.data.alor.model.AlorOrderType
+import com.project.ti2358.data.tinkoff.model.OperationType
 
 //{
 //    "side": "buy",
@@ -19,14 +19,15 @@ import com.project.ti2358.data.alor.model.AlorOrderType
 //}
 
 data class AlorBodyOrder(
-    val side: AlorOrderSide,
+    val side: OperationType,
     val quantity: Int,
     val instrument: AlorInstrument,
     val user: AlorUser,
 
-    val type: AlorOrderType?,
-    val triggerPrice: Double?,
-    val price: Double?,
+    val type: AlorOrderType? = null,
+    val price: Double? = null,
 
-    val orderEndUnixTime: Long?
+    val triggerPrice: Double? = null,
+
+    val orderEndUnixTime: Long? = null
 )

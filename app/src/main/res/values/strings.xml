@@ -100,7 +100,8 @@
     <string name="dividends">ДИВЫ</string>
     <string name="fda">FDA</string>
 
-    <!-- Preference Titles -->
+    <!-- prefs titles -->
+    <string name="settings_header_broker">Активный брокер</string>
 
     <string name="settings_header_2358">Стратегия 2258</string>
     <string name="settings_header_1728">Стратегия 1628</string>
@@ -116,6 +117,10 @@
     <string name="settings_header_2225">Стратегия 2225 шорт</string>
 
     <string name="dark_theme">Ночная тема</string>
+
+    <!-- broker settings -->
+    <string name="broker_tinkoff">Tinkoff Инвестиции</string>
+    <string name="broker_alor">ALOR Инвестиции</string>
 
     <!-- token settings -->
     <string name="tinkoff_header">Tinkoff</string>
@@ -342,8 +347,11 @@
     <string name="order_item">order_item</string>
 
     <!-- setting keys-->
-
     <string name="setting_key_dark_theme">dark_theme</string>
+
+    <!-- broker -->
+    <string name="setting_key_broker_tinkoff">broker_tinkoff</string>
+    <string name="setting_key_broker_alor">broker_alor</string>
 
     <!-- tinkoff -->
     <string name="setting_key_token_market">token_market</string>

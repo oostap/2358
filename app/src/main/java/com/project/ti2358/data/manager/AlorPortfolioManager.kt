@@ -4,9 +4,8 @@ import com.project.ti2358.data.alor.model.*
 import com.project.ti2358.data.alor.service.AlorPortfolioService
 import com.project.ti2358.data.alor.service.StreamingAlorService
 import com.project.ti2358.data.daager.service.ThirdPartyService
+import com.project.ti2358.data.tinkoff.model.*
 import com.project.ti2358.data.tinkoff.model.Currency
-import com.project.ti2358.data.tinkoff.model.InstrumentType
-import com.project.ti2358.data.tinkoff.model.PortfolioPosition
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import kotlinx.coroutines.*
@@ -33,7 +32,7 @@ class AlorPortfolioManager : KoinComponent {
     private var stockServers: List<AlorTradeServer> = mutableListOf()
     private var mainServer: AlorTradeServer? = null
 
-    private var orders: MutableList<AlorOrder> = mutableListOf()
+    var orders: MutableList<AlorOrder> = mutableListOf()
     private var stopOrders: MutableList<AlorOrder> = mutableListOf()
 
     private var portfolioPositions: MutableList<AlorPosition> = mutableListOf()
@@ -42,6 +41,12 @@ class AlorPortfolioManager : KoinComponent {
     private var summary: AlorSummary? = null
 
     private var refreshDepositDelay: Long = 20 * 1000 // 20s
+
+
+    companion object {
+        var PORTFOLIO: String = ""
+        var ACCOUNT: String = ""
+    }
 
     fun start() {
         GlobalScope.launch(Dispatchers.Default) {
@@ -59,6 +64,8 @@ class AlorPortfolioManager : KoinComponent {
 
                         if (stockServers.isNotEmpty()) {
                             mainServer = stockServers.first()
+                            PORTFOLIO = mainServer?.portfolio ?: ""
+                            ACCOUNT = mainServer?.tks ?: ""
                         }
                     }
 
@@ -116,6 +123,8 @@ class AlorPortfolioManager : KoinComponent {
 
                 if (stockServers.isNotEmpty()) {
                     mainServer = stockServers.first()
+                    PORTFOLIO = mainServer?.portfolio ?: ""
+                    ACCOUNT = mainServer?.tks ?: ""
                 }
             }
 
@@ -130,6 +139,8 @@ class AlorPortfolioManager : KoinComponent {
         try {
             mainServer?.let {
                 orders = synchronizedList(alorPortfolioService.orders(AlorExchange.SPBX, it.portfolio))
+                orders.removeAll { o -> o.status != AlorOrderStatus.WORKING }
+
                 stopOrders = synchronizedList(alorPortfolioService.stoporders(AlorExchange.SPBX, it.portfolio))
 
                 log("ALOR orders = $orders")
@@ -264,6 +275,10 @@ class AlorPortfolioManager : KoinComponent {
 
     public fun getPositionForTicker(ticker: String): AlorPosition? {
         return portfolioPositions.find { it.symbol == ticker }
+    }
+
+    public fun getOrderAllOrdersForTicker(ticker: String, operation: OperationType): List<AlorOrder> {
+        return orders.filter { it.symbol == ticker && it.side == operation }
     }
 }
 

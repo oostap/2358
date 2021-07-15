@@ -205,7 +205,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
                 GlobalScope.launch(Dispatchers.Main) {
                     val orders = portfolioManager.getOrderAllOrdersForFigi(portfolioPosition.figi, OperationType.SELL)
                     orders.forEach {
-                        orderbookManager.cancelOrder(it)
+                        orderbookManager.cancelOrderTinkoff(it)
                     }
                 }
 

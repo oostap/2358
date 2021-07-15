@@ -14,7 +14,7 @@ import com.project.ti2358.R
 import com.project.ti2358.data.manager.ChartManager
 import com.project.ti2358.data.manager.PortfolioManager
 import com.project.ti2358.data.manager.OrderbookManager
-import com.project.ti2358.data.tinkoff.model.Order
+import com.project.ti2358.data.tinkoff.model.TinkoffOrder
 import com.project.ti2358.databinding.FragmentOrdersTinkoffBinding
 import com.project.ti2358.databinding.FragmentOrdersTinkoffItemBinding
 import com.project.ti2358.service.Utils
@@ -68,7 +68,7 @@ class OrdersTinkoffFragment : Fragment(R.layout.fragment_orders_tinkoff) {
             cancelButton.setOnClickListener {
                 jobCancelAll?.cancel()
                 jobCancelAll = GlobalScope.launch(Dispatchers.Main) {
-                    orderbookManager.cancelAllOrders()
+                    orderbookManager.cancelAllOrdersTinkoff()
                     updateData()
                 }
             }
@@ -98,8 +98,8 @@ class OrdersTinkoffFragment : Fragment(R.layout.fragment_orders_tinkoff) {
         }
     }
 
-    inner class ItemOrdersRecyclerViewAdapter(private var values: List<Order>) : RecyclerView.Adapter<ItemOrdersRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<Order>) {
+    inner class ItemOrdersRecyclerViewAdapter(private var values: List<TinkoffOrder>) : RecyclerView.Adapter<ItemOrdersRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<TinkoffOrder>) {
             values = newValues
             notifyDataSetChanged()
         }
@@ -122,7 +122,7 @@ class OrdersTinkoffFragment : Fragment(R.layout.fragment_orders_tinkoff) {
                     cancelButton.setOnClickListener {
                         jobCancel?.cancel()
                         jobCancel = GlobalScope.launch(Dispatchers.Main) {
-                            orderbookManager.cancelOrder(order)
+                            orderbookManager.cancelOrderTinkoff(order)
                             updateData()
                         }
                     }

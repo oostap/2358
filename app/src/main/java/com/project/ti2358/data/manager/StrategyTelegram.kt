@@ -13,7 +13,7 @@ import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.network.fold
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.project.ti2358.data.tinkoff.model.Order
+import com.project.ti2358.data.tinkoff.model.TinkoffOrder
 import com.project.ti2358.data.pantini.model.PantiniLenta
 import com.project.ti2358.data.tinkoff.service.OperationsService
 import com.project.ti2358.data.tinkoff.service.OrdersService
@@ -43,7 +43,7 @@ class StrategyTelegram : KoinComponent {
     var operationsPosted: MutableList<String> = mutableListOf()
 
     var jobUpdateOrders: Job? = null
-    var orders: MutableList<Order> = mutableListOf()
+    var orders: MutableList<TinkoffOrder> = mutableListOf()
     var ordersPosted: MutableList<String> = mutableListOf()
 
     var started: Boolean = false
@@ -263,7 +263,7 @@ class StrategyTelegram : KoinComponent {
         return calendar.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS") + zone
     }
 
-    private fun orderToString(order: Order): String {
+    private fun orderToString(order: TinkoffOrder): String {
         val ticker = order.stock?.ticker
         val orderSymbol = if (order.operation == OperationType.BUY) "🟢" else "🔴"
         var orderString = if (order.operation == OperationType.BUY) "BUY " else "SELL "

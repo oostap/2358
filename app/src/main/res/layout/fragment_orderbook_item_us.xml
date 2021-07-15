@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:divider="?android:dividerHorizontal"
+        android:dividerPadding="10dp"
+        android:showDividers="middle"
+        android:weightSum="2" >
+
+    <LinearLayout
+        android:id="@+id/drag_to_buy_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            tools:ignore="NestedWeights">
+
+            <RelativeLayout
+                android:id="@+id/background_bid_view"
+                android:layout_height="25dp"
+                android:background="@color/green"
+                android:layout_width="500dp"
+                android:gravity="right"
+                android:layout_alignParentRight="true"
+                tools:ignore="NestedWeights">
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/price_bid_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:gravity="end"
+                android:padding="4dp"
+                android:text="100 000"
+                android:layout_alignParentLeft="true"
+                android:textSize="12sp"
+                android:layout_centerVertical="true"/>
+
+            <TextView
+                android:id="@+id/price_bid_percent_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:gravity="end"
+                android:padding="4dp"
+                android:layout_marginLeft="50dp"
+                android:text="100 000"
+                android:layout_alignParentLeft="true"
+                android:textSize="10sp"
+                android:layout_centerVertical="true"/>
+
+            <TextView
+                android:id="@+id/count_bid_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:gravity="end"
+                android:padding="4dp"
+                android:text="1.56"
+                android:layout_alignParentRight="true"
+                android:textSize="12sp"
+                android:layout_centerVertical="true" />
+
+        </RelativeLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/drag_to_sell_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            tools:ignore="NestedWeights">
+
+            <RelativeLayout
+                android:id="@+id/background_ask_view"
+                android:layout_height="25dp"
+                android:background="@color/red"
+                android:layout_width="50dp"
+                android:gravity="right"
+                android:layout_alignParentLeft="true"
+                tools:ignore="NestedWeights">
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/price_ask_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:gravity="center_vertical"
+                android:text="200 000"
+                android:textSize="12sp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"/>
+
+            <TextView
+                android:id="@+id/price_ask_percent_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:gravity="end"
+                android:padding="4dp"
+                android:layout_marginRight="50dp"
+                android:text="100 000"
+                android:layout_alignParentRight="true"
+                android:textSize="10sp"
+                android:layout_centerVertical="true"/>
+
+            <TextView
+                android:id="@+id/count_ask_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:gravity="end"
+                android:padding="4dp"
+                android:text="1.58"
+                android:textSize="12sp"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"/>
+
+        </RelativeLayout>
+    </LinearLayout>
+</LinearLayout>

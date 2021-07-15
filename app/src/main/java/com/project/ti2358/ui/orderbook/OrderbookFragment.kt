@@ -20,13 +20,16 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.alor.model.AlorOrder
+import com.project.ti2358.data.common.BaseOrder
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.tinkoff.model.OperationType
-import com.project.ti2358.data.tinkoff.model.Order
+import com.project.ti2358.data.tinkoff.model.TinkoffOrder
 import com.project.ti2358.data.tinkoff.model.PortfolioPosition
 import com.project.ti2358.data.pantini.model.PantiniPrint
 import com.project.ti2358.databinding.FragmentOrderbookBinding
 import com.project.ti2358.databinding.FragmentOrderbookItemBinding
+import com.project.ti2358.databinding.FragmentOrderbookItemUsBinding
 import com.project.ti2358.databinding.FragmentOrderbookLentaItemBinding
 import com.project.ti2358.service.*
 import kotlinx.coroutines.*
@@ -51,7 +54,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     private var fragmentOrderbookBinding: FragmentOrderbookBinding? = null
 
     var orderlinesViews: MutableList<OrderlineHolder> = mutableListOf()
-    var orderlinesUSViews: MutableList<OrderlineHolder> = mutableListOf()
+    var orderlinesUSViews: MutableList<OrderlineUsHolder> = mutableListOf()
     var orderlentaUSViews: MutableList<OrderLentaHolder> = mutableListOf()
 
     var activeStock: Stock? = null
@@ -95,7 +98,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             }
 
             for (i in 0..5) {
-                val orderlineHolder = OrderlineHolder(FragmentOrderbookItemBinding.inflate(LayoutInflater.from(context), null, false))
+                val orderlineHolder = OrderlineUsHolder(FragmentOrderbookItemUsBinding.inflate(LayoutInflater.from(context), null, false))
                 orderbookUsLinesView.addView(orderlineHolder.binding.root)
                 orderlinesUSViews.add(orderlineHolder)
             }
@@ -365,19 +368,26 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         try {
             val text = textView.text.toString().replace("+", "")
             val change = text.toInt()
-            moveAllBuyOrders(change, operationType)
+            moveAllOrders(change, operationType)
         } catch (e: Exception) {
 
         }
     }
 
-    private fun moveAllBuyOrders(delta: Int, operationType: OperationType) {
+    private fun moveAllOrders(delta: Int, operationType: OperationType) {
         activeStock?.let {
-            val buyOrders = portfolioManager.getOrderAllOrdersForFigi(it.figi, operationType)
-            buyOrders.forEach { order ->
+            val buyOrdersTinkoff = portfolioManager.getOrderAllOrdersForFigi(it.figi, operationType)
+            buyOrdersTinkoff.forEach { order ->
                 val newIntPrice = (order.price * 100).roundToInt() + delta
                 val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, order.stock)
-                orderbookManager.replaceOrder(order, newPrice, operationType)
+                orderbookManager.replaceOrderTinkoff(order, newPrice, operationType)
+            }
+
+            val buyOrdersAlor = alorPortfolioManager.getOrderAllOrdersForTicker(it.ticker, operationType)
+            buyOrdersAlor.forEach { order ->
+                val newIntPrice = (order.price * 100).roundToInt() + delta
+                val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, order.stock)
+                orderbookManager.replaceOrderAlor(order, newPrice, operationType)
             }
         }
     }
@@ -480,9 +490,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             }
         }
 
-        val ticker = activeStock?.getTickerLove() ?: ""
         val act = requireActivity() as AppCompatActivity
-        act.supportActionBar?.title = getString(R.string.menu_orderbook) + " $ticker"
+        act.supportActionBar?.title = activeStock?.getTickerLove() ?: ""
     }
 
     inner class ChoiceDragListener : OnDragListener {
@@ -521,15 +530,16 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                             val lineTo = v.getTag(R.string.order_line) as OrderbookLine
                             val operationTo = v.getTag(R.string.order_type) as OperationType
 
-                            var lineFrom = dropped.getTag(R.string.order_line) as OrderbookLine
-                            val order = dropped.getTag(R.string.order_item) as Order
-
                             dropped.visibility = View.INVISIBLE
+
+                            var lineFrom = dropped.getTag(R.string.order_line) as OrderbookLine
+                            val order = dropped.getTag(R.string.order_item) as BaseOrder
                             orderbookManager.replaceOrder(order, lineTo, operationTo)
+
                         }
                     } else if (actionType == "remove") {
                         val dropped = view as TextView              // заявка
-                        val order = dropped.getTag(R.string.order_item) as Order
+                        val order = dropped.getTag(R.string.order_item) as BaseOrder
                         orderbookManager.cancelOrder(order)
                     }
 
@@ -627,7 +637,9 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 var size = min(item.ordersBuy.size, ordersBuy.size)
                 for (i in 0 until size) {
                     ordersBuy[i].visibility = VISIBLE
-                    ordersBuy[i].text = "${item.ordersBuy[i].requestedLots - item.ordersBuy[i].executedLots}"
+                    ordersBuy[i].text = "${item.ordersBuy[i].getLotsRequested() - item.ordersBuy[i].getLotsExecuted()}"
+
+                    ordersBuy[i].setBackgroundColor(item.ordersBuy[i].getBrokerColor())
 
                     ordersBuy[i].setTag(R.string.order_line, item)
                     ordersBuy[i].setTag(R.string.order_item, item.ordersBuy[i])
@@ -644,7 +656,9 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 size = min(item.ordersSell.size, ordersSell.size)
                 for (i in 0 until size) {
                     ordersSell[i].visibility = VISIBLE
-                    ordersSell[i].text = "${item.ordersSell[i].requestedLots - item.ordersSell[i].executedLots}"
+                    ordersSell[i].text = "${item.ordersSell[i].getLotsRequested() - item.ordersSell[i].getLotsExecuted()}"
+
+                    ordersSell[i].setBackgroundColor(item.ordersSell[i].getBrokerColor())
 
                     ordersSell[i].setTag(R.string.order_line, item)
                     ordersSell[i].setTag(R.string.order_item, item.ordersSell[i])
@@ -667,6 +681,106 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     dragToSellView.setTag(R.string.order_type, OperationType.SELL)
                     dragToSellView.setTag(R.string.action_type, "replace")
                 }
+                dragToSellView.setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        v.setBackgroundColor(Utils.LIGHT)
+                    }
+
+                    if (event.action == MotionEvent.ACTION_UP) {
+                        showEditOrder(item, OperationType.SELL)
+                        v.setBackgroundColor(Utils.getColorForIndex(index))
+                    }
+                    true
+                }
+
+                dragToBuyView.setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        v.setBackgroundColor(Utils.LIGHT)
+                    }
+
+                    if (event.action == MotionEvent.ACTION_UP) {
+                        showEditOrder(item, OperationType.BUY)
+                        v.setBackgroundColor(Utils.getColorForIndex(index))
+                    }
+                    true
+                }
+            }
+        }
+    }
+
+    inner class OrderlineUsHolder(val binding: FragmentOrderbookItemUsBinding) : RecyclerView.ViewHolder(binding.root) {
+
+        @SuppressLint("ClickableViewAccessibility")
+        fun updateData(item: OrderbookLine, index: Int) {
+            with(binding) {
+                countBidView.text = "${item.bidCount}"
+                priceBidView.text = item.bidPrice.toMoney(item.stock, false)
+
+                countAskView.text = "${item.askCount}"
+                priceAskView.text = item.askPrice.toMoney(item.stock, false)
+
+                var targetPriceAsk = 0.0
+                var targetPriceBid = 0.0
+                var portfolioPosition: PortfolioPosition? = null
+                activeStock?.let {
+                    if (orderbookLines.isNotEmpty()) {
+                        targetPriceAsk = orderbookLines.first().askPrice
+                        targetPriceBid = orderbookLines.first().bidPrice
+
+                        portfolioPosition = portfolioManager.getPositionForFigi(it.figi)
+                        portfolioPosition?.let { p ->
+                            targetPriceAsk = p.getAveragePrice()
+                            targetPriceBid = p.getAveragePrice()
+                        }
+                    }
+                }
+
+                val allow = true
+                if (targetPriceAsk != 0.0 && allow) {
+                    var sign = 1.0
+                    portfolioPosition?.let {
+                        sign = sign(it.lots.toDouble())
+                    }
+
+                    val percentBid = Utils.getPercentFromTo(item.bidPrice, targetPriceBid) * sign
+                    priceBidPercentView.text = "%.2f%%".format(locale = Locale.US, percentBid)
+                    priceBidPercentView.setTextColor(Utils.getColorForValue(percentBid))
+                    priceBidPercentView.visibility = VISIBLE
+
+                    val percentAsk = Utils.getPercentFromTo(item.askPrice, targetPriceAsk) * sign
+                    priceAskPercentView.text = "%.2f%%".format(locale = Locale.US, percentAsk)
+                    priceAskPercentView.setTextColor(Utils.getColorForValue(percentAsk))
+                    priceAskPercentView.visibility = VISIBLE
+
+                    if (percentBid == 0.0 && portfolioPosition != null) {
+                        dragToBuyView.setBackgroundColor(Utils.TEAL)
+                    }
+                    if (percentAsk == 0.0 && portfolioPosition != null) {
+                        dragToSellView.setBackgroundColor(Utils.TEAL)
+                    }
+                } else {
+                    priceAskPercentView.visibility = GONE
+                    priceBidPercentView.visibility = GONE
+                }
+
+                if (item.exchange != "") { // US line
+
+                    priceAskPercentView.text = item.exchange
+                    priceBidPercentView.text = item.exchange
+
+                    priceAskPercentView.setTextColor(Color.BLACK)
+                    priceBidPercentView.setTextColor(Color.BLACK)
+
+                    backgroundBidView.alpha = 0.4f
+                    backgroundAskView.alpha = 0.4f
+                } else {
+                    backgroundBidView.alpha = 1.0f
+                    backgroundAskView.alpha = 1.0f
+                }
+
+                backgroundBidView.startAnimation(ResizeWidthAnimation(backgroundBidView, (item.bidPercent * 1000).toInt()).apply { duration = 250 })
+                backgroundAskView.startAnimation(ResizeWidthAnimation(backgroundAskView, (item.askPercent * 1000).toInt()).apply { duration = 250 })
+
                 dragToSellView.setOnTouchListener { v, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
                         v.setBackgroundColor(Utils.LIGHT)

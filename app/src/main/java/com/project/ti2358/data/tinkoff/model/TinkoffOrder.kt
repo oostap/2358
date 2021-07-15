@@ -1,8 +1,10 @@
 package com.project.ti2358.data.tinkoff.model
 
+import com.project.ti2358.data.common.BaseOrder
 import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.service.Utils
 
-data class Order(
+data class TinkoffOrder(
     val orderId: String,
     val figi: String,
     val operation: OperationType,
@@ -13,7 +15,7 @@ data class Order(
     val price: Double,
 
     var stock: Stock?
-) {
+) : BaseOrder() {
 
     fun getOperationStatusString(): String {
         if (operation == OperationType.BUY) {
@@ -24,4 +26,8 @@ data class Order(
 
         return ""
     }
+
+    override fun getLotsExecuted(): Int = executedLots
+    override fun getLotsRequested(): Int = requestedLots
+    override fun getBrokerColor(): Int { return Utils.TINKOFF }
 }

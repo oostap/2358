@@ -279,8 +279,12 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
 
                         if (iterations * DelayLong / 1000.0 > orderLifeTimeSeconds) { // отменить заявку на покупку
                             status = PurchaseStatus.CANCELED
-                            buyLimitOrder?.let {
-                                ordersService.cancel(it.orderId, portfolioManager.getActiveBrokerAccountId())
+                            try {
+                                buyLimitOrder?.let {
+                                    ordersService.cancel(it.orderId, portfolioManager.getActiveBrokerAccountId())
+                                }
+                            } catch (e: Exception) {
+
                             }
                             Utils.showToastAlert("$ticker: заявка отменена по $buyPrice")
                             return@launch
@@ -458,8 +462,12 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
 
                         if (iterations * DelayLong / 1000.0 > orderLifeTimeSeconds) { // отменить заявку на покупку
                             status = PurchaseStatus.CANCELED
-                            sellLimitOrder?.let {
-                                ordersService.cancel(it.orderId, portfolioManager.getActiveBrokerAccountId())
+                            try {
+                                sellLimitOrder?.let {
+                                    ordersService.cancel(it.orderId, portfolioManager.getActiveBrokerAccountId())
+                                }
+                            } catch (e: Exception) {
+
                             }
                             Utils.showToastAlert("$ticker: заявка отменена по $sellPrice")
                             return@launch

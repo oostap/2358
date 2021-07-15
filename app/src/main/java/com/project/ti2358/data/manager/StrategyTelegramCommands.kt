@@ -364,7 +364,7 @@ class StrategyTelegramCommands : KoinComponent {
                                     OperationType.BUY,
                                     portfolioManager.getActiveBrokerAccountId()
                                 )
-                                Utils.showToastAlert("$ticker создан новый ордер: ПОКУПКА!")
+                                Utils.showToastAlert("$ticker новый ордер: ПОКУПКА!")
                             } catch (e: Exception) {
 
                             }
@@ -390,7 +390,7 @@ class StrategyTelegramCommands : KoinComponent {
                                     OperationType.SELL,
                                     portfolioManager.getActiveBrokerAccountId()
                                 )
-                                Utils.showToastAlert("$ticker создан новый ордер: ПРОДАЖА!")
+                                Utils.showToastAlert("$ticker новый ордер: ПРОДАЖА!")
                             } catch (e: Exception) {
 
                             }
@@ -408,7 +408,7 @@ class StrategyTelegramCommands : KoinComponent {
                     buyOrders.forEach { order ->
                         val newIntPrice = ((order.price + change) * 100).roundToInt()
                         val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, order.stock)
-                        orderbookManager.replaceOrder(order, newPrice, operationType)
+                        orderbookManager.replaceOrderTinkoff(order, newPrice, operationType)
                     }
                 }
 
@@ -418,7 +418,7 @@ class StrategyTelegramCommands : KoinComponent {
                     val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
                     val buyOrders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
                     buyOrders.forEach { order ->
-                        orderbookManager.cancelOrder(order)
+                        orderbookManager.cancelOrderTinkoff(order)
 
                         val money = (order.requestedLots - order.executedLots) * order.price
                         if (operationType == OperationType.SELL) {

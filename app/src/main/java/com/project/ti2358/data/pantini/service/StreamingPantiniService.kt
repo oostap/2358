@@ -90,7 +90,7 @@ class StreamingPantiniService {
 
         override fun onMessage(webSocket: WebSocket, text: String) {
             messagesStatus = true
-            log("StreamingPantiniService::onMessage, text: $text")
+//            log("StreamingPantiniService::onMessage, text: $text")
             val jsonObject = JSONObject(text)
             if (!jsonObject.isNull("m")) {
                 val m: String? = jsonObject.getString("m")

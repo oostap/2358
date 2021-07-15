@@ -4,7 +4,7 @@ import com.project.ti2358.data.tinkoff.stream.LimitOrderBody
 import com.project.ti2358.data.tinkoff.stream.MarketOrderBody
 import com.project.ti2358.data.tinkoff.model.LimitOrder
 import com.project.ti2358.data.tinkoff.model.MarketOrder
-import com.project.ti2358.data.tinkoff.model.Order
+import com.project.ti2358.data.tinkoff.model.TinkoffOrder
 import com.project.ti2358.data.common.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -29,7 +29,7 @@ interface OrdersApi {
     @GET("orders")
     suspend fun orders(
         @Query("brokerAccountId") brokerAccountId: String
-    ): Response<List<Order>>
+    ): Response<List<TinkoffOrder>>
 
     @POST("orders/cancel")
     suspend fun cancel(

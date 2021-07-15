@@ -27,6 +27,16 @@ class SettingsManager {
             return preferences.getBoolean(key, false)
         }
 
+        fun getBrokerTinkoff(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_broker_tinkoff)
+            return preferences.getBoolean(key, true)
+        }
+
+        fun getBrokerAlor(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_broker_alor)
+            return preferences.getBoolean(key, false)
+        }
+
         fun getTokenTinkoff(): String {
             val tokenKey = TheApplication.application.applicationContext.getString(R.string.setting_key_token_market)
             return preferences.getString(tokenKey, "")?.trim() ?: ""

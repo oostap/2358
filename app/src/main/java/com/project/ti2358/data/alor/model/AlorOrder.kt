@@ -1,6 +1,9 @@
 package com.project.ti2358.data.alor.model
 
+import com.project.ti2358.data.common.BaseOrder
 import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.data.tinkoff.model.OperationType
+import com.project.ti2358.service.Utils
 import java.util.*
 
 //{
@@ -29,7 +32,7 @@ data class AlorOrder(
     val brokerSymbol: String,
     val exchange: AlorExchange,
     val type: AlorOrderType,
-    val side: AlorOrderSide,
+    val side: OperationType,
     val status: AlorOrderStatus,
     val transTime: Date,
     val qtyUnits: Int,
@@ -43,7 +46,21 @@ data class AlorOrder(
 
     // для стоп ордеров
     val stopPrice: Double?,
-    val endTime: Date?,
+    val endTime: String,
 
     var stock: Stock?
-)
+) : BaseOrder() {
+    fun getOperationStatusString(): String {
+        if (side == OperationType.BUY) {
+            return "Покупка"
+        } else if (side == OperationType.SELL) {
+            return "Продажа"
+        }
+
+        return ""
+    }
+
+    override fun getLotsExecuted(): Int = filled
+    override fun getLotsRequested(): Int = qtyUnits
+    override fun getBrokerColor(): Int { return Utils.ALOR }
+}

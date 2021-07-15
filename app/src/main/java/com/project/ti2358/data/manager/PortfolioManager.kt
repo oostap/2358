@@ -4,7 +4,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
-import com.project.ti2358.data.tinkoff.model.Order
+import com.project.ti2358.data.tinkoff.model.TinkoffOrder
 import com.project.ti2358.data.tinkoff.model.*
 import com.project.ti2358.data.tinkoff.service.OrdersService
 import com.project.ti2358.data.tinkoff.service.PortfolioService
@@ -28,7 +28,7 @@ class PortfolioManager : KoinComponent {
 
     var portfolioPositions: MutableList<PortfolioPosition> = synchronizedList(mutableListOf())
     var currencyPositions: MutableList<CurrencyPosition> = synchronizedList(mutableListOf())
-    var orders: MutableList<Order> = synchronizedList(mutableListOf())
+    var orders: MutableList<TinkoffOrder> = synchronizedList(mutableListOf())
     var accounts: MutableList<Account> = synchronizedList(mutableListOf())
 
     private var refreshDepositDelay: Long = 20 * 1000 // 20s
@@ -200,15 +200,15 @@ class PortfolioManager : KoinComponent {
         return portfolioPositions.find { it.figi == figi }
     }
 
-    public fun getOrderForId(id: String, operation: OperationType): Order? {
+    public fun getOrderForId(id: String, operation: OperationType): TinkoffOrder? {
         return orders.find { it.orderId == id && it.operation == operation }
     }
 
-    public fun getOrderForFigi(figi: String, operation: OperationType): Order? {
+    public fun getOrderForFigi(figi: String, operation: OperationType): TinkoffOrder? {
         return orders.find { it.figi == figi && it.operation == operation }
     }
 
-    public fun getOrderAllOrdersForFigi(figi: String, operation: OperationType): List<Order> {
+    public fun getOrderAllOrdersForFigi(figi: String, operation: OperationType): List<TinkoffOrder> {
         return orders.filter { it.figi == figi && it.operation == operation }
     }
 
