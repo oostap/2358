@@ -94,7 +94,7 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
             prepareText,
             time,
             positions.size,
-            strategy1000Buy.getTotalPurchaseString(strategy1000Buy.toBuyPurchase)
+            strategy1000Buy.getTotalPurchaseString(strategy1000Buy.stocksToPurchase)
         )
     }
 

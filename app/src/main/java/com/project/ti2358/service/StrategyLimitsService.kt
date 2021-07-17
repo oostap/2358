@@ -67,7 +67,7 @@ class StrategyLimitsService : Service() {
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Лимиты отменены", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Лимиты отменены", Toast.LENGTH_SHORT).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -79,7 +79,7 @@ class StrategyLimitsService : Service() {
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Лимиты запущены", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Лимиты запущены", Toast.LENGTH_SHORT).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {

@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.daager.model.PresetStock
 import com.project.ti2358.service.PurchaseStatus
 import com.project.ti2358.service.Sorting
@@ -25,7 +26,7 @@ class Strategy1000Sell() : KoinComponent {
     var stocks: MutableList<Stock> = mutableListOf()
     var presetStocksSelected: MutableList<PresetStock> = mutableListOf()
 
-    private var toSellPurchase: MutableList<StockPurchase> = mutableListOf()
+    private var stocksToPurchase: MutableList<StockPurchase> = mutableListOf()
 
     var positionsToSell700: MutableList<StockPurchase> = mutableListOf()
     var positionsToSell1000: MutableList<StockPurchase> = mutableListOf()
@@ -70,7 +71,7 @@ class Strategy1000Sell() : KoinComponent {
         }
 
         // сохранить лоты и проценты из PurchaseStock
-        for (purchase in toSellPurchase) {
+        for (purchase in stocksToPurchase) {
             val preset = presetStocksSelected.find { it.ticker == purchase.ticker}
             preset?.let {
                 it.percent = purchase.percentLimitPriceChange
@@ -122,23 +123,26 @@ class Strategy1000Sell() : KoinComponent {
         val purchases: MutableList<StockPurchase> = mutableListOf()
 
         for (preset in presetStocksSelected) {
-            val stock = stocks.find { it.ticker == preset.ticker }
-            if (stock != null) {
-                val purchase = StockPurchase(stock)
-
-                purchase.percentLimitPriceChange = preset.percent
-                purchase.lots = preset.lots
-                purchase.profitPercent = preset.profit
-
-                purchase.apply {
-                    position = portfolioManager.getPositionForFigi(stock.figi)
+            stocks.find { it.ticker == preset.ticker }?.let {
+                if (SettingsManager.getBrokerTinkoff()) {
+                    val purchase = StockPurchaseTinkoff(it).apply {
+                        percentLimitPriceChange = preset.percent
+                        lots = preset.lots
+                        profitPercent = preset.profit
+                        position = portfolioManager.getPositionForFigi(it.figi)
+                    }
+                    purchases.add(purchase)
                 }
-                purchases.add(purchase)
+
+                // TODO: ALOR
+                if (SettingsManager.getBrokerAlor()) {
+
+                }
             }
         }
-        toSellPurchase = purchases
+        stocksToPurchase = purchases
 
-        toSellPurchase.forEach {
+        stocksToPurchase.forEach {
             if (it.percentLimitPriceChange == 0.0) it.processInitialProfit()
             if (it.profitPercent == 0.0) it.profitPercent = SettingsManager.get1000SellTakeProfit()
             if (it.lots == 0) it.lots = it.position?.getLots() ?: 1
@@ -147,12 +151,12 @@ class Strategy1000Sell() : KoinComponent {
 
             it.status = PurchaseStatus.WAITING
         }
-        return toSellPurchase
+        return stocksToPurchase
     }
 
     fun getTotalPurchasePieces(): Int {
         var value = 0
-        for (purchaseStock in toSellPurchase) {
+        for (purchaseStock in stocksToPurchase) {
             value += purchaseStock.lots
         }
         return value
@@ -160,7 +164,7 @@ class Strategy1000Sell() : KoinComponent {
 
     fun getTotalSellString(): String {
         var value = 0.0
-        for (purchaseStock in toSellPurchase) {
+        for (purchaseStock in stocksToPurchase) {
             value += purchaseStock.getLimitPriceDouble() * purchaseStock.lots
         }
         return value.toMoney(null)
@@ -200,12 +204,12 @@ class Strategy1000Sell() : KoinComponent {
 
     fun prepareSell700() {
         started700 = false
-        positionsToSell700 = toSellPurchase
+        positionsToSell700 = stocksToPurchase
     }
 
     fun prepareSell1000() {
         started1000 = false
-        positionsToSell1000 = toSellPurchase
+        positionsToSell1000 = stocksToPurchase
     }
 
     fun startStrategy700Sell() {

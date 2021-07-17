@@ -68,7 +68,7 @@ class StrategyTelegramService : Service() {
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Телеграм бот отключен", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Телеграм бот отключен", Toast.LENGTH_SHORT).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -79,7 +79,7 @@ class StrategyTelegramService : Service() {
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Телеграм бот запущен!", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Телеграм бот запущен!", Toast.LENGTH_SHORT).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {

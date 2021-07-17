@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.daager.model.PresetStock
 import com.project.ti2358.service.PurchaseStatus
 import com.project.ti2358.service.Sorting
@@ -23,7 +24,7 @@ class Strategy1000Buy : KoinComponent {
 
     var stocks: MutableList<Stock> = mutableListOf()
     var presetStocksSelected: MutableList<PresetStock> = mutableListOf()
-    var toBuyPurchase: MutableList<StockPurchase> = mutableListOf()
+    var stocksToPurchase: MutableList<StockPurchase> = mutableListOf()
     var currentSort: Sorting = Sorting.DESCENDING
 
     var stocksToBuy700: MutableList<StockPurchase> = mutableListOf()
@@ -64,7 +65,7 @@ class Strategy1000Buy : KoinComponent {
         }
 
         // сохранить лоты и проценты из PurchaseStock
-        for (purchase in toBuyPurchase) {
+        for (purchase in stocksToPurchase) {
             val preset = presetStocksSelected.find { it.ticker == purchase.ticker}
             preset?.let {
                 it.percent = purchase.percentLimitPriceChange
@@ -116,24 +117,26 @@ class Strategy1000Buy : KoinComponent {
 
         val purchases: MutableList<StockPurchase> = mutableListOf()
         for (preset in presetStocksSelected) {
-            val stock = stocks.find { it.ticker == preset.ticker }
-            if (stock != null) {
-                val purchase = StockPurchase(stock)
-
-                purchase.percentLimitPriceChange = preset.percent
-                purchase.lots = preset.lots
-                purchase.profitPercent = preset.profit
-
-                purchase.apply {
-                    position = portfolioManager.getPositionForFigi(stock.figi)
+            stocks.find { it.ticker == preset.ticker }?.let {
+                if (SettingsManager.getBrokerTinkoff()) {
+                    val purchase = StockPurchaseTinkoff(it, BrokerType.TINKOFF).apply {
+                        percentLimitPriceChange = preset.percent
+                        lots = preset.lots
+                        profitPercent = preset.profit
+                        position = portfolioManager.getPositionForFigi(it.figi)
+                    }
+                    purchases.add(purchase)
                 }
 
-                purchases.add(purchase)
+                // TODO: ALOR
+                if (SettingsManager.getBrokerAlor()) {
+
+                }
             }
         }
-        toBuyPurchase = purchases
+        stocksToPurchase = purchases
 
-        toBuyPurchase.forEach {
+        stocksToPurchase.forEach {
             if (it.percentLimitPriceChange == 0.0) it.percentLimitPriceChange = -1.0
             if (it.profitPercent == 0.0) it.profitPercent = SettingsManager.get1000BuyTakeProfit()
 
@@ -147,7 +150,7 @@ class Strategy1000Buy : KoinComponent {
             it.status = PurchaseStatus.WAITING
         }
 
-        return toBuyPurchase
+        return stocksToPurchase
     }
 
     fun getTotalPurchaseString(purchases: MutableList<StockPurchase>): String {
@@ -160,7 +163,7 @@ class Strategy1000Buy : KoinComponent {
 
     fun getTotalPurchasePieces(): Int {
         var value = 0
-        for (stock in toBuyPurchase) {
+        for (stock in stocksToPurchase) {
             value += stock.lots
         }
         return value
@@ -193,12 +196,12 @@ class Strategy1000Buy : KoinComponent {
 
     fun prepareBuy700() {
         started700 = false
-        stocksToBuy700 = toBuyPurchase
+        stocksToBuy700 = stocksToPurchase
     }
 
     fun prepareBuy1000() {
         started1000 = false
-        stocksToBuy1000 = toBuyPurchase
+        stocksToBuy1000 = stocksToPurchase
     }
 
     fun startStrategy700Buy() {

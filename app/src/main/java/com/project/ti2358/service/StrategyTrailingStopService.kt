@@ -64,7 +64,7 @@ class StrategyTrailingStopService : Service() {
     override fun onDestroy() {
         job?.cancel()
         strategyTrailingStop.stopStrategy()
-        Toast.makeText(this, "Трейлинг стоп отменён", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Трейлинг стоп отменён", Toast.LENGTH_SHORT).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -72,7 +72,7 @@ class StrategyTrailingStopService : Service() {
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Трейлинг стоп активирован", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Трейлинг стоп активирован", Toast.LENGTH_SHORT).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {

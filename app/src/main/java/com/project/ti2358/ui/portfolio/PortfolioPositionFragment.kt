@@ -25,6 +25,8 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.math.sign
 
+// TODO: этот экран не поддерживает ALOR
+
 @KoinApiExtension
 class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position) {
     private val brokerManager: BrokerManager by inject()
@@ -56,7 +58,8 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
         tinkoffPosition = positionManager.activePosition!!
         tinkoffPosition.stock?.let {
             stock = it
-            stockPurchase = StockPurchase(it).apply {
+
+            stockPurchase = StockPurchaseTinkoff(it).apply {
                 position = tinkoffPosition
                 lots = position?.getLots() ?: 0
                 percentProfitSellFrom = Utils.getPercentFromTo(stock.getPriceNow(), position?.getAveragePrice() ?: 0.0)

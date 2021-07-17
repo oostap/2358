@@ -164,7 +164,6 @@
     <string name="stocks_2358_take_profit_from">Заявка на продажу от в % (0.0 = не создавать)</string>
     <string name="stocks_2358_take_profit_to">Заявка на продажу до в % (0.0 = не создавать)</string>
     <string name="stocks_2358_take_profit_step">Количество заявок в равных долях</string>
-    <string name="stocks_2358_protect_stock_up">Защита от раннего откупа</string>
 
     <!-- 1000 sell settings -->
     <string name="stocks_1000_sell_set_1">Набор 1 (SPCE -1.0 5 0.5 ентер)</string>
@@ -318,7 +317,6 @@
     <string name="stocks_2225_take_profit_from">Заявка на откуп от в % (0.0 = не создавать)</string>
     <string name="stocks_2225_take_profit_to">Заявка на откуп до в % (0.0 = не создавать)</string>
     <string name="stocks_2225_take_profit_step">Количество заявок в равных долях</string>
-    <string name="stocks_2225_protect_stock_up">Защита от раннего слива</string>
 
     <!-- trend settings -->
     <string name="stocks_trend_change_min_down_change_percent">Просадка со старта в %</string>
@@ -393,7 +391,6 @@
     <string name="setting_key_2358_take_profit_from">2358_take_profit_from</string>
     <string name="setting_key_2358_take_profit_to">2358_take_profit_to</string>
     <string name="setting_key_2358_take_profit_step">2358_take_profit_step</string>
-    <string name="setting_key_2358_protect_stock_up">2358_protect_stock_up</string>
 
     <!-- 1000 sell settings -->
     <string name="setting_key_1000_sell_set_1">1000_sell_set_1</string>
@@ -542,7 +539,6 @@
     <string name="setting_key_2225_take_profit_from">2225_take_profit_from</string>
     <string name="setting_key_2225_take_profit_to">2225_take_profit_to</string>
     <string name="setting_key_2225_take_profit_step">2225_take_profit_step</string>
-    <string name="setting_key_2225_protect_stock_up">2225_protect_stock_up</string>
 
     <!-- trend settings -->
     <string name="setting_key_trend_change_min_down_change_percent">trend_change_min_down_change_percent</string>

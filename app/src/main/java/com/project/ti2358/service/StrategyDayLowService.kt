@@ -71,7 +71,7 @@ class StrategyDayLowService : Service() {
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Покупка DAY LOW отменена", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Покупка DAY LOW отменена", Toast.LENGTH_SHORT).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -81,7 +81,7 @@ class StrategyDayLowService : Service() {
     }
 
     private fun schedulePurchase() {
-        Toast.makeText(this, "Запущен таймер на покупку 2358 DAY LOW", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Запущен таймер на покупку 2358 DAY LOW", Toast.LENGTH_SHORT).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {

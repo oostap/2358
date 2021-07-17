@@ -222,11 +222,6 @@
             app:useSimpleSummaryProvider="true"
             app:defaultValue="1"/>
 
-        <SwitchPreferenceCompat
-            app:key="@string/setting_key_2358_protect_stock_up"
-            app:title="@string/stocks_2358_protect_stock_up"
-            app:defaultValue="true" />
-
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_1000_sell">
@@ -872,11 +867,6 @@
             app:title="@string/stocks_2225_take_profit_step"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="1"/>
-
-        <SwitchPreferenceCompat
-            app:key="@string/setting_key_2225_protect_stock_up"
-            app:title="@string/stocks_2225_protect_stock_up"
-            app:defaultValue="true" />
 
     </PreferenceCategory>
 

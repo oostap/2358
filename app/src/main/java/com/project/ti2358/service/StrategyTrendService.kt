@@ -68,7 +68,7 @@ class StrategyTrendService : Service() {
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Тренды отменены", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Тренды отменены", Toast.LENGTH_SHORT).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -81,7 +81,7 @@ class StrategyTrendService : Service() {
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Тренды запущены", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Тренды запущены", Toast.LENGTH_SHORT).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {

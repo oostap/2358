@@ -160,20 +160,26 @@ class Strategy1728DownFragment : Fragment(R.layout.fragment_1728_down) {
                         if (SettingsManager.get1728PurchaseVolume() <= 0) {
                             Utils.showMessageAlert(requireContext(), "В настройках не задана сумма покупки для позиции, раздел 1728.")
                         } else {
-                            val purchase = StockPurchase(stock)
+                            if (SettingsManager.getBrokerTinkoff()) {
+                                StockPurchaseTinkoff(stock).apply {
+                                    lots = (SettingsManager.get1728PurchaseVolume() / stock.getPriceNow()).roundToInt()
 
-                            // считаем лоты
-                            purchase.lots = (SettingsManager.get1728PurchaseVolume() / purchase.stock.getPriceNow()).roundToInt()
+                                    // включаем трейлинг тейк
+                                    if (SettingsManager.get1728TrailingStop()) {
+                                        trailingStop = true
+                                        trailingStopTakeProfitPercentActivation = SettingsManager.getTrailingStopTakeProfitPercentActivation()
+                                        trailingStopTakeProfitPercentDelta = SettingsManager.getTrailingStopTakeProfitPercentDelta()
+                                        trailingStopStopLossPercent = SettingsManager.getTrailingStopStopLossPercent()
+                                    }
 
-                            // включаем трейлинг тейк
-                            if (SettingsManager.get1728TrailingStop()) {
-                                purchase.trailingStop = true
-                                purchase.trailingStopTakeProfitPercentActivation = SettingsManager.getTrailingStopTakeProfitPercentActivation()
-                                purchase.trailingStopTakeProfitPercentDelta = SettingsManager.getTrailingStopTakeProfitPercentDelta()
-                                purchase.trailingStopStopLossPercent = SettingsManager.getTrailingStopStopLossPercent()
+                                    buyFromAsk1728()
+                                }
                             }
 
-                            purchase.buyFromAsk1728()
+                            // TODO:
+                            if (SettingsManager.getBrokerAlor()) {
+
+                            }
                         }
                     }
 

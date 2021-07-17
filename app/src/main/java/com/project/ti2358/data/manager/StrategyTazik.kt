@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.tinkoff.model.Candle
 import com.project.ti2358.data.tinkoff.model.Currency
 import com.project.ti2358.service.*
@@ -13,6 +14,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.lang.Exception
 import java.util.*
+import java.util.Collections.synchronizedList
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -21,6 +23,8 @@ import kotlin.math.roundToInt
 class StrategyTazik : KoinComponent {
     private val stockManager: StockManager by inject()
     private val portfolioManager: PortfolioManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
+
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTelegram: StrategyTelegram by inject()
     private val strategyBlacklist: StrategyBlacklist by inject()
@@ -124,29 +128,53 @@ class StrategyTazik : KoinComponent {
 
         stocksToPurchase.clear()
 
+        val totalMoneyTinkoff: Double = SettingsManager.getTazikPurchaseVolume().toDouble()
+        var onePieceTinkoff: Double = totalMoneyTinkoff / SettingsManager.getTazikPurchaseParts()
+
+        // TODO:
+        val totalMoneyAlor: Double = 100.0//SettingsManager.getTazikPurchaseVolume().toDouble()
+        var onePieceAlor: Double = totalMoneyAlor / 2 // totalMoneyAlor / SettingsManager.getTazikPurchaseParts()
+
         val percent = SettingsManager.getTazikChangePercent()
-        val totalMoney: Double = SettingsManager.getTazikPurchaseVolume().toDouble()
-        var onePiece: Double = totalMoney / SettingsManager.getTazikPurchaseParts()
         val before11 = Utils.isSessionBefore11()
-
-        stocksToPurchase = stocksSelected.map {
-            StockPurchase(it).apply {
-                percentLimitPriceChange = -abs(percent)
-
-                // отнять процент роста с начала премаркета, если мы запускаем в 10
-                if (before11) {
-                    val deltaPercent = it.getPriceNow() / it.getPrice0145() * 100.0 - 100.0
-                    if (!deltaPercent.isNaN() && deltaPercent > 0.0) {
-                        percentLimitPriceChange -= abs(deltaPercent * 0.5)
-                    }
-                }
-
-                val total = if (it.instrument.currency == Currency.RUB) onePiece * Utils.getUSDRUB() else onePiece
-                lots = (total / (stock.getPriceNow() * stock.instrument.lot)).roundToInt()
-                updateAbsolutePrice()
-                status = PurchaseStatus.WAITING
+        val purchases: MutableList<StockPurchase> = mutableListOf()
+        for (stock in stocksSelected) {
+            if (SettingsManager.getBrokerTinkoff()) {
+                val purchaseTinkoff = StockPurchaseTinkoff(stock)
+                purchases.add(purchaseTinkoff)
             }
-        }.toMutableList()
+
+            if (SettingsManager.getBrokerAlor()) {
+                val purchaseAlor = StockPurchaseAlor(stock)
+                purchases.add(purchaseAlor)
+            }
+        }
+
+        purchases.forEach {
+            it.percentLimitPriceChange = -abs(percent)
+
+            // отнять процент роста с начала премаркета, если мы запускаем в 10
+            if (before11) {
+                val deltaPercent = it.stock.getPriceNow() / it.stock.getPrice0145() * 100.0 - 100.0
+                if (!deltaPercent.isNaN() && deltaPercent > 0.0) {
+                    it.percentLimitPriceChange -= abs(deltaPercent * 0.5)
+                }
+            }
+
+            // посчитать количество лотов на каждую бумагу/брокера
+            val part = when (it.broker) {
+                BrokerType.TINKOFF -> if (it.stock.instrument.currency == Currency.RUB) onePieceTinkoff * Utils.getUSDRUB() else onePieceTinkoff
+                BrokerType.ALOR -> if (it.stock.instrument.currency == Currency.RUB) onePieceAlor * Utils.getUSDRUB() else onePieceAlor
+            }
+
+            if (it.stock.getPriceNow() != 0.0) {
+                it.lots = (part / (it.stock.getPriceNow() * it.stock.instrument.lot)).roundToInt()
+            }
+            it.updateAbsolutePrice()
+            it.status = PurchaseStatus.WAITING
+        }
+
+        stocksToPurchase = synchronizedList(purchases)
 
         // удалить все бумаги, у которых 0 лотов = не хватает на покупку одной части
         stocksToPurchase.removeAll { it.lots == 0 }
@@ -168,7 +196,8 @@ class StrategyTazik : KoinComponent {
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         if (SettingsManager.getTazikExcludeDepo()) {
-            stocksToPurchase.removeAll { p -> portfolioManager.portfolioPositions.any { it.ticker == p.ticker } }
+            stocksToPurchase.removeAll { p -> portfolioManager.portfolioPositions.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
+            stocksToPurchase.removeAll { p -> alorPortfolioManager.portfolioPositions.any { it.symbol == p.ticker && p.broker == BrokerType.ALOR } }
         }
 
         // удалить все бумаги из чёрного списка

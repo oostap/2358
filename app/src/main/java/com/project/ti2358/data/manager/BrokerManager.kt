@@ -18,6 +18,7 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.lang.Exception
+import java.util.function.ToIntBiFunction
 import kotlin.math.max
 
 @KoinApiExtension
@@ -43,36 +44,47 @@ class BrokerManager() : KoinComponent {
         }
     }
 
-    private suspend fun placeOrderTinkoff(stock: Stock, price: Double, count: Int, operationType: OperationType) {
+    suspend fun placeOrderTinkoff(stock: Stock, price: Double, count: Int, operationType: OperationType): TinkoffOrder? {
+        val operation = if (operationType == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
+        var order: TinkoffOrder? = null
         try {
-            ordersService.placeLimitOrder(
+            order = ordersService.placeLimitOrder(
                 count,
                 stock.figi,
                 price,
                 operationType,
                 portfolioManager.getActiveBrokerAccountId()
             )
-            val operation = if (operationType == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
             Utils.showToastAlert("ТИ ${stock.ticker} новый ордер: $operation")
         } catch (e: Exception) {
 
         }
+
+        Utils.showToastAlert("ТИ ${stock.ticker} ошибка ордера: $operation")
+        return order
     }
 
-    private suspend fun placeOrderAlor(stock: Stock, price: Double, lots: Int, operationType: OperationType) {
+    suspend fun placeOrderAlor(stock: Stock, price: Double, lots: Int, operationType: OperationType): String {
+        val operation = if (operationType == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
+
         try {
-            alorOrdersService.placeLimitOrder(
+            val response = alorOrdersService.placeLimitOrder(
                 operationType,
                 lots,
                 price,
                 stock.ticker,
                 AlorExchange.SPBX
             )
-            val operation = if (operationType == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
-            Utils.showToastAlert("ALOR ${stock.ticker} новый ордер: $operation")
+            if (response.message == "success") {
+                Utils.showToastAlert("ALOR ${stock.ticker} новый ордер: $operation")
+                return response.orderNumber ?: ""
+            }
         } catch (e: Exception) {
 
         }
+
+        Utils.showToastAlert("ALOR ${stock.ticker} ошибка ордера: $operation")
+        return ""
     }
 
     /******************** cancel order *************************/

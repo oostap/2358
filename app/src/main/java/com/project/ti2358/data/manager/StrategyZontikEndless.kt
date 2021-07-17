@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.tinkoff.model.Candle
 import com.project.ti2358.data.tinkoff.model.Currency
 import com.project.ti2358.service.*
@@ -20,6 +21,7 @@ import kotlin.math.roundToInt
 class StrategyZontikEndless : KoinComponent {
     private val stockManager: StockManager by inject()
     private val portfolioManager: PortfolioManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTelegram: StrategyTelegram by inject()
     private val strategyBlacklist: StrategyBlacklist by inject()
@@ -124,34 +126,44 @@ class StrategyZontikEndless : KoinComponent {
         if (started) return@withContext stocksToPurchase
 
         val percent = SettingsManager.getZontikEndlessChangePercent()
-        val totalMoney: Double = SettingsManager.getZontikEndlessPurchaseVolume().toDouble()
-        val onePiece: Double = totalMoney / SettingsManager.getZontikEndlessPurchaseParts()
+
+        val totalMoneyTinkoff: Double = SettingsManager.getZontikEndlessPurchaseVolume().toDouble()
+        var onePieceTinkoff: Double = totalMoneyTinkoff / SettingsManager.getZontikEndlessPurchaseParts()
+
+        // TODO:
+        val totalMoneyAlor: Double = 100.0//SettingsManager.getZontikEndlessPurchaseVolume().toDouble()
+        var onePieceAlor: Double = totalMoneyAlor / 2 // totalMoneyAlor / SettingsManager.getTazikPurchaseParts()
 
         val purchases: MutableList<StockPurchase> = mutableListOf()
         for (stock in stocksSelected) {
-            val purchase = StockPurchase(stock)
-            for (p in stocksToPurchase) {
-                if (p.ticker == stock.ticker) {
-                    purchase.apply {
-                        percentLimitPriceChange = p.percentLimitPriceChange
-                    }
-                    break
-                }
+            if (SettingsManager.getBrokerTinkoff()) {
+                val purchaseTinkoff = StockPurchaseTinkoff(stock)
+                purchases.add(purchaseTinkoff)
             }
-            purchases.add(purchase)
+
+            if (SettingsManager.getBrokerAlor()) {
+                val purchaseAlor = StockPurchaseAlor(stock)
+                purchases.add(purchaseAlor)
+            }
         }
-        stocksToPurchase = purchases
-        stocksToPurchase.forEach {
+
+        purchases.forEach {
             it.percentLimitPriceChange = percent
 
-            val total = if (it.stock.instrument.currency == Currency.RUB) onePiece * Utils.getUSDRUB() else onePiece
+            // посчитать количество лотов на каждую бумагу/брокера
+            val part = when (it.broker) {
+                BrokerType.TINKOFF -> if (it.stock.instrument.currency == Currency.RUB) onePieceTinkoff * Utils.getUSDRUB() else onePieceTinkoff
+                BrokerType.ALOR -> if (it.stock.instrument.currency == Currency.RUB) onePieceAlor * Utils.getUSDRUB() else onePieceAlor
+            }
 
             if (it.stock.getPriceNow() != 0.0) {
-                it.lots = (total / it.stock.getPriceNow()).roundToInt()
+                it.lots = (part / it.stock.getPriceNow()).roundToInt()
             }
             it.updateAbsolutePrice()
             it.status = PurchaseStatus.WAITING
         }
+
+        stocksToPurchase = Collections.synchronizedList(purchases)
 
         // удалить все бумаги, у которых 0 лотов = не хватает на покупку одной части
         stocksToPurchase.removeAll { it.lots == 0 || it.lots > 99999999 }
@@ -173,7 +185,8 @@ class StrategyZontikEndless : KoinComponent {
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         if (SettingsManager.getZontikEndlessExcludeDepo()) {
-            stocksToPurchase.removeAll { p -> portfolioManager.portfolioPositions.any { it.ticker == p.ticker } }
+            stocksToPurchase.removeAll { p -> portfolioManager.portfolioPositions.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
+            stocksToPurchase.removeAll { p -> alorPortfolioManager.portfolioPositions.any { it.symbol == p.ticker && p.broker == BrokerType.ALOR } }
         }
 
         // удалить все бумаги из чёрного списка
@@ -317,7 +330,7 @@ class StrategyZontikEndless : KoinComponent {
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(TheApplication.application.applicationContext)
         val editor: SharedPreferences.Editor = preferences.edit()
-        val key = TheApplication.application.applicationContext.getString(R.string.setting_key_tazik_endless_take_profit)
+        val key = TheApplication.application.applicationContext.getString(R.string.setting_key_zontik_endless_take_profit)
         editor.putString(key, "%.2f".format(locale = Locale.US, profit))
         editor.apply()
 

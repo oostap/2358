@@ -79,7 +79,7 @@ class StrategyZontikEndlessService : Service() {
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Зонтики сложены", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Зонтики сложены", Toast.LENGTH_SHORT).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -91,7 +91,7 @@ class StrategyZontikEndlessService : Service() {
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Выставлены зонтики на шорт спайков", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Выставлены зонтики на шорт спайков", Toast.LENGTH_SHORT).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {

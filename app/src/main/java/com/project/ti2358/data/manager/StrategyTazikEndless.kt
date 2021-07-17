@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.tinkoff.model.Candle
 import com.project.ti2358.data.tinkoff.model.Currency
 import com.project.ti2358.service.*
@@ -12,6 +13,7 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.*
+import java.util.Collections.synchronizedList
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -20,6 +22,7 @@ import kotlin.math.roundToInt
 class StrategyTazikEndless : KoinComponent {
     private val stockManager: StockManager by inject()
     private val portfolioManager: PortfolioManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTelegram: StrategyTelegram by inject()
     private val strategyBlacklist: StrategyBlacklist by inject()
@@ -121,39 +124,54 @@ class StrategyTazikEndless : KoinComponent {
 
     suspend fun getPurchaseStock(): MutableList<StockPurchase> = withContext(StockManager.stockContext) {
         if (started) return@withContext stocksToPurchase
-
         val percent = SettingsManager.getTazikEndlessChangePercent()
-        val totalMoney: Double = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
-        val onePiece: Double = totalMoney / SettingsManager.getTazikEndlessPurchaseParts()
+
+
+        val totalMoneyTinkoff: Double = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
+        val onePieceTinkoff: Double = totalMoneyTinkoff / SettingsManager.getTazikEndlessPurchaseParts()
+
+        val totalMoneyAlor: Double = 100.0 //SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
+        val onePieceAlor: Double = totalMoneyAlor / 2 //totalMoneyAlor / SettingsManager.getTazikEndlessPurchaseParts()
 
         val purchases: MutableList<StockPurchase> = mutableListOf()
         for (stock in stocksSelected) {
-            val purchase = StockPurchase(stock)
-            for (p in stocksToPurchase) {
-                if (p.ticker == stock.ticker) {
-                    purchase.apply {
-                        percentLimitPriceChange = p.percentLimitPriceChange
-                    }
-                    break
-                }
+            if (SettingsManager.getBrokerTinkoff()) {
+                val purchaseTinkoff = StockPurchaseTinkoff(stock)
+                purchases.add(purchaseTinkoff)
             }
-            purchases.add(purchase)
+
+            if (SettingsManager.getBrokerAlor()) {
+                val purchaseAlor = StockPurchaseAlor(stock)
+                purchases.add(purchaseAlor)
+            }
         }
-        stocksToPurchase = purchases
-        stocksToPurchase.forEach {
+
+        purchases.forEach {
+            // сбросить все проценты без сохранения
             it.percentLimitPriceChange = percent
 
-            val total = if (it.stock.instrument.currency == Currency.RUB) onePiece * Utils.getUSDRUB() else onePiece
+            // посчитать количество лотов на каждую бумагу/брокера
+            val part = when (it.broker) {
+                BrokerType.TINKOFF -> if (it.stock.instrument.currency == Currency.RUB) onePieceTinkoff * Utils.getUSDRUB() else onePieceTinkoff
+                BrokerType.ALOR -> if (it.stock.instrument.currency == Currency.RUB) onePieceAlor * Utils.getUSDRUB() else onePieceAlor
+            }
 
             if (it.stock.getPriceNow() != 0.0) {
-                it.lots = (total / it.stock.getPriceNow()).roundToInt()
+                it.lots = (part / it.stock.getPriceNow()).roundToInt()
             }
             it.updateAbsolutePrice()
             it.status = PurchaseStatus.WAITING
         }
+        stocksToPurchase = synchronizedList(purchases)
+
+        // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
+        if (SettingsManager.getTazikEndlessExcludeDepo()) {
+            stocksToPurchase.removeAll { p -> portfolioManager.portfolioPositions.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
+            stocksToPurchase.removeAll { p -> alorPortfolioManager.portfolioPositions.any { it.symbol == p.ticker && p.broker == BrokerType.ALOR } }
+        }
 
         // удалить все бумаги, у которых 0 лотов = не хватает на покупку одной части
-        stocksToPurchase.removeAll { it.lots == 0 || it.lots > 99999999 }
+        stocksToPurchase.removeAll { it.lots == 0 || it.lots > 9999999 }
 
         // удалить все бумаги, у которых недавно или скоро отчёты
         if (SettingsManager.getTazikEndlessExcludeReports()) {
@@ -168,11 +186,6 @@ class StrategyTazikEndless : KoinComponent {
         // удалить все бумаги, у которых скоро FDA фаза
         if (SettingsManager.getTazikEndlessExcludeFDA()) {
             stocksToPurchase.removeAll { it.stock.fda != null }
-        }
-
-        // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
-        if (SettingsManager.getTazikEndlessExcludeDepo()) {
-            stocksToPurchase.removeAll { p -> portfolioManager.portfolioPositions.any { it.ticker == p.ticker } }
         }
 
         // удалить все бумаги из чёрного списка

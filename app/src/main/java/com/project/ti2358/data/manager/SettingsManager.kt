@@ -235,11 +235,6 @@ class SettingsManager {
             }
         }
 
-        fun get2358ProtectStockUp(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2358_protect_stock_up)
-            return preferences.getBoolean(key, true)
-        }
-
         /******************** Love *************************/
 
         fun getLoveSet(): List<String> {
@@ -1260,11 +1255,6 @@ class SettingsManager {
             } catch (e: Exception) {
                 1.0
             }
-        }
-
-        fun get2225ProtectStockUp(): Boolean {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_2225_protect_stock_up)
-            return preferences.getBoolean(key, false)
         }
 
         /******************** Follower *************************/

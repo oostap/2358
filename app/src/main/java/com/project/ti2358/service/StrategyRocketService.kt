@@ -69,7 +69,7 @@ class StrategyRocketService : Service() {
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Ракеты отменены", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Ракеты отменены", Toast.LENGTH_SHORT).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -82,7 +82,7 @@ class StrategyRocketService : Service() {
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Ракеты запущены", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Ракеты запущены", Toast.LENGTH_SHORT).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {

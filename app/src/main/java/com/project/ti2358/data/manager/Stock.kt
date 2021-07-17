@@ -34,8 +34,6 @@ data class Stock(var instrument: Instrument) {
 
     var dayVolumeCash: Double = 0.0
 
-    var changeOnStartTimer: Double = 0.0    // сколько % было на старте таймера для 2358
-
     var closePrices: ClosePrice? = null
     var candleToday: Candle? = null                               // реалтайм, дневная свеча
     var minutesVolume: Int = 0

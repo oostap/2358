@@ -68,7 +68,7 @@ class StrategyArbitrationService : Service() {
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Арбитраж отменен", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Арбитраж отменен", Toast.LENGTH_SHORT).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -80,7 +80,7 @@ class StrategyArbitrationService : Service() {
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Арбитраж запущен", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Арбитраж запущен", Toast.LENGTH_SHORT).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {

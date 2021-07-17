@@ -169,12 +169,12 @@ class PortfolioAlorFragment : Fragment(R.layout.fragment_portfolio_alor) {
                     }
 
                     itemView.setOnClickListener {
-                        if (portfolioPosition.stock == null) {
-                            Utils.showMessageAlert(requireContext(), "Какая-то странная бумага, нет такой в каталоге у ТИ!")
-                        } else {
+//                        if (portfolioPosition.stock == null) {
+//                            Utils.showMessageAlert(requireContext(), "Какая-то странная бумага, нет такой в каталоге у ТИ!")
+//                        } else {
 //                            positionManager.start(portfolioPosition)
 //                            itemView.findNavController().navigate(R.id.action_nav_portfolio_to_nav_portfolio_position)
-                        }
+//                        }
                     }
 
                     sectorView.text = ""

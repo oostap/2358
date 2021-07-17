@@ -79,7 +79,7 @@ class StrategyTazikService : Service() {
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Тазики убраны", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Тазики убраны", Toast.LENGTH_SHORT).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -91,7 +91,7 @@ class StrategyTazikService : Service() {
     }
 
     private fun scheduleUpdate() {
-        Toast.makeText(this, "Запущены тазики на покупку просадок", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Запущены тазики на покупку просадок", Toast.LENGTH_SHORT).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {

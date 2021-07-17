@@ -15,6 +15,8 @@ data class Orderbook(
     val limitDown: Double,
 ) {
     fun getBestPriceFromAsk(quantity: Int): Double {
+        if (asks.isEmpty()) return 0.0
+
         if (quantity == 0) return asks.first().price
 
         var total = 0
@@ -28,6 +30,8 @@ data class Orderbook(
     }
 
     fun getBestPriceFromBid(quantity: Int): Double {
+        if (bids.isEmpty()) return 0.0
+
         if (quantity == 0) return bids.first().price
 
         var total = 0

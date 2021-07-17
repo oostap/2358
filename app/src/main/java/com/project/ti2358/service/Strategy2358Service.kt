@@ -74,7 +74,7 @@ class Strategy2358Service : Service() {
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Покупка 2358 отменена", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Покупка 2358 отменена", Toast.LENGTH_SHORT).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -84,7 +84,7 @@ class Strategy2358Service : Service() {
     }
 
     private fun schedulePurchase() {
-        Toast.makeText(this, "Запущен таймер на покупку 2358", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Запущен таймер на покупку 2358", Toast.LENGTH_SHORT).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {

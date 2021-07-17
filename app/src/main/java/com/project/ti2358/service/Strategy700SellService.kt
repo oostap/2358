@@ -67,7 +67,7 @@ class Strategy700SellService : Service() {
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "Продажа 700 sell отменена", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Продажа 700 sell отменена", Toast.LENGTH_SHORT).show()
         if (notificationButtonReceiver != null) unregisterReceiver(notificationButtonReceiver)
         notificationButtonReceiver = null
         isServiceRunning = false
@@ -77,7 +77,7 @@ class Strategy700SellService : Service() {
     }
 
     private fun scheduleSell() {
-        Toast.makeText(this, "Запущен таймер на продажу 700", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Запущен таймер на продажу 700", Toast.LENGTH_SHORT).show()
         isServiceRunning = true
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {

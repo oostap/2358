@@ -10,7 +10,6 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
-import android.widget.Toast.LENGTH_LONG
 import android.widget.Toast.LENGTH_SHORT
 import androidx.navigation.NavController
 import com.project.ti2358.BuildConfig
