@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.*
-import com.project.ti2358.data.tinkoff.model.PortfolioPosition
+import com.project.ti2358.data.tinkoff.model.TinkoffPosition
 import com.project.ti2358.data.daager.service.ThirdPartyService
 import com.project.ti2358.databinding.FragmentPortfolioTinkoffBinding
 import com.project.ti2358.databinding.FragmentPortfolioTinkoffItemBinding
@@ -67,7 +67,7 @@ class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
             updateButton.setOnClickListener {
                 updateData()
 
-                strategyTelegram.sendDepo()
+//                strategyTelegram.sendDepo()
 //                strategyTA.processALL()
             }
 
@@ -120,8 +120,8 @@ class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
         }
     }
 
-    inner class ItemPortfolioRecyclerViewAdapter(var values: List<PortfolioPosition>) : RecyclerView.Adapter<ItemPortfolioRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<PortfolioPosition>) {
+    inner class ItemPortfolioRecyclerViewAdapter(var values: List<TinkoffPosition>) : RecyclerView.Adapter<ItemPortfolioRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<TinkoffPosition>) {
             values = newValues
             notifyDataSetChanged()
         }
@@ -141,7 +141,7 @@ class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
                     val avg = portfolioPosition.getAveragePrice()
                     var priceNow = "0.0$"
                     portfolioPosition.stock?.let {
-                        lotsView.text = "${portfolioPosition.lots * it.instrument.lot}"
+                        lotsView.text = "${portfolioPosition.getLots() * it.instrument.lot}"
                         priceNow = (it.getPriceNow() / it.instrument.lot).toMoney(it)
                     }
 
@@ -153,7 +153,7 @@ class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
                     var percent = portfolioPosition.getProfitPercent()
 
                     // инвертировать доходность шорта
-                    percent *= sign(portfolioPosition.lots.toDouble())
+                    percent *= sign(portfolioPosition.getLots().toDouble())
 
                     val totalCash = portfolioPosition.balance * avg + profit
                     cashView.text = totalCash.toMoney(portfolioPosition.stock)

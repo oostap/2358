@@ -139,7 +139,7 @@ class StreamingPantiniService {
                 }
             }
 
-            if (!jsonObject.isNull("ts") && ticker != "") { // лента {"t":"BBBY","tsh":["1624038539527|27.38|@ T |QD|350|1","1624038540152|27.39|@ TI|PA|33|3","1624038540152|27.38|@ TI|PA|1|2","1624038540257|27.38|@FT |PA|115|2","1624038540358|27.38|@FTI|PA|55|2","1624038545177|27.38|@FT |PA|600|2","1624038548565|27.38|@FT |PA|300|2","1624038548687|27.38|@FT |PA|300|2","1624038583507|27.34|@ T |QD|871|1","1624038606161|27.42|@ TI|QD|1|5","1624038613437|27.4|@ TI|QD|50|5","1624038614808|27.37|@ TI|PA|2|5","1624038689008|27.36|@FTI|PA|2|5","1624038714791|27.37|@FTI|PA|10|5","1624038786827|27.36|@ TI|PA|7|5","1624038814359|27.35|@ TI|PA|25|5","1624038827173|27.35|@ TI|Q|1|5","1624038934562|27.36|@ TI|PA|2|5","1624038981078|27.34|@ TI|QD|45|1","1624039050200|27.37|@ TI|PA|3|5","1624039157433|27.37|@ TI|PA|15|5","1624039218743|27.58|@ TI|QD|25|2","1624039306878|27.58|@ TI|QD|10|2","1624039485360|27.49|@ TI|QD|16|5","1624039485360|27.5|@ TI|QD|10|5","1624039786924|27.5|@ T |QD|974|1","1624040098164|27.41|@ TI|PA|5|5","1624040098164|27.4|@ TI|PA|21|5","1624040518486|27.4|@ TI|PA|20|5","1624040624573|27.5|@ TI|QD|1|2","1624041023245|27.4|@FTI|PA|59|5","1624041023245|27.38|@FTI|PA|10|5","1624041023246|27.36|@FTI|Q|2|5","1624041023246|27.34|@FTI|PA|29|1","1624041353271|27.38|@ TI|PA|1|5","1624041353271|27.38|@ TI|PA|4|5","1624041420873|27.48|@ TI|PA|1|5","1624041438246|27.48|@ TI|PA|10|5","1624041568825|27.38|@FTI|PA|1|5","1624041568826|27.35|@FTI|PA|40|5","1624041568827|27.34|@FTI|PA|3|1","1624041596021|27.47|@FTI|PA|10|5","1624041629137|27.47|@ TI|PA|1|5","1624041716153|27.47|@ TI|PA|1|5","1624041757100|27.47|@ TI|PA|1|5","1624042986184|27.37|@ TI|PA|50|5","1624042986184|27.34|@ TI|PA|39|1","1624042993237|27.48|@ T |QD|100|2","1624043018114|27.48|@ T |QD|100|2","1624043219432|27.46|@ TI|PA|3|5","1624043469001|27.48|@ T |QD|100|2","1624043679401|27.45|@ TI|PA|6|5","1624043797530|27.45|@ TI|PA|30|5","1624044252761|27.34|@FTI|PA|50|1","1624044451461|27.4|@ T |PA|200|5","1624044514925|27.34|@FTI|PA|67|5","1624044514925|27.34|@FTI|PA|9|5","1624045153906|27.38|@ TI|PA|50|5","1624045153943|27.38|@ TI|PA|40|5","1624045422499|27.39|@ T |QD|200|2","1624045476370|27.38|@ TI|PA|1|5","1624045676945|27.39|@ TI|QD|50|2","1624045784439|27.34|@ TI|QD|46|5","1624045784439|27.3|@ TI|QD|1|1","1624045804635|27.34|@FTI|Q|12|5","1624045804635|27.34|@FTI|Q|20|5","1624045804635|27.3|@FTI|Q|80|5","1624045804635|27.3|@FTI|Q|10|5","1624045804635|27.27|@FTI|Q|1|5","1624045804635|27.25|@FTI|Q|1|1","1624045804635|27.34|@FTI|PA|1|5","1624045804635|27.32|@FTI|PA|10|5","1624045804635|27.3|@FTI|PA|5|5","1624045804635|27.3|@FTI|PA|1|5","1624045804635|27.3|@FTI|PA|2|5","1624045804635|27.25|@FTI|PA|20|5","1624045804635|27.25|@FTI|PA|75|5","1624045804636|27.2|@FTI|PA|5|5","1624045811907|27.2|@FT |PA|2710|5","1624045859203|27.19|@ TI|PA|10|5","1624045949954|27.25|@ TI|QD|50|5","1624045971355|27.19|@ TI|PA|10|5","1624046006426|27.25|@ TI|QD|10|5","1624046127738|27.29|@ T |PA|300|5","1624046127738|27.3|@ T |PA|2700|2","1624046138985|27.26|@ TI|PA|5|5","1624046138985|27.25|@ TI|PA|5|1","1624046138985|27.25|@ TI|PA|85|1","1624046235510|27.29|@ TI|QD|10|2","1624046270762|27.29|@ TI|QD|15|2","1624046330924|27.29|@FTI|Q|10|5","1624046334508|27.29|@ TI|PA|10|5","1624046335477|27.25|@ TI|PA|15|5","1624046335477|27.25|@ TI|PA|85|5","1624046346781|27.15|@ TI|QD|5|5","1624046346784|27.25|@ TI|PA|10|5","1624046361731|27.25|@ TI|PA|5|1","1624046361731|27.25|@ T |PA|145|1","1624046365348|27.3|@ TI|QD|2|2","1624046383126|27.3|@ T |PA|155|2"]}
+            if (!jsonObject.isNull("ts") && ticker != "") { // лента {"t":"BBBY","ts":"1624038539527|27.38|@ T |QD|350|1"}
                 val ts: String = jsonObject.getString("ts")
                 val lenta = PantiniLenta(ticker)
                 lenta.addPrint(ts)
@@ -244,7 +244,6 @@ class StreamingPantiniService {
     }
 
     private fun subscribeOrderbookEventsStream(stock: Stock) {
-//        Log.d("StreamingService", "subscribe for order events: figi: $figi, depth: $depth")
         webSocket?.send(Gson().toJson(PantiniMessageBody("l2sub", stock.ticker, true)))
         if (activeOrderbookSubscriptions.find { it.ticker == stock.ticker } == null) {
             activeOrderbookSubscriptions.add(stock)
@@ -257,7 +256,6 @@ class StreamingPantiniService {
     }
 
     private fun subscribeLentaEventsStream(stock: Stock) {
-//        Log.d("StreamingService", "subscribe for candle events: figi: $figi, interval: $interval")
         webSocket?.send(Gson().toJson(PantiniMessageBody("tssub", stock.ticker, true)))
         if (activeLentaSubscriptions.find { it.ticker == stock.ticker } == null) {
             activeLentaSubscriptions.add(stock)
@@ -265,9 +263,8 @@ class StreamingPantiniService {
     }
 
     fun unsubscribeLentaEventsStream(stock: Stock) {
-//        Log.d("StreamingService", "unsubscribe from candle events: figi: $figi, interval: $interval")
         webSocket?.send(Gson().toJson(PantiniMessageBody("tsunsub", stock.ticker)))
-        activeOrderbookSubscriptions.removeAll { it.ticker == stock.ticker }
+        activeLentaSubscriptions.removeAll { it.ticker == stock.ticker }
     }
 
 }

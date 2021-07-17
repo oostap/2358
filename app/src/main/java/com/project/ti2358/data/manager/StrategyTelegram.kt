@@ -13,10 +13,12 @@ import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.network.fold
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.project.ti2358.data.alor.model.AlorOrder
+import com.project.ti2358.data.common.BaseOrder
+import com.project.ti2358.data.common.BasePosition
 import com.project.ti2358.data.tinkoff.model.TinkoffOrder
 import com.project.ti2358.data.pantini.model.PantiniLenta
 import com.project.ti2358.data.tinkoff.service.OperationsService
-import com.project.ti2358.data.tinkoff.service.OrdersService
 import com.project.ti2358.data.daager.service.ThirdPartyService
 import com.project.ti2358.data.tinkoff.model.*
 import com.project.ti2358.service.*
@@ -32,9 +34,12 @@ import kotlin.math.sign
 @KoinApiExtension
 class StrategyTelegram : KoinComponent {
     private val stockManager: StockManager by inject()
+    private val brokerManager: BrokerManager by inject()
     private val operationsService: OperationsService by inject()
-    private val ordersService: OrdersService by inject()
+
     private val portfolioManager: PortfolioManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
+
     private val strategyTelegramCommands: StrategyTelegramCommands by inject()
     private val thirdPartyService: ThirdPartyService by inject()
 
@@ -108,22 +113,21 @@ class StrategyTelegram : KoinComponent {
         jobUpdateOrders = GlobalScope.launch(Dispatchers.Default) {
             while (true) {
                 try {
-                    orders = Collections.synchronizedList(ordersService.orders(portfolioManager.getActiveBrokerAccountId()))
+                    brokerManager.refreshOrders()
+                    val orders = brokerManager.getOrdersAll()
                     if (ordersPosted.isEmpty()) {
                         orders.forEach {
-                            ordersPosted.add(it.orderId)
+                            ordersPosted.add(it.getOrderID())
                         }
                     } else {
                         ordersPosted.add("empty")
                     }
 
                     for (order in orders) {
-                        if (order.orderId !in ordersPosted) {
-                            if (order.status != OrderStatus.NEW) continue
+                        if (order.getOrderID() !in ordersPosted) {
+                            if (!order.isCreated()) continue // незавершенная
 
-                            ordersPosted.add(order.orderId)
-                            order.stock = stockManager.getStockByFigi(order.figi)
-
+                            ordersPosted.add(order.getOrderID())
                             sendMessageToChats(orderToString(order))
                         }
                     }
@@ -263,24 +267,34 @@ class StrategyTelegram : KoinComponent {
         return calendar.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS") + zone
     }
 
-    private fun orderToString(order: TinkoffOrder): String {
-        val ticker = order.stock?.ticker
-        val orderSymbol = if (order.operation == OperationType.BUY) "🟢" else "🔴"
-        var orderString = if (order.operation == OperationType.BUY) "BUY " else "SELL "
-        val position = portfolioManager.getPositionForFigi(order.figi)
-        if (position == null && order.operation == OperationType.BUY) {
+    private fun orderToString(order: BaseOrder): String {
+        val ticker = order.getOrderStock()?.ticker
+        val orderSymbol = if (order.getOrderOperation() == OperationType.BUY) "🟢" else "🔴"
+        var orderString = if (order.getOrderOperation() == OperationType.BUY) "BUY " else "SELL "
+
+        var position: BasePosition? = null
+        if (order is TinkoffOrder) {
+            position = portfolioManager.getPositionForFigi(order.figi)
+        }
+
+        if (order is AlorOrder) {
+            position = alorPortfolioManager.getPositionForTicker(order.symbol)
+            return ""
+        }
+
+        if (position == null && order.getOrderOperation() == OperationType.BUY) {
             orderString += "LONG вход"
         }
 
-        if (position == null && order.operation == OperationType.SELL) {
+        if (position == null && order.getOrderOperation() == OperationType.SELL) {
             orderString += "SHORT вход"
         }
 
-        if (position != null && order.operation == OperationType.SELL) {
-            orderString += if (position.lots < 0) { // продажа в шорте
+        if (position != null && order.getOrderOperation() == OperationType.SELL) {
+            orderString += if (position.getLots() < 0) { // продажа в шорте
                 "SHORT усреднение"
             } else { // продажа в лонге
-                if (order.requestedLots == abs(position.lots)) {
+                if (order.getLotsRequested() == abs(position.getLots())) {
                     "LONG выход"
                 } else {
                     "LONG выход часть"
@@ -288,9 +302,9 @@ class StrategyTelegram : KoinComponent {
             }
         }
 
-        if (position != null && order.operation == OperationType.BUY) {
-            orderString += if (position.lots < 0) { // покупка в шорте
-                if (order.requestedLots == abs(position.lots)) {
+        if (position != null && order.getOrderOperation() == OperationType.BUY) {
+            orderString += if (position.getLots() < 0) { // покупка в шорте
+                if (order.getLotsRequested() == abs(position.getLots())) {
                     "SHORT выход"
                 } else {
                     "SHORT выход часть"
@@ -302,13 +316,13 @@ class StrategyTelegram : KoinComponent {
 
         var depo = ""
         position?.let {
-            val percent = it.getProfitPercent() * sign(it.lots.toDouble())
+            val percent = it.getProfitPercent() * sign(it.getLots().toDouble())
             val emoji = Utils.getEmojiForPercent(percent)
             depo += "\n💼 %d * %.2f$ = %.2f$ > %.2f%%%s".format(
                 locale = Locale.US,
-                it.lots,
+                it.getLots(),
                 it.getAveragePrice(),
-                it.lots * it.getAveragePrice(),
+                it.getLots() * it.getAveragePrice(),
                 percent,
                 emoji
             )
@@ -318,10 +332,10 @@ class StrategyTelegram : KoinComponent {
             ticker,
             orderString,
             orderSymbol,
-            order.executedLots,
-            order.requestedLots,
-            order.price,
-            order.requestedLots * order.price,
+            order.getLotsExecuted(),
+            order.getLotsRequested(),
+            order.getOrderPrice(),
+            order.getLotsRequested() * order.getOrderPrice(),
             depo
         )
     }
@@ -341,8 +355,8 @@ class StrategyTelegram : KoinComponent {
         }
 
         if (position != null && operation.operationType == OperationType.SELL) {
-            operationString += if (position.lots < 0) { // продажа в шорте
-                if (operation.quantityExecuted == abs(position.lots)) {
+            operationString += if (position.getLots() < 0) { // продажа в шорте
+                if (operation.quantityExecuted == abs(position.getLots())) {
                     "SHORT вход"
                 } else {
                     "SHORT усреднение"
@@ -353,10 +367,10 @@ class StrategyTelegram : KoinComponent {
         }
 
         if (position != null && operation.operationType == OperationType.BUY) {
-            operationString += if (position.lots < 0) { // покупка в шорте
+            operationString += if (position.getLots() < 0) { // покупка в шорте
                 "SHORT выход часть"
             } else { // покупка в лонге
-                if (operation.quantityExecuted == abs(position.lots)) {
+                if (operation.quantityExecuted == abs(position.getLots())) {
                     "LONG вход"
                 } else {
                     "LONG усреднение"
@@ -372,13 +386,13 @@ class StrategyTelegram : KoinComponent {
         val dateString = msk.time.toString("HH:mm:ss")
         var depo = ""
         position?.let {
-            val percent = it.getProfitPercent() * sign(it.lots.toDouble())
+            val percent = it.getProfitPercent() * sign(it.getLots().toDouble())
             val emoji = Utils.getEmojiForPercent(percent)
             depo += "\n💼 %d * %.2f$ = %.2f$ > %.2f%%%s".format(
                 locale = Locale.US,
-                it.lots,
+                it.getLots(),
                 it.getAveragePrice(),
-                it.lots * it.getAveragePrice(),
+                it.getLots() * it.getAveragePrice(),
                 percent,
                 emoji
             )
@@ -827,13 +841,15 @@ class StrategyTelegram : KoinComponent {
     }
 
     fun sendDepo() {
-        val positions = portfolioManager.getPositions().toMutableList()
-        positions.removeAll { it.stock == null }
-        val stocks = positions.map { it.stock!! }
+        val positions = brokerManager.getPositionsAll()
+        positions.removeAll { it.getPositionStock() == null }
+        val stocks = positions.map { it.getPositionStock()!! }
 
-        var text = "<code>%5s %4s %6s %5s %5s\n".format("💼", "шт.", "сред.", "$", "%")
+        var text = "<code> %-5s %-4s %-6s %-5s %-5s\n".format("💼", "lot", "avg.", "$", "%")
         for (p in positions) {
-            text += "%5s %4d %6.2f %5.2f %5.2f\n".format(p.stock?.ticker, p.lots, p.getAveragePrice(), p.getProfitAmount(), p.getProfitPercent())
+            val marker = if (p is TinkoffPosition) "🟡" else "🔵"
+
+            text += "%s%-5s %-4d %-6.2f %-5.2f %-5.2f\n".format(marker, p.getPositionStock()?.ticker, p.getLots(), p.getAveragePrice(), p.getProfitAmount(), p.getProfitPercent())
         }
         text += "</code>"
 

@@ -14,7 +14,12 @@ data class TinkoffOrder(
     val type: OrderType,
     val price: Double,
 
-    var stock: Stock?
+    var stock: Stock?,
+
+    val rejectReason: String,
+    val message: String,
+    val commission: MoneyAmount?,
+
 ) : BaseOrder() {
 
     fun getOperationStatusString(): String {
@@ -30,4 +35,13 @@ data class TinkoffOrder(
     override fun getLotsExecuted(): Int = executedLots
     override fun getLotsRequested(): Int = requestedLots
     override fun getBrokerColor(): Int { return Utils.TINKOFF }
+
+    override fun isCreated(): Boolean = (status == OrderStatus.NEW || status == OrderStatus.PENDING_NEW)
+
+    override fun getOrderID(): String = orderId
+
+    override fun getOrderStock(): Stock? { return stock }
+    override fun getOrderPrice(): Double { return price }
+
+    override fun getOrderOperation(): OperationType = operation
 }

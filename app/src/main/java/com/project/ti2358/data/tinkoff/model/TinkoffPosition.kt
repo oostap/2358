@@ -1,16 +1,17 @@
 package com.project.ti2358.data.tinkoff.model
 
+import com.google.gson.annotations.SerializedName
+import com.project.ti2358.data.common.BasePosition
 import com.project.ti2358.data.manager.Stock
-import com.project.ti2358.data.tinkoff.model.InstrumentType
-import com.project.ti2358.data.tinkoff.model.MoneyAmount
 
-data class PortfolioPosition(
+data class TinkoffPosition(
     val figi: String,
     val ticker: String,
     val isin: String,
     val name: String,
 
-    val lots: Int,
+    @SerializedName("lots")
+    val count: Int,
 
     val instrumentType: InstrumentType,
     val balance: Double,
@@ -20,18 +21,22 @@ data class PortfolioPosition(
     val averagePositionPriceNoNkd: MoneyAmount?,
 
     var stock: Stock?
-) {
-    fun getProfitAmount(): Double {
-        return expectedYield?.value ?: 0.0
-    }
-
-    fun getAveragePrice(): Double {
+): BasePosition() {
+    override fun getAveragePrice(): Double {
         return averagePositionPrice?.value ?: 0.0
     }
 
-    fun getProfitPercent(): Double {
+    override fun getLots(): Int = count
+
+    override fun getProfitAmount(): Double {
+        return expectedYield?.value ?: 0.0
+    }
+
+    override fun getProfitPercent(): Double {
         val profit = getProfitAmount()
         val totalCash = balance * getAveragePrice()
         return if (totalCash == 0.0) 0.0 else (100 * profit) / totalCash
     }
+
+    override fun getPositionStock(): Stock? = stock
 }

@@ -16,7 +16,7 @@ class StrategyTelegramCommands : KoinComponent {
     private val stockManager: StockManager by inject()
     private val portfolioManager: PortfolioManager by inject()
     private val ordersService: OrdersService by inject()
-    private val orderbookManager: OrderbookManager by inject()
+    private val brokerManager: BrokerManager by inject()
     private val strategyTelegram: StrategyTelegram by inject()
 
     private val strategyTazik: StrategyTazik by inject()
@@ -382,7 +382,7 @@ class StrategyTelegramCommands : KoinComponent {
 
                     if (operation == "sell") {  // # SELL VIPS 29.46 1
                         val position = portfolioManager.getPositionForFigi(figi) ?: return 0
-                        val lots = (position.lots / 100.0 * percent).toInt()
+                        val lots = (position.getLots() / 100.0 * percent).toInt()
 
                         if (lots == 0) return 0
 
@@ -410,13 +410,15 @@ class StrategyTelegramCommands : KoinComponent {
                 if (operation in listOf("buy_move", "sell_move")) { // # BUY_MOVE VIPS 0.01
                     if (list.size != 4) return 0
 
-                    val change = list[3].toDouble()
-                    val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
-                    val buyOrders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
-                    buyOrders.forEach { order ->
-                        val newIntPrice = ((order.price + change) * 100).roundToInt()
-                        val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, order.stock)
-                        orderbookManager.replaceOrderTinkoff(order, newPrice, operationType)
+                    GlobalScope.launch(Dispatchers.Main) {
+                        val change = list[3].toDouble()
+                        val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
+                        val orders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
+                        orders.forEach { order ->
+                            val newIntPrice = ((order.price + change) * 100).roundToInt()
+                            val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, order.stock)
+                            brokerManager.replaceOrderTinkoff(order, newPrice, operationType)
+                        }
                     }
                 }
 
@@ -425,9 +427,9 @@ class StrategyTelegramCommands : KoinComponent {
 
                     GlobalScope.launch(Dispatchers.Main) {
                         val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
-                        val buyOrders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
-                        buyOrders.forEach { order ->
-                            orderbookManager.cancelOrderTinkoff(order)
+                        val orders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
+                        orders.forEach { order ->
+                            brokerManager.cancelOrderTinkoff(order)
 
                             val money = (order.requestedLots - order.executedLots) * order.price
                             if (operationType == OperationType.SELL) {

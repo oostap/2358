@@ -3,6 +3,7 @@ package com.project.ti2358.data.alor.model
 import com.project.ti2358.data.common.BaseOrder
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.tinkoff.model.OperationType
+import com.project.ti2358.data.tinkoff.model.OrderStatus
 import com.project.ti2358.service.Utils
 import java.util.*
 
@@ -63,4 +64,13 @@ data class AlorOrder(
     override fun getLotsExecuted(): Int = filled
     override fun getLotsRequested(): Int = qtyUnits
     override fun getBrokerColor(): Int { return Utils.ALOR }
+
+    override fun isCreated(): Boolean = (status == AlorOrderStatus.WORKING)
+
+    override fun getOrderID(): String = id
+
+    override fun getOrderStock(): Stock? { return stock }
+    override fun getOrderPrice(): Double { return price }
+
+    override fun getOrderOperation(): OperationType = side
 }

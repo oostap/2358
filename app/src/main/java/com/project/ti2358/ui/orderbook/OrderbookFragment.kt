@@ -20,12 +20,10 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.alor.model.AlorOrder
 import com.project.ti2358.data.common.BaseOrder
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.tinkoff.model.OperationType
-import com.project.ti2358.data.tinkoff.model.TinkoffOrder
-import com.project.ti2358.data.tinkoff.model.PortfolioPosition
+import com.project.ti2358.data.tinkoff.model.TinkoffPosition
 import com.project.ti2358.data.pantini.model.PantiniPrint
 import com.project.ti2358.databinding.FragmentOrderbookBinding
 import com.project.ti2358.databinding.FragmentOrderbookItemBinding
@@ -47,6 +45,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     val chartManager: ChartManager by inject()
     val stockManager: StockManager by inject()
     val orderbookManager: OrderbookManager by inject()
+    val brokerManager: BrokerManager by inject()
 
     val portfolioManager: PortfolioManager by inject()
     val alorPortfolioManager: AlorPortfolioManager by inject()
@@ -236,7 +235,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             positionView.setOnClickListener {
                 activeStock?.let {
                     portfolioManager.getPositionForFigi(it.figi)?.let { p ->
-                        volumeEditText.setText(abs(p.lots - p.blocked).toInt().toString())
+                        volumeEditText.setText(abs(p.getLots() - p.blocked).toInt().toString())
                     }
                 }
             }
@@ -314,11 +313,11 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                         val profit = p.getProfitAmount()
                         priceChangeAbsoluteView.text = profit.toMoney(stock)
 
-                        val percent = p.getProfitPercent() * sign(p.lots.toDouble())   // инвертировать доходность шорта
+                        val percent = p.getProfitPercent() * sign(p.getLots().toDouble())   // инвертировать доходность шорта
                         val totalCash = p.balance * avg + profit
                         cashView.text = totalCash.toMoney(stock)
 
-                        lotsView.text = "${p.lots}"
+                        lotsView.text = "${p.getLots()}"
                         lotsBlockedView.text = "${p.blocked.toInt()}🔒"
 
                         priceChangePercentView.text = percent.toPercent()
@@ -375,19 +374,14 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     }
 
     private fun moveAllOrders(delta: Int, operationType: OperationType) {
-        activeStock?.let {
-            val buyOrdersTinkoff = portfolioManager.getOrderAllOrdersForFigi(it.figi, operationType)
-            buyOrdersTinkoff.forEach { order ->
-                val newIntPrice = (order.price * 100).roundToInt() + delta
-                val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, order.stock)
-                orderbookManager.replaceOrderTinkoff(order, newPrice, operationType)
-            }
-
-            val buyOrdersAlor = alorPortfolioManager.getOrderAllOrdersForTicker(it.ticker, operationType)
-            buyOrdersAlor.forEach { order ->
-                val newIntPrice = (order.price * 100).roundToInt() + delta
-                val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, order.stock)
-                orderbookManager.replaceOrderAlor(order, newPrice, operationType)
+        GlobalScope.launch(Dispatchers.Main) {
+            activeStock?.let {
+                val orders = brokerManager.getOrdersAllForStock(it, operationType)
+                orders.forEach { order ->
+                    val newIntPrice = (order.getOrderPrice() * 100).roundToInt() + delta
+                    val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, it)
+                    brokerManager.replaceOrder(order, newPrice, operationType)
+                }
             }
         }
     }
@@ -430,7 +424,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         layout.addView(lotsBox)
 
         val position = portfolioManager.getPositionForFigi(orderbookLine.stock.figi)
-        val depoCount = position?.lots ?: 0
+        val depoCount = position?.getLots() ?: 0
         val avg = position?.getAveragePrice() ?: 0
         val title = "В депо: $depoCount по $avg"
 
@@ -540,9 +534,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     } else if (actionType == "remove") {
                         val dropped = view as TextView              // заявка
                         val order = dropped.getTag(R.string.order_item) as BaseOrder
-                        GlobalScope.launch(Dispatchers.Main) {
-                            orderbookManager.cancelOrder(order)
-                        }
+                        orderbookManager.cancelOrder(order)
                     }
 
                     fragmentOrderbookBinding?.scalperPanelView?.visibility = VISIBLE
@@ -569,14 +561,14 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
                 var targetPriceAsk = 0.0
                 var targetPriceBid = 0.0
-                var portfolioPosition: PortfolioPosition? = null
+                var tinkoffPosition: TinkoffPosition? = null
                 activeStock?.let {
                     if (orderbookLines.isNotEmpty()) {
                         targetPriceAsk = orderbookLines.first().askPrice
                         targetPriceBid = orderbookLines.first().bidPrice
 
-                        portfolioPosition = portfolioManager.getPositionForFigi(it.figi)
-                        portfolioPosition?.let { p ->
+                        tinkoffPosition = portfolioManager.getPositionForFigi(it.figi)
+                        tinkoffPosition?.let { p ->
                             targetPriceAsk = p.getAveragePrice()
                             targetPriceBid = p.getAveragePrice()
                         }
@@ -586,8 +578,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 val allow = true
                 if (targetPriceAsk != 0.0 && allow) {
                     var sign = 1.0
-                    portfolioPosition?.let {
-                        sign = sign(it.lots.toDouble())
+                    tinkoffPosition?.let {
+                        sign = sign(it.getLots().toDouble())
                     }
 
                     val percentBid = Utils.getPercentFromTo(item.bidPrice, targetPriceBid) * sign
@@ -600,10 +592,10 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     priceAskPercentView.setTextColor(Utils.getColorForValue(percentAsk))
                     priceAskPercentView.visibility = VISIBLE
 
-                    if (percentBid == 0.0 && portfolioPosition != null) {
+                    if (percentBid == 0.0 && tinkoffPosition != null) {
                         dragToBuyView.setBackgroundColor(Utils.TEAL)
                     }
-                    if (percentAsk == 0.0 && portfolioPosition != null) {
+                    if (percentAsk == 0.0 && tinkoffPosition != null) {
                         dragToSellView.setBackgroundColor(Utils.TEAL)
                     }
                 } else {
@@ -720,50 +712,6 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
                 countAskView.text = "${item.askCount}"
                 priceAskView.text = item.askPrice.toMoney(item.stock, false)
-
-                var targetPriceAsk = 0.0
-                var targetPriceBid = 0.0
-                var portfolioPosition: PortfolioPosition? = null
-                activeStock?.let {
-                    if (orderbookLines.isNotEmpty()) {
-                        targetPriceAsk = orderbookLines.first().askPrice
-                        targetPriceBid = orderbookLines.first().bidPrice
-
-                        portfolioPosition = portfolioManager.getPositionForFigi(it.figi)
-                        portfolioPosition?.let { p ->
-                            targetPriceAsk = p.getAveragePrice()
-                            targetPriceBid = p.getAveragePrice()
-                        }
-                    }
-                }
-
-                val allow = true
-                if (targetPriceAsk != 0.0 && allow) {
-                    var sign = 1.0
-                    portfolioPosition?.let {
-                        sign = sign(it.lots.toDouble())
-                    }
-
-                    val percentBid = Utils.getPercentFromTo(item.bidPrice, targetPriceBid) * sign
-                    priceBidPercentView.text = "%.2f%%".format(locale = Locale.US, percentBid)
-                    priceBidPercentView.setTextColor(Utils.getColorForValue(percentBid))
-                    priceBidPercentView.visibility = VISIBLE
-
-                    val percentAsk = Utils.getPercentFromTo(item.askPrice, targetPriceAsk) * sign
-                    priceAskPercentView.text = "%.2f%%".format(locale = Locale.US, percentAsk)
-                    priceAskPercentView.setTextColor(Utils.getColorForValue(percentAsk))
-                    priceAskPercentView.visibility = VISIBLE
-
-                    if (percentBid == 0.0 && portfolioPosition != null) {
-                        dragToBuyView.setBackgroundColor(Utils.TEAL)
-                    }
-                    if (percentAsk == 0.0 && portfolioPosition != null) {
-                        dragToSellView.setBackgroundColor(Utils.TEAL)
-                    }
-                } else {
-                    priceAskPercentView.visibility = GONE
-                    priceBidPercentView.visibility = GONE
-                }
 
                 if (item.exchange != "") { // US line
 

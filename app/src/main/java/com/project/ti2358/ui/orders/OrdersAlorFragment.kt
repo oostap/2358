@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.alor.model.AlorOrder
 import com.project.ti2358.data.manager.AlorPortfolioManager
+import com.project.ti2358.data.manager.BrokerManager
 import com.project.ti2358.data.manager.ChartManager
 import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.databinding.FragmentOrdersAlorBinding
@@ -26,6 +27,7 @@ import org.koin.core.component.KoinApiExtension
 @KoinApiExtension
 class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
     private val orderbookManager: OrderbookManager by inject()
+    private val brokerManager: BrokerManager by inject()
     private val chartManager: ChartManager by inject()
 
     val alorPortfolioManager: AlorPortfolioManager by inject()
@@ -68,7 +70,7 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
             cancelButton.setOnClickListener {
                 jobCancelAll?.cancel()
                 jobCancelAll = GlobalScope.launch(Dispatchers.Main) {
-                    orderbookManager.cancelAllOrdersAlor()
+                    brokerManager.cancelAllOrdersAlor()
                     updateData()
                 }
             }
@@ -122,7 +124,7 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
                     cancelButton.setOnClickListener {
                         jobCancel?.cancel()
                         jobCancel = GlobalScope.launch(Dispatchers.Main) {
-                            orderbookManager.cancelOrderAlor(order)
+                            brokerManager.cancelOrderAlor(order)
                             updateData()
                         }
                     }

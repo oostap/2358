@@ -10,7 +10,7 @@ import androidx.navigation.findNavController
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.tinkoff.model.OperationType
-import com.project.ti2358.data.tinkoff.model.PortfolioPosition
+import com.project.ti2358.data.tinkoff.model.TinkoffPosition
 import com.project.ti2358.databinding.FragmentPortfolioPositionBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
@@ -27,6 +27,7 @@ import kotlin.math.sign
 
 @KoinApiExtension
 class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position) {
+    private val brokerManager: BrokerManager by inject()
     private val portfolioManager: PortfolioManager by inject()
     private val positionManager: PositionManager by inject()
     private val orderbookManager: OrderbookManager by inject()
@@ -35,7 +36,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
     private var fragmentPortfolioPositionBinding: FragmentPortfolioPositionBinding? = null
 
     private lateinit var stock: Stock
-    private lateinit var portfolioPosition: PortfolioPosition
+    private lateinit var tinkoffPosition: TinkoffPosition
     private lateinit var stockPurchase: StockPurchase
 
     private var jobOrderbook: Job? = null
@@ -52,12 +53,12 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
         val binding = FragmentPortfolioPositionBinding.bind(view)
         fragmentPortfolioPositionBinding = binding
 
-        portfolioPosition = positionManager.activePosition!!
-        portfolioPosition.stock?.let {
+        tinkoffPosition = positionManager.activePosition!!
+        tinkoffPosition.stock?.let {
             stock = it
             stockPurchase = StockPurchase(it).apply {
-                position = portfolioPosition
-                lots = position?.lots ?: 0
+                position = tinkoffPosition
+                lots = position?.getLots() ?: 0
                 percentProfitSellFrom = Utils.getPercentFromTo(stock.getPriceNow(), position?.getAveragePrice() ?: 0.0)
                 trailingStopTakeProfitPercentActivation = SettingsManager.getTrailingStopTakeProfitPercentActivation()
                 trailingStopTakeProfitPercentDelta = SettingsManager.getTrailingStopTakeProfitPercentDelta()
@@ -75,8 +76,8 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
             lotsPlusButton.setOnClickListener {
                 stockPurchase.position?.let {
                     stockPurchase.lots += 1
-                    if (stockPurchase.lots > it.lots) {
-                        stockPurchase.lots = it.lots
+                    if (stockPurchase.lots > it.getLots()) {
+                        stockPurchase.lots = it.getLots()
                     }
                 }
                 updateLots()
@@ -203,9 +204,10 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
             cancelAllButton.setOnClickListener {
                 // отменить все лимитки на продажу
                 GlobalScope.launch(Dispatchers.Main) {
-                    val orders = portfolioManager.getOrderAllOrdersForFigi(portfolioPosition.figi, OperationType.SELL)
+
+                    val orders = portfolioManager.getOrderAllOrdersForFigi(tinkoffPosition.figi, OperationType.SELL)
                     orders.forEach {
-                        orderbookManager.cancelOrderTinkoff(it)
+                        brokerManager.cancelOrderTinkoff(it)
                     }
                 }
 
@@ -271,7 +273,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
             lotsEditText.setText(stockPurchase.lots.toString(), TextView.BufferType.EDITABLE)
             lotsPercentView.text = "? %"
             stockPurchase.position?.let {
-                lotsPercentView.text = (stockPurchase.lots.toDouble() / it.lots.toDouble() * 100.0).toInt().toString() + "%"
+                lotsPercentView.text = (stockPurchase.lots.toDouble() / it.getLots().toDouble() * 100.0).toInt().toString() + "%"
             }
             lotsBar.progress = stockPurchase.lots
         }
@@ -284,16 +286,16 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
             try {
                 portfolioManager.refreshDeposit()
 
-                val pos = portfolioManager.getPositionForFigi(portfolioPosition.figi)
+                val pos = portfolioManager.getPositionForFigi(tinkoffPosition.figi)
                 if (pos == null) view?.findNavController()?.navigateUp()
 
-                portfolioPosition = pos!!
+                tinkoffPosition = pos!!
 
                 val orderbook = positionManager.loadOrderbook()
                 orderbook?.let {
                     val priceAsk = it.getBestPriceFromAsk(0)
                     val priceBid = it.getBestPriceFromBid(0)
-                    val pricePosition = portfolioPosition.getAveragePrice()
+                    val pricePosition = tinkoffPosition.getAveragePrice()
 
                     val percentBid = Utils.getPercentFromTo(priceBid, pricePosition)
                     val percentAsk = Utils.getPercentFromTo(priceAsk, pricePosition)
@@ -333,11 +335,11 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
 
     private fun updatePosition() {
         fragmentPortfolioPositionBinding?.apply {
-            portfolioPosition.let {
+            tinkoffPosition.let {
                 tickerView.text = "${it.stock?.getTickerLove()}"
 
                 lotsBlockedView.text = if (it.blocked.toInt() > 0) "(${it.blocked.toInt()}🔒)" else ""
-                lotsView.text = "${it.lots}"
+                lotsView.text = "${it.getLots()}"
 
                 val avg = it.getAveragePrice()
                 priceView.text = "${avg.toMoney(it.stock)} ➡ ${it.stock?.getPriceString()}"
@@ -345,7 +347,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
                 val profit = it.getProfitAmount()
                 priceChangeAbsoluteView.text = profit.toMoney(it.stock)
 
-                val percent = it.getProfitPercent() * sign(it.lots.toDouble()) // инвертировать доходность шорта
+                val percent = it.getProfitPercent() * sign(it.getLots().toDouble()) // инвертировать доходность шорта
 
                 val totalCash = it.balance * avg + profit
                 cashView.text = totalCash.toMoney(it.stock)

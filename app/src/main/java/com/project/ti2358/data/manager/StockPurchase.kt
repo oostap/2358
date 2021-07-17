@@ -1,5 +1,6 @@
 package com.project.ti2358.data.manager
 
+import com.project.ti2358.data.common.BaseOrder
 import com.project.ti2358.data.tinkoff.model.*
 import com.project.ti2358.data.tinkoff.service.MarketService
 import com.project.ti2358.data.tinkoff.service.OrdersService
@@ -15,6 +16,7 @@ import kotlin.math.ceil
 
 @KoinApiExtension
 data class StockPurchase(var stock: Stock) : KoinComponent {
+    private val brokerManager: BrokerManager by inject()
     private val ordersService: OrdersService by inject()
     private val portfolioManager: PortfolioManager by inject()
     private val marketService: MarketService by inject()
@@ -23,7 +25,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
     var ticker = stock.ticker
     var figi = stock.figi
 
-    var position: PortfolioPosition? = null
+    var position: TinkoffPosition? = null
 
     var tazikPrice: Double = 0.0                       // обновляемая фиксированная цена, от которой считаем тазы
     var tazikEndlessPrice: Double = 0.0               // обновляемая фиксированная цена, от которой считаем бесконечные тазы
@@ -37,9 +39,9 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
 
     var status: PurchaseStatus = PurchaseStatus.NONE
 
-    var buyMarketOrder: MarketOrder? = null
-    var buyLimitOrder: LimitOrder? = null
-    var sellLimitOrder: LimitOrder? = null
+    var buyMarketOrder: BaseOrder? = null
+    var buyLimitOrder: BaseOrder? = null
+    var sellLimitOrder: BaseOrder? = null
 
     // для продажи/откупа лесенкой в 2225 и 2258 и DayLOW
     var percentProfitSellFrom: Double = 0.0
@@ -88,8 +90,8 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
         if (lots < 1) lots = 1
 
         position?.let {
-            if (lots > it.lots && stock.short == null) { // если бумага недоступна в шорт, то ограничить лоты размером позиции
-                lots = it.lots
+            if (lots > it.getLots() && stock.short == null) { // если бумага недоступна в шорт, то ограничить лоты размером позиции
+                lots = it.getLots()
             }
         }
     }
@@ -140,13 +142,13 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 }
 
                 // проверяем появился ли в портфеле тикер
-                var position: PortfolioPosition? = null
+                var position: TinkoffPosition? = null
                 var counter = 50
                 while (counter > 0) {
                     portfolioManager.refreshDeposit()
 
                     position = portfolioManager.getPositionForFigi(stock.figi)
-                    if (position != null && position.lots >= lots) { // куплено!
+                    if (position != null && position.getLots() >= lots) { // куплено!
                         status = PurchaseStatus.BOUGHT
                         break
                     }
@@ -162,7 +164,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                     status = PurchaseStatus.ORDER_SELL_PREPARE
                     position?.let {
                         sellLimitOrder = ordersService.placeLimitOrder(
-                            it.lots,
+                            it.getLots(),
                             stock.figi,
                             sellPrice,
                             OperationType.SELL,
@@ -201,7 +203,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
 
         val p = portfolioManager.getPositionForFigi(figi)
 
-        val lotsPortfolio = p?.lots ?: 0
+        val lotsPortfolio = p?.getLots() ?: 0
         var lotsToBuy = lots
 
         status = PurchaseStatus.WAITING
@@ -224,7 +226,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         )
                         delay(DelayFast)
 
-                        if (buyLimitOrder!!.status == OrderStatus.NEW || buyLimitOrder!!.status == OrderStatus.PENDING_NEW) {
+                        if (buyLimitOrder?.isCreated() == true) {
                             status = PurchaseStatus.ORDER_BUY
                             break
                         }
@@ -254,16 +256,10 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 if (profit == 0.0) {
                     delay(orderLifeTimeSeconds * 1000L)
                     status = PurchaseStatus.CANCELED
-                    try {
-                        buyLimitOrder?.let {
-                            ordersService.cancel(it.orderId, portfolioManager.getActiveBrokerAccountId())
-                        }
-                    } catch (e: Exception) {
-
-                    }
+                    brokerManager.cancelOrder(buyLimitOrder)
                 } else {
                     // проверяем появился ли в портфеле тикер
-                    var position: PortfolioPosition?
+                    var position: TinkoffPosition?
                     var iterations = 0
 
                     while (true) {
@@ -279,18 +275,12 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
 
                         if (iterations * DelayLong / 1000.0 > orderLifeTimeSeconds) { // отменить заявку на покупку
                             status = PurchaseStatus.CANCELED
-                            try {
-                                buyLimitOrder?.let {
-                                    ordersService.cancel(it.orderId, portfolioManager.getActiveBrokerAccountId())
-                                }
-                            } catch (e: Exception) {
-
-                            }
+                            brokerManager.cancelOrder(buyLimitOrder)
                             Utils.showToastAlert("$ticker: заявка отменена по $buyPrice")
                             return@launch
                         }
 
-                        val orderBuy = portfolioManager.getOrderForId(buyLimitOrder?.orderId ?: "", OperationType.BUY)
+                        val orderBuy = brokerManager.getOrderForId(buyLimitOrder?.getOrderID() ?: "", OperationType.BUY)
                         position = portfolioManager.getPositionForFigi(figi)
 
                         // проверка на большое количество лотов
@@ -315,7 +305,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         position?.let { // появилась позиция, проверить есть ли что продать
                             // выставить ордер на продажу
                             try {
-                                val lotsToSell = it.lots - it.blocked.toInt() - lotsPortfolio
+                                val lotsToSell = it.getLots() - it.blocked.toInt() - lotsPortfolio
                                 if (lotsToSell <= 0) {  // если свободных лотов нет, продолжаем
                                     return@let
                                 }
@@ -335,7 +325,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                                     portfolioManager.getActiveBrokerAccountId()
                                 )
 
-                                if (sellLimitOrder!!.status == OrderStatus.NEW || sellLimitOrder!!.status == OrderStatus.PENDING_NEW) {
+                                if (sellLimitOrder?.isCreated() == true) {
                                     status = PurchaseStatus.ORDER_SELL
                                     Utils.showToastAlert("$ticker: ордер на продажу по $profitPrice")
                                 } else { // заявка отклонена, вернуть лоты
@@ -360,7 +350,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                     while (true) {
                         delay(DelayLong)
                         val position = portfolioManager.getPositionForFigi(figi)
-                        if (position == null || position.lots == lotsPortfolio) { // продано!
+                        if (position == null || position.getLots() == lotsPortfolio) { // продано!
                             status = PurchaseStatus.SOLD
                             Utils.showToastAlert("$ticker: продано!?")
                             break
@@ -384,7 +374,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
 
         val p = portfolioManager.getPositionForFigi(figi)
 
-        val lotsPortfolio = abs(p?.lots ?: 0)
+        val lotsPortfolio = abs(p?.getLots() ?: 0)
         var lotsToSell = lots
 
         status = PurchaseStatus.WAITING
@@ -407,7 +397,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         )
                         delay(DelayFast)
 
-                        if (sellLimitOrder!!.status == OrderStatus.NEW || sellLimitOrder!!.status == OrderStatus.PENDING_NEW) {
+                        if (sellLimitOrder?.isCreated() == true) {
                             status = PurchaseStatus.ORDER_SELL
                             break
                         }
@@ -437,16 +427,10 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 if (profit == 0.0) {
                     delay(orderLifeTimeSeconds * 1000L)
                     status = PurchaseStatus.CANCELED
-                    try {
-                        sellLimitOrder?.let {
-                            ordersService.cancel(it.orderId, portfolioManager.getActiveBrokerAccountId())
-                        }
-                    } catch (e: Exception) {
-
-                    }
+                    brokerManager.cancelOrder(sellLimitOrder)
                 } else {
                     // проверяем появился ли в портфеле тикер
-                    var position: PortfolioPosition?
+                    var position: TinkoffPosition?
                     var iterations = 0
 
                     while (true) {
@@ -462,18 +446,12 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
 
                         if (iterations * DelayLong / 1000.0 > orderLifeTimeSeconds) { // отменить заявку на покупку
                             status = PurchaseStatus.CANCELED
-                            try {
-                                sellLimitOrder?.let {
-                                    ordersService.cancel(it.orderId, portfolioManager.getActiveBrokerAccountId())
-                                }
-                            } catch (e: Exception) {
-
-                            }
+                            brokerManager.cancelOrder(sellLimitOrder)
                             Utils.showToastAlert("$ticker: заявка отменена по $sellPrice")
                             return@launch
                         }
 
-                        val orderSell = portfolioManager.getOrderForId(buyLimitOrder?.orderId ?: "", OperationType.SELL)
+                        val orderSell = brokerManager.getOrderForId(buyLimitOrder?.getOrderID() ?: "", OperationType.SELL)
                         position = portfolioManager.getPositionForFigi(figi)
 
                         // проверка на большое количество лотов
@@ -498,7 +476,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         position?.let { // появилась позиция, проверить есть ли что продать
                             // выставить ордер на продажу
                             try {
-                                val lotsToBuy = abs(it.lots) - abs(it.blocked.toInt()) - lotsPortfolio
+                                val lotsToBuy = abs(it.getLots()) - abs(it.blocked.toInt()) - lotsPortfolio
                                 if (lotsToBuy <= 0) {  // если свободных лотов нет, продолжаем
                                     return@let
                                 }
@@ -518,7 +496,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                                     portfolioManager.getActiveBrokerAccountId()
                                 )
 
-                                if (buyLimitOrder!!.status == OrderStatus.NEW || buyLimitOrder!!.status == OrderStatus.PENDING_NEW) {
+                                if (buyLimitOrder?.isCreated() == true) {
                                     status = PurchaseStatus.ORDER_BUY
                                     Utils.showToastAlert("$ticker: ордер на откуп шорта по $profitPrice")
                                 } else { // заявка отклонена, вернуть лоты
@@ -543,7 +521,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                     while (true) {
                         delay(DelayLong)
                         val position = portfolioManager.getPositionForFigi(figi)
-                        if (position == null || position.lots == lotsPortfolio) { // продано!
+                        if (position == null || position.getLots() == lotsPortfolio) { // продано!
                             status = PurchaseStatus.SOLD
                             Utils.showToastAlert("$ticker: продано!?")
                             break
@@ -593,7 +571,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 delay(DelayFast)
 
                 // проверяем появился ли в портфеле тикер
-                var position: PortfolioPosition?
+                var position: TinkoffPosition?
                 while (true) {
                     try {
                         portfolioManager.refreshDeposit()
@@ -602,7 +580,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                     }
 
                     position = portfolioManager.getPositionForFigi(figi)
-                    if (position != null && position.lots >= lots) {
+                    if (position != null && position.getLots() >= lots) {
                         status = PurchaseStatus.BOUGHT
                         Utils.showToastAlert("$ticker: куплено!")
                         break
@@ -733,7 +711,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 delay(DelayFast)
 
                 // проверяем появился ли в портфеле тикер
-                var position: PortfolioPosition?
+                var position: TinkoffPosition?
                 while (true) {
                     try {
                         portfolioManager.refreshDeposit()
@@ -742,7 +720,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                     }
 
                     position = portfolioManager.getPositionForFigi(figi)
-                    if (position != null && position.lots >= lots) {
+                    if (position != null && position.getLots() >= lots) {
                         status = PurchaseStatus.BOUGHT
                         Utils.showToastAlert("$ticker: куплено!")
                         break
@@ -921,7 +899,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                         )
                         delay(DelayFast)
 
-                        if (sellLimitOrder!!.status == OrderStatus.NEW || sellLimitOrder!!.status == OrderStatus.PENDING_NEW) {
+                        if (sellLimitOrder?.isCreated() == true) {
                             status = PurchaseStatus.ORDER_SELL
                             break
                         }
@@ -944,12 +922,12 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                     delay(DelayLong + DelayLong)
                     val p = portfolioManager.getPositionForFigi(figi)
                     if (!short) {
-                        if (p == null || p.lots == 0) { // продано
+                        if (p == null || p.getLots() == 0) { // продано
                             status = PurchaseStatus.SOLD
                             break
                         }
                     } else {
-                        if (p != null && p.lots < 0) { // шорт
+                        if (p != null && p.getLots() < 0) { // шорт
                             status = PurchaseStatus.SOLD
                             break
                         }
@@ -1004,7 +982,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
         val ticker = stock.ticker
 
         val pos = portfolioManager.getPositionForFigi(figi)
-        if (pos == null || pos.lots == 0) {
+        if (pos == null || pos.getLots() == 0) {
             status = PurchaseStatus.CANCELED
             return null
         }
@@ -1044,7 +1022,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
     fun sellToBestAsk(): Job? {
         val figi = stock.figi
         val pos = portfolioManager.getPositionForFigi(figi)
-        if (pos == null || pos.lots == 0) {
+        if (pos == null || pos.getLots() == 0) {
             status = PurchaseStatus.CANCELED
             return null
         }
@@ -1087,7 +1065,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
         val ticker = stock.ticker
 
         val pos = portfolioManager.getPositionForFigi(figi)
-        if (pos == null || pos.lots == 0 || percentProfitSellFrom == 0.0) {
+        if (pos == null || pos.getLots() == 0 || percentProfitSellFrom == 0.0) {
             status = PurchaseStatus.CANCELED
             return null
         }
@@ -1195,7 +1173,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                 delay(DelayFast)
 
                 // проверяем появился ли в портфеле тикер
-                var position: PortfolioPosition?
+                var position: TinkoffPosition?
                 while (true) {
                     try {
                         portfolioManager.refreshDeposit()
@@ -1204,7 +1182,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
                     }
 
                     position = portfolioManager.getPositionForFigi(figi)
-                    if (position != null && abs(position.lots) >= lots) {
+                    if (position != null && abs(position.getLots()) >= lots) {
                         status = PurchaseStatus.BOUGHT
                         Utils.showToastAlert("$ticker: продано!")
                         break
@@ -1249,7 +1227,7 @@ data class StockPurchase(var stock: Stock) : KoinComponent {
 //                    }
 //                } else { // откуп 2225 лесенкой
                     position?.let {
-                        val totalLots = abs(it.lots)
+                        val totalLots = abs(it.getLots())
                         val profitFrom = if (percentProfitSellFrom != 0.0) percentProfitSellFrom else SettingsManager.get2225TakeProfitFrom()
                         val profitTo = if (percentProfitSellTo != 0.0) percentProfitSellTo else SettingsManager.get2225TakeProfitTo()
 

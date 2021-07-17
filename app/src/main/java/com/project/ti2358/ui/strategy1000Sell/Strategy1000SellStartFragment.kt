@@ -181,7 +181,7 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
 
                     if (portfolioPosition != null) { // если есть в депо
                         val avg = portfolioPosition.getAveragePrice()
-                        volumeSharesView.text = "${portfolioPosition.lots} шт."
+                        volumeSharesView.text = "${portfolioPosition.getLots()} шт."
                         priceView.text = "${avg.toMoney(portfolioPosition.stock)} ➡ ${portfolioPosition.stock?.getPriceString()}"
 
                         val profit = portfolioPosition.getProfitAmount()

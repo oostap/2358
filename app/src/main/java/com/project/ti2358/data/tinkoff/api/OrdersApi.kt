@@ -2,8 +2,6 @@ package com.project.ti2358.data.tinkoff.api
 
 import com.project.ti2358.data.tinkoff.stream.LimitOrderBody
 import com.project.ti2358.data.tinkoff.stream.MarketOrderBody
-import com.project.ti2358.data.tinkoff.model.LimitOrder
-import com.project.ti2358.data.tinkoff.model.MarketOrder
 import com.project.ti2358.data.tinkoff.model.TinkoffOrder
 import com.project.ti2358.data.common.Response
 import retrofit2.http.Body
@@ -17,14 +15,14 @@ interface OrdersApi {
         @Body orderBody: MarketOrderBody,
         @Query("figi") figi: String,
         @Query("brokerAccountId") brokerAccountId: String
-    ): Response<MarketOrder>
+    ): Response<TinkoffOrder>
 
     @POST("orders/limit-order")
     suspend fun placeLimitOrder(
         @Body orderBody: LimitOrderBody,
         @Query("figi") figi: String,
         @Query("brokerAccountId") brokerAccountId: String
-    ): Response<LimitOrder>
+    ): Response<TinkoffOrder>
 
     @GET("orders")
     suspend fun orders(

@@ -129,11 +129,11 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                     purchaseStock.position?.let {
                         val avg = it.getAveragePrice()
 
-                        if (it.lots > 20) {
-                            deltaLots = (it.lots * 0.05).toInt()
+                        if (it.getLots() > 20) {
+                            deltaLots = (it.getLots() * 0.05).toInt()
                         }
 
-                        tickerView.text = "${it.ticker} x ${it.lots}"
+                        tickerView.text = "${it.ticker} x ${it.getLots()}"
 
                         val profit = it.getProfitAmount()
                         var totalCash = it.balance * avg
@@ -144,7 +144,7 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                         priceView.text = "${avg.toMoney(purchaseStock.stock)} ➡ ${totalCash.toMoney(purchaseStock.stock)}"
 
                         priceProfitTotalView.text = profit.toMoney(purchaseStock.stock)
-                        priceProfitView.text = (profit / it.lots).toMoney(purchaseStock.stock)
+                        priceProfitView.text = (profit / it.getLots()).toMoney(purchaseStock.stock)
 
                         priceView.setTextColor(Utils.getColorForValue(percent))
                         percentProfitView.setTextColor(Utils.getColorForValue(percent))

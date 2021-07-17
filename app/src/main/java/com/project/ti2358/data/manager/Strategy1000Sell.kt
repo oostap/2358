@@ -94,7 +94,7 @@ class Strategy1000Sell() : KoinComponent {
         stocks.sortBy { stock ->
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
             val position = portfolioManager.getPositions().find { it.ticker == stock.ticker }
-            val multiplier1 = if (position != null) (abs(position.lots * position.getAveragePrice())).toInt() else 1
+            val multiplier1 = if (position != null) (abs(position.getLots() * position.getAveragePrice())).toInt() else 1
             val multiplier3 = if (presetStocksSelected.find { it.ticker == stock.ticker } != null) 1000 else 1
             stock.changePrice2300DayPercent * sign - multiplier1 - multiplier3
         }
@@ -141,7 +141,7 @@ class Strategy1000Sell() : KoinComponent {
         toSellPurchase.forEach {
             if (it.percentLimitPriceChange == 0.0) it.processInitialProfit()
             if (it.profitPercent == 0.0) it.profitPercent = SettingsManager.get1000SellTakeProfit()
-            if (it.lots == 0) it.lots = it.position?.lots ?: 1
+            if (it.lots == 0) it.lots = it.position?.getLots() ?: 1
 
             it.updateAbsolutePrice()
 

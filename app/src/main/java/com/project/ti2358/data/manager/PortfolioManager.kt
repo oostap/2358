@@ -24,9 +24,8 @@ class PortfolioManager : KoinComponent {
 
     private val portfolioService: PortfolioService by inject()
     private val ordersService: OrdersService by inject()
-    private val strategyBlacklist: StrategyBlacklist by inject()
 
-    var portfolioPositions: MutableList<PortfolioPosition> = synchronizedList(mutableListOf())
+    var portfolioPositions: MutableList<TinkoffPosition> = synchronizedList(mutableListOf())
     var currencyPositions: MutableList<CurrencyPosition> = synchronizedList(mutableListOf())
     var orders: MutableList<TinkoffOrder> = synchronizedList(mutableListOf())
     var accounts: MutableList<Account> = synchronizedList(mutableListOf())
@@ -196,7 +195,7 @@ class PortfolioManager : KoinComponent {
         return (busy / (free + busy) * 100).toInt()
     }
 
-    public fun getPositionForFigi(figi: String): PortfolioPosition? {
+    public fun getPositionForFigi(figi: String): TinkoffPosition? {
         return portfolioPositions.find { it.figi == figi }
     }
 
@@ -217,7 +216,7 @@ class PortfolioManager : KoinComponent {
 
         portfolioPositions.sortByDescending {
             val multiplier = if (it.stock?.instrument?.currency == Currency.USD) 1.0 else 1.0 / Utils.getUSDRUB()
-            abs(it.lots * it.getAveragePrice() * multiplier)
+            abs(it.getLots() * it.getAveragePrice() * multiplier)
         }
 
         // удалить все НЕ акции
@@ -237,7 +236,7 @@ class PortfolioManager : KoinComponent {
         }
     }
 
-    fun getPositions() : List<PortfolioPosition> {
+    fun getPositions() : List<TinkoffPosition> {
 //        val list = portfolioPositions
 //        val blacklist = strategyBlacklist.getBlacklistStocks()
 //        list.removeAll { it.ticker in blacklist.map { stock -> stock.ticker } }

@@ -1,5 +1,6 @@
 package com.project.ti2358.data.alor.model
 
+import com.project.ti2358.data.common.BasePosition
 import com.project.ti2358.data.manager.Stock
 
 //{
@@ -52,25 +53,29 @@ data class AlorPosition(
     val isCurrency: Boolean,
 
     var stock: Stock?
-) {
-    fun getLots(): Int {
+) : BasePosition() {
+    override fun getAveragePrice(): Double = avgPrice
+
+    override fun getLots(): Int {
         return qtyUnits.toInt()
     }
 
-    fun getBlocked(): Int {
+    override fun getBlocked(): Int {
         return openUnits.toInt()
     }
 
-    fun getProfitAmount(): Double {
+    override fun getProfitAmount(): Double {
         if (stock != null) {
             return getLots() * (stock!!.getPriceRaw() - avgPrice)
         }
         return 0.0
     }
 
-    fun getProfitPercent(): Double {
+    override fun getProfitPercent(): Double {
         val profit = getProfitAmount()
         val totalCash = getLots() * avgPrice
         return if (totalCash == 0.0) 0.0 else (100 * profit) / totalCash
     }
+
+    override fun getPositionStock(): Stock? = stock
 }

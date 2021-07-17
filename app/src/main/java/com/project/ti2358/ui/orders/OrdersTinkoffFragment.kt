@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.manager.BrokerManager
 import com.project.ti2358.data.manager.ChartManager
 import com.project.ti2358.data.manager.PortfolioManager
 import com.project.ti2358.data.manager.OrderbookManager
@@ -26,6 +27,7 @@ import org.koin.core.component.KoinApiExtension
 @KoinApiExtension
 class OrdersTinkoffFragment : Fragment(R.layout.fragment_orders_tinkoff) {
     private val orderbookManager: OrderbookManager by inject()
+    private val brokerManager: BrokerManager by inject()
     private val chartManager: ChartManager by inject()
 
     val portfolioManager: PortfolioManager by inject()
@@ -68,7 +70,7 @@ class OrdersTinkoffFragment : Fragment(R.layout.fragment_orders_tinkoff) {
             cancelButton.setOnClickListener {
                 jobCancelAll?.cancel()
                 jobCancelAll = GlobalScope.launch(Dispatchers.Main) {
-                    orderbookManager.cancelAllOrdersTinkoff()
+                    brokerManager.cancelAllOrdersTinkoff()
                     updateData()
                 }
             }
@@ -122,7 +124,7 @@ class OrdersTinkoffFragment : Fragment(R.layout.fragment_orders_tinkoff) {
                     cancelButton.setOnClickListener {
                         jobCancel?.cancel()
                         jobCancel = GlobalScope.launch(Dispatchers.Main) {
-                            orderbookManager.cancelOrderTinkoff(order)
+                            brokerManager.cancelOrderTinkoff(order)
                             updateData()
                         }
                     }

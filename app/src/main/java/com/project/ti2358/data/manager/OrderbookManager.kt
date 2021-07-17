@@ -1,14 +1,8 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.alor.model.AlorExchange
-import com.project.ti2358.data.alor.model.AlorOrder
-import com.project.ti2358.data.alor.service.AlorOrdersService
 import com.project.ti2358.data.common.BaseOrder
 import com.project.ti2358.data.tinkoff.model.OperationType
-import com.project.ti2358.data.tinkoff.model.TinkoffOrder
 import com.project.ti2358.data.pantini.model.PantiniPrint
-import com.project.ti2358.data.tinkoff.service.OrdersService
-import com.project.ti2358.service.Utils
 import com.project.ti2358.ui.orderbook.OrderbookLine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -16,16 +10,14 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.lang.Exception
 import kotlin.math.max
 
 @KoinApiExtension
 class OrderbookManager() : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val portfolioManager: PortfolioManager by inject()
+    private val portfolioManager: PortfolioManager by inject()          // убрать упоминания портфеле из всех файлов, кроме депозита
     private val alorPortfolioManager: AlorPortfolioManager by inject()
-    private val ordersService: OrdersService by inject()
-    private val alorOrdersService: AlorOrdersService by inject()
+    private val brokerManager: BrokerManager by inject()
 
     var activeStock: Stock? = null
     var orderbook: MutableList<OrderbookLine> = mutableListOf()
@@ -57,186 +49,30 @@ class OrderbookManager() : KoinComponent {
         activeStock = null
     }
 
-    suspend fun placeOrder(stock: Stock, price: Double, lots: Int, operationType: OperationType) {
-        if (SettingsManager.getBrokerTinkoff()) {
-            placeOrderTinkoff(stock, price, lots, operationType)
-        }
-
-        if (SettingsManager.getBrokerAlor()) {
-            placeOrderAlor(stock, price, lots, operationType)
-        }
-    }
-
-    suspend fun cancelOrder(order: BaseOrder, refresh: Boolean = false) {
-        if (order is TinkoffOrder) {
-            cancelOrderTinkoff(order)
-
-            if (refresh) {
-                portfolioManager.refreshOrders()
-                process()
-            }
-        }
-
-        if (order is AlorOrder) {
-            cancelOrderAlor(order)
-
-            if (refresh) {
-                alorPortfolioManager.refreshOrders()
-                process()
-            }
-        }
-    }
-
-    private suspend fun placeOrderTinkoff(stock: Stock, price: Double, count: Int, operationType: OperationType) {
-        try {
-            ordersService.placeLimitOrder(
-                count,
-                stock.figi,
-                price,
-                operationType,
-                portfolioManager.getActiveBrokerAccountId()
-            )
-            val operation = if (operationType == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
-            Utils.showToastAlert("ТИ ${stock.ticker} новый ордер: $operation")
-        } catch (e: Exception) {
-
-        }
-    }
-
-    private suspend fun placeOrderAlor(stock: Stock, price: Double, lots: Int, operationType: OperationType) {
-        try {
-            alorOrdersService.placeLimitOrder(
-                operationType,
-                lots,
-                price,
-                stock.ticker,
-                AlorExchange.SPBX
-            )
-            val operation = if (operationType == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
-            Utils.showToastAlert("ALOR ${stock.ticker} новый ордер: $operation")
-        } catch (e: Exception) {
-
-        }
-    }
-
     fun createOrder(stock: Stock, price: Double, lots: Int, operationType: OperationType) {
         GlobalScope.launch(Dispatchers.Main) {
-            if (SettingsManager.getBrokerTinkoff()) {
-                placeOrderTinkoff(stock, price, lots, operationType)
-                portfolioManager.refreshOrders()
-            }
+            brokerManager.placeOrder(stock, price, lots, operationType, true)
+            process()
+        }
+    }
 
-            if (SettingsManager.getBrokerAlor()) {
-                placeOrderAlor(stock, price, lots, operationType)
-                alorPortfolioManager.refreshOrders()
-            }
-
+    fun cancelOrder(order: BaseOrder) {
+        GlobalScope.launch(Dispatchers.Main) {
+            brokerManager.cancelOrder(order, true)
             process()
         }
     }
 
     fun replaceOrder(from: BaseOrder, toLine: OrderbookLine, operationType: OperationType) {
-        if (from is TinkoffOrder) {
-            replaceOrderTinkoff(from, toLine, operationType)
-        }
-
-        if (from is AlorOrder) {
-            replaceOrderAlor(from, toLine, operationType)
-        }
-    }
-
-    suspend fun cancelOrderTinkoff(order: TinkoffOrder) {
-        val operation = if (order.operation == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
-        try {
-            ordersService.cancel(order.orderId, portfolioManager.getActiveBrokerAccountId())
-            Utils.showToastAlert("ТИ ${order.stock?.ticker} ордер отменён: $operation")
-        } catch (e: Exception) { // возможно уже отменена
-            Utils.showToastAlert("ТИ ${order.stock?.ticker} ордер УЖЕ отменён: $operation")
-        }
-
-        portfolioManager.refreshOrders()
-        process()
-    }
-
-    suspend fun cancelAllOrdersTinkoff() {
-        for (order in portfolioManager.orders) {
-            try {
-                cancelOrderTinkoff(order)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-        portfolioManager.refreshOrders()
-    }
-
-    fun replaceOrderTinkoff(from: TinkoffOrder, price: Double, operationType: OperationType) {
         GlobalScope.launch(Dispatchers.Main) {
-            cancelOrderTinkoff(from)
+            val price = if (operationType == OperationType.BUY) toLine.bidPrice else toLine.askPrice
 
-            from.stock?.let {
-                placeOrderTinkoff(it, price, from.getLotsRequested() - from.getLotsExecuted(), operationType)
-            }
-
-            portfolioManager.refreshOrders()
+            brokerManager.replaceOrder(from, price, operationType)
             process()
         }
     }
 
-    private fun replaceOrderTinkoff(from: TinkoffOrder, toLine: OrderbookLine, operationType: OperationType) {
-        val price = if (operationType == OperationType.BUY) {
-            toLine.bidPrice
-        } else {
-            toLine.askPrice
-        }
-        replaceOrderTinkoff(from, price, operationType)
-    }
-
-    // ALOR
-    suspend fun cancelOrderAlor(order: AlorOrder) {
-        val operation = if (order.side == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
-        try {
-            Utils.showToastAlert("ALOR ${order.stock?.ticker} ордер отменён: $operation")
-            alorOrdersService.cancel(order.id, AlorExchange.SPBX)
-        } catch (e: Exception) {
-            // возможно уже отменена
-//                Utils.showToastAlert("${order.stock?.ticker} ордер УЖЕ отменён: $operation")
-        }
-    }
-
-    suspend fun cancelAllOrdersAlor() {
-        GlobalScope.launch(Dispatchers.Main) {
-            for (order in alorPortfolioManager.orders) {
-                try {
-                    cancelOrderAlor(order)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-            alorPortfolioManager.refreshOrders()
-        }
-    }
-
-    fun replaceOrderAlor(from: AlorOrder, price: Double, operationType: OperationType) {
-        GlobalScope.launch(Dispatchers.Main) {
-            cancelOrderAlor(from)
-
-            from.stock?.let {
-                placeOrderAlor(it, price, from.getLotsRequested() - from.getLotsExecuted(), operationType)
-            }
-
-            alorPortfolioManager.refreshOrders()
-            process()
-        }
-    }
-
-    private fun replaceOrderAlor(from: AlorOrder, toLine: OrderbookLine, operationType: OperationType) {
-        val price = if (operationType == OperationType.BUY) {
-            toLine.bidPrice
-        } else {
-            toLine.askPrice
-        }
-        replaceOrderAlor(from, price, operationType)
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     fun process(): MutableList<OrderbookLine> {
         orderbook.clear()
@@ -292,28 +128,15 @@ class OrderbookManager() : KoinComponent {
                 line.ordersBuy.clear()
                 line.ordersSell.clear()
 
-                for (order in portfolioManager.orders) {
-                    if (order.figi == line.stock.figi) {
-                        if (order.price == line.askPrice || order.price == line.bidPrice) {
-                            if (order.operation == OperationType.BUY) {
+                val orders = brokerManager.getOrdersAll()
+                for (order in orders) {
+                    if (order.getOrderStock()?.ticker == line.stock.ticker) {
+                        if (order.getOrderPrice() == line.askPrice || order.getOrderPrice() == line.bidPrice) {
+                            if (order.getOrderOperation() == OperationType.BUY) {
                                 line.ordersBuy.add(order)
                             }
 
-                            if (order.operation == OperationType.SELL) {
-                                line.ordersSell.add(order)
-                            }
-                        }
-                    }
-                }
-
-                for (order in alorPortfolioManager.orders) {
-                    if (order.symbol == line.stock.ticker) {
-                        if (order.price == line.askPrice || order.price == line.bidPrice) {
-                            if (order.side == OperationType.BUY) {
-                                line.ordersBuy.add(order)
-                            }
-
-                            if (order.side == OperationType.SELL) {
+                            if (order.getOrderOperation() == OperationType.SELL) {
                                 line.ordersSell.add(order)
                             }
                         }

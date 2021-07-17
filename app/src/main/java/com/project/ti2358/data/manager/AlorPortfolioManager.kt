@@ -14,7 +14,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import java.util.*
 import java.util.Collections.synchronizedList
 import java.util.Collections.synchronizedMap
 import kotlin.math.abs
@@ -35,7 +34,7 @@ class AlorPortfolioManager : KoinComponent {
     var orders: MutableList<AlorOrder> = mutableListOf()
     private var stopOrders: MutableList<AlorOrder> = mutableListOf()
 
-    private var portfolioPositions: MutableList<AlorPosition> = mutableListOf()
+    var portfolioPositions: MutableList<AlorPosition> = mutableListOf()
 
     private var money: AlorMoney? = null
     private var summary: AlorSummary? = null
@@ -279,6 +278,10 @@ class AlorPortfolioManager : KoinComponent {
 
     public fun getOrderAllOrdersForTicker(ticker: String, operation: OperationType): List<AlorOrder> {
         return orders.filter { it.symbol == ticker && it.side == operation }
+    }
+
+    public fun getOrderForId(id: String, operation: OperationType): AlorOrder? {
+        return orders.find { it.id == id && it.side == operation }
     }
 }
 
