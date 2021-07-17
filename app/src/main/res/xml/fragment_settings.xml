@@ -971,6 +971,11 @@
             app:title="@string/stocks_telegram_allow_command_buy_sell"
             app:defaultValue="false" />
 
+        <SwitchPreferenceCompat
+            app:key="@string/setting_key_telegram_allow_command_depo"
+            app:title="@string/stocks_telegram_allow_command_depo"
+            app:defaultValue="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_follower">

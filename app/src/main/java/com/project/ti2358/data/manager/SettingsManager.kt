@@ -1179,6 +1179,11 @@ class SettingsManager {
             return preferences.getBoolean(key, false)
         }
 
+        fun getTelegramAllowShowDepo(): Boolean {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_telegram_allow_command_depo)
+            return preferences.getBoolean(key, false)
+        }
+
         /******************** 2225 short *************************/
 
         fun get2225ChangePercent(): Double {

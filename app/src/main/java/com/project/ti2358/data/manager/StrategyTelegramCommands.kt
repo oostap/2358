@@ -184,6 +184,14 @@ class StrategyTelegramCommands : KoinComponent {
             }
 
             val delay = 100L
+
+            if (operation == "depo" && SettingsManager.getTelegramAllowShowDepo()) {
+                GlobalScope.launch(Dispatchers.Main) {
+                    strategyTelegram.sendDepo()
+                }
+                return 2
+            }
+
             if (operation == "restart") {
                 if (ticker == "ALL") {
                     GlobalScope.launch(Dispatchers.Main) {
@@ -415,16 +423,18 @@ class StrategyTelegramCommands : KoinComponent {
                 if (operation in listOf("buy_cancel", "sell_cancel")) { // # BUY_CANCEL VIPS
                     if (list.size != 3) return 0
 
-                    val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
-                    val buyOrders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
-                    buyOrders.forEach { order ->
-                        orderbookManager.cancelOrderTinkoff(order)
+                    GlobalScope.launch(Dispatchers.Main) {
+                        val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
+                        val buyOrders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
+                        buyOrders.forEach { order ->
+                            orderbookManager.cancelOrderTinkoff(order)
 
-                        val money = (order.requestedLots - order.executedLots) * order.price
-                        if (operationType == OperationType.SELL) {
-                            moneySpent += money
-                        } else {
-                            moneySpent -= money
+                            val money = (order.requestedLots - order.executedLots) * order.price
+                            if (operationType == OperationType.SELL) {
+                                moneySpent += money
+                            } else {
+                                moneySpent -= money
+                            }
                         }
                     }
                 }

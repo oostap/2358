@@ -540,7 +540,9 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     } else if (actionType == "remove") {
                         val dropped = view as TextView              // заявка
                         val order = dropped.getTag(R.string.order_item) as BaseOrder
-                        orderbookManager.cancelOrder(order)
+                        GlobalScope.launch(Dispatchers.Main) {
+                            orderbookManager.cancelOrder(order)
+                        }
                     }
 
                     fragmentOrderbookBinding?.scalperPanelView?.visibility = VISIBLE

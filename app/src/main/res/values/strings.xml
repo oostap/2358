@@ -302,6 +302,7 @@
     <string name="stocks_telegram_allow_command_inform">Команды информирования</string>
     <string name="stocks_telegram_allow_command_handle">Команды управления стратегиями</string>
     <string name="stocks_telegram_allow_command_buy_sell">Команды покупки/продажи</string>
+    <string name="stocks_telegram_allow_command_depo">Команда показа депо (! depo)</string>
     <string name="stocks_telegram_send_goto_terminal">Переход в терминал</string>
 
     <!-- follower settings -->
@@ -525,6 +526,7 @@
     <string name="setting_key_telegram_allow_command_inform">telegram_allow_command_inform</string>
     <string name="setting_key_telegram_allow_command_handle">telegram_allow_command_handle</string>
     <string name="setting_key_telegram_allow_command_buy_sell">telegram_allow_command_buy_sell</string>
+    <string name="setting_key_telegram_allow_command_depo">telegram_allow_command_depo</string>
     <string name="setting_key_telegram_send_goto_terminal">telegram_send_goto_terminal</string>
 
     <!-- follower settings -->

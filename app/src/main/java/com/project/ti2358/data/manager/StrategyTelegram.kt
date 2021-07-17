@@ -490,23 +490,21 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-//    fun sendArbitrationStart(start: Boolean) {
-//        if (started && SettingsManager.getTelegramSendArbitration()) {
-//            val text = if (start) {
-//                String.format(
-//                    locale = Locale.US,
-//                    "🟢🏴‍☠️ %.2f%% / v%d / v%d / %d мин",
-//                    SettingsManager.getArbitrationMinPercent(),
-//                    SettingsManager.getArbitrationVolumeDayFrom(),
-//                    SettingsManager.getArbitrationVolumeDayTo(),
-//                    SettingsManager.getArbitrationRepeatInterval()
-//                )
-//            } else {
-//                "🔴🏴‍☠️ стоп!"
-//            }
-//            sendMessageToChats(text, 15)
-//        }
-//    }
+    fun sendArbitrationStart(start: Boolean) {
+        if (started) {
+            val text = if (start) {
+                String.format(
+                    locale = Locale.US,
+                    "🟢🏴‍☠️ v%d / v%d",
+                    SettingsManager.getArbitrationVolumeDayFrom(),
+                    SettingsManager.getArbitrationVolumeDayTo()
+                )
+            } else {
+                "🔴🏴‍☠️ стоп!"
+            }
+            sendMessageToChats(text, 15)
+        }
+    }
 
     fun sendLimitsStart(start: Boolean) {
         if (started && SettingsManager.getTelegramSendRockets()) {
@@ -826,6 +824,25 @@ class StrategyTelegram : KoinComponent {
             val phrase = stockManager.getPulsePhrase()
             sendMessageToChats(phrase, deleteAfterSeconds = 120, replyToMessageId = messageId)
         }
+    }
+
+    fun sendDepo() {
+        val positions = portfolioManager.getPositions().toMutableList()
+        positions.removeAll { it.stock == null }
+        val stocks = positions.map { it.stock!! }
+
+        var text = "<code>%5s %4s %6s %5s %5s\n".format("💼", "шт.", "сред.", "$", "%")
+        for (p in positions) {
+            text += "%5s %4d %6.2f %5.2f %5.2f\n".format(p.stock?.ticker, p.lots, p.getAveragePrice(), p.getProfitAmount(), p.getProfitPercent())
+        }
+        text += "</code>"
+
+        if (positions.isEmpty()) {
+            text = "💼 ✅"
+        }
+
+        val buttons = getButtonsMarkupMany(stocks)
+        sendMessageToChats(text, deleteAfterSeconds = -1, replyMarkup = buttons)
     }
 
     fun sendTop(stocks: List<Stock>, count: Int) {

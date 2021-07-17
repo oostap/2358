@@ -114,12 +114,12 @@ class StrategyArbitration : KoinComponent {
         stockManager.subscribeOrderbookRU(stockManager.stocksStream)
 
         started = true
-//        strategyTelegram.sendArbitrationStart(true)
+        strategyTelegram.sendArbitrationStart(true)
     }
 
     fun stopStrategy() {
         started = false
-//        strategyTelegram.sendArbitrationStart(false)
+        strategyTelegram.sendArbitrationStart(false)
         stockManager.unsubscribeOrderbookAllRU()
     }
 

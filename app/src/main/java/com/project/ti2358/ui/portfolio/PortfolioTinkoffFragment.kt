@@ -35,6 +35,7 @@ class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
     private val positionManager: PositionManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTA: StrategyTA by inject()
+    private val strategyTelegram: StrategyTelegram by inject()
 
     private var fragmentPortfolioTinkoffBinding: FragmentPortfolioTinkoffBinding? = null
 
@@ -66,6 +67,7 @@ class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
             updateButton.setOnClickListener {
                 updateData()
 
+                strategyTelegram.sendDepo()
 //                strategyTA.processALL()
             }
 
