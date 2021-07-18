@@ -16,6 +16,7 @@ import com.project.ti2358.BuildConfig
 import com.project.ti2358.MainActivity
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.tinkoff.model.Currency
 import com.project.ti2358.data.tinkoff.model.Interval
@@ -128,8 +129,16 @@ class Utils{
 
         val TEAL: Int = Color.parseColor("#4903DAC5")
 
-        val TINKOFF: Int = Color.parseColor("#FFf1d62c")
-        val ALOR: Int = Color.parseColor("#FF0F59a9")
+        val TINKOFF: Int = Color.parseColor("#88f1d62c")
+        val ALOR: Int = Color.parseColor("#880F59a9")
+        val TRANSPARENT: Int = Color.parseColor("#000F59a9")
+
+        @KoinApiExtension
+        fun getColorForBrokerValue(brokerType: BrokerType): Int {
+            if (brokerType == BrokerType.TINKOFF) return TINKOFF
+            if (brokerType == BrokerType.ALOR) return ALOR
+            return TRANSPARENT
+        }
 
         @KoinApiExtension
         fun getNeutralColor(): Int {

@@ -22,10 +22,17 @@ class SettingsManager {
             preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         }
 
+        fun isAllowCurrency(currency: Currency?): Boolean {
+            if (currency == Currency.USD) return true
+            return false
+        }
+
         fun getDarkTheme(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_dark_theme)
             return preferences.getBoolean(key, false)
         }
+
+        /******************** broker *************************/
 
         fun getBrokerTinkoff(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_broker_tinkoff)
@@ -37,12 +44,16 @@ class SettingsManager {
             return preferences.getBoolean(key, false)
         }
 
+        /******************** tinkoff *************************/
+
         fun getTokenTinkoff(): String {
             val tokenKey = TheApplication.application.applicationContext.getString(R.string.setting_key_token_market)
             return preferences.getString(tokenKey, "")?.trim() ?: ""
         }
 
         fun getActiveBaseUrlTinkoff(): String = "https://api-invest.tinkoff.ru/openapi/"
+
+        /******************** alor *************************/
 
         fun getAlorQuotes(): Boolean {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_alor_quotes)
@@ -64,10 +75,17 @@ class SettingsManager {
             return preferences.getString(value, "")?.trim() ?: ""
         }
 
-        fun isAllowCurrency(currency: Currency?): Boolean {
-            if (currency == Currency.USD) return true
-            return false
+        fun getAlorMultiplierMoney(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_alor_multiplier_money)
+            val value: String? = preferences.getString(key, "0.5")
+            return try {
+                (value ?: "0.5").toDouble()
+            } catch (e: Exception) {
+                0.5
+            }
         }
+
+        /******************** pantini *************************/
 
         fun getPantiniTelegramID(): String {
             val tokenKey = TheApplication.application.applicationContext.getString(R.string.setting_key_pantini_telegram_id)
@@ -338,7 +356,7 @@ class SettingsManager {
                 2 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_set_2)
                 3 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_set_3)
                 4 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_set_4)
-                else -> ""
+                else -> return emptyList()
             }
             val value: String = preferences.getString(key, "SPCE 1.0 10 0.5\nTAL 1.0 10 0.5")?.trim() ?: ""
             return stringToPresetStocks(value)
@@ -362,7 +380,7 @@ class SettingsManager {
                 2 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_set_2)
                 3 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_set_3)
                 4 -> TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_set_4)
-                else -> ""
+                else -> return emptyList()
             }
             val value: String = preferences.getString(key, "SPCE -1.0 10 0.5\nTAL -1.0 10 0.5")?.trim() ?: ""
             return stringToPresetStocks(value)

@@ -1,5 +1,7 @@
 package com.project.ti2358.data.manager
 
+import com.project.ti2358.data.common.BaseOrder
+import com.project.ti2358.data.common.BasePosition
 import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.tinkoff.model.*
 import com.project.ti2358.data.tinkoff.service.MarketService
@@ -14,10 +16,16 @@ import kotlin.math.ceil
 
 @KoinApiExtension
 data class StockPurchaseTinkoff(override var stock: Stock, override var broker: BrokerType = BrokerType.TINKOFF) : StockPurchase(stock, broker) {
+    override var ticker: String = stock.ticker
+    override var figi: String = stock.figi
+
     private val brokerManager: BrokerManager by inject()
     private val portfolioManager: PortfolioManager by inject()
     private val marketService: MarketService by inject()
     private val strategyTrailingStop: StrategyTrailingStop by inject()
+
+    var buyLimitOrder: BaseOrder? = null
+    var sellLimitOrder: BaseOrder? = null
 
     override fun buyLimitFromBid(price: Double, profit: Double, counter: Int, orderLifeTimeSeconds: Int): Job? {
         if (lots > 999999999 || lots == 0 || price == 0.0) return null
@@ -26,7 +34,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
         var profitPrice = buyPrice + buyPrice / 100.0 * profit
         profitPrice = Utils.makeNicePrice(profitPrice, stock)
 
-        val p = portfolioManager.getPositionForFigi(figi)
+        val p = portfolioManager.getPositionForStock(stock)
 
         val lotsPortfolio = p?.getLots() ?: 0
         var lotsToBuy = lots
@@ -34,7 +42,6 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
         status = PurchaseStatus.WAITING
         return GlobalScope.launch(Dispatchers.Main) {
             try {
-                val figi = stock.figi
                 val ticker = stock.ticker
 
                 // счётчик на количество повторов (возможно просто нет депо) = примерно 1 минуту
@@ -69,7 +76,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
                     brokerManager.cancelOrder(buyLimitOrder)
                 } else {
                     // проверяем появился ли в портфеле тикер
-                    var position: TinkoffPosition?
+                    var position: BasePosition?
                     var iterations = 0
 
                     while (true) {
@@ -91,10 +98,10 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
                         }
 
                         val orderBuy = brokerManager.getOrderForId(buyLimitOrder?.getOrderID() ?: "", OperationType.BUY)
-                        position = portfolioManager.getPositionForFigi(figi)
+                        position = portfolioManager.getPositionForStock(stock)
 
                         // проверка на большое количество лотов
-                        val orders = portfolioManager.getOrderAllOrdersForFigi(figi, OperationType.SELL)
+                        val orders = portfolioManager.getOrderAllForStock(stock, OperationType.SELL)
                         var totalSellingLots = 0
                         orders.forEach { totalSellingLots += it.requestedLots }
                         if (totalSellingLots >= lots) break
@@ -114,7 +121,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
 
                         position?.let { // появилась позиция, проверить есть ли что продать
                             // выставить ордер на продажу
-                            val lotsToSell = it.getLots() - it.blocked.toInt() - lotsPortfolio
+                            val lotsToSell = it.getLots() - it.getBlocked().toInt() - lotsPortfolio
                             if (lotsToSell <= 0) {  // если свободных лотов нет, продолжаем
                                 return@let
                             }
@@ -148,7 +155,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
                 if (status == PurchaseStatus.ORDER_SELL) {
                     while (true) {
                         delay(DelayLong)
-                        val position = portfolioManager.getPositionForFigi(figi)
+                        val position = portfolioManager.getPositionForStock(stock)
                         if (position == null || position.getLots() == lotsPortfolio) { // продано!
                             status = PurchaseStatus.SOLD
                             Utils.showToastAlert("$ticker: продано!?")
@@ -171,7 +178,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
         var profitPrice = sellPrice - sellPrice / 100.0 * profit
         profitPrice = Utils.makeNicePrice(profitPrice, stock)
 
-        val p = portfolioManager.getPositionForFigi(figi)
+        val p = portfolioManager.getPositionForStock(stock)
 
         val lotsPortfolio = abs(p?.getLots() ?: 0)
         var lotsToSell = lots
@@ -214,7 +221,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
                     brokerManager.cancelOrder(sellLimitOrder)
                 } else {
                     // проверяем появился ли в портфеле тикер
-                    var position: TinkoffPosition?
+                    var position: BasePosition?
                     var iterations = 0
 
                     while (true) {
@@ -235,11 +242,11 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
                             return@launch
                         }
 
-                        val orderSell = brokerManager.getOrderForId(buyLimitOrder?.getOrderID() ?: "", OperationType.SELL)
-                        position = portfolioManager.getPositionForFigi(figi)
+                        val orderSell = brokerManager.getOrderForId(sellLimitOrder?.getOrderID() ?: "", OperationType.SELL)
+                        position = portfolioManager.getPositionForStock(stock)
 
                         // проверка на большое количество лотов
-                        val orders = portfolioManager.getOrderAllOrdersForFigi(figi, OperationType.BUY)
+                        val orders = portfolioManager.getOrderAllForStock(stock, OperationType.BUY)
                         var totalBuyingLots = 0
                         orders.forEach { totalBuyingLots += it.requestedLots }
                         if (totalBuyingLots >= lots) break
@@ -293,7 +300,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
                 if (status == PurchaseStatus.ORDER_BUY) {
                     while (true) {
                         delay(DelayLong)
-                        val position = portfolioManager.getPositionForFigi(figi)
+                        val position = portfolioManager.getPositionForStock(stock)
                         if (position == null || position.getLots() == lotsPortfolio) { // продано!
                             status = PurchaseStatus.SOLD
                             Utils.showToastAlert("$ticker: продано!?")
@@ -336,7 +343,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
                 delay(DelayFast)
 
                 // проверяем появился ли в портфеле тикер
-                var position: TinkoffPosition?
+                var position: BasePosition?
                 while (true) {
                     try {
                         portfolioManager.refreshDeposit()
@@ -344,7 +351,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
                         e.printStackTrace()
                     }
 
-                    position = portfolioManager.getPositionForFigi(figi)
+                    position = portfolioManager.getPositionForStock(stock)
                     if (position != null && position.getLots() >= lots) {
                         status = PurchaseStatus.BOUGHT
                         Utils.showToastAlert("$ticker: куплено!")
@@ -408,7 +415,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
                 }
 
                 while (true) {
-                    position = portfolioManager.getPositionForFigi(figi)
+                    position = portfolioManager.getPositionForStock(stock)
                     if (position == null) { // продано!
                         status = PurchaseStatus.SOLD
                         Utils.showToastAlert("$ticker: продано!")
@@ -453,7 +460,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
                 delay(DelayFast)
 
                 // проверяем появился ли в портфеле тикер
-                var position: TinkoffPosition?
+                var position: BasePosition?
                 while (true) {
                     try {
                         portfolioManager.refreshDeposit()
@@ -461,7 +468,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
                         e.printStackTrace()
                     }
 
-                    position = portfolioManager.getPositionForFigi(figi)
+                    position = portfolioManager.getPositionForStock(stock)
                     if (position != null && position.getLots() >= lots) {
                         status = PurchaseStatus.BOUGHT
                         Utils.showToastAlert("$ticker: куплено!")
@@ -580,7 +587,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
 
                 while (true) {
                     delay(DelayLong * 5)
-                    if (portfolioManager.getPositionForFigi(figi) == null) { // продано!
+                    if (portfolioManager.getPositionForStock(stock) == null) { // продано!
                         status = PurchaseStatus.SOLD
                         Utils.showToastAlert("$ticker: продано!")
                         break
@@ -597,8 +604,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
     }
 
     override fun sellWithLimit(): Job? {
-        val figi = stock.figi
-        val pos = portfolioManager.getPositionForFigi(figi)
+        val pos = portfolioManager.getPositionForStock(stock)
         if (pos == null || lots == 0 || percentProfitSellFrom == 0.0) {
             status = PurchaseStatus.CANCELED
             return null
@@ -621,9 +627,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
     }
 
     override fun sellToBestBid(): Job? {
-        val figi = stock.figi
-
-        val pos = portfolioManager.getPositionForFigi(figi)
+        val pos = portfolioManager.getPositionForStock(stock)
         if (pos == null || pos.getLots() == 0) {
             status = PurchaseStatus.CANCELED
             return null
@@ -633,7 +637,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
             position = pos
             status = PurchaseStatus.ORDER_SELL_PREPARE
 
-            val orderbook = marketService.orderbook(figi, 5)
+            val orderbook = marketService.orderbook(stock.figi, 5)
             val bestBid = orderbook.getBestPriceFromBid(lots)
             val profitSellPrice = Utils.makeNicePrice(bestBid, stock)
 
@@ -648,7 +652,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
 
     override fun sellToBestAsk(): Job? {
         val figi = stock.figi
-        val pos = portfolioManager.getPositionForFigi(figi)
+        val pos = portfolioManager.getPositionForStock(stock)
         if (pos == null || pos.getLots() == 0) {
             status = PurchaseStatus.CANCELED
             return null
@@ -674,7 +678,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
     override fun sellWithTrailing(): Job? {
         val figi = stock.figi
 
-        val pos = portfolioManager.getPositionForFigi(figi)
+        val pos = portfolioManager.getPositionForStock(stock)
         if (pos == null || pos.getLots() == 0 || percentProfitSellFrom == 0.0) {
             status = PurchaseStatus.CANCELED
             return null
@@ -731,7 +735,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
                 delay(DelayFast)
 
                 // проверяем появился ли в портфеле тикер
-                var position: TinkoffPosition?
+                var position: BasePosition?
                 while (true) {
                     try {
                         portfolioManager.refreshDeposit()
@@ -739,7 +743,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
                         e.printStackTrace()
                     }
 
-                    position = portfolioManager.getPositionForFigi(figi)
+                    position = portfolioManager.getPositionForStock(stock)
                     if (position != null && abs(position.getLots()) >= lots) {
                         status = PurchaseStatus.BOUGHT
                         Utils.showToastAlert("$ticker: продано!")
@@ -865,7 +869,7 @@ data class StockPurchaseTinkoff(override var stock: Stock, override var broker: 
 
                 while (true) {
                     delay(DelayLong * 5)
-                    if (portfolioManager.getPositionForFigi(figi) == null) { // продано!
+                    if (portfolioManager.getPositionForStock(stock) == null) { // продано!
                         status = PurchaseStatus.SOLD
                         Utils.showToastAlert("$ticker: зашорчено!")
                         break

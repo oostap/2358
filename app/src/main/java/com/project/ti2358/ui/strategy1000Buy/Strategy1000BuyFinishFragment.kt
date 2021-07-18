@@ -128,50 +128,49 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
             var watcher: TextWatcher? = null
 
             fun bind(index: Int) {
-                val purchaseStock = values[index]
+                val purchase = values[index]
 
                 with (binding) {
-                    tickerView.text = "${index + 1}) ${purchaseStock.stock.getTickerLove()}"
-                    priceView.text = "${purchaseStock.stock.getPrice2359String()} ➡ ${purchaseStock.stock.getPriceNow().toMoney(purchaseStock.stock)}"
-                    priceView.setTextColor(Utils.getColorForValue(purchaseStock.stock.changePrice2300DayPercent))
+                    tickerView.text = "${index + 1}) ${purchase.stock.getTickerLove()}"
+                    priceView.text = "${purchase.stock.getPrice2359String()} ➡ ${purchase.stock.getPriceNow().toMoney(purchase.stock)}"
+                    priceView.setTextColor(Utils.getColorForValue(purchase.stock.changePrice2300DayPercent))
 
-                    refreshPercent(purchaseStock)
+                    refreshPercent(purchase)
 
                     pricePlusButton.setOnClickListener {
-                        purchaseStock.addPriceLimitPercent(0.05)
-                        refreshPercent(purchaseStock)
-                        lotsEditText.setText("${purchaseStock.lots}")
+                        purchase.addPriceLimitPercent(0.05)
+                        refreshPercent(purchase)
+                        lotsEditText.setText("${purchase.lots}")
                         strategy1000Buy.saveSelectedStocks()
                     }
 
                     priceMinusButton.setOnClickListener {
-                        purchaseStock.addPriceLimitPercent(-0.05)
-                        refreshPercent(purchaseStock)
-                        lotsEditText.setText("${purchaseStock.lots}")
+                        purchase.addPriceLimitPercent(-0.05)
+                        refreshPercent(purchase)
+                        lotsEditText.setText("${purchase.lots}")
                         strategy1000Buy.saveSelectedStocks()
                     }
 
                     lotsPlusButton.setOnClickListener {
-                        purchaseStock.addLots(1)
-                        refreshPercent(purchaseStock)
-                        lotsEditText.setText("${purchaseStock.lots}")
+                        purchase.addLots(1)
+                        refreshPercent(purchase)
+                        lotsEditText.setText("${purchase.lots}")
                         strategy1000Buy.saveSelectedStocks()
                     }
 
                     lotsMinusButton.setOnClickListener {
-                        purchaseStock.addLots(-1)
-                        refreshPercent(purchaseStock)
-                        lotsEditText.setText("${purchaseStock.lots}")
+                        purchase.addLots(-1)
+                        refreshPercent(purchase)
+                        lotsEditText.setText("${purchase.lots}")
                         strategy1000Buy.saveSelectedStocks()
                     }
 
-                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
-                    refreshPercent(purchaseStock)
+                    refreshPercent(purchase)
 
                     lotsEditText.clearFocus()
                     lotsEditText.removeCallbacks {  }
                     lotsEditText.removeTextChangedListener(watcher)
-                    lotsEditText.setText("${purchaseStock.lots}")
+                    lotsEditText.setText("${purchase.lots}")
                     watcher = lotsEditText.addTextChangedListener { v ->
                         if (lotsEditText.hasFocus()) {
                             val value = try {
@@ -179,9 +178,15 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
                             } catch (e: Exception) {
                                 1
                             }
-                            purchaseStock.lots = value
-                            refreshPercent(purchaseStock)
+                            purchase.lots = value
+                            refreshPercent(purchase)
                         }
+                    }
+
+                    if (SettingsManager.getBrokerAlor() && SettingsManager.getBrokerTinkoff()) {
+                        itemView.setBackgroundColor(Utils.getColorForBrokerValue(purchase.broker))
+                    } else {
+                        itemView.setBackgroundColor(Utils.getColorForIndex(index))
                     }
                 }
             }

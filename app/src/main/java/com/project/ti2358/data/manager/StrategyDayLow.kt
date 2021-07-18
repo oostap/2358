@@ -155,7 +155,7 @@ class StrategyDayLow : KoinComponent {
         val totalMoneyTinkoff: Double = SettingsManager.get2358PurchaseVolume().toDouble()
         val onePieceTinkoff: Double = if (allTinkoff == 0) 0.0 else totalMoneyTinkoff / allTinkoff
 
-        val totalMoneyAlor: Double = 100.0 //SettingsManager.get2358PurchaseVolume().toDouble() // TODO:
+        val totalMoneyAlor: Double = SettingsManager.get2358PurchaseVolume().toDouble() * SettingsManager.getAlorMultiplierMoney()
         val onePieceAlor: Double = if (allAlor == 0) 0.0 else totalMoneyAlor / allAlor
 
         stocksToPurchase.forEach {

@@ -129,11 +129,10 @@ class StrategyTazik : KoinComponent {
         stocksToPurchase.clear()
 
         val totalMoneyTinkoff: Double = SettingsManager.getTazikPurchaseVolume().toDouble()
-        var onePieceTinkoff: Double = totalMoneyTinkoff / SettingsManager.getTazikPurchaseParts()
+        val onePieceTinkoff: Double = totalMoneyTinkoff / SettingsManager.getTazikPurchaseParts()
 
-        // TODO:
-        val totalMoneyAlor: Double = 100.0//SettingsManager.getTazikPurchaseVolume().toDouble()
-        var onePieceAlor: Double = totalMoneyAlor / 2 // totalMoneyAlor / SettingsManager.getTazikPurchaseParts()
+        val totalMoneyAlor: Double = SettingsManager.getTazikPurchaseVolume().toDouble() * SettingsManager.getAlorMultiplierMoney()
+        val onePieceAlor: Double = totalMoneyAlor / SettingsManager.getTazikPurchaseParts()
 
         val percent = SettingsManager.getTazikChangePercent()
         val before11 = Utils.isSessionBefore11()

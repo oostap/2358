@@ -195,20 +195,20 @@ class PortfolioManager : KoinComponent {
         return (busy / (free + busy) * 100).toInt()
     }
 
-    public fun getPositionForFigi(figi: String): TinkoffPosition? {
-        return portfolioPositions.find { it.figi == figi }
+    public fun getPositionForStock(stock: Stock): TinkoffPosition? {
+        return portfolioPositions.find { it.figi == stock.figi }
     }
 
     public fun getOrderForId(id: String, operation: OperationType): TinkoffOrder? {
         return orders.find { it.orderId == id && it.operation == operation }
     }
 
-    public fun getOrderForFigi(figi: String, operation: OperationType): TinkoffOrder? {
-        return orders.find { it.figi == figi && it.operation == operation }
+    public fun getOrderForStock(stock: Stock, operation: OperationType): TinkoffOrder? {
+        return orders.find { it.figi == stock.figi && it.operation == operation }
     }
 
-    public fun getOrderAllOrdersForFigi(figi: String, operation: OperationType): List<TinkoffOrder> {
-        return orders.filter { it.figi == figi && it.operation == operation }
+    public fun getOrderAllForStock(stock: Stock, operation: OperationType): List<TinkoffOrder> {
+        return orders.filter { it.figi == stock.figi && it.operation == operation }
     }
 
     private suspend fun baseSortPortfolio() = withContext(StockManager.stockContext) {

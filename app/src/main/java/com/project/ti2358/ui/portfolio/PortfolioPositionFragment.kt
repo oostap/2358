@@ -208,7 +208,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
                 // отменить все лимитки на продажу
                 GlobalScope.launch(Dispatchers.Main) {
 
-                    val orders = portfolioManager.getOrderAllOrdersForFigi(tinkoffPosition.figi, OperationType.SELL)
+                    val orders = portfolioManager.getOrderAllForStock(stock, OperationType.SELL)
                     orders.forEach {
                         brokerManager.cancelOrderTinkoff(it)
                     }
@@ -240,7 +240,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
             ttDeltaEdit.setText("%.2f".format(locale = Locale.US, stockPurchase.trailingStopTakeProfitPercentDelta))
             ttStopLossEdit.setText("%.2f".format(locale = Locale.US, stockPurchase.trailingStopStopLossPercent))
 
-            val avg = stockPurchase.position?.stock?.getPriceNow() ?: 0.0
+            val avg = stock.getPriceNow()
             val activationPrice = avg + stockPurchase.trailingStopTakeProfitPercentActivation / 100.0 * avg
             val stopLossPrice = avg - abs(stockPurchase.trailingStopStopLossPercent / 100.0 * avg)
             val delta = stockPurchase.trailingStopTakeProfitPercentDelta / 100.0 * avg
@@ -289,7 +289,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
             try {
                 portfolioManager.refreshDeposit()
 
-                val pos = portfolioManager.getPositionForFigi(tinkoffPosition.figi)
+                val pos = portfolioManager.getPositionForStock(stock)
                 if (pos == null) view?.findNavController()?.navigateUp()
 
                 tinkoffPosition = pos!!

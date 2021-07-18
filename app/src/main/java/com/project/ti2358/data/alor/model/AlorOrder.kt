@@ -49,7 +49,6 @@ data class AlorOrder(
     val stopPrice: Double?,
     val endTime: String,
 
-    var stock: Stock?
 ) : BaseOrder() {
     fun getOperationStatusString(): String {
         if (side == OperationType.BUY) {

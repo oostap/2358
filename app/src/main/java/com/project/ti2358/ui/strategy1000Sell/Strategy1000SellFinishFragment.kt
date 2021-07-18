@@ -8,12 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.StockPurchase
 import com.project.ti2358.data.manager.Strategy1000Sell
 import com.project.ti2358.databinding.Fragment1000SellFinishBinding
@@ -55,8 +55,6 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                         Utils.startService(requireContext(), Strategy1000SellService::class.java)
                     }
                 }
-
-                start1000Button.findNavController().navigateUp()
                 updateServiceButtonText1000()
             }
             updateServiceButtonText1000()
@@ -69,8 +67,6 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                         Utils.startService(requireContext(), Strategy700SellService::class.java)
                     }
                 }
-
-                start1000Button.findNavController().navigateUp()
                 updateServiceButtonText700()
             }
             updateServiceButtonText700()
@@ -122,29 +118,29 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
             var watcher: TextWatcher? = null
 
             fun bind(index: Int) {
-                val purchaseStock = values[index]
+                val purchase = values[index]
 
                 with(binding) {
                     var deltaLots = 1
-                    purchaseStock.position?.let {
+                    purchase.position?.let {
                         val avg = it.getAveragePrice()
 
                         if (it.getLots() > 20) {
                             deltaLots = (it.getLots() * 0.05).toInt()
                         }
 
-                        tickerView.text = "${it.ticker} x ${it.getLots()}"
+                        tickerView.text = "${it.getPositionStock()?.ticker} x ${it.getLots()}"
 
                         val profit = it.getProfitAmount()
-                        var totalCash = it.balance * avg
+                        var totalCash = it.getLots() * avg
                         val percent = it.getProfitPercent()
                         percentProfitView.text = percent.toPercent()
 
                         totalCash += profit
-                        priceView.text = "${avg.toMoney(purchaseStock.stock)} ➡ ${totalCash.toMoney(purchaseStock.stock)}"
+                        priceView.text = "${avg.toMoney(purchase.stock)} ➡ ${totalCash.toMoney(purchase.stock)}"
 
-                        priceProfitTotalView.text = profit.toMoney(purchaseStock.stock)
-                        priceProfitView.text = (profit / it.getLots()).toMoney(purchaseStock.stock)
+                        priceProfitTotalView.text = profit.toMoney(purchase.stock)
+                        priceProfitView.text = (profit / it.getLots()).toMoney(purchase.stock)
 
                         priceView.setTextColor(Utils.getColorForValue(percent))
                         percentProfitView.setTextColor(Utils.getColorForValue(percent))
@@ -152,9 +148,9 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                         priceProfitTotalView.setTextColor(Utils.getColorForValue(percent))
                     }
 
-                    if (purchaseStock.position == null) {
-                        tickerView.text = "${purchaseStock.ticker} x ${0}"
-                        priceView.text = "${purchaseStock.stock.getPrice2359String()} ➡ ${purchaseStock.stock.getPriceString()}"
+                    if (purchase.position == null) {
+                        tickerView.text = "${purchase.ticker} x ${0}"
+                        priceView.text = "${purchase.stock.getPrice2359String()} ➡ ${purchase.stock.getPriceString()}"
 
                         percentProfitView.text = ""
                         priceProfitView.text = ""
@@ -162,40 +158,39 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                     }
 
                     percentPlusButton.setOnClickListener {
-                        purchaseStock.addPriceLimitPercent(0.05)
-                        refreshPercent(purchaseStock)
-                        lotsEditText.setText("${purchaseStock.lots}")
+                        purchase.addPriceLimitPercent(0.05)
+                        refreshPercent(purchase)
+                        lotsEditText.setText("${purchase.lots}")
                         strategy1000Sell.saveSelectedStocks()
                     }
 
                     percentMinusButton.setOnClickListener {
-                        purchaseStock.addPriceLimitPercent(-0.05)
-                        refreshPercent(purchaseStock)
-                        lotsEditText.setText("${purchaseStock.lots}")
+                        purchase.addPriceLimitPercent(-0.05)
+                        refreshPercent(purchase)
+                        lotsEditText.setText("${purchase.lots}")
                         strategy1000Sell.saveSelectedStocks()
                     }
 
                     lotsPlusButton.setOnClickListener {
-                        purchaseStock.addLots(deltaLots)
-                        refreshPercent(purchaseStock)
-                        lotsEditText.setText("${purchaseStock.lots}")
+                        purchase.addLots(deltaLots)
+                        refreshPercent(purchase)
+                        lotsEditText.setText("${purchase.lots}")
                         strategy1000Sell.saveSelectedStocks()
                     }
 
                     lotsMinusButton.setOnClickListener {
-                        purchaseStock.addLots(-deltaLots)
-                        refreshPercent(purchaseStock)
-                        lotsEditText.setText("${purchaseStock.lots}")
+                        purchase.addLots(-deltaLots)
+                        refreshPercent(purchase)
+                        lotsEditText.setText("${purchase.lots}")
                         strategy1000Sell.saveSelectedStocks()
                     }
 
-                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
-                    refreshPercent(purchaseStock)
+                    refreshPercent(purchase)
 
                     lotsEditText.clearFocus()
                     lotsEditText.removeCallbacks {  }
                     lotsEditText.removeTextChangedListener(watcher)
-                    lotsEditText.setText("${purchaseStock.lots}")
+                    lotsEditText.setText("${purchase.lots}")
                     watcher = lotsEditText.addTextChangedListener { v ->
                         if (lotsEditText.hasFocus()) {
                             val value = try {
@@ -203,9 +198,15 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                             } catch (e: Exception) {
                                 1
                             }
-                            purchaseStock.lots = value
-                            refreshPercent(purchaseStock)
+                            purchase.lots = value
+                            refreshPercent(purchase)
                         }
+                    }
+
+                    if (SettingsManager.getBrokerAlor() && SettingsManager.getBrokerTinkoff()) {
+                        itemView.setBackgroundColor(Utils.getColorForBrokerValue(purchase.broker))
+                    } else {
+                        itemView.setBackgroundColor(Utils.getColorForIndex(index))
                     }
                 }
             }

@@ -153,29 +153,33 @@ class StrategyZontikEndlessFinishFragment : Fragment(R.layout.fragment_zontik_en
 
         inner class ViewHolder(private val binding: FragmentZontikEndlessFinishItemBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(index: Int) {
-                val purchaseStock = values[index]
+                val purchase = values[index]
 
                 with(binding) {
-                    val avg = purchaseStock.stock.getPriceNow()
-                    tickerView.text = "${index + 1}) ${purchaseStock.stock.getTickerLove()} x ${purchaseStock.lots}"
-                    priceView.text = "${purchaseStock.stock.getPrice2359String()} ➡ ${avg.toMoney(purchaseStock.stock)}"
-                    priceTotalView.text = (purchaseStock.stock.getPriceNow() * purchaseStock.lots).toMoney(purchaseStock.stock)
+                    val avg = purchase.stock.getPriceNow()
+                    tickerView.text = "${index + 1}) ${purchase.stock.getTickerLove()} x ${purchase.lots}"
+                    priceView.text = "${purchase.stock.getPrice2359String()} ➡ ${avg.toMoney(purchase.stock)}"
+                    priceTotalView.text = (purchase.stock.getPriceNow() * purchase.lots).toMoney(purchase.stock)
 
-                    refreshPercent(purchaseStock)
+                    refreshPercent(purchase)
 
                     percentPlusButton.setOnClickListener {
-                        purchaseStock.addPriceLimitPercent(0.05)
-                        refreshPercent(purchaseStock)
+                        purchase.addPriceLimitPercent(0.05)
+                        refreshPercent(purchase)
                         updateInfoText()
                     }
 
                     percentMinusButton.setOnClickListener {
-                        purchaseStock.addPriceLimitPercent(-0.05)
-                        refreshPercent(purchaseStock)
+                        purchase.addPriceLimitPercent(-0.05)
+                        refreshPercent(purchase)
                         updateInfoText()
                     }
 
-                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                    if (SettingsManager.getBrokerAlor() && SettingsManager.getBrokerTinkoff()) {
+                        itemView.setBackgroundColor(Utils.getColorForBrokerValue(purchase.broker))
+                    } else {
+                        itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                    }
                 }
             }
 

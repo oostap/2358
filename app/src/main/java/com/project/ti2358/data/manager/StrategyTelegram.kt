@@ -268,19 +268,24 @@ class StrategyTelegram : KoinComponent {
     }
 
     private fun orderToString(order: BaseOrder): String {
-        val ticker = order.getOrderStock()?.ticker
         val orderSymbol = if (order.getOrderOperation() == OperationType.BUY) "🟢" else "🔴"
         var orderString = if (order.getOrderOperation() == OperationType.BUY) "BUY " else "SELL "
 
         var position: BasePosition? = null
         if (order is TinkoffOrder) {
-            position = portfolioManager.getPositionForFigi(order.figi)
+            val stock = stockManager.getStockByFigi(order.figi) ?: return ""
+            position = portfolioManager.getPositionForStock(stock)
+            order.stock = stock
         }
 
         if (order is AlorOrder) {
-            position = alorPortfolioManager.getPositionForTicker(order.symbol)
+            val stock = stockManager.getStockByTicker(order.symbol) ?: return ""
+            position = alorPortfolioManager.getPositionForStock(stock)
+            order.stock = stock
             return ""
         }
+
+        val ticker = order.getOrderStock()?.ticker
 
         if (position == null && order.getOrderOperation() == OperationType.BUY) {
             orderString += "LONG вход"
@@ -342,10 +347,12 @@ class StrategyTelegram : KoinComponent {
 
     @SuppressLint("SimpleDateFormat")
     private fun operationToString(operation: Operation): String {
+        if (operation.stock == null) return ""
+
         val ticker = operation.stock?.ticker
         val operationSymbol = if (operation.operationType == OperationType.BUY) "🟢" else "🔴"
         var operationString = if (operation.operationType == OperationType.BUY) "BUY " else "SELL "
-        val position = portfolioManager.getPositionForFigi(operation.figi)
+        val position = portfolioManager.getPositionForStock(operation.stock!!)
         if (position == null && operation.operationType == OperationType.BUY) {
             operationString += "SHORT выход"
         }

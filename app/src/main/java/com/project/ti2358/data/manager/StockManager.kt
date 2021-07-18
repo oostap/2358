@@ -298,7 +298,7 @@ class StockManager : KoinComponent {
     }
 
     fun getStockByTicker(ticker: String): Stock? {
-        return stocksAll.find { it.ticker == ticker.toLowerCase() || it.ticker == ticker || ticker.toLowerCase() in it.alterName.split(" ")}
+        return stocksAll.find { it.ticker == ticker.toUpperCase() || it.ticker == ticker.toLowerCase() || it.ticker == ticker || ticker.toLowerCase() in it.alterName.split(" ")}
     }
 
     private suspend fun processStocks() = withContext(stockContext) {

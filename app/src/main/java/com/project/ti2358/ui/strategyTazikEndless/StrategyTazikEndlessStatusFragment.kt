@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.OrderbookManager
+import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.StockPurchase
 import com.project.ti2358.data.manager.StrategyTazikEndless
 import com.project.ti2358.databinding.FragmentTazikEndlessStatusBinding
@@ -99,7 +100,7 @@ class StrategyTazikEndlessStatusFragment : Fragment(R.layout.fragment_tazik_endl
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            act.supportActionBar?.title = "Статус 🛁: ${strategyTazikEndless.stocksSelected.size} шт."
+            act.supportActionBar?.title = "Статус 🛁: ${stockPurchases.size} шт."
         }
     }
 
@@ -142,7 +143,11 @@ class StrategyTazikEndlessStatusFragment : Fragment(R.layout.fragment_tazik_endl
                         Utils.openOrderbookForStock(it.findNavController(), orderbookManager, purchase.stock)
                     }
 
-                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                    if (SettingsManager.getBrokerAlor() && SettingsManager.getBrokerTinkoff()) {
+                        itemView.setBackgroundColor(Utils.getColorForBrokerValue(purchase.broker))
+                    } else {
+                        itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                    }
                 }
             }
         }

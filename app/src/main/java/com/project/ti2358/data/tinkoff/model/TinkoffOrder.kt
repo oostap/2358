@@ -14,8 +14,6 @@ data class TinkoffOrder(
     val type: OrderType,
     val price: Double,
 
-    var stock: Stock?,
-
     val rejectReason: String,
     val message: String,
     val commission: MoneyAmount?,

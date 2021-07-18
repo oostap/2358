@@ -176,7 +176,7 @@ class Strategy1728UpFragment : Fragment(R.layout.fragment_1728_up) {
                                 }
                             }
 
-                            // TODO:
+                            // TODO: ALOR
                             if (SettingsManager.getBrokerAlor()) {
 
                             }

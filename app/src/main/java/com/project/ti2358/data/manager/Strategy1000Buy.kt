@@ -110,7 +110,7 @@ class Strategy1000Buy : KoinComponent {
     }
 
     fun processPrepare(): MutableList<StockPurchase> {
-        loadSelectedStocks(currentNumberSet)
+        if (currentNumberSet != 0) loadSelectedStocks(currentNumberSet)
 
         val totalMoney: Double = SettingsManager.get1000BuyPurchaseVolume().toDouble()
         val onePiece: Double = totalMoney / presetStocksSelected.size
@@ -123,7 +123,7 @@ class Strategy1000Buy : KoinComponent {
                         percentLimitPriceChange = preset.percent
                         lots = preset.lots
                         profitPercent = preset.profit
-                        position = portfolioManager.getPositionForFigi(it.figi)
+                        position = portfolioManager.getPositionForStock(it)
                     }
                     purchases.add(purchase)
                 }

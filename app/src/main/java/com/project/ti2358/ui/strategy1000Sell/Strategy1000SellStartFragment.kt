@@ -33,7 +33,7 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
     var adapterList: Item1000SellRecyclerViewAdapter = Item1000SellRecyclerViewAdapter(emptyList())
     var jobUpdate: Job? = null
     var stocks: MutableList<Stock> = mutableListOf()
-    var numberSet: Int = 1
+    var numberSet: Int = 0
 
     override fun onDestroy() {
         jobUpdate?.cancel()
@@ -61,6 +61,11 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
             }
 
             updateButton.setOnClickListener {
+                updateData()
+            }
+
+            set0Button.setOnClickListener {
+                numberSet = 0
                 updateData()
             }
 
@@ -125,11 +130,13 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
                 val colorDefault = Utils.DARK_BLUE
                 val colorSelect = Utils.RED
 
+                it.set0Button.setBackgroundColor(colorDefault)
                 it.set1Button.setBackgroundColor(colorDefault)
                 it.set2Button.setBackgroundColor(colorDefault)
                 it.set3Button.setBackgroundColor(colorDefault)
 
                 when (numberSet) {
+                    0 -> it.set0Button.setBackgroundColor(colorSelect)
                     1 -> it.set1Button.setBackgroundColor(colorSelect)
                     2 -> it.set2Button.setBackgroundColor(colorSelect)
                     3 -> it.set3Button.setBackgroundColor(colorSelect)
@@ -159,7 +166,7 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
         inner class ViewHolder(private val binding: Fragment1000SellStartItemBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(index: Int) {
                 val stock = values[index]
-                val portfolioPosition = portfolioManager.getPositionForFigi(stock.figi)
+                val portfolioPosition = portfolioManager.getPositionForStock(stock)
 
                 with(binding) {
                     tickerView.text = "${index + 1}) ${stock.getTickerLove()}"

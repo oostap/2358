@@ -32,7 +32,8 @@ class StrategyTazikEndless : KoinComponent {
 
     var stocksToPurchase: MutableList<StockPurchase> = mutableListOf()
     var stocksToClonePurchase: MutableList<StockPurchase> = mutableListOf()
-    var stocksTickerInProcess: MutableMap<String, Job> = ConcurrentHashMap()
+
+    var stocksTickerInProcess: MutableMap<StockPurchase, Job> = ConcurrentHashMap()
 
     var basicPercentLimitPriceChange: Double = 0.0
     var started: Boolean = false
@@ -126,12 +127,11 @@ class StrategyTazikEndless : KoinComponent {
         if (started) return@withContext stocksToPurchase
         val percent = SettingsManager.getTazikEndlessChangePercent()
 
-
         val totalMoneyTinkoff: Double = SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
         val onePieceTinkoff: Double = totalMoneyTinkoff / SettingsManager.getTazikEndlessPurchaseParts()
 
-        val totalMoneyAlor: Double = 100.0 //SettingsManager.getTazikEndlessPurchaseVolume().toDouble()
-        val onePieceAlor: Double = totalMoneyAlor / 2 //totalMoneyAlor / SettingsManager.getTazikEndlessPurchaseParts()
+        val totalMoneyAlor: Double = SettingsManager.getTazikEndlessPurchaseVolume().toDouble() * SettingsManager.getAlorMultiplierMoney()
+        val onePieceAlor: Double = totalMoneyAlor / SettingsManager.getTazikEndlessPurchaseParts()
 
         val purchases: MutableList<StockPurchase> = mutableListOf()
         for (stock in stocksSelected) {
@@ -192,7 +192,7 @@ class StrategyTazikEndless : KoinComponent {
         val blacklist = strategyBlacklist.getBlacklistStocks()
         stocksToPurchase.removeAll { it.ticker in blacklist.map { stock -> stock.ticker } }
 
-        stocksToClonePurchase = stocksToPurchase.distinctBy { it.ticker }.toMutableList()
+        stocksToClonePurchase = stocksToPurchase.toMutableList()
 
         return@withContext stocksToPurchase
     }
@@ -424,6 +424,19 @@ class StrategyTazikEndless : KoinComponent {
         }
     }
 
+    fun clearJobs() {
+        stocksTickerInProcess.forEach {
+            try {
+                if (it.value.isActive) {
+                    it.value.cancel()
+                }
+            } catch (e: Exception) {
+
+            }
+        }
+        stocksTickerInProcess.clear()
+    }
+
     suspend fun startStrategy(scheduled: Boolean) = withContext(StockManager.stockContext) {
         scheduledTimeStart = null
         basicPercentLimitPriceChange = SettingsManager.getTazikEndlessChangePercent()
@@ -442,17 +455,7 @@ class StrategyTazikEndless : KoinComponent {
         }
 
         strategyBlacklist.process(stockManager.stocksStream)
-
-        stocksTickerInProcess.forEach {
-            try {
-                if (it.value.isActive) {
-                    it.value.cancel()
-                }
-            } catch (e: Exception) {
-
-            }
-        }
-        stocksTickerInProcess.clear()
+        clearJobs()
         started = true
 
         jobResetPrice?.cancel()
@@ -471,16 +474,8 @@ class StrategyTazikEndless : KoinComponent {
         scheduledTimeEnd = null
 
         started = false
-        stocksTickerInProcess.forEach {
-            try {
-                if (it.value.isActive) {
-                    it.value.cancel()
-                }
-            } catch (e: Exception) {
+        clearJobs()
 
-            }
-        }
-        stocksTickerInProcess.clear()
         jobResetPrice?.cancel()
         strategyTelegram.sendTazikEndlessStart(false)
     }
@@ -515,16 +510,25 @@ class StrategyTazikEndless : KoinComponent {
 
         val ticker = purchase.ticker
 
-        // лимит на заявки исчерпан?
-        if (stocksTickerInProcess.size >= SettingsManager.getTazikEndlessPurchaseParts()) return false
+        // лимит на заявки исчерпан у брокера?
+        val countBroker = stocksTickerInProcess.filter { it.key.broker == purchase.broker }.size
+        if (countBroker >= SettingsManager.getTazikEndlessPurchaseParts()) return false
 
         // проверить, если бумага в депо и усреднение отключено, то запретить тарить
-        if (portfolioManager.portfolioPositions.find { it.ticker == purchase.ticker } != null && !SettingsManager.getTazikEndlessAllowAveraging()) {
-            return false
+        if (purchase.broker == BrokerType.TINKOFF) {
+            if (portfolioManager.portfolioPositions.find { it.ticker == ticker } != null && !SettingsManager.getTazikEndlessAllowAveraging()) {
+                return false
+            }
         }
 
-        // ещё не брали бумагу?
-        if (ticker !in stocksTickerInProcess) {
+        if (purchase.broker == BrokerType.ALOR) {
+            if (alorPortfolioManager.portfolioPositions.find { it.symbol == ticker } != null && !SettingsManager.getTazikEndlessAllowAveraging()) {
+                return false
+            }
+        }
+
+        // ещё не брали бумагу в этом брокере?
+        if (stocksTickerInProcess.filter { it.key.broker == purchase.broker && it.key.stock.ticker == ticker }.isEmpty()) {
             return true
         }
 
@@ -644,14 +648,14 @@ class StrategyTazikEndless : KoinComponent {
         var finalProfit = SettingsManager.getTazikEndlessTakeProfit()
 
         // если мы усредняем, то не нужно выставлять ТП, потому что неизвестно какие заявки из усреднения выполнятся и какая будет в итоге средняя
-        if (stock.ticker in stocksTickerInProcess && SettingsManager.getTazikEndlessAllowAveraging()) {
+        if (stocksTickerInProcess.filter { it.key.broker == purchase.broker && it.key.stock.ticker == purchase.ticker }.isNotEmpty() && SettingsManager.getTazikEndlessAllowAveraging()) {
             finalProfit = 0.0
         }
 
         buyPrice = Utils.makeNicePrice(buyPrice, stock)
         val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikEndlessOrderLifeTimeSeconds())
         if (job != null) {
-            stocksTickerInProcess[stock.ticker] = job
+            stocksTickerInProcess[purchase] = job
 
             var sellPrice = buyPrice + buyPrice / 100.0 * finalProfit
             sellPrice = Utils.makeNicePrice(sellPrice, stock)

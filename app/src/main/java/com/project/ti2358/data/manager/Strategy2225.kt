@@ -117,7 +117,7 @@ class Strategy2225() : KoinComponent {
         val totalMoneyTinkoff: Double = SettingsManager.get2225PurchaseVolume().toDouble()
         val onePieceTinkoff: Double = if (allTinkoff == 0) 0.0 else totalMoneyTinkoff / allTinkoff
 
-        val totalMoneyAlor: Double = 100.0 //SettingsManager.get2225PurchaseVolume().toDouble() // TODO:
+        val totalMoneyAlor: Double = SettingsManager.get2225PurchaseVolume().toDouble() * SettingsManager.getAlorMultiplierMoney()
         val onePieceAlor: Double = if (allAlor == 0) 0.0 else totalMoneyAlor / allAlor
 
         stocksToPurchase.forEach {

@@ -50,6 +50,12 @@
             app:title="@string/alor_orderbook_title"
             app:defaultValue="false" />
 
+        <EditTextPreference
+            app:key="@string/setting_key_alor_multiplier_money"
+            app:title="@string/alor_multiplier_money"
+            app:defaultValue="0.5"
+            app:useSimpleSummaryProvider="true" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/pantini_header">

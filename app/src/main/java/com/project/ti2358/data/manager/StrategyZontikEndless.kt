@@ -128,11 +128,10 @@ class StrategyZontikEndless : KoinComponent {
         val percent = SettingsManager.getZontikEndlessChangePercent()
 
         val totalMoneyTinkoff: Double = SettingsManager.getZontikEndlessPurchaseVolume().toDouble()
-        var onePieceTinkoff: Double = totalMoneyTinkoff / SettingsManager.getZontikEndlessPurchaseParts()
+        val onePieceTinkoff: Double = totalMoneyTinkoff / SettingsManager.getZontikEndlessPurchaseParts()
 
-        // TODO:
-        val totalMoneyAlor: Double = 100.0//SettingsManager.getZontikEndlessPurchaseVolume().toDouble()
-        var onePieceAlor: Double = totalMoneyAlor / 2 // totalMoneyAlor / SettingsManager.getTazikPurchaseParts()
+        val totalMoneyAlor: Double = SettingsManager.getZontikEndlessPurchaseVolume().toDouble() * SettingsManager.getAlorMultiplierMoney()
+        val onePieceAlor: Double = totalMoneyAlor / SettingsManager.getZontikEndlessPurchaseParts()
 
         val purchases: MutableList<StockPurchase> = mutableListOf()
         for (stock in stocksSelected) {

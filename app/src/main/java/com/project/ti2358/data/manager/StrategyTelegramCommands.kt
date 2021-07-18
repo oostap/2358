@@ -344,7 +344,7 @@ class StrategyTelegramCommands : KoinComponent {
 
             val stock = stockManager.getStockByTicker(ticker)
             val figi = stock?.figi ?: ""
-            if (figi == "") return 0
+            if (figi == "" || stock == null) return 0
 
             if (SettingsManager.getTelegramAllowCommandBuySell()) {
                 if (operation in listOf("buy", "sell")) {
@@ -381,7 +381,7 @@ class StrategyTelegramCommands : KoinComponent {
                     }
 
                     if (operation == "sell") {  // # SELL VIPS 29.46 1
-                        val position = portfolioManager.getPositionForFigi(figi) ?: return 0
+                        val position = portfolioManager.getPositionForStock(stock) ?: return 0
                         val lots = (position.getLots() / 100.0 * percent).toInt()
 
                         if (lots == 0) return 0
@@ -413,7 +413,7 @@ class StrategyTelegramCommands : KoinComponent {
                     GlobalScope.launch(Dispatchers.Main) {
                         val change = list[3].toDouble()
                         val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
-                        val orders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
+                        val orders = portfolioManager.getOrderAllForStock(stock, operationType)
                         orders.forEach { order ->
                             val newIntPrice = ((order.price + change) * 100).roundToInt()
                             val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, order.stock)
@@ -427,7 +427,7 @@ class StrategyTelegramCommands : KoinComponent {
 
                     GlobalScope.launch(Dispatchers.Main) {
                         val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
-                        val orders = portfolioManager.getOrderAllOrdersForFigi(figi, operationType)
+                        val orders = portfolioManager.getOrderAllForStock(stock, operationType)
                         orders.forEach { order ->
                             brokerManager.cancelOrderTinkoff(order)
 

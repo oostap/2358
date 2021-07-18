@@ -23,6 +23,7 @@
     <string name="cancel_all2">Отменить всё</string>
     <string name="sell_tt">Продать с трейлинг-стопом</string>
 
+    <string name="set_0">0</string>
     <string name="set_1">1</string>
     <string name="set_2">2</string>
     <string name="set_3">3</string>
@@ -132,6 +133,7 @@
     <string name="alor_username">ALOR username (P123456)</string>
     <string name="alor_qoutes_title">Котировки ALOR</string>
     <string name="alor_orderbook_title">Стакан ALOR</string>
+    <string name="alor_multiplier_money">Множитель сумм для всех стратегий (пример: 1.0 = точно такая же, 0.5 = половина)</string>
 
     <string name="pantini_header">John Pantini</string>
     <string name="pantini_telegram_id">Pantini: Телеграм ID</string>
@@ -361,6 +363,7 @@
     <string name="setting_key_token_market_alor">token_market_alor</string>
     <string name="setting_key_alor_quotes">alor_quotes</string>
     <string name="setting_key_alor_orderbook">alor_orderbook</string>
+    <string name="setting_key_alor_multiplier_money">alor_multiplier_money</string>
 
     <!-- pantini -->
     <string name="setting_key_pantini_telegram_id">pantini_telegram_id</string>

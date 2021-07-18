@@ -1,8 +1,7 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.common.BaseOrder
+import com.project.ti2358.data.common.BasePosition
 import com.project.ti2358.data.common.BrokerType
-import com.project.ti2358.data.tinkoff.model.*
 import com.project.ti2358.service.PurchaseStatus
 import com.project.ti2358.service.Utils
 import kotlinx.coroutines.Job
@@ -10,12 +9,13 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import java.util.*
 
+/// TODO: !!!!! Различия StockPurchaseTinkoff и StockPurchaseAlor только в способах подтверждения установки заявки, в будущем нужно их объединить
 @KoinApiExtension
 open class StockPurchase(open var stock: Stock, open var broker: BrokerType) : KoinComponent {
-    var ticker = stock.ticker
-    var figi = stock.figi
+    open lateinit var ticker: String
+    open lateinit var figi: String
 
-    var position: TinkoffPosition? = null
+    var position: BasePosition? = null
 
     var tazikPrice: Double = 0.0                      // обновляемая фиксированная цена, от которой считаем тазы
     var tazikEndlessPrice: Double = 0.0               // обновляемая фиксированная цена, от которой считаем бесконечные тазы
@@ -28,9 +28,6 @@ open class StockPurchase(open var stock: Stock, open var broker: BrokerType) : K
     var profitPercent: Double = 0.0                   // процент профита лонг/шорт (> 0.0)
 
     var status: PurchaseStatus = PurchaseStatus.NONE
-
-    var buyLimitOrder: BaseOrder? = null
-    var sellLimitOrder: BaseOrder? = null
 
     // для продажи/откупа лесенкой в 2225 и 2258 и DayLOW
     var percentProfitSellFrom: Double = 0.0
@@ -129,7 +126,7 @@ open class StockPurchase(open var stock: Stock, open var broker: BrokerType) : K
     }
 
     fun processInitialProfit() {
-        percentProfitSellFrom = SettingsManager.get1000SellTakeProfit()
+        percentLimitPriceChange = SettingsManager.get1000SellTakeProfit()
 
         position?.let {
             // по умолчанию взять профит из настроек
@@ -139,11 +136,9 @@ open class StockPurchase(open var stock: Stock, open var broker: BrokerType) : K
             if (futureProfit == 0.0) futureProfit = 1.0
 
             // если текущий профит уже больше, то за базовый взять его
-            val change = it.getProfitAmount()
-            val totalCash = it.balance * it.getAveragePrice()
-            val currentProfit = (100.0 * change) / totalCash
+            val currentProfit = it.getProfitPercent()
 
-            percentProfitSellFrom = if (currentProfit > futureProfit) currentProfit else futureProfit
+            percentLimitPriceChange = if (currentProfit > futureProfit) currentProfit else futureProfit
         }
         status = PurchaseStatus.WAITING
     }

@@ -35,7 +35,16 @@
         android:layout_marginRight="80dp"
         android:layout_marginBottom="65dp"
         android:layout_alignParentBottom="true"
-        android:weightSum="4" >
+        android:weightSum="5" >
+        <Button
+            android:layout_height="70dp"
+            android:id="@+id/set0_button"
+            android:layout_marginRight="5dp"
+            android:text="@string/set_0"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:layout_width="0dp" />
+
         <Button
             android:layout_height="70dp"
             android:id="@+id/set1_button"

@@ -35,7 +35,7 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
 
     var adapterList: Item1005RecyclerViewAdapter = Item1005RecyclerViewAdapter(emptyList())
     var stocks: MutableList<Stock> = mutableListOf()
-    var numberSet: Int = 1
+    var numberSet: Int = 0
 
     override fun onDestroy() {
         fragment1000BuyStartBinding = null
@@ -62,6 +62,11 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
             }
 
             updateButton.setOnClickListener {
+                updateData()
+            }
+
+            set0Button.setOnClickListener {
+                numberSet = 0
                 updateData()
             }
 
@@ -121,12 +126,14 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
                 val colorDefault = Utils.DARK_BLUE
                 val colorSelect = Utils.RED
 
+                it.set0Button.setBackgroundColor(colorDefault)
                 it.set1Button.setBackgroundColor(colorDefault)
                 it.set2Button.setBackgroundColor(colorDefault)
                 it.set3Button.setBackgroundColor(colorDefault)
                 it.set4Button.setBackgroundColor(colorDefault)
 
                 when (numberSet) {
+                    0 -> it.set0Button.setBackgroundColor(colorSelect)
                     1 -> it.set1Button.setBackgroundColor(colorSelect)
                     2 -> it.set2Button.setBackgroundColor(colorSelect)
                     3 -> it.set3Button.setBackgroundColor(colorSelect)

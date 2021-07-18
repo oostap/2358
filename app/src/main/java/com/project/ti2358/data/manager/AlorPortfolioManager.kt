@@ -272,12 +272,12 @@ class AlorPortfolioManager : KoinComponent {
         return (busy / (free + busy) * 100).toInt()
     }
 
-    public fun getPositionForTicker(ticker: String): AlorPosition? {
-        return portfolioPositions.find { it.symbol == ticker }
+    public fun getPositionForStock(stock: Stock): AlorPosition? {
+        return portfolioPositions.find { it.symbol == stock.ticker }
     }
 
-    public fun getOrderAllOrdersForTicker(ticker: String, operation: OperationType): List<AlorOrder> {
-        return orders.filter { it.symbol == ticker && it.side == operation }
+    public fun getOrderAllForStock(stock: Stock, operation: OperationType): List<AlorOrder> {
+        return orders.filter { it.symbol == stock.ticker && it.side == operation }
     }
 
     public fun getOrderForId(id: String, operation: OperationType): AlorOrder? {

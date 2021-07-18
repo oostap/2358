@@ -7,10 +7,8 @@ import com.project.ti2358.data.common.BaseOrder
 import com.project.ti2358.data.common.BasePosition
 import com.project.ti2358.data.tinkoff.model.OperationType
 import com.project.ti2358.data.tinkoff.model.TinkoffOrder
-import com.project.ti2358.data.pantini.model.PantiniPrint
 import com.project.ti2358.data.tinkoff.service.OrdersService
 import com.project.ti2358.service.Utils
-import com.project.ti2358.ui.orderbook.OrderbookLine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -18,8 +16,6 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.lang.Exception
-import java.util.function.ToIntBiFunction
-import kotlin.math.max
 
 @KoinApiExtension
 class BrokerManager() : KoinComponent {
@@ -116,9 +112,16 @@ class BrokerManager() : KoinComponent {
 
     suspend fun cancelOrderAlor(order: AlorOrder) {
         val operation = if (order.side == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
+        order.stock?.let {
+            cancelOrderAlorForId(order.id, it, order.side)
+        }
+    }
+
+    suspend fun cancelOrderAlorForId(orderId: String, stock: Stock, operationType: OperationType) {
+        val operation = if (operationType == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
         try {
-            Utils.showToastAlert("ALOR ${order.stock?.ticker} ордер отменён: $operation")
-            alorOrdersService.cancel(order.id, AlorExchange.SPBX)
+            Utils.showToastAlert("ALOR ${stock.ticker} ордер отменён: $operation")
+            alorOrdersService.cancel(orderId, AlorExchange.SPBX)
         } catch (e: Exception) { // TODO: тут всегда эксепшин из-за разного формата ответа, а ретрофит понимает только json
             // возможно уже отменена
 //                Utils.showToastAlert("${order.stock?.ticker} ордер УЖЕ отменён: $operation")
@@ -198,12 +201,12 @@ class BrokerManager() : KoinComponent {
         val orders = mutableListOf<BaseOrder>()
 
         if (SettingsManager.getBrokerTinkoff()) {
-            val tinkoff = portfolioManager.getOrderAllOrdersForFigi(stock.figi, operation)
+            val tinkoff = portfolioManager.getOrderAllForStock(stock, operation)
             orders.addAll(tinkoff)
         }
 
         if (SettingsManager.getBrokerAlor()) {
-            val alor = alorPortfolioManager.getOrderAllOrdersForTicker(stock.ticker, operation)
+            val alor = alorPortfolioManager.getOrderAllForStock(stock, operation)
             orders.addAll(alor)
         }
 

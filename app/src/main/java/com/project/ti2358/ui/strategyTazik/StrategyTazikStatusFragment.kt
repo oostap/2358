@@ -141,7 +141,11 @@ class StrategyTazikStatusFragment : Fragment(R.layout.fragment_tazik_status) {
                         Utils.openTinkoffForTicker(requireContext(), purchase.ticker)
                     }
 
-                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                    if (SettingsManager.getBrokerAlor() && SettingsManager.getBrokerTinkoff()) {
+                        itemView.setBackgroundColor(Utils.getColorForBrokerValue(purchase.broker))
+                    } else {
+                        itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                    }
                 }
             }
         }

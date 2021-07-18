@@ -1,5 +1,8 @@
 package com.project.ti2358.data.manager
 
+import com.project.ti2358.data.alor.model.AlorPosition
+import com.project.ti2358.data.common.BaseOrder
+import com.project.ti2358.data.common.BasePosition
 import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.tinkoff.model.*
 import com.project.ti2358.data.tinkoff.service.MarketService
@@ -14,10 +17,16 @@ import kotlin.math.ceil
 
 @KoinApiExtension
 data class StockPurchaseAlor(override var stock: Stock, override var broker: BrokerType = BrokerType.ALOR) : StockPurchase(stock, broker) {
+    override var ticker: String = stock.ticker
+    override var figi: String = stock.figi
+
     private val brokerManager: BrokerManager by inject()
-    private val portfolioManager: PortfolioManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
     private val marketService: MarketService by inject()
     private val strategyTrailingStop: StrategyTrailingStop by inject()
+
+    var buyLimitOrderId: String = ""
+    var sellLimitOrderId: String = ""
 
     override fun buyLimitFromBid(price: Double, profit: Double, counter: Int, orderLifeTimeSeconds: Int): Job? {
         if (lots > 999999999 || lots == 0 || price == 0.0) return null
@@ -26,7 +35,7 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
         var profitPrice = buyPrice + buyPrice / 100.0 * profit
         profitPrice = Utils.makeNicePrice(profitPrice, stock)
 
-        val p = portfolioManager.getPositionForFigi(figi)
+        val p = alorPortfolioManager.getPositionForStock(stock)
 
         val lotsPortfolio = p?.getLots() ?: 0
         var lotsToBuy = lots
@@ -34,23 +43,22 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
         status = PurchaseStatus.WAITING
         return GlobalScope.launch(Dispatchers.Main) {
             try {
-                val figi = stock.figi
                 val ticker = stock.ticker
 
                 // счётчик на количество повторов (возможно просто нет депо) = примерно 1 минуту
                 var tries = counter
                 while (tries >= 0) { // выставить ордер на покупку
                     status = PurchaseStatus.ORDER_BUY_PREPARE
-                    buyLimitOrder = brokerManager.placeOrderTinkoff(stock, buyPrice, lotsToBuy, OperationType.BUY)
+                    buyLimitOrderId = brokerManager.placeOrderAlor(stock, buyPrice, lotsToBuy, OperationType.BUY)
                     delay(DelayFast)
 
-                    if (buyLimitOrder?.isCreated() == true) {
+                    if (buyLimitOrderId != "") {
                         status = PurchaseStatus.ORDER_BUY
                         break
                     }
 
-                    portfolioManager.refreshOrders()
-                    portfolioManager.refreshDeposit()
+                    alorPortfolioManager.refreshOrders()
+                    alorPortfolioManager.refreshDeposit()
 
                     delay(DelaySuperFast)
                     tries--
@@ -66,17 +74,17 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
                 if (profit == 0.0) {
                     delay(orderLifeTimeSeconds * 1000L)
                     status = PurchaseStatus.CANCELED
-                    brokerManager.cancelOrder(buyLimitOrder)
+                    brokerManager.cancelOrderAlorForId(buyLimitOrderId, stock, OperationType.BUY)
                 } else {
                     // проверяем появился ли в портфеле тикер
-                    var position: TinkoffPosition?
+                    var position: AlorPosition?
                     var iterations = 0
 
                     while (true) {
                         iterations++
                         try {
-                            portfolioManager.refreshDeposit()
-                            portfolioManager.refreshOrders()
+                            alorPortfolioManager.refreshDeposit()
+                            alorPortfolioManager.refreshOrders()
                         } catch (e: Exception) {
                             e.printStackTrace()
                             delay(DelayLong)
@@ -85,18 +93,18 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
 
                         if (iterations * DelayLong / 1000.0 > orderLifeTimeSeconds) { // отменить заявку на покупку
                             status = PurchaseStatus.CANCELED
-                            brokerManager.cancelOrder(buyLimitOrder)
+                            brokerManager.cancelOrderAlorForId(buyLimitOrderId, stock, OperationType.BUY)
                             Utils.showToastAlert("$ticker: заявка отменена по $buyPrice")
                             return@launch
                         }
 
-                        val orderBuy = brokerManager.getOrderForId(buyLimitOrder?.getOrderID() ?: "", OperationType.BUY)
-                        position = portfolioManager.getPositionForFigi(figi)
+                        val orderBuy = brokerManager.getOrderForId(buyLimitOrderId, OperationType.BUY)
+                        position = alorPortfolioManager.getPositionForStock(stock)
 
                         // проверка на большое количество лотов
-                        val orders = portfolioManager.getOrderAllOrdersForFigi(figi, OperationType.SELL)
+                        val orders = alorPortfolioManager.getOrderAllForStock(stock, OperationType.SELL)
                         var totalSellingLots = 0
-                        orders.forEach { totalSellingLots += it.requestedLots }
+                        orders.forEach { totalSellingLots += it.getLotsRequested() }
                         if (totalSellingLots >= lots) break
 
                         // заявка стоит, ничего не куплено
@@ -114,7 +122,7 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
 
                         position?.let { // появилась позиция, проверить есть ли что продать
                             // выставить ордер на продажу
-                            val lotsToSell = it.getLots() - it.blocked.toInt() - lotsPortfolio
+                            val lotsToSell = it.getLots() - it.getBlocked() - lotsPortfolio
                             if (lotsToSell <= 0) {  // если свободных лотов нет, продолжаем
                                 return@let
                             }
@@ -126,9 +134,9 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
 
                             Utils.showToastAlert("$ticker: куплено по $buyPrice")
 
-                            sellLimitOrder = brokerManager.placeOrderTinkoff(stock, profitPrice, lotsToSell, OperationType.SELL)
+                            sellLimitOrderId = brokerManager.placeOrderAlor(stock, profitPrice, lotsToSell, OperationType.SELL)
 
-                            if (sellLimitOrder?.isCreated() == true) {
+                            if (sellLimitOrderId != "") {
                                 status = PurchaseStatus.ORDER_SELL
                                 Utils.showToastAlert("$ticker: ордер на продажу по $profitPrice")
                             } else { // заявка отклонена, вернуть лоты
@@ -148,7 +156,7 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
                 if (status == PurchaseStatus.ORDER_SELL) {
                     while (true) {
                         delay(DelayLong)
-                        val position = portfolioManager.getPositionForFigi(figi)
+                        val position = alorPortfolioManager.getPositionForStock(stock)
                         if (position == null || position.getLots() == lotsPortfolio) { // продано!
                             status = PurchaseStatus.SOLD
                             Utils.showToastAlert("$ticker: продано!?")
@@ -171,7 +179,7 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
         var profitPrice = sellPrice - sellPrice / 100.0 * profit
         profitPrice = Utils.makeNicePrice(profitPrice, stock)
 
-        val p = portfolioManager.getPositionForFigi(figi)
+        val p = alorPortfolioManager.getPositionForStock(stock)
 
         val lotsPortfolio = abs(p?.getLots() ?: 0)
         var lotsToSell = lots
@@ -179,23 +187,22 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
         status = PurchaseStatus.WAITING
         return GlobalScope.launch(Dispatchers.Main) {
             try {
-                val figi = stock.figi
                 val ticker = stock.ticker
 
                 // счётчик на количество повторов (возможно просто нет депо) = примерно 1 минуту
                 var tries = counter
                 while (tries >= 0) { // выставить ордер на покупку
                     status = PurchaseStatus.ORDER_BUY_PREPARE
-                    sellLimitOrder = brokerManager.placeOrderTinkoff(stock, sellPrice, lotsToSell, OperationType.SELL)
+                    sellLimitOrderId = brokerManager.placeOrderAlor(stock, sellPrice, lotsToSell, OperationType.SELL)
                     delay(DelayFast)
 
-                    if (sellLimitOrder?.isCreated() == true) {
+                    if (sellLimitOrderId != "") {
                         status = PurchaseStatus.ORDER_SELL
                         break
                     }
 
-                    portfolioManager.refreshOrders()
-                    portfolioManager.refreshDeposit()
+                    alorPortfolioManager.refreshOrders()
+                    alorPortfolioManager.refreshDeposit()
 
                     delay(DelaySuperFast)
                     tries--
@@ -211,17 +218,17 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
                 if (profit == 0.0) {
                     delay(orderLifeTimeSeconds * 1000L)
                     status = PurchaseStatus.CANCELED
-                    brokerManager.cancelOrder(sellLimitOrder)
+                    brokerManager.cancelOrderAlorForId(sellLimitOrderId, stock, OperationType.SELL)
                 } else {
                     // проверяем появился ли в портфеле тикер
-                    var position: TinkoffPosition?
+                    var position: BasePosition?
                     var iterations = 0
 
                     while (true) {
                         iterations++
                         try {
-                            portfolioManager.refreshDeposit()
-                            portfolioManager.refreshOrders()
+                            alorPortfolioManager.refreshDeposit()
+                            alorPortfolioManager.refreshOrders()
                         } catch (e: Exception) {
                             e.printStackTrace()
                             delay(DelayLong)
@@ -230,18 +237,18 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
 
                         if (iterations * DelayLong / 1000.0 > orderLifeTimeSeconds) { // отменить заявку на покупку
                             status = PurchaseStatus.CANCELED
-                            brokerManager.cancelOrder(sellLimitOrder)
+                            brokerManager.cancelOrderAlorForId(sellLimitOrderId, stock, OperationType.SELL)
                             Utils.showToastAlert("$ticker: заявка отменена по $sellPrice")
                             return@launch
                         }
 
-                        val orderSell = brokerManager.getOrderForId(buyLimitOrder?.getOrderID() ?: "", OperationType.SELL)
-                        position = portfolioManager.getPositionForFigi(figi)
+                        val orderSell = brokerManager.getOrderForId(sellLimitOrderId, OperationType.SELL)
+                        position = alorPortfolioManager.getPositionForStock(stock)
 
                         // проверка на большое количество лотов
-                        val orders = portfolioManager.getOrderAllOrdersForFigi(figi, OperationType.BUY)
+                        val orders = alorPortfolioManager.getOrderAllForStock(stock, OperationType.BUY)
                         var totalBuyingLots = 0
-                        orders.forEach { totalBuyingLots += it.requestedLots }
+                        orders.forEach { totalBuyingLots += it.getLotsRequested() }
                         if (totalBuyingLots >= lots) break
 
                         // заявка стоит, ничего не куплено
@@ -259,7 +266,7 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
 
                         position?.let { // появилась позиция, проверить есть ли что продать
                             // выставить ордер на продажу
-                            val lotsToBuy = abs(it.getLots()) - abs(it.blocked.toInt()) - lotsPortfolio
+                            val lotsToBuy = abs(it.getLots()) - abs(it.getBlocked()) - lotsPortfolio
                             if (lotsToBuy <= 0) {  // если свободных лотов нет, продолжаем
                                 return@let
                             }
@@ -271,9 +278,9 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
 
                             Utils.showToastAlert("$ticker: продано по $sellPrice")
 
-                            buyLimitOrder = brokerManager.placeOrderTinkoff(stock, profitPrice, lotsToBuy, OperationType.BUY)
+                            buyLimitOrderId = brokerManager.placeOrderAlor(stock, profitPrice, lotsToBuy, OperationType.BUY)
 
-                            if (buyLimitOrder?.isCreated() == true) {
+                            if (buyLimitOrderId != "") {
                                 status = PurchaseStatus.ORDER_BUY
                                 Utils.showToastAlert("$ticker: ордер на откуп шорта по $profitPrice")
                             } else { // заявка отклонена, вернуть лоты
@@ -293,7 +300,7 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
                 if (status == PurchaseStatus.ORDER_BUY) {
                     while (true) {
                         delay(DelayLong)
-                        val position = portfolioManager.getPositionForFigi(figi)
+                        val position = alorPortfolioManager.getPositionForStock(stock)
                         if (position == null || position.getLots() == lotsPortfolio) { // продано!
                             status = PurchaseStatus.SOLD
                             Utils.showToastAlert("$ticker: продано!?")
@@ -315,16 +322,15 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
         return GlobalScope.launch(StockManager.stockContext) {
             try {
                 val ticker = stock.ticker
-                val figi = stock.figi
 
                 status = PurchaseStatus.ORDER_BUY_PREPARE
 
-                val orderbook = marketService.orderbook(figi, 10)
+                val orderbook = marketService.orderbook(stock.figi, 10)
                 val buyPrice = orderbook.getBestPriceFromAsk(lots)
                 if (buyPrice == 0.0) return@launch
 
-                buyLimitOrder = brokerManager.placeOrderTinkoff(stock, buyPrice, lots, OperationType.BUY)
-                if (buyLimitOrder?.isCreated() == true) {
+                buyLimitOrderId = brokerManager.placeOrderAlor(stock, buyPrice, lots, OperationType.BUY)
+                if (buyLimitOrderId != "") {
                     status = PurchaseStatus.ORDER_BUY
                 } else {
                     Utils.showToastAlert("$ticker: недостаточно средств $buyPrice")
@@ -336,15 +342,15 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
                 delay(DelayFast)
 
                 // проверяем появился ли в портфеле тикер
-                var position: TinkoffPosition?
+                var position: BasePosition?
                 while (true) {
                     try {
-                        portfolioManager.refreshDeposit()
+                        alorPortfolioManager.refreshDeposit()
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
 
-                    position = portfolioManager.getPositionForFigi(figi)
+                    position = alorPortfolioManager.getPositionForStock(stock)
                     if (position != null && position.getLots() >= lots) {
                         status = PurchaseStatus.BOUGHT
                         Utils.showToastAlert("$ticker: куплено!")
@@ -369,7 +375,7 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
 
                         // выставить ордер на продажу в лучший бид
                         if (SettingsManager.getTrailingStopSellBestBid()) {
-                            val orderbook = marketService.orderbook(figi, 5)
+                            val orderbook = marketService.orderbook(stock.figi, 5)
                             profitSellPrice = orderbook.getBestPriceFromBid(lots)
                         }
 
@@ -377,8 +383,8 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
 
                         while (true) {
                             profitSellPrice = Utils.makeNicePrice(profitSellPrice, stock)
-                            sellLimitOrder = brokerManager.placeOrderTinkoff(stock, profitSellPrice, lots, OperationType.SELL)
-                            if (sellLimitOrder?.isCreated() == true) {
+                            sellLimitOrderId = brokerManager.placeOrderAlor(stock, profitSellPrice, lots, OperationType.SELL)
+                            if (sellLimitOrderId != "") {
                                 status = PurchaseStatus.ORDER_SELL
                                 break
                             }
@@ -395,8 +401,8 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
                         // выставить ордер на продажу
                         while (true) {
                             status = PurchaseStatus.ORDER_SELL_PREPARE
-                            sellLimitOrder = brokerManager.placeOrderTinkoff(stock, profitPrice, lots, OperationType.SELL)
-                            if (sellLimitOrder?.isCreated() == true) {
+                            sellLimitOrderId = brokerManager.placeOrderAlor(stock, profitPrice, lots, OperationType.SELL)
+                            if (sellLimitOrderId != "") {
                                 status = PurchaseStatus.ORDER_SELL
                                 break
                             }
@@ -408,7 +414,7 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
                 }
 
                 while (true) {
-                    position = portfolioManager.getPositionForFigi(figi)
+                    position = alorPortfolioManager.getPositionForStock(stock)
                     if (position == null) { // продано!
                         status = PurchaseStatus.SOLD
                         Utils.showToastAlert("$ticker: продано!")
@@ -432,16 +438,14 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
         return GlobalScope.launch(StockManager.stockContext) {
             try {
                 val ticker = stock.ticker
-                val figi = stock.figi
 
-                var buyPrice: Double = 0.0
                 status = PurchaseStatus.ORDER_BUY_PREPARE
-                val orderbook = marketService.orderbook(figi, 10)
-                buyPrice = orderbook.getBestPriceFromAsk(lots)
+                val orderbook = marketService.orderbook(stock.figi, 10)
+                val buyPrice = orderbook.getBestPriceFromAsk(lots)
                 if (buyPrice == 0.0) return@launch
 
-                buyLimitOrder = brokerManager.placeOrderTinkoff(stock, buyPrice, lots, OperationType.BUY)
-                if (buyLimitOrder?.isCreated() == true) {
+                buyLimitOrderId = brokerManager.placeOrderAlor(stock, buyPrice, lots, OperationType.BUY)
+                if (buyLimitOrderId != "") {
                     status = PurchaseStatus.ORDER_BUY
                 } else {
                     status = PurchaseStatus.CANCELED
@@ -453,15 +457,15 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
                 delay(DelayFast)
 
                 // проверяем появился ли в портфеле тикер
-                var position: TinkoffPosition?
+                var position: BasePosition?
                 while (true) {
                     try {
-                        portfolioManager.refreshDeposit()
+                        alorPortfolioManager.refreshDeposit()
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
 
-                    position = portfolioManager.getPositionForFigi(figi)
+                    position = alorPortfolioManager.getPositionForStock(stock)
                     if (position != null && position.getLots() >= lots) {
                         status = PurchaseStatus.BOUGHT
                         Utils.showToastAlert("$ticker: куплено!")
@@ -485,14 +489,14 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
                         if (profitSellPrice == 0.0) return@launch
 
                         if (SettingsManager.getTrailingStopSellBestBid()) { // выставить ордер на продажу в лучший бид
-                            val localOrderbook = marketService.orderbook(figi, 5)
+                            val localOrderbook = marketService.orderbook(stock.figi, 5)
                             profitSellPrice = localOrderbook.getBestPriceFromBid(lots)
                         }
                         if (profitSellPrice == 0.0) return@launch
 
                         profitSellPrice = Utils.makeNicePrice(profitSellPrice, stock)
-                        sellLimitOrder = brokerManager.placeOrderTinkoff(stock, profitSellPrice, lots, OperationType.SELL)
-                        if (sellLimitOrder?.isCreated() == true) {
+                        sellLimitOrderId = brokerManager.placeOrderAlor(stock, profitSellPrice, lots, OperationType.SELL)
+                        if (sellLimitOrderId != "") {
                             status = PurchaseStatus.ORDER_SELL
                         } else {
                             status = PurchaseStatus.ERROR_NEED_WATCH
@@ -566,8 +570,8 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
                             if (lotsStep <= 0 || profitPrice == 0.0) continue
 
                             // выставить ордер на продажу
-                            sellLimitOrder = brokerManager.placeOrderTinkoff(stock, profitPrice, lotsStep, OperationType.SELL)
-                            if (sellLimitOrder?.isCreated() == true) {
+                            sellLimitOrderId = brokerManager.placeOrderAlor(stock, profitPrice, lotsStep, OperationType.SELL)
+                            if (sellLimitOrderId != "") {
                                 status = PurchaseStatus.ORDER_SELL
                             } else {
                                 status = PurchaseStatus.ERROR_NEED_WATCH
@@ -580,7 +584,7 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
 
                 while (true) {
                     delay(DelayLong * 5)
-                    if (portfolioManager.getPositionForFigi(figi) == null) { // продано!
+                    if (alorPortfolioManager.getPositionForStock(stock) == null) { // продано!
                         status = PurchaseStatus.SOLD
                         Utils.showToastAlert("$ticker: продано!")
                         break
@@ -597,8 +601,7 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
     }
 
     override fun sellWithLimit(): Job? {
-        val figi = stock.figi
-        val pos = portfolioManager.getPositionForFigi(figi)
+        val pos = alorPortfolioManager.getPositionForStock(stock)
         if (pos == null || lots == 0 || percentProfitSellFrom == 0.0) {
             status = PurchaseStatus.CANCELED
             return null
@@ -611,8 +614,8 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
             if (profitPrice == 0.0) return@launch
 
             status = PurchaseStatus.ORDER_SELL_PREPARE
-            sellLimitOrder = brokerManager.placeOrderTinkoff(stock, profitPrice, lots, OperationType.SELL)
-            if (sellLimitOrder?.isCreated() == true) {
+            sellLimitOrderId = brokerManager.placeOrderAlor(stock, profitPrice, lots, OperationType.SELL)
+            if (sellLimitOrderId != "") {
                 status = PurchaseStatus.ORDER_SELL
             } else {
                 status = PurchaseStatus.CANCELED
@@ -621,9 +624,7 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
     }
 
     override fun sellToBestBid(): Job? {
-        val figi = stock.figi
-
-        val pos = portfolioManager.getPositionForFigi(figi)
+        val pos = alorPortfolioManager.getPositionForStock(stock)
         if (pos == null || pos.getLots() == 0) {
             status = PurchaseStatus.CANCELED
             return null
@@ -633,12 +634,12 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
             position = pos
             status = PurchaseStatus.ORDER_SELL_PREPARE
 
-            val orderbook = marketService.orderbook(figi, 5)
+            val orderbook = marketService.orderbook(stock.figi, 5)
             val bestBid = orderbook.getBestPriceFromBid(lots)
             val profitSellPrice = Utils.makeNicePrice(bestBid, stock)
 
-            sellLimitOrder = brokerManager.placeOrderTinkoff(stock, profitSellPrice, lots, OperationType.SELL)
-            if (sellLimitOrder?.isCreated() == true) {
+            sellLimitOrderId = brokerManager.placeOrderAlor(stock, profitSellPrice, lots, OperationType.SELL)
+            if (sellLimitOrderId != "") {
                 status = PurchaseStatus.ORDER_SELL
             } else {
                 status = PurchaseStatus.CANCELED
@@ -647,8 +648,7 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
     }
 
     override fun sellToBestAsk(): Job? {
-        val figi = stock.figi
-        val pos = portfolioManager.getPositionForFigi(figi)
+        val pos = alorPortfolioManager.getPositionForStock(stock)
         if (pos == null || pos.getLots() == 0) {
             status = PurchaseStatus.CANCELED
             return null
@@ -658,12 +658,12 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
             position = pos
             status = PurchaseStatus.ORDER_SELL_PREPARE
 
-            val orderbook = marketService.orderbook(figi, 10)
+            val orderbook = marketService.orderbook(stock.figi, 10)
             val bestAsk = orderbook.getBestPriceFromAsk(lots)
             val profitSellPrice = Utils.makeNicePrice(bestAsk, stock)
 
-            sellLimitOrder = brokerManager.placeOrderTinkoff(stock, profitSellPrice, lots, OperationType.SELL)
-            if (sellLimitOrder?.isCreated() == true) {
+            sellLimitOrderId = brokerManager.placeOrderAlor(stock, profitSellPrice, lots, OperationType.SELL)
+            if (sellLimitOrderId != "") {
                 status = PurchaseStatus.ORDER_SELL
             } else {
                 status = PurchaseStatus.CANCELED
@@ -672,9 +672,7 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
     }
 
     override fun sellWithTrailing(): Job? {
-        val figi = stock.figi
-
-        val pos = portfolioManager.getPositionForFigi(figi)
+        val pos = alorPortfolioManager.getPositionForStock(stock)
         if (pos == null || pos.getLots() == 0 || percentProfitSellFrom == 0.0) {
             status = PurchaseStatus.CANCELED
             return null
@@ -695,8 +693,8 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
                 if (profitSellPrice == 0.0) return@launch
 
                 profitSellPrice = Utils.makeNicePrice(profitSellPrice, stock)
-                sellLimitOrder = brokerManager.placeOrderTinkoff(stock, profitSellPrice, lots, OperationType.SELL)
-                if (sellLimitOrder?.isCreated() == true) {
+                sellLimitOrderId = brokerManager.placeOrderAlor(stock, profitSellPrice, lots, OperationType.SELL)
+                if (sellLimitOrderId != "") {
                     status = PurchaseStatus.ORDER_SELL
                 } else {
                     status = PurchaseStatus.CANCELED
@@ -711,15 +709,14 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
         return GlobalScope.launch(Dispatchers.Main) {
             try {
                 val ticker = stock.ticker
-                val figi = stock.figi
 
                 status = PurchaseStatus.ORDER_SELL_PREPARE
-                val orderbook = marketService.orderbook(figi, 10)
+                val orderbook = marketService.orderbook(stock.figi, 10)
                 val sellPrice = orderbook.getBestPriceFromBid(lots)
                 if (sellPrice == 0.0) return@launch
 
-                sellLimitOrder = brokerManager.placeOrderTinkoff(stock, sellPrice, lots, OperationType.SELL)
-                if (sellLimitOrder?.isCreated() == true) {
+                sellLimitOrderId = brokerManager.placeOrderAlor(stock, sellPrice, lots, OperationType.SELL)
+                if (sellLimitOrderId != "") {
                     status = PurchaseStatus.ORDER_SELL
                 } else {
                     status = PurchaseStatus.CANCELED
@@ -731,15 +728,15 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
                 delay(DelayFast)
 
                 // проверяем появился ли в портфеле тикер
-                var position: TinkoffPosition?
+                var position: BasePosition?
                 while (true) {
                     try {
-                        portfolioManager.refreshDeposit()
+                        alorPortfolioManager.refreshDeposit()
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
 
-                    position = portfolioManager.getPositionForFigi(figi)
+                    position = alorPortfolioManager.getPositionForStock(stock)
                     if (position != null && abs(position.getLots()) >= lots) {
                         status = PurchaseStatus.BOUGHT
                         Utils.showToastAlert("$ticker: продано!")
@@ -851,8 +848,8 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
                             if (lotsStep <= 0 || profitPrice == 0.0) continue
 
                             // выставить ордер на откуп
-                            buyLimitOrder = brokerManager.placeOrderTinkoff(stock, profitPrice, lotsStep, OperationType.BUY)
-                            if (buyLimitOrder?.isCreated() == true) {
+                            buyLimitOrderId = brokerManager.placeOrderAlor(stock, profitPrice, lotsStep, OperationType.BUY)
+                            if (buyLimitOrderId != "") {
                                 status = PurchaseStatus.ORDER_BUY
                             } else {
                                 status = PurchaseStatus.ERROR_NEED_WATCH
@@ -865,7 +862,7 @@ data class StockPurchaseAlor(override var stock: Stock, override var broker: Bro
 
                 while (true) {
                     delay(DelayLong * 5)
-                    if (portfolioManager.getPositionForFigi(figi) == null) { // продано!
+                    if (alorPortfolioManager.getPositionForStock(stock) == null) { // продано!
                         status = PurchaseStatus.SOLD
                         Utils.showToastAlert("$ticker: зашорчено!")
                         break

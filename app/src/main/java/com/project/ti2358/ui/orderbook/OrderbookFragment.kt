@@ -234,7 +234,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
             positionView.setOnClickListener {
                 activeStock?.let {
-                    portfolioManager.getPositionForFigi(it.figi)?.let { p ->
+                    portfolioManager.getPositionForStock(it)?.let { p ->
                         volumeEditText.setText(abs(p.getLots() - p.blocked).toInt().toString())
                     }
                 }
@@ -242,7 +242,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
             alorPositionView.setOnClickListener {
                 activeStock?.let {
-                    alorPortfolioManager.getPositionForTicker(it.ticker)?.let { p ->
+                    alorPortfolioManager.getPositionForStock(it)?.let { p ->
                         volumeEditText.setText(abs(p.getLots() - p.getBlocked()).toInt().toString())
                     }
                 }
@@ -306,7 +306,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             fragmentOrderbookBinding?.apply {
                 activeStock?.let { stock ->
                     positionView.visibility = GONE
-                    portfolioManager.getPositionForFigi(stock.figi)?.let { p ->
+                    portfolioManager.getPositionForStock(stock)?.let { p ->
                         val avg = p.getAveragePrice()
                         priceView.text = "${avg.toMoney(stock)} ➡ ${stock.getPriceString()}"
 
@@ -337,7 +337,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             fragmentOrderbookBinding?.apply {
                 activeStock?.let { stock ->
                     alorPositionView.visibility = GONE
-                    alorPortfolioManager.getPositionForTicker(stock.ticker)?.let { p ->
+                    alorPortfolioManager.getPositionForStock(stock)?.let { p ->
                         val avg = p.avgPrice
                         alorPriceView.text = "${avg.toMoney(stock)} ➡ ${stock.getPriceString()}"
 
@@ -423,7 +423,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         lotsBox.hint = "количество"
         layout.addView(lotsBox)
 
-        val position = portfolioManager.getPositionForFigi(orderbookLine.stock.figi)
+        val position = portfolioManager.getPositionForStock(orderbookLine.stock)
         val depoCount = position?.getLots() ?: 0
         val avg = position?.getAveragePrice() ?: 0
         val title = "В депо: $depoCount по $avg"
@@ -567,7 +567,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                         targetPriceAsk = orderbookLines.first().askPrice
                         targetPriceBid = orderbookLines.first().bidPrice
 
-                        tinkoffPosition = portfolioManager.getPositionForFigi(it.figi)
+                        tinkoffPosition = portfolioManager.getPositionForStock(it)
                         tinkoffPosition?.let { p ->
                             targetPriceAsk = p.getAveragePrice()
                             targetPriceBid = p.getAveragePrice()

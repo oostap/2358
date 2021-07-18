@@ -17,4 +17,6 @@ open class BaseOrder() {
     open fun getOrderPrice(): Double = 0.0
 
     open fun getOrderOperation(): OperationType = OperationType.NONE
+
+    var stock: Stock? = null
 }

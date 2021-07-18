@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.OrderbookManager
+import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.StockPurchase
 import com.project.ti2358.data.manager.StrategyZontikEndless
 import com.project.ti2358.databinding.FragmentZontikEndlessStatusBinding
@@ -142,7 +143,11 @@ class StrategyZontikEndlessStatusFragment : Fragment(R.layout.fragment_zontik_en
                         Utils.openOrderbookForStock(it.findNavController(), orderbookManager, purchase.stock)
                     }
 
-                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                    if (SettingsManager.getBrokerAlor() && SettingsManager.getBrokerTinkoff()) {
+                        itemView.setBackgroundColor(Utils.getColorForBrokerValue(purchase.broker))
+                    } else {
+                        itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                    }
                 }
             }
         }
