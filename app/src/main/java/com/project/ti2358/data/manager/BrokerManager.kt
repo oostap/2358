@@ -24,23 +24,20 @@ import java.lang.Exception
 
 @KoinApiExtension
 class BrokerManager() : KoinComponent {
-    private val stockManager: StockManager by inject()
     private val portfolioManager: PortfolioManager by inject()
     private val alorPortfolioManager: AlorPortfolioManager by inject()
     private val ordersService: OrdersService by inject()
     private val alorOrdersService: AlorOrdersService by inject()
 
     /******************** place order *************************/
-    suspend fun placeOrder(stock: Stock, price: Double, lots: Int, operationType: OperationType, refresh: Boolean = false) {
-        if (SettingsManager.getBrokerTinkoff()) {
+    suspend fun placeOrder(stock: Stock, price: Double, lots: Int, operationType: OperationType, brokerType: BrokerType, refresh: Boolean) {
+        if (brokerType == BrokerType.TINKOFF) {
             placeOrderTinkoff(stock, price, lots, operationType)
-
             if (refresh) portfolioManager.refreshOrders()
         }
 
-        if (SettingsManager.getBrokerAlor()) {
+        if (brokerType == BrokerType.ALOR) {
             placeOrderAlor(stock, price, lots, operationType)
-
             if (refresh) alorPortfolioManager.refreshOrders()
         }
     }
@@ -296,15 +293,15 @@ class BrokerManager() : KoinComponent {
         }
     }
 
-    suspend fun refreshDeposit() {
-        if (SettingsManager.getBrokerTinkoff()) {
-            portfolioManager.refreshDeposit()
-        }
-
-        if (SettingsManager.getBrokerAlor()) {
-            alorPortfolioManager.refreshDeposit()
-        }
-    }
+//    suspend fun refreshDeposit() {
+//        if (SettingsManager.getBrokerTinkoff()) {
+//            portfolioManager.refreshDeposit()
+//        }
+//
+//        if (SettingsManager.getBrokerAlor()) {
+//            alorPortfolioManager.refreshDeposit()
+//        }
+//    }
 
     suspend fun refreshOrders(brokerType: BrokerType) {
         if (brokerType == BrokerType.TINKOFF) {

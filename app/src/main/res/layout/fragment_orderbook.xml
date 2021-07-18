@@ -316,6 +316,20 @@
             app:srcCompat="@drawable/ic_tinkoff"
             app:tint="@color/orderbook_color"/>
 
+        <TextView
+            android:id="@+id/broker_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp"
+            android:layout_marginLeft="45dp"
+            android:text="T I N K O F F"
+            android:layout_weight="1"
+            android:textSize="10dp"
+            android:textStyle="bold"
+            />
+
         <ImageView
             android:id="@+id/orderbook_us_button"
             android:layout_width="40dp"

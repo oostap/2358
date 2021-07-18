@@ -1,6 +1,7 @@
 package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.common.BaseOrder
+import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.tinkoff.model.OperationType
 import com.project.ti2358.data.pantini.model.PantiniPrint
 import com.project.ti2358.ui.orderbook.OrderbookLine
@@ -49,9 +50,9 @@ class OrderbookManager() : KoinComponent {
         activeStock = null
     }
 
-    fun createOrder(stock: Stock, price: Double, lots: Int, operationType: OperationType) {
+    fun createOrder(stock: Stock, price: Double, lots: Int, operationType: OperationType, brokerType: BrokerType) {
         GlobalScope.launch(Dispatchers.Main) {
-            brokerManager.placeOrder(stock, price, lots, operationType, true)
+            brokerManager.placeOrder(stock, price, lots, operationType, brokerType, true)
             process()
         }
     }

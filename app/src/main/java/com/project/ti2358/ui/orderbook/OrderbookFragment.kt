@@ -21,6 +21,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.common.BaseOrder
+import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.tinkoff.model.OperationType
 import com.project.ti2358.data.tinkoff.model.TinkoffPosition
@@ -38,7 +39,6 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.sign
-
 
 @KoinApiExtension
 class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
@@ -67,6 +67,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
     var lenta: Boolean = false
     var orderbookUs: Boolean = true
+
+    var brokerType: BrokerType = BrokerType.TINKOFF
 
     override fun onDestroy() {
         jobRefreshOrders?.cancel()
@@ -303,9 +305,42 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 //                }
 //            }
 
+            brokerView.setOnClickListener {
+                changeBroker()
+            }
+
             updateData()
             updatePositionTinkoff()
             updatePositionAlor()
+            initBroker()
+        }
+    }
+
+    private fun changeBroker() {
+        fragmentOrderbookBinding?.apply {
+            brokerType = if (brokerType == BrokerType.TINKOFF) BrokerType.ALOR else BrokerType.TINKOFF
+            brokerView.text = if (brokerType == BrokerType.TINKOFF) "T I N K O F F" else "A L O R"
+            scalperPanelView.setBackgroundColor(Utils.getColorForBrokerValue(brokerType))
+        }
+    }
+
+    private fun initBroker() {
+        fragmentOrderbookBinding?.apply {
+            if (SettingsManager.getBrokerTinkoff() && SettingsManager.getBrokerAlor()) {
+                brokerView.visibility = VISIBLE
+                brokerType = BrokerType.ALOR
+                changeBroker()
+            } else {
+                brokerView.visibility = GONE
+
+                if (SettingsManager.getBrokerTinkoff()) {
+                    brokerType = BrokerType.TINKOFF
+                }
+
+                if (SettingsManager.getBrokerAlor()) {
+                    brokerType = BrokerType.ALOR
+                }
+            }
         }
     }
 
@@ -384,7 +419,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     private fun moveAllOrders(delta: Int, operationType: OperationType) {
         GlobalScope.launch(Dispatchers.Main) {
             activeStock?.let {
-                val orders = brokerManager.getOrdersAllForStock(it, operationType)
+                val orders = brokerManager.getOrdersAllForStock(it, operationType, brokerType)
                 orders.forEach { order ->
                     val newIntPrice = (order.getOrderPrice() * 100).roundToInt() + delta
                     val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, it)
@@ -419,7 +454,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         val volume = getActiveVolume()
         if (volume != 0) {
             val price = priceBox.text.toString().toDouble()
-            orderbookManager.createOrder(orderbookLine.stock, price, volume, operationType)
+            orderbookManager.createOrder(orderbookLine.stock, price, volume, operationType, brokerType)
             return
         }
 
@@ -442,7 +477,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 try {
                     val price = Utils.makeNicePrice(priceBox.text.toString().toDouble(), orderbookLine.stock)
                     val lots = lotsBox.text.toString().toInt()
-                    orderbookManager.createOrder(orderbookLine.stock, price, lots, OperationType.SELL)
+                    orderbookManager.createOrder(orderbookLine.stock, price, lots, OperationType.SELL, brokerType)
                 } catch (e: Exception) {
                     Utils.showMessageAlert(requireContext(), "Неверный формат чисел!")
                 }
@@ -454,7 +489,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 try {
                     val price = Utils.makeNicePrice(priceBox.text.toString().toDouble(), orderbookLine.stock)
                     val lots = lotsBox.text.toString().toInt()
-                    orderbookManager.createOrder(orderbookLine.stock, price, lots, OperationType.BUY)
+                    orderbookManager.createOrder(orderbookLine.stock, price, lots, OperationType.BUY, brokerType)
                 } catch (e: Exception) {
                     Utils.showMessageAlert(requireContext(), "Неверный формат чисел!")
                 }
