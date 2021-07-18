@@ -53,26 +53,10 @@ class AlorPortfolioManager : KoinComponent {
             alorAuthManager.refreshToken()
 
             // загрузить сервера портфелей
-            try {
-                if (SettingsManager.getAlorUsername() != "") {
-                    tradeServers = synchronizedMap(alorPortfolioService.portfolios(SettingsManager.getAlorUsername()))
-                    log("ALOR $tradeServers")
+            if (SettingsManager.getAlorUsername() != "") {
+                refreshAccounts()
 
-                    if (tradeServers.containsKey("Фондовый рынок")) {
-                        stockServers = tradeServers["Фондовый рынок"]!!
-
-                        if (stockServers.isNotEmpty()) {
-                            mainServer = stockServers.first()
-                            PORTFOLIO = mainServer?.portfolio ?: ""
-                            ACCOUNT = mainServer?.tks ?: ""
-                        }
-                    }
-
-                    startUpdatePortfolio()
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                log(e.printStackTrace().toString())
+                startUpdatePortfolio()
             }
         }
     }
@@ -136,16 +120,19 @@ class AlorPortfolioManager : KoinComponent {
 
     suspend fun refreshOrders(): Boolean {
         try {
-            mainServer?.let {
-                orders = synchronizedList(alorPortfolioService.orders(AlorExchange.SPBX, it.portfolio))
+            if (mainServer != null) {
+                orders = synchronizedList(alorPortfolioService.orders(AlorExchange.SPBX, mainServer!!.portfolio))
                 orders.removeAll { o -> o.status != AlorOrderStatus.WORKING }
 
-                stopOrders = synchronizedList(alorPortfolioService.stoporders(AlorExchange.SPBX, it.portfolio))
+                stopOrders = synchronizedList(alorPortfolioService.stoporders(AlorExchange.SPBX, mainServer!!.portfolio))
 
                 log("ALOR orders = $orders")
                 log("ALOR stoporders = $orders")
+
+                baseSortOrders()
+            } else {
+                start()
             }
-            baseSortOrders()
             return true
         } catch (e: Exception) {
             e.printStackTrace()
@@ -155,10 +142,12 @@ class AlorPortfolioManager : KoinComponent {
 
     suspend fun refreshDeposit(): Boolean {
         try {
-            mainServer?.let {
-                portfolioPositions = synchronizedList(alorPortfolioService.positions(AlorExchange.SPBX, it.portfolio))
+            if (mainServer != null) {
+                portfolioPositions = synchronizedList(alorPortfolioService.positions(AlorExchange.SPBX, mainServer!!.portfolio))
                 baseSortPortfolio()
                 log("ALOR positions = $portfolioPositions")
+            } else {
+                start()
             }
             return true
         } catch (e: Exception) {
@@ -169,11 +158,13 @@ class AlorPortfolioManager : KoinComponent {
 
     suspend fun refreshKotleta() {
         try {
-            mainServer?.let {
-                summary = alorPortfolioService.summary(AlorExchange.SPBX, it.portfolio)
-                money = alorPortfolioService.money(AlorExchange.SPBX, it.portfolio)
+            if (mainServer != null) {
+                summary = alorPortfolioService.summary(AlorExchange.SPBX, mainServer!!.portfolio)
+                money = alorPortfolioService.money(AlorExchange.SPBX, mainServer!!.portfolio)
                 log("ALOR summary = $summary")
                 log("ALOR money = $money")
+            } else {
+                start()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -219,7 +210,7 @@ class AlorPortfolioManager : KoinComponent {
     }
 
     fun getFreeCashUSD(): String {
-        var total = 0.0
+        var total = (summary?.portfolioEvaluation ?: 0.0) / Utils.getUSDRUB()
 //        for (currency in currencyPositions) {
 //            if (currency.currency == Currency.USD) {
 //                total += currency.balance

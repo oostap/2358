@@ -129,8 +129,8 @@ class Utils{
 
         val TEAL: Int = Color.parseColor("#4903DAC5")
 
-        val TINKOFF: Int = Color.parseColor("#88f1d62c")
-        val ALOR: Int = Color.parseColor("#880F59a9")
+        val TINKOFF: Int = Color.parseColor("#77f1d62c")
+        val ALOR: Int = Color.parseColor("#770F59a9")
         val TRANSPARENT: Int = Color.parseColor("#000F59a9")
 
         @KoinApiExtension

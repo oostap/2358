@@ -109,8 +109,9 @@ class PortfolioAlorFragment : Fragment(R.layout.fragment_portfolio_alor) {
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            val percent = alorPortfolioManager.getPercentBusyInStocks()
-            act.supportActionBar?.title = "Депозит ALOR $percent%"
+//            val percent = alorPortfolioManager.getPercentBusyInStocks()
+            val freeCash = alorPortfolioManager.getFreeCashUSD()
+            act.supportActionBar?.title = "Депозит ALOR - ±$freeCash"
         }
     }
 
