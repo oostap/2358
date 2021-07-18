@@ -4,6 +4,7 @@
     android:layout_height="fill_parent">
 
     <RelativeLayout
+        android:id="@+id/chart_parent_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
@@ -16,7 +17,7 @@
             <com.icechao.klinelib.view.KChartView
                 android:id="@+id/chart_line_view"
                 android:layout_width="match_parent"
-                android:layout_height="500dp"/>
+                android:layout_height="100dp"/>
 
         </com.icechao.klinelib.view.ScrollView>
     </RelativeLayout>

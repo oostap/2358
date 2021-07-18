@@ -1,8 +1,11 @@
 package com.project.ti2358.ui.chart
 
+import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.icechao.klinelib.adapter.KLineChartAdapter
@@ -12,16 +15,23 @@ import com.icechao.klinelib.utils.LogUtil
 import com.icechao.klinelib.utils.SlidListener
 import com.icechao.klinelib.utils.Status
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.*
+import com.project.ti2358.data.manager.ChartManager
+import com.project.ti2358.data.manager.PortfolioManager
+import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.tinkoff.model.Candle
 import com.project.ti2358.data.tinkoff.model.Interval
 import com.project.ti2358.databinding.FragmentChartBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.util.*
+
 
 @KoinApiExtension
 class ChartFragment : Fragment(R.layout.fragment_chart) {
@@ -168,11 +178,27 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
                 updateSecondaryIndicatorButton()
             }
 
+//            val a = chartParentView.layoutParams.height
+//            chartLineView.layoutParams = FrameLayout.LayoutParams(chartLineView.layoutParams.width, chartParentView.layoutParams.height)
+
+            view.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    if (view.height > 0 && view.width > 0) {
+                        view.viewTreeObserver.removeOnGlobalLayoutListener(this)
+
+                        val dp = (100 * Resources.getSystem().displayMetrics.density).toInt()
+                        chartLineView.layoutParams = FrameLayout.LayoutParams(view.width, view.height - dp)
+                    }
+                }
+            })
+
             chartAdapter = KLineChartAdapter()
             chartLineView.setAdapter(chartAdapter)
                 .setSelectedPointRadius(20f)
                 .setPriceLabelInLineMarginRight(200f)
                 .setSelectedPointColor(Color.RED)
+                .setIncreaseColor(Utils.GREEN)
+                .setDecreaseColor(Utils.RED)
                 .setAnimLoadData(false)
                 .setPriceLabelInLineClickable(true)
                 .setLabelSpace(130f)
