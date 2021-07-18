@@ -61,7 +61,7 @@ class StrategyTelegramCommands : KoinComponent {
                     all.removeAll { it.morning == null }
                 }
 
-                strategyTelegram.sendTop(all, count)
+                strategyTelegram.sendTop(all, count, true)
                 return true
             } else if (operation == "bot") { // топ отросших бумаг от закрытия
                 var count = 10
@@ -74,7 +74,7 @@ class StrategyTelegramCommands : KoinComponent {
                     all.removeAll { it.morning == null }
                 }
 
-                strategyTelegram.sendTop(all, count)
+                strategyTelegram.sendTop(all, count, false)
                 return true
             } else if (operation == "arb") { // топ отросших бумаг от закрытия
                 var count = 10

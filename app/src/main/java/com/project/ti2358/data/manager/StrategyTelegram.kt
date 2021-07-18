@@ -852,11 +852,13 @@ class StrategyTelegram : KoinComponent {
         positions.removeAll { it.getPositionStock() == null }
         val stocks = positions.map { it.getPositionStock()!! }
 
-        var text = "<code> %-5s %-4s %-6s %-5s %-5s\n".format("💼", "lot", "avg.", "$", "%")
+        var text = "<code>%-7s %-4s %-6s %-6s %-5s\n".format("💼", "lot", "avg.", "$", "%")
         for (p in positions) {
             val marker = if (p is TinkoffPosition) "🟡" else "🔵"
 
-            text += "%s%-5s %-4d %-6.2f %-5.2f %-5.2f\n".format(marker, p.getPositionStock()?.ticker, p.getLots(), p.getAveragePrice(), p.getProfitAmount(), p.getProfitPercent())
+            val profitMoney = if (p.getProfitAmount() > 0) "+%-5.2f".format(p.getProfitAmount()) else "%-6.2f".format(p.getProfitAmount())
+            val profitPercent = if (p.getProfitPercent() > 0) "+%-4.2f".format(p.getProfitPercent()) else "%-5.2f".format(p.getProfitPercent())
+            text += "%s%-5s %-4d %-6.2f %s %s\n".format(marker, p.getPositionStock()?.ticker, p.getLots(), p.getAveragePrice(), profitMoney, profitPercent)
         }
         text += "</code>"
 
@@ -868,9 +870,9 @@ class StrategyTelegram : KoinComponent {
         sendMessageToChats(text, deleteAfterSeconds = -1, replyMarkup = buttons)
     }
 
-    fun sendTop(stocks: List<Stock>, count: Int) {
+    fun sendTop(stocks: List<Stock>, count: Int, top: Boolean) {
         val min = min(count, stocks.size)
-        var text = ""
+        var text = if (top) "TOP 🟢\n" else "BOT 🔴\n"
         for (i in 0 until min) {
             val stock = stocks[i]
             text += "<b>%4.2f%%</b> $%s %4.2f$ -> %4.2f$ \n".format(stock.changePrice2300DayPercent, stock.getTickerLove(), stock.getPrice2300(), stock.getPriceRaw())
@@ -881,7 +883,7 @@ class StrategyTelegram : KoinComponent {
 
     fun sendDayLow(stocks: List<Stock>, count: Int) {
         val min = min(count, stocks.size)
-        var text = ""
+        var text = "DAY LOW 🔴\n"
         for (i in 0 until min) {
             val stock = stocks[i]
             text += "<b>%4.2f%%</b> ⤴️ %.2f%% $%s %4.2f$ -> %4.2f$\n".format(stock.changePrice2300DayPercent, stock.changePriceLowDayPercent, stock.getTickerLove(), stock.getPrice2300(), stock.getPriceRaw())
@@ -892,7 +894,7 @@ class StrategyTelegram : KoinComponent {
 
     fun sendDayHigh(stocks: List<Stock>, count: Int) {
         val min = min(count, stocks.size)
-        var text = ""
+        var text = "DAY HIGH 🟢\n"
         for (i in 0 until min) {
             val stock = stocks[i]
             text += "<b>%4.2f%%</> ⤵️ %.2f%% $%s %4.2f$ -> %4.2f$\n".format(stock.changePrice2300DayPercent, stock.changePriceHighDayPercent, stock.getTickerLove(), stock.getPrice2300(), stock.getPriceRaw())
