@@ -66,6 +66,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     var jobRefreshOrderbookData: Job? = null
 
     var lenta: Boolean = false
+    var orderbookUs: Boolean = true
 
     override fun onDestroy() {
         jobRefreshOrders?.cancel()
@@ -230,6 +231,13 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 scrollOrderbookUsLinesView.visibility = if (lenta) VISIBLE else GONE
                 scrollOrderbookLinesView.visibility = if (lenta) GONE else VISIBLE
                 orderbookUsLinesView.visibility = if (lenta) GONE else VISIBLE
+            }
+
+            orderbookUsButton.setOnClickListener {
+                if (!lenta) {
+                    orderbookUs = !orderbookUs
+                    orderbookUsLinesView.visibility = if (orderbookUs) VISIBLE else GONE
+                }
             }
 
             positionView.setOnClickListener {

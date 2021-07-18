@@ -317,13 +317,26 @@
             app:tint="@color/orderbook_color"/>
 
         <ImageView
+            android:id="@+id/orderbook_us_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="fitCenter"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:layout_marginRight="80dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            app:srcCompat="@drawable/ic_glass_us"
+            app:tint="@color/orderbook_color"/>
+
+        <ImageView
             android:id="@+id/lenta_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:scaleType="fitCenter"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
-            android:layout_marginRight="45dp"
+            android:layout_marginRight="40dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             app:srcCompat="@drawable/ic_list"
