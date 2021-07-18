@@ -178,9 +178,6 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
                 updateSecondaryIndicatorButton()
             }
 
-//            val a = chartParentView.layoutParams.height
-//            chartLineView.layoutParams = FrameLayout.LayoutParams(chartLineView.layoutParams.width, chartParentView.layoutParams.height)
-
             view.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
                     if (view.height > 0 && view.width > 0) {

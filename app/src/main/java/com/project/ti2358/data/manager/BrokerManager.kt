@@ -5,12 +5,17 @@ import com.project.ti2358.data.alor.model.AlorOrder
 import com.project.ti2358.data.alor.service.AlorOrdersService
 import com.project.ti2358.data.common.BaseOrder
 import com.project.ti2358.data.common.BasePosition
+import com.project.ti2358.data.common.BrokerType
+import com.project.ti2358.data.common.OrderInfo
 import com.project.ti2358.data.tinkoff.model.OperationType
+import com.project.ti2358.data.tinkoff.model.OrderStatus
 import com.project.ti2358.data.tinkoff.model.TinkoffOrder
+import com.project.ti2358.data.tinkoff.model.TinkoffPosition
 import com.project.ti2358.data.tinkoff.service.OrdersService
 import com.project.ti2358.service.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -38,6 +43,23 @@ class BrokerManager() : KoinComponent {
 
             if (refresh) alorPortfolioManager.refreshOrders()
         }
+    }
+
+    suspend fun placeOrder(stock: Stock, price: Double, lots: Int, operationType: OperationType, brokerType: BrokerType): OrderInfo? {
+        if (brokerType == BrokerType.TINKOFF) {
+            val order = placeOrderTinkoff(stock, price, lots, operationType)
+            val success = order?.status == OrderStatus.NEW || order?.status == OrderStatus.PENDING_NEW
+            return OrderInfo(order?.orderId ?: "", success, stock, brokerType, operationType)
+
+        }
+
+        if (brokerType == BrokerType.ALOR) {
+            val orderId = placeOrderAlor(stock, price, lots, operationType)
+            val success = orderId != ""
+            return OrderInfo(orderId, success, stock, brokerType, operationType)
+        }
+
+        return null
     }
 
     suspend fun placeOrderTinkoff(stock: Stock, price: Double, count: Int, operationType: OperationType): TinkoffOrder? {
@@ -100,6 +122,20 @@ class BrokerManager() : KoinComponent {
         }
     }
 
+    suspend fun cancelOrder(orderInfo: OrderInfo?) {
+        if (orderInfo == null || orderInfo.id == "") return
+
+        if (orderInfo.brokerType == BrokerType.TINKOFF) {
+            cancelOrderTinkoffForId(orderInfo.id, orderInfo.stock, orderInfo.operationType)
+            return
+        }
+
+        if (orderInfo.brokerType == BrokerType.ALOR) {
+            cancelOrderAlorForId(orderInfo.id, orderInfo.stock, orderInfo.operationType)
+            return
+        }
+    }
+
     suspend fun cancelOrderTinkoff(order: TinkoffOrder) {
         val operation = if (order.operation == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
         try {
@@ -111,9 +147,18 @@ class BrokerManager() : KoinComponent {
     }
 
     suspend fun cancelOrderAlor(order: AlorOrder) {
-        val operation = if (order.side == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
         order.stock?.let {
             cancelOrderAlorForId(order.id, it, order.side)
+        }
+    }
+
+    suspend fun cancelOrderTinkoffForId(orderId: String, stock: Stock, operationType: OperationType) {
+        val operation = if (operationType == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
+        try {
+            ordersService.cancel(orderId, portfolioManager.getActiveBrokerAccountId())
+            Utils.showToastAlert("ТИ ${stock.ticker} ордер отменён: $operation")
+        } catch (e: Exception) { // возможно уже отменена
+            Utils.showToastAlert("ТИ ${stock.ticker} ордер УЖЕ отменён: $operation")
         }
     }
 
@@ -197,6 +242,18 @@ class BrokerManager() : KoinComponent {
         return order
     }
 
+    public fun getOrdersAllForStock(stock: Stock, operation: OperationType, brokerType: BrokerType): List<BaseOrder> {
+        if (brokerType == BrokerType.TINKOFF) {
+            return portfolioManager.getOrderAllForStock(stock, operation)
+        }
+
+        if (brokerType == BrokerType.ALOR) {
+            return alorPortfolioManager.getOrderAllForStock(stock, operation)
+        }
+
+        return emptyList()
+    }
+
     public fun getOrdersAllForStock(stock: Stock, operation: OperationType): List<BaseOrder> {
         val orders = mutableListOf<BaseOrder>()
 
@@ -229,6 +286,16 @@ class BrokerManager() : KoinComponent {
         return orders
     }
 
+    suspend fun refreshDeposit(brokerType: BrokerType) {
+        if (brokerType == BrokerType.TINKOFF) {
+            portfolioManager.refreshDeposit()
+        }
+
+        if (brokerType == BrokerType.ALOR) {
+            alorPortfolioManager.refreshDeposit()
+        }
+    }
+
     suspend fun refreshDeposit() {
         if (SettingsManager.getBrokerTinkoff()) {
             portfolioManager.refreshDeposit()
@@ -236,6 +303,16 @@ class BrokerManager() : KoinComponent {
 
         if (SettingsManager.getBrokerAlor()) {
             alorPortfolioManager.refreshDeposit()
+        }
+    }
+
+    suspend fun refreshOrders(brokerType: BrokerType) {
+        if (brokerType == BrokerType.TINKOFF) {
+            portfolioManager.refreshOrders()
+        }
+
+        if (brokerType == BrokerType.ALOR) {
+            alorPortfolioManager.refreshOrders()
         }
     }
 
@@ -264,5 +341,17 @@ class BrokerManager() : KoinComponent {
         }
 
         return orders
+    }
+
+    public fun getPositionForStock(stock: Stock, brokerType: BrokerType): BasePosition? {
+        if (brokerType == BrokerType.TINKOFF) {
+            return portfolioManager.getPositionForStock(stock)
+        }
+
+        if (brokerType == BrokerType.ALOR) {
+            return alorPortfolioManager.getPositionForStock(stock)
+        }
+
+        return null
     }
 }

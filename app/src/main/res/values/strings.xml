@@ -133,7 +133,7 @@
     <string name="alor_username">ALOR username (P123456)</string>
     <string name="alor_qoutes_title">Котировки ALOR</string>
     <string name="alor_orderbook_title">Стакан ALOR</string>
-    <string name="alor_multiplier_money">Множитель сумм для всех стратегий (пример: 1.0 = точно такая же, 0.5 = половина)</string>
+    <string name="alor_multiplier_money">Множитель суммы для всех стратегий (пример: 1.0 = точно такая же, 0.5 = половина)</string>
 
     <string name="pantini_header">John Pantini</string>
     <string name="pantini_telegram_id">Pantini: Телеграм ID</string>

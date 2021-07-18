@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
+import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.databinding.Fragment1728ItemUpBinding
 import com.project.ti2358.databinding.Fragment1728UpBinding
@@ -161,7 +162,7 @@ class Strategy1728UpFragment : Fragment(R.layout.fragment_1728_up) {
                             Utils.showMessageAlert(requireContext(), "В настройках не задана сумма покупки для позиции, раздел 1728.")
                         } else {
                             if (SettingsManager.getBrokerTinkoff()) {
-                                StockPurchaseTinkoff(stock).apply {
+                                StockPurchase(stock, BrokerType.TINKOFF).apply {
                                     lots = (SettingsManager.get1728PurchaseVolume() / stock.getPriceNow()).roundToInt()
 
                                     // включаем трейлинг тейк

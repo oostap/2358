@@ -125,7 +125,7 @@ class Strategy1000Sell() : KoinComponent {
         for (preset in presetStocksSelected) {
             stocks.find { it.ticker == preset.ticker }?.let {
                 if (SettingsManager.getBrokerTinkoff()) {
-                    val purchase = StockPurchaseTinkoff(it).apply {
+                    val purchase = StockPurchase(it, BrokerType.TINKOFF).apply {
                         percentLimitPriceChange = preset.percent
                         lots = preset.lots
                         profitPercent = preset.profit

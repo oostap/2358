@@ -136,13 +136,13 @@ class StrategyTazikEndless : KoinComponent {
         val purchases: MutableList<StockPurchase> = mutableListOf()
         for (stock in stocksSelected) {
             if (SettingsManager.getBrokerTinkoff()) {
-                val purchaseTinkoff = StockPurchaseTinkoff(stock)
-                purchases.add(purchaseTinkoff)
+                val purchase = StockPurchase(stock, BrokerType.TINKOFF)
+                purchases.add(purchase)
             }
 
             if (SettingsManager.getBrokerAlor()) {
-                val purchaseAlor = StockPurchaseAlor(stock)
-                purchases.add(purchaseAlor)
+                val purchase = StockPurchase(stock, BrokerType.ALOR)
+                purchases.add(purchase)
             }
         }
 

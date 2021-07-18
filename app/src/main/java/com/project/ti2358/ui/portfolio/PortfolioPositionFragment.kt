@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.project.ti2358.R
+import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.tinkoff.model.OperationType
 import com.project.ti2358.data.tinkoff.model.TinkoffPosition
@@ -59,7 +60,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
         tinkoffPosition.stock?.let {
             stock = it
 
-            stockPurchase = StockPurchaseTinkoff(it).apply {
+            stockPurchase = StockPurchase(it, BrokerType.TINKOFF).apply {
                 position = tinkoffPosition
                 lots = position?.getLots() ?: 0
                 percentProfitSellFrom = Utils.getPercentFromTo(stock.getPriceNow(), position?.getAveragePrice() ?: 0.0)

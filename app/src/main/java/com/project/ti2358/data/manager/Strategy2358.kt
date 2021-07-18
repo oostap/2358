@@ -102,13 +102,13 @@ class Strategy2358() : KoinComponent {
         val purchases: MutableList<StockPurchase> = mutableListOf()
         for (stock in stocksSelected) {
             if (SettingsManager.getBrokerTinkoff()) {
-                val purchase = StockPurchaseTinkoff(stock)
+                val purchase = StockPurchase(stock, BrokerType.TINKOFF)
                 preparePurchase(purchase)
                 purchases.add(purchase)
             }
 
             if (SettingsManager.getBrokerAlor()) {
-                val purchase = StockPurchaseAlor(stock)
+                val purchase = StockPurchase(stock, BrokerType.ALOR)
                 preparePurchase(purchase)
                 purchases.add(purchase)
             }
