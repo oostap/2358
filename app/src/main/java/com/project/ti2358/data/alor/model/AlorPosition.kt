@@ -61,7 +61,7 @@ data class AlorPosition(
     }
 
     override fun getBlocked(): Int {
-        return openUnits.toInt()
+        return 0
     }
 
     override fun getProfitAmount(): Double {

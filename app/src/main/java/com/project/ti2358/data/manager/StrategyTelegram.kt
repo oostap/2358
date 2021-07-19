@@ -282,7 +282,6 @@ class StrategyTelegram : KoinComponent {
             val stock = stockManager.getStockByTicker(order.symbol) ?: return ""
             position = alorPortfolioManager.getPositionForStock(stock)
             order.stock = stock
-            return ""
         }
 
         val ticker = order.getOrderStock()?.ticker
@@ -821,7 +820,7 @@ class StrategyTelegram : KoinComponent {
             val price = stock.getPriceRaw()
             val percentUp = "%.2f".format(Utils.getPercentFromTo(stockInfo.limit_up, price))
             val percentDown = "%.2f".format(Utils.getPercentFromTo(stockInfo.limit_down, price))
-            sendMessageToChats("$${stock.getTickerLove()} ${price}$ - ⬆️${stockInfo.limit_up}$ / ${percentUp}% ⬇️${stockInfo.limit_down}$ / ${percentDown}%", deleteAfterSeconds = 60, replyMarkup = buttons)
+            sendMessageToChats("$${stock.getTickerLove()} ${price}$ - ⬆️${stockInfo.limit_up}$ / ${percentUp}% ⬇️${stockInfo.limit_down}$ / ${percentDown}%", deleteAfterSeconds = -1, replyMarkup = buttons)
         } else {
             sendMessageToChats("$${stock.getTickerLove()} нет лимитов, current = ${stock.getPriceNow()}", deleteAfterSeconds = -1, replyMarkup = buttons)
         }

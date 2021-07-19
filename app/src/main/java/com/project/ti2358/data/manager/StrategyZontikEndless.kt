@@ -31,7 +31,7 @@ class StrategyZontikEndless : KoinComponent {
 
     var stocksToPurchase: MutableList<StockPurchase> = mutableListOf()
     var stocksToClonePurchase: MutableList<StockPurchase> = mutableListOf()
-    var stocksTickerInProcess: MutableMap<String, Job> = ConcurrentHashMap()
+    var stocksPurchaseInProcess: MutableMap<StockPurchase, Job> = ConcurrentHashMap()
 
     var basicPercentLimitPriceChange: Double = 0.0
     var started: Boolean = false
@@ -153,6 +153,7 @@ class StrategyZontikEndless : KoinComponent {
             val part = when (it.broker) {
                 BrokerType.TINKOFF -> if (it.stock.instrument.currency == Currency.RUB) onePieceTinkoff * Utils.getUSDRUB() else onePieceTinkoff
                 BrokerType.ALOR -> if (it.stock.instrument.currency == Currency.RUB) onePieceAlor * Utils.getUSDRUB() else onePieceAlor
+                else -> 0.0
             }
 
             if (it.stock.getPriceNow() != 0.0) {
@@ -247,7 +248,7 @@ class StrategyZontikEndless : KoinComponent {
         val volumeShares = SettingsManager.getZontikEndlessMinVolume()
         return String.format(
             "%d из %d по %.2f$, просадка %.2f / %.2f / %.2f / %d",
-            stocksTickerInProcess.size,
+            stocksPurchaseInProcess.size,
             p,
             volume / p,
             basicPercentLimitPriceChange,
@@ -422,6 +423,19 @@ class StrategyZontikEndless : KoinComponent {
         }
     }
 
+    private fun clearJobs() {
+        stocksPurchaseInProcess.forEach {
+            try {
+                if (it.value.isActive) {
+                    it.value.cancel()
+                }
+            } catch (e: java.lang.Exception) {
+
+            }
+        }
+        stocksPurchaseInProcess.clear()
+    }
+
     suspend fun startStrategy(scheduled: Boolean) = withContext(StockManager.stockContext) {
         basicPercentLimitPriceChange = SettingsManager.getZontikEndlessChangePercent()
 
@@ -438,16 +452,7 @@ class StrategyZontikEndless : KoinComponent {
             fixPrice()
         }
 
-        stocksTickerInProcess.forEach {
-            try {
-                if (it.value.isActive) {
-                    it.value.cancel()
-                }
-            } catch (e: Exception) {
-
-            }
-        }
-        stocksTickerInProcess.clear()
+        clearJobs()
         started = true
 
         jobResetPrice?.cancel()
@@ -464,16 +469,7 @@ class StrategyZontikEndless : KoinComponent {
 
     fun stopStrategy() {
         started = false
-        stocksTickerInProcess.forEach {
-            try {
-                if (it.value.isActive) {
-                    it.value.cancel()
-                }
-            } catch (e: Exception) {
-
-            }
-        }
-        stocksTickerInProcess.clear()
+        clearJobs()
         jobResetPrice?.cancel()
         strategyTelegram.sendZontikEndlessStart(false)
     }
@@ -509,7 +505,8 @@ class StrategyZontikEndless : KoinComponent {
         val ticker = purchase.ticker
 
         // лимит на заявки исчерпан?
-        if (stocksTickerInProcess.size >= SettingsManager.getZontikEndlessPurchaseParts()) return false
+        val countBroker = stocksPurchaseInProcess.filter { it.key.broker == purchase.broker }.size
+        if (countBroker >= SettingsManager.getZontikEndlessPurchaseParts()) return false
 
         // проверить, если бумага в депо и усреднение отключено, то запретить тарить
         if (portfolioManager.portfolioPositions.find { it.ticker == purchase.ticker } != null && !SettingsManager.getZontikEndlessAllowAveraging()) {
@@ -517,7 +514,7 @@ class StrategyZontikEndless : KoinComponent {
         }
 
         // ещё не брали бумагу?
-        if (ticker !in stocksTickerInProcess) {
+        if (stocksPurchaseInProcess.filter { it.key.broker == purchase.broker && it.key.stock.ticker == ticker }.isEmpty()) {
             return true
         }
 
@@ -533,10 +530,10 @@ class StrategyZontikEndless : KoinComponent {
         if (!started) return@runBlocking
 
         // если стратегия стартанула и какие-то корутины уже завершились, то убрать их, чтобы появился доступ для новых покупок
-        for (value in stocksTickerInProcess) {
+        for (value in stocksPurchaseInProcess) {
             if (!value.value.isActive) {
                 val key = value.key
-                stocksTickerInProcess.remove(key)
+                stocksPurchaseInProcess.remove(key)
             }
         }
     }
@@ -548,8 +545,8 @@ class StrategyZontikEndless : KoinComponent {
         val ticker = stock.ticker
 
         // если бумага не в списке скана - игнорируем
-        val sorted = stocksToClonePurchase.find { it.ticker == ticker }
-        sorted?.let { purchase ->
+        val sorted = stocksToClonePurchase.filter { it.ticker == ticker }
+        sorted.forEach { purchase ->
             val change = candle.closingPrice / purchase.zontikEndlessPrice * 100.0 - 100.0
             val volume = candle.volume
 
@@ -562,7 +559,8 @@ class StrategyZontikEndless : KoinComponent {
     private fun processSell(purchase: StockPurchase, stock: Stock, candle: Candle) {
         // завершение стратегии
         val parts = SettingsManager.getZontikEndlessPurchaseParts()
-        if (stocksTickerInProcess.size >= parts) { // останавливить стратегию автоматически
+        val countBroker = stocksPurchaseInProcess.filter { it.key.broker == purchase.broker }.size
+        if (countBroker >= parts) { // останавливить стратегию автоматически
             stopStrategy()
             return
         }
@@ -609,7 +607,7 @@ class StrategyZontikEndless : KoinComponent {
                         purchase.zontikEndlessPrice,
                         candle.closingPrice,
                         change,
-                        stocksTickerInProcess.size,
+                        stocksPurchaseInProcess.size,
                         parts
                     )
                     return
@@ -635,20 +633,20 @@ class StrategyZontikEndless : KoinComponent {
         var finalProfit = SettingsManager.getZontikEndlessTakeProfit()
 
         // если мы усредняем, то не нужно выставлять ТП, потому что неизвестно какие заявки из усреднения выполнятся и какая будет в итоге средняя
-        if (stock.ticker in stocksTickerInProcess && SettingsManager.getZontikEndlessAllowAveraging()) {
+        if (stocksPurchaseInProcess.filter { it.key.broker == purchase.broker && it.key.stock.ticker == purchase.ticker }.isNotEmpty() && SettingsManager.getZontikEndlessAllowAveraging()) {
             finalProfit = 0.0
         }
 
         sellPrice = Utils.makeNicePrice(sellPrice, stock)
         val job = purchase.sellLimitFromAsk(sellPrice, finalProfit, 1, SettingsManager.getZontikEndlessOrderLifeTimeSeconds())
         if (job != null) {
-            stocksTickerInProcess[stock.ticker] = job
+            stocksPurchaseInProcess[purchase] = job
 
             var buyPrice = sellPrice - sellPrice / 100.0 * finalProfit
             buyPrice = Utils.makeNicePrice(buyPrice, stock)
 
             strategySpeaker.speakZontik(purchase, change)
-            strategyTelegram.sendZontikSell(purchase, sellPrice, buyPrice, purchase.zontikEndlessPrice, candle.closingPrice, change, stocksTickerInProcess.size, parts)
+            strategyTelegram.sendZontikSell(purchase, sellPrice, buyPrice, purchase.zontikEndlessPrice, candle.closingPrice, change, countBroker, parts)
             purchase.zontikEndlessPrice = candle.closingPrice
         }
     }

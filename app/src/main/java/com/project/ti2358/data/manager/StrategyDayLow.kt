@@ -163,6 +163,7 @@ class StrategyDayLow : KoinComponent {
                 val part = when (it.broker) {
                     BrokerType.TINKOFF -> if (it.stock.instrument.currency == Currency.RUB) onePieceTinkoff * Utils.getUSDRUB() else onePieceTinkoff
                     BrokerType.ALOR -> if (it.stock.instrument.currency == Currency.RUB) onePieceAlor * Utils.getUSDRUB() else onePieceAlor
+                    else -> 0.0
                 }
 
                 it.lots = (part / it.stock.getPriceNow()).roundToInt()

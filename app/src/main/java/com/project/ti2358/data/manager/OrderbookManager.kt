@@ -68,7 +68,7 @@ class OrderbookManager() : KoinComponent {
         GlobalScope.launch(Dispatchers.Main) {
             val price = if (operationType == OperationType.BUY) toLine.bidPrice else toLine.askPrice
 
-            brokerManager.replaceOrder(from, price, operationType)
+            brokerManager.replaceOrder(from, price)
             process()
         }
     }

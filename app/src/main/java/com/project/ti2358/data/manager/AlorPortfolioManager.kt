@@ -58,6 +58,8 @@ class AlorPortfolioManager : KoinComponent {
 
                 startUpdatePortfolio()
             }
+
+            alorAuthManager.startRefreshToken()
         }
     }
 

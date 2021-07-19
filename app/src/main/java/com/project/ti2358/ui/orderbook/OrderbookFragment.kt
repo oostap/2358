@@ -21,6 +21,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.common.BaseOrder
+import com.project.ti2358.data.common.BasePosition
 import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.tinkoff.model.OperationType
@@ -68,7 +69,9 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     var lenta: Boolean = false
     var orderbookUs: Boolean = true
 
-    var brokerType: BrokerType = BrokerType.TINKOFF
+    companion object {
+        var brokerType: BrokerType = BrokerType.NONE
+    }
 
     override fun onDestroy() {
         jobRefreshOrders?.cancel()
@@ -232,7 +235,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
                 scrollOrderbookUsLinesView.visibility = if (lenta) VISIBLE else GONE
                 scrollOrderbookLinesView.visibility = if (lenta) GONE else VISIBLE
-                orderbookUsLinesView.visibility = if (lenta) GONE else VISIBLE
+                orderbookUsLinesView.visibility = if (lenta) GONE else if (orderbookUs) VISIBLE else GONE
             }
 
             orderbookUsButton.setOnClickListener {
@@ -243,6 +246,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             }
 
             positionView.setOnClickListener {
+                brokerType = BrokerType.TINKOFF
+                updateBroker()
                 activeStock?.let {
                     portfolioManager.getPositionForStock(it)?.let { p ->
                         volumeEditText.setText(abs(p.getLots() - p.blocked).toInt().toString())
@@ -251,6 +256,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             }
 
             alorPositionView.setOnClickListener {
+                brokerType = BrokerType.ALOR
+                updateBroker()
                 activeStock?.let {
                     alorPortfolioManager.getPositionForStock(it)?.let { p ->
                         volumeEditText.setText(abs(p.getLots() - p.getBlocked()).toInt().toString())
@@ -306,7 +313,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 //            }
 
             brokerView.setOnClickListener {
-                changeBroker()
+                brokerType = if (brokerType == BrokerType.TINKOFF) BrokerType.ALOR else BrokerType.TINKOFF
+                updateBroker()
             }
 
             updateData()
@@ -316,31 +324,31 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         }
     }
 
-    private fun changeBroker() {
+    private fun updateBroker() {
         fragmentOrderbookBinding?.apply {
-            brokerType = if (brokerType == BrokerType.TINKOFF) BrokerType.ALOR else BrokerType.TINKOFF
-            brokerView.text = if (brokerType == BrokerType.TINKOFF) "T I N K O F F" else "A L O R"
+            if (brokerType == BrokerType.TINKOFF) {
+                brokerView.text = "T I N K O F F"
+            }
+
+            if (brokerType == BrokerType.ALOR) {
+                brokerView.text = "A L O R"
+            }
             scalperPanelView.setBackgroundColor(Utils.getColorForBrokerValue(brokerType))
         }
     }
 
     private fun initBroker() {
         fragmentOrderbookBinding?.apply {
-            if (SettingsManager.getBrokerTinkoff() && SettingsManager.getBrokerAlor()) {
-                brokerView.visibility = VISIBLE
-                brokerType = BrokerType.ALOR
-                changeBroker()
-            } else {
-                brokerView.visibility = GONE
-
-                if (SettingsManager.getBrokerTinkoff()) {
-                    brokerType = BrokerType.TINKOFF
-                }
-
-                if (SettingsManager.getBrokerAlor()) {
-                    brokerType = BrokerType.ALOR
+            activeStock?.let { stock ->
+                when {
+                    portfolioManager.getPositionForStock(stock) != null -> brokerType = BrokerType.TINKOFF
+                    alorPortfolioManager.getPositionForStock(stock) != null -> brokerType = BrokerType.ALOR
+                    SettingsManager.getBrokerTinkoff() -> brokerType = if (brokerType == BrokerType.NONE) BrokerType.TINKOFF else brokerType
+                    SettingsManager.getBrokerAlor() -> brokerType = if (brokerType == BrokerType.NONE) BrokerType.ALOR else brokerType
                 }
             }
+
+            updateBroker()
         }
     }
 
@@ -423,7 +431,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 orders.forEach { order ->
                     val newIntPrice = (order.getOrderPrice() * 100).roundToInt() + delta
                     val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, it)
-                    brokerManager.replaceOrder(order, newPrice, operationType)
+                    brokerManager.replaceOrder(order, newPrice)
                 }
             }
         }
@@ -604,14 +612,14 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
                 var targetPriceAsk = 0.0
                 var targetPriceBid = 0.0
-                var tinkoffPosition: TinkoffPosition? = null
+                var position: BasePosition? = null
                 activeStock?.let {
                     if (orderbookLines.isNotEmpty()) {
                         targetPriceAsk = orderbookLines.first().askPrice
                         targetPriceBid = orderbookLines.first().bidPrice
 
-                        tinkoffPosition = portfolioManager.getPositionForStock(it)
-                        tinkoffPosition?.let { p ->
+                        position = brokerManager.getPositionForStock(it, brokerType)
+                        position?.let { p ->
                             targetPriceAsk = p.getAveragePrice()
                             targetPriceBid = p.getAveragePrice()
                         }
@@ -621,7 +629,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 val allow = true
                 if (targetPriceAsk != 0.0 && allow) {
                     var sign = 1.0
-                    tinkoffPosition?.let {
+                    position?.let {
                         sign = sign(it.getLots().toDouble())
                     }
 
@@ -635,10 +643,10 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     priceAskPercentView.setTextColor(Utils.getColorForValue(percentAsk))
                     priceAskPercentView.visibility = VISIBLE
 
-                    if (percentBid == 0.0 && tinkoffPosition != null) {
+                    if (percentBid == 0.0 && position != null) {
                         dragToBuyView.setBackgroundColor(Utils.TEAL)
                     }
-                    if (percentAsk == 0.0 && tinkoffPosition != null) {
+                    if (percentAsk == 0.0 && position != null) {
                         dragToSellView.setBackgroundColor(Utils.TEAL)
                     }
                 } else {
@@ -646,21 +654,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     priceBidPercentView.visibility = GONE
                 }
 
-                if (item.exchange != "") { // US line
-
-                    priceAskPercentView.text = item.exchange
-                    priceBidPercentView.text = item.exchange
-
-                    priceAskPercentView.setTextColor(Color.BLACK)
-                    priceBidPercentView.setTextColor(Color.BLACK)
-
-                    backgroundBidView.alpha = 0.4f
-                    backgroundAskView.alpha = 0.4f
-                } else {
-                    backgroundBidView.alpha = 1.0f
-                    backgroundAskView.alpha = 1.0f
-                }
-
+                backgroundBidView.alpha = 1.0f
+                backgroundAskView.alpha = 1.0f
                 backgroundBidView.startAnimation(ResizeWidthAnimation(backgroundBidView, (item.bidPercent * 1000).toInt()).apply { duration = 250 })
                 backgroundAskView.startAnimation(ResizeWidthAnimation(backgroundAskView, (item.askPercent * 1000).toInt()).apply { duration = 250 })
 
@@ -701,23 +696,22 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     ordersSell[i].setTag(R.string.order_item, item.ordersSell[i])
                 }
 
-                if (item.exchange == "") {
-                    dragToBuyView.setBackgroundColor(Utils.getColorForIndex(index))
-                    dragToSellView.setBackgroundColor(Utils.getColorForIndex(index))
+                dragToBuyView.setBackgroundColor(Utils.getColorForIndex(index))
+                dragToSellView.setBackgroundColor(Utils.getColorForIndex(index))
 
-                    dragToBuyView.setOnDragListener(ChoiceDragListener())
-                    dragToSellView.setOnDragListener(ChoiceDragListener())
+                dragToBuyView.setOnDragListener(ChoiceDragListener())
+                dragToSellView.setOnDragListener(ChoiceDragListener())
 
-                    dragToBuyView.setTag(R.string.position_line, index)
-                    dragToBuyView.setTag(R.string.order_line, item)
-                    dragToBuyView.setTag(R.string.order_type, OperationType.BUY)
-                    dragToBuyView.setTag(R.string.action_type, "replace")
+                dragToBuyView.setTag(R.string.position_line, index)
+                dragToBuyView.setTag(R.string.order_line, item)
+                dragToBuyView.setTag(R.string.order_type, OperationType.BUY)
+                dragToBuyView.setTag(R.string.action_type, "replace")
 
-                    dragToSellView.setTag(R.string.position_line, index)
-                    dragToSellView.setTag(R.string.order_line, item)
-                    dragToSellView.setTag(R.string.order_type, OperationType.SELL)
-                    dragToSellView.setTag(R.string.action_type, "replace")
-                }
+                dragToSellView.setTag(R.string.position_line, index)
+                dragToSellView.setTag(R.string.order_line, item)
+                dragToSellView.setTag(R.string.order_type, OperationType.SELL)
+                dragToSellView.setTag(R.string.action_type, "replace")
+
                 dragToSellView.setOnTouchListener { v, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
                         v.setBackgroundColor(Utils.LIGHT)

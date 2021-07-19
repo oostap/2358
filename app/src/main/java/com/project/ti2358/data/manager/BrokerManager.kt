@@ -72,10 +72,8 @@ class BrokerManager() : KoinComponent {
             )
             Utils.showToastAlert("ТИ ${stock.ticker} новый ордер: $operation")
         } catch (e: Exception) {
-
+            Utils.showToastAlert("ТИ ${stock.ticker} ошибка ордера: $operation")
         }
-
-        Utils.showToastAlert("ТИ ${stock.ticker} ошибка ордера: $operation")
         return order
     }
 
@@ -196,14 +194,14 @@ class BrokerManager() : KoinComponent {
     }
 
     /******************** replace order *************************/
-    suspend fun replaceOrder(from: BaseOrder, price: Double, operationType: OperationType, refresh: Boolean = false) {
+    suspend fun replaceOrder(from: BaseOrder, price: Double, refresh: Boolean = false) {
         if (from is TinkoffOrder) {
-            replaceOrderTinkoff(from, price, operationType)
+            replaceOrderTinkoff(from, price, from.getOrderOperation())
             if (refresh) portfolioManager.refreshOrders()
         }
 
         if (from is AlorOrder) {
-            replaceOrderAlor(from, price, operationType)
+            replaceOrderAlor(from, price, from.getOrderOperation())
             if (refresh) alorPortfolioManager.refreshOrders()
         }
     }

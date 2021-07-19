@@ -116,40 +116,44 @@ class Strategy2225FinishFragment : Fragment(R.layout.fragment_2225_finish) {
 
         inner class ViewHolder(private val binding: Fragment2225FinishItemBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(index: Int) {
-                val purchaseStock = values[index]
+                val purchase = values[index]
 
                 with(binding) {
-                    tickerView.text = "${index + 1}) ${purchaseStock.stock.getTickerLove()}"
-                    priceView.text = purchaseStock.stock.getPriceString()
+                    tickerView.text = "${index + 1}) ${purchase.stock.getTickerLove()}"
+                    priceView.text = purchase.stock.getPriceString()
 
-                    refreshPercent(purchaseStock, 0.0)
+                    refreshPercent(purchase, 0.0)
                     pricePlusButton.setOnClickListener {
-                        refreshPercent(purchaseStock, 0.05)
+                        refreshPercent(purchase, 0.05)
                     }
 
                     priceMinusButton.setOnClickListener {
-                        refreshPercent(purchaseStock, -0.05)
+                        refreshPercent(purchase, -0.05)
                     }
 
                     lotsPlusButton.setOnClickListener {
                         updateEqualParts(false)
-                        purchaseStock.addLots(1)
-                        refreshPercent(purchaseStock, 0.0)
+                        purchase.addLots(1)
+                        refreshPercent(purchase, 0.0)
                     }
 
                     lotsMinusButton.setOnClickListener {
                         updateEqualParts(false)
-                        purchaseStock.addLots(-1)
-                        refreshPercent(purchaseStock, 0.0)
+                        purchase.addLots(-1)
+                        refreshPercent(purchase, 0.0)
                     }
 
                     chooseView.visibility = View.GONE
                     chooseView.setOnCheckedChangeListener { _, checked ->
-                        purchaseStock.trailingStop = checked
-                        refreshPercent(purchaseStock, 0.0)
+                        purchase.trailingStop = checked
+                        refreshPercent(purchase, 0.0)
                     }
 
-                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                    if (SettingsManager.getBrokerAlor() && SettingsManager.getBrokerTinkoff()) {
+                        itemView.setBackgroundColor(Utils.getColorForBrokerValue(purchase.broker))
+                    } else {
+                        itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                    }
                 }
             }
 

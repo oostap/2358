@@ -1,12 +1,8 @@
 package com.project.ti2358.data.manager
 
-import com.project.ti2358.data.alor.service.AlorPortfolioService
 import com.project.ti2358.data.alor.service.StreamingAlorService
 import com.project.ti2358.data.daager.service.ThirdPartyService
-import com.project.ti2358.service.log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -16,19 +12,31 @@ class AlorAuthManager : KoinComponent {
     private val thirdPartyService: ThirdPartyService by inject()
     private val streamingAlorService: StreamingAlorService by inject()
 
+    private var refreshJob: Job? = null
+
     companion object {
         var TOKEN: String = ""
     }
 
     suspend fun refreshToken() {
-//        GlobalScope.launch(Dispatchers.Default) {
+        while (true) {
             try {
                 TOKEN = thirdPartyService.alorRefreshToken("https://oauth.alor.ru/refresh")
                 streamingAlorService.resubscribe()
+                break
             } catch (e: Exception) {
                 e.printStackTrace()
+                delay(1000)
             }
-//        }
+        }
+    }
+
+    suspend fun startRefreshToken() {
+        refreshJob?.cancel()
+        refreshJob = GlobalScope.launch(Dispatchers.Default) {
+            refreshToken()
+            delay(1000 * 300)
+        }
     }
 
     fun isAuthorized(): Boolean {
