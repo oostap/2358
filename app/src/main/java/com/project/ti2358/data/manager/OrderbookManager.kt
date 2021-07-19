@@ -8,6 +8,7 @@ import com.project.ti2358.ui.orderbook.OrderbookLine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -53,14 +54,18 @@ class OrderbookManager() : KoinComponent {
     fun createOrder(stock: Stock, price: Double, lots: Int, operationType: OperationType, brokerType: BrokerType) {
         GlobalScope.launch(Dispatchers.Main) {
             brokerManager.placeOrder(stock, price, lots, operationType, brokerType, true)
-            process()
+            withContext(StockManager.stockContext) {
+                process()
+            }
         }
     }
 
     fun cancelOrder(order: BaseOrder) {
         GlobalScope.launch(Dispatchers.Main) {
             brokerManager.cancelOrder(order, true)
-            process()
+            withContext(StockManager.stockContext) {
+                process()
+            }
         }
     }
 
@@ -69,7 +74,9 @@ class OrderbookManager() : KoinComponent {
             val price = if (operationType == OperationType.BUY) toLine.bidPrice else toLine.askPrice
 
             brokerManager.replaceOrder(from, price)
-            process()
+            withContext(StockManager.stockContext) {
+                process()
+            }
         }
     }
 

@@ -30,19 +30,13 @@ import kotlin.math.sign
 @KoinApiExtension
 class PortfolioAlorFragment : Fragment(R.layout.fragment_portfolio_alor) {
     private val orderbookManager: OrderbookManager by inject()
-    private val thirdPartyService: ThirdPartyService by inject()
     private val alorPortfolioManager: AlorPortfolioManager by inject()
-    private val positionManager: PositionManager by inject()
 
     private var fragmentPortfolioAlorBinding: FragmentPortfolioAlorBinding? = null
 
     var adapterList: ItemPortfolioRecyclerViewAdapter = ItemPortfolioRecyclerViewAdapter(emptyList())
     var jobUpdate: Job? = null
     var jobVersion: Job? = null
-
-    companion object {
-        var versionUpdateShowed: Boolean = false
-    }
 
     override fun onDestroy() {
         jobUpdate?.cancel()
@@ -71,29 +65,6 @@ class PortfolioAlorFragment : Fragment(R.layout.fragment_portfolio_alor) {
         }
 
         updateData()
-
-        if (!versionUpdateShowed) {
-            jobVersion?.cancel()
-            jobVersion = GlobalScope.launch(Dispatchers.Main) {
-                delay(3000)
-                val pInfo: PackageInfo = TheApplication.application.applicationContext.packageManager.getPackageInfo(
-                    TheApplication.application.applicationContext.packageName,
-                    0
-                )
-                val currentVersion = pInfo.versionName
-
-                val version = try {
-                    thirdPartyService.githubVersion()
-                } catch (e: Exception) {
-                    currentVersion
-                }
-
-                if (version != currentVersion) { // показать окно обновления
-                    Utils.showUpdateAlert(requireContext(), currentVersion, version)
-                }
-            }
-            versionUpdateShowed = true
-        }
     }
 
     fun updateData() {

@@ -12,6 +12,7 @@ import com.project.ti2358.service.toMoney
 import org.koin.core.component.KoinApiExtension
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.math.min
 
 data class Stock(var instrument: Instrument) {
     var ticker = instrument.ticker
@@ -235,8 +236,8 @@ data class Stock(var instrument: Instrument) {
             lentaUS = PantiniLenta(ticker)
         }
 
-        lentaUS?.prints?.addAll(0, pantiniLenta.prints)
-        lentaUS?.prints = (lentaUS?.prints?.subList(0, 100) ?: emptyList()) as MutableList<PantiniPrint>
+        lentaUS?.prints?.addAll(0, pantiniLenta.prints.toMutableList())
+        lentaUS?.prints = (lentaUS?.prints?.subList(0, min(100, lentaUS?.prints?.size ?: 0)) ?: emptyList()) as MutableList<PantiniPrint>
     }
 
     fun processStockInfo(instrumentInfo: InstrumentInfo) {

@@ -288,7 +288,6 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 while (true) {
                     delay(1000)
                     withContext(StockManager.stockContext) {
-
                         orderbookLines = orderbookManager.process()
                         orderbookUSLines = orderbookManager.processUS()
                         orderbookUSLenta = orderbookManager.processUSLenta()
