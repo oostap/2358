@@ -291,15 +291,15 @@ class BrokerManager() : KoinComponent {
         }
     }
 
-//    suspend fun refreshDeposit() {
-//        if (SettingsManager.getBrokerTinkoff()) {
-//            portfolioManager.refreshDeposit()
-//        }
-//
-//        if (SettingsManager.getBrokerAlor()) {
-//            alorPortfolioManager.refreshDeposit()
-//        }
-//    }
+    suspend fun refreshDeposit() {
+        if (SettingsManager.getBrokerTinkoff()) {
+            portfolioManager.refreshDeposit()
+        }
+
+        if (SettingsManager.getBrokerAlor()) {
+            alorPortfolioManager.refreshDeposit()
+        }
+    }
 
     suspend fun refreshOrders(brokerType: BrokerType) {
         if (brokerType == BrokerType.TINKOFF) {

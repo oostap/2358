@@ -269,11 +269,9 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             jobRefreshOrders = GlobalScope.launch(Dispatchers.Main) {
                 while (true) {
                     delay(5000)
-                    portfolioManager.refreshOrders()
-                    portfolioManager.refreshDeposit()
 
-                    alorPortfolioManager.refreshOrders()
-                    alorPortfolioManager.refreshDeposit()
+                    brokerManager.refreshOrders()
+                    brokerManager.refreshDeposit()
 
                     updatePositionTinkoff()
                     updatePositionAlor()
@@ -282,8 +280,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
             jobRefreshOrderbook?.cancel()
             jobRefreshOrderbook = GlobalScope.launch(Dispatchers.Main) {
-                portfolioManager.refreshOrders()
-                alorPortfolioManager.refreshOrders()
+                brokerManager.refreshOrders()
 
                 while (true) {
                     delay(1000)
@@ -473,7 +470,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         lotsBox.hint = "количество"
         layout.addView(lotsBox)
 
-        val position = portfolioManager.getPositionForStock(orderbookLine.stock)
+        val position = brokerManager.getPositionForStock(orderbookLine.stock, brokerType)
         val depoCount = position?.getLots() ?: 0
         val avg = position?.getAveragePrice() ?: 0
         val title = "В депо: $depoCount по $avg"
@@ -488,9 +485,6 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 } catch (e: Exception) {
                     Utils.showMessageAlert(requireContext(), "Неверный формат чисел!")
                 }
-            }).setNegativeButton("ОТМЕНА",
-            DialogInterface.OnClickListener { dialog, whichButton ->
-
             }).setNeutralButton("КУПИТЬ",
             DialogInterface.OnClickListener { dialog, whichButton ->
                 try {
