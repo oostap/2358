@@ -26,7 +26,7 @@ import kotlin.math.sign
 @KoinApiExtension
 class PortfolioAlorFragment : Fragment(R.layout.fragment_portfolio_alor) {
     private val orderbookManager: OrderbookManager by inject()
-    private val portfolioAlorManager: PortfolioAlorManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
 
     private var fragmentPortfolioAlorBinding: FragmentPortfolioAlorBinding? = null
 
@@ -66,9 +66,9 @@ class PortfolioAlorFragment : Fragment(R.layout.fragment_portfolio_alor) {
     fun updateData() {
         jobUpdate?.cancel()
         jobUpdate = GlobalScope.launch(Dispatchers.Main) {
-            portfolioAlorManager.refreshDeposit()
-            portfolioAlorManager.refreshKotleta()
-            adapterList.setData(portfolioAlorManager.getPositions())
+            alorPortfolioManager.refreshDeposit()
+            alorPortfolioManager.refreshKotleta()
+            adapterList.setData(alorPortfolioManager.getPositions())
             updateTitle()
         }
     }
@@ -76,9 +76,8 @@ class PortfolioAlorFragment : Fragment(R.layout.fragment_portfolio_alor) {
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-//            val percent = alorPortfolioManager.getPercentBusyInStocks()
-            val freeCash = portfolioAlorManager.getFreeCashUSD()
-            act.supportActionBar?.title = "Депозит ALOR - ±$freeCash"
+            val percent = alorPortfolioManager.getPercentBusyInStocks()
+            act.supportActionBar?.title = "Депозит ALOR $percent%"
         }
     }
 

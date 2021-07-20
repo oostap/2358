@@ -21,8 +21,8 @@ import kotlin.math.roundToInt
 @KoinApiExtension
 class StrategyTazikEndless : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
-    private val portfolioAlorManager: PortfolioAlorManager by inject()
+    private val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTelegram: StrategyTelegram by inject()
     private val strategyBlacklist: StrategyBlacklist by inject()
@@ -167,8 +167,8 @@ class StrategyTazikEndless : KoinComponent {
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         if (SettingsManager.getTazikEndlessExcludeDepo()) {
-            stocksToPurchase.removeAll { p -> portfolioTinkoffManager.portfolioPositionTinkoffs.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
-            stocksToPurchase.removeAll { p -> portfolioAlorManager.portfolioPositionAlors.any { it.symbol == p.ticker && p.broker == BrokerType.ALOR } }
+            stocksToPurchase.removeAll { p -> tinkoffPortfolioManager.portfolioPositionTinkoffs.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
+            stocksToPurchase.removeAll { p -> alorPortfolioManager.portfolioPositions.any { it.symbol == p.ticker && p.broker == BrokerType.ALOR } }
         }
 
         // удалить все бумаги, у которых 0 лотов = не хватает на покупку одной части
@@ -517,13 +517,13 @@ class StrategyTazikEndless : KoinComponent {
 
         // проверить, если бумага в депо и усреднение отключено, то запретить тарить
         if (purchase.broker == BrokerType.TINKOFF) {
-            if (portfolioTinkoffManager.portfolioPositionTinkoffs.find { it.ticker == ticker } != null && !SettingsManager.getTazikEndlessAllowAveraging()) {
+            if (tinkoffPortfolioManager.portfolioPositionTinkoffs.find { it.ticker == ticker } != null && !SettingsManager.getTazikEndlessAllowAveraging()) {
                 return false
             }
         }
 
         if (purchase.broker == BrokerType.ALOR) {
-            if (portfolioAlorManager.portfolioPositionAlors.find { it.symbol == ticker } != null && !SettingsManager.getTazikEndlessAllowAveraging()) {
+            if (alorPortfolioManager.portfolioPositions.find { it.symbol == ticker } != null && !SettingsManager.getTazikEndlessAllowAveraging()) {
                 return false
             }
         }

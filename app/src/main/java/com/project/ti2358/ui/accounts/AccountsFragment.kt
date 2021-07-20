@@ -24,7 +24,7 @@ import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
 class AccountsFragment : Fragment(R.layout.fragment_accounts) {
-    val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
+    val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
 
     private var fragmentAccountsBinding: FragmentAccountsBinding? = null
 
@@ -58,10 +58,10 @@ class AccountsFragment : Fragment(R.layout.fragment_accounts) {
     private fun updateData() {
         job?.cancel()
         job = GlobalScope.launch(Dispatchers.Main) {
-            portfolioTinkoffManager.refreshAccounts()
-            portfolioTinkoffManager.refreshDeposit()
-            portfolioTinkoffManager.refreshKotleta()
-            accounts = portfolioTinkoffManager.accounts
+            tinkoffPortfolioManager.refreshAccounts()
+            tinkoffPortfolioManager.refreshDeposit()
+            tinkoffPortfolioManager.refreshKotleta()
+            accounts = tinkoffPortfolioManager.accounts
             adapterList.setData(accounts)
             updateTitle()
         }
@@ -89,13 +89,13 @@ class AccountsFragment : Fragment(R.layout.fragment_accounts) {
                 val account = values[index]
                 with(binding) {
                     chooseView.setOnCheckedChangeListener(null)
-                    chooseView.isChecked = portfolioTinkoffManager.getActiveBrokerAccountId() == account.brokerAccountId
+                    chooseView.isChecked = tinkoffPortfolioManager.getActiveBrokerAccountId() == account.brokerAccountId
 
                     nameView.text = account.brokerAccountId
                     typeView.text = account.brokerAccountType
 
                     chooseView.setOnCheckedChangeListener { _, checked ->
-                        portfolioTinkoffManager.setActiveBrokerAccountId(account.brokerAccountId)
+                        tinkoffPortfolioManager.setActiveBrokerAccountId(account.brokerAccountId)
                         updateData()
                     }
 

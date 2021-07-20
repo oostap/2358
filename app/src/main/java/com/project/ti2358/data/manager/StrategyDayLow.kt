@@ -16,8 +16,8 @@ import kotlin.math.roundToInt
 @KoinApiExtension
 class StrategyDayLow : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
-    private val portfolioAlorManager: PortfolioAlorManager by inject()
+    private val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
     private val strategyTelegram: StrategyTelegram by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
@@ -124,7 +124,7 @@ class StrategyDayLow : KoinComponent {
 
         // удалить бумаги, которые уже есть в депо, иначе среднюю невозможно узнать
         stocksSelected.removeAll { stock ->
-            portfolioTinkoffManager.portfolioPositionTinkoffs.any { it.ticker == stock.ticker }
+            tinkoffPortfolioManager.portfolioPositionTinkoffs.any { it.ticker == stock.ticker }
         }
 
         val purchases: MutableList<StockPurchase> = mutableListOf()
@@ -145,8 +145,8 @@ class StrategyDayLow : KoinComponent {
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         if (SettingsManager.getTazikEndlessExcludeDepo()) {
-            stocksToPurchase.removeAll { p -> portfolioTinkoffManager.portfolioPositionTinkoffs.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
-            stocksToPurchase.removeAll { p -> portfolioAlorManager.portfolioPositionAlors.any { it.symbol == p.ticker && p.broker == BrokerType.ALOR } }
+            stocksToPurchase.removeAll { p -> tinkoffPortfolioManager.portfolioPositionTinkoffs.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
+            stocksToPurchase.removeAll { p -> alorPortfolioManager.portfolioPositions.any { it.symbol == p.ticker && p.broker == BrokerType.ALOR } }
         }
 
         val allTinkoff = stocksToPurchase.filter { it.broker == BrokerType.TINKOFF }.size

@@ -47,8 +47,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     val orderbookManager: OrderbookManager by inject()
     val brokerManager: BrokerManager by inject()
 
-    val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
-    val portfolioAlorManager: PortfolioAlorManager by inject()
+    val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
+    val alorPortfolioManager: AlorPortfolioManager by inject()
 
     private var fragmentOrderbookBinding: FragmentOrderbookBinding? = null
 
@@ -248,7 +248,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 brokerType = BrokerType.TINKOFF
                 updateBroker()
                 activeStock?.let {
-                    portfolioTinkoffManager.getPositionForStock(it)?.let { p ->
+                    tinkoffPortfolioManager.getPositionForStock(it)?.let { p ->
                         volumeEditText.setText(abs(p.getLots() - p.blocked).toInt().toString())
                     }
                 }
@@ -258,7 +258,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 brokerType = BrokerType.ALOR
                 updateBroker()
                 activeStock?.let {
-                    portfolioAlorManager.getPositionForStock(it)?.let { p ->
+                    alorPortfolioManager.getPositionForStock(it)?.let { p ->
                         volumeEditText.setText(abs(p.getLots() - p.getBlocked()).toInt().toString())
                     }
                 }
@@ -336,8 +336,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         fragmentOrderbookBinding?.apply {
             activeStock?.let { stock ->
                 when {
-                    portfolioTinkoffManager.getPositionForStock(stock) != null -> brokerType = BrokerType.TINKOFF
-                    portfolioAlorManager.getPositionForStock(stock) != null -> brokerType = BrokerType.ALOR
+                    tinkoffPortfolioManager.getPositionForStock(stock) != null -> brokerType = BrokerType.TINKOFF
+                    alorPortfolioManager.getPositionForStock(stock) != null -> brokerType = BrokerType.ALOR
                     SettingsManager.getBrokerTinkoff() -> brokerType = if (brokerType == BrokerType.NONE) BrokerType.TINKOFF else brokerType
                     SettingsManager.getBrokerAlor() -> brokerType = if (brokerType == BrokerType.NONE) BrokerType.ALOR else brokerType
                 }
@@ -352,7 +352,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             fragmentOrderbookBinding?.apply {
                 activeStock?.let { stock ->
                     positionView.visibility = GONE
-                    portfolioTinkoffManager.getPositionForStock(stock)?.let { p ->
+                    tinkoffPortfolioManager.getPositionForStock(stock)?.let { p ->
                         val avg = p.getAveragePrice()
                         priceView.text = "${avg.toMoney(stock)} ➡ ${stock.getPriceString()}"
 
@@ -383,7 +383,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             fragmentOrderbookBinding?.apply {
                 activeStock?.let { stock ->
                     alorPositionView.visibility = GONE
-                    portfolioAlorManager.getPositionForStock(stock)?.let { p ->
+                    alorPortfolioManager.getPositionForStock(stock)?.let { p ->
                         val avg = p.avgPrice
                         alorPriceView.text = "${avg.toMoney(stock)} ➡ ${stock.getPriceString()}"
 

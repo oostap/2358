@@ -25,7 +25,7 @@ import org.koin.core.component.KoinApiExtension
 @KoinApiExtension
 class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start) {
     val strategy1000Sell: Strategy1000Sell by inject()
-    val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
+    val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
     val orderbookManager: OrderbookManager by inject()
 
     private var fragment1000SellStartBinding: Fragment1000SellStartBinding? = null
@@ -112,7 +112,7 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
 
         jobUpdate?.cancel()
         jobUpdate = GlobalScope.launch(Dispatchers.Main) {
-            portfolioTinkoffManager.refreshDeposit()
+            tinkoffPortfolioManager.refreshDeposit()
             updateData()
         }
         updateData()
@@ -166,7 +166,7 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
         inner class ViewHolder(private val binding: Fragment1000SellStartItemBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(index: Int) {
                 val stock = values[index]
-                val portfolioPosition = portfolioTinkoffManager.getPositionForStock(stock)
+                val portfolioPosition = tinkoffPortfolioManager.getPositionForStock(stock)
 
                 with(binding) {
                     tickerView.text = "${index + 1}) ${stock.getTickerLove()}"

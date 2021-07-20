@@ -19,7 +19,7 @@ import java.util.Collections.synchronizedList
 import kotlin.math.abs
 
 @KoinApiExtension
-class PortfolioTinkoffManager : KoinComponent {
+class TinkoffPortfolioManager : KoinComponent {
     private val stocksManager: StockManager by inject()
 
     private val portfolioService: PortfolioService by inject()

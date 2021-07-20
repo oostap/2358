@@ -15,8 +15,8 @@ import kotlin.math.roundToInt
 @KoinApiExtension
 class Strategy2225() : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
-    private val portfolioAlorManager: PortfolioAlorManager by inject()
+    private val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
 
     private val strategyTelegram: StrategyTelegram by inject()
 
@@ -107,8 +107,8 @@ class Strategy2225() : KoinComponent {
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         if (SettingsManager.getTazikEndlessExcludeDepo()) {
-            stocksToPurchase.removeAll { p -> portfolioTinkoffManager.portfolioPositionTinkoffs.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
-            stocksToPurchase.removeAll { p -> portfolioAlorManager.portfolioPositionAlors.any { it.symbol == p.ticker && p.broker == BrokerType.ALOR } }
+            stocksToPurchase.removeAll { p -> tinkoffPortfolioManager.portfolioPositionTinkoffs.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
+            stocksToPurchase.removeAll { p -> alorPortfolioManager.portfolioPositions.any { it.symbol == p.ticker && p.broker == BrokerType.ALOR } }
         }
 
         val allTinkoff = stocksToPurchase.filter { it.broker == BrokerType.TINKOFF }.size

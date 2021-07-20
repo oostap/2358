@@ -38,12 +38,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="2dp"
-            android:text="@string/active_account"
+            android:text="@string/account_tinkoff"
             android:textSize="12sp"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <TextView
-            android:id="@+id/active_account"
+            android:id="@+id/tinkoff_data_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="2dp"
@@ -62,11 +62,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp"
-            android:text="@string/nav_header_subtitle"
+            android:text="@string/account_alor"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <TextView
-            android:id="@+id/free_cash"
+            android:id="@+id/alor_data_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="2dp"
@@ -306,6 +306,45 @@
 
             <TextView
                 android:id="@+id/index_6_emoji"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:padding="2dp"
+                android:text=""
+                android:textSize="12sp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/index_7_name"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:padding="2dp"
+                android:text=""
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/index_7_value"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:padding="2dp"
+                android:text=""
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/index_7_change"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:padding="2dp"
+                android:text=""
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/index_7_emoji"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:padding="2dp"

@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.PortfolioTinkoffManager
+import com.project.ti2358.data.manager.TinkoffPortfolioManager
 import com.project.ti2358.data.manager.SettingsManager
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.databinding.FragmentTelegramBinding
@@ -16,7 +16,7 @@ import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
 class TelegramFragment : Fragment(R.layout.fragment_telegram) {
-    val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
+    val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
     val stockManager: StockManager by inject()
 
     private var fragmentTelegramBinding: FragmentTelegramBinding? = null

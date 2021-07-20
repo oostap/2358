@@ -19,7 +19,7 @@ import kotlin.math.roundToInt
 
 @KoinApiExtension
 class Strategy1000Buy : KoinComponent {
-    private val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
+    private val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
     private val stockManager: StockManager by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
@@ -123,7 +123,7 @@ class Strategy1000Buy : KoinComponent {
                         percentLimitPriceChange = preset.percent
                         lots = preset.lots
                         profitPercent = preset.profit
-                        position = portfolioTinkoffManager.getPositionForStock(it)
+                        position = tinkoffPortfolioManager.getPositionForStock(it)
                     }
                     purchases.add(purchase)
                 }

@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.alor.model.AlorOrder
-import com.project.ti2358.data.manager.PortfolioAlorManager
+import com.project.ti2358.data.manager.AlorPortfolioManager
 import com.project.ti2358.data.manager.BrokerManager
 import com.project.ti2358.data.manager.ChartManager
 import com.project.ti2358.data.manager.OrderbookManager
@@ -30,7 +30,7 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
     private val brokerManager: BrokerManager by inject()
     private val chartManager: ChartManager by inject()
 
-    val portfolioAlorManager: PortfolioAlorManager by inject()
+    val alorPortfolioManager: AlorPortfolioManager by inject()
 
     private var fragmentOrdersAlorBinding: FragmentOrdersAlorBinding? = null
 
@@ -62,7 +62,7 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
             updateButton.setOnClickListener {
                 jobRefresh?.cancel()
                 jobRefresh = GlobalScope.launch(Dispatchers.Main) {
-                    portfolioAlorManager.refreshOrders()
+                    alorPortfolioManager.refreshOrders()
                     updateData()
                 }
             }
@@ -79,7 +79,7 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
         jobRefreshEndless?.cancel()
         jobRefreshEndless = GlobalScope.launch(Dispatchers.Main) {
             while (true) {
-                if (portfolioAlorManager.refreshOrders()) {
+                if (alorPortfolioManager.refreshOrders()) {
                     updateData()
                     break
                 }
@@ -89,14 +89,14 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
     }
 
     fun updateData() {
-        adapterList.setData(portfolioAlorManager.orders)
+        adapterList.setData(alorPortfolioManager.orders)
         updateTitle()
     }
 
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            act.supportActionBar?.title = "Заявки ALOR ${portfolioAlorManager.orders.size}"
+            act.supportActionBar?.title = "Заявки ALOR ${alorPortfolioManager.orders.size}"
         }
     }
 

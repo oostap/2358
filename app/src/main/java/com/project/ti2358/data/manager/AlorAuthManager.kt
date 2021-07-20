@@ -19,23 +19,22 @@ class AlorAuthManager : KoinComponent {
     }
 
     suspend fun refreshToken() {
-        while (true) {
-            try {
-                TOKEN = thirdPartyService.alorRefreshToken("https://oauth.alor.ru/refresh")
-                streamingAlorService.resubscribe()
-                break
-            } catch (e: Exception) {
-                e.printStackTrace()
-                delay(1000)
-            }
+        try {
+            TOKEN = thirdPartyService.alorRefreshToken("https://oauth.alor.ru/refresh")
+            streamingAlorService.resubscribe()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            delay(1000)
         }
     }
 
     suspend fun startRefreshToken() {
         refreshJob?.cancel()
         refreshJob = GlobalScope.launch(Dispatchers.Default) {
-            refreshToken()
-            delay(1000 * 300)
+            while (true) {
+                refreshToken()
+                delay(1000 * 300)
+            }
         }
     }
 

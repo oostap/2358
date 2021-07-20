@@ -38,8 +38,8 @@ class StrategyTelegram : KoinComponent {
     private val brokerManager: BrokerManager by inject()
     private val operationsService: OperationsService by inject()
 
-    private val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
-    private val portfolioAlorManager: PortfolioAlorManager by inject()
+    private val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
 
     private val strategyTelegramCommands: StrategyTelegramCommands by inject()
     private val thirdPartyService: ThirdPartyService by inject()
@@ -70,7 +70,7 @@ class StrategyTelegram : KoinComponent {
                     toDate.add(Calendar.HOUR_OF_DAY, -6)
                     val from = convertDateToTinkoffDate(toDate, zone)
 
-                    operations = Collections.synchronizedList(operationsService.operations(from, to, portfolioTinkoffManager.getActiveBrokerAccountId()).operations)
+                    operations = Collections.synchronizedList(operationsService.operations(from, to, tinkoffPortfolioManager.getActiveBrokerAccountId()).operations)
                     operations.sortBy { it.date }
                     if (operationsPosted.isEmpty()) {
                         operations.forEach {
@@ -80,7 +80,7 @@ class StrategyTelegram : KoinComponent {
                         operationsPosted.add("empty")
                     }
 
-                    portfolioTinkoffManager.refreshDeposit()
+                    tinkoffPortfolioManager.refreshDeposit()
 
                     for (operation in operations) {
                         if (operation.id !in operationsPosted) {
@@ -275,13 +275,13 @@ class StrategyTelegram : KoinComponent {
         var position: BasePosition? = null
         if (order is TinkoffOrder) {
             val stock = stockManager.getStockByFigi(order.figi) ?: return ""
-            position = portfolioTinkoffManager.getPositionForStock(stock)
+            position = tinkoffPortfolioManager.getPositionForStock(stock)
             order.stock = stock
         }
 
         if (order is AlorOrder) {
             val stock = stockManager.getStockByTicker(order.symbol) ?: return ""
-            position = portfolioAlorManager.getPositionForStock(stock)
+            position = alorPortfolioManager.getPositionForStock(stock)
             order.stock = stock
         }
 
@@ -352,7 +352,7 @@ class StrategyTelegram : KoinComponent {
         val ticker = operation.stock?.ticker
         val operationSymbol = if (operation.operationType == OperationType.BUY) "🟢" else "🔴"
         var operationString = if (operation.operationType == OperationType.BUY) "BUY " else "SELL "
-        val position = portfolioTinkoffManager.getPositionForStock(operation.stock!!)
+        val position = tinkoffPortfolioManager.getPositionForStock(operation.stock!!)
         if (position == null && operation.operationType == OperationType.BUY) {
             operationString += "SHORT выход"
         }

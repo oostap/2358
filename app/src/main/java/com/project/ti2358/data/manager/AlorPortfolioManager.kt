@@ -2,8 +2,6 @@ package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.alor.model.*
 import com.project.ti2358.data.alor.service.AlorPortfolioService
-import com.project.ti2358.data.alor.service.StreamingAlorService
-import com.project.ti2358.data.daager.service.ThirdPartyService
 import com.project.ti2358.data.tinkoff.model.*
 import com.project.ti2358.data.tinkoff.model.Currency
 import com.project.ti2358.service.Utils
@@ -19,12 +17,10 @@ import java.util.Collections.synchronizedMap
 import kotlin.math.abs
 
 @KoinApiExtension
-class PortfolioAlorManager : KoinComponent {
+class AlorPortfolioManager : KoinComponent {
     private val stockManager: StockManager by inject()
     private val alorAuthManager: AlorAuthManager by inject()
 
-    private val thirdPartyService: ThirdPartyService by inject()
-    private val streamingAlorService: StreamingAlorService by inject()
     private val alorPortfolioService: AlorPortfolioService by inject()
 
     private var tradeServers: Map<String, List<AlorTradeServer>> = mutableMapOf()
@@ -34,13 +30,16 @@ class PortfolioAlorManager : KoinComponent {
     var orders: MutableList<AlorOrder> = mutableListOf()
     private var stopOrders: MutableList<AlorOrder> = mutableListOf()
 
-    var portfolioPositionAlors: MutableList<PositionAlor> = mutableListOf()
+    var portfolioPositions: MutableList<PositionAlor> = mutableListOf()
+    var positionUSD: PositionAlor? = null
+
+    var portfolioPositionsMOEX: MutableList<PositionAlor> = mutableListOf()
+    var positionRUB: PositionAlor? = null
 
     private var money: AlorMoney? = null
     private var summary: AlorSummary? = null
 
     private var refreshDepositDelay: Long = 20 * 1000 // 20s
-
 
     companion object {
         var PORTFOLIO: String = ""
@@ -145,9 +144,10 @@ class PortfolioAlorManager : KoinComponent {
     suspend fun refreshDeposit(): Boolean {
         try {
             if (mainServer != null) {
-                portfolioPositionAlors = synchronizedList(alorPortfolioService.positions(AlorExchange.SPBX, mainServer!!.portfolio))
+                portfolioPositions = synchronizedList(alorPortfolioService.positions(AlorExchange.SPBX, mainServer!!.portfolio))
+                portfolioPositionsMOEX = synchronizedList(alorPortfolioService.positions(AlorExchange.MOEX, mainServer!!.portfolio))
                 baseSortPortfolio()
-                log("ALOR positions = $portfolioPositionAlors")
+                log("ALOR positions = $portfolioPositions")
             } else {
                 start()
             }
@@ -174,15 +174,21 @@ class PortfolioAlorManager : KoinComponent {
     }
 
     private suspend fun baseSortPortfolio() = withContext(StockManager.stockContext) {
-        portfolioPositionAlors.forEach { it.stock = stockManager.getStockByTicker(it.symbol) }
+        portfolioPositions.forEach { it.stock = stockManager.getStockByTicker(it.symbol) }
 
-        portfolioPositionAlors.sortByDescending {
+        portfolioPositions.sortByDescending {
             val multiplier = if (it.stock?.instrument?.currency == Currency.USD) 1.0 else 1.0 / Utils.getUSDRUB()
             abs(it.getLots() * it.avgPrice * multiplier)
         }
 
+        positionUSD = portfolioPositions.find { it.symbol == "USD" }
+        positionRUB = portfolioPositionsMOEX.find { it.symbol == "RUB" }
+
         // удалить позицию $
-        portfolioPositionAlors.removeAll { "USD" in it.symbol }
+        portfolioPositions.removeAll { "USD" in it.symbol }
+
+        // удалить нулевые позиции
+        portfolioPositions.removeAll { it.getLots() == 0 }
     }
 
     private fun baseSortOrders() {
@@ -196,77 +202,40 @@ class PortfolioAlorManager : KoinComponent {
     }
 
     fun getPositions() : List<PositionAlor> {
-        return portfolioPositionAlors
-    }
-
-    fun getFreeCashEUR(): String {
-        var total = 0.0
-//        for (currency in currencyPositions) {
-//            if (currency.currency == Currency.EUR) {
-//                total += currency.balance
-//            }
-//        }
-        val symbols = DecimalFormatSymbols.getInstance()
-        symbols.groupingSeparator = ' '
-        return DecimalFormat("###,###.##€", symbols).format(total)
+        return portfolioPositions
     }
 
     fun getFreeCashUSD(): String {
-        var total = (summary?.portfolioEvaluation ?: 0.0) / Utils.getUSDRUB()
-//        for (currency in currencyPositions) {
-//            if (currency.currency == Currency.USD) {
-//                total += currency.balance
-//            }
-//        }
+        val total = positionUSD?.qtyUnits
         val symbols = DecimalFormatSymbols.getInstance()
         symbols.groupingSeparator = ' '
         return DecimalFormat("###,###.##$", symbols).format(total)
     }
 
     fun getFreeCashRUB(): String {
-        var total = 0.0
-//        for (currency in currencyPositions) {
-//            if (currency.currency == Currency.RUB) {
-//                total += currency.balance
-//            }
-//        }
+        val total = positionRUB?.qtyUnits
         val symbols = DecimalFormatSymbols.getInstance()
         symbols.groupingSeparator = ' '
         return DecimalFormat("###,###.##₽", symbols).format(total)
     }
 
     private fun getFreeCash(): Double {
-        var total = 0.0
-//        for (currency in currencyPositions) {
-//            if (currency.currency == Currency.USD) {
-//                total += currency.balance
-//            }
-//            if (currency.currency == Currency.RUB) {
-//                total += currency.balance / Utils.getUSDRUB()
-//            }
-//        }
-        return total
+        return (positionUSD?.qtyUnits ?: 0.0) + ((positionRUB?.qtyUnits ?: 0.0) / Utils.getUSDRUB())
     }
 
     fun getPercentBusyInStocks(): Int {
         val free = getFreeCash()
         var busy = 0.0
 
-        for (position in portfolioPositionAlors) {
-            if (position.isCurrency) {
-                busy += abs(position.avgPrice * position.getLots())
-            }
-
-            if (!position.isCurrency) {
-                busy += abs(position.avgPrice * position.getLots() / Utils.getUSDRUB())
-            }
+        for (position in portfolioPositions) {
+            busy += abs(position.avgPrice * position.getLots())
         }
 
         return (busy / (free + busy) * 100).toInt()
     }
 
     public fun getPositionForStock(stock: Stock): PositionAlor? {
-        return portfolioPositionAlors.find { it.symbol == stock.ticker }
+        return portfolioPositions.find { it.symbol == stock.ticker }
     }
 
     public fun getOrderAllForStock(stock: Stock, operation: OperationType): List<AlorOrder> {

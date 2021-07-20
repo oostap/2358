@@ -20,18 +20,18 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 @KoinApiExtension
 class WorkflowManager() : KoinComponent {
-    private val portfolioAlorManager: PortfolioAlorManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
     private val stockManager: StockManager by inject()
-    private val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
+    private val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
 
     fun startApp() {
         stockManager.loadStocks()
-        portfolioTinkoffManager.startUpdatePortfolio()
+        tinkoffPortfolioManager.startUpdatePortfolio()
         stockManager.startUpdateIndices()
 
         if (SettingsManager.getAlorToken() != "") {
-            portfolioAlorManager.start()
+            alorPortfolioManager.start()
         }
 
         strategySpeaker.start()
@@ -41,13 +41,13 @@ class WorkflowManager() : KoinComponent {
         private val processingModule = module {
             fun provideWorkflowManager(): WorkflowManager = WorkflowManager()
             fun provideStocksManager(): StockManager = StockManager()
-            fun providePortfolioManager(): PortfolioTinkoffManager = PortfolioTinkoffManager()
+            fun providePortfolioManager(): TinkoffPortfolioManager = TinkoffPortfolioManager()
             fun provideOrderbookManager(): OrderbookManager = OrderbookManager()
             fun provideChartManager(): ChartManager = ChartManager()
             fun providePositionManager(): PositionManager = PositionManager()
 
             fun provideAlorAuthManager(): AlorAuthManager = AlorAuthManager()
-            fun provideAlorPortfolioManager(): PortfolioAlorManager = PortfolioAlorManager()
+            fun provideAlorPortfolioManager(): AlorPortfolioManager = AlorPortfolioManager()
 
             fun provideBrokerManager(): BrokerManager = BrokerManager()
 

@@ -20,10 +20,11 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
-import com.project.ti2358.data.manager.PortfolioTinkoffManager
+import com.project.ti2358.data.manager.TinkoffPortfolioManager
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.WorkflowManager
 import com.project.ti2358.data.daager.model.Index
+import com.project.ti2358.data.manager.AlorPortfolioManager
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toPercent
@@ -42,7 +43,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     val stockManager: StockManager by inject()
-    val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
+    val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
+    val alorPortfolioManager: AlorPortfolioManager by inject()
     val workflowManager: WorkflowManager by inject()
 
     var job: Job? = null
@@ -121,8 +123,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         val header = navView.getHeaderView(0)
-        val freeCashView: TextView = header.findViewById(R.id.free_cash)
-        val activeAccountView: TextView = header.findViewById(R.id.active_account)
+        val tinkoffDataView: TextView = header.findViewById(R.id.tinkoff_data_view)
+        val alorDataView: TextView = header.findViewById(R.id.alor_data_view)
 
         val index1NameView: TextView = header.findViewById(R.id.index_1_name)
         val index2NameView: TextView = header.findViewById(R.id.index_2_name)
@@ -130,12 +132,14 @@ class MainActivity : AppCompatActivity() {
         val index4NameView: TextView = header.findViewById(R.id.index_4_name)
         val index5NameView: TextView = header.findViewById(R.id.index_5_name)
         val index6NameView: TextView = header.findViewById(R.id.index_6_name)
+        val index7NameView: TextView = header.findViewById(R.id.index_7_name)
 
         val index2ValueView: TextView = header.findViewById(R.id.index_2_value)
         val index3ValueView: TextView = header.findViewById(R.id.index_3_value)
         val index4ValueView: TextView = header.findViewById(R.id.index_4_value)
         val index5ValueView: TextView = header.findViewById(R.id.index_5_value)
         val index6ValueView: TextView = header.findViewById(R.id.index_6_value)
+        val index7ValueView: TextView = header.findViewById(R.id.index_7_value)
 
         val index1ChangeView: TextView = header.findViewById(R.id.index_1_change)
         val index2ChangeView: TextView = header.findViewById(R.id.index_2_change)
@@ -143,6 +147,7 @@ class MainActivity : AppCompatActivity() {
         val index4ChangeView: TextView = header.findViewById(R.id.index_4_change)
         val index5ChangeView: TextView = header.findViewById(R.id.index_5_change)
         val index6ChangeView: TextView = header.findViewById(R.id.index_6_change)
+        val index7ChangeView: TextView = header.findViewById(R.id.index_7_change)
 
         val index1EmojiView: TextView = header.findViewById(R.id.index_1_emoji)
         val index2EmojiView: TextView = header.findViewById(R.id.index_2_emoji)
@@ -150,6 +155,7 @@ class MainActivity : AppCompatActivity() {
         val index4EmojiView: TextView = header.findViewById(R.id.index_4_emoji)
         val index5EmojiView: TextView = header.findViewById(R.id.index_5_emoji)
         val index6EmojiView: TextView = header.findViewById(R.id.index_6_emoji)
+        val index7EmojiView: TextView = header.findViewById(R.id.index_7_emoji)
 
         val accountView: LinearLayout = header.findViewById(R.id.account_view)
         accountView.setOnClickListener {
@@ -187,10 +193,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             fun updateInfo() {
-                val cash = portfolioTinkoffManager.getFreeCashEUR() + "\n" + portfolioTinkoffManager.getFreeCashRUB() + "\n" + portfolioTinkoffManager.getFreeCashUSD()
-                freeCashView.text = cash
+                val infoTinkoff = tinkoffPortfolioManager.getActiveBrokerAccountId() + "\n" + tinkoffPortfolioManager.getFreeCashRUB() + "\n" + tinkoffPortfolioManager.getFreeCashUSD()
+                tinkoffDataView.text = infoTinkoff
 
-                activeAccountView.text = portfolioTinkoffManager.getActiveBrokerAccountId()
+                val infoAlor = alorPortfolioManager.getFreeCashRUB() + "\n" + alorPortfolioManager.getFreeCashUSD()
+                alorDataView.text = infoAlor
 
                 val indices = stockManager.indices
 
@@ -200,6 +207,7 @@ class MainActivity : AppCompatActivity() {
                     processIndex(indices[2], index4NameView, index4ValueView, index4ChangeView, index4EmojiView)
                     processIndex(indices[3], index5NameView, index5ValueView, index5ChangeView, index5EmojiView)
                     processIndex(indices[4], index6NameView, index6ValueView, index6ChangeView, index6EmojiView, true)
+                    processIndex(indices[5], index7NameView, index7ValueView, index7ChangeView, index7EmojiView)
 
                     index1NameView.text = "SUPER"
                     val superChange = indices[0].change_per + indices[1].change_per + indices[2].change_per + indices[3].change_per

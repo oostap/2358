@@ -1,7 +1,6 @@
 <resources>
     <string name="new_app_name">oost.app</string>
     <string name="new_title_activity_main">oost.app</string>
-    <string name="nav_header_subtitle">Котлета:</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="service_2358_prepare">Продолжить</string>
@@ -14,7 +13,8 @@
     <string name="restart">Рестарт</string>
     <string name="title_hour_1">1 час</string>
     <string name="title_hour_2">2 часа</string>
-    <string name="active_account">Счёт: ✏️</string>
+    <string name="account_tinkoff">Котлета ТИ: ✏️</string>
+    <string name="account_alor">Котлета ALOR:️</string>
     <string name="accounts">Счета</string>
 
     <string name="sell_bid">продать в\nлучший бид</string>
