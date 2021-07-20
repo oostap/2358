@@ -24,7 +24,7 @@ import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
 class AccountsFragment : Fragment(R.layout.fragment_accounts) {
-    val portfolioManager: PortfolioManager by inject()
+    val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
 
     private var fragmentAccountsBinding: FragmentAccountsBinding? = null
 
@@ -58,10 +58,10 @@ class AccountsFragment : Fragment(R.layout.fragment_accounts) {
     private fun updateData() {
         job?.cancel()
         job = GlobalScope.launch(Dispatchers.Main) {
-            portfolioManager.refreshAccounts()
-            portfolioManager.refreshDeposit()
-            portfolioManager.refreshKotleta()
-            accounts = portfolioManager.accounts
+            portfolioTinkoffManager.refreshAccounts()
+            portfolioTinkoffManager.refreshDeposit()
+            portfolioTinkoffManager.refreshKotleta()
+            accounts = portfolioTinkoffManager.accounts
             adapterList.setData(accounts)
             updateTitle()
         }
@@ -89,13 +89,13 @@ class AccountsFragment : Fragment(R.layout.fragment_accounts) {
                 val account = values[index]
                 with(binding) {
                     chooseView.setOnCheckedChangeListener(null)
-                    chooseView.isChecked = portfolioManager.getActiveBrokerAccountId() == account.brokerAccountId
+                    chooseView.isChecked = portfolioTinkoffManager.getActiveBrokerAccountId() == account.brokerAccountId
 
                     nameView.text = account.brokerAccountId
                     typeView.text = account.brokerAccountType
 
                     chooseView.setOnCheckedChangeListener { _, checked ->
-                        portfolioManager.setActiveBrokerAccountId(account.brokerAccountId)
+                        portfolioTinkoffManager.setActiveBrokerAccountId(account.brokerAccountId)
                         updateData()
                     }
 

@@ -16,7 +16,7 @@ import com.icechao.klinelib.utils.SlidListener
 import com.icechao.klinelib.utils.Status
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.ChartManager
-import com.project.ti2358.data.manager.PortfolioManager
+import com.project.ti2358.data.manager.PortfolioTinkoffManager
 import com.project.ti2358.data.manager.Stock
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.tinkoff.model.Candle
@@ -36,7 +36,7 @@ import java.util.*
 @KoinApiExtension
 class ChartFragment : Fragment(R.layout.fragment_chart) {
     private val chartManager: ChartManager by inject()
-    val portfolioManager: PortfolioManager by inject()
+    val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
     val stockManager: StockManager by inject()
 
     private var fragmentChartBinding: FragmentChartBinding? = null

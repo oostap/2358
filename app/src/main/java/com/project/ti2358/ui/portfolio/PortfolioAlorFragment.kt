@@ -1,6 +1,5 @@
 package com.project.ti2358.ui.portfolio
 
-import android.content.pm.PackageInfo
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,10 +11,8 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.TheApplication
-import com.project.ti2358.data.alor.model.AlorPosition
+import com.project.ti2358.data.alor.model.PositionAlor
 import com.project.ti2358.data.manager.*
-import com.project.ti2358.data.daager.service.ThirdPartyService
 import com.project.ti2358.databinding.FragmentPortfolioAlorBinding
 import com.project.ti2358.databinding.FragmentPortfolioAlorItemBinding
 import com.project.ti2358.service.Utils
@@ -24,13 +21,12 @@ import com.project.ti2358.service.toPercent
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
-import java.lang.Exception
 import kotlin.math.sign
 
 @KoinApiExtension
 class PortfolioAlorFragment : Fragment(R.layout.fragment_portfolio_alor) {
     private val orderbookManager: OrderbookManager by inject()
-    private val alorPortfolioManager: AlorPortfolioManager by inject()
+    private val portfolioAlorManager: PortfolioAlorManager by inject()
 
     private var fragmentPortfolioAlorBinding: FragmentPortfolioAlorBinding? = null
 
@@ -70,9 +66,9 @@ class PortfolioAlorFragment : Fragment(R.layout.fragment_portfolio_alor) {
     fun updateData() {
         jobUpdate?.cancel()
         jobUpdate = GlobalScope.launch(Dispatchers.Main) {
-            alorPortfolioManager.refreshDeposit()
-            alorPortfolioManager.refreshKotleta()
-            adapterList.setData(alorPortfolioManager.getPositions())
+            portfolioAlorManager.refreshDeposit()
+            portfolioAlorManager.refreshKotleta()
+            adapterList.setData(portfolioAlorManager.getPositions())
             updateTitle()
         }
     }
@@ -81,13 +77,13 @@ class PortfolioAlorFragment : Fragment(R.layout.fragment_portfolio_alor) {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
 //            val percent = alorPortfolioManager.getPercentBusyInStocks()
-            val freeCash = alorPortfolioManager.getFreeCashUSD()
+            val freeCash = portfolioAlorManager.getFreeCashUSD()
             act.supportActionBar?.title = "Депозит ALOR - ±$freeCash"
         }
     }
 
-    inner class ItemPortfolioRecyclerViewAdapter(var values: List<AlorPosition>) : RecyclerView.Adapter<ItemPortfolioRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<AlorPosition>) {
+    inner class ItemPortfolioRecyclerViewAdapter(var values: List<PositionAlor>) : RecyclerView.Adapter<ItemPortfolioRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<PositionAlor>) {
             values = newValues
             notifyDataSetChanged()
         }

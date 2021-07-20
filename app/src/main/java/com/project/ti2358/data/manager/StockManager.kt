@@ -366,9 +366,9 @@ class StockManager : KoinComponent {
 //                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
-                        GlobalScope.launch {
+//                        GlobalScope.launch {
                             addCandle(it)
-                        }
+//                        }
                     },
                     onError = {
                         it.printStackTrace()
@@ -389,9 +389,9 @@ class StockManager : KoinComponent {
 //                .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {
-                    GlobalScope.launch {
+//                    GlobalScope.launch {
                         addCandle(it)
-                    }
+//                    }
                 },
                 onError = {
                     it.printStackTrace()
@@ -411,9 +411,9 @@ class StockManager : KoinComponent {
 //            .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {
-                    GlobalScope.launch {
+//                    GlobalScope.launch {
                         addCandle(it)
-                    }
+//                    }
                 },
                 onError = {
                     it.printStackTrace()
@@ -621,7 +621,7 @@ class StockManager : KoinComponent {
         stock?.processLentaUS(lentaPantini)
     }
 
-    private suspend fun addCandle(candle: Candle) = withContext(stockContext) {
+    private fun addCandle(candle: Candle) { //= withContext(stockContext) {
         val stock: Stock? = stocksStream.find { it.ticker == candle.figi || it.figi == candle.figi }
         stock?.let {
             it.processCandle(candle)

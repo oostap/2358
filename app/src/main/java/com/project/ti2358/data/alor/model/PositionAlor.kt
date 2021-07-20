@@ -28,7 +28,7 @@ import com.project.ti2358.data.manager.Stock
 //    "isCurrency": false
 //}
 
-data class AlorPosition(
+data class PositionAlor(
     val symbol: String,
     val brokerSymbol: String,
     val exchange: AlorExchange,

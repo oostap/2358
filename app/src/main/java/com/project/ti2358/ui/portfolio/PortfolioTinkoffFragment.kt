@@ -31,7 +31,7 @@ import kotlin.math.sign
 class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
     private val orderbookManager: OrderbookManager by inject()
     private val thirdPartyService: ThirdPartyService by inject()
-    private val portfolioManager: PortfolioManager by inject()
+    private val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
     private val positionManager: PositionManager by inject()
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTA: StrategyTA by inject()
@@ -105,9 +105,9 @@ class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
     fun updateData() {
         jobUpdate?.cancel()
         jobUpdate = GlobalScope.launch(Dispatchers.Main) {
-            portfolioManager.refreshDeposit()
-            portfolioManager.refreshKotleta()
-            adapterList.setData(portfolioManager.getPositions())
+            portfolioTinkoffManager.refreshDeposit()
+            portfolioTinkoffManager.refreshKotleta()
+            adapterList.setData(portfolioTinkoffManager.getPositions())
             updateTitle()
         }
     }
@@ -115,7 +115,7 @@ class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            val percent = portfolioManager.getPercentBusyInStocks()
+            val percent = portfolioTinkoffManager.getPercentBusyInStocks()
             act.supportActionBar?.title = "Депозит ТИ $percent%"
         }
     }

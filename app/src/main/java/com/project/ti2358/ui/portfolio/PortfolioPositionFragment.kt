@@ -31,7 +31,7 @@ import kotlin.math.sign
 @KoinApiExtension
 class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position) {
     private val brokerManager: BrokerManager by inject()
-    private val portfolioManager: PortfolioManager by inject()
+    private val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
     private val positionManager: PositionManager by inject()
     private val orderbookManager: OrderbookManager by inject()
     private val strategyTrailingStop: StrategyTrailingStop by inject()
@@ -39,7 +39,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
     private var fragmentPortfolioPositionBinding: FragmentPortfolioPositionBinding? = null
 
     private lateinit var stock: Stock
-    private lateinit var tinkoffPosition: TinkoffPosition
+    private lateinit var positionTinkoff: TinkoffPosition
     private lateinit var stockPurchase: StockPurchase
 
     private var jobOrderbook: Job? = null
@@ -56,12 +56,12 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
         val binding = FragmentPortfolioPositionBinding.bind(view)
         fragmentPortfolioPositionBinding = binding
 
-        tinkoffPosition = positionManager.activePosition!!
-        tinkoffPosition.stock?.let {
+        positionTinkoff = positionManager.activePositionTinkoff!!
+        positionTinkoff.stock?.let {
             stock = it
 
             stockPurchase = StockPurchase(it, BrokerType.TINKOFF).apply {
-                position = tinkoffPosition
+                position = positionTinkoff
                 lots = position?.getLots() ?: 0
                 percentProfitSellFrom = Utils.getPercentFromTo(stock.getPriceNow(), position?.getAveragePrice() ?: 0.0)
                 trailingStopTakeProfitPercentActivation = SettingsManager.getTrailingStopTakeProfitPercentActivation()
@@ -209,7 +209,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
                 // отменить все лимитки на продажу
                 GlobalScope.launch(Dispatchers.Main) {
 
-                    val orders = portfolioManager.getOrderAllForStock(stock, OperationType.SELL)
+                    val orders = portfolioTinkoffManager.getOrderAllForStock(stock, OperationType.SELL)
                     orders.forEach {
                         brokerManager.cancelOrderTinkoff(it)
                     }
@@ -288,18 +288,18 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
         jobOrderbook?.cancel()
         jobOrderbook = GlobalScope.launch(Dispatchers.Main) {
             try {
-                portfolioManager.refreshDeposit()
+                portfolioTinkoffManager.refreshDeposit()
 
-                val pos = portfolioManager.getPositionForStock(stock)
+                val pos = portfolioTinkoffManager.getPositionForStock(stock)
                 if (pos == null) view?.findNavController()?.navigateUp()
 
-                tinkoffPosition = pos!!
+                positionTinkoff = pos!!
 
                 val orderbook = positionManager.loadOrderbook()
                 orderbook?.let {
                     val priceAsk = it.getBestPriceFromAsk(0)
                     val priceBid = it.getBestPriceFromBid(0)
-                    val pricePosition = tinkoffPosition.getAveragePrice()
+                    val pricePosition = positionTinkoff.getAveragePrice()
 
                     val percentBid = Utils.getPercentFromTo(priceBid, pricePosition)
                     val percentAsk = Utils.getPercentFromTo(priceAsk, pricePosition)
@@ -339,7 +339,7 @@ class PortfolioPositionFragment : Fragment(R.layout.fragment_portfolio_position)
 
     private fun updatePosition() {
         fragmentPortfolioPositionBinding?.apply {
-            tinkoffPosition.let {
+            positionTinkoff.let {
                 tickerView.text = "${it.stock?.getTickerLove()}"
 
                 lotsBlockedView.text = if (it.blocked.toInt() > 0) "(${it.blocked.toInt()}🔒)" else ""

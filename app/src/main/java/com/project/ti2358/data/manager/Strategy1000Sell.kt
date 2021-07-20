@@ -20,7 +20,7 @@ import kotlin.math.abs
 
 @KoinApiExtension
 class Strategy1000Sell() : KoinComponent {
-    private val portfolioManager: PortfolioManager by inject()
+    private val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
     private val stockManager: StockManager by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
@@ -49,7 +49,7 @@ class Strategy1000Sell() : KoinComponent {
         stocks.sortBy { it.changePrice2300DayPercent }
 
         // удалить все бумаги, по которым нет шорта в ТИ
-        stocks.removeAll { it.short == null && portfolioManager.getPositions().find { p -> p.ticker == it.ticker } == null }
+        stocks.removeAll { it.short == null && portfolioTinkoffManager.getPositions().find { p -> p.ticker == it.ticker } == null }
 
         loadSelectedStocks(numberSet)
     }
@@ -94,7 +94,7 @@ class Strategy1000Sell() : KoinComponent {
         currentSort = if (currentSort == Sorting.DESCENDING) Sorting.ASCENDING else Sorting.DESCENDING
         stocks.sortBy { stock ->
             val sign = if (currentSort == Sorting.ASCENDING) 1 else -1
-            val position = portfolioManager.getPositions().find { it.ticker == stock.ticker }
+            val position = portfolioTinkoffManager.getPositions().find { it.ticker == stock.ticker }
             val multiplier1 = if (position != null) (abs(position.getLots() * position.getAveragePrice())).toInt() else 1
             val multiplier3 = if (presetStocksSelected.find { it.ticker == stock.ticker } != null) 1000 else 1
             stock.changePrice2300DayPercent * sign - multiplier1 - multiplier3
@@ -129,7 +129,7 @@ class Strategy1000Sell() : KoinComponent {
                         percentLimitPriceChange = preset.percent
                         lots = preset.lots
                         profitPercent = preset.profit
-                        position = portfolioManager.getPositionForStock(it)
+                        position = portfolioTinkoffManager.getPositionForStock(it)
                     }
                     purchases.add(purchase)
                 }

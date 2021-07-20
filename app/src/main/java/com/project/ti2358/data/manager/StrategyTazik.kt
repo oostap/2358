@@ -22,8 +22,8 @@ import kotlin.math.roundToInt
 @KoinApiExtension
 class StrategyTazik : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val portfolioManager: PortfolioManager by inject()
-    private val alorPortfolioManager: AlorPortfolioManager by inject()
+    private val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
+    private val portfolioAlorManager: PortfolioAlorManager by inject()
 
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTelegram: StrategyTelegram by inject()
@@ -196,8 +196,8 @@ class StrategyTazik : KoinComponent {
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         if (SettingsManager.getTazikExcludeDepo()) {
-            stocksToPurchase.removeAll { p -> portfolioManager.portfolioPositions.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
-            stocksToPurchase.removeAll { p -> alorPortfolioManager.portfolioPositions.any { it.symbol == p.ticker && p.broker == BrokerType.ALOR } }
+            stocksToPurchase.removeAll { p -> portfolioTinkoffManager.portfolioPositionTinkoffs.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
+            stocksToPurchase.removeAll { p -> portfolioAlorManager.portfolioPositionAlors.any { it.symbol == p.ticker && p.broker == BrokerType.ALOR } }
         }
 
         // удалить все бумаги из чёрного списка
@@ -510,7 +510,7 @@ class StrategyTazik : KoinComponent {
         if (countBroker >= SettingsManager.getTazikPurchaseParts()) return false
 
         // проверить, если бумага в депо и усреднение отключено, то запретить тарить
-        if (portfolioManager.portfolioPositions.find { it.ticker == purchase.ticker } != null && !SettingsManager.getTazikAllowAveraging()) {
+        if (portfolioTinkoffManager.portfolioPositionTinkoffs.find { it.ticker == purchase.ticker } != null && !SettingsManager.getTazikAllowAveraging()) {
             return false
         }
 

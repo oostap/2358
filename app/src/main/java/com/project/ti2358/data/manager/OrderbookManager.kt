@@ -17,8 +17,8 @@ import kotlin.math.max
 @KoinApiExtension
 class OrderbookManager() : KoinComponent {
     private val stockManager: StockManager by inject()
-    private val portfolioManager: PortfolioManager by inject()          // убрать упоминания портфеле из всех файлов, кроме депозита
-    private val alorPortfolioManager: AlorPortfolioManager by inject()
+    private val portfolioTinkoffManager: PortfolioTinkoffManager by inject()          // убрать упоминания портфеле из всех файлов, кроме депозита
+    private val portfolioAlorManager: PortfolioAlorManager by inject()
     private val brokerManager: BrokerManager by inject()
 
     var activeStock: Stock? = null

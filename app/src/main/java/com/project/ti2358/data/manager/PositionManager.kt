@@ -12,15 +12,15 @@ import org.koin.core.component.inject
 class PositionManager() : KoinComponent {
     private val marketService: MarketService by inject()
 
-    var activePosition: TinkoffPosition? = null
+    var activePositionTinkoff: TinkoffPosition? = null
     var orderbook: MutableList<OrderbookLine> = mutableListOf()
 
-    fun start(position: TinkoffPosition) {
-        activePosition = position
+    fun start(positionTinkoff: TinkoffPosition) {
+        activePositionTinkoff = positionTinkoff
     }
 
     suspend fun loadOrderbook(): Orderbook? {
-        activePosition?.let {
+        activePositionTinkoff?.let {
             return marketService.orderbook(it.figi, 10)
         }
         return null

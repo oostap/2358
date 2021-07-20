@@ -19,7 +19,7 @@ import java.util.Collections.synchronizedMap
 import kotlin.math.abs
 
 @KoinApiExtension
-class AlorPortfolioManager : KoinComponent {
+class PortfolioAlorManager : KoinComponent {
     private val stockManager: StockManager by inject()
     private val alorAuthManager: AlorAuthManager by inject()
 
@@ -34,7 +34,7 @@ class AlorPortfolioManager : KoinComponent {
     var orders: MutableList<AlorOrder> = mutableListOf()
     private var stopOrders: MutableList<AlorOrder> = mutableListOf()
 
-    var portfolioPositions: MutableList<AlorPosition> = mutableListOf()
+    var portfolioPositionAlors: MutableList<PositionAlor> = mutableListOf()
 
     private var money: AlorMoney? = null
     private var summary: AlorSummary? = null
@@ -89,7 +89,7 @@ class AlorPortfolioManager : KoinComponent {
                         1000 * 5 // 1s
                     }
                     else -> {
-                        1000 * 20 // 20s
+                        1000 * 30 // 20s
                     }
                 }
 
@@ -145,9 +145,9 @@ class AlorPortfolioManager : KoinComponent {
     suspend fun refreshDeposit(): Boolean {
         try {
             if (mainServer != null) {
-                portfolioPositions = synchronizedList(alorPortfolioService.positions(AlorExchange.SPBX, mainServer!!.portfolio))
+                portfolioPositionAlors = synchronizedList(alorPortfolioService.positions(AlorExchange.SPBX, mainServer!!.portfolio))
                 baseSortPortfolio()
-                log("ALOR positions = $portfolioPositions")
+                log("ALOR positions = $portfolioPositionAlors")
             } else {
                 start()
             }
@@ -174,15 +174,15 @@ class AlorPortfolioManager : KoinComponent {
     }
 
     private suspend fun baseSortPortfolio() = withContext(StockManager.stockContext) {
-        portfolioPositions.forEach { it.stock = stockManager.getStockByTicker(it.symbol) }
+        portfolioPositionAlors.forEach { it.stock = stockManager.getStockByTicker(it.symbol) }
 
-        portfolioPositions.sortByDescending {
+        portfolioPositionAlors.sortByDescending {
             val multiplier = if (it.stock?.instrument?.currency == Currency.USD) 1.0 else 1.0 / Utils.getUSDRUB()
             abs(it.getLots() * it.avgPrice * multiplier)
         }
 
         // удалить позицию $
-        portfolioPositions.removeAll { "USD" in it.symbol }
+        portfolioPositionAlors.removeAll { "USD" in it.symbol }
     }
 
     private fun baseSortOrders() {
@@ -195,8 +195,8 @@ class AlorPortfolioManager : KoinComponent {
         }
     }
 
-    fun getPositions() : List<AlorPosition> {
-        return portfolioPositions
+    fun getPositions() : List<PositionAlor> {
+        return portfolioPositionAlors
     }
 
     fun getFreeCashEUR(): String {
@@ -252,7 +252,7 @@ class AlorPortfolioManager : KoinComponent {
         val free = getFreeCash()
         var busy = 0.0
 
-        for (position in portfolioPositions) {
+        for (position in portfolioPositionAlors) {
             if (position.isCurrency) {
                 busy += abs(position.avgPrice * position.getLots())
             }
@@ -265,8 +265,8 @@ class AlorPortfolioManager : KoinComponent {
         return (busy / (free + busy) * 100).toInt()
     }
 
-    public fun getPositionForStock(stock: Stock): AlorPosition? {
-        return portfolioPositions.find { it.symbol == stock.ticker }
+    public fun getPositionForStock(stock: Stock): PositionAlor? {
+        return portfolioPositionAlors.find { it.symbol == stock.ticker }
     }
 
     public fun getOrderAllForStock(stock: Stock, operation: OperationType): List<AlorOrder> {

@@ -25,7 +25,6 @@ import com.project.ti2358.data.common.BasePosition
 import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.tinkoff.model.OperationType
-import com.project.ti2358.data.tinkoff.model.TinkoffPosition
 import com.project.ti2358.data.pantini.model.PantiniPrint
 import com.project.ti2358.databinding.FragmentOrderbookBinding
 import com.project.ti2358.databinding.FragmentOrderbookItemBinding
@@ -48,8 +47,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
     val orderbookManager: OrderbookManager by inject()
     val brokerManager: BrokerManager by inject()
 
-    val portfolioManager: PortfolioManager by inject()
-    val alorPortfolioManager: AlorPortfolioManager by inject()
+    val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
+    val portfolioAlorManager: PortfolioAlorManager by inject()
 
     private var fragmentOrderbookBinding: FragmentOrderbookBinding? = null
 
@@ -249,7 +248,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 brokerType = BrokerType.TINKOFF
                 updateBroker()
                 activeStock?.let {
-                    portfolioManager.getPositionForStock(it)?.let { p ->
+                    portfolioTinkoffManager.getPositionForStock(it)?.let { p ->
                         volumeEditText.setText(abs(p.getLots() - p.blocked).toInt().toString())
                     }
                 }
@@ -259,7 +258,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 brokerType = BrokerType.ALOR
                 updateBroker()
                 activeStock?.let {
-                    alorPortfolioManager.getPositionForStock(it)?.let { p ->
+                    portfolioAlorManager.getPositionForStock(it)?.let { p ->
                         volumeEditText.setText(abs(p.getLots() - p.getBlocked()).toInt().toString())
                     }
                 }
@@ -337,8 +336,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
         fragmentOrderbookBinding?.apply {
             activeStock?.let { stock ->
                 when {
-                    portfolioManager.getPositionForStock(stock) != null -> brokerType = BrokerType.TINKOFF
-                    alorPortfolioManager.getPositionForStock(stock) != null -> brokerType = BrokerType.ALOR
+                    portfolioTinkoffManager.getPositionForStock(stock) != null -> brokerType = BrokerType.TINKOFF
+                    portfolioAlorManager.getPositionForStock(stock) != null -> brokerType = BrokerType.ALOR
                     SettingsManager.getBrokerTinkoff() -> brokerType = if (brokerType == BrokerType.NONE) BrokerType.TINKOFF else brokerType
                     SettingsManager.getBrokerAlor() -> brokerType = if (brokerType == BrokerType.NONE) BrokerType.ALOR else brokerType
                 }
@@ -353,7 +352,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             fragmentOrderbookBinding?.apply {
                 activeStock?.let { stock ->
                     positionView.visibility = GONE
-                    portfolioManager.getPositionForStock(stock)?.let { p ->
+                    portfolioTinkoffManager.getPositionForStock(stock)?.let { p ->
                         val avg = p.getAveragePrice()
                         priceView.text = "${avg.toMoney(stock)} ➡ ${stock.getPriceString()}"
 
@@ -384,7 +383,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
             fragmentOrderbookBinding?.apply {
                 activeStock?.let { stock ->
                     alorPositionView.visibility = GONE
-                    alorPortfolioManager.getPositionForStock(stock)?.let { p ->
+                    portfolioAlorManager.getPositionForStock(stock)?.let { p ->
                         val avg = p.avgPrice
                         alorPriceView.text = "${avg.toMoney(stock)} ➡ ${stock.getPriceString()}"
 
@@ -534,7 +533,6 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
     inner class ChoiceDragListener : OnDragListener {
         override fun onDrag(v: View, event: DragEvent): Boolean {
-            log("onDrag")
             when (event.action) {
                 DragEvent.ACTION_DRAG_STARTED -> {
                 }

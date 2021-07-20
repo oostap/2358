@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.BrokerManager
 import com.project.ti2358.data.manager.ChartManager
-import com.project.ti2358.data.manager.PortfolioManager
+import com.project.ti2358.data.manager.PortfolioTinkoffManager
 import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.tinkoff.model.TinkoffOrder
 import com.project.ti2358.databinding.FragmentOrdersTinkoffBinding
@@ -30,7 +30,7 @@ class OrdersTinkoffFragment : Fragment(R.layout.fragment_orders_tinkoff) {
     private val brokerManager: BrokerManager by inject()
     private val chartManager: ChartManager by inject()
 
-    val portfolioManager: PortfolioManager by inject()
+    val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
 
     private var fragmentOrdersTinkoffBinding: FragmentOrdersTinkoffBinding? = null
 
@@ -62,7 +62,7 @@ class OrdersTinkoffFragment : Fragment(R.layout.fragment_orders_tinkoff) {
             updateButton.setOnClickListener {
                 jobRefresh?.cancel()
                 jobRefresh = GlobalScope.launch(Dispatchers.Main) {
-                    portfolioManager.refreshOrders()
+                    portfolioTinkoffManager.refreshOrders()
                     updateData()
                 }
             }
@@ -79,7 +79,7 @@ class OrdersTinkoffFragment : Fragment(R.layout.fragment_orders_tinkoff) {
         jobRefreshEndless?.cancel()
         jobRefreshEndless = GlobalScope.launch(Dispatchers.Main) {
             while (true) {
-                if (portfolioManager.refreshOrders()) {
+                if (portfolioTinkoffManager.refreshOrders()) {
                     updateData()
                     break
                 }
@@ -89,14 +89,14 @@ class OrdersTinkoffFragment : Fragment(R.layout.fragment_orders_tinkoff) {
     }
 
     fun updateData() {
-        adapterList.setData(portfolioManager.orders)
+        adapterList.setData(portfolioTinkoffManager.orders)
         updateTitle()
     }
 
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            act.supportActionBar?.title = "Заявки ТИ ${portfolioManager.orders.size}"
+            act.supportActionBar?.title = "Заявки ТИ ${portfolioTinkoffManager.orders.size}"
         }
     }
 

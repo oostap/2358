@@ -20,7 +20,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
-import com.project.ti2358.data.manager.PortfolioManager
+import com.project.ti2358.data.manager.PortfolioTinkoffManager
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.WorkflowManager
 import com.project.ti2358.data.daager.model.Index
@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     val stockManager: StockManager by inject()
-    val portfolioManager: PortfolioManager by inject()
+    val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
     val workflowManager: WorkflowManager by inject()
 
     var job: Job? = null
@@ -187,10 +187,10 @@ class MainActivity : AppCompatActivity() {
             }
 
             fun updateInfo() {
-                val cash = portfolioManager.getFreeCashEUR() + "\n" + portfolioManager.getFreeCashRUB() + "\n" + portfolioManager.getFreeCashUSD()
+                val cash = portfolioTinkoffManager.getFreeCashEUR() + "\n" + portfolioTinkoffManager.getFreeCashRUB() + "\n" + portfolioTinkoffManager.getFreeCashUSD()
                 freeCashView.text = cash
 
-                activeAccountView.text = portfolioManager.getActiveBrokerAccountId()
+                activeAccountView.text = portfolioTinkoffManager.getActiveBrokerAccountId()
 
                 val indices = stockManager.indices
 

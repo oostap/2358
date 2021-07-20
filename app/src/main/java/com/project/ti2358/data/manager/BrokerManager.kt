@@ -10,12 +10,10 @@ import com.project.ti2358.data.common.OrderInfo
 import com.project.ti2358.data.tinkoff.model.OperationType
 import com.project.ti2358.data.tinkoff.model.OrderStatus
 import com.project.ti2358.data.tinkoff.model.TinkoffOrder
-import com.project.ti2358.data.tinkoff.model.TinkoffPosition
 import com.project.ti2358.data.tinkoff.service.OrdersService
 import com.project.ti2358.service.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -24,8 +22,8 @@ import java.lang.Exception
 
 @KoinApiExtension
 class BrokerManager() : KoinComponent {
-    private val portfolioManager: PortfolioManager by inject()
-    private val alorPortfolioManager: AlorPortfolioManager by inject()
+    private val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
+    private val portfolioAlorManager: PortfolioAlorManager by inject()
     private val ordersService: OrdersService by inject()
     private val alorOrdersService: AlorOrdersService by inject()
 
@@ -33,12 +31,12 @@ class BrokerManager() : KoinComponent {
     suspend fun placeOrder(stock: Stock, price: Double, lots: Int, operationType: OperationType, brokerType: BrokerType, refresh: Boolean) {
         if (brokerType == BrokerType.TINKOFF) {
             placeOrderTinkoff(stock, price, lots, operationType)
-            if (refresh) portfolioManager.refreshOrders()
+            if (refresh) portfolioTinkoffManager.refreshOrders()
         }
 
         if (brokerType == BrokerType.ALOR) {
             placeOrderAlor(stock, price, lots, operationType)
-            if (refresh) alorPortfolioManager.refreshOrders()
+            if (refresh) portfolioAlorManager.refreshOrders()
         }
     }
 
@@ -68,7 +66,7 @@ class BrokerManager() : KoinComponent {
                 stock.figi,
                 price,
                 operationType,
-                portfolioManager.getActiveBrokerAccountId()
+                portfolioTinkoffManager.getActiveBrokerAccountId()
             )
             Utils.showToastAlert("ТИ ${stock.ticker} новый ордер: $operation")
         } catch (e: Exception) {
@@ -107,13 +105,13 @@ class BrokerManager() : KoinComponent {
         if (order is TinkoffOrder) {
             cancelOrderTinkoff(order)
 
-            if (refresh) portfolioManager.refreshOrders()
+            if (refresh) portfolioTinkoffManager.refreshOrders()
         }
 
         if (order is AlorOrder) {
             cancelOrderAlor(order)
 
-            if (refresh) alorPortfolioManager.refreshOrders()
+            if (refresh) portfolioAlorManager.refreshOrders()
         }
     }
 
@@ -134,7 +132,7 @@ class BrokerManager() : KoinComponent {
     suspend fun cancelOrderTinkoff(order: TinkoffOrder) {
         val operation = if (order.operation == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
         try {
-            ordersService.cancel(order.orderId, portfolioManager.getActiveBrokerAccountId())
+            ordersService.cancel(order.orderId, portfolioTinkoffManager.getActiveBrokerAccountId())
             Utils.showToastAlert("ТИ ${order.stock?.ticker} ордер отменён: $operation")
         } catch (e: Exception) { // возможно уже отменена
             Utils.showToastAlert("ТИ ${order.stock?.ticker} ордер УЖЕ отменён: $operation")
@@ -150,7 +148,7 @@ class BrokerManager() : KoinComponent {
     suspend fun cancelOrderTinkoffForId(orderId: String, stock: Stock, operationType: OperationType) {
         val operation = if (operationType == OperationType.BUY) "ПОКУПКА!" else "ПРОДАЖА!"
         try {
-            ordersService.cancel(orderId, portfolioManager.getActiveBrokerAccountId())
+            ordersService.cancel(orderId, portfolioTinkoffManager.getActiveBrokerAccountId())
             Utils.showToastAlert("ТИ ${stock.ticker} ордер отменён: $operation")
         } catch (e: Exception) { // возможно уже отменена
             Utils.showToastAlert("ТИ ${stock.ticker} ордер УЖЕ отменён: $operation")
@@ -170,26 +168,26 @@ class BrokerManager() : KoinComponent {
 
     /******************** cancel all orders *************************/
     suspend fun cancelAllOrdersTinkoff() {
-        for (order in portfolioManager.orders) {
+        for (order in portfolioTinkoffManager.orders) {
             try {
                 cancelOrderTinkoff(order)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
-        portfolioManager.refreshOrders()
+        portfolioTinkoffManager.refreshOrders()
     }
 
     suspend fun cancelAllOrdersAlor() {
         GlobalScope.launch(Dispatchers.Main) {
-            for (order in alorPortfolioManager.orders) {
+            for (order in portfolioAlorManager.orders) {
                 try {
                     cancelOrderAlor(order)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
-            alorPortfolioManager.refreshOrders()
+            portfolioAlorManager.refreshOrders()
         }
     }
 
@@ -197,12 +195,12 @@ class BrokerManager() : KoinComponent {
     suspend fun replaceOrder(from: BaseOrder, price: Double, refresh: Boolean = false) {
         if (from is TinkoffOrder) {
             replaceOrderTinkoff(from, price, from.getOrderOperation())
-            if (refresh) portfolioManager.refreshOrders()
+            if (refresh) portfolioTinkoffManager.refreshOrders()
         }
 
         if (from is AlorOrder) {
             replaceOrderAlor(from, price, from.getOrderOperation())
-            if (refresh) alorPortfolioManager.refreshOrders()
+            if (refresh) portfolioAlorManager.refreshOrders()
         }
     }
 
@@ -227,11 +225,11 @@ class BrokerManager() : KoinComponent {
         var order: BaseOrder? = null
 
         if (SettingsManager.getBrokerTinkoff()) {
-            order = portfolioManager.getOrderForId(orderId, operationType)
+            order = portfolioTinkoffManager.getOrderForId(orderId, operationType)
         }
 
         if (SettingsManager.getBrokerAlor()) {
-            order = alorPortfolioManager.getOrderForId(orderId, operationType)
+            order = portfolioAlorManager.getOrderForId(orderId, operationType)
         }
 
         return order
@@ -239,11 +237,11 @@ class BrokerManager() : KoinComponent {
 
     public fun getOrdersAllForStock(stock: Stock, operation: OperationType, brokerType: BrokerType): List<BaseOrder> {
         if (brokerType == BrokerType.TINKOFF) {
-            return portfolioManager.getOrderAllForStock(stock, operation)
+            return portfolioTinkoffManager.getOrderAllForStock(stock, operation)
         }
 
         if (brokerType == BrokerType.ALOR) {
-            return alorPortfolioManager.getOrderAllForStock(stock, operation)
+            return portfolioAlorManager.getOrderAllForStock(stock, operation)
         }
 
         return emptyList()
@@ -253,12 +251,12 @@ class BrokerManager() : KoinComponent {
         val orders = mutableListOf<BaseOrder>()
 
         if (SettingsManager.getBrokerTinkoff()) {
-            val tinkoff = portfolioManager.getOrderAllForStock(stock, operation)
+            val tinkoff = portfolioTinkoffManager.getOrderAllForStock(stock, operation)
             orders.addAll(tinkoff)
         }
 
         if (SettingsManager.getBrokerAlor()) {
-            val alor = alorPortfolioManager.getOrderAllForStock(stock, operation)
+            val alor = portfolioAlorManager.getOrderAllForStock(stock, operation)
             orders.addAll(alor)
         }
 
@@ -269,12 +267,12 @@ class BrokerManager() : KoinComponent {
         val orders = mutableListOf<BaseOrder>()
 
         if (SettingsManager.getBrokerTinkoff()) {
-            val tinkoff = portfolioManager.orders
+            val tinkoff = portfolioTinkoffManager.orders
             orders.addAll(tinkoff)
         }
 
         if (SettingsManager.getBrokerAlor()) {
-            val alor = alorPortfolioManager.orders
+            val alor = portfolioAlorManager.orders
             orders.addAll(alor)
         }
 
@@ -283,41 +281,41 @@ class BrokerManager() : KoinComponent {
 
     suspend fun refreshDeposit(brokerType: BrokerType) {
         if (brokerType == BrokerType.TINKOFF) {
-            portfolioManager.refreshDeposit()
+            portfolioTinkoffManager.refreshDeposit()
         }
 
         if (brokerType == BrokerType.ALOR) {
-            alorPortfolioManager.refreshDeposit()
+            portfolioAlorManager.refreshDeposit()
         }
     }
 
     suspend fun refreshDeposit() {
         if (SettingsManager.getBrokerTinkoff()) {
-            portfolioManager.refreshDeposit()
+            portfolioTinkoffManager.refreshDeposit()
         }
 
         if (SettingsManager.getBrokerAlor()) {
-            alorPortfolioManager.refreshDeposit()
+            portfolioAlorManager.refreshDeposit()
         }
     }
 
     suspend fun refreshOrders(brokerType: BrokerType) {
         if (brokerType == BrokerType.TINKOFF) {
-            portfolioManager.refreshOrders()
+            portfolioTinkoffManager.refreshOrders()
         }
 
         if (brokerType == BrokerType.ALOR) {
-            alorPortfolioManager.refreshOrders()
+            portfolioAlorManager.refreshOrders()
         }
     }
 
     suspend fun refreshOrders() {
         if (SettingsManager.getBrokerTinkoff()) {
-            portfolioManager.refreshOrders()
+            portfolioTinkoffManager.refreshOrders()
         }
 
         if (SettingsManager.getBrokerAlor()) {
-            alorPortfolioManager.refreshOrders()
+            portfolioAlorManager.refreshOrders()
         }
     }
 
@@ -326,12 +324,12 @@ class BrokerManager() : KoinComponent {
         val orders = mutableListOf<BasePosition>()
 
         if (SettingsManager.getBrokerTinkoff()) {
-            val tinkoff = portfolioManager.portfolioPositions
+            val tinkoff = portfolioTinkoffManager.portfolioPositionTinkoffs
             orders.addAll(tinkoff)
         }
 
         if (SettingsManager.getBrokerAlor()) {
-            val alor = alorPortfolioManager.portfolioPositions
+            val alor = portfolioAlorManager.portfolioPositionAlors
             orders.addAll(alor)
         }
 
@@ -340,11 +338,11 @@ class BrokerManager() : KoinComponent {
 
     public fun getPositionForStock(stock: Stock, brokerType: BrokerType): BasePosition? {
         if (brokerType == BrokerType.TINKOFF) {
-            return portfolioManager.getPositionForStock(stock)
+            return portfolioTinkoffManager.getPositionForStock(stock)
         }
 
         if (brokerType == BrokerType.ALOR) {
-            return alorPortfolioManager.getPositionForStock(stock)
+            return portfolioAlorManager.getPositionForStock(stock)
         }
 
         return null

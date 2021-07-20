@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.PortfolioManager
+import com.project.ti2358.data.manager.PortfolioTinkoffManager
 import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.alor.service.StreamingAlorService
 import com.project.ti2358.data.pantini.service.StreamingPantiniService
@@ -16,7 +16,7 @@ import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
 class DiagnosticsFragment : Fragment(R.layout.fragment_diagnostics) {
-    val portfolioManager: PortfolioManager by inject()
+    val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
     val stockManager: StockManager by inject()
     val streamingTinkoffService: StreamingTinkoffService by inject()
     val streamingAlorService: StreamingAlorService by inject()
@@ -42,7 +42,7 @@ class DiagnosticsFragment : Fragment(R.layout.fragment_diagnostics) {
 
     @SuppressLint("SetTextI18n")
     fun updateData() {
-        val tinkoffREST = if (portfolioManager.accounts.isNotEmpty()) "ОК" else "НЕ ОК 😱"
+        val tinkoffREST = if (portfolioTinkoffManager.accounts.isNotEmpty()) "ОК" else "НЕ ОК 😱"
         val tinkoffConnectedStatus = if (streamingTinkoffService.connectedStatus) "ОК" else "НЕ ОК 😱"
         val tinkoffMessagesStatus = if (streamingTinkoffService.messagesStatus) "ОК" else "НЕ ОК 😱"
         val alorConnectedStatus = if (streamingAlorService.connectedStatus) "ОК" else "НЕ ОК 😱"

@@ -16,6 +16,7 @@ import com.google.gson.JsonObject
 import com.project.ti2358.data.alor.model.AlorOrder
 import com.project.ti2358.data.common.BaseOrder
 import com.project.ti2358.data.common.BasePosition
+import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.tinkoff.model.TinkoffOrder
 import com.project.ti2358.data.pantini.model.PantiniLenta
 import com.project.ti2358.data.tinkoff.service.OperationsService
@@ -37,8 +38,8 @@ class StrategyTelegram : KoinComponent {
     private val brokerManager: BrokerManager by inject()
     private val operationsService: OperationsService by inject()
 
-    private val portfolioManager: PortfolioManager by inject()
-    private val alorPortfolioManager: AlorPortfolioManager by inject()
+    private val portfolioTinkoffManager: PortfolioTinkoffManager by inject()
+    private val portfolioAlorManager: PortfolioAlorManager by inject()
 
     private val strategyTelegramCommands: StrategyTelegramCommands by inject()
     private val thirdPartyService: ThirdPartyService by inject()
@@ -69,7 +70,7 @@ class StrategyTelegram : KoinComponent {
                     toDate.add(Calendar.HOUR_OF_DAY, -6)
                     val from = convertDateToTinkoffDate(toDate, zone)
 
-                    operations = Collections.synchronizedList(operationsService.operations(from, to, portfolioManager.getActiveBrokerAccountId()).operations)
+                    operations = Collections.synchronizedList(operationsService.operations(from, to, portfolioTinkoffManager.getActiveBrokerAccountId()).operations)
                     operations.sortBy { it.date }
                     if (operationsPosted.isEmpty()) {
                         operations.forEach {
@@ -79,7 +80,7 @@ class StrategyTelegram : KoinComponent {
                         operationsPosted.add("empty")
                     }
 
-                    portfolioManager.refreshDeposit()
+                    portfolioTinkoffManager.refreshDeposit()
 
                     for (operation in operations) {
                         if (operation.id !in operationsPosted) {
@@ -274,13 +275,13 @@ class StrategyTelegram : KoinComponent {
         var position: BasePosition? = null
         if (order is TinkoffOrder) {
             val stock = stockManager.getStockByFigi(order.figi) ?: return ""
-            position = portfolioManager.getPositionForStock(stock)
+            position = portfolioTinkoffManager.getPositionForStock(stock)
             order.stock = stock
         }
 
         if (order is AlorOrder) {
             val stock = stockManager.getStockByTicker(order.symbol) ?: return ""
-            position = alorPortfolioManager.getPositionForStock(stock)
+            position = portfolioAlorManager.getPositionForStock(stock)
             order.stock = stock
         }
 
@@ -351,7 +352,7 @@ class StrategyTelegram : KoinComponent {
         val ticker = operation.stock?.ticker
         val operationSymbol = if (operation.operationType == OperationType.BUY) "🟢" else "🔴"
         var operationString = if (operation.operationType == OperationType.BUY) "BUY " else "SELL "
-        val position = portfolioManager.getPositionForStock(operation.stock!!)
+        val position = portfolioTinkoffManager.getPositionForStock(operation.stock!!)
         if (position == null && operation.operationType == OperationType.BUY) {
             operationString += "SHORT выход"
         }
@@ -653,8 +654,11 @@ class StrategyTelegram : KoinComponent {
 
     fun sendTazikBuy(purchase: StockPurchase, buyPrice: Double, sellPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
-            val text = "🛁 $%s B%.2f$ -> S%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
+            val marker = if (purchase.broker == BrokerType.TINKOFF) "🟡" else "🔵"
+
+            val text = "🛁%s $%s B%.2f$ -> S%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
                 locale = Locale.US,
+                marker,
                 purchase.ticker,
                 buyPrice,
                 sellPrice,
@@ -671,8 +675,11 @@ class StrategyTelegram : KoinComponent {
 
     fun sendZontikSell(purchase: StockPurchase, sellPrice: Double, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
-            val text = "☂️ $%s S%.2f$ -> B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
+            val marker = if (purchase.broker == BrokerType.TINKOFF) "🟡" else "🔵"
+
+            val text = "☂️%s $%s S%.2f$ -> B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
                 locale = Locale.US,
+                marker,
                 purchase.ticker,
                 sellPrice,
                 buyPrice,
@@ -689,8 +696,11 @@ class StrategyTelegram : KoinComponent {
 
     fun sendTazikSpike(purchase: StockPurchase, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendSpikes()) {
-            val text = "спайк! 🛁 $%s B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
+            val marker = if (purchase.broker == BrokerType.TINKOFF) "🟡" else "🔵"
+
+            val text = "спайк! 🛁%s $%s B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
                 locale = Locale.US,
+                marker,
                 purchase.ticker,
                 buyPrice,
                 priceFrom,
@@ -706,8 +716,11 @@ class StrategyTelegram : KoinComponent {
 
     fun sendZontikSpike(purchase: StockPurchase, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
         if (started && SettingsManager.getTelegramSendSpikes()) {
-            val text = "спайк! ☂️ $%s B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
+            val marker = if (purchase.broker == BrokerType.TINKOFF) "🟡" else "🔵"
+
+            val text = "спайк! ☂️%s $%s B%.2f$, F%.2f$ -> T%.2f$ = %.2f%%, %d/%d".format(
                 locale = Locale.US,
+                marker,
                 purchase.ticker,
                 buyPrice,
                 priceFrom,
@@ -759,7 +772,7 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun getButtonsMarkup(stock: Stock): ReplyMarkup? {
+    private fun getButtonsMarkup(stock: Stock): ReplyMarkup? {
         if (!SettingsManager.getTelegramSendGotoTerminal()) return null
 
         val ticker = stock.ticker
@@ -777,7 +790,7 @@ class StrategyTelegram : KoinComponent {
         return replyMarkup
     }
 
-    fun getButtonsMarkupMany(stocks: List<Stock>): ReplyMarkup? {
+    private fun getButtonsMarkupMany(stocks: List<Stock>): ReplyMarkup? {
         if (!SettingsManager.getTelegramSendGotoTerminal()) return null
 
         val rows = stocks.size / 4 + 1
