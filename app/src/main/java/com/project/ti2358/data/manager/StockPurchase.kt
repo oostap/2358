@@ -217,7 +217,6 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
         status = PurchaseStatus.WAITING
         return GlobalScope.launch(Dispatchers.Main) {
             try {
-                val figi = stock.figi
                 val ticker = stock.ticker
 
                 // счётчик на количество повторов (возможно просто нет депо) = примерно 1 минуту

@@ -426,7 +426,8 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 orders.forEach { order ->
                     val newIntPrice = (order.getOrderPrice() * 100).roundToInt() + delta
                     val newPrice: Double = Utils.makeNicePrice(newIntPrice / 100.0, it)
-                    brokerManager.replaceOrder(order, newPrice)
+                    brokerManager.replaceOrder(order, newPrice, true)
+                    updateData()
                 }
             }
         }
@@ -570,8 +571,11 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
 
                             var lineFrom = dropped.getTag(R.string.order_line) as OrderbookLine
                             val order = dropped.getTag(R.string.order_item) as BaseOrder
-                            orderbookManager.replaceOrder(order, lineTo, operationTo)
 
+                            GlobalScope.launch(Dispatchers.Main) {
+                                orderbookManager.replaceOrder(order, lineTo, operationTo)
+                                updateData()
+                            }
                         }
                     } else if (actionType == "remove") {
                         val dropped = view as TextView              // заявка

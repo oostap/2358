@@ -69,14 +69,12 @@ class OrderbookManager() : KoinComponent {
         }
     }
 
-    fun replaceOrder(from: BaseOrder, toLine: OrderbookLine, operationType: OperationType) {
-        GlobalScope.launch(Dispatchers.Main) {
-            val price = if (operationType == OperationType.BUY) toLine.bidPrice else toLine.askPrice
+    suspend fun replaceOrder(from: BaseOrder, toLine: OrderbookLine, operationType: OperationType) {
+        val price = if (operationType == OperationType.BUY) toLine.bidPrice else toLine.askPrice
 
-            brokerManager.replaceOrder(from, price)
-            withContext(StockManager.stockContext) {
-                process()
-            }
+        brokerManager.replaceOrder(from, price, true)
+        withContext(StockManager.stockContext) {
+            process()
         }
     }
 

@@ -122,7 +122,7 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
 
-            var text = "Депозит"
+            var text = ""
 
             if (SettingsManager.getBrokerTinkoff()) {
                 text += " ТИ=${tinkoffPortfolioManager.getPercentBusyInStocks()}%"
