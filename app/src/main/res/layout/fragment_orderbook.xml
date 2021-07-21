@@ -382,8 +382,8 @@
                 android:layout_height="40dp"
                 android:layout_gravity="center"
                 android:textAlignment="center"
-                android:ems="10"
-                android:hint="активный объём"
+                android:ems="8"
+                android:hint="лоты"
                 android:textSize="14sp"
                 android:inputType="number" />
 

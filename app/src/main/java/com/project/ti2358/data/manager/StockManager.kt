@@ -12,6 +12,7 @@ import com.project.ti2358.data.pantini.model.PantiniOrderbook
 import com.project.ti2358.data.alor.service.StreamingAlorService
 import com.project.ti2358.data.daager.model.*
 import com.project.ti2358.data.daager.service.ThirdPartyService
+import com.project.ti2358.data.pantini.model.PantiniPrint
 import com.project.ti2358.data.pantini.service.StreamingPantiniService
 import com.project.ti2358.data.tinkoff.model.*
 import com.project.ti2358.data.tinkoff.service.MarketService
@@ -614,6 +615,11 @@ class StockManager : KoinComponent {
     private suspend fun addOrderbookUS(orderbookPantini: PantiniOrderbook) = withContext(stockContext) {
         val stock = stocksStream.find { it.figi == orderbookPantini.ticker || it.ticker == orderbookPantini.ticker }
         stock?.processOrderbookUS(orderbookPantini)
+    }
+
+    private suspend fun addPrintUS(pantiniPrint: PantiniPrint) = withContext(stockContext) {
+        val stock = stocksStream.find { it.figi == pantiniPrint.ticker || it.ticker == pantiniPrint.ticker }
+        stock?.processPrintUS(pantiniPrint)
     }
 
     private suspend fun addLentaUS(lentaPantini: PantiniLenta) = withContext(stockContext) {

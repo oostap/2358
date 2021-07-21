@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
-            if (destination.id in listOf(R.id.nav_settings, R.id.nav_orderbook, R.id.nav_orders_tinkoff, R.id.nav_orders_alor,
+            if (destination.id in listOf(R.id.nav_settings, R.id.nav_orderbook, R.id.nav_orders,
                     R.id.nav_chart, R.id.nav_donate, R.id.nav_reports, R.id.nav_premarket,
                     R.id.nav_accounts, R.id.nav_chat, R.id.nav_sectors)) {
                 fab.visibility = View.INVISIBLE
@@ -258,8 +258,7 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_settings,
-                R.id.nav_portfolio_tinkoff,
-                R.id.nav_portfolio_alor,
+                R.id.nav_portfolio,
                 R.id.nav_premarket,
                 R.id.nav_1000_sell_start,
                 R.id.nav_1000_buy_start,

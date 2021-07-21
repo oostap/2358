@@ -43,7 +43,9 @@ class BrokerManager() : KoinComponent {
     suspend fun placeOrder(stock: Stock, price: Double, lots: Int, operationType: OperationType, brokerType: BrokerType): OrderInfo? {
         if (brokerType == BrokerType.TINKOFF) {
             val order = placeOrderTinkoff(stock, price, lots, operationType)
-            val success = order?.status == OrderStatus.NEW || order?.status == OrderStatus.PENDING_NEW
+            val success = order?.status == OrderStatus.NEW || order?.status == OrderStatus.PENDING_NEW ||
+                          order?.status == OrderStatus.FILL || order?.status == OrderStatus.PARTIALLY_FILL
+
             return OrderInfo(order?.orderId ?: "", success, stock, brokerType, operationType)
 
         }
@@ -299,6 +301,16 @@ class BrokerManager() : KoinComponent {
         }
     }
 
+    suspend fun refreshKotleta() {
+        if (SettingsManager.getBrokerTinkoff()) {
+            tinkoffPortfolioManager.refreshKotleta()
+        }
+
+        if (SettingsManager.getBrokerAlor()) {
+            alorPortfolioManager.refreshKotleta()
+        }
+    }
+
     suspend fun refreshOrders(brokerType: BrokerType) {
         if (brokerType == BrokerType.TINKOFF) {
             tinkoffPortfolioManager.refreshOrders()
@@ -346,5 +358,23 @@ class BrokerManager() : KoinComponent {
         }
 
         return null
+    }
+
+    fun getBlockedForStock(stock: Stock?, brokerType: BrokerType): Int {
+        if (stock == null) return 0
+
+        val pos = getPositionForStock(stock, brokerType)
+        val lots = pos?.getLots() ?: return 0
+
+        var blockedLots = 0
+        if (lots > 0) { // лонг, посчитать сколько заявок на продажу
+            val sells = getOrdersAllForStock(stock, OperationType.SELL, brokerType)
+            sells.forEach { blockedLots += it.getLotsRequested() - it.getLotsExecuted() }
+        } else { // шорт, посчитать сколько заявок на покупку
+            val buys = getOrdersAllForStock(stock, OperationType.BUY, brokerType)
+            buys.forEach { blockedLots += it.getLotsRequested() - it.getLotsExecuted() }
+        }
+
+        return blockedLots
     }
 }

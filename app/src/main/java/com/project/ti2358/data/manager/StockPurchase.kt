@@ -152,7 +152,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
 
                         position?.let { // появилась позиция, проверить есть ли что продать
                             // выставить ордер на продажу
-                            val lotsToSell = it.getLots() - it.getBlocked().toInt() - lotsPortfolio
+                            val lotsToSell = it.getLots() - brokerManager.getBlockedForStock(stock, broker) - lotsPortfolio
                             if (lotsToSell <= 0) {  // если свободных лотов нет, продолжаем
                                 return@let
                             }
@@ -297,7 +297,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
 
                         position?.let { // появилась позиция, проверить есть ли что продать
                             // выставить ордер на продажу
-                            val lotsToBuy = abs(it.getLots()) - abs(it.getBlocked().toInt()) - lotsPortfolio
+                            val lotsToBuy = abs(it.getLots()) - abs(brokerManager.getBlockedForStock(stock, broker)) - lotsPortfolio
                             if (lotsToBuy <= 0) {  // если свободных лотов нет, продолжаем
                                 return@let
                             }

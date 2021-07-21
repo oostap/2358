@@ -20,7 +20,7 @@ data class TinkoffOrder(
 
 ) : BaseOrder() {
 
-    fun getOperationStatusString(): String {
+    override fun getOperationStatusString(): String {
         if (operation == OperationType.BUY) {
             return "Покупка"
         } else if (operation == OperationType.SELL) {
@@ -32,7 +32,9 @@ data class TinkoffOrder(
 
     override fun getLotsExecuted(): Int = executedLots
     override fun getLotsRequested(): Int = requestedLots
-    override fun getBrokerColor(): Int { return Utils.TINKOFF }
+    override fun getBrokerColor(bright: Boolean): Int {
+        return if (bright) Utils.TINKOFF_BRIGHT else Utils.TINKOFF
+    }
 
     override fun isCreated(): Boolean = (status == OrderStatus.NEW || status == OrderStatus.PENDING_NEW)
 

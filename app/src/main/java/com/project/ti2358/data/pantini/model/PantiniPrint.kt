@@ -10,5 +10,7 @@ data class PantiniPrint (
     val condition: String,
     val exchange: String,
     val size: Int,
-    val hit: Int
-)
+    val hit: Int,
+) {
+    var ticker: String = ""
+}

@@ -13,11 +13,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.TheApplication
+import com.project.ti2358.data.common.BasePosition
+import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.manager.*
 import com.project.ti2358.data.tinkoff.model.TinkoffPosition
 import com.project.ti2358.data.daager.service.ThirdPartyService
-import com.project.ti2358.databinding.FragmentPortfolioTinkoffBinding
-import com.project.ti2358.databinding.FragmentPortfolioTinkoffItemBinding
+import com.project.ti2358.databinding.FragmentPortfolioBinding
+import com.project.ti2358.databinding.FragmentPortfolioItemBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import com.project.ti2358.service.toPercent
@@ -28,16 +30,20 @@ import java.lang.Exception
 import kotlin.math.sign
 
 @KoinApiExtension
-class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
+class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
     private val orderbookManager: OrderbookManager by inject()
     private val thirdPartyService: ThirdPartyService by inject()
-    private val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
     private val positionManager: PositionManager by inject()
+
+    private val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
+    private val brokerManager: BrokerManager by inject()
+
     private val strategySpeaker: StrategySpeaker by inject()
     private val strategyTA: StrategyTA by inject()
     private val strategyTelegram: StrategyTelegram by inject()
 
-    private var fragmentPortfolioTinkoffBinding: FragmentPortfolioTinkoffBinding? = null
+    private var fragmentPortfolioBinding: FragmentPortfolioBinding? = null
 
     var adapterList: ItemPortfolioRecyclerViewAdapter = ItemPortfolioRecyclerViewAdapter(emptyList())
     var jobUpdate: Job? = null
@@ -50,14 +56,14 @@ class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
     override fun onDestroy() {
         jobUpdate?.cancel()
         jobVersion?.cancel()
-        fragmentPortfolioTinkoffBinding = null
+        fragmentPortfolioBinding = null
         super.onDestroy()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val binding = FragmentPortfolioTinkoffBinding.bind(view)
-        fragmentPortfolioTinkoffBinding = binding
+        val binding = FragmentPortfolioBinding.bind(view)
+        fragmentPortfolioBinding = binding
 
         with(binding) {
             list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
@@ -105,9 +111,9 @@ class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
     fun updateData() {
         jobUpdate?.cancel()
         jobUpdate = GlobalScope.launch(Dispatchers.Main) {
-            tinkoffPortfolioManager.refreshDeposit()
-            tinkoffPortfolioManager.refreshKotleta()
-            adapterList.setData(tinkoffPortfolioManager.getPositions())
+            brokerManager.refreshDeposit()
+            brokerManager.refreshKotleta()
+            adapterList.setData(brokerManager.getPositionsAll())
             updateTitle()
         }
     }
@@ -115,48 +121,59 @@ class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            val percent = tinkoffPortfolioManager.getPercentBusyInStocks()
-            act.supportActionBar?.title = "Депозит ТИ $percent%"
+
+            var text = "Депозит"
+
+            if (SettingsManager.getBrokerTinkoff()) {
+                text += " ТИ=${tinkoffPortfolioManager.getPercentBusyInStocks()}%"
+            }
+            if (SettingsManager.getBrokerAlor()) {
+                text += " ALOR=${alorPortfolioManager.getPercentBusyInStocks()}%"
+            }
+            act.supportActionBar?.title = text
         }
     }
 
-    inner class ItemPortfolioRecyclerViewAdapter(var values: List<TinkoffPosition>) : RecyclerView.Adapter<ItemPortfolioRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<TinkoffPosition>) {
+    inner class ItemPortfolioRecyclerViewAdapter(var values: List<BasePosition>) : RecyclerView.Adapter<ItemPortfolioRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<BasePosition>) {
             values = newValues
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentPortfolioTinkoffItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentPortfolioItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
         override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(private val binding: FragmentPortfolioTinkoffItemBinding) : RecyclerView.ViewHolder(binding.root) {
+        inner class ViewHolder(private val binding: FragmentPortfolioItemBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(index: Int) {
                 val portfolioPosition = values[index]
-                with(binding) {
-                    tickerView.text = "${index + 1}) ${portfolioPosition.stock?.getTickerLove()}"
+                val stock = portfolioPosition.getPositionStock()
+                val broker = if (portfolioPosition is TinkoffPosition) BrokerType.TINKOFF else BrokerType.ALOR
 
-                    lotsBlockedView.text = if (portfolioPosition.blocked.toInt() > 0) "(${portfolioPosition.blocked.toInt()}🔒)" else ""
+                with(binding) {
+                    tickerView.text = "${index + 1}) ${stock?.getTickerLove()}"
+
+                    lotsBlockedView.text = "(${brokerManager.getBlockedForStock(stock, broker)}🔒)"
 
                     val avg = portfolioPosition.getAveragePrice()
                     var priceNow = "0.0$"
-                    portfolioPosition.stock?.let {
+                    stock?.let {
                         lotsView.text = "${portfolioPosition.getLots() * it.instrument.lot}"
                         priceNow = (it.getPriceNow() / it.instrument.lot).toMoney(it)
                     }
 
-                    priceView.text = "${avg.toMoney(portfolioPosition.stock)} ➡ $priceNow"
+                    priceView.text = "${avg.toMoney(stock)} ➡ $priceNow"
 
                     val profit = portfolioPosition.getProfitAmount()
-                    priceChangeAbsoluteView.text = profit.toMoney(portfolioPosition.stock)
+                    priceChangeAbsoluteView.text = profit.toMoney(stock)
 
                     var percent = portfolioPosition.getProfitPercent()
 
                     // инвертировать доходность шорта
                     percent *= sign(portfolioPosition.getLots().toDouble())
 
-                    val totalCash = portfolioPosition.balance * avg + profit
-                    cashView.text = totalCash.toMoney(portfolioPosition.stock)
+                    val totalCash = portfolioPosition.getLots() * avg + profit
+                    cashView.text = totalCash.toMoney(stock)
 
                     val emoji = Utils.getEmojiForPercent(percent)
                     priceChangePercentView.text = percent.toPercent() + emoji
@@ -165,27 +182,27 @@ class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
                     priceChangeAbsoluteView.setTextColor(Utils.getColorForValue(percent))
                     priceChangePercentView.setTextColor(Utils.getColorForValue(percent))
                     orderbookButton.setOnClickListener {
-                        if (portfolioPosition.stock == null) {
-                            Utils.showMessageAlert(requireContext(), "Какая-то странная бумага, нет такой в каталоге у ТИ!")
+                        if (stock != null) {
+                            Utils.openOrderbookForStock(orderbookButton.findNavController(), orderbookManager, stock)
                         } else {
-                            portfolioPosition.stock?.let {
-                                Utils.openOrderbookForStock(orderbookButton.findNavController(), orderbookManager, it)
-                            }
+                            Utils.showMessageAlert(requireContext(), "Бумага не загружена, нажмите обновить или напишите разрабу что за бумага такая")
                         }
                     }
 
                     itemView.setOnClickListener {
-                        if (portfolioPosition.stock == null) {
-                            Utils.showMessageAlert(requireContext(), "Какая-то странная бумага, нет такой в каталоге у ТИ!")
+                        if (stock != null) {
+                            if (portfolioPosition is TinkoffPosition) {
+                                positionManager.start(portfolioPosition)
+                                itemView.findNavController().navigate(R.id.action_nav_portfolio_to_nav_portfolio_position)
+                            }
                         } else {
-                            positionManager.start(portfolioPosition)
-                            itemView.findNavController().navigate(R.id.action_nav_portfolio_to_nav_portfolio_position)
+                            Utils.showMessageAlert(requireContext(), "Какая-то странная бумага, нет такой в каталоге у ТИ!")
                         }
                     }
 
                     sectorView.text = ""
                     reportInfoView.text = ""
-                    portfolioPosition.stock?.let { stock ->
+                    stock?.let { stock ->
                         sectorView.text = stock.getSectorName()
                         sectorView.setTextColor(Utils.getColorForSector(stock.closePrices?.sector))
 
@@ -197,7 +214,12 @@ class PortfolioTinkoffFragment : Fragment(R.layout.fragment_portfolio_tinkoff) {
                         }
                         reportInfoView.setTextColor(Utils.RED)
                     }
-                    itemView.setBackgroundColor(Utils.getColorForIndex(index))
+
+                    if (SettingsManager.getBrokerAlor() && SettingsManager.getBrokerTinkoff()) {
+                        itemView.setBackgroundColor(Utils.getColorForBrokerValue(broker, true))
+                    } else {
+                        itemView.setBackgroundColor(Utils.getColorForIndex(index))
+                    }
                 }
             }
         }

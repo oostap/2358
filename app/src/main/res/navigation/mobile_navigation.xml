@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_portfolio_tinkoff">
+    app:startDestination="@+id/nav_portfolio">
 
     <!-- настройки -->
     <fragment
@@ -14,31 +14,18 @@
 
     <!-- депозит tinkoff -->
     <fragment
-        android:id="@+id/nav_portfolio_tinkoff"
-        android:name="com.project.ti2358.ui.portfolio.PortfolioTinkoffFragment"
-        android:label="@string/menu_portfolio_tinkoff"
-        tools:layout="@layout/fragment_portfolio_tinkoff">
+        android:id="@+id/nav_portfolio"
+        android:name="com.project.ti2358.ui.portfolio.PortfolioFragment"
+        android:label="@string/menu_portfolio"
+        tools:layout="@layout/fragment_portfolio">
         <action
             android:id="@+id/action_nav_portfolio_to_nav_orders"
-            app:destination="@id/nav_orders_tinkoff"
+            app:destination="@id/nav_orders"
             app:enterAnim="@animator/slide_in_right"
             app:exitAnim="@animator/slide_out_left" />
         <action
             android:id="@+id/action_nav_portfolio_to_nav_portfolio_position"
             app:destination="@id/nav_portfolio_position" />
-    </fragment>
-
-    <!-- депозит alor -->
-    <fragment
-        android:id="@+id/nav_portfolio_alor"
-        android:name="com.project.ti2358.ui.portfolio.PortfolioAlorFragment"
-        android:label="@string/menu_portfolio_alor"
-        tools:layout="@layout/fragment_portfolio_alor">
-        <action
-            android:id="@+id/action_nav_portfolio_alor_to_nav_orders_alor"
-            app:destination="@id/nav_orders_alor"
-            app:enterAnim="@animator/slide_in_right"
-            app:exitAnim="@animator/slide_out_left" />
     </fragment>
 
     <!-- счета -->
@@ -76,24 +63,16 @@
     <fragment
         android:id="@+id/nav_portfolio_position"
         android:name="com.project.ti2358.ui.portfolio.PortfolioPositionFragment"
-        android:label="@string/menu_portfolio_tinkoff"
+        android:label="@string/menu_portfolio"
         tools:layout="@layout/fragment_portfolio_position">
     </fragment>
 
-    <!-- заявки tinkoff -->
+    <!-- заявки -->
     <fragment
-        android:id="@+id/nav_orders_tinkoff"
-        android:name="com.project.ti2358.ui.orders.OrdersTinkoffFragment"
-        android:label="@string/menu_orders_tinkoff"
-        tools:layout="@layout/fragment_orders_tinkoff">
-    </fragment>
-
-    <!-- заявки alor -->
-    <fragment
-        android:id="@+id/nav_orders_alor"
-        android:name="com.project.ti2358.ui.orders.OrdersAlorFragment"
-        android:label="@string/menu_orders_alor"
-        tools:layout="@layout/fragment_orders_alor">
+        android:id="@+id/nav_orders"
+        android:name="com.project.ti2358.ui.orders.OrdersFragment"
+        android:label="@string/menu_orders"
+        tools:layout="@layout/fragment_orders">
     </fragment>
 
     <!-- отчёты -->

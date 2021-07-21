@@ -249,7 +249,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 updateBroker()
                 activeStock?.let {
                     tinkoffPortfolioManager.getPositionForStock(it)?.let { p ->
-                        volumeEditText.setText(abs(p.getLots() - p.blocked).toInt().toString())
+                        volumeEditText.setText(abs(abs(p.getLots()) - brokerManager.getBlockedForStock(it, brokerType)).toString())
                     }
                 }
             }
@@ -259,7 +259,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 updateBroker()
                 activeStock?.let {
                     alorPortfolioManager.getPositionForStock(it)?.let { p ->
-                        volumeEditText.setText(abs(p.getLots() - p.getBlocked()).toInt().toString())
+                        volumeEditText.setText(abs(abs(p.getLots()) - brokerManager.getBlockedForStock(it, brokerType)).toString())
                     }
                 }
             }
@@ -364,7 +364,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                         cashView.text = totalCash.toMoney(stock)
 
                         lotsView.text = "${p.getLots()}"
-                        lotsBlockedView.text = "${p.blocked.toInt()}🔒"
+                        lotsBlockedView.text = "${brokerManager.getBlockedForStock(stock, BrokerType.TINKOFF)}🔒"
 
                         priceChangePercentView.text = percent.toPercent()
 
@@ -395,7 +395,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                         alorCashView.text = totalCash.toMoney(stock)
 
                         alorLotsView.text = "${p.getLots()}"
-                        alorLotsBlockedView.text = "${p.getBlocked().toInt()}🔒"
+                        alorLotsBlockedView.text = "${brokerManager.getBlockedForStock(stock, BrokerType.ALOR)}🔒"
 
                         alorPriceChangePercentView.text = percent.toPercent()
 
@@ -662,7 +662,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     ordersBuy[i].visibility = VISIBLE
                     ordersBuy[i].text = "${item.ordersBuy[i].getLotsRequested() - item.ordersBuy[i].getLotsExecuted()}"
 
-                    ordersBuy[i].setBackgroundColor(item.ordersBuy[i].getBrokerColor())
+                    ordersBuy[i].setBackgroundColor(item.ordersBuy[i].getBrokerColor(true))
 
                     ordersBuy[i].setTag(R.string.order_line, item)
                     ordersBuy[i].setTag(R.string.order_item, item.ordersBuy[i])
@@ -673,7 +673,6 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 ordersSell.forEach {
                     it.visibility = GONE
                     it.setOnTouchListener(ChoiceTouchListener())
-
                 }
 
                 size = min(item.ordersSell.size, ordersSell.size)
@@ -681,7 +680,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                     ordersSell[i].visibility = VISIBLE
                     ordersSell[i].text = "${item.ordersSell[i].getLotsRequested() - item.ordersSell[i].getLotsExecuted()}"
 
-                    ordersSell[i].setBackgroundColor(item.ordersSell[i].getBrokerColor())
+                    ordersSell[i].setBackgroundColor(item.ordersSell[i].getBrokerColor(true))
 
                     ordersSell[i].setTag(R.string.order_line, item)
                     ordersSell[i].setTag(R.string.order_item, item.ordersSell[i])

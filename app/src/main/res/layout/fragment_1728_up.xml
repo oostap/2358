@@ -14,7 +14,9 @@
         android:layout_marginTop="0dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.strategy1728Up.Strategy1728UpFragment"
-        tools:listitem="@layout/fragment_1728_item_up" />
+        tools:listitem="@layout/fragment_1728_item_up"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false" />
 
     <LinearLayout
         android:layout_width="fill_parent"

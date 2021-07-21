@@ -129,14 +129,21 @@ class Utils{
 
         val TEAL: Int = Color.parseColor("#4903DAC5")
 
+        val TINKOFF_CLEAR: Int = Color.parseColor("#33f1d62c")
+        val ALOR_CLEAR: Int = Color.parseColor("#330F59a9")
+
         val TINKOFF: Int = Color.parseColor("#77f1d62c")
         val ALOR: Int = Color.parseColor("#770F59a9")
+
+        val TINKOFF_BRIGHT: Int = Color.parseColor("#FFf1d62c")
+        val ALOR_BRIGHT: Int = Color.parseColor("#FF0F59a9")
+
         val TRANSPARENT: Int = Color.parseColor("#000F59a9")
 
         @KoinApiExtension
-        fun getColorForBrokerValue(brokerType: BrokerType): Int {
-            if (brokerType == BrokerType.TINKOFF) return TINKOFF
-            if (brokerType == BrokerType.ALOR) return ALOR
+        fun getColorForBrokerValue(brokerType: BrokerType, clear: Boolean = false): Int {
+            if (brokerType == BrokerType.TINKOFF) return if (clear) TINKOFF_CLEAR else TINKOFF
+            if (brokerType == BrokerType.ALOR) return if (clear) ALOR_CLEAR else ALOR
             return TRANSPARENT
         }
 

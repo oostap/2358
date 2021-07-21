@@ -13,15 +13,10 @@
             android:icon="@drawable/ic_settings"
             android:title="@string/menu_settings" />
         <item
-            android:id="@+id/nav_portfolio_tinkoff"
+            android:id="@+id/nav_portfolio"
             app:iconTint="@drawable/selector"
             android:icon="@drawable/ic_portfolio"
-            android:title="@string/menu_portfolio_tinkoff" />
-        <item
-            android:id="@+id/nav_portfolio_alor"
-            app:iconTint="@drawable/selector"
-            android:icon="@drawable/ic_portfolio"
-            android:title="@string/menu_portfolio_alor" />
+            android:title="@string/menu_portfolio" />
     </group>
 
     <group

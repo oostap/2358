@@ -6,7 +6,6 @@ open class BasePosition() {
     open fun getAveragePrice(): Double = 0.0
 
     open fun getLots(): Int = 0
-    open fun getBlocked(): Int = 0
     open fun getProfitAmount(): Double = 0.0
     open fun getProfitPercent(): Double = 0.0
 

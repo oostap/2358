@@ -60,10 +60,6 @@ data class PositionAlor(
         return qtyUnits.toInt()
     }
 
-    override fun getBlocked(): Int {
-        return 0
-    }
-
     override fun getProfitAmount(): Double {
         if (stock != null) {
             return getLots() * (stock!!.getPriceRaw() - avgPrice)

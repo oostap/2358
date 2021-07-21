@@ -26,7 +26,9 @@
         android:layout_marginTop="50dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.strategyTazik.StrategyTazikStartFragment"
-        tools:listitem="@layout/fragment_tazik_endless_status_item" />
+        tools:listitem="@layout/fragment_tazik_endless_status_item"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false"/>
 
     <LinearLayout
         android:layout_width="match_parent"

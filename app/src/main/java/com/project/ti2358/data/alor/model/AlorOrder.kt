@@ -50,7 +50,7 @@ data class AlorOrder(
     val endTime: String,
 
 ) : BaseOrder() {
-    fun getOperationStatusString(): String {
+    override fun getOperationStatusString(): String {
         if (side == OperationType.BUY) {
             return "Покупка"
         } else if (side == OperationType.SELL) {
@@ -62,7 +62,9 @@ data class AlorOrder(
 
     override fun getLotsExecuted(): Int = filled
     override fun getLotsRequested(): Int = qtyUnits
-    override fun getBrokerColor(): Int { return Utils.ALOR }
+    override fun getBrokerColor(bright: Boolean): Int {
+        return if (bright) Utils.ALOR_BRIGHT else Utils.ALOR
+    }
 
     override fun isCreated(): Boolean = (status == AlorOrderStatus.WORKING)
 

@@ -21,11 +21,13 @@
         android:layout_height="match_parent"
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp"
-        android:layout_marginBottom="65dp"
+        android:layout_marginBottom="130dp"
         android:layout_marginTop="50dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.strategy2225.Strategy2358StartFragment"
-        tools:listitem="@layout/fragment_1000_buy_start_item" />
+        tools:listitem="@layout/fragment_1000_buy_start_item"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false" />
 
     <LinearLayout
         android:layout_width="fill_parent"

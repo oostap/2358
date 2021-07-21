@@ -232,12 +232,17 @@ data class Stock(var instrument: Instrument) {
     }
 
     fun processLentaUS(pantiniLenta: PantiniLenta) {
-        if (lentaUS == null) {
-            lentaUS = PantiniLenta(ticker)
-        }
+        if (lentaUS == null) lentaUS = pantiniLenta
 
         lentaUS?.prints?.addAll(0, pantiniLenta.prints.toMutableList())
-        lentaUS?.prints = (lentaUS?.prints?.subList(0, min(100, lentaUS?.prints?.size ?: 0)) ?: emptyList()) as MutableList<PantiniPrint>
+        lentaUS?.prints = (lentaUS?.prints?.subList(0, min(100, lentaUS?.prints?.size ?: 0)) ?: mutableListOf())
+    }
+
+    fun processPrintUS(pantiniPrint: PantiniPrint) {
+        if (lentaUS == null) lentaUS = PantiniLenta(ticker)
+
+        lentaUS?.prints?.add(0, pantiniPrint)
+        lentaUS?.prints = (lentaUS?.prints?.subList(0, min(100, lentaUS?.prints?.size ?: 0)) ?: mutableListOf())
     }
 
     fun processStockInfo(instrumentInfo: InstrumentInfo) {

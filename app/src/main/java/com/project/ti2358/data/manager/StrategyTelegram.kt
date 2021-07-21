@@ -599,7 +599,7 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun send2358Start(start: Boolean, tickers : List<String>) {
+    fun send2358Start(start: Boolean, tickers: List<String>) {
         if (started) {// && SettingsManager.getTelegramSendTaziks()) {
             val text = if (start) {
                 String.format("🟢 2358 тарим ${tickers.joinToString(" ")} на ${SettingsManager.get2358PurchaseVolume()}$")

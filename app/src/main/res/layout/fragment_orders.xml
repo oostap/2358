@@ -13,8 +13,10 @@
         android:layout_marginBottom="70dp"
         android:layout_marginTop="0dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context=".ui.portfolio.PortfolioTinkoffFragment"
-        tools:listitem="@layout/fragment_orders_item" />
+        tools:context=".ui.portfolio.PortfolioFragment"
+        tools:listitem="@layout/fragment_orders_item"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false" />
 
     <LinearLayout
         android:layout_width="fill_parent"

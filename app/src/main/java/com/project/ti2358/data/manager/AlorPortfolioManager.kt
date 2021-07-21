@@ -145,8 +145,12 @@ class AlorPortfolioManager : KoinComponent {
         try {
             if (mainServer != null) {
                 portfolioPositions = synchronizedList(alorPortfolioService.positions(AlorExchange.SPBX, mainServer!!.portfolio))
-                portfolioPositionsMOEX = synchronizedList(alorPortfolioService.positions(AlorExchange.MOEX, mainServer!!.portfolio))
+                positionUSD = portfolioPositions.find { it.symbol == "USD" }
                 baseSortPortfolio()
+
+                portfolioPositionsMOEX = synchronizedList(alorPortfolioService.positions(AlorExchange.MOEX, mainServer!!.portfolio))
+                positionRUB = portfolioPositionsMOEX.find { it.symbol == "RUB" }
+
                 log("ALOR positions = $portfolioPositions")
             } else {
                 start()
@@ -181,9 +185,6 @@ class AlorPortfolioManager : KoinComponent {
             abs(it.getLots() * it.avgPrice * multiplier)
         }
 
-        positionUSD = portfolioPositions.find { it.symbol == "USD" }
-        positionRUB = portfolioPositionsMOEX.find { it.symbol == "RUB" }
-
         // удалить позицию $
         portfolioPositions.removeAll { "USD" in it.symbol }
 
@@ -206,14 +207,14 @@ class AlorPortfolioManager : KoinComponent {
     }
 
     fun getFreeCashUSD(): String {
-        val total = positionUSD?.qtyUnits
+        val total = positionUSD?.qtyUnits ?: 0.0
         val symbols = DecimalFormatSymbols.getInstance()
         symbols.groupingSeparator = ' '
         return DecimalFormat("###,###.##$", symbols).format(total)
     }
 
     fun getFreeCashRUB(): String {
-        val total = positionRUB?.qtyUnits
+        val total = positionRUB?.qtyUnits ?: 0.0
         val symbols = DecimalFormatSymbols.getInstance()
         symbols.groupingSeparator = ' '
         return DecimalFormat("###,###.##₽", symbols).format(total)

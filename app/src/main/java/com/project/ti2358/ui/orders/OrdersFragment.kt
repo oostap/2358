@@ -11,13 +11,10 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.alor.model.AlorOrder
-import com.project.ti2358.data.manager.AlorPortfolioManager
-import com.project.ti2358.data.manager.BrokerManager
-import com.project.ti2358.data.manager.ChartManager
-import com.project.ti2358.data.manager.OrderbookManager
-import com.project.ti2358.databinding.FragmentOrdersAlorBinding
-import com.project.ti2358.databinding.FragmentOrdersAlorItemBinding
+import com.project.ti2358.data.common.BaseOrder
+import com.project.ti2358.data.manager.*
+import com.project.ti2358.databinding.FragmentOrdersBinding
+import com.project.ti2358.databinding.FragmentOrdersTinkoffItemBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.*
@@ -25,14 +22,15 @@ import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
 @KoinApiExtension
-class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
+class OrdersFragment : Fragment(R.layout.fragment_orders) {
     private val orderbookManager: OrderbookManager by inject()
     private val brokerManager: BrokerManager by inject()
     private val chartManager: ChartManager by inject()
 
-    val alorPortfolioManager: AlorPortfolioManager by inject()
+    private val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
+    private val alorPortfolioManager: AlorPortfolioManager by inject()
 
-    private var fragmentOrdersAlorBinding: FragmentOrdersAlorBinding? = null
+    private var fragmentOrdersBinding: FragmentOrdersBinding? = null
 
     var adapterList: ItemOrdersRecyclerViewAdapter = ItemOrdersRecyclerViewAdapter(emptyList())
     var jobRefreshEndless: Job? = null
@@ -41,7 +39,7 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
     var jobRefresh: Job? = null
 
     override fun onDestroy() {
-        fragmentOrdersAlorBinding = null
+        fragmentOrdersBinding = null
         jobCancelAll?.cancel()
         jobRefreshEndless?.cancel()
         jobRefresh?.cancel()
@@ -51,8 +49,8 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val binding = FragmentOrdersAlorBinding.bind(view)
-        fragmentOrdersAlorBinding = binding
+        val binding = FragmentOrdersBinding.bind(view)
+        fragmentOrdersBinding = binding
 
         with(binding) {
             list.addItemDecoration(DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL))
@@ -62,7 +60,7 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
             updateButton.setOnClickListener {
                 jobRefresh?.cancel()
                 jobRefresh = GlobalScope.launch(Dispatchers.Main) {
-                    alorPortfolioManager.refreshOrders()
+                    brokerManager.refreshOrders()
                     updateData()
                 }
             }
@@ -70,7 +68,7 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
             cancelButton.setOnClickListener {
                 jobCancelAll?.cancel()
                 jobCancelAll = GlobalScope.launch(Dispatchers.Main) {
-                    brokerManager.cancelAllOrdersAlor()
+                    brokerManager.cancelAllOrdersTinkoff()
                     updateData()
                 }
             }
@@ -78,53 +76,58 @@ class OrdersAlorFragment : Fragment(R.layout.fragment_orders_alor) {
 
         jobRefreshEndless?.cancel()
         jobRefreshEndless = GlobalScope.launch(Dispatchers.Main) {
-            while (true) {
-                if (alorPortfolioManager.refreshOrders()) {
-                    updateData()
-                    break
-                }
-                delay(5000)
-            }
+            brokerManager.refreshOrders()
+            updateData()
         }
     }
 
     fun updateData() {
-        adapterList.setData(alorPortfolioManager.orders)
+        adapterList.setData(brokerManager.getOrdersAll())
         updateTitle()
     }
 
     private fun updateTitle() {
         if (isAdded) {
             val act = requireActivity() as AppCompatActivity
-            act.supportActionBar?.title = "Заявки ALOR ${alorPortfolioManager.orders.size}"
+
+            var text = "Заявки"
+
+            if (SettingsManager.getBrokerTinkoff()) {
+                text += " ТИ=${tinkoffPortfolioManager.orders.size}%"
+            }
+            if (SettingsManager.getBrokerAlor()) {
+                text += " ALOR=${alorPortfolioManager.orders.size}%"
+            }
+
+            act.supportActionBar?.title = "Заявки ТИ ${tinkoffPortfolioManager.orders.size}"
         }
     }
 
-    inner class ItemOrdersRecyclerViewAdapter(private var values: List<AlorOrder>) : RecyclerView.Adapter<ItemOrdersRecyclerViewAdapter.ViewHolder>() {
-        fun setData(newValues: List<AlorOrder>) {
+    inner class ItemOrdersRecyclerViewAdapter(private var values: List<BaseOrder>) : RecyclerView.Adapter<ItemOrdersRecyclerViewAdapter.ViewHolder>() {
+        fun setData(newValues: List<BaseOrder>) {
             values = newValues
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentOrdersAlorItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(position)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentOrdersTinkoffItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onBindViewHolder(holder: ItemOrdersRecyclerViewAdapter.ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(private val binding: FragmentOrdersAlorItemBinding) : RecyclerView.ViewHolder(binding.root) {
+        inner class ViewHolder(private val binding: FragmentOrdersTinkoffItemBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(index: Int) {
                 val order = values[index]
                 with(binding) {
                     tickerView.text = "${index + 1}) ${order.stock?.getTickerLove()}"
-                    lotsView.text = "${order.filled} / ${order.qtyUnits} шт."
-                    priceView.text = order.price.toMoney(order.stock)
+                    lotsView.text = "${order.getLotsExecuted()} / ${order.getLotsRequested()} шт."
+                    priceView.text = order.getOrderPrice().toMoney(order.stock)
 
                     orderTypeView.text = order.getOperationStatusString()
-                    orderTypeView.setTextColor(Utils.getColorForOperation(order.side))
+                    orderTypeView.setTextColor(Utils.getColorForOperation(order.getOrderOperation()))
 
                     cancelButton.setOnClickListener {
                         jobCancel?.cancel()
                         jobCancel = GlobalScope.launch(Dispatchers.Main) {
-                            brokerManager.cancelOrderAlor(order)
+                            brokerManager.cancelOrder(order)
                             updateData()
                         }
                     }

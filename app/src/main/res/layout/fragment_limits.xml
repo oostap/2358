@@ -25,7 +25,9 @@
         android:layout_marginTop="50dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.strategy2225.Strategy2358StartFragment"
-        tools:listitem="@layout/fragment_limits_all_item" />
+        tools:listitem="@layout/fragment_limits_all_item"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false" />
 
     <androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -39,7 +41,9 @@
         android:layout_marginTop="0dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.strategy2225.Strategy2358StartFragment"
-        tools:listitem="@layout/fragment_limits_item" />
+        tools:listitem="@layout/fragment_limits_item"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false" />
 
     <LinearLayout
         android:layout_width="fill_parent"
