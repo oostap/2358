@@ -12,9 +12,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.common.BaseOrder
+import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.manager.*
+import com.project.ti2358.data.tinkoff.model.TinkoffOrder
+import com.project.ti2358.data.tinkoff.model.TinkoffPosition
 import com.project.ti2358.databinding.FragmentOrdersBinding
-import com.project.ti2358.databinding.FragmentOrdersTinkoffItemBinding
+import com.project.ti2358.databinding.FragmentOrdersItemBinding
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.toMoney
 import kotlinx.coroutines.*
@@ -93,13 +96,13 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
             var text = "Заявки"
 
             if (SettingsManager.getBrokerTinkoff()) {
-                text += " ТИ=${tinkoffPortfolioManager.orders.size}%"
+                text += " ТИ=${tinkoffPortfolioManager.orders.size}"
             }
             if (SettingsManager.getBrokerAlor()) {
-                text += " ALOR=${alorPortfolioManager.orders.size}%"
+                text += " ALOR=${alorPortfolioManager.orders.size}"
             }
 
-            act.supportActionBar?.title = "Заявки ТИ ${tinkoffPortfolioManager.orders.size}"
+            act.supportActionBar?.title = text
         }
     }
 
@@ -109,11 +112,11 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
             notifyDataSetChanged()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentOrdersTinkoffItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(FragmentOrdersItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
         override fun onBindViewHolder(holder: ItemOrdersRecyclerViewAdapter.ViewHolder, position: Int) = holder.bind(position)
         override fun getItemCount(): Int = values.size
 
-        inner class ViewHolder(private val binding: FragmentOrdersTinkoffItemBinding) : RecyclerView.ViewHolder(binding.root) {
+        inner class ViewHolder(private val binding: FragmentOrdersItemBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(index: Int) {
                 val order = values[index]
                 with(binding) {
@@ -142,6 +145,13 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
                         order.stock?.let {
                             Utils.openChartForStock(findNavController(), chartManager, it)
                         }
+                    }
+
+                    if (SettingsManager.getBrokerAlor() && SettingsManager.getBrokerTinkoff()) {
+                        val broker = if (order is TinkoffOrder) BrokerType.TINKOFF else BrokerType.ALOR
+                        itemView.setBackgroundColor(Utils.getColorForBrokerValue(broker, true))
+                    } else {
+                        itemView.setBackgroundColor(Utils.getColorForIndex(index))
                     }
                 }
             }
