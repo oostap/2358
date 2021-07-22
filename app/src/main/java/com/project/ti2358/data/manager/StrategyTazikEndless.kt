@@ -631,6 +631,8 @@ class StrategyTazikEndless : KoinComponent {
                 }
             }
         }
+        val fromPrice = purchase.tazikEndlessPrice
+        purchase.tazikEndlessPrice = candle.closingPrice
 
         // проверка на цену закрытия (выше не тарить)
         if (SettingsManager.getTazikEndlessClosePriceProtectionPercent() != 0.0) {
@@ -663,8 +665,7 @@ class StrategyTazikEndless : KoinComponent {
             sellPrice = Utils.makeNicePrice(sellPrice, stock)
 
             strategySpeaker.speakTazik(purchase, change)
-            strategyTelegram.sendTazikBuy(purchase, buyPrice, sellPrice, purchase.tazikEndlessPrice, candle.closingPrice, change, countBroker, parts)
-            purchase.tazikEndlessPrice = candle.closingPrice
+            strategyTelegram.sendTazikBuy(purchase, buyPrice, sellPrice, fromPrice, candle.closingPrice, change, countBroker, parts)
         }
     }
 }

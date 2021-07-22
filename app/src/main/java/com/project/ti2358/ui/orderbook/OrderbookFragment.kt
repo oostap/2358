@@ -249,7 +249,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 updateBroker()
                 activeStock?.let {
                     tinkoffPortfolioManager.getPositionForStock(it)?.let { p ->
-                        volumeEditText.setText(abs(abs(p.getLots()) - brokerManager.getBlockedForStock(it, brokerType)).toString())
+                        volumeEditText.setText(abs(abs(p.getLots()) - brokerManager.getBlockedForPosition(p, it, brokerType)).toString())
                     }
                 }
             }
@@ -259,7 +259,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                 updateBroker()
                 activeStock?.let {
                     alorPortfolioManager.getPositionForStock(it)?.let { p ->
-                        volumeEditText.setText(abs(abs(p.getLots()) - brokerManager.getBlockedForStock(it, brokerType)).toString())
+                        volumeEditText.setText(abs(abs(p.getLots()) - brokerManager.getBlockedForPosition(p, it, brokerType)).toString())
                     }
                 }
             }
@@ -364,7 +364,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                         cashView.text = totalCash.toMoney(stock)
 
                         lotsView.text = "${p.getLots()}"
-                        lotsBlockedView.text = "${brokerManager.getBlockedForStock(stock, BrokerType.TINKOFF)}🔒"
+                        lotsBlockedView.text = "${brokerManager.getBlockedForPosition(p, stock, BrokerType.TINKOFF)}🔒"
 
                         priceChangePercentView.text = percent.toPercent()
 
@@ -395,7 +395,7 @@ class OrderbookFragment : Fragment(R.layout.fragment_orderbook) {
                         alorCashView.text = totalCash.toMoney(stock)
 
                         alorLotsView.text = "${p.getLots()}"
-                        alorLotsBlockedView.text = "${brokerManager.getBlockedForStock(stock, BrokerType.ALOR)}🔒"
+                        alorLotsBlockedView.text = "${brokerManager.getBlockedForPosition(p, stock, BrokerType.ALOR)}🔒"
 
                         alorPriceChangePercentView.text = percent.toPercent()
 

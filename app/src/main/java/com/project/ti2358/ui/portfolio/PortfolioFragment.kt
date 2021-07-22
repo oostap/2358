@@ -153,7 +153,7 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
                 with(binding) {
                     tickerView.text = "${index + 1}) ${stock?.getTickerLove()}"
 
-                    lotsBlockedView.text = "(${brokerManager.getBlockedForStock(stock, broker)}🔒)"
+                    lotsBlockedView.text = "(${brokerManager.getBlockedForPosition(portfolioPosition, stock, broker)}🔒)"
 
                     val avg = portfolioPosition.getAveragePrice()
                     var priceNow = "0.0$"

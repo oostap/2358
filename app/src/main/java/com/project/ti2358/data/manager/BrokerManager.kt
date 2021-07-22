@@ -363,8 +363,14 @@ class BrokerManager() : KoinComponent {
     fun getBlockedForStock(stock: Stock?, brokerType: BrokerType): Int {
         if (stock == null) return 0
 
-        val pos = getPositionForStock(stock, brokerType)
-        val lots = pos?.getLots() ?: return 0
+        val position = getPositionForStock(stock, brokerType)
+        return getBlockedForPosition(position, stock, brokerType)
+    }
+
+    fun getBlockedForPosition(position: BasePosition?, stock: Stock?, brokerType: BrokerType): Int {
+        if (position == null || stock == null) return 0
+
+        val lots = position.getLots()
 
         var blockedLots = 0
         if (lots > 0) { // лонг, посчитать сколько заявок на продажу

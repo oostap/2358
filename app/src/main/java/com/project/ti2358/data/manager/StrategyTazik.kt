@@ -613,6 +613,8 @@ class StrategyTazik : KoinComponent {
                 }
             }
         }
+        val fromPrice = purchase.tazikPrice
+        purchase.tazikPrice = candle.closingPrice
 
         // финальный профит
         delta *= factor                                                     // 0.5% * 0.25% = 0.125%
@@ -633,8 +635,7 @@ class StrategyTazik : KoinComponent {
             sellPrice = Utils.makeNicePrice(sellPrice, stock)
 
             strategySpeaker.speakTazik(purchase, change)
-            strategyTelegram.sendTazikBuy(purchase, buyPrice, sellPrice, purchase.tazikPrice, candle.closingPrice, change, countBroker, parts)
-            purchase.tazikPrice = candle.closingPrice
+            strategyTelegram.sendTazikBuy(purchase, buyPrice, sellPrice, fromPrice, candle.closingPrice, change, countBroker, parts)
         }
     }
 }

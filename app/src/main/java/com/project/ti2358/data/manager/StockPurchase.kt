@@ -7,6 +7,7 @@ import com.project.ti2358.data.tinkoff.model.OperationType
 import com.project.ti2358.data.tinkoff.service.MarketService
 import com.project.ti2358.service.PurchaseStatus
 import com.project.ti2358.service.Utils
+import com.project.ti2358.service.log
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -94,12 +95,11 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                     tries--
                 }
                 if (tries < 0) { // заявка не выставилась, сворачиваем лавочку, можно вернуть один таз
-                    Utils.showToastAlert("$ticker: не смогли выставить ордер на покупку по $buyPrice")
+                    Utils.showToastAlert("$ticker: отмена заявки по $buyPrice")
                     status = PurchaseStatus.CANCELED
+                    brokerManager.cancelOrder(buyLimitOrderInfo)
                     return@launch
                 }
-
-                Utils.showToastAlert("$ticker: ордер на покупку по $buyPrice")
 
                 if (profit == 0.0) {
                     delay(orderLifeTimeSeconds * 1000L)
@@ -121,13 +121,15 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                             continue
                         }
 
-                        if (iterations * DelayLong / 1000.0 > orderLifeTimeSeconds) { // отменить заявку на покупку
+                        if (iterations * DelayLong * 2 / 1000.0 > orderLifeTimeSeconds) { // отменить заявку на покупку
                             status = PurchaseStatus.CANCELED
                             brokerManager.cancelOrder(buyLimitOrderInfo)
-                            Utils.showToastAlert("$ticker: заявка отменена по $buyPrice")
+
+                            log("OOST.cancel timeout ${broker} $buyPrice ${buyLimitOrderInfo?.id}")
                             return@launch
                         }
 
+                        log("OOST.APP order_id = ${buyLimitOrderInfo?.id}")
                         val orderBuy = brokerManager.getOrderForId(buyLimitOrderInfo?.id ?: "", OperationType.BUY)
                         position = brokerManager.getPositionForStock(stock, broker)
 
@@ -135,7 +137,10 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                         val orders = brokerManager.getOrdersAllForStock(stock, OperationType.SELL, broker)
                         var totalSellingLots = 0
                         orders.forEach { totalSellingLots += it.getLotsRequested() }
-                        if (totalSellingLots >= lots) break
+                        if (totalSellingLots >= lots) {
+                            log("OOST.cancel totalSellingLots >= lots ${totalSellingLots} >= ${lots}")
+                            break
+                        }
 
                         // заявка стоит, ничего не куплено
                         if (orderBuy != null && position == null) {
@@ -144,15 +149,16 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                             continue
                         }
 
-                        if (orderBuy == null && position == null) { // заявка отменена, ничего не куплено
-                            status = PurchaseStatus.CANCELED
-                            Utils.showToastAlert("$ticker: отмена по $buyPrice")
-                            return@launch
-                        }
+//                        if (orderBuy == null && position == null) { // заявка отменена, ничего не куплено
+//                            status = PurchaseStatus.CANCELED
+//                            Utils.showToastAlert("$ticker: отмена по $buyPrice")
+//                            log("OOST.APP отмена по $buyPrice ${buyLimitOrderInfo?.id}")
+//                            return@launch
+//                        }
 
                         position?.let { // появилась позиция, проверить есть ли что продать
                             // выставить ордер на продажу
-                            val lotsToSell = it.getLots() - brokerManager.getBlockedForStock(stock, broker) - lotsPortfolio
+                            val lotsToSell = it.getLots() - brokerManager.getBlockedForPosition(it, stock, broker) - lotsPortfolio
                             if (lotsToSell <= 0) {  // если свободных лотов нет, продолжаем
                                 return@let
                             }
@@ -168,14 +174,14 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
 
                             if (sellLimitOrderInfo?.success == true) {
                                 status = PurchaseStatus.ORDER_SELL
-                                Utils.showToastAlert("$ticker: ордер на продажу по $profitPrice")
                             } else { // заявка отклонена, вернуть лоты
                                 lotsToBuy += lotsToSell
                             }
                         }
 
-                        if (orderBuy == null) { // если ордер исчез - удалён вручную или весь заполнился - завершаем
+                        if (orderBuy == null && status == PurchaseStatus.ORDER_SELL) { // если ордер исчез - удалён вручную или весь заполнился - завершаем
                             status = PurchaseStatus.ORDER_SELL
+                            log("OOST.APP ORDER_SELL $buyPrice ${buyLimitOrderInfo?.id}")
                             break
                         }
 
@@ -189,7 +195,6 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                         val position = brokerManager.getPositionForStock(stock, broker)
                         if (position == null || position.getLots() == lotsPortfolio) { // продано!
                             status = PurchaseStatus.SOLD
-                            Utils.showToastAlert("$ticker: продано!?")
                             break
                         }
                     }
@@ -288,15 +293,15 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                             continue
                         }
 
-                        if (orderSell == null && position == null) { // заявка отменена, ничего не куплено
-                            status = PurchaseStatus.CANCELED
-                            Utils.showToastAlert("$ticker: не налили по $sellPrice")
-                            return@launch
-                        }
+//                        if (orderSell == null && position == null) { // заявка отменена, ничего не куплено
+//                            status = PurchaseStatus.CANCELED
+//                            Utils.showToastAlert("$ticker: не налили по $sellPrice")
+//                            return@launch
+//                        }
 
                         position?.let { // появилась позиция, проверить есть ли что продать
                             // выставить ордер на продажу
-                            val lotsToBuy = abs(it.getLots()) - abs(brokerManager.getBlockedForStock(stock, broker)) - lotsPortfolio
+                            val lotsToBuy = abs(it.getLots()) - abs(brokerManager.getBlockedForPosition(it, stock, broker)) - lotsPortfolio
                             if (lotsToBuy <= 0) {  // если свободных лотов нет, продолжаем
                                 return@let
                             }
@@ -318,7 +323,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                             }
                         }
 
-                        if (orderSell == null) { // если ордер исчез - удалён вручную или весь заполнился - завершаем
+                        if (orderSell == null && status == PurchaseStatus.ORDER_BUY) { // если ордер исчез - удалён вручную или весь заполнился - завершаем
                             status = PurchaseStatus.ORDER_BUY
                             break
                         }

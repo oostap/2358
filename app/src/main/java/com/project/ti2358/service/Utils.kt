@@ -25,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
@@ -247,7 +248,11 @@ class Utils{
 
         fun showToastAlert(text: String) {
             GlobalScope.launch(Dispatchers.Main) {
-                Toast.makeText(TheApplication.application.applicationContext, text, LENGTH_SHORT).show()
+                try {
+                    Toast.makeText(TheApplication.application.applicationContext, text, LENGTH_SHORT).show()
+                } catch (e: Exception) {
+
+                }
             }
         }
 
