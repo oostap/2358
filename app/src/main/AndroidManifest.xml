@@ -7,8 +7,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW"
-        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" tools:ignore="ProtectedPermissions" />
+
+    <permission android:name="android.permission.SET_TIME" android:protectionLevel="signature|system"/>
+    <uses-permission android:name="android.permission.SET_TIME" tools:remove="android:maxSdkVersion" tools:ignore="ProtectedPermissions" />
 
     <application
         android:name=".TheApplication"

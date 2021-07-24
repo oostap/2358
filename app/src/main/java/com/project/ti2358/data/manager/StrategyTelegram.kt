@@ -1,6 +1,12 @@
 package com.project.ti2358.data.manager
 
 import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.content.Context
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
@@ -13,15 +19,15 @@ import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.network.fold
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.project.ti2358.TheApplication
 import com.project.ti2358.data.alor.model.AlorOrder
 import com.project.ti2358.data.common.BaseOrder
 import com.project.ti2358.data.common.BasePosition
 import com.project.ti2358.data.common.BrokerType
-import com.project.ti2358.data.tinkoff.model.TinkoffOrder
-import com.project.ti2358.data.pantini.model.PantiniLenta
-import com.project.ti2358.data.tinkoff.service.OperationsService
 import com.project.ti2358.data.daager.service.ThirdPartyService
+import com.project.ti2358.data.pantini.model.PantiniLenta
 import com.project.ti2358.data.tinkoff.model.*
+import com.project.ti2358.data.tinkoff.service.OperationsService
 import com.project.ti2358.service.*
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinApiExtension
@@ -31,6 +37,7 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.sign
+
 
 @KoinApiExtension
 class StrategyTelegram : KoinComponent {
@@ -70,7 +77,13 @@ class StrategyTelegram : KoinComponent {
                     toDate.add(Calendar.HOUR_OF_DAY, -6)
                     val from = convertDateToTinkoffDate(toDate, zone)
 
-                    operations = Collections.synchronizedList(operationsService.operations(from, to, tinkoffPortfolioManager.getActiveBrokerAccountId()).operations)
+                    operations = Collections.synchronizedList(
+                        operationsService.operations(
+                            from,
+                            to,
+                            tinkoffPortfolioManager.getActiveBrokerAccountId()
+                        ).operations
+                    )
                     operations.sortBy { it.date }
                     if (operationsPosted.isEmpty()) {
                         operations.forEach {
@@ -195,14 +208,23 @@ class StrategyTelegram : KoinComponent {
                         val dateMsg = Calendar.getInstance()
                         dateMsg.time = Date(it.date * 1000)
                         val dateNow = Calendar.getInstance()
-
                         val delta = (dateNow.time.time - dateMsg.time.time) / 1000
+
+                        val command = (it.text ?: "").trim()
+
+                        if (command == "! sync") { // суперкоманда
+                            GlobalScope.launch(Dispatchers.Main) {
+                                stockManager.processStocks()
+                                Utils.showToastAlert("Всё перезагружено!")
+                            }
+                            return@let
+                        }
+
                         if (abs(delta) > 300) { // если сообщение устарело на 300 секунд = 5 минут - игнорируем всю обработку
                             return@let          // также игнорится, если время на телефоне настроено НЕВЕРНО
                         }
 
                         log("chat telegram msg ${it.text} delta = ${delta}")
-                        val command = (it.text ?: "").trim()
 
                         if (command == "chat_id") {
                             val text = "айди чата: ${it.chat.id}"
@@ -608,7 +630,7 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun send2358DayLowStart(start: Boolean, tickers : List<String>) {
+    fun send2358DayLowStart(start: Boolean, tickers: List<String>) {
         if (started) {// && SettingsManager.getTelegramSendTaziks()) {
             val text = if (start) {
                 String.format("🟢 2358DL тарим ${tickers.joinToString(" ")} на ${SettingsManager.get2358PurchaseVolume()}$")
@@ -619,7 +641,7 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun send2225Start(start: Boolean, tickers : List<String>) {
+    fun send2225Start(start: Boolean, tickers: List<String>) {
         if (started) {// && SettingsManager.getTelegramSendTaziks()) {
             val text = if (start) {
                 String.format("🟢 2225 шортим ${tickers.joinToString(" ")} на ${SettingsManager.get2225PurchaseVolume()}$")
@@ -650,7 +672,16 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun sendTazikBuy(purchase: StockPurchase, buyPrice: Double, sellPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
+    fun sendTazikBuy(
+        purchase: StockPurchase,
+        buyPrice: Double,
+        sellPrice: Double,
+        priceFrom: Double,
+        priceTo: Double,
+        change: Double,
+        tazikUsed: Int,
+        tazikTotal: Int
+    ) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
             val marker = if (purchase.broker == BrokerType.TINKOFF) "🟡" else "🔵"
 
@@ -671,7 +702,16 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun sendZontikSell(purchase: StockPurchase, sellPrice: Double, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
+    fun sendZontikSell(
+        purchase: StockPurchase,
+        sellPrice: Double,
+        buyPrice: Double,
+        priceFrom: Double,
+        priceTo: Double,
+        change: Double,
+        tazikUsed: Int,
+        tazikTotal: Int
+    ) {
         if (started && SettingsManager.getTelegramSendTaziks()) {
             val marker = if (purchase.broker == BrokerType.TINKOFF) "🟡" else "🔵"
 
@@ -712,7 +752,15 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    fun sendZontikSpike(purchase: StockPurchase, buyPrice: Double, priceFrom: Double, priceTo: Double, change: Double, tazikUsed: Int, tazikTotal: Int) {
+    fun sendZontikSpike(
+        purchase: StockPurchase,
+        buyPrice: Double,
+        priceFrom: Double,
+        priceTo: Double,
+        change: Double,
+        tazikUsed: Int,
+        tazikTotal: Int
+    ) {
         if (started && SettingsManager.getTelegramSendSpikes()) {
             val marker = if (purchase.broker == BrokerType.TINKOFF) "🟡" else "🔵"
 
@@ -732,7 +780,13 @@ class StrategyTelegram : KoinComponent {
         }
     }
 
-    private fun sendMessageToChats(text: String, deleteAfterSeconds: Int = -1, stop: Boolean = false, replyMarkup: ReplyMarkup? = null, replyToMessageId: Long? = null) {
+    private fun sendMessageToChats(
+        text: String,
+        deleteAfterSeconds: Int = -1,
+        stop: Boolean = false,
+        replyMarkup: ReplyMarkup? = null,
+        replyToMessageId: Long? = null
+    ) {
         GlobalScope.launch(Dispatchers.Default) {
             try {
                 val chatIds = SettingsManager.getTelegramChatID()
@@ -740,7 +794,13 @@ class StrategyTelegram : KoinComponent {
                     if (text == "") break
 
                     while (true) {
-                        val result = telegramBot?.sendMessage(ChatId.fromId(id = chatId), text = text, replyMarkup = replyMarkup, replyToMessageId = replyToMessageId, parseMode = ParseMode.HTML)
+                        val result = telegramBot?.sendMessage(
+                            ChatId.fromId(id = chatId),
+                            text = text,
+                            replyMarkup = replyMarkup,
+                            replyToMessageId = replyToMessageId,
+                            parseMode = ParseMode.HTML
+                        )
                         if (result?.first?.isSuccessful != true) {
                             delay(2500)
                             continue
@@ -831,9 +891,17 @@ class StrategyTelegram : KoinComponent {
             val price = stock.getPriceRaw()
             val percentUp = "%.2f".format(Utils.getPercentFromTo(stockInfo.limit_up, price))
             val percentDown = "%.2f".format(Utils.getPercentFromTo(stockInfo.limit_down, price))
-            sendMessageToChats("$${stock.getTickerLove()} ${price}$ - ⬆️${stockInfo.limit_up}$ / ${percentUp}% ⬇️${stockInfo.limit_down}$ / ${percentDown}%", deleteAfterSeconds = -1, replyMarkup = buttons)
+            sendMessageToChats(
+                "$${stock.getTickerLove()} ${price}$ - ⬆️${stockInfo.limit_up}$ / ${percentUp}% ⬇️${stockInfo.limit_down}$ / ${percentDown}%",
+                deleteAfterSeconds = -1,
+                replyMarkup = buttons
+            )
         } else {
-            sendMessageToChats("$${stock.getTickerLove()} нет лимитов, current = ${stock.getPriceNow()}", deleteAfterSeconds = -1, replyMarkup = buttons)
+            sendMessageToChats(
+                "$${stock.getTickerLove()} нет лимитов, current = ${stock.getPriceNow()}",
+                deleteAfterSeconds = -1,
+                replyMarkup = buttons
+            )
         }
     }
 
@@ -868,7 +936,14 @@ class StrategyTelegram : KoinComponent {
 
             val profitMoney = if (p.getProfitAmount() > 0) "+%-5.2f".format(p.getProfitAmount()) else "%-6.2f".format(p.getProfitAmount())
             val profitPercent = if (p.getProfitPercent() > 0) "+%-4.2f".format(p.getProfitPercent()) else "%-5.2f".format(p.getProfitPercent())
-            text += "%s%-5s %-4d %-6.2f %s %s\n".format(marker, p.getPositionStock()?.ticker, p.getLots(), p.getAveragePrice(), profitMoney, profitPercent)
+            text += "%s%-5s %-4d %-6.2f %s %s\n".format(
+                marker,
+                p.getPositionStock()?.ticker,
+                p.getLots(),
+                p.getAveragePrice(),
+                profitMoney,
+                profitPercent
+            )
         }
         text += "</code>"
 
@@ -885,7 +960,12 @@ class StrategyTelegram : KoinComponent {
         var text = if (top) "TOP 🟢\n" else "BOT 🔴\n"
         for (i in 0 until min) {
             val stock = stocks[i]
-            text += "<b>%4.2f%%</b> $%s %4.2f$ -> %4.2f$ \n".format(stock.changePrice2300DayPercent, stock.getTickerLove(), stock.getPrice2300(), stock.getPriceRaw())
+            text += "<b>%4.2f%%</b> $%s %4.2f$ -> %4.2f$ \n".format(
+                stock.changePrice2300DayPercent,
+                stock.getTickerLove(),
+                stock.getPrice2300(),
+                stock.getPriceRaw()
+            )
         }
         val buttons = getButtonsMarkupMany(stocks.subList(0, min))
         sendMessageToChats(text, deleteAfterSeconds = -1, replyMarkup = buttons)
@@ -896,7 +976,13 @@ class StrategyTelegram : KoinComponent {
         var text = "DAY LOW 🔴\n"
         for (i in 0 until min) {
             val stock = stocks[i]
-            text += "<b>%4.2f%%</b> ⤴️ %.2f%% $%s %4.2f$ -> %4.2f$\n".format(stock.changePrice2300DayPercent, stock.changePriceLowDayPercent, stock.getTickerLove(), stock.getPrice2300(), stock.getPriceRaw())
+            text += "<b>%4.2f%%</b> ⤴️ %.2f%% $%s %4.2f$ -> %4.2f$\n".format(
+                stock.changePrice2300DayPercent,
+                stock.changePriceLowDayPercent,
+                stock.getTickerLove(),
+                stock.getPrice2300(),
+                stock.getPriceRaw()
+            )
         }
         val buttons = getButtonsMarkupMany(stocks.subList(0, min))
         sendMessageToChats(text, deleteAfterSeconds = -1, replyMarkup = buttons)
@@ -907,7 +993,13 @@ class StrategyTelegram : KoinComponent {
         var text = "DAY HIGH 🟢\n"
         for (i in 0 until min) {
             val stock = stocks[i]
-            text += "<b>%4.2f%%</> ⤵️ %.2f%% $%s %4.2f$ -> %4.2f$\n".format(stock.changePrice2300DayPercent, stock.changePriceHighDayPercent, stock.getTickerLove(), stock.getPrice2300(), stock.getPriceRaw())
+            text += "<b>%4.2f%%</> ⤵️ %.2f%% $%s %4.2f$ -> %4.2f$\n".format(
+                stock.changePrice2300DayPercent,
+                stock.changePriceHighDayPercent,
+                stock.getTickerLove(),
+                stock.getPrice2300(),
+                stock.getPriceRaw()
+            )
         }
         val buttons = getButtonsMarkupMany(stocks.subList(0, min))
         sendMessageToChats(text, deleteAfterSeconds = -1, replyMarkup = buttons)

@@ -302,7 +302,7 @@ class StockManager : KoinComponent {
         return stocksAll.find { it.ticker == ticker.toUpperCase() || it.ticker == ticker.toLowerCase() || it.ticker == ticker || ticker.toLowerCase() in it.alterName.split(" ")}
     }
 
-    private suspend fun processStocks() = withContext(stockContext) {
+    suspend fun processStocks() = withContext(stockContext) {
         if (SettingsManager.isAllowRus()) {
             stocksStream = stocksAll
         } else {

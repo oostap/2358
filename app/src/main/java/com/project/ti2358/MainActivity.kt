@@ -1,6 +1,7 @@
 package com.project.ti2358
 
 import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
@@ -10,6 +11,8 @@ import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -20,15 +23,14 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
-import com.project.ti2358.data.manager.TinkoffPortfolioManager
-import com.project.ti2358.data.manager.StockManager
-import com.project.ti2358.data.manager.WorkflowManager
 import com.project.ti2358.data.daager.model.Index
 import com.project.ti2358.data.manager.AlorPortfolioManager
+import com.project.ti2358.data.manager.StockManager
+import com.project.ti2358.data.manager.TinkoffPortfolioManager
+import com.project.ti2358.data.manager.WorkflowManager
 import com.project.ti2358.service.Utils
 import com.project.ti2358.service.log
 import com.project.ti2358.service.toPercent
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -113,9 +115,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
-            if (destination.id in listOf(R.id.nav_settings, R.id.nav_orderbook, R.id.nav_orders,
+            if (destination.id in listOf(
+                    R.id.nav_settings, R.id.nav_orderbook, R.id.nav_orders,
                     R.id.nav_chart, R.id.nav_donate, R.id.nav_reports, R.id.nav_premarket,
-                    R.id.nav_accounts, R.id.nav_chat, R.id.nav_sectors)) {
+                    R.id.nav_accounts, R.id.nav_chat, R.id.nav_sectors
+                )) {
                 fab.visibility = View.INVISIBLE
             } else {
                 fab.visibility = View.VISIBLE
