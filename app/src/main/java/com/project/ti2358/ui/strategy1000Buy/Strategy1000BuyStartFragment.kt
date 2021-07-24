@@ -60,11 +60,11 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
             listDepo.adapter = adapterListDepo
 
             startButton.setOnClickListener {
-                if (strategy1000Buy.presetStocksSelected.isNotEmpty()) {
-                    strategy1000Buy.currentNumberSet = numberSet
-                    view.findNavController().navigate(R.id.action_nav_1000_buy_start_to_nav_1000_buy_finish)
-                } else {
+                strategy1000Buy.currentNumberSet = numberSet
+                if (strategy1000Buy.presetStocksSelected.isEmpty() && numberSet != 0 || (numberSet == 0 && strategy1000Buy.purchaseFromPortfolioSelected.isEmpty())) {
                     Utils.showErrorAlert(requireContext())
+                } else {
+                    view.findNavController().navigate(R.id.action_nav_1000_buy_start_to_nav_1000_buy_finish)
                 }
             }
 

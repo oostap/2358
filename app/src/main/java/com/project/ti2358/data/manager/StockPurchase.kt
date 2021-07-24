@@ -94,6 +94,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                     delay(DelaySuperFast)
                     tries--
                 }
+
                 if (tries < 0) { // заявка не выставилась, сворачиваем лавочку, можно вернуть один таз
                     Utils.showToastAlert("$ticker: отмена заявки по $buyPrice")
                     status = PurchaseStatus.CANCELED
@@ -102,9 +103,12 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                 }
 
                 if (profit == 0.0) {
+                    if (orderLifeTimeSecondsBuy == 0) return@launch
+
                     delay(orderLifeTimeSecondsBuy * 1000L)
                     status = PurchaseStatus.CANCELED
                     brokerManager.cancelOrder(buyLimitOrderInfo)
+                    return@launch
                 } else {
                     // проверяем появился ли в портфеле тикер
                     var position: BasePosition?
@@ -121,7 +125,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                             continue
                         }
 
-                        if (iterations * DelayLong * 2 / 1000.0 > orderLifeTimeSecondsBuy) { // отменить заявку на покупку
+                        if (iterations * DelayLong * 2 / 1000.0 > orderLifeTimeSecondsBuy && orderLifeTimeSecondsBuy != 0) { // отменить заявку на покупку
                             status = PurchaseStatus.CANCELED
                             brokerManager.cancelOrder(buyLimitOrderInfo)
 
@@ -149,12 +153,12 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                             continue
                         }
 
-//                        if (orderBuy == null && position == null) { // заявка отменена, ничего не куплено
-//                            status = PurchaseStatus.CANCELED
-//                            Utils.showToastAlert("$ticker: отмена по $buyPrice")
-//                            log("OOST.APP отмена по $buyPrice ${buyLimitOrderInfo?.id}")
-//                            return@launch
-//                        }
+                        if (orderBuy == null && position == null && iterations > 30) { // заявка отменена, ничего не куплено
+                            status = PurchaseStatus.CANCELED
+                            Utils.showToastAlert("$ticker: отмена по $buyPrice")
+                            log("OOST.APP отмена по $buyPrice ${buyLimitOrderInfo?.id}")
+                            return@launch
+                        }
 
                         position?.let { // появилась позиция, проверить есть ли что продать
                             // выставить ордер на продажу
@@ -186,6 +190,17 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                         }
 
                         delay(DelayLong)
+                    }
+                }
+
+                // отменить все заявки на продажу спустя время
+                if (orderLifeTimeSecondsSell != 0) {
+                    GlobalScope.launch(StockManager.stockContext) {
+                        delay(orderLifeTimeSecondsSell * 1000L)
+                        val orders = brokerManager.getOrdersAllForStock(stock, OperationType.SELL, broker)
+                        orders.forEach {
+                            brokerManager.cancelOrder(it)
+                        }
                     }
                 }
 
@@ -251,9 +266,12 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                 Utils.showToastAlert("$ticker: ордер на шорт по $sellPrice")
 
                 if (profit == 0.0) {
+                    if (orderLifeTimeSecondsBuy == 0) return@launch
+
                     delay(orderLifeTimeSecondsSell * 1000L)
                     status = PurchaseStatus.CANCELED
                     brokerManager.cancelOrder(sellLimitOrderInfo)
+                    return@launch
                 } else {
                     // проверяем появился ли в портфеле тикер
                     var position: BasePosition?
@@ -270,7 +288,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                             continue
                         }
 
-                        if (iterations * DelayLong / 1000.0 > orderLifeTimeSecondsSell) { // отменить заявку на покупку
+                        if (iterations * DelayLong / 1000.0 > orderLifeTimeSecondsSell && orderLifeTimeSecondsSell != 0) { // отменить заявку на покупку
                             status = PurchaseStatus.CANCELED
                             brokerManager.cancelOrder(sellLimitOrderInfo)
                             Utils.showToastAlert("$ticker: заявка отменена по $sellPrice")
@@ -293,11 +311,11 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                             continue
                         }
 
-//                        if (orderSell == null && position == null) { // заявка отменена, ничего не куплено
-//                            status = PurchaseStatus.CANCELED
-//                            Utils.showToastAlert("$ticker: не налили по $sellPrice")
-//                            return@launch
-//                        }
+                        if (orderSell == null && position == null && iterations > 30) { // заявка отменена, ничего не куплено
+                            status = PurchaseStatus.CANCELED
+                            Utils.showToastAlert("$ticker: не налили по $sellPrice")
+                            return@launch
+                        }
 
                         position?.let { // появилась позиция, проверить есть ли что продать
                             // выставить ордер на продажу
