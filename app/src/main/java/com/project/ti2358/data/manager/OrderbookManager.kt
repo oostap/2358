@@ -52,7 +52,7 @@ class OrderbookManager() : KoinComponent {
     }
 
     fun createOrder(stock: Stock, price: Double, lots: Int, operationType: OperationType, brokerType: BrokerType) {
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(StockManager.stockContext) {
             brokerManager.placeOrder(stock, price, lots, operationType, brokerType, true)
             withContext(StockManager.stockContext) {
                 process()
@@ -61,11 +61,9 @@ class OrderbookManager() : KoinComponent {
     }
 
     fun cancelOrder(order: BaseOrder) {
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(StockManager.stockContext) {
             brokerManager.cancelOrder(order, true)
-            withContext(StockManager.stockContext) {
-                process()
-            }
+            process()
         }
     }
 

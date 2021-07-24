@@ -255,16 +255,41 @@
             app:defaultValue="SPCE 1.0 1"/>
 
         <EditTextPreference
-            app:key="@string/setting_key_1000_sell_take_profit"
-            app:title="@string/stocks_1000_sell_take_profit"
+            app:key="@string/setting_key_1000_sell_take_profit_depo"
+            app:title="@string/stocks_1000_sell_take_profit_depo"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="1.0"/>
 
         <EditTextPreference
-            app:key="@string/setting_key_1000_sell_order_lifetime_seconds"
-            app:title="@string/stocks_1000_sell_order_lifetime_seconds"
+            app:key="@string/setting_key_1000_sell_take_profit_short"
+            app:title="@string/stocks_1000_sell_take_profit_short"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_sell_take_profit_buy"
+            app:title="@string/stocks_1000_sell_take_profit_buy"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_sell_order_lifetime_seconds_depo"
+            app:title="@string/stocks_1000_sell_order_lifetime_seconds_depo"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_sell_order_lifetime_seconds_short"
+            app:title="@string/stocks_1000_sell_order_lifetime_seconds_short"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="120"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_sell_order_lifetime_seconds_buy"
+            app:title="@string/stocks_1000_sell_order_lifetime_seconds_buy"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="120"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/settings_header_1000_buy">
@@ -292,20 +317,44 @@
             app:defaultValue="SPCE -1.0 1"/>
 
         <EditTextPreference
-            app:key="@string/setting_key_1000_buy_take_profit"
-            app:title="@string/stocks_1000_buy_take_profit"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue="1.0"/>
-
-        <EditTextPreference
             app:key="@string/setting_key_1000_buy_purchase_volume"
             app:title="@string/stocks_1000_buy_purchase_volume"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="0"/>
 
         <EditTextPreference
-            app:key="@string/setting_key_1000_buy_order_lifetime_seconds"
-            app:title="@string/stocks_1000_buy_order_lifetime_seconds"
+            app:key="@string/setting_key_1000_buy_take_profit_depo"
+            app:title="@string/stocks_1000_buy_take_profit_depo"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_buy_take_profit_long"
+            app:title="@string/stocks_1000_buy_take_profit_long"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="-1.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_buy_take_profit_sell"
+            app:title="@string/stocks_1000_buy_take_profit_sell"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1.0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_buy_order_lifetime_seconds_depo"
+            app:title="@string/stocks_1000_buy_order_lifetime_seconds_depo"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="0"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_buy_order_lifetime_seconds_long"
+            app:title="@string/stocks_1000_buy_order_lifetime_seconds_long"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="120"/>
+
+        <EditTextPreference
+            app:key="@string/setting_key_1000_buy_order_lifetime_seconds_sell"
+            app:title="@string/stocks_1000_buy_order_lifetime_seconds_sell"
             app:useSimpleSummaryProvider="true"
             app:defaultValue="120"/>
 

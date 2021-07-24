@@ -47,7 +47,7 @@ class AlorPortfolioManager : KoinComponent {
     }
 
     fun start() {
-        GlobalScope.launch(Dispatchers.Default) {
+        GlobalScope.launch(StockManager.stockContext) {
             // обновить токен
             alorAuthManager.refreshToken()
 
@@ -63,7 +63,7 @@ class AlorPortfolioManager : KoinComponent {
     }
 
     private fun startUpdatePortfolio() {
-        GlobalScope.launch(Dispatchers.Default) {
+        GlobalScope.launch(StockManager.stockContext) {
             while (true) {
                 try {
                     refreshDeposit()

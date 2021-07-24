@@ -96,7 +96,7 @@ class Strategy2358() : KoinComponent {
 
         // удалить бумаги, которые уже есть в депо, иначе среднюю невозможно узнать
         stocksSelected.removeAll { stock ->
-            tinkoffPortfolioManager.portfolioPositionTinkoffs.any { it.ticker == stock.ticker }
+            tinkoffPortfolioManager.portfolioPositions.any { it.ticker == stock.ticker }
         }
 
         val purchases: MutableList<StockPurchase> = mutableListOf()
@@ -117,7 +117,7 @@ class Strategy2358() : KoinComponent {
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         if (SettingsManager.getTazikEndlessExcludeDepo()) {
-            stocksToPurchase.removeAll { p -> tinkoffPortfolioManager.portfolioPositionTinkoffs.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
+            stocksToPurchase.removeAll { p -> tinkoffPortfolioManager.portfolioPositions.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
             stocksToPurchase.removeAll { p -> alorPortfolioManager.portfolioPositions.any { it.symbol == p.ticker && p.broker == BrokerType.ALOR } }
         }
 

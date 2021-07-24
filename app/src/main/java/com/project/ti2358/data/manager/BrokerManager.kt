@@ -336,7 +336,7 @@ class BrokerManager() : KoinComponent {
         val orders = mutableListOf<BasePosition>()
 
         if (SettingsManager.getBrokerTinkoff()) {
-            val tinkoff = tinkoffPortfolioManager.portfolioPositionTinkoffs
+            val tinkoff = tinkoffPortfolioManager.portfolioPositions
             orders.addAll(tinkoff)
         }
 
@@ -346,6 +346,18 @@ class BrokerManager() : KoinComponent {
         }
 
         return orders
+    }
+
+    public fun getPositionsAll(brokerType: BrokerType): List<BasePosition> {
+        if (brokerType == BrokerType.TINKOFF) {
+            return tinkoffPortfolioManager.portfolioPositions
+        }
+
+        if (brokerType == BrokerType.ALOR) {
+            return alorPortfolioManager.portfolioPositions
+        }
+
+        return emptyList()
     }
 
     public fun getPositionForStock(stock: Stock, brokerType: BrokerType): BasePosition? {

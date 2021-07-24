@@ -336,50 +336,39 @@ data class Stock(var instrument: Instrument) {
     fun getPriceNow(): Double {
         var value = 0.0
 
-        val hour = Utils.getTimeMSK().get(Calendar.HOUR_OF_DAY)
-        if (hour > 2 && hour < 7) { // если время до старта, то всегда берём post
-            closePrices?.let {
-                value = it.post
-            }
-        } else if (hour >= 7 && hour < 10 && morning == null) { // если с 7 до 10 и бумага не торгуется с утра, то берём post
-            closePrices?.let {
-                value = it.post
-            }
-        } else {
-            closePrices?.let {
-                value = it.post
-            }
+        closePrices?.let {
+            value = it.post
+        }
 
-            candleToday?.let {
-                value = it.closingPrice
-            }
+        candleToday?.let {
+            value = it.closingPrice
+        }
 
-            if (minuteCandles.isNotEmpty()) {
-                value = minuteCandles.last().closingPrice
-            }
+        if (minuteCandles.isNotEmpty()) {
+            value = minuteCandles.last().closingPrice
         }
 
         return value * instrument.lot
     }
 
     fun getPrice0300(): Double {
-        return closePrices?.yahoo ?: 0.0
+        return (closePrices?.yahoo ?: 0.0) * instrument.lot
     }
 
     fun getPrice2300(): Double {
         if (instrument.currency == Currency.USD) {
-            return closePrices?.os ?: 0.0
+            return (closePrices?.os ?: 0.0) * instrument.lot
         } else {
             return getPrice1000() * instrument.lot
         }
     }
 
     fun getPrice1000(): Double {
-        return candleToday?.openingPrice ?: getPrice0145()
+        return candleToday?.openingPrice ?: getPrice0145() * instrument.lot
     }
 
     fun getPrice0145(): Double {
-        return closePrices?.post ?: 0.0
+        return (closePrices?.post ?: 0.0) * instrument.lot
     }
 
     fun getPriceString(): String {
@@ -424,15 +413,15 @@ data class Stock(var instrument: Instrument) {
 
     fun getPriceRaw(): Double {
         if (minuteCandles.isNotEmpty()) {
-            return minuteCandles.last().closingPrice
+            return minuteCandles.last().closingPrice * instrument.lot
         }
 
         if (candleToday != null) {
-            return candleToday?.closingPrice ?: 0.0
+            return (candleToday?.closingPrice ?: 0.0) * instrument.lot
         }
 
         if (closePrices != null) {
-            return closePrices?.post ?: 0.0
+            return (closePrices?.post ?: 0.0) * instrument.lot
         }
 
         return 0.0

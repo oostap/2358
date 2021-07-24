@@ -6,8 +6,11 @@ import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.daager.model.PresetStock
+import com.project.ti2358.data.tinkoff.model.Currency
+import com.project.ti2358.data.tinkoff.model.TinkoffPosition
 import com.project.ti2358.service.PurchaseStatus
 import com.project.ti2358.service.Sorting
+import com.project.ti2358.service.Utils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinApiExtension
@@ -19,11 +22,18 @@ import kotlin.math.roundToInt
 
 @KoinApiExtension
 class Strategy1000Buy : KoinComponent {
-    private val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
     private val stockManager: StockManager by inject()
+    private val brokerManager: BrokerManager by inject()
 
     var stocks: MutableList<Stock> = mutableListOf()
     var presetStocksSelected: MutableList<PresetStock> = mutableListOf()
+
+    // первая вкладка - позиции из двух депозитов
+    private var purchaseFromPortfolio: MutableList<StockPurchase> = mutableListOf()
+
+    // выбранные позиции для продажи
+    var purchaseFromPortfolioSelected: MutableList<StockPurchase> = mutableListOf()
+
     var stocksToPurchase: MutableList<StockPurchase> = mutableListOf()
     var currentSort: Sorting = Sorting.DESCENDING
 
@@ -38,14 +48,36 @@ class Strategy1000Buy : KoinComponent {
 
     var currentNumberSet: Int = 0
 
-    suspend fun process(numberSet: Int) = withContext(StockManager.stockContext) {
+    suspend fun processLong(numberSet: Int) = withContext(StockManager.stockContext) {
         val all = stockManager.getWhiteStocks()
         val min = SettingsManager.getCommonPriceMin()
         val max = SettingsManager.getCommonPriceMax()
 
         stocks = all.filter { (it.getPriceNow() > min && it.getPriceNow() < max) || it.getPriceNow() == 0.0 || it.getPrice2300() == 0.0 }.toMutableList()
         stocks.sortBy { it.changePrice2300DayPercent }
+
+        // удалить все бумаги, которые есть в депо (они в другой вкладке)
+        val positions = brokerManager.getPositionsAll()
+        stocks.removeAll { positions.find { p -> p.getPositionStock()?.ticker == it.ticker } != null }
+
         loadSelectedStocks(numberSet)
+    }
+
+    suspend fun processPortfolio(): List<StockPurchase> = withContext(StockManager.stockContext) {
+        val positions = brokerManager.getPositionsAll()
+        purchaseFromPortfolio.clear()
+        positions.forEach { pos ->
+            if (pos.getLots() < 0) {
+                pos.getPositionStock()?.let { stock ->
+                    val broker = if (pos is TinkoffPosition) BrokerType.TINKOFF else BrokerType.ALOR
+                    val p = StockPurchase(stock, broker)
+                    p.position = pos
+                    p.lots = pos.getLots()
+                    purchaseFromPortfolio.add(p)
+                }
+            }
+        }
+        return@withContext purchaseFromPortfolio
     }
 
     private fun loadSelectedStocks(numberSet: Int) {
@@ -94,7 +126,7 @@ class Strategy1000Buy : KoinComponent {
         return@withContext stocks
     }
 
-    suspend fun setSelected(stock: Stock, value: Boolean, numberSet: Int) = withContext(StockManager.stockContext) {
+    suspend fun setSelectedLong(stock: Stock, value: Boolean, numberSet: Int) = withContext(StockManager.stockContext) {
         if (value) {
             if (presetStocksSelected.find { it.ticker == stock.ticker } == null) {
                 presetStocksSelected.add(PresetStock(stock.ticker, -1.0, 0, 1.0))
@@ -105,50 +137,88 @@ class Strategy1000Buy : KoinComponent {
         saveSelectedStocks(numberSet)
     }
 
-    fun isSelected(stock: Stock): Boolean {
+    suspend fun setSelectedPortfolio(purchase: StockPurchase, value: Boolean) = withContext(StockManager.stockContext) {
+        if (value) {
+            if (purchaseFromPortfolioSelected.find { it.ticker == purchase.ticker && it.broker == purchase.broker } == null) {
+                purchaseFromPortfolioSelected.add(purchase)
+            } else {
+
+            }
+        } else {
+            purchaseFromPortfolioSelected.removeAll { it.ticker == purchase.ticker && it.broker == purchase.broker }
+        }
+    }
+
+    fun isSelectedPortfolio(purchase: StockPurchase): Boolean {
+        return purchaseFromPortfolioSelected.find { it.ticker == purchase.ticker } != null
+    }
+
+    fun isSelectedLong(stock: Stock): Boolean {
         return presetStocksSelected.find { it.ticker == stock.ticker } != null
     }
 
     fun processPrepare(): MutableList<StockPurchase> {
         if (currentNumberSet != 0) loadSelectedStocks(currentNumberSet)
 
-        val totalMoney: Double = SettingsManager.get1000BuyPurchaseVolume().toDouble()
-        val onePiece: Double = totalMoney / presetStocksSelected.size
+        val totalMoneyTinkoff: Double = SettingsManager.get1000BuyPurchaseVolume().toDouble()
+        val onePieceTinkoff: Double = totalMoneyTinkoff / presetStocksSelected.size
+
+        val totalMoneyAlor: Double = SettingsManager.get1000BuyPurchaseVolume().toDouble() * SettingsManager.getAlorMultiplierMoney()
+        val onePieceAlor: Double = totalMoneyAlor / presetStocksSelected.size
 
         val purchases: MutableList<StockPurchase> = mutableListOf()
-        for (preset in presetStocksSelected) {
-            stocks.find { it.ticker == preset.ticker }?.let {
-                if (SettingsManager.getBrokerTinkoff()) {
-                    val purchase = StockPurchase(it, BrokerType.TINKOFF).apply {
-                        percentLimitPriceChange = preset.percent
-                        lots = preset.lots
-                        profitPercent = preset.profit
-                        position = tinkoffPortfolioManager.getPositionForStock(it)
+
+        if (currentNumberSet != 0) {
+            for (preset in presetStocksSelected) {
+                stocks.find { it.ticker == preset.ticker }?.let {
+                    if (SettingsManager.getBrokerTinkoff()) {
+                        val purchase = StockPurchase(it, BrokerType.TINKOFF).apply {
+                            percentLimitPriceChange = preset.percent
+                            lots = preset.lots
+                            profitPercent = preset.profit
+                        }
+                        purchases.add(purchase)
                     }
-                    purchases.add(purchase)
-                }
 
-                // TODO: ALOR
-                if (SettingsManager.getBrokerAlor()) {
-
+                    if (SettingsManager.getBrokerAlor()) {
+                        val purchase = StockPurchase(it, BrokerType.ALOR).apply {
+                            percentLimitPriceChange = preset.percent
+                            lots = preset.lots
+                            profitPercent = preset.profit
+                        }
+                        purchases.add(purchase)
+                    }
                 }
+            }
+        } else { // продажа депозита
+            purchaseFromPortfolioSelected.forEach {
+                purchases.add(it)
             }
         }
         stocksToPurchase = purchases
 
         stocksToPurchase.forEach {
             if (it.percentLimitPriceChange == 0.0) it.percentLimitPriceChange = -1.0
-            if (it.profitPercent == 0.0) it.profitPercent = SettingsManager.get1000BuyTakeProfit()
+            if (it.profitPercent == 0.0) it.profitPercent = SettingsManager.get1000BuyTakeProfitSell()
 
             it.updateAbsolutePrice()
 
             if (it.lots == 0) { // если уже настраивали количество, то не трогаем
+
+                val part = when (it.broker) {
+                    BrokerType.TINKOFF -> if (it.stock.instrument.currency == Currency.RUB) onePieceTinkoff * Utils.getUSDRUB() else onePieceTinkoff
+                    BrokerType.ALOR -> if (it.stock.instrument.currency == Currency.RUB) onePieceAlor * Utils.getUSDRUB() else onePieceAlor
+                    else -> 0.0
+                }
+
                 if (!it.getLimitPriceDouble().isNaN()) {
-                    it.lots = (onePiece / it.getLimitPriceDouble()).roundToInt()
+                    it.lots = (part / it.getLimitPriceDouble()).roundToInt()
                 }
             }
             it.status = PurchaseStatus.WAITING
         }
+
+        stocksToPurchase.removeAll { it.lots == 0 }
 
         return stocksToPurchase
     }
@@ -209,11 +279,17 @@ class Strategy1000Buy : KoinComponent {
         started700 = true
 
         for (purchase in stocksToBuy700) {
-            // если позиция уже в портфеле, то НЕ выставлять ТП, а просто добрать лонг или откупить шорт
+            // если позиция уже в портфеле, то НЕ выставлять ТП после откупа шорта
             val profit = if (purchase.position == null) purchase.profitPercent else 0.0
-            val job = purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), profit, 50, SettingsManager.get1000BuyOrderLifeTimeSeconds())
-            if (job != null)
-                job700.add(job)
+
+            // время жизни заявки для позиции из депо и для шорта разные
+            val lifetimeBuy = if (purchase.position == null) SettingsManager.get1000BuyOrderLifeTimeSecondsLong() else SettingsManager.get1000BuyOrderLifeTimeSecondsDepo()
+
+            // время жизни заявки на продажу лонга
+            val lifetimeSell = if (purchase.position == null) SettingsManager.get1000BuyOrderLifeTimeSecondsSell() else 0
+
+            val job = purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), profit, 50, lifetimeBuy, lifetimeSell)
+            if (job != null) job700.add(job)
         }
     }
 
@@ -222,11 +298,17 @@ class Strategy1000Buy : KoinComponent {
         started1000 = true
 
         for (purchase in stocksToBuy1000) {
-            // если позиция уже в портфеле, то НЕ выставлять ТП, а просто добрать лонг или откупить шорт
+            // если позиция уже в портфеле, то НЕ выставлять ТП после откупа шорта
             val profit = if (purchase.position == null) purchase.profitPercent else 0.0
-            val job = purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), profit, 50, SettingsManager.get1000BuyOrderLifeTimeSeconds())
-            if (job != null)
-                job1000.add(job)
+
+            // время жизни заявки для позиции из депо и для шорта разные
+            val lifetimeBuy = if (purchase.position == null) SettingsManager.get1000BuyOrderLifeTimeSecondsLong() else SettingsManager.get1000BuyOrderLifeTimeSecondsDepo()
+
+            // время жизни заявки на продажу лонга
+            val lifetimeSell = if (purchase.position == null) SettingsManager.get1000BuyOrderLifeTimeSecondsSell() else 0
+
+            val job = purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), profit, 50, lifetimeBuy, lifetimeSell)
+            if (job != null) job1000.add(job)
         }
     }
 

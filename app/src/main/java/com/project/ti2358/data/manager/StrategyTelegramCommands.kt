@@ -1,5 +1,6 @@
 package com.project.ti2358.data.manager
 
+import com.project.ti2358.data.common.BrokerType
 import com.project.ti2358.data.tinkoff.model.OperationType
 import com.project.ti2358.data.tinkoff.service.OrdersService
 import com.project.ti2358.service.Utils
@@ -29,8 +30,6 @@ class StrategyTelegramCommands : KoinComponent {
     private val strategyDayLow: StrategyDayLow by inject()
     private val strategy2225: Strategy2225 by inject()
     private val strategyArbitration: StrategyArbitration by inject()
-
-    private var moneySpent: Double = 0.0
 
     private var jobRefreshDeposit: Job? = null
 
@@ -149,7 +148,7 @@ class StrategyTelegramCommands : KoinComponent {
                 val stock = stockManager.getStockByTicker(ticker)
 
                 if (stock != null) {
-                    if (operation == "limits") { // # LIMIT UP/DOWN
+                    if (operation == "limits" || operation == "лимиты") { // # LIMIT UP/DOWN
                         strategyTelegram.sendStockInfo(stock)
                         return false
                     }
@@ -354,56 +353,52 @@ class StrategyTelegramCommands : KoinComponent {
                     if (price == 0.0 || percent == 0) return 0
 
                     if (operation == "buy") {   // ! buy vips 29.46 1
-                        val moneyPart = SettingsManager.getFollowerPurchaseVolume() / 100.0 * percent
-                        val lots = (moneyPart / price).toInt()
 
-                        // недостаточно для покупки даже одного лота
-                        if (lots == 0 || moneyPart == 0.0) return 0
-
-                        // превышен лимит торговли по сигналам
-                        if (abs(moneySpent - lots * price) > SettingsManager.getFollowerPurchaseVolume()) return 0
-
-                        GlobalScope.launch(Dispatchers.Main) {
-                            try {
-                                ordersService.placeLimitOrder(
-                                    lots,
-                                    figi,
-                                    price,
-                                    OperationType.BUY,
-                                    tinkoffPortfolioManager.getActiveBrokerAccountId()
-                                )
-                                Utils.showToastAlert("$ticker новый ордер: ПОКУПКА!")
-                            } catch (e: Exception) {
-
-                            }
-                        }
-                        moneySpent -= lots * price
+                        // TODO: разрешить только усреднять существующую позу
+//                        val moneyPart = SettingsManager.getFollowerPurchaseVolume() / 100.0 * percent
+//                        val lots = (moneyPart / price).toInt()
+//
+//                        // недостаточно для покупки даже одного лота
+//                        if (lots == 0 || moneyPart == 0.0) return 0
+//
+//                        GlobalScope.launch(StockManager.stockContext) {
+//                            try {
+//                                ordersService.placeLimitOrder(
+//                                    lots,
+//                                    figi,
+//                                    price,
+//                                    OperationType.BUY,
+//                                    tinkoffPortfolioManager.getActiveBrokerAccountId()
+//                                )
+//                                Utils.showToastAlert("$ticker новый ордер: ПОКУПКА!")
+//                            } catch (e: Exception) {
+//
+//                            }
+//                        }
                     }
 
                     if (operation == "sell") {  // # SELL VIPS 29.46 1
-                        val position = tinkoffPortfolioManager.getPositionForStock(stock) ?: return 0
-                        val lots = (position.getLots() / 100.0 * percent).toInt()
-
-                        if (lots == 0) return 0
-
-                        // сильно большая поза, не сдавать
-//                    if (lots * price > SettingsManager.getFollowerPurchaseVolume() || position.lots * price > SettingsManager.getFollowerPurchaseVolume()) return 0
-
-                        GlobalScope.launch(Dispatchers.Main) {
+                        GlobalScope.launch(StockManager.stockContext) {
                             try {
-                                ordersService.placeLimitOrder(
-                                    lots,
-                                    figi,
-                                    price,
-                                    OperationType.SELL,
-                                    tinkoffPortfolioManager.getActiveBrokerAccountId()
-                                )
-                                Utils.showToastAlert("$ticker новый ордер: ПРОДАЖА!")
+                                var brokerType = BrokerType.TINKOFF
+                                brokerManager.getPositionForStock(stock, brokerType)?.let {
+                                    val lots = (it.getLots() / 100.0 * percent).toInt()
+                                    if (lots > 0) {
+                                        brokerManager.placeOrder(stock, price, lots, OperationType.SELL, brokerType)
+                                    }
+                                }
+
+                                brokerType = BrokerType.ALOR
+                                brokerManager.getPositionForStock(stock, brokerType)?.let {
+                                    val lots = (it.getLots() / 100.0 * percent).toInt()
+                                    if (lots > 0) {
+                                        brokerManager.placeOrder(stock, price, lots, OperationType.SELL, brokerType)
+                                    }
+                                }
                             } catch (e: Exception) {
 
                             }
                         }
-                        moneySpent += lots * price
                     }
                 }
 
@@ -427,16 +422,9 @@ class StrategyTelegramCommands : KoinComponent {
 
                     GlobalScope.launch(Dispatchers.Main) {
                         val operationType = if ("sell" in operation) OperationType.SELL else OperationType.BUY
-                        val orders = tinkoffPortfolioManager.getOrderAllForStock(stock, operationType)
-                        orders.forEach { order ->
-                            brokerManager.cancelOrderTinkoff(order)
 
-                            val money = (order.requestedLots - order.executedLots) * order.price
-                            if (operationType == OperationType.SELL) {
-                                moneySpent += money
-                            } else {
-                                moneySpent -= money
-                            }
+                        brokerManager.getOrdersAllForStock(stock, operationType).forEach { order ->
+                            brokerManager.cancelOrder(order)
                         }
                     }
                 }

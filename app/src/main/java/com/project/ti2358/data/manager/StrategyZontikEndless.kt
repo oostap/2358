@@ -185,7 +185,7 @@ class StrategyZontikEndless : KoinComponent {
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         if (SettingsManager.getZontikEndlessExcludeDepo()) {
-            stocksToPurchase.removeAll { p -> tinkoffPortfolioManager.portfolioPositionTinkoffs.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
+            stocksToPurchase.removeAll { p -> tinkoffPortfolioManager.portfolioPositions.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
             stocksToPurchase.removeAll { p -> alorPortfolioManager.portfolioPositions.any { it.symbol == p.ticker && p.broker == BrokerType.ALOR } }
         }
 
@@ -363,9 +363,7 @@ class StrategyZontikEndless : KoinComponent {
         if (timeFromTo.first != "") { // старт таза
             val dayTimeStart = timeFromTo.first.split(":").toTypedArray()
             if (dayTimeStart.size < 3) {
-                GlobalScope.launch(Dispatchers.Main) {
-                    Utils.showToastAlert("Неверный формат времени старта $dayTimeStart")
-                }
+                Utils.showToastAlert("Неверный формат времени старта $dayTimeStart")
                 return@runBlocking
             }
 
@@ -384,9 +382,7 @@ class StrategyZontikEndless : KoinComponent {
                 val now = Calendar.getInstance(TimeZone.getDefault())
                 val scheduleDelay = it.timeInMillis - now.timeInMillis
                 if (scheduleDelay < 0) {
-                    GlobalScope.launch(Dispatchers.Main) {
-                        Utils.showToastAlert("Ошибка! Отрицательное время!? втф = $scheduleDelay")
-                    }
+                    Utils.showToastAlert("Ошибка! Отрицательное время!? втф = $scheduleDelay")
                 }
             }
         }
@@ -394,9 +390,7 @@ class StrategyZontikEndless : KoinComponent {
         if (timeFromTo.second != "") { // старт таза
             val dayTimeEnd = timeFromTo.second.split(":").toTypedArray()
             if (dayTimeEnd.size < 3) {
-                GlobalScope.launch(Dispatchers.Main) {
-                    Utils.showToastAlert("Неверный формат времени финиша $dayTimeEnd")
-                }
+                Utils.showToastAlert("Неверный формат времени финиша $dayTimeEnd")
                 return@runBlocking
             }
 
@@ -509,7 +503,7 @@ class StrategyZontikEndless : KoinComponent {
         if (countBroker >= SettingsManager.getZontikEndlessPurchaseParts()) return false
 
         // проверить, если бумага в депо и усреднение отключено, то запретить тарить
-        if (tinkoffPortfolioManager.portfolioPositionTinkoffs.find { it.ticker == purchase.ticker } != null && !SettingsManager.getZontikEndlessAllowAveraging()) {
+        if (tinkoffPortfolioManager.portfolioPositions.find { it.ticker == purchase.ticker } != null && !SettingsManager.getZontikEndlessAllowAveraging()) {
             return false
         }
 
@@ -638,7 +632,7 @@ class StrategyZontikEndless : KoinComponent {
         }
 
         sellPrice = Utils.makeNicePrice(sellPrice, stock)
-        val job = purchase.sellLimitFromAsk(sellPrice, finalProfit, 1, SettingsManager.getZontikEndlessOrderLifeTimeSeconds())
+        val job = purchase.sellLimitFromAsk(sellPrice, finalProfit, 1, SettingsManager.getZontikEndlessOrderLifeTimeSeconds(), 0)
         if (job != null) {
             stocksPurchaseInProcess[purchase] = job
 

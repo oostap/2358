@@ -23,7 +23,7 @@
     <string name="cancel_all2">Отменить всё</string>
     <string name="sell_tt">Продать с трейлинг-стопом</string>
 
-    <string name="set_0">0</string>
+    <string name="set_0">💼</string>
     <string name="set_1">1</string>
     <string name="set_2">2</string>
     <string name="set_3">3</string>
@@ -170,17 +170,25 @@
     <string name="stocks_1000_sell_set_2">Набор 2 (SPCE -1.0 5 0.5 ентер)</string>
     <string name="stocks_1000_sell_set_3">Набор 3 (SPCE -1.0 5 0.5 ентер)</string>
     <string name="stocks_1000_sell_set_4">Набор 4 (SPCE -1.0 5 0.5 ентер)</string>
-    <string name="stocks_1000_sell_take_profit">Тейкпрофит после продажи в % (0.0 = не создавать)</string>
-    <string name="stocks_1000_sell_order_lifetime_seconds">Время жизни заявки в секундах</string>
+    <string name="stocks_1000_sell_take_profit_depo">Базовый ТП на продажу из депо в %</string>
+    <string name="stocks_1000_sell_take_profit_short">Базовый рост на шорт в %</string>
+    <string name="stocks_1000_sell_take_profit_buy">Базовый ТП на откуп шорта в % (0.0 = не создавать)</string>
+    <string name="stocks_1000_sell_order_lifetime_seconds_depo">Время жизни заявки: из депо (в секундах, 0 = не снимать)</string>
+    <string name="stocks_1000_sell_order_lifetime_seconds_short">Время жизни заявки: шорт (в секундах, 0 = не снимать)</string>
+    <string name="stocks_1000_sell_order_lifetime_seconds_buy">Время жизни заявки: откуп шорта (в секундах, 0 = не снимать)</string>
 
     <!-- 1000 buy settings -->
     <string name="stocks_1000_buy_set_1">Набор 1 (SPCE -1.0 5 0.5 ентер)</string>
     <string name="stocks_1000_buy_set_2">Набор 2 (SPCE -1.0 5 0.5 ентер)</string>
     <string name="stocks_1000_buy_set_3">Набор 3 (SPCE -1.0 5 0.5 ентер)</string>
     <string name="stocks_1000_buy_set_4">Набор 4 (SPCE -1.0 5 0.5 ентер)</string>
-    <string name="stocks_1000_buy_take_profit">Тейкпрофит после покупки в % (0.0 = не создавать)</string>
-    <string name="stocks_1000_buy_purchase_volume">Общая сумма покупки в $</string>
-    <string name="stocks_1000_buy_order_lifetime_seconds">Время жизни заявки в секундах</string>
+    <string name="stocks_1000_buy_purchase_volume">Базовая сумма покупки в $</string>
+    <string name="stocks_1000_buy_take_profit_depo">Базовый ТП на откуп шорта из депо в %</string>
+    <string name="stocks_1000_buy_take_profit_long">Базовая просадка на лонг в %</string>
+    <string name="stocks_1000_buy_take_profit_sell">Базовый ТП на продажу лонга в % (0.0 = не создавать)</string>
+    <string name="stocks_1000_buy_order_lifetime_seconds_depo">Время жизни заявки: из депо (в секундах, 0 = не снимать)</string>
+    <string name="stocks_1000_buy_order_lifetime_seconds_long">Время жизни заявки: лонг (в секундах, 0 = не снимать)</string>
+    <string name="stocks_1000_buy_order_lifetime_seconds_sell">Время жизни заявки: продажа лонга (в секундах, 0 = не снимать)</string>
 
     <!-- premarket settings -->
     <string name="stocks_premarket_price_change_percent">Изменение от %</string>
@@ -398,17 +406,25 @@
     <string name="setting_key_1000_sell_set_2">1000_sell_set_2</string>
     <string name="setting_key_1000_sell_set_3">1000_sell_set_3</string>
     <string name="setting_key_1000_sell_set_4">1000_sell_set_4</string>
-    <string name="setting_key_1000_sell_take_profit">1000_take_sell_profit</string>
-    <string name="setting_key_1000_sell_order_lifetime_seconds">1000_sell_order_lifetime_seconds</string>
+    <string name="setting_key_1000_sell_take_profit_depo">1000_sell_take_profit_depo</string>
+    <string name="setting_key_1000_sell_take_profit_short">1000_sell_take_profit_short</string>
+    <string name="setting_key_1000_sell_take_profit_buy">1000_sell_take_profit_buy</string>
+    <string name="setting_key_1000_sell_order_lifetime_seconds_depo">1000_sell_order_lifetime_seconds_depo</string>
+    <string name="setting_key_1000_sell_order_lifetime_seconds_short">1000_sell_order_lifetime_seconds_short</string>
+    <string name="setting_key_1000_sell_order_lifetime_seconds_buy">1000_sell_order_lifetime_seconds_buy</string>
 
     <!-- 1000 buy settings -->
     <string name="setting_key_1000_buy_set_1">1000_buy_set_1</string>
     <string name="setting_key_1000_buy_set_2">1000_buy_set_2</string>
     <string name="setting_key_1000_buy_set_3">1000_buy_set_3</string>
     <string name="setting_key_1000_buy_set_4">1000_buy_set_4</string>
-    <string name="setting_key_1000_buy_take_profit">1000_buy_take_profit</string>
     <string name="setting_key_1000_buy_purchase_volume">1000_buy_purchase_volume</string>
-    <string name="setting_key_1000_buy_order_lifetime_seconds">1000_buy_order_lifetime_seconds</string>
+    <string name="setting_key_1000_buy_take_profit_depo">1000_buy_take_profit_depo</string>
+    <string name="setting_key_1000_buy_take_profit_long">1000_buy_take_profit_long</string>
+    <string name="setting_key_1000_buy_take_profit_sell">1000_buy_take_profit_sell</string>
+    <string name="setting_key_1000_buy_order_lifetime_seconds_depo">1000_buy_order_lifetime_seconds_depo</string>
+    <string name="setting_key_1000_buy_order_lifetime_seconds_long">1000_buy_order_lifetime_seconds_long</string>
+    <string name="setting_key_1000_buy_order_lifetime_seconds_sell">1000_buy_order_lifetime_seconds_sell</string>
 
     <!-- love settings -->
     <string name="setting_key_love_set">love_set</string>

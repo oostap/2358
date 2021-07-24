@@ -149,6 +149,6 @@ class StrategyTazikService : Service() {
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(NOTIFICATION_ID, notification)
 
-        return 1
+        return 10
     }
 }

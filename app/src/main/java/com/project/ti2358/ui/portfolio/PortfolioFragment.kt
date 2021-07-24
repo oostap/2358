@@ -111,10 +111,14 @@ class PortfolioFragment : Fragment(R.layout.fragment_portfolio) {
     fun updateData() {
         jobUpdate?.cancel()
         jobUpdate = GlobalScope.launch(Dispatchers.Main) {
-            brokerManager.refreshDeposit()
-            brokerManager.refreshKotleta()
-            adapterList.setData(brokerManager.getPositionsAll())
-            updateTitle()
+            try {
+                brokerManager.refreshDeposit()
+                brokerManager.refreshKotleta()
+                adapterList.setData(brokerManager.getPositionsAll())
+                updateTitle()
+            } catch (e: Exception) {
+
+            }
         }
     }
 

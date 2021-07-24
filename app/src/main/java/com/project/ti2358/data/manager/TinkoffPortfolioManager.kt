@@ -25,7 +25,7 @@ class TinkoffPortfolioManager : KoinComponent {
     private val portfolioService: PortfolioService by inject()
     private val ordersService: OrdersService by inject()
 
-    var portfolioPositionTinkoffs: MutableList<TinkoffPosition> = synchronizedList(mutableListOf())
+    var portfolioPositions: MutableList<TinkoffPosition> = synchronizedList(mutableListOf())
     var currencyPositions: MutableList<CurrencyPosition> = synchronizedList(mutableListOf())
     var orders: MutableList<TinkoffOrder> = synchronizedList(mutableListOf())
     var accounts: MutableList<Account> = synchronizedList(mutableListOf())
@@ -33,7 +33,7 @@ class TinkoffPortfolioManager : KoinComponent {
     private var refreshDepositDelay: Long = 20 * 1000 // 20s
 
     public fun startUpdatePortfolio() {
-        GlobalScope.launch(Dispatchers.Default) {
+        GlobalScope.launch(StockManager.stockContext) {
             while (true) {
                 try {
                     if (accounts.isEmpty()) accounts = synchronizedList(portfolioService.accounts().accounts)
@@ -112,7 +112,7 @@ class TinkoffPortfolioManager : KoinComponent {
     suspend fun refreshDeposit(): Boolean {
         try {
             if (accounts.isEmpty()) accounts = synchronizedList(portfolioService.accounts().accounts)
-            portfolioPositionTinkoffs = synchronizedList(portfolioService.portfolio(getActiveBrokerAccountId()).positions)
+            portfolioPositions = synchronizedList(portfolioService.portfolio(getActiveBrokerAccountId()).positions)
             baseSortPortfolio()
             return true
         } catch (e: Exception) {
@@ -182,7 +182,7 @@ class TinkoffPortfolioManager : KoinComponent {
         val free = getFreeCash()
         var busy = 0.0
 
-        for (position in portfolioPositionTinkoffs) {
+        for (position in portfolioPositions) {
             if (position.averagePositionPrice?.currency == Currency.USD) {
                 busy += abs(position.getAveragePrice() * position.balance)
             }
@@ -196,7 +196,7 @@ class TinkoffPortfolioManager : KoinComponent {
     }
 
     public fun getPositionForStock(stock: Stock): TinkoffPosition? {
-        return portfolioPositionTinkoffs.find { it.figi == stock.figi }
+        return portfolioPositions.find { it.figi == stock.figi }
     }
 
     public fun getOrderForId(id: String, operation: OperationType): TinkoffOrder? {
@@ -212,18 +212,18 @@ class TinkoffPortfolioManager : KoinComponent {
     }
 
     private suspend fun baseSortPortfolio() = withContext(StockManager.stockContext) {
-        portfolioPositionTinkoffs.forEach { it.stock = stocksManager.getStockByFigi(it.figi) }
+        portfolioPositions.forEach { it.stock = stocksManager.getStockByFigi(it.figi) }
 
-        portfolioPositionTinkoffs.sortByDescending {
+        portfolioPositions.sortByDescending {
             val multiplier = if (it.stock?.instrument?.currency == Currency.USD) 1.0 else 1.0 / Utils.getUSDRUB()
             abs(it.getLots() * it.getAveragePrice() * multiplier)
         }
 
         // удалить все НЕ акции
-        portfolioPositionTinkoffs.removeAll { it.instrumentType != InstrumentType.STOCK }
+        portfolioPositions.removeAll { it.instrumentType != InstrumentType.STOCK }
 
         // удалить позицию $
-        portfolioPositionTinkoffs.removeAll { "USD000" in it.ticker }
+        portfolioPositions.removeAll { "USD000" in it.ticker }
     }
 
     private fun baseSortOrders() {
@@ -240,6 +240,6 @@ class TinkoffPortfolioManager : KoinComponent {
 //        val list = portfolioPositions
 //        val blacklist = strategyBlacklist.getBlacklistStocks()
 //        list.removeAll { it.ticker in blacklist.map { stock -> stock.ticker } }
-        return portfolioPositionTinkoffs
+        return portfolioPositions
     }
 }

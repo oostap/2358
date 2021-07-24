@@ -300,7 +300,7 @@ class MainActivity : AppCompatActivity() {
         navView.requestFocus()
 
         job?.cancel()
-        job = GlobalScope.launch(Dispatchers.Default) {
+        job = GlobalScope.launch(StockManager.stockContext) {
             stockManager.reloadClosePrices()
         }
     }

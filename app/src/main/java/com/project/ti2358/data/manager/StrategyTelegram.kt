@@ -191,40 +191,38 @@ class StrategyTelegram : KoinComponent {
 
                 // сообщение в ЛС боту
                 text {
-                    log("chat telegram msg ${update.message?.text}")
-                    val command = (update.message?.text ?: "").trim()
+                    update.message?.let {
+                        val dateMsg = Calendar.getInstance()
+                        dateMsg.time = Date(it.date * 1000)
+                        val dateNow = Calendar.getInstance()
 
-                    if (command == "chat_id") {
-                        val text = "айди чата: ${update.message!!.chat.id}"
-                        bot.sendMessage(ChatId.fromId(id = update.message!!.chat.id), text = text)
-                        update.consume()
-                    } else if (command == "my_id") {
-                        val text = "твой айди: ${update.message!!.from?.id}"
-                        bot.sendMessage(ChatId.fromId(id = update.message!!.chat.id), text = text)
-                        update.consume()
-                    } else if (command.startsWith("!")) {
-                        if (strategyTelegramCommands.started && SettingsManager.getTelegramAllowCommandHandle()) {
-                            val success = strategyTelegramCommands.processActiveCommand(update.message!!.from?.id ?: 0, command)
-                            val status = ""
-//                            when (success) {
-//                                0 -> "-"
-//                                1 -> "+"
-//                                else -> ""
-//                            }
-//                            if (status != "") {
-//                                bot.sendMessage(
-//                                    ChatId.fromId(id = update.message!!.chat.id),
-//                                    text = status,
-//                                    replyToMessageId = update.message!!.messageId
-//                                )
-//                            }
+                        val delta = (dateNow.time.time - dateMsg.time.time) / 1000
+                        if (abs(delta) > 300) { // если сообщение устарело на 300 секунд = 5 минут - игнорируем всю обработку
+                            return@let          // также игнорится, если время на телефоне настроено НЕВЕРНО
                         }
-                        update.consume()
-                    } else {
-                        if (strategyTelegramCommands.started && SettingsManager.getTelegramAllowCommandInform()) {
-                            val delete = strategyTelegramCommands.processInfoCommand(command, update.message!!.messageId)
-                            if (delete) {
-                                telegramBot?.deleteMessage(ChatId.fromId(id = update.message!!.chat.id), messageId = update.message!!.messageId)
+
+                        log("chat telegram msg ${it.text} delta = ${delta}")
+                        val command = (it.text ?: "").trim()
+
+                        if (command == "chat_id") {
+                            val text = "айди чата: ${it.chat.id}"
+                            bot.sendMessage(ChatId.fromId(id = it.chat.id), text = text)
+                            update.consume()
+                        } else if (command == "my_id") {
+                            val text = "твой айди: ${it.from?.id}"
+                            bot.sendMessage(ChatId.fromId(id = it.chat.id), text = text)
+                            update.consume()
+                        } else if (command.startsWith("!")) {
+                            if (strategyTelegramCommands.started && SettingsManager.getTelegramAllowCommandHandle()) {
+                                strategyTelegramCommands.processActiveCommand(it.from?.id ?: 0, command)
+                            }
+                            update.consume()
+                        } else {
+                            if (strategyTelegramCommands.started && SettingsManager.getTelegramAllowCommandInform()) {
+                                val delete = strategyTelegramCommands.processInfoCommand(command, it.messageId)
+                                if (delete) {
+                                    telegramBot?.deleteMessage(ChatId.fromId(id = it.chat.id), messageId = it.messageId)
+                                }
                             }
                         }
                     }

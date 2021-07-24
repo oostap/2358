@@ -340,8 +340,28 @@ class SettingsManager {
             return presetStocks
         }
 
-        fun get1000SellTakeProfit(): Double {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_take_profit)
+        fun get1000SellTakeProfitDepo(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_take_profit_depo)
+            val value: String? = preferences.getString(key, "1.0")
+            return try {
+                (value ?: "1.0").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun get1000SellTakeProfitShort(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_take_profit_short)
+            val value: String? = preferences.getString(key, "1.0")
+            return try {
+                (value ?: "1.0").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun get1000SellTakeProfitBuy(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_take_profit_buy)
             val value: String? = preferences.getString(key, "1.0")
             return try {
                 (value ?: "1.0").toDouble()
@@ -362,8 +382,18 @@ class SettingsManager {
             return stringToPresetStocks(value)
         }
 
-        fun get1000SellOrderLifeTimeSeconds(): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_order_lifetime_seconds)
+        fun get1000SellOrderLifeTimeSecondsDepo(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_order_lifetime_seconds_depo)
+            val value: String? = preferences.getString(key, "0")
+            return try {
+                parseInt(value ?: "0")
+            } catch (e: Exception) {
+                0
+            }
+        }
+
+        fun get1000SellOrderLifeTimeSecondsShort(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_order_lifetime_seconds_short)
             val value: String? = preferences.getString(key, "120")
             return try {
                 parseInt(value ?: "120")
@@ -372,6 +402,15 @@ class SettingsManager {
             }
         }
 
+        fun get1000SellOrderLifeTimeSecondsBuy(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_sell_order_lifetime_seconds_buy)
+            val value: String? = preferences.getString(key, "120")
+            return try {
+                parseInt(value ?: "120")
+            } catch (e: Exception) {
+                120
+            }
+        }
         /******************** 1000 buy *************************/
 
         fun get1000BuySet(numberSet: Int): List<PresetStock> {
@@ -386,16 +425,6 @@ class SettingsManager {
             return stringToPresetStocks(value)
         }
 
-        fun get1000BuyTakeProfit(): Double {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_take_profit)
-            val value: String? = preferences.getString(key, "1")
-            return try {
-                (value ?: "1").toDouble()
-            } catch (e: Exception) {
-                1.0
-            }
-        }
-
         fun get1000BuyPurchaseVolume(): Int {
             val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_purchase_volume)
             val value: String? = preferences.getString(key, "500")
@@ -406,8 +435,58 @@ class SettingsManager {
             }
         }
 
-        fun get1000BuyOrderLifeTimeSeconds(): Int {
-            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_order_lifetime_seconds)
+        fun get1000BuyTakeProfitDepo(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_take_profit_depo)
+            val value: String? = preferences.getString(key, "1.0")
+            return try {
+                (value ?: "1.0").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun get1000BuyTakeProfitLong(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_take_profit_long)
+            val value: String? = preferences.getString(key, "-1.0")
+            return try {
+                (value ?: "-1.0").toDouble()
+            } catch (e: Exception) {
+                -1.0
+            }
+        }
+
+        fun get1000BuyTakeProfitSell(): Double {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_take_profit_sell)
+            val value: String? = preferences.getString(key, "1.0")
+            return try {
+                (value ?: "1.0").toDouble()
+            } catch (e: Exception) {
+                1.0
+            }
+        }
+
+        fun get1000BuyOrderLifeTimeSecondsDepo(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_order_lifetime_seconds_depo)
+            val value: String? = preferences.getString(key, "0")
+            return try {
+                parseInt(value ?: "0")
+            } catch (e: Exception) {
+                0
+            }
+        }
+
+        fun get1000BuyOrderLifeTimeSecondsLong(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_order_lifetime_seconds_long)
+            val value: String? = preferences.getString(key, "120")
+            return try {
+                parseInt(value ?: "120")
+            } catch (e: Exception) {
+                120
+            }
+        }
+
+        fun get1000BuyOrderLifeTimeSecondsSell(): Int {
+            val key: String = TheApplication.application.applicationContext.getString(R.string.setting_key_1000_buy_order_lifetime_seconds_sell)
             val value: String? = preferences.getString(key, "120")
             return try {
                 parseInt(value ?: "120")

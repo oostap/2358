@@ -364,7 +364,8 @@ class StockManager : KoinComponent {
                 .onBackpressureBuffer()
                 .subscribeOn(Schedulers.computation())
 //                .observeOn(candleScheduler)
-                .observeOn(AndroidSchedulers.mainThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.computation())
                 .subscribeBy(
                     onNext = {
                         GlobalScope.launch {
@@ -376,9 +377,8 @@ class StockManager : KoinComponent {
                         FirebaseCrashlytics.getInstance().recordException(it)
                     }
                 )
-        } else {
-
         }
+
         streamingTinkoffService
             .getCandleEventStream(
                 if (minute) stocksStream.map { it.figi } else emptyList(),

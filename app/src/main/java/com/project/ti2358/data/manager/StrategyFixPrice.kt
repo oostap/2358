@@ -39,7 +39,7 @@ class StrategyFixPrice() : KoinComponent {
         reloadSchedule()
         fixPrice()
 
-        GlobalScope.launch(Dispatchers.Default) {
+        GlobalScope.launch(StockManager.stockContext) {
             while (true) {
                 delay(1000) // 1 sec
 

@@ -196,7 +196,7 @@ class StrategyTazik : KoinComponent {
 
         // удалить все бумаги, которые уже есть в портфеле, чтобы избежать коллизий
         if (SettingsManager.getTazikExcludeDepo()) {
-            stocksToPurchase.removeAll { p -> tinkoffPortfolioManager.portfolioPositionTinkoffs.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
+            stocksToPurchase.removeAll { p -> tinkoffPortfolioManager.portfolioPositions.any { it.ticker == p.ticker && p.broker == BrokerType.TINKOFF } }
             stocksToPurchase.removeAll { p -> alorPortfolioManager.portfolioPositions.any { it.symbol == p.ticker && p.broker == BrokerType.ALOR } }
         }
 
@@ -367,9 +367,7 @@ class StrategyTazik : KoinComponent {
         if (timeFromTo.first != "") { // старт таза
             val dayTimeStart = timeFromTo.first.split(":").toTypedArray()
             if (dayTimeStart.size < 3) {
-                GlobalScope.launch(Dispatchers.Main) {
-                    Utils.showToastAlert("Неверный формат времени старта $dayTimeStart")
-                }
+                Utils.showToastAlert("Неверный формат времени старта $dayTimeStart")
                 return@runBlocking
             }
 
@@ -388,9 +386,7 @@ class StrategyTazik : KoinComponent {
                 val now = Calendar.getInstance(TimeZone.getDefault())
                 val scheduleDelay = it.timeInMillis - now.timeInMillis
                 if (scheduleDelay < 0) {
-                    GlobalScope.launch(Dispatchers.Main) {
-                        Utils.showToastAlert("Ошибка! Отрицательное время!? втф = $scheduleDelay")
-                    }
+                    Utils.showToastAlert("Ошибка! Отрицательное время!? втф = $scheduleDelay")
                 }
             }
         }
@@ -510,7 +506,7 @@ class StrategyTazik : KoinComponent {
         if (countBroker >= SettingsManager.getTazikPurchaseParts()) return false
 
         // проверить, если бумага в депо и усреднение отключено, то запретить тарить
-        if (tinkoffPortfolioManager.portfolioPositionTinkoffs.find { it.ticker == purchase.ticker } != null && !SettingsManager.getTazikAllowAveraging()) {
+        if (tinkoffPortfolioManager.portfolioPositions.find { it.ticker == purchase.ticker } != null && !SettingsManager.getTazikAllowAveraging()) {
             return false
         }
 
@@ -627,7 +623,7 @@ class StrategyTazik : KoinComponent {
             finalProfit = 0.0
         }
 
-        val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikOrderLifeTimeSeconds())
+        val job = purchase.buyLimitFromBid(buyPrice, finalProfit, 1, SettingsManager.getTazikOrderLifeTimeSeconds(), 0)
         if (job != null) {
             stocksPurchaseInProcess[purchase] = job
 

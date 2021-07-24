@@ -59,7 +59,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
     var buyLimitOrderInfo: OrderInfo? = null
     var sellLimitOrderInfo: OrderInfo? = null
 
-    fun buyLimitFromBid(price: Double, profit: Double, counter: Int, orderLifeTimeSeconds: Int): Job? {
+    fun buyLimitFromBid(price: Double, profit: Double, counter: Int, orderLifeTimeSecondsBuy: Int, orderLifeTimeSecondsSell: Int): Job? {
         if (lots > 999999999 || lots == 0 || price == 0.0) return null
         val buyPrice = Utils.makeNicePrice(price, stock)
 
@@ -72,7 +72,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
         var lotsToBuy = lots
 
         status = PurchaseStatus.WAITING
-        return GlobalScope.launch(Dispatchers.Main) {
+        return GlobalScope.launch(StockManager.stockContext) {
             try {
                 val ticker = stock.ticker
 
@@ -102,7 +102,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                 }
 
                 if (profit == 0.0) {
-                    delay(orderLifeTimeSeconds * 1000L)
+                    delay(orderLifeTimeSecondsBuy * 1000L)
                     status = PurchaseStatus.CANCELED
                     brokerManager.cancelOrder(buyLimitOrderInfo)
                 } else {
@@ -121,7 +121,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                             continue
                         }
 
-                        if (iterations * DelayLong * 2 / 1000.0 > orderLifeTimeSeconds) { // отменить заявку на покупку
+                        if (iterations * DelayLong * 2 / 1000.0 > orderLifeTimeSecondsBuy) { // отменить заявку на покупку
                             status = PurchaseStatus.CANCELED
                             brokerManager.cancelOrder(buyLimitOrderInfo)
 
@@ -207,7 +207,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
         }
     }
 
-    fun sellLimitFromAsk(price: Double, profit: Double, counter: Int, orderLifeTimeSeconds: Int): Job? {
+    fun sellLimitFromAsk(price: Double, profit: Double, counter: Int, orderLifeTimeSecondsSell: Int, orderLifeTimeSecondsBuy: Int): Job? {
         if (lots > 999999999 || lots == 0 || price == 0.0) return null
         val sellPrice = Utils.makeNicePrice(price, stock)
 
@@ -220,7 +220,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
         var lotsToSell = lots
 
         status = PurchaseStatus.WAITING
-        return GlobalScope.launch(Dispatchers.Main) {
+        return GlobalScope.launch(StockManager.stockContext) {
             try {
                 val ticker = stock.ticker
 
@@ -251,7 +251,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                 Utils.showToastAlert("$ticker: ордер на шорт по $sellPrice")
 
                 if (profit == 0.0) {
-                    delay(orderLifeTimeSeconds * 1000L)
+                    delay(orderLifeTimeSecondsSell * 1000L)
                     status = PurchaseStatus.CANCELED
                     brokerManager.cancelOrder(sellLimitOrderInfo)
                 } else {
@@ -270,7 +270,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
                             continue
                         }
 
-                        if (iterations * DelayLong / 1000.0 > orderLifeTimeSeconds) { // отменить заявку на покупку
+                        if (iterations * DelayLong / 1000.0 > orderLifeTimeSecondsSell) { // отменить заявку на покупку
                             status = PurchaseStatus.CANCELED
                             brokerManager.cancelOrder(sellLimitOrderInfo)
                             Utils.showToastAlert("$ticker: заявка отменена по $sellPrice")
@@ -644,7 +644,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
             return null
         }
 
-        return GlobalScope.launch(Dispatchers.Main) {
+        return GlobalScope.launch(StockManager.stockContext) {
             position = pos
 
             val profitPrice = getProfitPriceForSell()
@@ -667,7 +667,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
             return null
         }
 
-        return GlobalScope.launch(Dispatchers.Main) {
+        return GlobalScope.launch(StockManager.stockContext) {
             position = pos
             status = PurchaseStatus.ORDER_SELL_PREPARE
 
@@ -691,7 +691,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
             return null
         }
 
-        return GlobalScope.launch(Dispatchers.Main) {
+        return GlobalScope.launch(StockManager.stockContext) {
             position = pos
             status = PurchaseStatus.ORDER_SELL_PREPARE
 
@@ -743,7 +743,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
     fun sellShortToBid2225(): Job? {
         if (lots == 0) return null
 
-        return GlobalScope.launch(Dispatchers.Main) {
+        return GlobalScope.launch(StockManager.stockContext) {
             try {
                 val ticker = stock.ticker
                 val figi = stock.figi
@@ -943,7 +943,7 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
 
     fun addLots(lot: Int) {
         lots += lot
-        if (lots < 1) lots = 1
+        if (lots < 0) lots = 0
 
         position?.let {
             if (lots > it.getLots() && stock.short == null) { // если бумага недоступна в шорт, то ограничить лоты размером позиции
@@ -986,14 +986,11 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
     }
 
     fun processInitialProfit() {
-        percentLimitPriceChange = SettingsManager.get1000SellTakeProfit()
+        percentLimitPriceChange = SettingsManager.get1000SellTakeProfitShort()
 
         position?.let {
             // по умолчанию взять профит из настроек
-            var futureProfit = SettingsManager.get1000SellTakeProfit()
-
-            // если не задан в настройках, то 1% по умолчанию
-            if (futureProfit == 0.0) futureProfit = 1.0
+            val futureProfit = SettingsManager.get1000SellTakeProfitDepo()
 
             // если текущий профит уже больше, то за базовый взять его
             val currentProfit = it.getProfitPercent()
