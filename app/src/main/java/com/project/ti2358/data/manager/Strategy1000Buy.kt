@@ -232,6 +232,8 @@ class Strategy1000Buy : KoinComponent {
     }
 
     fun getTotalPurchasePieces(): Int {
+        stocksToPurchase.removeAll { it.lots == 0 }
+
         var value = 0
         for (stock in stocksToPurchase) {
             value += stock.lots
