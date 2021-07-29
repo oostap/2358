@@ -354,27 +354,22 @@ class StrategyTelegramCommands : KoinComponent {
 
                     if (operation == "buy") {   // ! buy vips 29.46 1
 
-                        // TODO: разрешить только усреднять существующую позу
-//                        val moneyPart = SettingsManager.getFollowerPurchaseVolume() / 100.0 * percent
-//                        val lots = (moneyPart / price).toInt()
-//
-//                        // недостаточно для покупки даже одного лота
-//                        if (lots == 0 || moneyPart == 0.0) return 0
-//
-//                        GlobalScope.launch(StockManager.stockContext) {
-//                            try {
-//                                ordersService.placeLimitOrder(
-//                                    lots,
-//                                    figi,
-//                                    price,
-//                                    OperationType.BUY,
-//                                    tinkoffPortfolioManager.getActiveBrokerAccountId()
-//                                )
-//                                Utils.showToastAlert("$ticker новый ордер: ПОКУПКА!")
-//                            } catch (e: Exception) {
-//
-//                            }
-//                        }
+                        val lots = percent
+
+                        GlobalScope.launch(StockManager.stockContext) {
+                            try {
+                                ordersService.placeLimitOrder(
+                                    lots,
+                                    figi,
+                                    price,
+                                    OperationType.BUY,
+                                    tinkoffPortfolioManager.getActiveBrokerAccountId()
+                                )
+                                Utils.showToastAlert("$ticker новый ордер: ПОКУПКА!")
+                            } catch (e: Exception) {
+
+                            }
+                        }
                     }
 
                     if (operation == "sell") {  // # SELL VIPS 29.46 1

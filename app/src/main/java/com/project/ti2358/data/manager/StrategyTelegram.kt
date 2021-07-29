@@ -953,7 +953,7 @@ class StrategyTelegram : KoinComponent {
         }
 
         val buttons = getButtonsMarkupMany(stocks)
-        sendMessageToChats(text, deleteAfterSeconds = -1, replyMarkup = buttons)
+        sendMessageToChats(text, deleteAfterSeconds = 30, replyMarkup = buttons)
     }
 
     fun sendTop(stocks: List<Stock>, count: Int, top: Boolean) {
