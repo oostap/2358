@@ -976,7 +976,12 @@ open class StockPurchase(var stock: Stock, open var broker: BrokerType) : KoinCo
     }
 
     fun updateAbsolutePrice() {
-        fixedPrice = stock.getPriceNow()
+        fixedPrice = if (position == null) {
+            stock.getPriceNow()
+        } else {
+            position?.getAveragePrice() ?: 0.0
+        }
+
         absoluteLimitPriceChange = fixedPrice / 100 * percentLimitPriceChange
         absoluteLimitPriceChange = Utils.makeNicePrice(absoluteLimitPriceChange, stock)
     }

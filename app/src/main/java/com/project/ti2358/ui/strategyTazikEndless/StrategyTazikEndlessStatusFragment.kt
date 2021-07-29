@@ -12,10 +12,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.OrderbookManager
-import com.project.ti2358.data.manager.SettingsManager
-import com.project.ti2358.data.manager.StockPurchase
-import com.project.ti2358.data.manager.StrategyTazikEndless
+import com.project.ti2358.data.manager.*
 import com.project.ti2358.databinding.FragmentTazikEndlessStatusBinding
 import com.project.ti2358.databinding.FragmentTazikEndlessStatusItemBinding
 import com.project.ti2358.service.*
@@ -88,12 +85,15 @@ class StrategyTazikEndlessStatusFragment : Fragment(R.layout.fragment_tazik_endl
     }
 
     private fun updateData(search: String = "") {
-        GlobalScope.launch(Dispatchers.Main) {
-            fragmentTazikEndlessStatusBinding?.currentChangeView?.text = strategyTazikEndless.basicPercentLimitPriceChange.toPercent()
+        GlobalScope.launch(StockManager.stockContext) {
             stockPurchases = strategyTazikEndless.getSortedPurchases().toMutableList()
             if (search != "") stockPurchases = Utils.search(stockPurchases, search)
-            adapterList.setData(stockPurchases)
-            updateTitle()
+
+            withContext(Dispatchers.Main) {
+                fragmentTazikEndlessStatusBinding?.currentChangeView?.text = strategyTazikEndless.basicPercentLimitPriceChange.toPercent()
+                adapterList.setData(stockPurchases)
+                updateTitle()
+            }
         }
     }
 

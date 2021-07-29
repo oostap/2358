@@ -15,6 +15,7 @@ import com.project.ti2358.R
 import com.project.ti2358.TheApplication
 import com.project.ti2358.data.manager.StockPurchase
 import com.project.ti2358.data.manager.SettingsManager
+import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.StrategyZontikEndless
 import com.project.ti2358.databinding.FragmentZontikEndlessFinishBinding
 import com.project.ti2358.databinding.FragmentZontikEndlessFinishItemBinding
@@ -22,6 +23,7 @@ import com.project.ti2358.service.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -68,13 +70,16 @@ class StrategyZontikEndlessFinishFragment : Fragment(R.layout.fragment_zontik_en
             }
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(StockManager.stockContext) {
             positions = strategyZontikEndless.getPurchaseStock()
-            adapterList.setData(positions)
 
-            updateInfoText()
-            updateServiceButtonText()
-            updateTitle()
+            withContext(Dispatchers.Main) {
+                adapterList.setData(positions)
+
+                updateInfoText()
+                updateServiceButtonText()
+                updateTitle()
+            }
         }
     }
 

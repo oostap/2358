@@ -19,6 +19,7 @@ import com.project.ti2358.service.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -78,27 +79,29 @@ class ArbitrationFragment : Fragment(R.layout.fragment_arbitration) {
     private fun updateDataArb(isLong: Boolean) {
         long = isLong
 
-        GlobalScope.launch(Dispatchers.Main) {
-            fragmentArbitrationBinding?.apply {
-                listAll.visibility = View.GONE
-                listArbs.visibility = View.VISIBLE
+        GlobalScope.launch(StockManager.stockContext) {
+            stocksArbs = strategyArbitration.resort(long)
 
-                val colorDefault = Utils.DARK_BLUE
-                val colorSelect = Utils.RED
+            withContext(Dispatchers.Main) {
+                fragmentArbitrationBinding?.apply {
+                    listAll.visibility = View.GONE
+                    listArbs.visibility = View.VISIBLE
 
-                longButton.setBackgroundColor(colorDefault)
-                shortButton.setBackgroundColor(colorDefault)
+                    val colorDefault = Utils.DARK_BLUE
+                    val colorSelect = Utils.RED
 
-                stocksArbs = strategyArbitration.resort(long)
-                
-                if (long) {
-                    longButton.setBackgroundColor(colorSelect)
-                } else {
-                    shortButton.setBackgroundColor(colorSelect)
+                    longButton.setBackgroundColor(colorDefault)
+                    shortButton.setBackgroundColor(colorDefault)
+
+                    if (long) {
+                        longButton.setBackgroundColor(colorSelect)
+                    } else {
+                        shortButton.setBackgroundColor(colorSelect)
+                    }
+
+                    adapterList.setData(stocksArbs)
+                    updateTitle()
                 }
-
-                adapterList.setData(stocksArbs)
-                updateTitle()
             }
         }
     }

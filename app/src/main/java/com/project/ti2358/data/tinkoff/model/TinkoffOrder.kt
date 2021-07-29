@@ -40,7 +40,6 @@ data class TinkoffOrder(
 
     override fun getOrderID(): String = orderId
 
-    override fun getOrderStock(): Stock? { return stock }
     override fun getOrderPrice(): Double { return price }
 
     override fun getOrderOperation(): OperationType = operation

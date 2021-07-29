@@ -313,9 +313,13 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     private fun fixPrice() {
-        // зафикировать цену, чтобы change считать от неё
-        for (purchase in stocksToClonePurchase) {
-            purchase.tazikEndlessPrice = purchase.stock.getPriceNow()
+        try { // concurrent ?
+            // зафикировать цену, чтобы change считать от неё
+            for (purchase in stocksToClonePurchase) {
+                purchase.tazikEndlessPrice = purchase.stock.getPriceNow()
+            }
+        } catch (e: Exception) {
+
         }
     }
 
@@ -451,16 +455,22 @@ class StrategyTazikEndless : KoinComponent {
         clearJobs()
         started = true
 
-        jobResetPrice?.cancel()
-        jobResetPrice = GlobalScope.launch(StockManager.stockContext) {
-            while (true) {
-                val seconds = SettingsManager.getTazikEndlessResetIntervalSeconds().toLong()
-                delay(1000 * seconds)
-                fixPrice()
-            }
-        }
+        tryRestartFixPriceUpdate()
 
         strategyTelegram.sendTazikEndlessStart(true)
+    }
+
+    private fun tryRestartFixPriceUpdate() {
+        if (jobResetPrice?.isActive == true) {
+            jobResetPrice?.cancel()
+            jobResetPrice = GlobalScope.launch(StockManager.stockContext) {
+                while (true) {
+                    val seconds = SettingsManager.getTazikEndlessResetIntervalSeconds().toLong()
+                    delay(1000 * seconds)
+                    fixPrice()
+                }
+            }
+        }
     }
 
     fun stopStrategy() {
@@ -625,6 +635,7 @@ class StrategyTazikEndless : KoinComponent {
         }
         val fromPrice = purchase.tazikEndlessPrice
         purchase.tazikEndlessPrice = candle.closingPrice
+        tryRestartFixPriceUpdate()
 
         // проверка на цену закрытия (выше не тарить)
         if (SettingsManager.getTazikEndlessClosePriceProtectionPercent() != 0.0) {

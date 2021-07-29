@@ -70,6 +70,10 @@ class Strategy1000SellFinishFragment : Fragment(R.layout.fragment_1000_sell_fini
                 updateServiceButtonText700()
             }
             updateServiceButtonText700()
+
+            startNowButton.setOnClickListener {
+                strategy1000Sell.startStrategyNow()
+            }
         }
         positions = strategy1000Sell.processPrepare()
         adapterListSell.setData(positions)

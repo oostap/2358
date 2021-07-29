@@ -124,7 +124,7 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
         }
 
         jobUpdate?.cancel()
-        jobUpdate = GlobalScope.launch(Dispatchers.Main) {
+        jobUpdate = GlobalScope.launch(StockManager.stockContext) {
             brokerManager.refreshDeposit()
             if (numberSet == 0) {
                 updateDataDepo()
@@ -135,35 +135,40 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
     }
 
     private fun updateDataDepo() {
-        fragment1000BuyStartBinding?.apply {
-            listLong.visibility = View.GONE
-            searchView.visibility = View.GONE
-            listDepo.visibility = View.VISIBLE
-        }
-
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(StockManager.stockContext) {
             purchases = strategy1000Buy.processPortfolio()
-            adapterListDepo.setData(purchases)
-            updateTitle()
-            updateButtons()
+
+            withContext(Dispatchers.Main) {
+                fragment1000BuyStartBinding?.apply {
+                    listLong.visibility = View.GONE
+                    searchView.visibility = View.GONE
+                    listDepo.visibility = View.VISIBLE
+                }
+
+                adapterListDepo.setData(purchases)
+                updateTitle()
+                updateButtons()
+            }
         }
     }
 
     private fun updateDataLong(search: String = "") {
-        fragment1000BuyStartBinding?.apply {
-            listLong.visibility = View.VISIBLE
-            searchView.visibility = View.VISIBLE
-            listDepo.visibility = View.GONE
-        }
-
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(StockManager.stockContext) {
             strategy1000Buy.processLong(numberSet)
             stocks = strategy1000Buy.resort()
             if (search != "") stocks = Utils.search(stocks, search)
-            adapterListLong.setData(stocks)
 
-            updateTitle()
-            updateButtons()
+            withContext(Dispatchers.Main) {
+                fragment1000BuyStartBinding?.apply {
+                    listLong.visibility = View.VISIBLE
+                    searchView.visibility = View.VISIBLE
+                    listDepo.visibility = View.GONE
+                }
+
+                adapterListLong.setData(stocks)
+                updateTitle()
+                updateButtons()
+            }
         }
     }
 
@@ -196,7 +201,7 @@ class Strategy1000BuyStartFragment : Fragment(R.layout.fragment_1000_buy_start) 
             if (numberSet == 0) {
                 val ti = brokerManager.getPositionsAll(BrokerType.TINKOFF)
                 val alor = brokerManager.getPositionsAll(BrokerType.ALOR)
-                var text = "700/1000 SELL"
+                var text = "700/1000 BUY"
 
                 if (ti.isNotEmpty()) {
                     text += " ТИ=${ti.size}"

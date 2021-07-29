@@ -23,4 +23,7 @@ interface AlorPortfolioApi {
 
     @GET
     suspend fun positions(@Url url: String): List<PositionAlor>
+
+    @GET
+    suspend fun operations(@Url url: String): List<AlorOperation>
 }

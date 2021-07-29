@@ -59,10 +59,6 @@ class Strategy1000Sell() : KoinComponent {
         // удалить все бумаги, по которым нет шорта в ТИ
         stocks.removeAll { it.short == null}
 
-        // удалить все бумаги, которые есть в депо (они в другой вкладке)
-        val positions = brokerManager.getPositionsAll()
-        stocks.removeAll { positions.find { p -> p.getPositionStock()?.ticker == it.ticker } != null }
-
         loadSelectedStocks(numberSet)
     }
 
@@ -112,7 +108,9 @@ class Strategy1000Sell() : KoinComponent {
         if (key != "") {
             var data = ""
             for (preset in presetStocksSelected) {
-                data += "%s %.2f %d %.2f\n".format(locale = Locale.US, preset.ticker, preset.percent, preset.lots, preset.profit)
+                if (preset.ticker != "") {
+                    data += "%s %.2f %d %.2f\n".format(locale = Locale.US, preset.ticker, preset.percent, preset.lots, preset.profit)
+                }
             }
             editor.putString(key, data)
             editor.apply()
@@ -132,7 +130,7 @@ class Strategy1000Sell() : KoinComponent {
     suspend fun setSelectedShort(stock: Stock, value: Boolean, numberSet: Int) = withContext(StockManager.stockContext) {
         if (value) {
             if (presetStocksSelected.find { it.ticker == stock.ticker } == null) {
-                presetStocksSelected.add(PresetStock(stock.ticker, 1.0, 0))
+                presetStocksSelected.add(PresetStock(stock.ticker, 1.0, 0, 0.0))
             }
         } else {
             presetStocksSelected.removeAll { it.ticker == stock.ticker }
@@ -284,6 +282,22 @@ class Strategy1000Sell() : KoinComponent {
 
             val job = purchase.sellLimitFromAsk(purchase.getLimitPriceDouble(), profit, 50, lifetimeSell, lifetimeBuy)
             if (job != null) job700.add(job)
+        }
+    }
+
+    fun startStrategyNow() {
+        for (purchase in stocksToPurchase) {
+            // если позиция уже в портфеле, то НЕ выставлять ТП после продажи позиции
+            val profit = if (purchase.position == null) purchase.profitPercent else 0.0
+
+            // время жизни заявки для позиции из депо и для шорта разные
+            val lifetimeShort = if (purchase.position == null) SettingsManager.get1000SellOrderLifeTimeSecondsShort() else 0
+
+            // время жизни заявки на откуп шорта
+            val lifetimeBuy = if (purchase.position == null) SettingsManager.get1000SellOrderLifeTimeSecondsBuy() else 0
+
+            val job = purchase.sellLimitFromAsk(purchase.getLimitPriceDouble(), profit, 50, lifetimeShort, lifetimeBuy)
+            if (job != null) job1000.add(job)
         }
     }
 

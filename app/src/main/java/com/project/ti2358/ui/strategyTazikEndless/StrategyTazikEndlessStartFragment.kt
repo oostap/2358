@@ -107,28 +107,32 @@ class StrategyTazikEndlessStartFragment : Fragment(R.layout.fragment_tazik_endle
     }
 
     private fun updateData(search: String = "") {
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(StockManager.stockContext) {
             strategyTazikEndless.process(numberSet)
             stocks = strategyTazikEndless.resort()
             if (search != "") stocks = Utils.search(stocks, search)
-            adapterList.setData(stocks)
-            updateTitle()
 
-            fragmentTazikEndlessStartBinding?.let {
-                val colorDefault = Utils.DARK_BLUE
-                val colorSelect = Utils.RED
+            withContext(Dispatchers.Main) {
+                adapterList.setData(stocks)
+                updateTitle()
 
-                it.set1Button.setBackgroundColor(colorDefault)
-                it.set2Button.setBackgroundColor(colorDefault)
-                it.set3Button.setBackgroundColor(colorDefault)
-                it.setLoveButton.setBackgroundColor(colorDefault)
+                fragmentTazikEndlessStartBinding?.let {
+                    val colorDefault = Utils.DARK_BLUE
+                    val colorSelect = Utils.RED
 
-                when (numberSet) {
-                    1 -> it.set1Button.setBackgroundColor(colorSelect)
-                    2 -> it.set2Button.setBackgroundColor(colorSelect)
-                    3 -> it.set3Button.setBackgroundColor(colorSelect)
-                    4 -> it.setLoveButton.setBackgroundColor(colorSelect)
-                    else -> { }
+                    it.set1Button.setBackgroundColor(colorDefault)
+                    it.set2Button.setBackgroundColor(colorDefault)
+                    it.set3Button.setBackgroundColor(colorDefault)
+                    it.setLoveButton.setBackgroundColor(colorDefault)
+
+                    when (numberSet) {
+                        1 -> it.set1Button.setBackgroundColor(colorSelect)
+                        2 -> it.set2Button.setBackgroundColor(colorSelect)
+                        3 -> it.set3Button.setBackgroundColor(colorSelect)
+                        4 -> it.setLoveButton.setBackgroundColor(colorSelect)
+                        else -> {
+                        }
+                    }
                 }
             }
         }

@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.OrderbookManager
 import com.project.ti2358.data.manager.Stock
+import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.StrategyZontikEndless
 import com.project.ti2358.databinding.FragmentZontikEndlessStartBinding
 import com.project.ti2358.databinding.FragmentZontikEndlessStartItemBinding
@@ -106,28 +107,32 @@ class StrategyZontikEndlessStartFragment : Fragment(R.layout.fragment_zontik_end
     }
 
     private fun updateData(search: String = "") {
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(StockManager.stockContext) {
             strategyZontikEndless.process(numberSet)
             stocks = strategyZontikEndless.resort()
             if (search != "") stocks = Utils.search(stocks, search)
-            adapterList.setData(stocks)
-            updateTitle()
 
-            fragmentZontikEndlessStartBinding?.let {
-                val colorDefault = Utils.DARK_BLUE
-                val colorSelect = Utils.RED
+            withContext(Dispatchers.Main) {
+                adapterList.setData(stocks)
+                updateTitle()
 
-                it.set1Button.setBackgroundColor(colorDefault)
-                it.set2Button.setBackgroundColor(colorDefault)
-                it.set3Button.setBackgroundColor(colorDefault)
-                it.setLoveButton.setBackgroundColor(colorDefault)
+                fragmentZontikEndlessStartBinding?.let {
+                    val colorDefault = Utils.DARK_BLUE
+                    val colorSelect = Utils.RED
 
-                when (numberSet) {
-                    1 -> it.set1Button.setBackgroundColor(colorSelect)
-                    2 -> it.set2Button.setBackgroundColor(colorSelect)
-                    3 -> it.set3Button.setBackgroundColor(colorSelect)
-                    4 -> it.setLoveButton.setBackgroundColor(colorSelect)
-                    else -> { }
+                    it.set1Button.setBackgroundColor(colorDefault)
+                    it.set2Button.setBackgroundColor(colorDefault)
+                    it.set3Button.setBackgroundColor(colorDefault)
+                    it.setLoveButton.setBackgroundColor(colorDefault)
+
+                    when (numberSet) {
+                        1 -> it.set1Button.setBackgroundColor(colorSelect)
+                        2 -> it.set2Button.setBackgroundColor(colorSelect)
+                        3 -> it.set3Button.setBackgroundColor(colorSelect)
+                        4 -> it.setLoveButton.setBackgroundColor(colorSelect)
+                        else -> {
+                        }
+                    }
                 }
             }
         }

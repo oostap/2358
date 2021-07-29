@@ -20,4 +20,6 @@ class AlorPortfolioService(retrofit: Retrofit) : BaseService(retrofit) {
     suspend fun summary(exchange: AlorExchange, portfolio: String) = alorPortfolioApi.summary("https://api.alor.ru/md/v2/clients/${exchange}/${portfolio}/summary")
 
     suspend fun positions(exchange: AlorExchange, portfolio: String) = alorPortfolioApi.positions("https://api.alor.ru//md/v2/clients/${exchange}/${portfolio}/positions")
+
+    suspend fun operations(exchange: AlorExchange, portfolio: String) = alorPortfolioApi.operations("https://api.alor.ru/md/v2/clients/${exchange}/${portfolio}/trades")
 }

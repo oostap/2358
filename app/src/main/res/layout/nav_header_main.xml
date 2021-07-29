@@ -23,9 +23,9 @@
             android:id="@+id/version"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="2dp"
+            android:paddingTop="2sp"
             android:text=""
-            android:textSize="12sp"
+            android:textSize="12dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textColor="@color/teal_200"/>
 
@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:paddingTop="2dp"
             android:text="@string/account_tinkoff"
-            android:textSize="12sp"
+            android:textSize="12dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <TextView
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:paddingTop="2dp"
             android:text=""
-            android:textSize="12sp"
+            android:textSize="12dp"
             android:textColor="@color/teal_200"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
@@ -61,7 +61,7 @@
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
+            android:textSize="12dp"
             android:text="@string/account_alor"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
@@ -71,7 +71,7 @@
             android:layout_height="wrap_content"
             android:paddingTop="2dp"
             android:text=""
-            android:textSize="12sp"
+            android:textSize="12dp"
             android:textColor="@color/teal_200"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
     </LinearLayout>
@@ -94,7 +94,7 @@
                 android:gravity="center_vertical"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp" />
+                android:textSize="12dp" />
 
             <TextView
                 android:id="@+id/index_1_change"
@@ -102,7 +102,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold"/>
 
             <TextView
@@ -111,7 +111,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp" />
+                android:textSize="12dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -125,7 +125,7 @@
                 android:gravity="center_vertical"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp" />
+                android:textSize="12dp" />
 
             <TextView
                 android:id="@+id/index_2_value"
@@ -133,7 +133,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -142,7 +142,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -151,7 +151,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp" />
+                android:textSize="12dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -165,7 +165,7 @@
                 android:gravity="center_vertical"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp" />
+                android:textSize="12dp" />
 
             <TextView
                 android:id="@+id/index_3_value"
@@ -173,7 +173,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -182,7 +182,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -191,7 +191,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp" />
+                android:textSize="12dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -205,7 +205,7 @@
                 android:gravity="center_vertical"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp" />
+                android:textSize="12dp" />
 
             <TextView
                 android:id="@+id/index_4_value"
@@ -213,7 +213,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -231,7 +231,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp" />
+                android:textSize="12dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -245,7 +245,7 @@
                 android:gravity="center_vertical"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp" />
+                android:textSize="12dp" />
 
             <TextView
                 android:id="@+id/index_5_value"
@@ -253,7 +253,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -262,7 +262,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -271,7 +271,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp" />
+                android:textSize="12dp" />
         </LinearLayout>
         <LinearLayout
             android:layout_width="wrap_content"
@@ -284,7 +284,7 @@
                 android:gravity="center_vertical"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp" />
+                android:textSize="12dp" />
 
             <TextView
                 android:id="@+id/index_6_value"
@@ -292,7 +292,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -301,7 +301,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -310,7 +310,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp" />
+                android:textSize="12dp" />
         </LinearLayout>
         <LinearLayout
             android:layout_width="wrap_content"
@@ -323,7 +323,7 @@
                 android:gravity="center_vertical"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp" />
+                android:textSize="12dp" />
 
             <TextView
                 android:id="@+id/index_7_value"
@@ -331,7 +331,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -340,7 +340,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -349,7 +349,7 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:text=""
-                android:textSize="12sp" />
+                android:textSize="12dp" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

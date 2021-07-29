@@ -2,6 +2,7 @@ package com.project.ti2358.data.manager
 
 import com.project.ti2358.data.alor.model.*
 import com.project.ti2358.data.alor.service.AlorPortfolioService
+import com.project.ti2358.data.common.BaseOperation
 import com.project.ti2358.data.tinkoff.model.*
 import com.project.ti2358.data.tinkoff.model.Currency
 import com.project.ti2358.service.Utils
@@ -175,6 +176,19 @@ class AlorPortfolioManager : KoinComponent {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    suspend fun loadOperations(): List<AlorOperation> {
+        try {
+            if (mainServer != null) {
+                val operations = alorPortfolioService.operations(AlorExchange.SPBX, mainServer!!.portfolio)
+                log("ALOR operations = $operations")
+                return operations
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return emptyList()
     }
 
     private suspend fun baseSortPortfolio() = withContext(StockManager.stockContext) {

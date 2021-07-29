@@ -20,6 +20,7 @@ import com.project.ti2358.service.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 
@@ -77,12 +78,15 @@ class LoveFragment : Fragment(R.layout.fragment_love) {
     }
 
     private fun updateData(query: String = "") {
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(StockManager.stockContext) {
             stocks = strategyLove.process(stockManager.stocksStream)
             stocks = strategyLove.resort()
             if (query != "") stocks = Utils.search(stocks, query)
-            adapterList.setData(stocks)
-            updateTitle()
+            
+            withContext(Dispatchers.Main) {
+                adapterList.setData(stocks)
+                updateTitle()
+            }
         }
     }
 

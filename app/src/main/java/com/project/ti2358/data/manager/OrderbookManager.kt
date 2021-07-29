@@ -54,9 +54,7 @@ class OrderbookManager() : KoinComponent {
     fun createOrder(stock: Stock, price: Double, lots: Int, operationType: OperationType, brokerType: BrokerType) {
         GlobalScope.launch(StockManager.stockContext) {
             brokerManager.placeOrder(stock, price, lots, operationType, brokerType, true)
-            withContext(StockManager.stockContext) {
-                process()
-            }
+            process()
         }
     }
 
@@ -134,7 +132,7 @@ class OrderbookManager() : KoinComponent {
 
                 val orders = brokerManager.getOrdersAll()
                 for (order in orders) {
-                    if (order.getOrderStock()?.ticker == line.stock.ticker) {
+                    if (order.stock?.ticker == line.stock.ticker) {
                         if (order.getOrderPrice() == line.askPrice || order.getOrderPrice() == line.bidPrice) {
                             if (order.getOrderOperation() == OperationType.BUY) {
                                 line.ordersBuy.add(order)

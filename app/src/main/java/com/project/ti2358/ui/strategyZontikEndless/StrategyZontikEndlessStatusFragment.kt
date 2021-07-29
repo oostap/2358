@@ -12,10 +12,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
-import com.project.ti2358.data.manager.OrderbookManager
-import com.project.ti2358.data.manager.SettingsManager
-import com.project.ti2358.data.manager.StockPurchase
-import com.project.ti2358.data.manager.StrategyZontikEndless
+import com.project.ti2358.data.manager.*
 import com.project.ti2358.databinding.FragmentZontikEndlessStatusBinding
 import com.project.ti2358.databinding.FragmentZontikEndlessStatusItemBinding
 import com.project.ti2358.service.*
@@ -88,12 +85,15 @@ class StrategyZontikEndlessStatusFragment : Fragment(R.layout.fragment_zontik_en
     }
 
     private fun updateData(search: String = "") {
-        GlobalScope.launch(Dispatchers.Main) {
-            fragmentZontikEndlessStatusBinding?.currentChangeView?.text = strategyZontikEndless.basicPercentLimitPriceChange.toPercent()
+        GlobalScope.launch(StockManager.stockContext) {
             stockPurchases = strategyZontikEndless.getSortedPurchases().toMutableList()
             if (search != "") stockPurchases = Utils.search(stockPurchases, search)
-            adapterList.setData(stockPurchases)
-            updateTitle()
+
+            withContext(Dispatchers.Main) {
+                fragmentZontikEndlessStatusBinding?.currentChangeView?.text = strategyZontikEndless.basicPercentLimitPriceChange.toPercent()
+                adapterList.setData(stockPurchases)
+                updateTitle()
+            }
         }
     }
 

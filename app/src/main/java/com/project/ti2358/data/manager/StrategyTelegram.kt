@@ -1,12 +1,6 @@
 package com.project.ti2358.data.manager
 
 import android.annotation.SuppressLint
-import android.app.AlarmManager
-import android.content.Context
-import android.content.pm.PackageManager
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
@@ -19,8 +13,9 @@ import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.network.fold
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.project.ti2358.TheApplication
+import com.project.ti2358.data.alor.model.AlorOperation
 import com.project.ti2358.data.alor.model.AlorOrder
+import com.project.ti2358.data.common.BaseOperation
 import com.project.ti2358.data.common.BaseOrder
 import com.project.ti2358.data.common.BasePosition
 import com.project.ti2358.data.common.BrokerType
@@ -43,7 +38,6 @@ import kotlin.math.sign
 class StrategyTelegram : KoinComponent {
     private val stockManager: StockManager by inject()
     private val brokerManager: BrokerManager by inject()
-    private val operationsService: OperationsService by inject()
 
     private val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
     private val alorPortfolioManager: AlorPortfolioManager by inject()
@@ -52,8 +46,9 @@ class StrategyTelegram : KoinComponent {
     private val thirdPartyService: ThirdPartyService by inject()
 
     var jobUpdateOperations: Job? = null
-    var operations: MutableList<Operation> = mutableListOf()
-    var operationsPosted: MutableList<String> = mutableListOf()
+    var operations: MutableList<BaseOperation> = mutableListOf()
+    var operationsPostedTinkoff: MutableList<String> = mutableListOf()
+    var operationsPostedAlor: MutableList<String> = mutableListOf()
 
     var jobUpdateOrders: Job? = null
     var orders: MutableList<TinkoffOrder> = mutableListOf()
@@ -70,41 +65,40 @@ class StrategyTelegram : KoinComponent {
         jobUpdateOperations = GlobalScope.launch(Dispatchers.Default) {
             while (true) {
                 try {
-                    val zone = Utils.getTimezoneCurrent()
-                    val toDate = Calendar.getInstance()
-                    val to = convertDateToTinkoffDate(toDate, zone)
+                    operations = brokerManager.loadOperations()
 
-                    toDate.add(Calendar.HOUR_OF_DAY, -6)
-                    val from = convertDateToTinkoffDate(toDate, zone)
-
-                    operations = Collections.synchronizedList(
-                        operationsService.operations(
-                            from,
-                            to,
-                            tinkoffPortfolioManager.getActiveBrokerAccountId()
-                        ).operations
-                    )
-                    operations.sortBy { it.date }
-                    if (operationsPosted.isEmpty()) {
+                    operations.sortBy { it.getOperationDate() }
+                    if (operationsPostedTinkoff.isEmpty()) {
                         operations.forEach {
-                            operationsPosted.add(it.id)
+                            if (it is TinkoffOperation) {
+                                operationsPostedTinkoff.add(it.getOperationID())
+                            }
                         }
-                    } else {
-                        operationsPosted.add("empty")
                     }
 
-                    tinkoffPortfolioManager.refreshDeposit()
+                    if (operationsPostedAlor.isEmpty()) {
+                        operations.forEach {
+                            if (it is AlorOperation) {
+                                operationsPostedAlor.add(it.getOperationID())
+                            }
+                        }
+                    }
+                    brokerManager.refreshDeposit()
 
                     for (operation in operations) {
-                        if (operation.id !in operationsPosted) {
-                            if (operation.status != OperationStatus.DONE || operation.quantityExecuted == 0) continue
+                        if ((operation is TinkoffOperation && operation.getOperationID() !in operationsPostedTinkoff) ||
+                            (operation is AlorOperation && operation.getOperationID() !in operationsPostedAlor)) {
+                            if (!operation.getOperationDone() || operation.getLotsExecuted() == 0) continue
 
-                            operationsPosted.add(operation.id)
-                            operation.stock = stockManager.getStockByFigi(operation.figi)
+                            if (operation is TinkoffOperation) {
+                                operationsPostedTinkoff.add(operation.getOperationID())
+                            } else {
+                                operationsPostedAlor.add(operation.getOperationID())
+                            }
 
                             val dateNow = Calendar.getInstance()
                             val dateOperation = Calendar.getInstance()
-                            dateOperation.time = operation.date
+                            dateOperation.time = operation.getOperationDate()
                             if (abs(dateNow.get(Calendar.DAY_OF_YEAR) - dateOperation.get(Calendar.DAY_OF_YEAR)) >= 1) {
                                 continue
                             }
@@ -284,10 +278,6 @@ class StrategyTelegram : KoinComponent {
         sendMessageToChats(SettingsManager.getTelegramBye(), deleteAfterSeconds = 10, stop = true)
     }
 
-    private fun convertDateToTinkoffDate(calendar: Calendar, zone: String): String {
-        return calendar.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS") + zone
-    }
-
     private fun orderToString(order: BaseOrder): String {
         val orderSymbol = if (order.getOrderOperation() == OperationType.BUY) "🟢" else "🔴"
         var orderString = if (order.getOrderOperation() == OperationType.BUY) "BUY " else "SELL "
@@ -305,7 +295,7 @@ class StrategyTelegram : KoinComponent {
             order.stock = stock
         }
 
-        val ticker = order.getOrderStock()?.ticker
+        val ticker = order.stock?.ticker
 
         if (position == null && order.getOrderOperation() == OperationType.BUY) {
             orderString += "LONG вход"
@@ -366,24 +356,34 @@ class StrategyTelegram : KoinComponent {
     }
 
     @SuppressLint("SimpleDateFormat")
-    private fun operationToString(operation: Operation): String {
+    private fun operationToString(operation: BaseOperation): String {
         if (operation.stock == null) return ""
 
         val ticker = operation.stock?.ticker
-        val operationSymbol = if (operation.operationType == OperationType.BUY) "🟢" else "🔴"
-        var operationString = if (operation.operationType == OperationType.BUY) "BUY " else "SELL "
-        val position = tinkoffPortfolioManager.getPositionForStock(operation.stock!!)
-        if (position == null && operation.operationType == OperationType.BUY) {
+        val marker = if (operation is TinkoffOperation) "🟡" else "🔵"
+        val operationSymbol = if (operation.getType() == OperationType.BUY) "🟢" else "🔴"
+        var operationString = if (operation.getType() == OperationType.BUY) "BUY " else "SELL "
+
+        var position: BasePosition? = null
+        if (operation is TinkoffOperation) {
+            position = tinkoffPortfolioManager.getPositionForStock(operation.stock!!)
+        }
+
+        if (operation is AlorOperation) {
+            position = alorPortfolioManager.getPositionForStock(operation.stock!!)
+        }
+
+        if (position == null && operation.getType() == OperationType.BUY) {
             operationString += "SHORT выход"
         }
 
-        if (position == null && operation.operationType == OperationType.SELL) {
+        if (position == null && operation.getType() == OperationType.SELL) {
             operationString += "LONG выход"
         }
 
-        if (position != null && operation.operationType == OperationType.SELL) {
+        if (position != null && operation.getType() == OperationType.SELL) {
             operationString += if (position.getLots() < 0) { // продажа в шорте
-                if (operation.quantityExecuted == abs(position.getLots())) {
+                if (operation.getLotsExecuted() == abs(position.getLots())) {
                     "SHORT вход"
                 } else {
                     "SHORT усреднение"
@@ -393,11 +393,11 @@ class StrategyTelegram : KoinComponent {
             }
         }
 
-        if (position != null && operation.operationType == OperationType.BUY) {
+        if (position != null && operation.getType() == OperationType.BUY) {
             operationString += if (position.getLots() < 0) { // покупка в шорте
                 "SHORT выход часть"
             } else { // покупка в лонге
-                if (operation.quantityExecuted == abs(position.getLots())) {
+                if (operation.getLotsExecuted() == abs(position.getLots())) {
                     "LONG вход"
                 } else {
                     "LONG усреднение"
@@ -406,7 +406,7 @@ class StrategyTelegram : KoinComponent {
         }
 
         val msk = Utils.getTimeMSK()
-        msk.time.time = operation.date.time
+        msk.time.time = operation.getOperationDate().time
         val differenceHours = Utils.getTimeDiffBetweenMSK()
         msk.add(Calendar.HOUR_OF_DAY, -differenceHours)
 
@@ -424,14 +424,15 @@ class StrategyTelegram : KoinComponent {
                 emoji
             )
         }
-        return "$%s %s\n%s %d * %.2f$ = %.2f$ - %s%s".format(
+        return "%s$%s %s\n%s %d * %.2f$ = %.2f$ - %s%s".format(
             locale = Locale.US,
+            marker,
             ticker,
             operationString,
             operationSymbol,
-            operation.quantityExecuted,
-            operation.price,
-            operation.quantityExecuted * operation.price,
+            operation.getLotsExecuted(),
+            operation.getOperationPrice(),
+            operation.getLotsExecuted() * operation.getOperationPrice(),
             dateString,
             depo
         )

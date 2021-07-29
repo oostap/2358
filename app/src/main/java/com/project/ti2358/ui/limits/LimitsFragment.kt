@@ -21,6 +21,7 @@ import com.project.ti2358.service.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinApiExtension
 import java.util.*
@@ -131,20 +132,20 @@ class LimitsFragment : Fragment(R.layout.fragment_limits) {
     }
 
     private fun updateData(search: String = "") {
-        GlobalScope.launch(Dispatchers.Main) {
-            fragmentLimitsBinding?.apply {
-                listAll.visibility = View.VISIBLE
-                listLimits.visibility = View.GONE
-            }
-
+        GlobalScope.launch(StockManager.stockContext) {
             stocks = strategyLimits.process()
             stocks = strategyLimits.resort()
-            if (search != "") {
-                stocks = Utils.search(stocks, search)
-            }
-            adapterListAll.setData(stocks)
+            if (search != "") stocks = Utils.search(stocks, search)
 
-            updateTitle()
+            withContext(Dispatchers.Main) {
+                adapterListAll.setData(stocks)
+                updateTitle()
+
+                fragmentLimitsBinding?.apply {
+                    listAll.visibility = View.VISIBLE
+                    listLimits.visibility = View.GONE
+                }
+            }
         }
     }
 

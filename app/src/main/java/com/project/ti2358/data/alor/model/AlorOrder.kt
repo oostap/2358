@@ -70,7 +70,6 @@ data class AlorOrder(
 
     override fun getOrderID(): String = id
 
-    override fun getOrderStock(): Stock? { return stock }
     override fun getOrderPrice(): Double { return price }
 
     override fun getOrderOperation(): OperationType = side

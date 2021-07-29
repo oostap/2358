@@ -56,10 +56,6 @@ class Strategy1000Buy : KoinComponent {
         stocks = all.filter { (it.getPriceNow() > min && it.getPriceNow() < max) || it.getPriceNow() == 0.0 || it.getPrice2300() == 0.0 }.toMutableList()
         stocks.sortBy { it.changePrice2300DayPercent }
 
-        // удалить все бумаги, которые есть в депо (они в другой вкладке)
-        val positions = brokerManager.getPositionsAll()
-        stocks.removeAll { positions.find { p -> p.getPositionStock()?.ticker == it.ticker } != null }
-
         loadSelectedStocks(numberSet)
     }
 
@@ -218,7 +214,7 @@ class Strategy1000Buy : KoinComponent {
             it.status = PurchaseStatus.WAITING
         }
 
-        stocksToPurchase.removeAll { it.lots == 0 }
+//        stocksToPurchase.removeAll { it.lots == 0 }
 
         return stocksToPurchase
     }
@@ -274,6 +270,22 @@ class Strategy1000Buy : KoinComponent {
     fun prepareBuy1000() {
         started1000 = false
         stocksToBuy1000 = stocksToPurchase
+    }
+
+    fun startStrategyNow() {
+        for (purchase in stocksToPurchase) {
+            // если позиция уже в портфеле, то НЕ выставлять ТП после откупа шорта
+            val profit = if (purchase.position == null) purchase.profitPercent else 0.0
+
+            // время жизни заявки для позиции из депо и для шорта разные
+            val lifetimeBuy = if (purchase.position == null) SettingsManager.get1000BuyOrderLifeTimeSecondsLong() else SettingsManager.get1000BuyOrderLifeTimeSecondsDepo()
+
+            // время жизни заявки на продажу лонга
+            val lifetimeSell = if (purchase.position == null) SettingsManager.get1000BuyOrderLifeTimeSecondsSell() else 0
+
+            val job = purchase.buyLimitFromBid(purchase.getLimitPriceDouble(), profit, 50, lifetimeBuy, lifetimeSell)
+            if (job != null) job700.add(job)
+        }
     }
 
     fun startStrategy700Buy() {

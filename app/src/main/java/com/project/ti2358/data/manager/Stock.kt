@@ -232,10 +232,16 @@ data class Stock(var instrument: Instrument) {
     }
 
     fun processLentaUS(pantiniLenta: PantiniLenta) {
-        if (lentaUS == null) lentaUS = pantiniLenta
+        if (lentaUS == null) {
+            lentaUS = pantiniLenta
+        } else {
+            lentaUS?.prints?.addAll(0, pantiniLenta.prints.toMutableList())
+        }
 
-        lentaUS?.prints?.addAll(0, pantiniLenta.prints.toMutableList())
-        lentaUS?.prints = (lentaUS?.prints?.subList(0, min(100, lentaUS?.prints?.size ?: 0)) ?: mutableListOf())
+        lentaUS?.let {
+            val lastIndex = min(100, it.prints.size)
+            it.prints = it.prints.subList(0, lastIndex).toMutableList()
+        }
     }
 
     fun processPrintUS(pantiniPrint: PantiniPrint) {

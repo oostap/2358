@@ -3,15 +3,15 @@ package com.project.ti2358.data.manager
 import com.project.ti2358.data.alor.model.AlorExchange
 import com.project.ti2358.data.alor.model.AlorOrder
 import com.project.ti2358.data.alor.service.AlorOrdersService
-import com.project.ti2358.data.common.BaseOrder
-import com.project.ti2358.data.common.BasePosition
-import com.project.ti2358.data.common.BrokerType
-import com.project.ti2358.data.common.OrderInfo
+import com.project.ti2358.data.alor.service.AlorPortfolioService
+import com.project.ti2358.data.common.*
 import com.project.ti2358.data.tinkoff.model.OperationType
 import com.project.ti2358.data.tinkoff.model.OrderStatus
 import com.project.ti2358.data.tinkoff.model.TinkoffOrder
+import com.project.ti2358.data.tinkoff.service.OperationsService
 import com.project.ti2358.data.tinkoff.service.OrdersService
 import com.project.ti2358.service.Utils
+import com.project.ti2358.service.toString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -19,13 +19,18 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.lang.Exception
+import java.util.*
 
 @KoinApiExtension
 class BrokerManager() : KoinComponent {
+    private val stockManager: StockManager by inject()
     private val tinkoffPortfolioManager: TinkoffPortfolioManager by inject()
     private val alorPortfolioManager: AlorPortfolioManager by inject()
     private val ordersService: OrdersService by inject()
     private val alorOrdersService: AlorOrdersService by inject()
+
+    private val alorPortfolioService: AlorPortfolioService by inject()
+    private val operationsService: OperationsService by inject()
 
     /******************** place order *************************/
     suspend fun placeOrder(stock: Stock, price: Double, lots: Int, operationType: OperationType, brokerType: BrokerType, refresh: Boolean) {
@@ -394,5 +399,43 @@ class BrokerManager() : KoinComponent {
         }
 
         return blockedLots
+    }
+
+    suspend fun loadOperations(): MutableList<BaseOperation> {
+        val operations = mutableListOf<BaseOperation>()
+
+        if (SettingsManager.getBrokerTinkoff()) {
+            val zone = Utils.getTimezoneCurrent()
+            val toDate = Calendar.getInstance()
+            val to = convertDateToTinkoffDate(toDate, zone)
+
+            toDate.add(Calendar.HOUR_OF_DAY, -6)
+            val from = convertDateToTinkoffDate(toDate, zone)
+
+            val tinkoff = operationsService.operations(from, to, tinkoffPortfolioManager.getActiveBrokerAccountId()).operations
+            for (operation in tinkoff) {
+                if (operation.stock == null) {
+                    operation.stock = stockManager.getStockByFigi(operation.figi)
+                }
+            }
+            operations.addAll(tinkoff)
+        }
+
+        if (SettingsManager.getBrokerAlor()) {
+            val alor = alorPortfolioManager.loadOperations()
+            for (operation in alor) {
+                if (operation.stock == null) {
+                    operation.stock = stockManager.getStockByTicker(operation.symbol)
+                }
+            }
+            operations.addAll(alor)
+        }
+
+        return operations
+    }
+
+
+    private fun convertDateToTinkoffDate(calendar: Calendar, zone: String): String {
+        return calendar.time.toString("yyyy-MM-dd'T'HH:mm:ss.SSSSSS") + zone
     }
 }

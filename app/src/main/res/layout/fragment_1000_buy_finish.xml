@@ -33,7 +33,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_alignParentBottom="true"
-        android:weightSum="2" >
+        android:weightSum="3" >
 
         <Button
             android:layout_height="70dp"
@@ -50,6 +50,15 @@
             android:id="@+id/start_1000_button"
             android:layout_marginLeft="5dp"
             android:text="@string/start_sell_1000"
+            android:layout_weight="1"
+            android:textSize="16dp" />
+
+        <Button
+            android:layout_height="70dp"
+            android:layout_width="0dp"
+            android:id="@+id/start_now_button"
+            android:layout_marginLeft="5dp"
+            android:text="@string/start_buy_now"
             android:layout_weight="1"
             android:textSize="16dp" />
 

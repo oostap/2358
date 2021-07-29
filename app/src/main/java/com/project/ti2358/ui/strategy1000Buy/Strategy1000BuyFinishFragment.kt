@@ -76,6 +76,10 @@ class Strategy1000BuyFinishFragment : Fragment(R.layout.fragment_1000_buy_finish
                 }
                 updateServiceButtonText1000()
             }
+
+            startNowButton.setOnClickListener {
+                strategy1000Buy.startStrategyNow()
+            }
         }
         updateServiceButtonText700()
         updateServiceButtonText1000()

@@ -35,8 +35,10 @@
 
     <string name="start_sell_700">ПРОДАТЬ 700</string>
     <string name="start_sell_1000">ПРОДАТЬ 1000</string>
+    <string name="start_sell_now">ПРОДАТЬ СЕЙЧАС</string>
     <string name="start_buy_700">КУПИТЬ 700</string>
     <string name="start_buy_1000">КУПИТЬ 1000</string>
+    <string name="start_buy_now">КУПИТЬ СЕЙЧАС</string>
 
     <string name="stop_700">СТОП 700</string>
     <string name="stop_1000">СТОП 1000</string>

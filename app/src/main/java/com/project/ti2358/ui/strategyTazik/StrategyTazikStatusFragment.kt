@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.ti2358.R
 import com.project.ti2358.data.manager.StockPurchase
 import com.project.ti2358.data.manager.SettingsManager
+import com.project.ti2358.data.manager.StockManager
 import com.project.ti2358.data.manager.StrategyTazik
 import com.project.ti2358.databinding.FragmentTazikStatusBinding
 import com.project.ti2358.databinding.FragmentTazikStatusItemBinding
@@ -85,12 +86,15 @@ class StrategyTazikStatusFragment : Fragment(R.layout.fragment_tazik_status) {
     }
 
     private fun updateData(search: String = "") {
-        GlobalScope.launch(Dispatchers.Main) {
-            fragmentTazikStatusBinding?.currentChangeView?.text = strategyTazik.basicPercentLimitPriceChange.toPercent()
+        GlobalScope.launch(StockManager.stockContext) {
             stockPurchases = strategyTazik.getSortedPurchases().toMutableList()
             if (search != "") stockPurchases = Utils.search(stockPurchases, search)
-            adapterList.setData(stockPurchases)
-            updateTitle()
+
+            withContext(Dispatchers.Main) {
+                fragmentTazikStatusBinding?.currentChangeView?.text = strategyTazik.basicPercentLimitPriceChange.toPercent()
+                adapterList.setData(stockPurchases)
+                updateTitle()
+            }
         }
     }
 

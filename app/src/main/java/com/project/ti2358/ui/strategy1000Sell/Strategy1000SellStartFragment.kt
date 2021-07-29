@@ -126,7 +126,7 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
         }
 
         jobUpdate?.cancel()
-        jobUpdate = GlobalScope.launch(Dispatchers.Main) {
+        jobUpdate = GlobalScope.launch(StockManager.stockContext) {
             brokerManager.refreshDeposit()
             if (numberSet == 0) {
                 updateDataDepo()
@@ -137,34 +137,40 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
     }
 
     private fun updateDataDepo() {
-        fragment1000SellStartBinding?.apply {
-            listShort.visibility = View.GONE
-            searchView.visibility = View.GONE
-            listDepo.visibility = View.VISIBLE
-        }
-
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(StockManager.stockContext) {
             purchases = strategy1000Sell.processPortfolio()
-            adapterListDepo.setData(purchases)
-            updateTitle()
-            updateButtons()
+
+            withContext(Dispatchers.Main) {
+                fragment1000SellStartBinding?.apply {
+                    listShort.visibility = View.GONE
+                    searchView.visibility = View.GONE
+                    listDepo.visibility = View.VISIBLE
+                }
+
+                adapterListDepo.setData(purchases)
+                updateTitle()
+                updateButtons()
+            }
         }
     }
 
     private fun updateDataShort(search: String = "") {
-        fragment1000SellStartBinding?.apply {
-            listShort.visibility = View.VISIBLE
-            searchView.visibility = View.VISIBLE
-            listDepo.visibility = View.GONE
-        }
-
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(StockManager.stockContext) {
             strategy1000Sell.processShort(numberSet)
             stocks = strategy1000Sell.resort()
             if (search != "") stocks = Utils.search(stocks, search)
-            adapterListShort.setData(stocks)
-            updateTitle()
-            updateButtons()
+
+            withContext(Dispatchers.Main) {
+                fragment1000SellStartBinding?.apply {
+                    listShort.visibility = View.VISIBLE
+                    searchView.visibility = View.VISIBLE
+                    listDepo.visibility = View.GONE
+                }
+
+                adapterListShort.setData(stocks)
+                updateTitle()
+                updateButtons()
+            }
         }
     }
 
@@ -177,12 +183,14 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
             it.set1Button.setBackgroundColor(colorDefault)
             it.set2Button.setBackgroundColor(colorDefault)
             it.set3Button.setBackgroundColor(colorDefault)
+            it.set4Button.setBackgroundColor(colorDefault)
 
             when (numberSet) {
                 0 -> it.set0Button.setBackgroundColor(colorSelect)
                 1 -> it.set1Button.setBackgroundColor(colorSelect)
                 2 -> it.set2Button.setBackgroundColor(colorSelect)
                 3 -> it.set3Button.setBackgroundColor(colorSelect)
+                4 -> it.set4Button.setBackgroundColor(colorSelect)
                 else -> { }
             }
         }
@@ -194,7 +202,7 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
             if (numberSet == 0) {
                 val ti = brokerManager.getPositionsAll(BrokerType.TINKOFF)
                 val alor = brokerManager.getPositionsAll(BrokerType.ALOR)
-                var text = "700/1000 SELL"
+                var text = "SELL"
 
                 if (ti.isNotEmpty()) {
                     text += " ТИ=${ti.size}"
@@ -205,7 +213,7 @@ class Strategy1000SellStartFragment : Fragment(R.layout.fragment_1000_sell_start
 
                 act.supportActionBar?.title = text
             } else {
-                act.supportActionBar?.title = "700/1000 SHORT ⚠️ - $numberSet (${strategy1000Sell.presetStocksSelected.size} шт.)"
+                act.supportActionBar?.title = "SHORT ⚠️ - $numberSet (${strategy1000Sell.presetStocksSelected.size} шт.)"
             }
         }
     }
