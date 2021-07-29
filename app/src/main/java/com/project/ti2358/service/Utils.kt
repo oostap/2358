@@ -336,7 +336,7 @@ class Utils{
                 return false
             }
 
-            if (hour < 7 || hour > 2) {
+            if (2 <= hour && hour < 7) {
                 return true
             }
 
