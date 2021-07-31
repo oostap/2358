@@ -28,7 +28,6 @@ class Strategy2358() : KoinComponent {
     var equalParts = true
 
     fun process(): MutableList<Stock> {
-//        val all = stockManager.getWhiteStocks()
         val all = stockManager.stocksStream
         val change = SettingsManager.get2358ChangePercent()
         val volumeDayPieces = SettingsManager.get2358VolumeDayPieces()
@@ -93,11 +92,6 @@ class Strategy2358() : KoinComponent {
 
         // удалить бумаги, которые перестали удовлетворять условию 2358
         stocksSelected.removeAll { it !in stocks }
-
-        // удалить бумаги, которые уже есть в депо, иначе среднюю невозможно узнать
-        stocksSelected.removeAll { stock ->
-            tinkoffPortfolioManager.portfolioPositions.any { it.ticker == stock.ticker }
-        }
 
         val purchases: MutableList<StockPurchase> = mutableListOf()
         for (stock in stocksSelected) {

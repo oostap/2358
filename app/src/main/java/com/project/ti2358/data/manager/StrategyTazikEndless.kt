@@ -461,8 +461,7 @@ class StrategyTazikEndless : KoinComponent {
     }
 
     private fun tryRestartFixPriceUpdate() {
-        if (jobResetPrice?.isActive == true) {
-            jobResetPrice?.cancel()
+        if (jobResetPrice == null || jobResetPrice?.isActive == false) {
             jobResetPrice = GlobalScope.launch(StockManager.stockContext) {
                 while (true) {
                     val seconds = SettingsManager.getTazikEndlessResetIntervalSeconds().toLong()
